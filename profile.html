@@ -596,21 +596,63 @@
         let selectedAvatarPath = null;
 
         const avatarCategories = {
-            "Aventureiros": "adventurer",
-            "Pixel Art": "pixel-art", 
-            "Bots": "bots",
-            "Minimalista": "miniavs"
+            adventurer: {
+                label: 'Aventureiros',
+                files: Array.from({ length: 6 }, (_, i) => `avatar${i + 1}.svg`)
+            },
+            'pixel-art': {
+                label: 'Pixel Art',
+                files: Array.from({ length: 6 }, (_, i) => `pixel${i + 1}.svg`)
+            },
+            bots: {
+                label: 'Bots',
+                files: Array.from({ length: 6 }, (_, i) => `bot${i + 1}.svg`)
+            },
+            miniavs: {
+                label: 'Minimalista',
+                files: Array.from({ length: 6 }, (_, i) => `miniav${i + 1}.svg`)
+            },
+            classic: {
+                label: 'Clássico',
+                files: [
+                    '1.svg',
+                    '2.svg',
+                    '3.svg',
+                    '4.svg',
+                    '5.svg',
+                    '6.svg',
+                    '7.svg',
+                    '8.svg',
+                    '9.svg',
+                    '10.svg',
+                    '11.svg',
+                    'avatar-svgrepo-com.svg',
+                    'avatar-svgrepo-com (1).svg',
+                    'avatar-svgrepo-com (2).svg',
+                    'avatar-svgrepo-com (3).svg',
+                    'avatar-svgrepo-com (4).svg',
+                    'avatar-svgrepo-com (5).svg'
+                ]
+            },
+            christmas: {
+                label: 'Natalino',
+                files: [
+                    'avatar-winter-custome-5-svgrepo-com.svg',
+                    'avatar-winter-custome-14-svgrepo-com.svg',
+                    'avatar-winter-custome-24-svgrepo-com.svg',
+                    'avatar-winter-custome-35-svgrepo-com.svg',
+                    'avatar-winter-custome-37-svgrepo-com.svg',
+                    'avatar-winter-custome-47-svgrepo-com.svg'
+                ]
+            }
         };
 
         async function testAvatarAccess() {
             console.log('🔍 Testando acesso aos avatares...');
-            const testPaths = [
-                './images/avatars/adventurer/avatar1.svg',
-                './images/avatars/pixel-art/pixel1.svg',
-                './images/avatars/bots/bot1.svg',
-                './images/avatars/miniavs/miniav1.svg'
-            ];
-            
+            const testPaths = Object.entries(avatarCategories).map(
+                ([category, data]) => `./images/avatars/${category}/${data.files[0]}`
+            );
+
             for (const path of testPaths) {
                 try {
                     const response = await fetch(path);
@@ -752,8 +794,8 @@
 
         function renderAvatarUI() {
             const container = document.getElementById('avatar-selection-ui');
-            const tabs = Object.keys(avatarCategories).map(name => 
-                `<button class="avatar-gallery-tab px-4 py-2 text-sm font-semibold rounded-lg border transition-colors" data-category="${avatarCategories[name]}">${name}</button>`
+            const tabs = Object.entries(avatarCategories).map(([key, data]) =>
+                `<button class="avatar-gallery-tab px-4 py-2 text-sm font-semibold rounded-lg border transition-colors" data-category="${key}">${data.label}</button>`
             ).join('');
 
             // Check if user is Google user
@@ -788,52 +830,49 @@
             console.log('🎨 Renderizando galeria para categoria:', category);
             const gallery = document.getElementById('avatar-gallery');
             gallery.innerHTML = '';
-            
-            for (let i = 1; i <= 6; i++) {
-                const fileName = category === 'adventurer' ? 'avatar' : 
-                               category === 'pixel-art' ? 'pixel' : 
-                               category === 'bots' ? 'bot' : 'miniav';
+
+            const files = avatarCategories[category]?.files || [];
+            files.forEach(file => {
                 // Try different path variations
                 const pathVariations = [
-                    `./images/avatars/${category}/${fileName}${i}.svg`,
-                    `images/avatars/${category}/${fileName}${i}.svg`,
-                    `/images/avatars/${category}/${fileName}${i}.svg`,
-                    `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/images/avatars/${category}/${fileName}${i}.svg`
+                    `./images/avatars/${category}/${file}`,
+                    `images/avatars/${category}/${file}`,
+                    `/images/avatars/${category}/${file}`,
+                    `${window.location.origin}${window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'))}/images/avatars/${category}/${file}`
                 ];
-                
-                const avatarPath = pathVariations[0]; // Start with relative path
-                
+
+                const avatarPath = pathVariations[0];
                 console.log(`🖼️ Tentando carregar avatar: ${avatarPath}`);
-                
+
                 const avatarContainer = document.createElement('div');
                 avatarContainer.className = 'relative';
-                
+
                 const img = document.createElement('img');
                 img.src = avatarPath;
                 img.className = `avatar-item rounded-full p-1 bg-gray-100 w-16 h-16 object-cover`;
-                img.alt = `Avatar ${fileName} ${i}`;
-                
+                img.alt = `Avatar ${file}`;
+
                 // Loading placeholder
                 const loadingDiv = document.createElement('div');
                 loadingDiv.className = 'w-16 h-16 rounded-full bg-gray-200 animate-pulse flex items-center justify-center';
                 loadingDiv.innerHTML = '<span class="text-xs text-gray-400">...</span>';
-                
+
                 // Error placeholder
                 const errorDiv = document.createElement('div');
                 errorDiv.className = 'w-16 h-16 rounded-full bg-red-100 border-2 border-red-300 hidden flex items-center justify-center';
                 errorDiv.innerHTML = '<span class="text-xs text-red-500">❌</span>';
-                
+
                 if (avatarPath === selectedAvatarPath) {
                     img.classList.add('selected');
                 }
-                
+
                 // Handle successful load
                 img.addEventListener('load', () => {
                     console.log(`✅ Avatar carregado com sucesso: ${avatarPath}`);
                     loadingDiv.style.display = 'none';
                     img.style.display = 'block';
                 });
-                
+
                 // Handle load error with fallback paths
                 let currentPathIndex = 0;
                 const tryNextPath = () => {
@@ -842,20 +881,20 @@
                         console.log(`🔄 Tentando caminho alternativo: ${pathVariations[currentPathIndex]}`);
                         img.src = pathVariations[currentPathIndex];
                     } else {
-                        console.error(`❌ Todos os caminhos falharam para: ${fileName}${i}`);
+                        console.error(`❌ Todos os caminhos falharam para: ${file}`);
                         loadingDiv.style.display = 'none';
                         img.style.display = 'none';
                         errorDiv.classList.remove('hidden');
                         errorDiv.classList.add('flex');
-                        errorDiv.title = `Erro: ${fileName}${i}.svg não encontrado`;
+                        errorDiv.title = `Erro: ${file} não encontrado`;
                     }
                 };
-                
+
                 img.addEventListener('error', tryNextPath);
-                
+
                 // Initially hide image and show loading
                 img.style.display = 'none';
-                
+
                 img.addEventListener('click', () => {
                     if (img.style.display !== 'none') {
                         document.querySelectorAll('.avatar-item.selected').forEach(el => el.classList.remove('selected'));
@@ -865,12 +904,12 @@
                         console.log('🎯 Avatar selecionado:', avatarPath);
                     }
                 });
-                
+
                 avatarContainer.appendChild(loadingDiv);
                 avatarContainer.appendChild(img);
                 avatarContainer.appendChild(errorDiv);
                 gallery.appendChild(avatarContainer);
-            }
+            });
         }
 
         function setupFormEvents() {
