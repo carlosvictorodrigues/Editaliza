@@ -1057,7 +1057,11 @@ const components = {
             completedTopicsCount: gamificationData.completedTopicsCount || 0,
             totalCompletedSessions: gamificationData.totalCompletedSessions || 0
         };
-        
+
+        // Obter ícone e título limpo do nível atual
+        const levelIcon = safeData.levelName.split(' ').pop();
+        const levelTitle = safeData.levelName.replace(levelIcon, '').trim();
+
         // Cards únicos com informações não duplicadas e métricas corretas
         container.innerHTML = `
             <div class="mb-8">
@@ -1072,15 +1076,13 @@ const components = {
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Sequência de Estudos Corrigida -->
+                    <!-- Nível Atual -->
                     <div class="bg-slate-50 border border-gray-200 p-6 rounded-xl shadow-inner text-center">
                         <div class="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
-                            <span class="text-2xl">${safeData.currentStreak > 0 ? '🔥' : '💤'}</span>
+                            <span class="text-2xl">${levelIcon}</span>
                         </div>
-                        <p class="text-lg font-semibold text-orange-800 uppercase tracking-wider mb-1">Sequência Atual</p>
-                        <p class="text-4xl font-bold ${safeData.currentStreak > 0 ? 'text-orange-600' : 'text-gray-400'}">${safeData.currentStreak}</p>
-                        <p class="text-xs text-orange-600 mt-1">${safeData.currentStreak === 1 ? 'dia consecutivo' : 'dias consecutivos'}</p>
-                        ${safeData.currentStreak === 0 ? '<p class="text-xs text-red-500 mt-1 font-medium">Vamos retomar!</p>' : ''}
+                        <p class="text-lg font-semibold text-orange-800 uppercase tracking-wider mb-1">Nível Atual</p>
+                        <p class="text-2xl font-bold text-orange-600">${levelTitle}</p>
                     </div>
                     
                     <!-- Total de Dias de Estudo -->
