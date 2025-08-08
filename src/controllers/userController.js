@@ -15,6 +15,7 @@ const { createSafeError, securityLog } = require('../utils/security');
  */
 const getProfile = async (req, res) => {
     try {
+        // Ensure profile data includes the profile_picture field for avatar display
         const profile = await userService.getUserProfile(req.user.id, req);
         res.json(profile);
     } catch (error) {
