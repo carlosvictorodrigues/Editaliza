@@ -1,0 +1,235 @@
+# Kubernetes Deployment Configuration for Editaliza
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: editaliza-production
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: editaliza-config
+  namespace: editaliza-production
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  DATABASE_PATH: "/app/data/database.db"
+  ALLOWED_ORIGINS: "https://yourdomain.com,https://www.yourdomain.com"
+  RATE_LIMIT_WINDOW_MS: "900000"
+  RATE_LIMIT_MAX_REQUESTS: "100"
+  LOG_LEVEL: "info"
+  ENABLE_PERFORMANCE_MONITORING: "true"
+  HEALTH_CHECK_ENABLED: "true"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: editaliza-secrets
+  namespace: editaliza-production
+type: Opaque
+data:
+  # Base64 encoded secrets (replace with actual values)
+  SESSION_SECRET: eW91ci1zdXBlci1zZWN1cmUtc2Vzc2lvbi1zZWNyZXQ=
+  JWT_SECRET: eW91ci1zdXBlci1zZWN1cmUtand0LXNlY3JldA==
+  REDIS_PASSWORD: eW91ci1yZWRpcy1wYXNzd29yZA==
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: editaliza-data-pvc
+  namespace: editaliza-production
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: fast-ssd # Adjust based on your cluster
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: editaliza-app
+  namespace: editaliza-production
+  labels:
+    app: editaliza
+    component: backend
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: editaliza
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: editaliza
+        component: backend
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        fsGroup: 1001
+      containers:
+      - name: editaliza
+        image: your-registry/editaliza:latest # Replace with your image
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: editaliza-secrets
+              key: SESSION_SECRET
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: editaliza-secrets
+              key: JWT_SECRET
+        envFrom:
+        - configMapRef:
+            name: editaliza-config
+        volumeMounts:
+        - name: data-volume
+          mountPath: /app/data
+        - name: logs-volume
+          mountPath: /app/logs
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: editaliza-data-pvc
+      - name: logs-volume
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: editaliza-service
+  namespace: editaliza-production
+  labels:
+    app: editaliza
+spec:
+  selector:
+    app: editaliza
+    component: backend
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: editaliza-ingress
+  namespace: editaliza-production
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - yourdomain.com
+    - www.yourdomain.com
+    secretName: editaliza-tls
+  rules:
+  - host: yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: editaliza-service
+            port:
+              number: 80
+  - host: www.yourdomain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: editaliza-service
+            port:
+              number: 80
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: editaliza-pdb
+  namespace: editaliza-production
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: editaliza
+      component: backend
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: editaliza-hpa
+  namespace: editaliza-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: editaliza-app
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

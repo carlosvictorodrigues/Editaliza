@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <!-- SCRIPTS CENTRALIZADOS -->
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <!-- Config do Tailwind para reconhecer as cores customizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-black': '#0d0d0d',
+                        'editaliza-gray': '#969696',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+        .accordion-header.active + .accordion-content {
+            /* O padding é aplicado dentro do <p> para não interferir no cálculo da altura */
+        }
+        .accordion-header.active svg {
+            transform: rotate(180deg);
+        }
+        .accordion-header svg {
+            transition: transform 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
+    <div id="main-nav-container"></div>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-editaliza-blue">Perguntas Frequentes</h1>
+            <p class="text-lg text-editaliza-gray mt-2">Encontre aqui as respostas para as suas dúvidas.</p>
+        </header>
+
+        <div class="space-y-10" id="faq-accordion-container">
+            <!-- Categoria 1: Primeiros Passos -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center"><span class="text-2xl mr-3">⚙️</span>Primeiros Passos e Configuração</h2>
+                <div class="space-y-4">
+                    <div class="content-card p-0 overflow-hidden">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Como começo a usar o cronograma?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <p class="px-6 pb-6">É simples! O primeiro passo é ir em "Gerenciar Planos" e criar seu primeiro plano de estudos. Depois, clique em "Configurar" para adicionar suas disciplinas, os tópicos de cada uma e definir suas horas de estudo. Com tudo pronto, é só clicar em "Gerar Cronograma".</p>
+                        </div>
+                    </div>
+                    <div class="content-card p-0 overflow-hidden">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">O que significa a "Prioridade" (de 1 a 5) nas disciplinas?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <p class="px-6 pb-6">Essa é a ferramenta mais poderosa para personalizar seu estudo. Uma disciplina com prioridade 5 aparecerá no seu cronograma cerca de 5 vezes mais do que uma de prioridade 1. Use-a para dar mais peso às matérias mais importantes ou que você tem mais dificuldade.</p>
+                        </div>
+                    </div>
+                    <div class="content-card p-0 overflow-hidden">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Posso ter mais de um plano de estudos?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <p class="px-6 pb-6">Sim! Nossa plataforma foi projetada para concurseiros que miram em várias provas. Você pode criar quantos planos de estudo desejar em "Gerenciar Planos". Use o seletor no "Painel Principal" para alternar facilmente entre eles e ver as tarefas do dia para cada um.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categoria 2: Uso Diário -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center"><span class="text-2xl mr-3">🗓️</span>Uso Diário e Funcionalidades</h2>
+                <div class="space-y-4">
+                     <div class="content-card p-0 overflow-hidden">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Perdi um dia de estudo. E agora?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <p class="px-6 pb-6">A vida acontece! Não se desespere. O sistema foi feito para ser flexível. No seu "Painel Principal", você verá um alerta sobre as tarefas atrasadas. Basta clicar no botão <strong>"Replanejar Automaticamente"</strong> e o sistema irá redistribuir as tarefas pendentes nos seus próximos dias de estudo disponíveis.</p>
+                        </div>
+                    </div>
+                    <div class="content-card p-0 overflow-hidden">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Para que serve o botão "Reforçar"?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <p class="px-6 pb-6">Se você estudou um tópico e sentiu que não o absorveu bem ou teve muita dificuldade, clique em "Reforçar". O sistema agendará de forma inteligente uma sessão de revisão extra para aquele tópico específico em breve, para garantir que o conhecimento seja consolidado.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categoria 3: Situações Específicas -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center"><span class="text-2xl mr-3">⁉️</span>Situações Específicas</h2>
+                <div class="space-y-4">
+                     <div class="content-card p-0 overflow-hidden">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">A data da minha prova mudou. O que eu faço?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <p class="px-6 pb-6">Sem problemas. Você não precisa criar um novo plano. Apenas vá em "Gerenciar Planos", clique para configurar o plano existente e altere a "Data da Prova". Depois, clique em <strong>"Gerar/Atualizar Cronograma"</strong>. O sistema irá recalcular todo o seu planejamento, ajustando o ritmo e as revisões de forma inteligente para se adequar ao novo prazo.</p>
+                        </div>
+                    </div>
+                     <div class="content-card p-0 overflow-hidden">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Terminei de estudar todos os tópicos antes da prova. E agora?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <p class="px-6 pb-6">Parabéns! Isso significa que seu planejamento foi excelente. O sistema reconhece isso e entra em "modo de manutenção". Ele irá parar de agendar "Novos Tópicos" e preencherá seus dias com um ciclo contínuo de revisões espaçadas e reforços dos tópicos já vistos, garantindo que todo o conteúdo esteja fresco na sua memória até o dia da prova.</p>
+                        </div>
+                    </div>
+                     <div class="content-card p-0 overflow-hidden">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Gerei meu cronograma, mas ele apareceu vazio. Por quê?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <p class="px-6 pb-6">Isso geralmente acontece por dois motivos: 1) Você ainda não adicionou disciplinas e tópicos nas configurações do plano (o sistema não tem o que agendar). 2) Você configurou "0" horas de estudo para todos os dias da semana. Verifique suas configurações e gere novamente!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            components.renderMainNavigation('faq.html');
+
+            const accordionContainer = document.getElementById('faq-accordion-container');
+            if (accordionContainer) {
+                accordionContainer.addEventListener('click', (event) => {
+                    const header = event.target.closest('.accordion-header');
+                    if (!header) return;
+
+                    const content = header.nextElementSibling;
+                    const isActive = header.classList.contains('active');
+
+                    // Fecha qualquer outro item que esteja aberto
+                    document.querySelectorAll('.accordion-header.active').forEach(activeHeader => {
+                        if (activeHeader !== header) {
+                            activeHeader.classList.remove('active');
+                            activeHeader.nextElementSibling.style.maxHeight = null;
+                        }
+                    });
+
+                    // Abre ou fecha o item clicado
+                    if (isActive) {
+                        header.classList.remove('active');
+                        content.style.maxHeight = null;
+                    } else {
+                        header.classList.add('active');
+                        // Define a altura máxima com base no tamanho real do conteúdo
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

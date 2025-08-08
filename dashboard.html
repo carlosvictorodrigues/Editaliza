@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <!-- SCRIPTS CENTRALIZADOS -->
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <!-- Config do Tailwind para reconhecer as cores customizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-black': '#0d0d0d',
+                        'editaliza-gray': '#969696',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Estilos específicos da página (se houver) podem ficar aqui */
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-container { transition: transform 0.3s ease; }
+    </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
+    <div id="main-nav-container"></div>
+
+    <!-- Modal de Confirmação para Exclusão -->
+    <div id="deleteConfirmationModal" class="modal-overlay hidden fixed inset-0 bg-editaliza-black bg-opacity-70 z-50 flex items-center justify-center p-4 opacity-0">
+        <div class="modal-container bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform scale-95">
+            <h2 class="text-2xl font-bold text-editaliza-black">Confirmar Exclusão</h2>
+            <p class="mt-2 text-gray-600">Você tem certeza que deseja apagar o plano "<strong id="planNameToDelete"></strong>"?</p>
+            <p class="mt-4 text-sm font-semibold text-red-700 bg-red-50 p-3 rounded-lg border border-red-200">
+                Atenção: Todos os dados associados serão permanentemente removidos. Esta ação não pode ser desfeita.
+            </p>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button id="cancelDeleteButton" class="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold transition-colors">Cancelar</button>
+                <button id="confirmDeleteButton" class="btn-danger px-6 py-2">Apagar</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-editaliza-black">Meus Planos de Estudo</h1>
+            <p class="text-md text-editaliza-gray mt-1">Gerencie seus planos existentes ou crie um novo para começar.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+            <!-- Coluna da Lista de Planos -->
+            <div class="content-card h-fit">
+                <h2 class="text-2xl font-semibold mb-4 border-b pb-3 text-gray-700 flex items-center">
+                    <span class="text-2xl mr-3">🗂️</span> Selecione um Plano
+                </h2>
+                <div id="planList" class="space-y-3">
+                    <p class="text-gray-500 text-center py-4">Carregando seus planos...</p>
+                </div>
+            </div>
+
+            <!-- Coluna de Criação de Novo Plano -->
+            <div class="content-card h-fit">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700 flex items-center">
+                    <span class="text-2xl mr-3">✨</span> Criar Novo Plano
+                </h2>
+                
+                <!-- Orientação Motivacional -->
+                <div class="bg-blue-50 border-l-4 border-editaliza-blue p-4 rounded-lg mb-6">
+                    <div class="flex items-start">
+                        <span class="text-2xl mr-3">🎯</span>
+                        <div>
+                            <h3 class="font-semibold text-editaliza-blue mb-1">Seu primeiro passo rumo à aprovação!</h3>
+                            <p class="text-sm text-gray-700">Vamos criar um plano personalizado para você. Depois vou te ajudar passo a passo na configuração.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="newPlanForm" class="space-y-4">
+                    <div>
+                        <label for="plan_name" class="block text-sm font-medium text-gray-700 mb-1">
+                            Nome do Plano
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="plan_name" class="form-input" placeholder="Ex: Concurso TJCE 2025, ENEM 2025, OAB 1ª Fase" required>
+                        <p class="text-xs text-gray-500 mt-1">💡 Dica: Use o nome do concurso e o ano para facilitar a organização</p>
+                    </div>
+                    
+                    <div>
+                        <label for="exam_date" class="block text-sm font-medium text-gray-700 mb-1">
+                            Data da Prova
+                            <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" id="exam_date" class="form-input" required>
+                        <p class="text-xs text-gray-500 mt-1">📅 Vou calcular automaticamente o tempo disponível para seus estudos</p>
+                    </div>
+                    
+                    <!-- Preview do Tempo Disponível -->
+                    <div id="timePreview" class="hidden bg-green-50 border border-green-200 rounded-lg p-3">
+                        <div class="flex items-center text-green-700">
+                            <span class="mr-2">⏰</span>
+                            <span id="timePreviewText" class="text-sm font-medium"></span>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" id="createPlanButton" class="btn-primary group">
+                        <span class="flex items-center justify-center">
+                            Criar Meu Plano!
+                            <span class="ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
+                        </span>
+                    </button>
+                </form>
+                
+                <!-- Templates Sugeridos -->
+                <div class="mt-6 pt-6 border-t border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-600 mb-3">🚀 Templates Populares</h3>
+                    <div class="space-y-2">
+                        <button type="button" class="template-btn w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors" data-name="Concurso Público Federal" data-months="6">
+                            <div class="font-medium text-sm text-gray-700">Concurso Público Federal</div>
+                            <div class="text-xs text-gray-500">Preparação completa de 6 meses</div>
+                        </button>
+                        <button type="button" class="template-btn w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors" data-name="OAB" data-months="3">
+                            <div class="font-medium text-sm text-gray-700">Exame da OAB</div>
+                            <div class="text-xs text-gray-500">Foco intensivo de 3 meses</div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const deleteModal = document.getElementById('deleteConfirmationModal');
+        let planIdToDelete = null;
+
+        function openDeleteModal(planId, planName) {
+            planIdToDelete = planId;
+            document.getElementById('planNameToDelete').textContent = planName;
+            deleteModal.classList.remove('hidden');
+            setTimeout(() => {
+                deleteModal.classList.remove('opacity-0');
+                deleteModal.querySelector('.modal-container').classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeDeleteModal() {
+            deleteModal.classList.add('opacity-0');
+            deleteModal.querySelector('.modal-container').classList.add('scale-95');
+            setTimeout(() => {
+                deleteModal.classList.add('hidden');
+                planIdToDelete = null;
+            }, 300);
+        }
+
+        async function fetchAndDisplayPlans() {
+            app.showSpinner();
+            try {
+                const plans = await app.apiFetch("/plans"); 
+                const planList = document.getElementById('planList');
+                planList.innerHTML = '';
+
+                if (plans.length === 0) {
+                    planList.innerHTML = '<div class="text-center p-6 bg-yellow-50 border border-yellow-200 rounded-lg"><p class="text-yellow-800">Vamos começar? Crie o seu primeiro plano de estudos ao lado!</p></div>';
+                    return;
+                }
+
+                plans.forEach(plan => {
+                    const planElement = document.createElement('div');
+                    planElement.className = 'flex justify-between items-center p-4 border rounded-lg hover:bg-slate-50 hover:shadow-sm transition-all duration-200';
+                    const examDate = new Date(plan.exam_date + 'T00:00:00');
+
+                    planElement.innerHTML = `
+                        <a href="plan_settings.html?id=${plan.id}" class="flex-grow group">
+                            <h3 class="font-semibold text-lg text-editaliza-blue group-hover:text-blue-700">${plan.plan_name}</h3>
+                            <p class="text-sm text-editaliza-gray">Data da Prova: ${examDate.toLocaleDateString('pt-BR')}</p>
+                        </a>
+                        <button onclick="openDeleteModal(${plan.id}, '${plan.plan_name.replace(/'/g, "\\'")}')" class="btn-danger-outline">
+                            Apagar
+                        </button>
+                    `;
+                    planList.appendChild(planElement);
+                });
+            } catch (error) {
+                app.showToast(error.message, 'error');
+                document.getElementById('planList').innerHTML = '<p class="text-red-500 text-center py-4">Não foi possível carregar os planos.</p>';
+            } finally {
+                app.hideSpinner();
+            }
+        }
+
+        async function confirmDelete() {
+            if (!planIdToDelete) return;
+            
+            app.showSpinner();
+            closeDeleteModal();
+
+            try {
+                const data = await app.apiFetch(`/plans/${planIdToDelete}`, { method: 'DELETE' });
+                app.showToast(data.message, 'success');
+                await fetchAndDisplayPlans();
+            } catch (error) {
+                app.showToast(error.message, 'error');
+            } finally {
+                app.hideSpinner();
+            }
+        }
+
+        async function initialize() {
+            await components.renderMainNavigation('dashboard.html');
+            fetchAndDisplayPlans();
+            
+            const examDateInput = document.getElementById('exam_date');
+            const timePreview = document.getElementById('timePreview');
+            const timePreviewText = document.getElementById('timePreviewText');
+            
+            // Define data mínima como hoje
+            examDateInput.min = new Date().toISOString().split("T")[0];
+            
+            // Preview de tempo em tempo real
+            examDateInput.addEventListener('change', function() {
+                const selectedDate = new Date(this.value);
+                const today = new Date();
+                const timeDiff = selectedDate - today;
+                const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+                
+                if (daysDiff > 0) {
+                    timePreview.classList.remove('hidden');
+                    const months = Math.floor(daysDiff / 30);
+                    const remainingDays = daysDiff % 30;
+                    
+                    let timeText = `Você tem ${daysDiff} dias para estudar`;
+                    if (months > 0) {
+                        timeText = `${months} ${months === 1 ? 'mês' : 'meses'}`;
+                        if (remainingDays > 0) {
+                            timeText += ` e ${remainingDays} ${remainingDays === 1 ? 'dia' : 'dias'}`;
+                        }
+                        timeText = `Você tem ${timeText} para estudar – vamos aproveitar cada dia! 💪`;
+                    } else if (daysDiff < 30) {
+                        timeText += ` – preparação intensiva! 🔥`;
+                    }
+                    
+                    timePreviewText.textContent = timeText;
+                } else {
+                    timePreview.classList.add('hidden');
+                }
+            });
+            
+            // Templates rápidos
+            document.querySelectorAll('.template-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const name = this.dataset.name;
+                    const months = parseInt(this.dataset.months);
+                    
+                    document.getElementById('plan_name').value = name;
+                    
+                    // Calcula data baseada nos meses
+                    const futureDate = new Date();
+                    futureDate.setMonth(futureDate.getMonth() + months);
+                    document.getElementById('exam_date').value = futureDate.toISOString().split('T')[0];
+                    
+                    // Trigger do evento de preview
+                    examDateInput.dispatchEvent(new Event('change'));
+                    
+                    // Feedback visual
+                    this.classList.add('bg-blue-100', 'border-blue-300');
+                    setTimeout(() => {
+                        this.classList.remove('bg-blue-100', 'border-blue-300');
+                    }, 1000);
+                });
+            });
+            
+            document.getElementById('newPlanForm').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const button = document.getElementById('createPlanButton');
+                const plan_name = document.getElementById('plan_name').value;
+                const exam_date = document.getElementById('exam_date').value;
+
+                button.disabled = true;
+                button.innerHTML = '<span class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Criando seu plano...</span>';
+                app.showSpinner();
+
+                try {
+                    const data = await app.apiFetch('/plans', {
+                        method: 'POST',
+                        body: JSON.stringify({ plan_name, exam_date })
+                    });
+                    
+                    // Feedback de sucesso antes da transição
+                    button.innerHTML = '<span class="flex items-center justify-center text-green-600"><svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>Plano criado! Redirecionando...</span>';
+                    
+                    setTimeout(() => {
+                        window.location.href = `plan_settings.html?id=${data.newPlanId}&new=true&guide=true`;
+                    }, 1500);
+                } catch (error) {
+                    app.showToast(error.message, 'error');
+                    button.disabled = false;
+                    button.innerHTML = '<span class="flex items-center justify-center">Criar Meu Plano! <span class="ml-2 transform group-hover:translate-x-1 transition-transform">→</span></span>';
+                    app.hideSpinner();
+                }
+            });
+            
+            document.getElementById('cancelDeleteButton').addEventListener('click', closeDeleteModal);
+            document.getElementById('confirmDeleteButton').addEventListener('click', confirmDelete);
+            deleteModal.addEventListener('click', (event) => {
+                if (event.target === deleteModal) closeDeleteModal();
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+</body>
+</html>

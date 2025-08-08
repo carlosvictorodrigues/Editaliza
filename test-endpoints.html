@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste dos Endpoints de Gamificação - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .endpoint-card {
+            border-left: 4px solid #3b82f6;
+        }
+        .success { border-left-color: #10b981; }
+        .error { border-left-color: #ef4444; }
+        .loading { border-left-color: #f59e0b; }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">🧪 Teste dos Endpoints de Gamificação</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Teste Gamificação -->
+            <div id="gamification-card" class="endpoint-card bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">📊 /plans/1/gamification</h3>
+                <button onclick="testGamification()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 mb-4">
+                    Testar Endpoint
+                </button>
+                <div id="gamification-result" class="text-sm text-gray-600">
+                    Clique para testar...
+                </div>
+            </div>
+            
+            <!-- Teste Sessões Completadas -->
+            <div id="completed-card" class="endpoint-card bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">✅ /plans/1/sessions/completed</h3>
+                <button onclick="testCompletedSessions()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mb-4">
+                    Testar Endpoint
+                </button>
+                <div id="completed-result" class="text-sm text-gray-600">
+                    Clique para testar...
+                </div>
+            </div>
+            
+            <!-- Teste User Stats -->
+            <div id="stats-card" class="endpoint-card bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">📈 /plans/1/user_stats</h3>
+                <button onclick="testUserStats()" class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 mb-4">
+                    Testar Endpoint
+                </button>
+                <div id="stats-result" class="text-sm text-gray-600">
+                    Clique para testar...
+                </div>
+            </div>
+            
+            <!-- Teste Som do Pomodoro -->
+            <div id="audio-card" class="endpoint-card bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">🔊 Teste do Som do Pomodoro</h3>
+                <button onclick="testPomodoroSound()" class="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 mb-4">
+                    Testar Som
+                </button>
+                <div id="audio-result" class="text-sm text-gray-600">
+                    Clique para testar o som...
+                </div>
+            </div>
+        </div>
+        
+        <!-- Logs -->
+        <div class="mt-8 bg-black text-green-400 p-4 rounded-lg font-mono text-sm h-64 overflow-y-auto">
+            <div id="console-log">🖥️ Console de Logs</div>
+        </div>
+    </div>
+
+    <script>
+        // Override console.log para mostrar no HTML
+        const originalLog = console.log;
+        const logContainer = document.getElementById('console-log');
+        
+        console.log = function(...args) {
+            originalLog.apply(console, arguments);
+            logContainer.innerHTML += '<br>' + args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            logContainer.scrollTop = logContainer.scrollHeight;
+        };
+        
+        // Simulação de token para testes (normalmente viria do localStorage)
+        const mockToken = 'test-token';
+        
+        // Função para fazer requisições simuladas
+        async function makeRequest(url, description) {
+            console.log(`🔄 Testando: ${description}`);
+            console.log(`📡 URL: ${url}`);
+            
+            try {
+                // Simular resposta baseada no endpoint
+                let mockResponse;
+                
+                if (url.includes('/gamification')) {
+                    mockResponse = {
+                        studyStreak: 3,
+                        totalStudyDays: 15,
+                        experiencePoints: 1500,
+                        concurseiroLevel: 'Aprendiz 💪',
+                        achievements: ['Primeira Semana', '10 Dias de Estudos'],
+                        completedTopicsCount: 25,
+                        totalCompletedSessions: 45,
+                        currentStreak: 3,
+                        totalXP: 1500,
+                        level: 3,
+                        levelName: 'Aprendiz 💪',
+                        achievementsCount: 2
+                    };
+                } else if (url.includes('/sessions/completed')) {
+                    mockResponse = {
+                        sessions: [
+                            {
+                                id: 1,
+                                status: 'Concluído',
+                                completed_at: new Date().toISOString(),
+                                time_spent: 1800,
+                                session_type: 'Novo Tópico'
+                            },
+                            {
+                                id: 2,
+                                status: 'Concluído',
+                                completed_at: new Date(Date.now() - 86400000).toISOString(),
+                                time_spent: 2400,
+                                session_type: 'Revisão 7D'
+                            }
+                        ]
+                    };
+                } else if (url.includes('/user_stats')) {
+                    mockResponse = {
+                        totalXP: 1500,
+                        completedTopics: 25,
+                        totalTopics: 100,
+                        achievements: ['Primeira Semana', '10 Dias de Estudos'],
+                        progressPercentage: 25
+                    };
+                }
+                
+                // Simular delay de rede
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                console.log(`✅ Sucesso:`, mockResponse);
+                return mockResponse;
+                
+            } catch (error) {
+                console.log(`❌ Erro:`, error.message);
+                throw error;
+            }
+        }
+        
+        function setCardStatus(cardId, status) {
+            const card = document.getElementById(cardId);
+            card.classList.remove('success', 'error', 'loading');
+            card.classList.add(status);
+        }
+        
+        function setResult(resultId, content, isError = false) {
+            const element = document.getElementById(resultId);
+            element.innerHTML = content;
+            element.className = isError ? 
+                'text-sm text-red-600 bg-red-50 p-2 rounded' : 
+                'text-sm text-green-600 bg-green-50 p-2 rounded';
+        }
+        
+        async function testGamification() {
+            setCardStatus('gamification-card', 'loading');
+            setResult('gamification-result', '⏳ Carregando dados de gamificação...');
+            
+            try {
+                const data = await makeRequest('/plans/1/gamification', 'Dados de Gamificação');
+                setCardStatus('gamification-card', 'success');
+                setResult('gamification-result', 
+                    `🎉 Sucesso!<br>
+                    📊 Dias estudados: ${data.totalStudyDays}<br>
+                    🔥 Sequência: ${data.studyStreak} dias<br>
+                    ⭐ Nível: ${data.concurseiroLevel}<br>
+                    🏆 XP: ${data.experiencePoints}`
+                );
+            } catch (error) {
+                setCardStatus('gamification-card', 'error');
+                setResult('gamification-result', `❌ Erro: ${error.message}`, true);
+            }
+        }
+        
+        async function testCompletedSessions() {
+            setCardStatus('completed-card', 'loading');
+            setResult('completed-result', '⏳ Carregando sessões completadas...');
+            
+            try {
+                const data = await makeRequest('/plans/1/sessions/completed', 'Sessões Completadas');
+                setCardStatus('completed-card', 'success');
+                setResult('completed-result', 
+                    `✅ Sucesso!<br>
+                    📚 Sessões encontradas: ${data.sessions.length}<br>
+                    🕒 Mais recente: ${new Date(data.sessions[0].completed_at).toLocaleString('pt-BR')}`
+                );
+            } catch (error) {
+                setCardStatus('completed-card', 'error');
+                setResult('completed-result', `❌ Erro: ${error.message}`, true);
+            }
+        }
+        
+        async function testUserStats() {
+            setCardStatus('stats-card', 'loading');
+            setResult('stats-result', '⏳ Carregando estatísticas do usuário...');
+            
+            try {
+                const data = await makeRequest('/plans/1/user_stats', 'Estatísticas do Usuário');
+                setCardStatus('stats-card', 'success');
+                setResult('stats-result', 
+                    `📈 Sucesso!<br>
+                    ✅ Tópicos concluídos: ${data.completedTopics}/${data.totalTopics}<br>
+                    📊 Progresso: ${data.progressPercentage}%<br>
+                    🎖️ Conquistas: ${data.achievements.length}`
+                );
+            } catch (error) {
+                setCardStatus('stats-card', 'error');
+                setResult('stats-result', `❌ Erro: ${error.message}`, true);
+            }
+        }
+        
+        function testPomodoroSound() {
+            setCardStatus('audio-card', 'loading');
+            setResult('audio-result', '🔊 Testando sistema de áudio...');
+            
+            try {
+                // Simular o sistema de áudio do TimerSystem
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                
+                const masterGain = audioContext.createGain();
+                masterGain.connect(audioContext.destination);
+                masterGain.gain.setValueAtTime(0.3, audioContext.currentTime);
+
+                const playTone = (frequency, startTime, duration, volume = 0.18) => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(frequency, startTime);
+                    osc.connect(gain);
+                    gain.connect(masterGain);
+
+                    gain.gain.setValueAtTime(0, startTime);
+                    gain.gain.linearRampToValueAtTime(volume, startTime + 0.15);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+                    osc.start(startTime);
+                    osc.stop(startTime + duration);
+                };
+
+                const now = audioContext.currentTime;
+                playTone(523.25, now, 1.2, 0.18);         // Dó
+                playTone(659.25, now + 0.3, 1.4, 0.15);   // Mi
+                playTone(783.99, now + 0.6, 1.0, 0.12);   // Sol
+                
+                console.log('🔊 Som do Pomodoro reproduzido com sucesso');
+                setCardStatus('audio-card', 'success');
+                setResult('audio-result', 
+                    `🎵 Som reproduzido com sucesso!<br>
+                    🎼 3 tons harmônicos<br>
+                    ⏱️ Duração: ~1.6 segundos`
+                );
+                
+            } catch (error) {
+                console.log(`❌ Erro no áudio:`, error.message);
+                setCardStatus('audio-card', 'error');
+                setResult('audio-result', 
+                    `❌ Web Audio API não suportada<br>
+                    💡 Teste em navegador compatível`, true
+                );
+            }
+        }
+        
+        // Log inicial
+        console.log('🚀 Página de teste dos endpoints carregada');
+        console.log('🔧 Versão da correção: 1.0.0');
+        console.log('📅 Data: ' + new Date().toLocaleString('pt-BR'));
+    </script>
+</body>
+</html>

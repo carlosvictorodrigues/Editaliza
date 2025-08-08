@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Principal - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <!-- SCRIPTS CENTRALIZADOS -->
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/checklist.js"></script>
+    <script src="js/timer.js"></script>
+    <script src="js/modules/gamification.js"></script>
+    <!-- Config do Tailwind para cores da marca -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-black': '#0d0d0d',
+                        'editaliza-gray': '#969696',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-container { transition: all 0.3s ease; }
+        .prose { max-width: none; }
+        .prose-sm { font-size: 0.875rem; line-height: 1.5; }
+        
+        /* Navegação com dropdown */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            z-index: 1;
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            top: 100%;
+            left: 0;
+        }
+        .dropdown-content a {
+            color: #374151;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .dropdown-content a:hover {
+            background-color: #f3f4f6;
+            color: #0528f2;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        /* Classes base do padrão visual */
+        .nav-link-active {
+            background: linear-gradient(135deg, #0528f2, #3b82f6);
+            color: white;
+            border-radius: 0.5rem;
+        }
+        .nav-link-default {
+            color: #374151;
+        }
+        .nav-link-default:hover {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #0528f2, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(5, 40, 242, 0.2);
+        }
+        .btn-secondary {
+            background: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+        }
+        .content-card {
+            background: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f3f4f6;
+        }
+        
+        /* Métricas principais */
+        .metric-card {
+            background: white;
+            border: 2px solid #f3f4f6;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+        .metric-card:hover {
+            border-color: #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+        .metric-card.blue-accent {
+            border-left: 4px solid #0528f2;
+        }
+        .metric-card.red-accent {
+            border-left: 4px solid #ef4444;
+        }
+        .metric-card.green-accent {
+            border-left: 4px solid #1ad937;
+        }
+        .metric-card.purple-accent {
+            border-left: 4px solid #8b5cf6;
+        }
+        .metric-card.orange-accent {
+            border-left: 4px solid #f97316;
+        }
+        .metric-card.yellow-accent {
+            border-left: 4px solid #eab308;
+        }
+        
+        /* Cards de estudo */
+        .study-card {
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            transition: all 0.2s ease;
+        }
+        .study-card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Avatar com transições suaves */
+        .user-avatar {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transition: all 0.2s ease;
+        }
+        .user-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Animações discretas */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        /* Cor de destaque da marca */
+        .text-brand {
+            color: #0528f2;
+        }
+        .bg-brand {
+            background-color: #0528f2;
+        }
+        .border-brand {
+            border-color: #0528f2;
+        }
+        
+        /* Progress indicator */
+        .progress-bar {
+            height: 0.5rem;
+            background-color: #f3f4f6;
+            border-radius: 0.25rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0528f2, #3b82f6);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+
+    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
+    <div id="main-nav-container"></div>
+
+    <!-- MODAL DE SESSÃO DE ESTUDO -->
+    <div id="studySessionModal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4 opacity-0">
+        <div id="studySessionModalContainer" class="modal-container bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl transform scale-95 max-h-[90vh] overflow-y-auto">
+            <!-- O conteúdo do modal será injetado aqui pelo JavaScript -->
+        </div>
+    </div>
+
+    <!-- MODAL PARA ADIAR TAREFA -->
+    <div id="postponeModal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 opacity-0">
+        <div class="modal-container bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform scale-95">
+            <div class="text-center mb-6">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-4xl">📅</span>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">Adiar Tarefa</h2>
+                <p class="text-gray-600">Para quando você gostaria de mover esta tarefa?</p>
+            </div>
+            
+            <div class="space-y-3 mb-6">
+                <button data-days="next" class="postpone-option-btn w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3">
+                    <span class="text-xl">⏭️</span>
+                    <span class="text-lg">Próxima data desta disciplina</span>
+                </button>
+                <button data-days="1" class="postpone-option-btn w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 hover:shadow-lg flex items-center justify-center space-x-2">
+                    <span class="text-lg">📆</span>
+                    <span>Amanhã</span>
+                </button>
+                <button data-days="7" class="postpone-option-btn w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 hover:shadow-lg flex items-center justify-center space-x-2">
+                    <span class="text-lg">🗓️</span>
+                    <span>Em 7 dias</span>
+                </button>
+            </div>
+            
+            <div class="text-center">
+                <button id="cancelPostponeButton" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-lg transition-colors duration-300">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+        
+        <!-- Boas-vindas com informações principais -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 fade-in">
+            <!-- Cabeçalho de boas-vindas -->
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-6">
+                <div class="mb-4 lg:mb-0">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                        <span id="welcomeMessage">Bem-vindo ao seu painel</span>
+                    </h1>
+                    <p class="text-gray-600">Acompanhe seu progresso e organize seus estudos</p>
+                </div>
+                
+                <!-- Seletor de plano -->
+                <div class="flex items-center space-x-4">
+                    <div>
+                        <label for="planSelector" class="block text-sm font-medium text-gray-700 mb-1">
+                            Plano ativo:
+                        </label>
+                        <select id="planSelector" 
+                                class="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand focus:ring-brand">
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Métricas principais -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Data de hoje -->
+                <div class="metric-card blue-accent">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Data de hoje</p>
+                            <p id="todayDateHero" class="text-xl font-semibold text-gray-900">--</p>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dias para prova -->
+                <div class="metric-card red-accent">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Dias para prova</p>
+                            <p id="daysToExamHero" class="text-xl font-semibold text-gray-900">--</p>
+                        </div>
+                        <div class="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progresso geral -->
+                <div class="metric-card green-accent">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Progresso geral</p>
+                            <p id="generalProgressHero" class="text-xl font-semibold text-gray-900">--%</p>
+                        </div>
+                        <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progresso do dia -->
+                <div class="metric-card purple-accent">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Progresso hoje</p>
+                            <p id="todayProgressText" class="text-xl font-semibold text-gray-900">0/0</p>
+                        </div>
+                        <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                
+            </div>
+        </div>
+
+
+        <!-- Atividades do dia -->
+        <div class="bg-white rounded-xl shadow-md mb-8 fade-in">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Atividades de hoje</h2>
+                        <p class="text-gray-600 mt-1">Concentre-se nas tarefas programadas para hoje</p>
+                    </div>
+                    <div class="text-sm text-gray-500">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-orange-400 rounded-full"></div>
+                            <span>Prioridade alta</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Container das atividades -->
+            <div id="todaySchedule" class="p-6">
+                <!-- Atividades serão carregadas aqui -->
+            </div>
+        </div>
+
+        <!-- Alertas importantes -->
+        <div id="overdue-alert-container"></div>
+    </main>
+
+    <script>
+            let todaySessionsData = [];
+            let allSessionsData = []; // Store all sessions for flexible access
+            
+            // Importar módulo de gamificação se disponível
+            if (typeof window.Gamification === 'undefined') {
+                // Tentar carregar o módulo de gamificação
+                try {
+                    import('./js/modules/gamification.js').then(module => {
+                        window.Gamification = module.Gamification;
+                    }).catch(err => console.warn('Módulo de gamificação não disponível:', err));
+                } catch (err) {
+                    console.warn('Import não suportado, gamificação usará fallback');
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', async () => {
+                app.showSpinner();
+
+                try {
+                    // Renderizar navegação principal
+                    await components.renderMainNavigation('home.html');
+                    const plans = await app.getPlans();
+                    if (!plans || plans.length === 0) {
+                        window.location.href = 'dashboard.html';
+                        return;
+                    }
+
+                    let planId = localStorage.getItem(app.config.planKey);
+                    const planExists = plans.some(p => p.id == planId);
+
+                    if (!planId || !planExists) {
+                        planId = plans[0].id;
+                        localStorage.setItem(app.config.planKey, planId);
+                    }
+
+                    app.state.activePlanId = planId;
+
+                    // Populate plan selector
+                    const planSelector = document.getElementById('planSelector');
+                    planSelector.innerHTML = plans.map(p => `<option value="${p.id}" ${p.id == planId ? 'selected' : ''}>${app.sanitizeHtml(p.plan_name)}</option>`).join('');
+                    planSelector.addEventListener('change', (e) => {
+                        const newPlanId = e.target.value;
+                        localStorage.setItem(app.config.planKey, newPlanId);
+                        window.location.reload();
+                    });
+
+                    // Carrega cada seção de forma independente
+                    loadUserProfile();
+                    loadMetrics(planId);
+                    loadTodaySchedule(planId);
+                    checkOverdueTasks();
+
+                } catch (error) {
+                    console.error("Erro ao inicializar a página:", error);
+                    if (error.message.includes("Sua sessão expirou")) {
+                         app.logout();
+                    } else {
+                        document.body.innerHTML = `<div class="h-screen flex flex-col items-center justify-center">
+                            <h1 class="text-2xl font-bold mb-4">Erro ao carregar seus dados</h1>
+                            <p class="text-gray-600 mb-8">Não foi possível carregar seus planos de estudo. Tente recarregar a página.</p>
+                            <button onclick="window.location.reload()" class="btn-primary">Recarregar</button>
+                        </div>`;
+                    }
+                } finally {
+                    app.hideSpinner();
+                }
+            });
+
+            async function loadUserProfile() {
+                try {
+                    const profile = await app.apiFetch("/profile");
+                    const welcomeElement = document.getElementById("welcomeMessage");
+                    const userAvatarElement = document.getElementById("userAvatar");
+
+                    if (profile && profile.name) {
+                        welcomeElement.textContent = "Olá, " + app.sanitizeHtml(profile.name) + "!";
+                    } else {
+                        // Tenta obter o nome do token como fallback
+                        const token = localStorage.getItem(app.config.tokenKey);
+                        if (token) {
+                            try {
+                                const payload = JSON.parse(atob(token.split('.')[1]));
+                                if (payload.name) {
+                                    welcomeElement.textContent = "Olá, " + app.sanitizeHtml(payload.name) + "!";
+                                } else {
+                                    welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
+                                }
+                            } catch (e) {
+                                welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
+                            }
+                        } else {
+                            welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
+                        }
+                    }
+
+                    if (userAvatarElement && profile.profile_picture && profile.profile_picture.trim() !== '') {
+                        const cacheBuster = '?t=' + new Date().getTime();
+                        let avatarUrl;
+                        
+                        if (profile.profile_picture.startsWith('https://')) {
+                            avatarUrl = profile.profile_picture;
+                        } else {
+                            avatarUrl = (profile.profile_picture.startsWith('./') ? 
+                                profile.profile_picture : './' + profile.profile_picture) + cacheBuster;
+                        }
+                        
+                        console.log('🖼️ Carregando avatar:', avatarUrl);
+                        userAvatarElement.src = avatarUrl;
+                        
+                        // Add error handling for avatar loading
+                        userAvatarElement.onerror = function() {
+                            console.warn('⚠️ Erro ao carregar avatar, mantendo padrão');
+                            this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='24' fill='%23e5e7eb'/%3E%3Ccircle cx='24' cy='18' r='8' fill='%236b7280'/%3E%3Cellipse cx='24' cy='38' rx='12' ry='8' fill='%236b7280'/%3E%3C/svg%3E";
+                        };
+                        
+                        userAvatarElement.onload = function() {
+                            console.log('✅ Avatar carregado com sucesso');
+                        };
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar perfil:', error);
+                    const welcomeElement = document.getElementById("welcomeMessage");
+                    if (welcomeElement) {
+                        // Tenta obter o nome do token como fallback em caso de erro na API
+                        const token = localStorage.getItem(app.config.tokenKey);
+                        if (token) {
+                            try {
+                                const payload = JSON.parse(atob(token.split('.')[1]));
+                                if (payload.name) {
+                                    welcomeElement.textContent = "Olá, " + app.sanitizeHtml(payload.name) + "! (offline)"; // Adiciona um indicador de que o dado é do cache
+                                } else {
+                                    welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
+                                }
+                            } catch (e) {
+                                welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
+                            }
+                        } else {
+                            welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
+                        }
+                    }
+                }
+            }
+
+            async function loadMetrics(planId) {
+                try {
+                    const [plan, progress] = await Promise.all([
+                        app.apiFetch(`/plans/${planId}`),
+                        app.getActivePlanData(planId, 'progress')
+                    ]);
+
+                    const today = new Date();
+                    document.getElementById('todayDateHero').textContent = today.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
+
+                    if (plan.exam_date) {
+                        const examDate = new Date(plan.exam_date);
+                        const diffTime = examDate - today;
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        document.getElementById('daysToExamHero').textContent = diffDays > 0 ? `${diffDays}` : 'Hoje!';
+                    }
+
+                    document.getElementById('generalProgressHero').textContent = `${progress.percentage || 0}%`;
+
+                } catch (error) {
+                    console.error('Erro ao carregar métricas:', error);
+                }
+            }
+
+            async function loadTodaySchedule(planId) {
+                const container = document.getElementById('todaySchedule');
+                try {
+                    const today = new Date().toISOString().split('T')[0];
+                    const scheduleData = await app.apiFetch(`/schedules/${planId}/range?startDate=${today}&endDate=${today}`);
+                    todaySessionsData = scheduleData || [];
+                    
+                    // Also load all sessions for flexible access (removing date restrictions)
+                    await loadAllSessions(planId);
+
+                    if (todaySessionsData.length === 0) {
+                        container.innerHTML = `
+                            <div class="text-center py-12">
+                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhuma atividade para hoje</h3>
+                                <p class="text-gray-600">Aproveite para descansar ou revisar conteúdos anteriores!</p>
+                            </div>
+                        `;
+                        // Update progress card even with no sessions
+                        updateTodayProgress();
+                        // Update study statistics cards
+                        updateStudyStatistics(planId);
+                        
+                            return;
+                    }
+
+                    const sessionsHtml = todaySessionsData.map(session => renderIndividualCard(session)).join('');
+                    container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">${sessionsHtml}</div>`;
+
+                    // Update today's progress card
+                    updateTodayProgress();
+                    
+                    // Update study statistics cards
+                    updateStudyStatistics(planId);
+                    
+
+                } catch (error) {
+                    console.error('Erro ao carregar cronograma de hoje:', error);
+                    container.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-medium text-gray-900 mb-2">Erro ao carregar atividades</h3>
+                            <p class="text-gray-600 mb-4">Não foi possível carregar as atividades de hoje.</p>
+                            <button onclick="window.location.reload()" class="btn-primary">Recarregar página</button>
+                        </div>
+                    `;
+                }
+            }
+
+            async function loadAllSessions(planId) {
+                try {
+                    // Load sessions for a wider date range (e.g., past 30 days and next 30 days)
+                    const today = new Date();
+                    const pastDate = new Date(today);
+                    pastDate.setDate(today.getDate() - 30);
+                    const futureDate = new Date(today);
+                    futureDate.setDate(today.getDate() + 30);
+                    
+                    const startDate = pastDate.toISOString().split('T')[0];
+                    const endDate = futureDate.toISOString().split('T')[0];
+                    
+                    const allScheduleData = await app.apiFetch(`/schedules/${planId}/range?startDate=${startDate}&endDate=${endDate}`);
+                    allSessionsData = allScheduleData || [];
+                    
+                    console.log(`📅 Carregadas ${allSessionsData.length} sessões (${startDate} a ${endDate})`);
+                } catch (error) {
+                    console.error('Erro ao carregar todas as sessões:', error);
+                    allSessionsData = todaySessionsData; // Fallback to today's sessions
+                }
+            }
+
+            function updateTodayProgress() {
+                try {
+                    const total = todaySessionsData.length;
+                    const completed = todaySessionsData.filter(session => {
+                        // Check if session has completed time or is marked as completed
+                        return session.completed_at || 
+                               session.status === 'completed' || 
+                               (session.study_time && session.study_time > 0);
+                    }).length;
+                    
+                    const progressElement = document.getElementById('todayProgressText');
+                    if (progressElement) {
+                        progressElement.textContent = `${completed}/${total}`;
+                        console.log(`📊 Progresso hoje atualizado: ${completed}/${total} sessões`);
+                        
+                        // Update color based on progress
+                        if (completed === total && total > 0) {
+                            progressElement.classList.add('text-green-600');
+                            progressElement.classList.remove('text-gray-900', 'text-yellow-600');
+                        } else if (completed > 0) {
+                            progressElement.classList.add('text-yellow-600');
+                            progressElement.classList.remove('text-gray-900', 'text-green-600');
+                        } else {
+                            progressElement.classList.add('text-gray-900');
+                            progressElement.classList.remove('text-green-600', 'text-yellow-600');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Erro ao atualizar progresso de hoje:', error);
+                }
+            }
+
+
+
+            async function updateStudyStatistics(planId) {
+                try {
+                    // Get study statistics from the API
+                    const stats = await app.apiFetch(`/users/study-stats/${planId}`);
+                    
+                    // Update Total de Dias
+                    const totalDaysElement = document.getElementById('totalStudyDaysText');
+                    if (totalDaysElement && stats.totalStudyDays !== undefined) {
+                        totalDaysElement.textContent = stats.totalStudyDays.toString();
+                        console.log(`📈 Total de dias atualizado: ${stats.totalStudyDays}`);
+                    }
+                    
+                    // Update Sequência Atual
+                    const currentStreakElement = document.getElementById('currentStreakText');
+                    if (currentStreakElement && stats.currentStreak !== undefined) {
+                        currentStreakElement.textContent = stats.currentStreak.toString();
+                        console.log(`🔥 Sequência atual atualizada: ${stats.currentStreak} dias`);
+                        
+                        // Update color based on streak
+                        if (stats.currentStreak > 7) {
+                            currentStreakElement.classList.add('text-green-600');
+                            currentStreakElement.classList.remove('text-gray-900', 'text-yellow-600');
+                        } else if (stats.currentStreak > 0) {
+                            currentStreakElement.classList.add('text-yellow-600');
+                            currentStreakElement.classList.remove('text-gray-900', 'text-green-600');
+                        } else {
+                            currentStreakElement.classList.add('text-gray-900');
+                            currentStreakElement.classList.remove('text-green-600', 'text-yellow-600');
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.error('Erro ao atualizar estatísticas de estudo:', error);
+                    // Set fallback values if API fails
+                    const totalDaysElement = document.getElementById('totalStudyDaysText');
+                    const currentStreakElement = document.getElementById('currentStreakText');
+                    
+                    if (totalDaysElement) {
+                        // Calculate basic total days from today's sessions
+                        const hasCompletedSessions = todaySessionsData.some(session => 
+                            session.completed_at || session.status === 'completed' || (session.study_time && session.study_time > 0)
+                        );
+                        // This is a simplified calculation - in production this should come from the API
+                        const storedTotalDays = localStorage.getItem('totalStudyDays') || '0';
+                        let totalDays = parseInt(storedTotalDays);
+                        
+                        // If user has studied today and it's not already counted
+                        const today = new Date().toISOString().split('T')[0];
+                        const lastStudyDate = localStorage.getItem('lastStudyDate');
+                        
+                        if (hasCompletedSessions && lastStudyDate !== today) {
+                            totalDays += 1;
+                            localStorage.setItem('totalStudyDays', totalDays.toString());
+                            localStorage.setItem('lastStudyDate', today);
+                        }
+                        
+                        totalDaysElement.textContent = totalDays.toString();
+                        console.log(`📊 Total de dias (fallback): ${totalDays}`);
+                    }
+                    
+                    if (currentStreakElement) {
+                        // Simplified streak calculation
+                        currentStreakElement.textContent = '0';
+                    }
+                }
+            }
+
+            function renderIndividualCard(session) {
+                switch (session.session_type) {
+                    case 'Novo Tópico': case 'Reforço Extra':
+                        return components.createSessionCard(session);
+                    case 'Revisão Consolidada':
+                        return components.createReviewCard(session);
+                    case 'Simulado Direcionado': case 'Simulado Completo':
+                        return components.createSimuladCard(session);
+                    case 'Redação':
+                        return components.createEssayCard(session);
+                    default:
+                        return components.createSessionCard(session);
+                }
+            }
+
+            function openStudySession(sessionId) {
+                // First try to find in all sessions (removes date restrictions)
+                let session = allSessionsData.find(s => s.id == sessionId);
+                
+                // If not found, try today's sessions as fallback
+                if (!session) {
+                    session = todaySessionsData.find(s => s.id == sessionId);
+                }
+                
+                if (session) {
+                    console.log(`🎯 Abrindo sessão ${sessionId} (Data: ${session.session_date || 'N/A'})`);
+                    StudyChecklist.show(session);
+                } else {
+                    app.showToast('Erro: Sessão não encontrada.', 'error');
+                    console.error(`❌ Sessão ${sessionId} não encontrada em todaySessionsData nem allSessionsData`);
+                }
+            }
+
+            // Função para verificar tarefas atrasadas
+            async function checkOverdueTasks() {
+                try {
+                    if (!app.state.activePlanId) {
+                        console.warn('❌ activePlanId não definido para verificar tarefas atrasadas');
+                        return;
+                    }
+                    const overdueData = await app.apiFetch(`/plans/${app.state.activePlanId}/overdue_check`);
+                    if (overdueData.count > 0) {
+                        components.renderOverdueAlert(overdueData.count);
+                        addReplanListener();
+                    } else {
+                        const container = document.getElementById('overdue-alert-container');
+                        if (container) container.innerHTML = '';
+                    }
+                } catch (error) {
+                    console.warn('Erro ao verificar tarefas atrasadas:', error);
+                    // Não mostrar toast para erros de API opcionais
+                }
+            }
+
+            function addReplanListener() {
+                const replanButton = document.getElementById('replanButton');
+                const showDetailsButton = document.getElementById('showReplanDetailsButton');
+
+                if (replanButton) {
+                    replanButton.onclick = async function() {
+                        replanButton.disabled = true;
+                        replanButton.innerHTML = `
+                            <div class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-3"></div>
+                            <span>Replanejando...</span>
+                        `;
+                        
+                        try {
+                            const response = await app.apiFetch(`/plans/${app.state.activePlanId}/replan`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' }
+                            });
+                            
+                            if (response.success) {
+                                app.showToast('✅ Cronograma replanejado com sucesso! As tarefas atrasadas foram redistribuídas.', 'success');
+                                
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1500);
+                            } else {
+                                throw new Error(response.message || 'Erro ao replanejar cronograma');
+                            }
+                        } catch (error) {
+                            console.error('Erro no replanejamento:', error);
+                            app.showToast('❌ Erro ao replanejar cronograma: ' + error.message, 'error');
+                            
+                            replanButton.disabled = false;
+                            replanButton.innerHTML = `
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span class="text-lg">Replanejar Agora</span>
+                                <span class="text-2xl">🚀</span>
+                            `;
+                        }
+                    };
+                }
+
+                if (showDetailsButton) {
+                    showDetailsButton.onclick = async function() {
+                        const replanDetails = document.getElementById('replanDetails');
+                        const detailsContent = document.getElementById('replanDetailsContent');
+                        
+                        if (replanDetails.classList.contains('hidden')) {
+                            replanDetails.classList.remove('hidden');
+                            showDetailsButton.innerHTML = `
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span class="text-lg">Ocultar Detalhes</span>
+                                <span class="text-xl">📋</span>
+                            `;
+                            
+                            try {
+                                const planData = await app.apiFetch(`/plans/${app.state.activePlanId}/overdue_details`);
+                                if (planData && planData.replanStrategy) {
+                                    detailsContent.innerHTML = `
+                                        <div class="space-y-4">
+                                            <div class="flex items-start space-x-3">
+                                                <span class="text-2xl">🎯</span>
+                                                <div>
+                                                    <p class="font-semibold text-blue-800 mb-2">Estratégia de Redistribuição:</p>
+                                                    <p class="text-blue-700">${planData.replanStrategy}</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-start space-x-3">
+                                                <span class="text-2xl">📅</span>
+                                                <div>
+                                                    <p class="font-semibold text-blue-800 mb-2">Próximos Passos:</p>
+                                                    <ul class="text-blue-700 space-y-1">
+                                                        <li>• Tarefas atrasadas serão reagendadas para os próximos dias disponíveis</li>
+                                                        <li>• Seu cronograma será otimizado para manter o ritmo de estudos</li>
+                                                        <li>• As datas da prova e metas serão preservadas</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }
+                            } catch (error) {
+                                console.warn('Erro ao carregar detalhes do replanejamento:', error);
+                                detailsContent.innerHTML = `
+                                    <div class="flex items-start space-x-3">
+                                        <span class="text-2xl">⚡</span>
+                                        <div>
+                                            <p class="font-semibold text-blue-800 mb-2">Replanejamento Inteligente:</p>
+                                            <p class="text-blue-700">O sistema irá automaticamente reorganizar suas tarefas atrasadas nos próximos dias disponíveis, mantendo sua meta de estudos e data da prova.</p>
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        } else {
+                            replanDetails.classList.add('hidden');
+                            showDetailsButton.innerHTML = `
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span class="text-lg">Ver Detalhes</span>
+                                <span class="text-xl">📋</span>
+                            `;
+                        }
+                    };
+                }
+            }
+
+            // Variável para armazenar o ID da sessão a ser adiada
+            let sessionIdToPostpone = null;
+
+            // Função para reforçar uma sessão (agenda para 3 dias depois)
+            async function reinforceSession(sessionId) {
+                try {
+                    const result = await app.apiFetch(`/sessions/${sessionId}/reinforce`, { method: 'POST' });
+                    if (result.message) {
+                        app.showToast('💪 ' + result.message, 'success');
+                        // Recarregar as atividades após o reforço
+                        if (app.state.activePlanId) {
+                            loadTodaySchedule(app.state.activePlanId);
+                        }
+                    } else {
+                        app.showToast('❌ Erro ao agendar sessão de reforço', 'error');
+                    }
+                } catch (error) {
+                    console.error('Erro ao reforçar sessão:', error);
+                    app.showToast('❌ Erro ao agendar sessão de reforço: ' + error.message, 'error');
+                }
+            }
+
+            // Função para abrir o modal de adiamento
+            function openPostponeModal(sessionId) {
+                sessionIdToPostpone = sessionId;
+                const postponeModal = document.getElementById('postponeModal');
+                postponeModal.classList.remove('hidden');
+                setTimeout(() => {
+                    postponeModal.classList.remove('opacity-0');
+                    postponeModal.querySelector('.modal-container').classList.remove('scale-95');
+                }, 10);
+            }
+
+            // Função para fechar o modal de adiamento
+            function closePostponeModal() {
+                const postponeModal = document.getElementById('postponeModal');
+                postponeModal.classList.add('opacity-0');
+                postponeModal.querySelector('.modal-container').classList.add('scale-95');
+                setTimeout(() => {
+                    postponeModal.classList.add('hidden');
+                    sessionIdToPostpone = null;
+                }, 300);
+            }
+
+            // Função para processar o adiamento
+            async function handlePostpone(days) {
+                if (!sessionIdToPostpone) return;
+                closePostponeModal();
+
+                try {
+                    const result = await app.apiFetch(`/sessions/${sessionIdToPostpone}/postpone`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ days: days })
+                    });
+                    
+                    if (result.message) {
+                        app.showToast('📅 ' + result.message, 'success');
+                        // Recarregar as atividades após o adiamento
+                        if (app.state.activePlanId) {
+                            loadTodaySchedule(app.state.activePlanId);
+                        }
+                    } else {
+                        app.showToast('❌ Erro ao adiar tarefa', 'error');
+                    }
+                } catch (error) {
+                    console.error('Erro ao adiar tarefa:', error);
+                    app.showToast('❌ Erro ao adiar tarefa: ' + error.message, 'error');
+                }
+            }
+
+            // Event listeners para o modal de adiamento
+            document.addEventListener('DOMContentLoaded', function() {
+                const postponeModal = document.getElementById('postponeModal');
+                const cancelButton = document.getElementById('cancelPostponeButton');
+                const postponeButtons = document.querySelectorAll('.postpone-option-btn');
+
+                // Botão de cancelar
+                cancelButton.addEventListener('click', closePostponeModal);
+
+                // Botões de opções de adiamento
+                postponeButtons.forEach(btn => {
+                    btn.addEventListener('click', (event) => {
+                        const days = event.currentTarget.dataset.days;
+                        handlePostpone(days);
+                    });
+                });
+
+                // Fechar modal ao clicar fora
+                postponeModal.addEventListener('click', (event) => {
+                    if (event.target === postponeModal) {
+                        closePostponeModal();
+                    }
+                });
+            });
+
+            // Make functions globally accessible
+            window.openStudySession = openStudySession;
+            window.checkOverdueTasks = checkOverdueTasks;
+            window.reinforceSession = reinforceSession;
+            window.openPostponeModal = openPostponeModal;
+            window.closePostponeModal = closePostponeModal;
+            window.updateDashboardStats = function() {
+                updateTodayProgress();
+                if (app.state.activePlanId) {
+                    updateStudyStatistics(app.state.activePlanId);
+                }
+            };
+
+        </script>
+</body>
+</html>

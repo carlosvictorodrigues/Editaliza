@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Interface Pós-Correções - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-black': '#0d0d0d',
+                        'editaliza-gray': '#969696',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-inter">
+    <div class="container mx-auto p-6 max-w-6xl">
+        <!-- Cabeçalho -->
+        <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+            <h1 class="text-3xl font-bold text-editaliza-black mb-2">🧪 Teste de Interface Pós-Correções</h1>
+            <p class="text-gray-600">Validando se a interface carrega os dados corretamente após as correções no backend</p>
+        </div>
+
+        <!-- Status dos Endpoints -->
+        <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">📡 Status dos Endpoints</h2>
+            <div id="endpoint-status" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Status será inserido aqui -->
+            </div>
+        </div>
+
+        <!-- Testes de Interface -->
+        <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">🎯 Testes de Interface</h2>
+            <div id="interface-tests" class="space-y-4">
+                <!-- Resultados dos testes serão inseridos aqui -->
+            </div>
+        </div>
+
+        <!-- Mock de Cards de Plan -->
+        <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">📊 Simulação dos Cards de Progresso</h2>
+            <div id="mock-cards" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Cards mock serão inseridos aqui -->
+            </div>
+        </div>
+
+        <!-- Console de Logs -->
+        <div class="bg-gray-900 text-green-400 p-6 rounded-xl shadow-sm">
+            <h2 class="text-xl font-bold text-white mb-4">📋 Console de Logs</h2>
+            <div id="test-console" class="font-mono text-sm space-y-1 h-64 overflow-y-auto">
+                <!-- Logs serão inseridos aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Objeto para gerenciar os testes
+        const InterfaceTest = {
+            planId: null,
+            testResults: {},
+            
+            // Função para log no console personalizado
+            log(message, type = 'info') {
+                const console = document.getElementById('test-console');
+                const timestamp = new Date().toLocaleTimeString();
+                const colors = {
+                    success: 'text-green-400',
+                    error: 'text-red-400',
+                    warning: 'text-yellow-400',
+                    info: 'text-blue-400'
+                };
+                
+                const logEntry = document.createElement('div');
+                logEntry.className = colors[type] || 'text-gray-400';
+                logEntry.textContent = `[${timestamp}] ${message}`;
+                console.appendChild(logEntry);
+                console.scrollTop = console.scrollHeight;
+            },
+
+            // Testar endpoints individualmente
+            async testEndpoint(endpoint, description) {
+                try {
+                    this.log(`Testando: ${description}`, 'info');
+                    const response = await app.apiFetch(endpoint);
+                    this.log(`✅ ${description} - OK`, 'success');
+                    return { success: true, data: response };
+                } catch (error) {
+                    this.log(`❌ ${description} - Erro: ${error.message}`, 'error');
+                    return { success: false, error: error.message };
+                }
+            },
+
+            // Atualizar status visual dos endpoints
+            updateEndpointStatus(tests) {
+                const container = document.getElementById('endpoint-status');
+                container.innerHTML = tests.map(test => `
+                    <div class="p-4 rounded-lg border ${test.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-lg">${test.success ? '✅' : '❌'}</span>
+                            <span class="font-medium ${test.success ? 'text-green-800' : 'text-red-800'}">${test.description}</span>
+                        </div>
+                        ${!test.success ? `<p class="text-sm text-red-600 mt-1">${test.error}</p>` : ''}
+                    </div>
+                `).join('');
+            },
+
+            // Simular cards de progresso com dados reais
+            async simulateProgressCards() {
+                const container = document.getElementById('mock-cards');
+                
+                if (!this.planId) {
+                    container.innerHTML = '<p class="text-gray-500 col-span-3 text-center">Nenhum plano encontrado para simular</p>';
+                    return;
+                }
+
+                try {
+                    // Buscar dados de progresso reais
+                    const progressData = await app.apiFetch(`/plans/${this.planId}/progress`);
+                    const goalData = await app.apiFetch(`/plans/${this.planId}/goal_progress`);
+                    
+                    container.innerHTML = `
+                        <!-- Card Tópicos Concluídos -->
+                        <div class="stats-card stats-green border p-4 rounded-xl shadow-sm">
+                            <div class="flex items-center mb-2">
+                                <span class="text-2xl mr-2">✅</span>
+                                <h3 class="font-semibold text-green-800">Tópicos Concluídos</h3>
+                            </div>
+                            <div class="flex items-baseline space-x-2">
+                                <p class="text-3xl font-bold text-green-700">${progressData.completedTopics || 0}</p>
+                                <p class="text-lg text-green-600">de ${progressData.totalTopics || 0}</p>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-1">${(progressData.totalProgress || 0).toFixed(1)}% do edital</p>
+                        </div>
+
+                        <!-- Card Meta Diária -->
+                        <div class="stats-card stats-blue border p-4 rounded-xl shadow-sm">
+                            <div class="flex items-center mb-2">
+                                <span class="text-2xl mr-2">🎯</span>
+                                <h3 class="font-semibold text-blue-800">Meta Diária</h3>
+                            </div>
+                            <div class="flex items-baseline space-x-2">
+                                <p class="text-3xl font-bold text-blue-700">${goalData.dailyProgress || 0}</p>
+                                <p class="text-lg text-blue-600">de ${goalData.dailyGoal || 0}</p>
+                            </div>
+                            <div class="mt-2 bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: ${goalData.dailyGoal > 0 ? Math.min(100, (goalData.dailyProgress / goalData.dailyGoal) * 100) : 0}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Card Meta Semanal -->
+                        <div class="stats-card stats-purple border p-4 rounded-xl shadow-sm">
+                            <div class="flex items-center mb-2">
+                                <span class="text-2xl mr-2">📊</span>
+                                <h3 class="font-semibold text-purple-800">Meta Semanal</h3>
+                            </div>
+                            <div class="flex items-baseline space-x-2">
+                                <p class="text-3xl font-bold text-purple-700">${goalData.weeklyProgress || 0}</p>
+                                <p class="text-lg text-purple-600">de ${goalData.weeklyGoal || 0}</p>
+                            </div>
+                            <div class="mt-2 bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-600 h-2 rounded-full" style="width: ${goalData.weeklyGoal > 0 ? Math.min(100, (goalData.weeklyProgress / goalData.weeklyGoal) * 100) : 0}%"></div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    this.log('Cards de progresso simulados com dados reais', 'success');
+                } catch (error) {
+                    this.log(`Erro ao simular cards: ${error.message}`, 'error');
+                    container.innerHTML = `
+                        <div class="col-span-3 text-center p-6 bg-red-50 text-red-700 rounded-lg">
+                            <p class="font-medium">Erro ao carregar dados para simulação</p>
+                            <p class="text-sm mt-1">${error.message}</p>
+                        </div>
+                    `;
+                }
+            },
+
+            // Executar todos os testes
+            async runAllTests() {
+                this.log('🚀 Iniciando testes de interface...', 'info');
+
+                // 1. Verificar se há planos disponíveis
+                try {
+                    const plans = await app.apiFetch('/plans');
+                    if (plans.length === 0) {
+                        this.log('⚠️ Nenhum plano encontrado. Criando dados de teste...', 'warning');
+                        return;
+                    }
+                    
+                    this.planId = plans[0].id;
+                    this.log(`✅ Plano encontrado: ${plans[0].plan_name} (ID: ${this.planId})`, 'success');
+                } catch (error) {
+                    this.log(`❌ Erro ao buscar planos: ${error.message}`, 'error');
+                    return;
+                }
+
+                // 2. Testar endpoints críticos
+                const endpointTests = [
+                    { 
+                        endpoint: `/plans/${this.planId}/question_radar`, 
+                        description: 'Question Radar (Pontos Fracos)' 
+                    },
+                    { 
+                        endpoint: `/plans/${this.planId}/progress`, 
+                        description: 'Progress (Progresso Geral)' 
+                    },
+                    { 
+                        endpoint: `/plans/${this.planId}/detailed_progress`, 
+                        description: 'Detailed Progress (Por Disciplina)' 
+                    },
+                    { 
+                        endpoint: `/plans/${this.planId}/goal_progress`, 
+                        description: 'Goal Progress (Metas)' 
+                    }
+                ];
+
+                const results = [];
+                for (const test of endpointTests) {
+                    const result = await this.testEndpoint(test.endpoint, test.description);
+                    results.push({
+                        ...result,
+                        description: test.description,
+                        endpoint: test.endpoint
+                    });
+                }
+
+                this.updateEndpointStatus(results);
+
+                // 3. Simular cards de progresso
+                await this.simulateProgressCards();
+
+                // 4. Teste de interface geral
+                this.updateInterfaceTests(results);
+
+                this.log('🏁 Testes concluídos!', 'success');
+            },
+
+            // Atualizar resultados dos testes de interface
+            updateInterfaceTests(results) {
+                const container = document.getElementById('interface-tests');
+                const allSuccessful = results.every(r => r.success);
+                
+                container.innerHTML = `
+                    <div class="p-4 rounded-lg border ${allSuccessful ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}">
+                        <h3 class="font-bold ${allSuccessful ? 'text-green-800' : 'text-yellow-800'} mb-2">
+                            ${allSuccessful ? '✅ Interface Funcionando Perfeitamente' : '⚠️ Interface com Problemas'}
+                        </h3>
+                        <p class="text-sm ${allSuccessful ? 'text-green-700' : 'text-yellow-700'}">
+                            ${allSuccessful 
+                                ? 'Todos os endpoints estão funcionando. A interface deve carregar os dados corretamente.'
+                                : 'Alguns endpoints apresentaram erros. Verifique os detalhes acima.'}
+                        </p>
+                    </div>
+
+                    <!-- Checklist de Funcionalidades -->
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-bold text-gray-800 mb-3">📋 Checklist de Funcionalidades</h4>
+                        <div class="space-y-2">
+                            ${results.map(result => `
+                                <div class="flex items-center space-x-2">
+                                    <span class="${result.success ? 'text-green-500' : 'text-red-500'}">${result.success ? '✓' : '✗'}</span>
+                                    <span class="text-sm ${result.success ? 'text-gray-700' : 'text-red-600'}">${result.description}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Próximos Passos -->
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-bold text-gray-800 mb-3">🎯 Próximos Passos</h4>
+                        <ol class="list-decimal list-inside space-y-1 text-sm text-gray-700">
+                            <li>Acesse <a href="http://localhost:3000" class="text-editaliza-blue underline" target="_blank">http://localhost:3000</a> no navegador</li>
+                            <li>Faça login ou registre um usuário</li>
+                            <li>Navegue para <strong>plan.html</strong> - verifique se os cards carregam corretamente</li>
+                            <li>Navegue para <strong>cronograma.html</strong> - teste funcionalidades do cronograma</li>
+                            <li>Teste o cronômetro e salvamento de sessões</li>
+                        </ol>
+                    </div>
+                `;
+            }
+        };
+
+        // Inicializar quando a página carregar
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Inicializar o app
+            await app.init();
+            
+            // Se não estiver autenticado, criar um teste básico
+            if (!app.state.token) {
+                InterfaceTest.log('⚠️ Usuário não autenticado. Execute os testes após fazer login.', 'warning');
+                
+                // Mostrar instruções de login
+                document.getElementById('interface-tests').innerHTML = `
+                    <div class="p-4 rounded-lg border bg-blue-50 border-blue-200">
+                        <h3 class="font-bold text-blue-800 mb-2">🔐 Autenticação Necessária</h3>
+                        <p class="text-sm text-blue-700 mb-3">
+                            Para testar a interface completamente, você precisa estar logado.
+                        </p>
+                        <div class="space-x-2">
+                            <a href="login.html" class="inline-flex items-center px-4 py-2 bg-editaliza-blue text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                Fazer Login
+                            </a>
+                            <a href="register.html" class="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                                Registrar
+                            </a>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Executar testes se estiver autenticado
+            await InterfaceTest.runAllTests();
+        });
+    </script>
+
+    <style>
+        /* Estilos para os cards */
+        .stats-card.stats-green {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+            border-color: #22c55e;
+        }
+        .stats-card.stats-blue {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+            border-color: #3b82f6;
+        }
+        .stats-card.stats-purple {
+            background: linear-gradient(135deg, #f3e8ff 0%, #ede9fe 100%) !important;
+            border-color: #a855f7;
+        }
+    </style>
+</body>
+</html>

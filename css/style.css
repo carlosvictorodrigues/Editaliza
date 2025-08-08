@@ -1,0 +1,379 @@
+/*
+ * File: css/style.css
+ * Description: Guia de Estilos e configuração de cores para o projeto Editaliza.
+ * Updated: Enhanced visual design system with modern UI components
+ */
+
+/* Variáveis CSS para as cores da marca Editaliza */
+:root {
+    --editaliza-blue: #0528f2;
+    --editaliza-blue-light: #3b82f6;
+    --editaliza-blue-dark: #0422c8;
+    --editaliza-green: #adeb00;
+    --editaliza-green-light: #c8f000;
+    --editaliza-green-dark: #88c100;
+    --editaliza-black: #0f172a;
+    --editaliza-gray: #6b7280;
+    --editaliza-light-gray: #f0f0f0;
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(255, 255, 255, 0.2);
+}
+
+/* Estilos Globais */
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: #1e293b; /* slate-800 */
+    line-height: 1.6;
+}
+
+/* Utilitários para cores da marca */
+.text-editaliza-blue { color: var(--editaliza-blue); }
+.text-editaliza-green { color: var(--editaliza-green); }
+.text-editaliza-black { color: var(--editaliza-black); }
+.text-editaliza-gray { color: var(--editaliza-gray); }
+.bg-editaliza-blue { background-color: var(--editaliza-blue); }
+.bg-editaliza-green { background-color: var(--editaliza-green); }
+.bg-editaliza-black { background-color: var(--editaliza-black); }
+.border-editaliza-blue { border-color: var(--editaliza-blue); }
+
+/* Garante que elementos de formulário herdem a fonte principal */
+button, input, textarea, select {
+    font-family: inherit;
+}
+
+/* Tipografia Base */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    color: #0f172a; /* slate-900 */
+}
+
+/*
+ * =================================================================
+ * Componentes Reutilizáveis (Classes de Estilo)
+ * =================================================================
+ */
+
+/* Botão Primário (Azul Editaliza) */
+.btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--editaliza-blue), var(--editaliza-blue-dark));
+    color: white;
+    font-weight: 700;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(5, 40, 242, 0.2);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--editaliza-blue-dark), var(--editaliza-blue));
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(5, 40, 242, 0.3);
+}
+
+.btn-primary:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(5, 40, 242, 0.3);
+}
+
+.btn-primary:disabled {
+    background: linear-gradient(135deg, #9ca3af, #6b7280);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Botão Secundário (Fundo escuro) */
+.btn-secondary {
+    width: 100%;
+    background-color: #334155; /* slate-700 */
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.3s;
+    border: none;
+    cursor: pointer;
+}
+.btn-secondary:hover {
+    background-color: #1e293b; /* slate-800 */
+}
+
+/* Botão de Perigo (Vermelho para exclusão) */
+.btn-danger {
+    background-color: #dc2626; /* red-600 */
+    color: white;
+    font-weight: 700;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s;
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    border: none;
+    cursor: pointer;
+}
+.btn-danger:hover {
+    background-color: #b91c1c; /* red-700 */
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+/* Botão de Perigo com Contorno */
+.btn-danger-outline {
+    background-color: #fee2e2; /* red-100 */
+    color: #b91c1c; /* red-700 */
+    font-weight: 700;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+}
+.btn-danger-outline:hover {
+    background-color: #fecaca; /* red-200 */
+}
+
+/* Botão de Ação Pequeno (dentro de cards) */
+.btn-action-sm {
+    flex: 1;
+    background-color: #f1f5f9; /* slate-100 */
+    color: #475569; /* slate-600 */
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+}
+.btn-action-sm:hover {
+    background-color: #e2e8f0; /* slate-200 */
+}
+
+/* Inputs de Formulário */
+.form-input {
+    margin-top: 0.25rem;
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background-color: white;
+    border: 1px solid #d1d5db; /* gray-300 */
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+.form-input:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    border-color: #0528f2;
+    box-shadow: 0 0 0 2px rgba(5, 40, 242, 0.5);
+}
+
+/* Cards */
+.content-card {
+    background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.8));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 2rem;
+    border-radius: 1.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.content-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Navegação Ativa */
+.nav-link-active {
+    background-color: #e0e7ff; /* blue-100 */
+    color: #0528f2;
+    font-weight: 700;
+}
+.nav-link-default {
+    color: #6b7280; /* gray-500 */
+}
+.nav-link-default:hover {
+    background-color: #f3f4f6; /* gray-100 */
+}
+
+/*
+ * =================================================================
+ * Enhanced Modern UI Components
+ * =================================================================
+ */
+
+/* Glass Morphism Effect - Elegant and readable */
+.glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+/* Enhanced Stats Cards - Beautiful gradients with good readability */
+.stats-card {
+    background: rgba(255, 255, 255, 0.98);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Ensure readability while maintaining beauty */
+.stats-card .text-gray-800,
+.stats-card .text-gray-700,
+.glass-card .text-gray-800,
+.glass-card .text-gray-700 {
+    color: #1f2937 !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.stats-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    background: rgba(255, 255, 255, 1);
+}
+
+/* Study Cards with Enhanced Hover Effects - Beautiful and readable */
+.study-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+/* Force white background only when explicitly needed for readability */
+.force-white-bg {
+    background: white !important;
+    background-color: white !important;
+}
+
+.study-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+}
+
+/* Animations */
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(5, 40, 242, 0.1); }
+    50% { box-shadow: 0 0 30px rgba(5, 40, 242, 0.2); }
+}
+
+@keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-glow { animation: glow 2s ease-in-out infinite; }
+.animate-gradient { 
+    background-size: 200% 200%;
+    animation: gradient-shift 4s ease infinite;
+}
+
+/* Daily activities highlight animation */
+@keyframes daily-highlight {
+    0%, 100% { box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15); }
+    50% { box-shadow: 0 8px 30px rgba(59, 130, 246, 0.25); }
+}
+
+.daily-activities-highlight {
+    animation: daily-highlight 3s ease-in-out infinite;
+}
+
+/* Motivation Text Gradient */
+.motivation-text {
+    background: linear-gradient(45deg, var(--editaliza-blue), var(--editaliza-green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+}
+
+/* Progress Ring Animation */
+.progress-ring {
+    transition: stroke-dashoffset 0.5s ease-in-out;
+}
+
+/* Enhanced Buttons */
+.btn-gradient {
+    background: linear-gradient(135deg, var(--editaliza-blue), var(--editaliza-green));
+    transition: all 0.3s ease;
+    transform: translateY(0);
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(5, 40, 242, 0.3);
+}
+
+/* Responsive Enhancements */
+@media (max-width: 768px) {
+    .study-card:hover {
+        transform: translateY(-4px) scale(1.01);
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-2px);
+    }
+}
+
+/* Enhanced gradient cards with proper text contrast */
+.gradient-card {
+    position: relative;
+}
+
+.gradient-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: inherit;
+    z-index: 0;
+}
+
+.gradient-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Ensure text readability on all gradient backgrounds */
+.bg-gradient-to-br .text-gray-800,
+.bg-gradient-to-br .text-gray-700,
+.bg-gradient-to-br .text-gray-600 {
+    color: #1f2937 !important;
+    font-weight: 600;
+}

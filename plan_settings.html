@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações do Plano - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <!-- SCRIPTS CENTRALIZADOS -->
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <!-- Config do Tailwind para reconhecer as cores customizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-black': '#0d0d0d',
+                        'editaliza-gray': '#969696',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .tooltip { 
+            position: relative; 
+            display: inline-flex; 
+            align-items: center;
+            margin-left: 8px;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden; 
+            width: 250px; 
+            background-color: #1e293b; /* slate-800 */
+            color: #fff; 
+            text-align: center;
+            border-radius: 6px; 
+            padding: 8px; 
+            position: absolute; 
+            z-index: 10;
+            bottom: 140%; 
+            left: 50%; 
+            margin-left: -125px; /* Metade da largura */
+            opacity: 0; 
+            transition: opacity 0.3s;
+            font-size: 0.75rem; 
+            line-height: 1.25;
+            font-weight: 400;
+        }
+        .tooltip:hover .tooltiptext { 
+            visibility: visible; 
+            opacity: 1; 
+        }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .accordion-header.open + .accordion-content {
+             /* A altura será definida via JS para garantir a animação correta */
+        }
+        .accordion-header.open svg { transform: rotate(180deg); }
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-container { transition: all 0.3s ease; }
+        .historic-date-input { display: none; }
+        .topic-item.show-date .historic-date-input { display: block; }
+        
+        /* Estilos para o guia e progress indicators */
+        .step-highlight {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+        }
+        
+        .template-discipline-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .goal-preset {
+            transition: all 0.2s ease;
+        }
+        
+        .goal-preset:hover {
+            transform: translateY(-1px);
+        }
+        
+        @keyframes pulse-blue {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            50% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+        }
+        
+        .pulse-blue {
+            animation: pulse-blue 2s infinite;
+        }
+        
+        /* Melhorias visuais para os indicadores de progresso */
+        #progress-indicator {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        /* Animações suaves para elementos do guia */
+        .guide-element {
+            transition: all 0.3s ease;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
+    <div id="main-nav-container"></div>
+
+    <!-- Modal para Edição/Exclusão -->
+    <div id="editModal" class="modal-overlay hidden fixed inset-0 bg-editaliza-black bg-opacity-70 z-30 flex items-center justify-center p-4 opacity-0">
+        <div class="modal-container bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg transform scale-95">
+            <h2 id="editModalTitle" class="text-2xl font-bold text-editaliza-black"></h2>
+            <div id="editModalBody" class="mt-4"></div>
+        </div>
+    </div>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-6xl">
+        <!-- CABEÇALHO DO PLANO (GERADO PELO JS) -->
+        <div id="plan-header-container"></div>
+        
+        <!-- Welcome Message Aprimorado -->
+        <div id="welcome-message" class="hidden bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 text-gray-800 p-6 rounded-xl mb-8 shadow-lg">
+            <div class="flex items-start space-x-4">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <span class="text-2xl">🎉</span>
+                    </div>
+                </div>
+                <div class="flex-grow">
+                    <h3 class="text-xl font-bold text-green-800 mb-2">Parabéns! Seu plano foi criado com sucesso!</h3>
+                    <p class="text-gray-700 mb-4">Agora vamos configurar seu plano passo a passo. Não se preocupe, vou te guiar em cada etapa.</p>
+                    
+                    <!-- Progress Steps -->
+                    <div class="bg-white rounded-lg p-4 border border-green-200">
+                        <h4 class="font-semibold text-gray-700 mb-3">Próximos passos:</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex items-center text-gray-600">
+                                <span class="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-bold mr-3">1</span>
+                                Adicione suas disciplinas e tópicos
+                            </div>
+                            <div class="flex items-center text-gray-500">
+                                <span class="w-6 h-6 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-xs font-bold mr-3">2</span>
+                                Configure seus horários de estudo
+                            </div>
+                            <div class="flex items-center text-gray-500">
+                                <span class="w-6 h-6 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-xs font-bold mr-3">3</span>
+                                Defina suas metas de questões
+                            </div>
+                            <div class="flex items-center text-gray-500">
+                                <span class="w-6 h-6 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center text-xs font-bold mr-3">4</span>
+                                Gerar seu cronograma personalizado
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex items-center justify-between">
+                        <button id="startGuideBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            🚀 Iniciar Tour Guiado
+                        </button>
+                        <button id="skipGuideBtn" class="text-gray-500 hover:text-gray-700 text-sm underline">
+                            Pular e configurar sozinho
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Guia de Progresso Fixo -->
+        <div id="progress-indicator" class="hidden sticky top-4 z-20 bg-white border border-gray-200 rounded-lg shadow-lg p-4 mb-6">
+            <div class="flex items-center justify-between text-sm">
+                <span class="font-medium text-gray-700">Progresso da Configuração:</span>
+                <span id="progress-text" class="text-blue-600 font-bold">0/4 completo</span>
+            </div>
+            <div class="mt-2 bg-gray-200 rounded-full h-2">
+                <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="lg:col-span-2 space-y-8">
+                 <div class="content-card" id="step-1-content">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
+                            <span class="text-2xl mr-3">📚</span>Conteúdo Programático
+                        </h2>
+                        <div class="hidden" id="step-1-indicator">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Passo 1/4</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Dicas para Primeira Vez -->
+                    <div id="first-time-tips" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-2xl">💡</span>
+                            <div>
+                                <h3 class="font-semibold text-yellow-800 mb-2">Primeira vez configurando? Aqui estão algumas dicas!</h3>
+                                <ul class="text-sm text-yellow-700 space-y-1">
+                                    <li>• <strong>Disciplinas:</strong> Adicione as matérias do seu edital (ex: Direito Constitucional, Matemática)</li>
+                                    <li>• <strong>Prioridade:</strong> 5 = muito importante, 1 = menos importante</li>
+                                    <li>• <strong>Tópicos:</strong> Divida cada disciplina em assuntos menores para melhor controle</li>
+                                    <li>• <strong>Já estudou?</strong> Marque os tópicos já vistos para ajustar o cronograma</li>
+                                </ul>
+                                <div class="mt-3">
+                                    <button id="showExampleBtn" class="text-blue-600 hover:text-blue-800 text-sm font-medium underline">
+                                        👁️ Ver exemplo prático
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Exemplo Prático Modal -->
+                    <div id="exampleModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-96 overflow-y-auto">
+                            <div class="p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-bold text-gray-800">Exemplo: Direito Constitucional</h3>
+                                    <button id="closeExampleBtn" class="text-gray-400 hover:text-gray-600">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="text-sm text-gray-700">
+                                    <p class="mb-3"><strong>Disciplina:</strong> Direito Constitucional | <strong>Prioridade:</strong> 5 (muito importante)</p>
+                                    <p class="mb-2"><strong>Tópicos sugeridos:</strong></p>
+                                    <div class="bg-gray-50 p-3 rounded-lg text-xs">
+                                        1. Princípios Fundamentais (Art. 1º ao 4º)<br>
+                                        2. Direitos e Garantias Fundamentais<br>
+                                        3. Organização do Estado<br>
+                                        4. Poder Legislativo<br>
+                                        5. Poder Executivo<br>
+                                        6. Poder Judiciário<br>
+                                        7. Controle de Constitucionalidade
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-slate-50 to-blue-50 p-6 rounded-xl border border-blue-200 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-semibold text-gray-700">🎯 Adicionar Disciplina e Tópicos</h3>
+                            <button id="loadTemplateBtn" class="text-blue-600 hover:bg-blue-100 px-3 py-1 rounded-lg text-sm font-medium transition-colors">
+                                🗂️ Usar Template
+                            </button>
+                        </div>
+                        
+                        <!-- Templates de Disciplinas -->
+                        <div id="disciplineTemplates" class="hidden mb-4 p-4 bg-white rounded-lg border">
+                            <h4 class="font-medium text-gray-700 mb-3">Templates Populares:</h4>
+                            <div class="grid grid-cols-2 gap-2 text-sm">
+                                <button class="template-discipline-btn text-left p-2 hover:bg-gray-50 rounded border" data-name="Direito Constitucional" data-priority="5" data-topics="1. Princípios Fundamentais (Art. 1º ao 4º)
+2. Direitos e Garantias Fundamentais
+3. Organização do Estado
+4. Poder Legislativo
+5. Poder Executivo
+6. Poder Judiciário
+7. Controle de Constitucionalidade">
+                                    <div class="font-medium text-gray-700">Direito Constitucional</div>
+                                    <div class="text-xs text-gray-500">7 tópicos principais</div>
+                                </button>
+                                <button class="template-discipline-btn text-left p-2 hover:bg-gray-50 rounded border" data-name="Matemática" data-priority="4" data-topics="1. Aritmética e Conjuntos
+2. Álgebra e Funções
+3. Geometria Plana
+4. Geometria Espacial
+5. Trigonometria
+6. Análise Combinatória
+7. Probabilidade e Estatística">
+                                    <div class="font-medium text-gray-700">Matemática</div>
+                                    <div class="text-xs text-gray-500">7 tópicos essenciais</div>
+                                </button>
+                                <button class="template-discipline-btn text-left p-2 hover:bg-gray-50 rounded border" data-name="Português" data-priority="5" data-topics="1. Ortografia e Acentuação
+2. Morfologia e Classes de Palavras
+3. Sintaxe do Período Simples
+4. Sintaxe do Período Composto
+5. Concordancia Nominal e Verbal
+6. Regência e Crase
+7. Interpretação de Textos">
+                                    <div class="font-medium text-gray-700">Língua Portuguesa</div>
+                                    <div class="text-xs text-gray-500">7 tópicos fundamentais</div>
+                                </button>
+                                <button class="template-discipline-btn text-left p-2 hover:bg-gray-50 rounded border" data-name="Informática" data-priority="3" data-topics="1. Conceitos de Hardware e Software
+2. Sistemas Operacionais
+3. Microsoft Office (Word, Excel, PowerPoint)
+4. Internet e Segurança
+5. Banco de Dados Básicos">
+                                    <div class="font-medium text-gray-700">Informática</div>
+                                    <div class="text-xs text-gray-500">5 tópicos essenciais</div>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <form id="newContentForm" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="md:col-span-2">
+                                    <label for="subject_name" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Nome da Disciplina <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" id="subject_name" class="form-input" placeholder="Ex: Direito Constitucional" required>
+                                    <p class="text-xs text-gray-500 mt-1">📝 Use o nome exato do edital</p>
+                                </div>
+                                <div>
+                                    <label for="priority_weight" class="block text-sm font-medium text-gray-700 mb-1">
+                                        Prioridade
+                                        <span class="tooltip">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span class="tooltiptext">5 = Prioridade máxima (maior peso no cronograma)<br>1 = Prioridade mínima</span>
+                                        </span>
+                                    </label>
+                                    <select id="priority_weight" class="form-input" required>
+                                        <option value="5">🔴 5 - Muito Importante</option>
+                                        <option value="4">🟠 4 - Importante</option>
+                                        <option value="3" selected>🟡 3 - Médio</option>
+                                        <option value="2">🟢 2 - Baixo</option>
+                                        <option value="1">⚪ 1 - Muito Baixo</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="topics_list" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Tópicos da Disciplina
+                                    <span class="tooltip">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="tooltiptext">Divida a disciplina em tópicos menores.<br>Um tópico por linha.<br>Exemplo: "1. Princípios Fundamentais"</span>
+                                    </span>
+                                </label>
+                                <textarea id="topics_list" class="form-input" rows="6" placeholder="1. Princípios Fundamentais
+2. Direitos e Garantias Fundamentais
+3. Organização do Estado
+4. Poder Legislativo
+..."></textarea>
+                                <div class="flex items-center justify-between mt-2">
+                                    <p class="text-xs text-gray-500">📝 Um tópico por linha | Deixe em branco para adicionar depois</p>
+                                    <span id="topicCount" class="text-xs text-blue-600 font-medium">0 tópicos</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-3">
+                                <button type="submit" class="btn-primary py-3 flex-grow">
+                                    <span class="flex items-center justify-center">
+                                        <span class="mr-2">➕</span>
+                                        Adicionar Disciplina
+                                    </span>
+                                </button>
+                                <button type="button" id="previewBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-3 rounded-lg font-medium transition-colors">
+                                    👁️ Preview
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-gray-700 mt-8 mb-2">Disciplinas Cadastradas</h3>
+                    <p class="text-sm text-gray-500 mb-4">
+                        Marque os tópicos que você já estudou e informe a data de conclusão para que o sistema ajuste seu cronograma e estatísticas. Lembre-se de salvar o progresso para cada disciplina.
+                    </p>
+                    <div id="subjectsContainer" class="space-y-4"></div>
+                 </div>
+            </div>
+
+            <div class="lg:col-span-1 space-y-8">
+                <div class="content-card" id="step-2-content">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-gray-700">Configurações Gerais</h2>
+                        <div class="hidden" id="step-2-indicator">
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Passo 2/4</span>
+                        </div>
+                    </div>
+                    <form id="generalSettingsForm" class="space-y-6">
+                        <div>
+                            <h3 class="font-semibold text-gray-600 border-b pb-2 mb-3">Estrutura de Estudo</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-sm font-medium text-gray-700 flex items-center">
+                                        Horas de estudo por dia
+                                        <span class="tooltip">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-editaliza-blue cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <span class="tooltiptext">Defina suas horas disponíveis. Sábados são priorizados para revisões e domingos para redação/descanso.</span>
+                                        </span>
+                                    </label>
+                                    <div id="hours-grid" class="grid grid-cols-4 gap-2 text-center mt-2"></div>
+                                </div>
+                                <div>
+                                    <label for="session_duration" class="text-sm font-medium text-gray-700 flex items-center">
+                                        Duração da Sessão (minutos)
+                                        <span class="tooltip">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-editaliza-blue cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <span class="tooltiptext">Recomendamos 50 min para foco total (Técnica Pomodoro), seguido por um descanso de 10 min.</span>
+                                        </span>
+                                    </label>
+                                    <input type="number" id="session_duration" class="form-input" value="50" min="10">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-600 border-b pb-2 mb-3">Estrutura de Fim de Semana</h3>
+                            <div class="flex items-center p-3 bg-slate-50 rounded-lg border">
+                                <input id="has_essay" name="has_essay" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue">
+                                <label for="has_essay" class="ml-3 block text-sm font-medium text-gray-700">
+                                    Incluir Redação aos Domingos
+                                    <span class="tooltip">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-editaliza-blue cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <span class="tooltiptext">Ao marcar, o sistema reservará os domingos para sessões de redação. Se desmarcado, os domingos serão dias de descanso.</span>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        <div id="step-3-content">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-gray-600">Metas de Questões</h3>
+                                <div class="hidden" id="step-3-indicator">
+                                    <span class="bg-orange-100 text-orange-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Passo 3/4</span>
+                                </div>
+                            </div>
+                            <div class="border-b pb-3 mb-3"></div>
+                            <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                                <div class="flex items-start space-x-2">
+                                    <span class="text-blue-600">🎯</span>
+                                    <div class="text-sm text-blue-800">
+                                        <p class="font-medium mb-1">Dica de Ouro:</p>
+                                        <p>Para concursos: 30-50 questões/dia. Para ENEM: 20-30 questões/dia. Ajuste conforme seu ritmo!</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="daily_goal" class="text-sm font-medium text-gray-700 flex items-center">
+                                        Meta Diária
+                                        <span class="tooltip">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span class="tooltiptext">Número de questões que você pretende resolver por dia. Seja realista!</span>
+                                        </span>
+                                    </label>
+                                    <input type="number" id="daily_goal" class="form-input" value="50" min="0">
+                                    <div class="mt-1 flex space-x-2">
+                                        <button type="button" class="goal-preset text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded" data-daily="20" data-weekly="140">Iniciante (20/dia)</button>
+                                        <button type="button" class="goal-preset text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded" data-daily="40" data-weekly="280">Intermediário (40/dia)</button>
+                                        <button type="button" class="goal-preset text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded" data-daily="60" data-weekly="420">Avançado (60/dia)</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="weekly_goal" class="text-sm font-medium text-gray-700">Meta Semanal</label>
+                                    <input type="number" id="weekly_goal" class="form-input" value="300" min="0" readonly>
+                                    <p class="text-xs text-gray-500 mt-1">Calculado automaticamente: meta diária × 7</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4 space-y-3" id="step-4-content">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-gray-600">Finalizar Configuração</h3>
+                                <div class="hidden" id="step-4-indicator">
+                                    <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Passo 4/4</span>
+                                </div>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg mb-4">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-green-600">✅</span>
+                                    <p class="text-sm font-medium text-green-800">Tudo pronto! Agora é só gerar seu cronograma personalizado.</p>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn-secondary mb-2">Salvar Configurações</button>
+                            <button id="generateButton" type="button" class="btn-primary group">
+                                <span class="flex items-center justify-center">
+                                    <span class="mr-2">🚀</span>
+                                    Gerar Meu Cronograma!
+                                    <span class="ml-2 transform group-hover:translate-x-1 transition-transform">✨</span>
+                                </span>
+                            </button>
+                            <p class="text-xs text-center text-gray-500 mt-2">
+                                📊 Vou criar um cronograma otimizado baseado em suas configurações
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const planId = urlParams.get('id');
+        const isNewPlan = urlParams.get('new') === 'true';
+        const hasGuide = urlParams.get('guide') === 'true';
+        const editModal = document.getElementById('editModal');
+        
+        // Estado do guia e progresso
+        let guideState = {
+            isActive: false,
+            currentStep: 1,
+            completedSteps: [],
+            totalSteps: 4
+        };
+        
+        // Atualizar progresso
+        function updateProgress() {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            const progressIndicator = document.getElementById('progress-indicator');
+            
+            if (!progressBar) return;
+            
+            let completedCount = 0;
+            
+            // Verificar disciplinas adicionadas
+            if (document.querySelectorAll('#subjectsContainer .accordion-header').length > 0) {
+                completedCount++;
+                guideState.completedSteps.push(1);
+            }
+            
+            // Verificar configurações de horário
+            const hoursInputs = document.querySelectorAll('.hours-input');
+            let hasHoursSet = false;
+            hoursInputs.forEach(input => {
+                if (parseInt(input.value) > 0) hasHoursSet = true;
+            });
+            if (hasHoursSet) {
+                completedCount++;
+                guideState.completedSteps.push(2);
+            }
+            
+            // Verificar metas
+            const dailyGoal = document.getElementById('daily_goal');
+            if (dailyGoal && parseInt(dailyGoal.value) > 0) {
+                completedCount++;
+                guideState.completedSteps.push(3);
+            }
+            
+            // Se tudo estiver pronto
+            if (completedCount >= 3) {
+                completedCount = 4;
+                guideState.completedSteps.push(4);
+            }
+            
+            const progressPercent = (completedCount / 4) * 100;
+            progressBar.style.width = progressPercent + '%';
+            progressText.textContent = `${completedCount}/4 completo`;
+            
+            if (guideState.isActive) {
+                progressIndicator.classList.remove('hidden');
+            }
+        }
+        
+        // Mostrar indicadores de passo
+        function showStepIndicators() {
+            const indicators = ['step-1-indicator', 'step-2-indicator', 'step-3-indicator', 'step-4-indicator'];
+            indicators.forEach((id, index) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.classList.remove('hidden');
+                }
+            });
+        }
+        
+        // Iniciar tour guiado
+        function startGuide() {
+            guideState.isActive = true;
+            showStepIndicators();
+            updateProgress();
+            
+            // Mostrar dicas para primeira vez
+            const firstTimeTips = document.getElementById('first-time-tips');
+            if (firstTimeTips) {
+                firstTimeTips.classList.remove('hidden');
+            }
+            
+            // Scroll suave para o conteúdo
+            document.getElementById('step-1-content').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
+
+        function openModal() {
+            editModal.classList.remove('hidden');
+            setTimeout(() => {
+                editModal.classList.remove('opacity-0');
+                editModal.querySelector('.modal-container').classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            editModal.classList.add('opacity-0');
+            editModal.querySelector('.modal-container').classList.add('scale-95');
+            setTimeout(() => {
+                editModal.classList.add('hidden');
+                document.getElementById('editModalBody').innerHTML = '';
+            }, 300);
+        }
+        
+        async function initialize() {
+            components.renderMainNavigation('dashboard.html');
+            if (!planId) { window.location.href = 'dashboard.html'; return; }
+            
+            if (isNewPlan) { 
+                document.getElementById('welcome-message').classList.remove('hidden'); 
+                
+                // Se veio com guia ativado
+                if (hasGuide) {
+                    setTimeout(() => {
+                        startGuide();
+                    }, 1000);
+                }
+            }
+            
+            renderHoursInputs();
+            app.showSpinner();
+            try {
+                const plan = await app.apiFetch(`/plans/${planId}`);
+                components.renderPlanHeader(planId, plan.plan_name, 'plan_settings.html');
+                
+                document.getElementById('daily_goal').value = plan.daily_question_goal;
+                document.getElementById('weekly_goal').value = plan.weekly_question_goal;
+                document.getElementById('session_duration').value = plan.session_duration_minutes;
+                document.getElementById('has_essay').checked = !!plan.has_essay;
+
+                if (plan.study_hours_per_day) {
+                    const hoursInputs = document.querySelectorAll('.hours-input');
+                    hoursInputs.forEach(input => {
+                        const day = input.dataset.day;
+                        if (plan.study_hours_per_day[day] !== undefined) {
+                            input.value = plan.study_hours_per_day[day];
+                        }
+                    });
+                }
+                await loadSubjects();
+            } catch (error) {
+                app.showToast('Erro ao carregar dados do plano: ' + error.message, 'error');
+            } finally {
+                app.hideSpinner();
+            }
+        }
+
+        function renderHoursInputs() {
+            const grid = document.getElementById('hours-grid');
+            const days = [{d:1,l:'Seg'}, {d:2,l:'Ter'}, {d:3,l:'Qua'}, {d:4,l:'Qui'}, {d:5,l:'Sex'}, {d:6,l:'Sáb'}, {d:0,l:'Dom'}];
+            grid.innerHTML = days.map(day => `
+                <div>
+                    <label class="text-xs font-medium text-gray-500">${day.l}</label>
+                    <input type="number" class="form-input py-2 text-center hours-input" data-day="${day.d}" value="${(day.d >= 1 && day.d <= 5) ? 4 : (day.d === 6 ? 2 : 0)}" min="0" max="24">
+                </div>
+            `).join('');
+        }
+
+        async function loadSubjects() {
+            try {
+                const subjects = await app.apiFetch(`/plans/${planId}/subjects`);
+                const container = document.getElementById('subjectsContainer');
+                container.innerHTML = '';
+
+                if (subjects.length === 0) {
+                    container.innerHTML = `<div class="text-center p-6 bg-yellow-50 border border-yellow-200 rounded-lg"><p class="text-yellow-800">Nenhuma disciplina cadastrada.</p></div>`;
+                    return;
+                }
+
+                subjects.forEach(subject => {
+                    const subjectDiv = document.createElement('div');
+                    subjectDiv.className = 'bg-white rounded-xl border border-gray-200 shadow-sm';
+                    subjectDiv.innerHTML = `
+                        <div class="accordion-header flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 rounded-t-xl">
+                            <div class="flex-grow">
+                                <h3 class="text-lg font-semibold text-gray-800">${subject.subject_name}</h3>
+                                <span class="text-sm text-editaliza-gray">Prioridade: ${subject.priority_weight}</span>
+                            </div>
+                            <div class="flex items-center space-x-2 flex-shrink-0">
+                                <button class="edit-subject-btn p-2 rounded-md hover:bg-gray-200" data-subject-id="${subject.id}" data-subject-name="${subject.subject_name}" data-priority="${subject.priority_weight}" title="Editar Disciplina">✏️</button>
+                                <button class="delete-subject-btn p-2 rounded-md hover:bg-gray-200" data-subject-id="${subject.id}" data-subject-name="${subject.subject_name}" title="Apagar Disciplina">🗑️</button>
+                                <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="p-4">
+                                <ul id="topics-for-${subject.id}" class="space-y-2 text-gray-700"><li>Carregando...</li></ul>
+                            </div>
+                             <div class="p-4 mt-4 border-t bg-slate-50 rounded-b-xl">
+                                <button class="save-progress-btn w-full bg-editaliza-green hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow" data-subject-id="${subject.id}">
+                                    Salvar Progresso da Disciplina
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(subjectDiv);
+                });
+
+                for (const subject of subjects) {
+                    await loadTopicsForSubject(subject.id);
+                }
+            } catch (error) {
+                app.showToast('Erro ao carregar disciplinas.', 'error');
+            }
+        }
+
+        async function loadTopicsForSubject(subjectId) {
+            const list = document.getElementById(`topics-for-${subjectId}`);
+            try {
+                const topics = await app.apiFetch(`/subjects/${subjectId}/topics`);
+                const todayStr = new Date().toISOString().split('T')[0];
+
+                list.innerHTML = topics.length > 0
+                    ? topics.map(topic => {
+                        const isCompleted = topic.status === 'Concluído';
+                        const completionDate = topic.completion_date || todayStr;
+                        const showDateClass = isCompleted ? 'show-date' : '';
+                        return `
+                        <li class="topic-item flex justify-between items-start group p-2 rounded-md hover:bg-gray-50 ${showDateClass}">
+                            <div class="flex-grow">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue topic-checkbox" data-topic-id="${topic.id}" ${isCompleted ? 'checked' : ''}>
+                                    <span class="ml-3">${topic.description}</span>
+                                </label>
+                                <div class="historic-date-input ml-7 mt-2">
+                                    <label class="text-xs text-gray-500">Data de conclusão:</label>
+                                    <input type="date" value="${completionDate}" class="form-input p-1 max-w-xs" data-topic-id="${topic.id}">
+                                </div>
+                            </div>
+                            <div class="space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button class="edit-topic-btn p-1 rounded-md hover:bg-gray-200" data-topic-id="${topic.id}" data-description="${topic.description}">✏️</button>
+                                <button class="delete-topic-btn p-1 rounded-md hover:bg-gray-200" data-topic-id="${topic.id}" data-description="${topic.description}">🗑️</button>
+                            </div>
+                        </li>`
+                    }).join('')
+                    : '<li class="text-gray-500 list-none">Nenhum tópico adicionado.</li>';
+            } catch (error) {
+                list.innerHTML = '<li class="text-red-500 list-none">Erro ao carregar tópicos.</li>';
+            }
+        }
+        
+        function getSettingsFromForm() {
+            const settings = {
+                daily_question_goal: document.getElementById('daily_goal').value,
+                weekly_question_goal: document.getElementById('weekly_goal').value,
+                session_duration_minutes: document.getElementById('session_duration').value,
+                has_essay: document.getElementById('has_essay').checked,
+                study_hours_per_day: {}
+            };
+            document.querySelectorAll('.hours-input').forEach(input => {
+                settings.study_hours_per_day[input.dataset.day] = parseInt(input.value, 10) || 0;
+            });
+            return settings;
+        }
+        
+        function handleEditSubject(id, name, priority) {
+            document.getElementById('editModalTitle').textContent = 'Editar Disciplina';
+            document.getElementById('editModalBody').innerHTML = `<form id="editSubjectForm" data-id="${id}" class="space-y-4"><div><label for="edit_subject_name" class="block text-sm font-medium text-gray-700">Nome</label><input type="text" id="edit_subject_name" value="${name}" class="form-input" required></div><div><label for="edit_priority_weight" class="block text-sm font-medium text-gray-700">Prioridade</label><input type="number" id="edit_priority_weight" value="${priority}" min="1" max="5" class="form-input" required></div><div class="flex justify-end space-x-3 pt-4"><button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 btn-cancel">Cancelar</button><button type="submit" class="btn-primary py-2 px-4 text-sm">Salvar</button></div></form>`;
+            openModal();
+            document.getElementById('editSubjectForm').addEventListener('submit', submitEditSubject);
+        }
+
+        function handleDeleteSubject(id, name) {
+            document.getElementById('editModalTitle').textContent = 'Apagar Disciplina';
+            document.getElementById('editModalBody').innerHTML = `<p>Você tem certeza que deseja apagar a disciplina "<strong>${name}</strong>"?</p><p class="mt-2 text-sm text-red-600">Atenção: Todos os tópicos e o progresso associado serão permanentemente removidos.</p><div class="flex justify-end space-x-3 pt-4 mt-4"><button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 btn-cancel">Cancelar</button><button id="confirmDeleteSubject" data-id="${id}" class="btn-danger px-4 py-2 text-sm">Sim, Apagar</button></div>`;
+            openModal();
+            document.getElementById('confirmDeleteSubject').addEventListener('click', submitDeleteSubject);
+        }
+
+        function handleEditTopic(id, description) {
+            document.getElementById('editModalTitle').textContent = 'Editar Tópico';
+            document.getElementById('editModalBody').innerHTML = `<form id="editTopicForm" data-id="${id}" class="space-y-4"><div><label for="edit_topic_description" class="block text-sm font-medium text-gray-700">Descrição</label><textarea id="edit_topic_description" class="form-input" rows="4" required>${description}</textarea></div><div class="flex justify-end space-x-3 pt-4"><button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 btn-cancel">Cancelar</button><button type="submit" class="btn-primary py-2 px-4 text-sm">Salvar</button></div></form>`;
+            openModal();
+            document.getElementById('editTopicForm').addEventListener('submit', submitEditTopic);
+        }
+
+        function handleDeleteTopic(id, description) {
+            document.getElementById('editModalTitle').textContent = 'Apagar Tópico';
+            document.getElementById('editModalBody').innerHTML = `<p>Você tem certeza que deseja apagar o tópico "<strong>${description}</strong>"?</p><div class="flex justify-end space-x-3 pt-4 mt-4"><button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 btn-cancel">Cancelar</button><button id="confirmDeleteTopic" data-id="${id}" class="btn-danger px-4 py-2 text-sm">Sim, Apagar</button></div>`;
+            openModal();
+            document.getElementById('confirmDeleteTopic').addEventListener('click', submitDeleteTopic);
+        }
+        
+        async function submitApiRequestWrapper(url, method, body, successMessage) {
+            app.showSpinner();
+            try {
+                const data = await app.apiFetch(url, { method, body: body ? JSON.stringify(body) : undefined });
+                app.showToast(successMessage || data.message, 'success');
+                closeModal();
+                await loadSubjects();
+                document.getElementById('generateButton').disabled = false;
+            } catch (error) {
+                app.showToast(error.message, 'error');
+            } finally {
+                app.hideSpinner();
+            }
+        }
+
+        async function submitEditSubject(event) {
+            event.preventDefault();
+            const id = event.target.dataset.id;
+            const body = { subject_name: document.getElementById('edit_subject_name').value, priority_weight: document.getElementById('edit_priority_weight').value };
+            await submitApiRequestWrapper(`/subjects/${id}`, 'PATCH', body, 'Disciplina atualizada!');
+        }
+        async function submitDeleteSubject(event) {
+            await submitApiRequestWrapper(`/subjects/${event.target.dataset.id}`, 'DELETE', null, 'Disciplina apagada!');
+        }
+        async function submitEditTopic(event) {
+            event.preventDefault();
+            const id = event.target.dataset.id;
+            const body = { description: document.getElementById('edit_topic_description').value };
+            await submitApiRequestWrapper(`/topics/${id}`, 'PATCH', body, 'Tópico atualizado!');
+        }
+        async function submitDeleteTopic(event) {
+            await submitApiRequestWrapper(`/plans/topics/${event.target.dataset.id}`, 'DELETE', null, 'Tópico apagado!');
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initialize();
+            
+            const generateButton = document.getElementById('generateButton');
+            const generalSettingsForm = document.getElementById('generalSettingsForm');
+            const newContentForm = document.getElementById('newContentForm');
+            
+            generateButton.disabled = true;
+            
+            const enableGenerateButton = () => { generateButton.disabled = false; };
+            
+            generalSettingsForm.addEventListener('input', enableGenerateButton);
+            newContentForm.addEventListener('submit', enableGenerateButton);
+
+            document.getElementById('subjectsContainer').addEventListener('change', (event) => {
+                if (event.target.classList.contains('topic-checkbox')) {
+                    const topicItem = event.target.closest('.topic-item');
+                    if (topicItem) {
+                        topicItem.classList.toggle('show-date', event.target.checked);
+                        const accordionContent = topicItem.closest('.accordion-content');
+                        const accordionHeader = accordionContent.previousElementSibling;
+                        if (accordionHeader.classList.contains('open')) {
+                           accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
+                        }
+                    }
+                }
+            });
+
+            newContentForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const form = event.target;
+                const body = { subject_name: document.getElementById('subject_name').value, priority_weight: document.getElementById('priority_weight').value, topics_list: document.getElementById('topics_list').value };
+                app.showSpinner();
+                try {
+                    const data = await app.apiFetch(`/plans/${planId}/subjects_with_topics`, { method: 'POST', body: JSON.stringify(body) });
+                    app.showToast(data.message, 'success');
+                    form.reset();
+                    await loadSubjects();
+                } catch (error) {
+                    app.showToast(error.message, 'error');
+                } finally {
+                    app.hideSpinner();
+                }
+            });
+
+            document.getElementById('subjectsContainer').addEventListener('click', async (event) => {
+                const button = event.target.closest('button');
+                
+                if (!button) {
+                    const header = event.target.closest('.accordion-header');
+                    if (header) {
+                        const content = header.nextElementSibling;
+                        header.classList.toggle('open');
+                        content.style.maxHeight = header.classList.contains('open') ? content.scrollHeight + "px" : null;
+                    }
+                    return;
+                }
+
+                if (button.classList.contains('save-progress-btn')) {
+                    event.preventDefault();
+                    const subjectId = button.dataset.subjectId;
+                    const topicsList = document.getElementById(`topics-for-${subjectId}`);
+                    const topicsToUpdate = Array.from(topicsList.querySelectorAll('.topic-item')).map(item => {
+                        const checkbox = item.querySelector('.topic-checkbox');
+                        const dateInput = item.querySelector('.historic-date-input input');
+                        return {
+                            id: checkbox.dataset.topicId,
+                            status: checkbox.checked ? 'Concluído' : 'Pendente',
+                            completion_date: checkbox.checked ? dateInput.value : null
+                        };
+                    });
+
+                    app.showSpinner();
+                    try {
+                        await app.apiFetch('/topics/batch_update', {
+                            method: 'PATCH',
+                            body: JSON.stringify({ topics: topicsToUpdate })
+                        });
+
+                        // ***** CORREÇÃO APLICADA AQUI *****
+                        // Invalida o cache do plano após salvar o progresso.
+                        app.invalidatePlanCache(planId);
+
+                        app.showToast('Progresso salvo com sucesso!', 'success');
+                        enableGenerateButton();
+                    } catch (error) {
+                        app.showToast(error.message, 'error');
+                    } finally {
+                        app.hideSpinner();
+                    }
+                } else if (button.classList.contains('edit-subject-btn')) {
+                    handleEditSubject(button.dataset.subjectId, button.dataset.subjectName, button.dataset.priority);
+                } else if (button.classList.contains('delete-subject-btn')) {
+                    handleDeleteSubject(button.dataset.subjectId, button.dataset.subjectName);
+                } else if (button.classList.contains('edit-topic-btn')) {
+                    handleEditTopic(button.dataset.topicId, button.dataset.description);
+                } else if (button.classList.contains('delete-topic-btn')) {
+                    handleDeleteTopic(button.dataset.topicId, button.dataset.description);
+                }
+            });
+
+            generalSettingsForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                app.showSpinner();
+                try {
+                    const settings = getSettingsFromForm();
+                    await app.apiFetch(`/plans/${planId}/settings`, {
+                        method: 'PATCH',
+                        body: JSON.stringify(settings)
+                    });
+                    app.showToast("Configurações salvas com sucesso!", 'success');
+                } catch (error) {
+                    app.showToast(error.message, 'error');
+                } finally {
+                    app.hideSpinner();
+                }
+            });
+
+            generateButton.addEventListener('click', async (event) => {
+                const btn = event.target;
+                btn.disabled = true;
+                btn.textContent = 'Gerando...';
+                app.showSpinner();
+                
+                try {
+                    const settings = getSettingsFromForm();
+                    const result = await app.apiFetch(`/plans/${planId}/generate`, { 
+                        method: 'POST',
+                        body: JSON.stringify(settings) 
+                    });
+                    
+                    app.showToast(result.message, 'success');
+                    app.invalidatePlanCache(planId);
+                } catch (error) {
+                    app.showToast(error.message, 'error');
+                } finally {
+                    app.hideSpinner();
+                    btn.textContent = 'Gerar/Atualizar Cronograma';
+                }
+            });
+            
+            editModal.addEventListener('click', (event) => {
+                if (event.target === editModal || event.target.closest('.btn-cancel')) {
+                    closeModal();
+                }
+            });
+            
+            // Event Listeners para novas funcionalidades
+            
+            // Botões do welcome message
+            const startGuideBtn = document.getElementById('startGuideBtn');
+            const skipGuideBtn = document.getElementById('skipGuideBtn');
+            
+            if (startGuideBtn) {
+                startGuideBtn.addEventListener('click', () => {
+                    document.getElementById('welcome-message').classList.add('hidden');
+                    startGuide();
+                });
+            }
+            
+            if (skipGuideBtn) {
+                skipGuideBtn.addEventListener('click', () => {
+                    document.getElementById('welcome-message').classList.add('hidden');
+                });
+            }
+            
+            // Templates de disciplinas
+            const loadTemplateBtn = document.getElementById('loadTemplateBtn');
+            const disciplineTemplates = document.getElementById('disciplineTemplates');
+            
+            if (loadTemplateBtn) {
+                loadTemplateBtn.addEventListener('click', () => {
+                    disciplineTemplates.classList.toggle('hidden');
+                });
+            }
+            
+            // Event listener para templates de disciplina
+            document.querySelectorAll('.template-discipline-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const name = this.dataset.name;
+                    const priority = this.dataset.priority;
+                    const topics = this.dataset.topics;
+                    
+                    document.getElementById('subject_name').value = name;
+                    document.getElementById('priority_weight').value = priority;
+                    document.getElementById('topics_list').value = topics;
+                    
+                    // Feedback visual
+                    this.classList.add('bg-blue-100', 'border-blue-300');
+                    setTimeout(() => {
+                        this.classList.remove('bg-blue-100', 'border-blue-300');
+                    }, 1000);
+                    
+                    // Fechar templates
+                    disciplineTemplates.classList.add('hidden');
+                    
+                    // Atualizar contador de tópicos
+                    updateTopicCounter();
+                });
+            });
+            
+            // Contador de tópicos
+            function updateTopicCounter() {
+                const topicsTextarea = document.getElementById('topics_list');
+                const topicCounter = document.getElementById('topicCount');
+                
+                if (topicsTextarea && topicCounter) {
+                    const lines = topicsTextarea.value.split('\n').filter(line => line.trim().length > 0);
+                    topicCounter.textContent = `${lines.length} tópicos`;
+                }
+            }
+            
+            // Event listener para atualizar contador
+            const topicsTextarea = document.getElementById('topics_list');
+            if (topicsTextarea) {
+                topicsTextarea.addEventListener('input', updateTopicCounter);
+            }
+            
+            // Botão de exemplo
+            const showExampleBtn = document.getElementById('showExampleBtn');
+            const exampleModal = document.getElementById('exampleModal');
+            const closeExampleBtn = document.getElementById('closeExampleBtn');
+            
+            if (showExampleBtn) {
+                showExampleBtn.addEventListener('click', () => {
+                    exampleModal.classList.remove('hidden');
+                });
+            }
+            
+            if (closeExampleBtn) {
+                closeExampleBtn.addEventListener('click', () => {
+                    exampleModal.classList.add('hidden');
+                });
+            }
+            
+            // Fechar modal clicando fora
+            if (exampleModal) {
+                exampleModal.addEventListener('click', (e) => {
+                    if (e.target === exampleModal) {
+                        exampleModal.classList.add('hidden');
+                    }
+                });
+            }
+            
+            // Presets de metas
+            document.querySelectorAll('.goal-preset').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const daily = this.dataset.daily;
+                    const weekly = this.dataset.weekly;
+                    
+                    document.getElementById('daily_goal').value = daily;
+                    document.getElementById('weekly_goal').value = weekly;
+                    
+                    // Feedback visual
+                    this.classList.add('bg-blue-200');
+                    setTimeout(() => {
+                        this.classList.remove('bg-blue-200');
+                    }, 500);
+                });
+            });
+            
+            // Atualizar meta semanal automaticamente
+            const dailyGoalInput = document.getElementById('daily_goal');
+            const weeklyGoalInput = document.getElementById('weekly_goal');
+            
+            if (dailyGoalInput && weeklyGoalInput) {
+                dailyGoalInput.addEventListener('input', function() {
+                    const dailyValue = parseInt(this.value) || 0;
+                    weeklyGoalInput.value = dailyValue * 7;
+                    updateProgress();
+                });
+            }
+            
+            // Atualizar progresso quando houver mudanças
+            document.addEventListener('change', updateProgress);
+            document.addEventListener('input', updateProgress);
+            
+            // Atualizar progresso inicial
+            setTimeout(updateProgress, 1000);
+        });
+    </script>
+</body>
+</html>
