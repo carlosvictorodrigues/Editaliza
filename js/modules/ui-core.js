@@ -154,5 +154,16 @@ document.addEventListener('DOMContentLoaded', () => {
     UICore.renderGlobalUI();
 });
 
+// Integration with Contextual Notifications (safe extension)
+UICore.showContextualToast = function(message, type = 'success', context = {}) {
+    // Use existing showToast as fallback, extend with contextual features
+    if (window.ContextualNotifications) {
+        window.ContextualNotifications.showContextualNotification(message, type, context);
+    } else {
+        // Fallback to existing system
+        this.showToast(message, type);
+    }
+};
+
 // Disponibilizar globalmente para compatibilidade
 window.UICore = UICore;
