@@ -17,7 +17,9 @@ class ComponentsCore {
             'cards': '/js/modules/cards.js',
             'gamification': '/js/modules/gamification.js',
             'smart-buttons': '/js/modules/smart-buttons.js',
-            'ui-core': '/js/modules/ui-core.js'
+            'ui-core': '/js/modules/ui-core.js',
+            'contextual-notifications': '/js/modules/contextual-notifications.js',
+            'notification-integrations': '/js/modules/notification-integrations.js'
         };
 
         // Auto-carregar módulos essenciais
@@ -30,6 +32,16 @@ class ComponentsCore {
         
         // Carregar UI Core imediatamente (essencial)
         await this.loadModule('ui-core');
+        
+        // 🔔 Carregar Sistema de Notificações Inteligentes
+        try {
+            await this.loadModule('contextual-notifications');
+            await this.loadModule('notification-integrations');
+            console.log('✅ Sistema de Notificações Inteligentes carregado');
+        } catch (error) {
+            console.warn('⚠️ Erro ao carregar sistema de notificações:', error);
+            // Não quebra a aplicação se as notificações falharem
+        }
         
         console.log('✅ ComponentsCore inicializado com sucesso');
     }
