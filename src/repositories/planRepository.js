@@ -58,15 +58,42 @@ const getTopicsWithStatus = async (planId) => {
  */
 const getSubjectProgressDetails = async (planId) => {
     const query = `
-        SELECT 
+        SELECT
+            s.id,
             s.subject_name as name,
             COUNT(t.id) as totalTopics,
-            COUNT(CASE WHEN t.status = 'Concluído' THEN 1 END) as completedTopics,
-            0 as totalTime, -- Placeholder, time calculation needs to be implemented
-            CASE 
-                WHEN COUNT(t.id) > 0 
-                THEN ROUND((COUNT(CASE WHEN t.status = 'Concluído' THEN 1 END) * 100.0) / COUNT(t.id), 1)
-                ELSE 0 
+            COUNT(
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM study_sessions ss
+                    WHERE ss.topic_id = t.id
+                    AND ss.session_type = 'Novo Tópico'
+                    AND ss.status = 'Concluído'
+                ) THEN 1 END
+            ) as completedTopics,
+            (
+                SELECT COALESCE(SUM(ss.time_studied_seconds), 0)
+                FROM study_sessions ss
+                LEFT JOIN topics tt ON ss.topic_id = tt.id
+                WHERE ss.study_plan_id = s.study_plan_id
+                AND ss.status = 'Concluído'
+                AND (
+                    tt.subject_id = s.id
+                    OR (ss.topic_id IS NULL AND ss.subject_name = s.subject_name)
+                )
+            ) as totalTime,
+            CASE
+                WHEN COUNT(t.id) > 0
+                THEN ROUND((
+                    COUNT(
+                        CASE WHEN EXISTS (
+                            SELECT 1 FROM study_sessions ss
+                            WHERE ss.topic_id = t.id
+                            AND ss.session_type = 'Novo Tópico'
+                            AND ss.status = 'Concluído'
+                        ) THEN 1 END
+                    ) * 100.0
+                ) / COUNT(t.id), 1)
+                ELSE 0
             END as progress
         FROM subjects s
         LEFT JOIN topics t ON s.id = t.subject_id
@@ -74,22 +101,23 @@ const getSubjectProgressDetails = async (planId) => {
         GROUP BY s.id, s.subject_name
         ORDER BY s.subject_name
     `;
-    
+
     const subjects = await dbAll(query, [planId]);
-    
-    // Get topics for each subject
+
+    // Get topics for each subject with time studied
     for (const subject of subjects) {
         subject.topics = await dbAll(`
-            SELECT 
+            SELECT
                 t.description as description,
-                0 as timeStudied -- Placeholder
+                COALESCE(SUM(ss.time_studied_seconds), 0) as timeStudied
             FROM topics t
-            JOIN subjects s ON t.subject_id = s.id
-            WHERE s.subject_name = ? AND s.study_plan_id = ?
+            LEFT JOIN study_sessions ss ON ss.topic_id = t.id AND ss.status = 'Concluído'
+            WHERE t.subject_id = ?
+            GROUP BY t.id, t.description
             ORDER BY t.id
-        `, [subject.name, planId]);
+        `, [subject.id]);
     }
-    
+
     return subjects;
 };
 
@@ -98,9 +126,16 @@ const getSubjectProgressDetails = async (planId) => {
  */
 const getTotalProgress = async (planId) => {
     const result = await dbGet(`
-        SELECT 
+        SELECT
             COUNT(t.id) as total,
-            COUNT(CASE WHEN t.status = 'Concluído' THEN 1 END) as completed
+            COUNT(
+                CASE WHEN EXISTS (
+                    SELECT 1 FROM study_sessions ss
+                    WHERE ss.topic_id = t.id
+                    AND ss.session_type = 'Novo Tópico'
+                    AND ss.status = 'Concluído'
+                ) THEN 1 END
+            ) as completed
         FROM topics t
         JOIN subjects s ON t.subject_id = s.id
         WHERE s.study_plan_id = ?
