@@ -595,80 +595,90 @@
         let originalData = {};
         let selectedAvatarPath = null;
 
-        const avatarCategories = {
-            adventurer: {
-                label: 'Aventureiros',
-                files: Array.from({ length: 6 }, (_, i) => `avatar${i + 1}.svg`)
-            },
-            'pixel-art': {
-                label: 'Pixel Art',
-                files: Array.from({ length: 6 }, (_, i) => `pixel${i + 1}.svg`)
-            },
-            bots: {
-                label: 'Bots',
-                files: Array.from({ length: 6 }, (_, i) => `bot${i + 1}.svg`)
-            },
-            miniavs: {
-                label: 'Minimalista',
-                files: Array.from({ length: 6 }, (_, i) => `miniav${i + 1}.svg`)
-            },
-            classic: {
-                label: 'Clássico',
-                files: [
-                    '1.svg',
-                    '2.svg',
-                    '3.svg',
-                    '4.svg',
-                    '5.svg',
-                    '6.svg',
-                    '7.svg',
-                    '8.svg',
-                    '9.svg',
-                    '10.svg',
-                    '11.svg',
-                    'avatar-svgrepo-com.svg',
-                    'avatar-svgrepo-com (1).svg',
-                    'avatar-svgrepo-com (2).svg',
-                    'avatar-svgrepo-com (3).svg',
-                    'avatar-svgrepo-com (4).svg',
-                    'avatar-svgrepo-com (5).svg'
-                ]
-            },
-            christmas: {
-                label: 'Natalino',
-                files: [
-                    'avatar-winter-custome-5-svgrepo-com.svg',
-                    'avatar-winter-custome-14-svgrepo-com.svg',
-                    'avatar-winter-custome-24-svgrepo-com.svg',
-                    'avatar-winter-custome-35-svgrepo-com.svg',
-                    'avatar-winter-custome-37-svgrepo-com.svg',
-                    'avatar-winter-custome-47-svgrepo-com.svg'
-                ]
-            }
+        const defaultAvatarCatalog = {
+            adventurer: [
+                'avatar1.svg',
+                'avatar2.svg',
+                'avatar3.svg',
+                'avatar4.svg',
+                'avatar5.svg',
+                'avatar6.svg'
+            ],
+            'pixel-art': [
+                'pixel1.svg',
+                'pixel2.svg',
+                'pixel3.svg',
+                'pixel4.svg',
+                'pixel5.svg',
+                'pixel6.svg'
+            ],
+            bots: [
+                'bot1.svg',
+                'bot2.svg',
+                'bot3.svg',
+                'bot4.svg',
+                'bot5.svg',
+                'bot6.svg'
+            ],
+            miniavs: [
+                'miniav1.svg',
+                'miniav2.svg',
+                'miniav3.svg',
+                'miniav4.svg',
+                'miniav5.svg',
+                'miniav6.svg'
+            ],
+            classic: [
+                '1.svg',
+                '2.svg',
+                '3.svg',
+                '4.svg',
+                '5.svg',
+                '6.svg',
+                '7.svg',
+                '8.svg',
+                '9.svg',
+                '10.svg',
+                '11.svg',
+                'avatar-svgrepo-com.svg',
+                'avatar-svgrepo-com (1).svg',
+                'avatar-svgrepo-com (2).svg',
+                'avatar-svgrepo-com (3).svg',
+                'avatar-svgrepo-com (4).svg',
+                'avatar-svgrepo-com (5).svg'
+            ],
+            christmas: [
+                'avatar-winter-custome-5-svgrepo-com.svg',
+                'avatar-winter-custome-14-svgrepo-com.svg',
+                'avatar-winter-custome-24-svgrepo-com.svg',
+                'avatar-winter-custome-35-svgrepo-com.svg',
+                'avatar-winter-custome-37-svgrepo-com.svg',
+                'avatar-winter-custome-47-svgrepo-com.svg'
+            ]
         };
 
-        async function testAvatarAccess() {
-            console.log('🔍 Testando acesso aos avatares...');
-            const testPaths = Object.entries(avatarCategories).map(
-                ([category, data]) => `./images/avatars/${category}/${data.files[0]}`
-            );
+        const labelMap = {
+            adventurer: 'Aventureiros',
+            'pixel-art': 'Pixel Art',
+            bots: 'Bots',
+            miniavs: 'Minimalista',
+            classic: 'Clássico',
+            christmas: 'Natalino'
+        };
 
-            for (const path of testPaths) {
-                try {
-                    const response = await fetch(path);
-                    console.log(`${response.ok ? '✅' : '❌'} ${path} - Status: ${response.status}`);
-                } catch (error) {
-                    console.error(`❌ Erro ao testar ${path}:`, error);
-                }
-            }
-        }
+        const avatarCatalog = window.avatarCatalog || defaultAvatarCatalog;
+        const avatarCategories = Object.fromEntries(
+            Object.entries(avatarCatalog).map(([key, files]) => [key, {
+                label: labelMap[key] || key,
+                files
+            }])
+        );
 
         async function initialize() {
             try {
                 console.log('🚀 Inicializando página de perfil...');
                 await components.renderMainNavigation('profile.html');
                 await loadProfileData();
-                await testAvatarAccess(); // Test avatar access
                 renderAvatarUI();
                 setupFormEvents();
                 setupTooltips();
