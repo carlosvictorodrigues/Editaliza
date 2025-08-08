@@ -2,7 +2,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database('./db.sqlite');
 
-console.log('🔍 Verificando estrutura do banco de dados...\n');
+console.info('🔍 Verificando estrutura do banco de dados...\n');
 
 // Listar todas as tabelas
 db.all("SELECT name FROM sqlite_master WHERE type='table'", (err, tables) => {
@@ -12,24 +12,24 @@ db.all("SELECT name FROM sqlite_master WHERE type='table'", (err, tables) => {
         return;
     }
     
-    console.log('📋 Tabelas encontradas:');
+    console.info('📋 Tabelas encontradas:');
     tables.forEach((table, index) => {
-        console.log(`  ${index + 1}. ${table.name}`);
+        console.info(`  ${index + 1}. ${table.name}`);
     });
     
-    console.log('\n📊 Análise detalhada das tabelas:');
+    console.info('\n📊 Análise detalhada das tabelas:');
     
     // Função recursiva para analisar cada tabela
     let tableIndex = 0;
     const analyzeNextTable = () => {
         if (tableIndex >= tables.length) {
-            console.log('\n✅ Análise concluída!');
+            console.info('\n✅ Análise concluída!');
             db.close();
             return;
         }
         
         const tableName = tables[tableIndex].name;
-        console.log(`\n🔍 Analisando tabela: ${tableName}`);
+        console.info(`\n🔍 Analisando tabela: ${tableName}`);
         
         // Contar registros
         db.all(`SELECT COUNT(*) as count FROM "${tableName}"`, (err, countResult) => {
@@ -40,14 +40,14 @@ db.all("SELECT name FROM sqlite_master WHERE type='table'", (err, tables) => {
                 return;
             }
             
-            console.log(`  📊 Registros: ${countResult[0].count}`);
+            console.info(`  📊 Registros: ${countResult[0].count}`);
             
             // Mostrar estrutura da tabela
             db.all(`PRAGMA table_info("${tableName}")`, (err, columns) => {
                 if (err) {
                     console.error(`  ❌ Erro ao obter estrutura: ${err.message}`);
                 } else {
-                    console.log(`  🏗️  Colunas: ${columns.map(col => col.name).join(', ')}`);
+                    console.info(`  🏗️  Colunas: ${columns.map(col => col.name).join(', ')}`);
                     
                     // Se há dados, mostrar alguns exemplos (apenas para tabelas pequenas)
                     if (countResult[0].count > 0 && countResult[0].count <= 10) {
@@ -55,7 +55,7 @@ db.all("SELECT name FROM sqlite_master WHERE type='table'", (err, tables) => {
                             if (err) {
                                 console.error(`  ❌ Erro ao obter amostras: ${err.message}`);
                             } else if (samples.length > 0) {
-                                console.log(`  📝 Exemplo de dados:`, JSON.stringify(samples[0], null, 2).slice(0, 200) + '...');
+                                console.info(`  📝 Exemplo de dados:`, JSON.stringify(samples[0], null, 2).slice(0, 200) + '...');
                             }
                             
                             tableIndex++;
