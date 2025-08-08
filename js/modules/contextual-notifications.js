@@ -389,16 +389,65 @@ const ContextualNotifications = {
     // === UTILITÁRIOS ===
 
     showContextualToast(options) {
-        // Usar o sistema de toast existente com melhorias
-        if (window.app && window.app.showToast) {
-            // Versão básica usando sistema existente
-            window.app.showToast(options.message, options.type || 'info');
-        }
+        const container = document.getElementById('toast-container') || this.createToastContainer();
 
-        // Versão melhorada se disponível
-        if (window.UICore && window.UICore.showContextualToast) {
-            window.UICore.showContextualToast(options);
-        }
+        const toast = document.createElement('div');
+        toast.className = 'bg-white rounded-xl shadow-2xl p-4 w-full max-w-sm transform transition-all duration-500 opacity-0 -translate-y-12';
+
+        const typeClasses = {
+            celebration: 'border-yellow-400',
+            achievement: 'border-purple-500',
+            motivational: 'border-blue-500',
+            reminder: 'border-red-500',
+            info: 'border-gray-400'
+        };
+
+        toast.innerHTML = `
+            <div class="border-l-4 ${typeClasses[options.type] || 'border-gray-400'} pl-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 pt-0.5">
+                        <span class="text-2xl">${options.title.split(' ')[0]}</span>
+                    </div>
+                    <div class="ml-3 w-0 flex-1">
+                        <p class="text-md font-bold text-gray-900">${options.title}</p>
+                        <p class="mt-1 text-sm text-gray-600">${options.message}</p>
+                    </div>
+                    <div class="ml-4 flex-shrink-0 flex">
+                        <button class="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none">
+                            <span class="sr-only">Close</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const closeButton = toast.querySelector('button');
+        const close = () => {
+            toast.classList.add('opacity-0', 'translate-y-full');
+            setTimeout(() => toast.remove(), 500);
+        };
+        closeButton.addEventListener('click', close);
+
+        container.appendChild(toast);
+
+        // Animate in
+        requestAnimationFrame(() => {
+            toast.classList.remove('opacity-0', '-translate-y-12');
+        });
+
+        setTimeout(close, options.duration || 6000);
+    },
+
+    createToastContainer() {
+        let container = document.getElementById('toast-container');
+        if (container) return container;
+
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'fixed top-5 right-5 z-50 space-y-3';
+        document.body.appendChild(container);
+        return container;
     },
 
     selectRandomMessage(messages) {

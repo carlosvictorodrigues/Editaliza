@@ -3,190 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste - Integração Notificações Inteligentes</title>
+    <title>Teste - Integração de Notificações Inteligentes</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <style>
-        .animate-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
-        }
-    </style>
 </head>
 <body class="bg-gray-50">
     <div class="container mx-auto p-8">
         <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
             <h1 class="text-3xl font-bold text-gray-800 mb-4 text-center">
-                🎯 Teste de Integração - Notificações Inteligentes
+                🎯 Teste de Integração - Sistema de Notificações Inteligentes
             </h1>
             <p class="text-gray-600 text-center mb-8">
-                Verificando se o sistema de notificações está integrado corretamente com a aplicação principal.
+                Teste da correção aplicada no sistema de notificações contextuais
             </p>
         </div>
 
         <!-- Status do Sistema -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-semibold mb-4 text-gray-800">📊 Status do Sistema</h3>
+            <div id="system-status" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-700 mb-2">ContextualNotifications</h4>
+                    <div id="contextual-status" class="text-sm text-gray-600">
+                        Verificando...
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-700 mb-2">NotificationIntegrations</h4>
+                    <div id="integration-status" class="text-sm text-gray-600">
+                        Verificando...
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-700 mb-2">App Integration</h4>
+                    <div id="app-status" class="text-sm text-gray-600">
+                        Verificando...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testes de Notificação -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-semibold mb-4 text-blue-800">🔔 Status do Sistema</h3>
-                <div id="system-status" class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span>ContextualNotifications:</span>
-                        <span id="contextual-status" class="px-2 py-1 rounded text-sm">Verificando...</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span>NotificationIntegrations:</span>
-                        <span id="integrations-status" class="px-2 py-1 rounded text-sm">Verificando...</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span>App Integration:</span>
-                        <span id="app-status" class="px-2 py-1 rounded text-sm">Verificando...</span>
-                    </div>
+                <h3 class="text-xl font-semibold mb-4 text-blue-800">🔔 Testes de Notificação</h3>
+                <div class="space-y-3">
+                    <button onclick="testWelcomeMessage()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Mensagem de Boas-vindas
+                    </button>
+                    <button onclick="testSessionComplete()" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Sessão Completa
+                    </button>
+                    <button onclick="testAchievement()" class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Conquista
+                    </button>
                 </div>
             </div>
 
             <div class="bg-white rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-semibold mb-4 text-green-800">🎯 Testes Rápidos</h3>
+                <h3 class="text-xl font-semibold mb-4 text-orange-800">🎯 Testes Contextuais</h3>
                 <div class="space-y-3">
-                    <button onclick="testWelcomeMessage()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
-                        Teste Mensagem de Boas-vindas
+                    <button onclick="testMotivational()" class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Motivacional
                     </button>
-                    <button onclick="testSessionComplete()" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
-                        Teste Conclusão de Sessão
+                    <button onclick="testReminder()" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Lembrete
                     </button>
-                    <button onclick="testAchievement()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors">
-                        Teste Conquista
+                    <button onclick="testCelebration()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Celebração
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- Logs -->
+        <!-- Teste Direto da Função -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-semibold mb-4 text-green-800">🧪 Teste Direto da Função</h3>
+            <div class="space-y-3">
+                <button onclick="testDirectToast()" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    Teste Direto showContextualToast
+                </button>
+                <button onclick="testToastContainer()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    Teste Criação Container
+                </button>
+            </div>
+        </div>
+
+        <!-- Log de Eventos -->
         <div class="bg-white rounded-xl shadow-lg p-6">
-            <h3 class="text-xl font-semibold mb-4 text-gray-800">📊 Logs do Sistema</h3>
-            <div id="logs" class="bg-gray-100 rounded-lg p-4 h-64 overflow-y-auto font-mono text-sm">
-                <div class="text-gray-500">Aguardando logs...</div>
+            <h3 class="text-xl font-semibold mb-4 text-gray-800">📝 Log de Eventos</h3>
+            <div id="event-log" class="bg-gray-50 rounded-lg p-4 h-64 overflow-y-auto text-sm font-mono">
+                <div class="text-gray-500">Aguardando eventos...</div>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="js/app.js"></script>
-    <script src="js/modules/contextual-notifications.js"></script>
-    <script src="js/modules/notification-integrations.js"></script>
-    
     <script>
-        // Função para adicionar logs
-        function addLog(message, type = 'info') {
-            const logs = document.getElementById('logs');
+        // Simular ambiente da aplicação
+        window.app = {
+            config: {
+                notifications: {
+                    enabled: true,
+                    maxPerDay: 6,
+                    cooldown: 300000,
+                    showWelcome: true
+                }
+            },
+            state: {
+                activePlanId: 'test-plan'
+            },
+            showToast: function(message, type) {
+                logEvent(`App.showToast: ${message} (${type})`);
+            }
+        };
+
+        // Função de log
+        function logEvent(message) {
+            const log = document.getElementById('event-log');
             const timestamp = new Date().toLocaleTimeString();
             const logEntry = document.createElement('div');
-            logEntry.className = `mb-1 ${type === 'error' ? 'text-red-600' : type === 'success' ? 'text-green-600' : 'text-gray-700'}`;
+            logEntry.className = 'text-gray-700 mb-1';
             logEntry.textContent = `[${timestamp}] ${message}`;
-            logs.appendChild(logEntry);
-            logs.scrollTop = logs.scrollHeight;
+            log.appendChild(logEntry);
+            log.scrollTop = log.scrollHeight;
         }
 
         // Verificar status do sistema
         function checkSystemStatus() {
-            addLog('🔍 Verificando status do sistema...');
-            
-            // Verificar ContextualNotifications
             const contextualStatus = document.getElementById('contextual-status');
+            const integrationStatus = document.getElementById('integration-status');
+            const appStatus = document.getElementById('app-status');
+
+            // Verificar ContextualNotifications
             if (window.ContextualNotifications) {
-                contextualStatus.textContent = '✅ Carregado';
-                contextualStatus.className = 'px-2 py-1 rounded text-sm bg-green-100 text-green-800';
-                addLog('✅ ContextualNotifications carregado com sucesso');
+                contextualStatus.innerHTML = '<span class="text-green-600">✅ Carregado</span>';
+                logEvent('ContextualNotifications: Módulo carregado');
             } else {
-                contextualStatus.textContent = '❌ Não carregado';
-                contextualStatus.className = 'px-2 py-1 rounded text-sm bg-red-100 text-red-800';
-                addLog('❌ ContextualNotifications não encontrado', 'error');
+                contextualStatus.innerHTML = '<span class="text-red-600">❌ Não carregado</span>';
+                logEvent('ContextualNotifications: Módulo não encontrado');
             }
 
             // Verificar NotificationIntegrations
-            const integrationsStatus = document.getElementById('integrations-status');
             if (window.NotificationIntegrations) {
-                integrationsStatus.textContent = '✅ Carregado';
-                integrationsStatus.className = 'px-2 py-1 rounded text-sm bg-green-100 text-green-800';
-                addLog('✅ NotificationIntegrations carregado com sucesso');
+                integrationStatus.innerHTML = '<span class="text-green-600">✅ Carregado</span>';
+                logEvent('NotificationIntegrations: Módulo carregado');
             } else {
-                integrationsStatus.textContent = '❌ Não carregado';
-                integrationsStatus.className = 'px-2 py-1 rounded text-sm bg-red-100 text-red-800';
-                addLog('❌ NotificationIntegrations não encontrado', 'error');
+                integrationStatus.innerHTML = '<span class="text-red-600">❌ Não carregado</span>';
+                logEvent('NotificationIntegrations: Módulo não encontrado');
             }
 
-            // Verificar integração com app
-            const appStatus = document.getElementById('app-status');
-            if (window.app && window.app.config && window.app.config.notifications) {
-                appStatus.textContent = '✅ Integrado';
-                appStatus.className = 'px-2 py-1 rounded text-sm bg-green-100 text-green-800';
-                addLog('✅ Sistema integrado com app.js');
+            // Verificar App
+            if (window.app) {
+                appStatus.innerHTML = '<span class="text-green-600">✅ Configurado</span>';
+                logEvent('App: Configuração carregada');
             } else {
-                appStatus.textContent = '❌ Não integrado';
-                appStatus.className = 'px-2 py-1 rounded text-sm bg-red-100 text-red-800';
-                addLog('❌ Sistema não integrado com app.js', 'error');
+                appStatus.innerHTML = '<span class="text-red-600">❌ Não configurado</span>';
+                logEvent('App: Configuração não encontrada');
             }
         }
 
-        // Teste de mensagem de boas-vindas
+        // Testes de notificação
         function testWelcomeMessage() {
-            addLog('🎯 Testando mensagem de boas-vindas...');
+            logEvent('Teste: Mensagem de boas-vindas');
             if (window.ContextualNotifications) {
                 window.ContextualNotifications.showWelcomeMessage();
-                addLog('✅ Mensagem de boas-vindas enviada', 'success');
             } else {
-                addLog('❌ ContextualNotifications não disponível', 'error');
+                logEvent('ERRO: ContextualNotifications não disponível');
             }
         }
 
-        // Teste de conclusão de sessão
         function testSessionComplete() {
-            addLog('🎯 Testando conclusão de sessão...');
+            logEvent('Teste: Sessão completa');
             if (window.ContextualNotifications) {
-                const sessionData = {
-                    sessionType: 'Estudo',
-                    duration: 25,
-                    subject: 'Direito Constitucional',
-                    difficulty: 3
-                };
-                window.ContextualNotifications.handleSessionCompleted(sessionData);
-                addLog('✅ Evento de conclusão de sessão disparado', 'success');
+                window.ContextualNotifications.showSessionCompletionMessage('pomodoro', 25, 'Português', 'médio');
             } else {
-                addLog('❌ ContextualNotifications não disponível', 'error');
+                logEvent('ERRO: ContextualNotifications não disponível');
             }
         }
 
-        // Teste de conquista
         function testAchievement() {
-            addLog('🎯 Testando conquista...');
+            logEvent('Teste: Conquista');
             if (window.ContextualNotifications) {
-                const achievement = {
+                window.ContextualNotifications.showAchievementMessage({
                     title: 'Primeira Sessão',
                     description: 'Completou sua primeira sessão de estudo!',
-                    type: 'achievement'
-                };
-                window.ContextualNotifications.handleAchievement(achievement);
-                addLog('✅ Evento de conquista disparado', 'success');
+                    xp: 50
+                });
             } else {
-                addLog('❌ ContextualNotifications não disponível', 'error');
+                logEvent('ERRO: ContextualNotifications não disponível');
             }
         }
 
-        // Inicializar quando DOM estiver pronto
+        function testMotivational() {
+            logEvent('Teste: Notificação motivacional');
+            if (window.ContextualNotifications) {
+                window.ContextualNotifications.showContextualToast({
+                    type: 'motivational',
+                    title: '💪 Motivação',
+                    message: 'Você está fazendo um excelente progresso! Continue assim!',
+                    duration: 5000
+                });
+            } else {
+                logEvent('ERRO: ContextualNotifications não disponível');
+            }
+        }
+
+        function testReminder() {
+            logEvent('Teste: Lembrete');
+            if (window.ContextualNotifications) {
+                window.ContextualNotifications.showContextualToast({
+                    type: 'reminder',
+                    title: '⏰ Lembrete',
+                    message: 'Que tal fazer uma pausa e alongar um pouco?',
+                    duration: 5000
+                });
+            } else {
+                logEvent('ERRO: ContextualNotifications não disponível');
+            }
+        }
+
+        function testCelebration() {
+            logEvent('Teste: Celebração');
+            if (window.ContextualNotifications) {
+                window.ContextualNotifications.showContextualToast({
+                    type: 'celebration',
+                    title: '🎉 Parabéns!',
+                    message: 'Você completou 7 dias consecutivos de estudo!',
+                    duration: 5000
+                });
+            } else {
+                logEvent('ERRO: ContextualNotifications não disponível');
+            }
+        }
+
+        // Teste direto da função
+        function testDirectToast() {
+            logEvent('Teste: Função showContextualToast direta');
+            if (window.ContextualNotifications && window.ContextualNotifications.showContextualToast) {
+                try {
+                    window.ContextualNotifications.showContextualToast({
+                        type: 'info',
+                        title: '🧪 Teste Direto',
+                        message: 'Esta é um teste direto da função showContextualToast!',
+                        duration: 3000
+                    });
+                    logEvent('✅ Teste direto executado com sucesso');
+                } catch (error) {
+                    logEvent(`❌ Erro no teste direto: ${error.message}`);
+                }
+            } else {
+                logEvent('❌ Função showContextualToast não disponível');
+            }
+        }
+
+        function testToastContainer() {
+            logEvent('Teste: Criação do container de toast');
+            if (window.ContextualNotifications && window.ContextualNotifications.createToastContainer) {
+                try {
+                    const container = window.ContextualNotifications.createToastContainer();
+                    logEvent(`✅ Container criado: ${container.id}`);
+                } catch (error) {
+                    logEvent(`❌ Erro ao criar container: ${error.message}`);
+                }
+            } else {
+                logEvent('❌ Função createToastContainer não disponível');
+            }
+        }
+
+        // Carregar módulos
+        async function loadModules() {
+            try {
+                // Carregar ContextualNotifications
+                const contextualModule = await import('./js/modules/contextual-notifications.js');
+                if (contextualModule.ContextualNotifications) {
+                    window.ContextualNotifications = contextualModule.ContextualNotifications;
+                    logEvent('ContextualNotifications: Módulo importado com sucesso');
+                }
+
+                // Carregar NotificationIntegrations
+                const integrationModule = await import('./js/modules/notification-integrations.js');
+                if (integrationModule.NotificationIntegrations) {
+                    window.NotificationIntegrations = integrationModule.NotificationIntegrations;
+                    logEvent('NotificationIntegrations: Módulo importado com sucesso');
+                }
+
+                // Inicializar se disponível
+                if (window.ContextualNotifications) {
+                    await window.ContextualNotifications.init();
+                    logEvent('ContextualNotifications: Inicializado');
+                }
+
+                if (window.NotificationIntegrations) {
+                    await window.NotificationIntegrations.init();
+                    logEvent('NotificationIntegrations: Inicializado');
+                }
+
+            } catch (error) {
+                logEvent(`ERRO ao carregar módulos: ${error.message}`);
+            }
+
+            checkSystemStatus();
+        }
+
+        // Inicializar quando a página carregar
         document.addEventListener('DOMContentLoaded', () => {
-            addLog('🚀 Página carregada, iniciando testes...');
-            
-            // Aguardar um pouco para os módulos carregarem
-            setTimeout(() => {
-                checkSystemStatus();
-                
-                // Verificar novamente após 3 segundos
-                setTimeout(() => {
-                    addLog('🔄 Verificação final do sistema...');
-                    checkSystemStatus();
-                }, 3000);
-            }, 1000);
+            logEvent('Página carregada - Iniciando testes...');
+            loadModules();
         });
     </script>
 </body>
