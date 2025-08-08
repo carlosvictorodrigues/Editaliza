@@ -1029,7 +1029,7 @@
 
             try {
                 console.log('💾 Enviando dados do perfil:', updateData);
-                const response = await app.apiFetch('/profile', {
+                const response = await app.apiFetch('/users/profile', {
                     method: 'PATCH',
                     body: JSON.stringify(updateData)
                 });
@@ -1041,9 +1041,7 @@
                 updateProfilePhoto(selectedAvatarPath);
                 
                 // Atualizar avatar na navegação
-                if (typeof app.onUserAvatarUpdated === 'function') {
-                    await app.onUserAvatarUpdated();
-                }
+                await app.onUserAvatarUpdated();
                 
                 app.showToast('Perfil atualizado com sucesso! Suas informações ajudarão a personalizar sua experiência.', 'success');
                 saveBtn.disabled = true;
