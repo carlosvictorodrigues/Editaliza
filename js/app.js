@@ -19,6 +19,19 @@ const app = {
         tokenKey: 'editaliza_token',
         planKey: 'selectedPlanId',
         sessionTimeout: 24 * 60 * 60 * 1000, // 24 horas em ms
+        
+        // 🔔 Configurações do Sistema de Notificações Inteligentes
+        notifications: {
+            enabled: true,
+            maxPerDay: 6,
+            cooldown: 300000, // 5 minutos
+            showWelcome: true,
+            showMilestones: true,
+            showTimingTips: true,
+            showProcrastinationNudges: true,
+            showSessionCompletion: true,
+            showAchievements: true
+        }
     },
 
     async init() {
@@ -41,6 +54,51 @@ const app = {
         if (this.state.token) {
             this.setupTokenRefresh();
         }
+
+        // 🔔 INICIALIZAR SISTEMA DE NOTIFICAÇÕES INTELIGENTES
+        await this.initializeNotificationSystem();
+    },
+
+    // 🔔 Sistema de Notificações Inteligentes
+    async initializeNotificationSystem() {
+        try {
+            console.log('🔔 Inicializando Sistema de Notificações Inteligentes...');
+            
+            // Aguardar carregamento dos módulos
+            await this.waitForNotificationModules();
+            
+            // Inicializar sistema de notificações contextuais
+            if (window.ContextualNotifications) {
+                await window.ContextualNotifications.init();
+                console.log('✅ ContextualNotifications inicializado');
+            }
+            
+            // Inicializar integrações de notificação
+            if (window.NotificationIntegrations) {
+                await window.NotificationIntegrations.init();
+                console.log('✅ NotificationIntegrations inicializado');
+            }
+            
+            console.log('🎯 Sistema de Notificações Inteligentes ativado com sucesso!');
+            
+        } catch (error) {
+            console.warn('⚠️ Erro ao inicializar sistema de notificações:', error);
+            // Não quebra a aplicação se as notificações falharem
+        }
+    },
+
+    // Aguardar módulos de notificação estarem disponíveis
+    async waitForNotificationModules(maxWait = 10000) {
+        const startTime = Date.now();
+        
+        while (Date.now() - startTime < maxWait) {
+            if (window.ContextualNotifications && window.NotificationIntegrations) {
+                return true;
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        throw new Error('Módulos de notificação não carregaram a tempo');
     },
 
     // Verificar se o token expirou
