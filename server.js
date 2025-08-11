@@ -904,10 +904,11 @@ app.patch('/plans/:planId/settings',
     validators.integer('weekly_question_goal', 0, 3500),
     validators.integer('session_duration_minutes', 10, 240),
     body('has_essay').isBoolean().withMessage('has_essay deve ser booleano'),
+    body('reta_final_mode').isBoolean().withMessage('reta_final_mode deve ser booleano'),
     validators.jsonField('study_hours_per_day'),
     handleValidationErrors,
     async (req, res) => {
-        const { daily_question_goal, weekly_question_goal, review_mode, session_duration_minutes, study_hours_per_day, has_essay } = req.body;
+        const { daily_question_goal, weekly_question_goal, review_mode, session_duration_minutes, study_hours_per_day, has_essay, reta_final_mode } = req.body;
         const hoursJson = JSON.stringify(study_hours_per_day);
         
         const validReviewModes = ['completo', 'focado'];
@@ -915,9 +916,9 @@ app.patch('/plans/:planId/settings',
             return res.status(400).json({ error: "Modo de revisão inválido" });
         }
         
-        const sql = 'UPDATE study_plans SET daily_question_goal = ?, weekly_question_goal = ?, review_mode = ?, session_duration_minutes = ?, study_hours_per_day = ?, has_essay = ? WHERE id = ? AND user_id = ?';
+        const sql = 'UPDATE study_plans SET daily_question_goal = ?, weekly_question_goal = ?, review_mode = ?, session_duration_minutes = ?, study_hours_per_day = ?, has_essay = ?, reta_final_mode = ? WHERE id = ? AND user_id = ?';
         try {
-            const result = await dbRun(sql, [daily_question_goal, weekly_question_goal, review_mode || 'completo', session_duration_minutes, hoursJson, has_essay, req.params.planId, req.user.id]);
+            const result = await dbRun(sql, [daily_question_goal, weekly_question_goal, review_mode || 'completo', session_duration_minutes, hoursJson, has_essay, reta_final_mode ? 1 : 0, req.params.planId, req.user.id]);
             if (result.changes === 0) return res.status(404).json({ error: "Plano não encontrado ou não autorizado." });
             res.json({ message: "Configurações salvas com sucesso!" });
         } catch (error) {
@@ -1153,20 +1154,22 @@ app.post('/plans/:planId/generate',
     validators.integer('weekly_question_goal', 0, 3500),
     validators.integer('session_duration_minutes', 10, 240),
     body('has_essay').isBoolean().withMessage('has_essay deve ser booleano'),
+    body('reta_final_mode').isBoolean().withMessage('reta_final_mode deve ser booleano'),
     validators.jsonField('study_hours_per_day'),
     handleValidationErrors,
     async (req, res) => {
         const planId = req.params.planId;
-        const { daily_question_goal, weekly_question_goal, session_duration_minutes, study_hours_per_day, has_essay } = req.body;
+        const { daily_question_goal, weekly_question_goal, session_duration_minutes, study_hours_per_day, has_essay, reta_final_mode } = req.body;
         
         console.time(`[PERF] Generate schedule for plan ${planId}`);
+        const startTime = Date.now();
 
         try {
             await dbRun('BEGIN IMMEDIATE TRANSACTION');
             
             const hoursJson = JSON.stringify(study_hours_per_day);
-            await dbRun('UPDATE study_plans SET daily_question_goal = ?, weekly_question_goal = ?, session_duration_minutes = ?, study_hours_per_day = ?, has_essay = ? WHERE id = ? AND user_id = ?', 
-                [daily_question_goal, weekly_question_goal, session_duration_minutes, hoursJson, has_essay, planId, req.user.id]);
+            await dbRun('UPDATE study_plans SET daily_question_goal = ?, weekly_question_goal = ?, session_duration_minutes = ?, study_hours_per_day = ?, has_essay = ?, reta_final_mode = ? WHERE id = ? AND user_id = ?',
+                [daily_question_goal, weekly_question_goal, session_duration_minutes, hoursJson, has_essay, reta_final_mode ? 1 : 0, planId, req.user.id]);
             
             const plan = await dbGet('SELECT * FROM study_plans WHERE id = ?', [planId]);
             if (!plan) {
@@ -1293,13 +1296,40 @@ app.post('/plans/:planId/generate',
             }
             
             const pendingTopics = allTopics.filter(t => t.status !== 'Concluído');
-            const weightedTopics = pendingTopics.flatMap(t => Array(t.priority).fill(t));
+            const availableSlots = getAvailableDates(today, examDate, true).reduce((sum, d) => sum + d.maxSessions, 0);
+            let topicsToSchedule = pendingTopics;
+            let excludedTopics = [];
+            let prioritizedSubjects = [];
+
+            if (pendingTopics.length > availableSlots) {
+                if (!plan.reta_final_mode) {
+                    await dbRun('ROLLBACK');
+                    return res.status(400).json({
+                        error: `❌ CRONOGRAMA INVIÁVEL: ${pendingTopics.length} tópicos para apenas ${availableSlots} sessões. Ative o Modo Reta Final para priorizar as disciplinas mais importantes.`
+                    });
+                }
+
+                // Ordena os tópicos por peso para priorizar disciplinas mais relevantes
+                const sortedTopics = [...pendingTopics].sort((a, b) => b.priority - a.priority);
+                topicsToSchedule = sortedTopics.slice(0, availableSlots);
+                excludedTopics = sortedTopics.slice(availableSlots);
+
+                const subjectsMap = new Map();
+                topicsToSchedule.forEach(t => {
+                    if (!subjectsMap.has(t.subject_name)) {
+                        subjectsMap.set(t.subject_name, { name: t.subject_name, weight: t.priority });
+                    }
+                });
+                prioritizedSubjects = Array.from(subjectsMap.values());
+            }
+
+            const weightedTopics = topicsToSchedule.flatMap(t => Array(t.priority).fill(t));
             for (let i = weightedTopics.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [weightedTopics[i], weightedTopics[j]] = [weightedTopics[j], weightedTopics[i]];
             }
             const uniquePendingTopicsInOrder = [...new Map(weightedTopics.map(item => [item.id, item])).values()];
-            
+
             let currentDateForNewTopics = new Date(today);
             let lastNewTopicDate = null;
 
@@ -1308,10 +1338,10 @@ app.post('/plans/:planId/generate',
                 if (!studyDay) break;
 
                 addSessionToAgenda(studyDay, { topicId: topic.id, subjectName: topic.subject_name, topicDescription: topic.description, sessionType: 'Novo Tópico' });
-                
+
                 lastNewTopicDate = new Date(studyDay);
                 currentDateForNewTopics = new Date(studyDay);
-                
+
                 [7, 14, 28].forEach(days => {
                     const targetReviewDate = new Date(studyDay);
                     targetReviewDate.setDate(targetReviewDate.getDate() + days);
@@ -1476,18 +1506,27 @@ app.post('/plans/:planId/generate',
             console.timeEnd(`[PERF] Generate schedule for plan ${planId}`);
             console.log(`[PERF] Total execution time: ${endTime - startTime}ms`);
             console.log(`[PERF] Sessions created: ${sessionsToCreate.length}`);
-            
+
             res.json({
                 message: `Seu mapa para a aprovação foi traçado com sucesso. 🗺️`,
                 performance: {
                     executionTime: `${endTime - startTime}ms`,
                     sessionsCreated: sessionsToCreate.length,
                     topicsProcessed: allTopics.length
+                },
+                retaFinal: {
+                    isActive: !!plan.reta_final_mode,
+                    excludedTopics: excludedTopics.map(t => ({ subject_name: t.subject_name, description: t.description })),
+                    prioritizedSubjects
                 }
             });
 
         } catch (error) {
-            await dbRun('ROLLBACK');
+            try {
+                await dbRun('ROLLBACK');
+            } catch (rollbackError) {
+                console.error("[CRONOGRAMA] Erro ao fazer rollback:", rollbackError);
+            }
             console.error("Erro ao gerar cronograma:", error);
             console.timeEnd(`[PERF] Generate schedule for plan ${planId}`);
             res.status(500).json({ error: "Ocorreu um erro interno no servidor ao gerar o cronograma." });

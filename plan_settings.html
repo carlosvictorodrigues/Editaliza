@@ -477,6 +477,15 @@
                                     <p class="text-sm font-medium text-green-800">Tudo pronto! Agora é só gerar seu cronograma personalizado.</p>
                                 </div>
                             </div>
+                            <div class="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-4">
+                                <div class="flex items-start space-x-3">
+                                    <input type="checkbox" id="retaFinalMode" class="w-5 h-5 text-red-600 bg-white border-red-300 rounded focus:ring-red-500 focus:ring-2">
+                                    <div>
+                                        <label for="retaFinalMode" class="text-lg font-bold text-red-700">🚨 Modo Reta Final</label>
+                                        <p class="text-sm text-red-600 mt-2">Prioriza matérias mais importantes quando o tempo é curto. Tópicos menos relevantes podem ficar de fora.</p>
+                                    </div>
+                                </div>
+                            </div>
                             <button type="submit" class="btn-secondary mb-2">Salvar Configurações</button>
                             <button id="generateButton" type="button" class="btn-primary group">
                                 <span class="flex items-center justify-center">
@@ -749,12 +758,38 @@
                 weekly_question_goal: document.getElementById('weekly_goal').value,
                 session_duration_minutes: document.getElementById('session_duration').value,
                 has_essay: document.getElementById('has_essay').checked,
+                reta_final_mode: document.getElementById('retaFinalMode').checked,
                 study_hours_per_day: {}
             };
             document.querySelectorAll('.hours-input').forEach(input => {
                 settings.study_hours_per_day[input.dataset.day] = parseInt(input.value, 10) || 0;
             });
             return settings;
+        }
+        function showRetaFinalReport(excludedTopics, prioritizedSubjects) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
+                    <h2 class="text-xl font-bold text-red-700 mb-4">Relatório Modo Reta Final</h2>
+                    <div class="mb-4">
+                        <h3 class="font-semibold text-green-800">Disciplinas Priorizadas</h3>
+                        <ul class="list-disc pl-5 text-sm text-green-700">
+                            ${prioritizedSubjects.map(s => `<li>${s.name} (peso ${s.weight})</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="mb-4">
+                        <h3 class="font-semibold text-red-800">Tópicos Excluídos</h3>
+                        <ul class="list-disc pl-5 text-sm text-red-700 max-h-40 overflow-y-auto">
+                            ${excludedTopics.map(t => `<li>${t.subject_name}: ${t.description}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="btn-primary px-4 py-2">Fechar</button>
+                    </div>
+                </div>`;
+            modal.querySelector('button').addEventListener('click', () => modal.remove());
+            document.body.appendChild(modal);
         }
         
         function handleEditSubject(id, name, priority) {
@@ -945,11 +980,14 @@
                 
                 try {
                     const settings = getSettingsFromForm();
-                    const result = await app.apiFetch(`/plans/${planId}/generate`, { 
+                    const result = await app.apiFetch(`/plans/${planId}/generate`, {
                         method: 'POST',
-                        body: JSON.stringify(settings) 
+                        body: JSON.stringify(settings)
                     });
-                    
+
+                    if (result.retaFinal && result.retaFinal.excludedTopics.length > 0) {
+                        showRetaFinalReport(result.retaFinal.excludedTopics, result.retaFinal.prioritizedSubjects || []);
+                    }
                     app.showToast(result.message, 'success');
                     app.invalidatePlanCache(planId);
                 } catch (error) {
