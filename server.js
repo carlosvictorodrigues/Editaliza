@@ -1162,6 +1162,7 @@ app.post('/plans/:planId/generate',
         const { daily_question_goal, weekly_question_goal, session_duration_minutes, study_hours_per_day, has_essay, reta_final_mode } = req.body;
         
         console.time(`[PERF] Generate schedule for plan ${planId}`);
+        const startTime = Date.now();
 
         try {
             await dbRun('BEGIN IMMEDIATE TRANSACTION');
@@ -1520,7 +1521,11 @@ app.post('/plans/:planId/generate',
             });
 
         } catch (error) {
-            await dbRun('ROLLBACK');
+            try {
+                await dbRun('ROLLBACK');
+            } catch (rollbackError) {
+                console.error("[CRONOGRAMA] Erro ao fazer rollback:", rollbackError);
+            }
             console.error("Erro ao gerar cronograma:", error);
             console.timeEnd(`[PERF] Generate schedule for plan ${planId}`);
             res.status(500).json({ error: "Ocorreu um erro interno no servidor ao gerar o cronograma." });
