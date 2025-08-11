@@ -632,6 +632,7 @@ async function openStudySession(sessionId) {
             return;
         }
 
+        let sessionRescheduled = false;
         const todayStr = new Date().toLocaleDateString('en-CA');
         if (session.session_date && session.session_date !== todayStr) {
             const confirmReschedule = confirm('Esta sessão estava marcada para outro dia. Deseja reagendá-la para hoje?');
@@ -699,7 +700,7 @@ async function openStudySession(sessionId) {
                     }
                 }
 
-                app.showToast('Sessão reagendada para hoje!', 'success');
+                sessionRescheduled = true;
             } catch (err) {
                 console.error('❌ Erro ao atualizar data da sessão:', err);
                 app.showToast('Erro ao reagendar sessão.', 'error');
@@ -708,9 +709,13 @@ async function openStudySession(sessionId) {
         }
 
         console.log('✅ Sessão carregada, abrindo checklist:', session.subject_name);
-        
+
         // CORREÇÃO 3: Sempre mostrar checklist para novas sessões ou quando usuário escolheu reiniciar
         StudyChecklist.show(session);
+
+        if (sessionRescheduled) {
+            app.showToast('Sessão reagendada para hoje!', 'success');
+        }
         
     } catch (error) {
         console.error('❌ Erro ao abrir sessão de estudo:', error);
