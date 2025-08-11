@@ -708,7 +708,25 @@ async function openStudySession(sessionId) {
             }
         }
 
-        console.log('✅ Sessão carregada, abrindo checklist:', session.subject_name);
+        console.log('✅ Sessão carregada:', session.subject_name);
+
+        // CORREÇÃO: Verificar se sessão já foi concluída
+        if (session.status === 'Concluído') {
+            console.log('⚠️ Sessão já foi concluída');
+            app.showToast('✅ Esta sessão já foi concluída!', 'info');
+            
+            // Atualizar visual do card para mostrar como concluída
+            if (window.TimerSystem) {
+                // Forçar estado de concluído no timer
+                if (!TimerSystem.timers[sessionId]) {
+                    TimerSystem.timers[sessionId] = { elapsed: 0 };
+                }
+                TimerSystem.timers[sessionId].isCompleted = true;
+                TimerSystem.updateCardVisuals(sessionId);
+            }
+            
+            return;
+        }
 
         // CORREÇÃO 3: Sempre mostrar checklist para novas sessões ou quando usuário escolheu reiniciar
         StudyChecklist.show(session);

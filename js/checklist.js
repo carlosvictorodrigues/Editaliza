@@ -365,9 +365,18 @@ const StudyChecklist = {
                 const timerData = TimerSystem.timers[sessionId];
                 studyTimeSeconds = Math.floor(timerData.elapsed / 1000);
                 
-                // Stop the timer
+                // Stop the timer and mark session as completed
                 TimerSystem.stop(sessionId);
-                console.log(`⏱️ Timer parado automaticamente. Tempo capturado: ${studyTimeSeconds} segundos`);
+                
+                // CORREÇÃO: Marcar timer como concluído para evitar botão "Continuar"
+                if (TimerSystem.timers[sessionId]) {
+                    TimerSystem.timers[sessionId].isCompleted = true;
+                }
+                
+                // Limpar do localStorage para evitar reaparecimento
+                TimerSystem.clearStoredTimer(sessionId);
+                
+                console.log(`⏱️ Timer parado e sessão marcada como concluída. Tempo capturado: ${studyTimeSeconds} segundos`);
             }
             
             // Get notes and questions from modal
@@ -414,6 +423,11 @@ const StudyChecklist = {
             if (window.updateDashboardStats) {
                 window.updateDashboardStats();
             }
+            
+            // CORREÇÃO: Atualizar visual do card imediatamente
+            setTimeout(() => {
+                TimerSystem.updateCardVisuals(sessionId);
+            }, 100);
             
             // Close modal
             this.close();

@@ -151,37 +151,68 @@ const TimerSystem = {
     // CORREÇÃO: Método melhorado para atualizar visuais dos cards com tempo preciso
     updateCardVisuals(sessionId) {
         const timerData = this.timers[sessionId];
-        if (!timerData) return;
         
         // Atualizar botão do card para mostrar timer ativo
         const studyButton = document.querySelector(`button[onclick="window.openStudySession(${sessionId})"]`);
         if (studyButton) {
-            const isRunning = timerData.isRunning;
-            const hasTime = timerData.elapsed > 1000; // Mais de 1 segundo
-            const timeStr = hasTime ? this.formatTime(timerData.elapsed) : '00:00:00';
-            
             // Remover todas as classes de estado anterior
             studyButton.classList.remove(
                 'bg-blue-600', 'hover:bg-blue-700', 
                 'bg-orange-500', 'hover:bg-orange-600', 
                 'bg-yellow-500', 'hover:bg-yellow-600',
+                'bg-green-600', 'hover:bg-green-700',
                 'animate-pulse'
             );
+            
+            // CORREÇÃO: Verificar se sessão foi concluída
+            if (timerData && timerData.isCompleted) {
+                // Sessão concluída - verde com ícone de check
+                studyButton.classList.add('bg-green-600', 'hover:bg-green-700');
+                studyButton.innerHTML = `✅ Concluído`;
+                studyButton.disabled = true;
+                studyButton.style.cursor = 'not-allowed';
+                studyButton.style.opacity = '0.7';
+                console.log(`✅ Card atualizado - Sessão concluída: ${sessionId}`);
+                return;
+            }
+            
+            if (!timerData) {
+                // Sem timer - azul padrão  
+                studyButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                studyButton.innerHTML = `🚀 Iniciar Estudo`;
+                studyButton.disabled = false;
+                studyButton.style.cursor = 'pointer';
+                studyButton.style.opacity = '1';
+                return;
+            }
+            
+            const isRunning = timerData.isRunning;
+            const hasTime = timerData.elapsed > 1000; // Mais de 1 segundo
+            const timeStr = hasTime ? this.formatTime(timerData.elapsed) : '00:00:00';
             
             if (isRunning) {
                 // Timer rodando - laranja pulsante com tempo atualizado
                 studyButton.classList.add('bg-orange-500', 'hover:bg-orange-600', 'animate-pulse');
                 studyButton.innerHTML = `⏱️ Estudando (${timeStr.substring(0, 5)})`;
+                studyButton.disabled = false;
+                studyButton.style.cursor = 'pointer';
+                studyButton.style.opacity = '1';
                 console.log(`🔄 Card atualizado - Timer rodando: ${timeStr}`);
             } else if (hasTime) {
                 // Timer pausado com tempo - amarelo com tempo exato
                 studyButton.classList.add('bg-yellow-500', 'hover:bg-yellow-600');
                 studyButton.innerHTML = `⏸️ Continuar (${timeStr.substring(0, 5)})`;
+                studyButton.disabled = false;
+                studyButton.style.cursor = 'pointer';
+                studyButton.style.opacity = '1';
                 console.log(`🔄 Card atualizado - Timer pausado: ${timeStr}`);
             } else {
                 // Sem timer - azul padrão  
                 studyButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
                 studyButton.innerHTML = `🚀 Iniciar Estudo`;
+                studyButton.disabled = false;
+                studyButton.style.cursor = 'pointer';
+                studyButton.style.opacity = '1';
             }
         }
         
@@ -499,16 +530,27 @@ const TimerSystem = {
 
     clearStoredTimer(sessionId) {
         try {
+            // Limpar do localStorage
             const saved = localStorage.getItem('editaliza_timers');
-            if (!saved) return;
-
-            const timersData = JSON.parse(saved);
-            delete timersData[sessionId];
-            localStorage.setItem('editaliza_timers', JSON.stringify(timersData));
+            if (saved) {
+                const timersData = JSON.parse(saved);
+                delete timersData[sessionId];
+                localStorage.setItem('editaliza_timers', JSON.stringify(timersData));
+            }
             
-            console.log(`🗑️ Timer removido do localStorage: ${sessionId}`);
+            // CORREÇÃO: Remover completamente da memória local também
+            if (this.timers[sessionId]) {
+                // Parar interval se estiver rodando
+                if (this.timers[sessionId].interval) {
+                    clearInterval(this.timers[sessionId].interval);
+                }
+                // Remover da memória
+                delete this.timers[sessionId];
+            }
+            
+            console.log(`🗑️ Timer completamente removido: ${sessionId}`);
         } catch (error) {
-            console.error('❌ Erro ao limpar timer do localStorage:', error);
+            console.error('❌ Erro ao limpar timer:', error);
         }
     },
 

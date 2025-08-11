@@ -1137,7 +1137,7 @@
                 console.log('💾 Enviando dados do perfil:', updateData);
                 console.log('📤 Dados sendo enviados para o servidor:', JSON.stringify(updateData, null, 2));
                 
-                const response = await app.apiFetch('/profile', {
+                const response = await app.apiFetch('/users/profile', {
                     method: 'PATCH',
                     body: JSON.stringify(updateData)
                 });

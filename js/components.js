@@ -6,6 +6,17 @@
 const components = {
     // CORREÇÃO: Gerar botão inteligente baseado no estado preciso do timer
     generateSmartButton(sessionId, defaultText = 'Iniciar Estudo', sessionData = null) {
+        // CORREÇÃO: Verificar primeiro se sessão já foi concluída
+        if (sessionData && sessionData.status === 'Concluído') {
+            return {
+                text: 'Concluído',
+                classes: 'bg-green-600 hover:bg-green-700 cursor-not-allowed opacity-70',
+                icon: '✅',
+                action: 'completed',
+                disabled: true
+            };
+        }
+        
         // Verificar diferentes estados do timer
         if (!window.TimerSystem) {
             return {
@@ -17,6 +28,17 @@ const components = {
         
         const hasActiveTimer = TimerSystem.hasActiveTimer(sessionId);
         const timer = TimerSystem.timers[sessionId];
+        
+        // CORREÇÃO: Verificar se timer foi marcado como concluído
+        if (timer && timer.isCompleted) {
+            return {
+                text: 'Concluído',
+                classes: 'bg-green-600 hover:bg-green-700 cursor-not-allowed opacity-70',
+                icon: '✅',
+                action: 'completed',
+                disabled: true
+            };
+        }
         
         if (hasActiveTimer) {
             // Timer ativo - rodando
@@ -596,14 +618,14 @@ const components = {
                             </button>
                         </div>
                     ` : `
-                        <button onclick='window.openStudySession(${session.id})' data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Estudo').classes} text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 mb-3">
+                        <button ${this.generateSmartButton(session.id, 'Iniciar Estudo', session).disabled ? 'disabled' : `onclick='window.openStudySession(${session.id})'`} data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Estudo', session).classes} text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 mb-3">
                             <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
                                 </svg>
                             </div>
-                            <span class="text-lg button-text">${this.generateSmartButton(session.id, 'Iniciar Estudo').text}</span>
-                            <span class="text-xl group-hover/btn:animate-bounce button-icon">${this.generateSmartButton(session.id, 'Iniciar Estudo').icon}</span>
+                            <span class="text-lg button-text">${this.generateSmartButton(session.id, 'Iniciar Estudo', session).text}</span>
+                            <span class="text-xl group-hover/btn:animate-bounce button-icon">${this.generateSmartButton(session.id, 'Iniciar Estudo', session).icon}</span>
                         </button>
                         <!-- Botões secundários -->
                         <div class="flex space-x-2">
@@ -839,14 +861,14 @@ const components = {
                             </button>
                         </div>
                     ` : `
-                        <button onclick='window.openStudySession(${session.id})' data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Simulado').classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Simulado').classes : `bg-gradient-to-r ${style.gradient}`} hover:shadow-2xl text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4 mb-3">
+                        <button ${this.generateSmartButton(session.id, 'Iniciar Simulado', session).disabled ? 'disabled' : `onclick='window.openStudySession(${session.id})'`} data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Simulado', session).classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Simulado', session).classes : `bg-gradient-to-r ${style.gradient}`} hover:shadow-2xl text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4 mb-3">
                             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
                                 </svg>
                             </div>
-                            <span class="text-xl button-text">${this.generateSmartButton(session.id, 'Iniciar Simulado').text}</span>
-                            <span class="text-2xl group-hover/btn:animate-bounce button-icon">${this.generateSmartButton(session.id, 'Iniciar Simulado').classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Simulado').icon : style.icon}</span>
+                            <span class="text-xl button-text">${this.generateSmartButton(session.id, 'Iniciar Simulado', session).text}</span>
+                            <span class="text-2xl group-hover/btn:animate-bounce button-icon">${this.generateSmartButton(session.id, 'Iniciar Simulado', session).classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Simulado', session).icon : style.icon}</span>
                         </button>
                         <!-- Botões secundários -->
                         <div class="flex space-x-3">
@@ -942,14 +964,14 @@ const components = {
                             </button>
                         </div>
                     ` : `
-                         <button onclick='window.openStudySession(${session.id})' data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Redação').classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Redação').classes : 'bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700'} hover:shadow-2xl text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4 mb-3">
+                         <button ${this.generateSmartButton(session.id, 'Iniciar Redação', session).disabled ? 'disabled' : `onclick='window.openStudySession(${session.id})'`} data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Redação', session).classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Redação', session).classes : 'bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700'} hover:shadow-2xl text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4 mb-3">
                             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
                                 </svg>
                             </div>
-                            <span class="text-xl button-text">${this.generateSmartButton(session.id, 'Iniciar Redação').text}</span>
-                            <span class="text-2xl group-hover/btn:animate-bounce button-icon">${this.generateSmartButton(session.id, 'Iniciar Redação').classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Redação').icon : '✍️'}</span>
+                            <span class="text-xl button-text">${this.generateSmartButton(session.id, 'Iniciar Redação', session).text}</span>
+                            <span class="text-2xl group-hover/btn:animate-bounce button-icon">${this.generateSmartButton(session.id, 'Iniciar Redação', session).classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Redação', session).icon : '✍️'}</span>
                          </button>
                          <!-- Botões secundários -->
                         <div class="flex space-x-3">
