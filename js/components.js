@@ -575,7 +575,7 @@ const components = {
                 <!-- Action Section -->
                 <div class="mt-auto">
                     ${isCompleted ? `
-                        <button onclick='openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] mb-3">
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] mb-3">
                             <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover/btn:bg-green-200 transition-colors">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
@@ -596,7 +596,7 @@ const components = {
                             </button>
                         </div>
                     ` : `
-                        <button onclick='openStudySession(${session.id})' data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Estudo').classes} text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 mb-3">
+                        <button onclick='window.openStudySession(${session.id})' data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Estudo').classes} text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 mb-3">
                             <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
@@ -818,7 +818,7 @@ const components = {
                 <!-- Action Section -->
                 <div class="mt-auto pt-6 border-t border-gray-200">
                      ${isCompleted ? `
-                        <button onclick='openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg mb-3">
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg mb-3">
                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover/btn:bg-green-200 transition-colors">
                                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
@@ -839,7 +839,7 @@ const components = {
                             </button>
                         </div>
                     ` : `
-                        <button onclick='openStudySession(${session.id})' data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Simulado').classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Simulado').classes : `bg-gradient-to-r ${style.gradient}`} hover:shadow-2xl text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4 mb-3">
+                        <button onclick='window.openStudySession(${session.id})' data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Simulado').classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Simulado').classes : `bg-gradient-to-r ${style.gradient}`} hover:shadow-2xl text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4 mb-3">
                             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
@@ -921,7 +921,7 @@ const components = {
                 <!-- Action Section -->
                 <div class="mt-auto pt-6 border-t ${isCompleted ? 'border-green-200' : 'border-rose-200'}">
                     ${isCompleted ? `
-                        <button onclick='openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg mb-3">
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg mb-3">
                             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover/btn:bg-green-200 transition-colors">
                                 <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
@@ -942,7 +942,7 @@ const components = {
                             </button>
                         </div>
                     ` : `
-                         <button onclick='openStudySession(${session.id})' data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Redação').classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Redação').classes : 'bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700'} hover:shadow-2xl text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4 mb-3">
+                         <button onclick='window.openStudySession(${session.id})' data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Redação').classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Redação').classes : 'bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700'} hover:shadow-2xl text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4 mb-3">
                             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
@@ -1058,7 +1058,7 @@ const components = {
                 <!-- Ação melhorada -->
                 <div class="mt-auto pt-6 border-t-2 ${isCompleted ? 'border-green-200' : 'border-yellow-200'}">
                     ${isCompleted ? `
-                        <button onclick='openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg mb-3">
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg mb-3">
                             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover/btn:bg-green-200 transition-colors">
                                 <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                             </div>
@@ -1226,7 +1226,7 @@ const components = {
     
     // CORREÇÃO: Função para atualizar um botão específico com estado preciso
     updateTimerButton(sessionId) {
-        const buttons = document.querySelectorAll(`button[onclick*="openStudySession(${sessionId})"], .timer-aware-button[onclick*="openStudySession(${sessionId})"]`);
+        const buttons = document.querySelectorAll(`button[onclick*="window.openStudySession(${sessionId})"], .timer-aware-button[onclick*="window.openStudySession(${sessionId})"]`);
         if (buttons.length === 0) return;
         
         buttons.forEach(button => {

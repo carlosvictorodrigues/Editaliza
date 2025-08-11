@@ -49,13 +49,15 @@ describe('TimerSystem - Cronômetro Persistente', () => {
         jest.spyOn(console, 'error').mockImplementation(() => {});
         jest.spyOn(console, 'warn').mockImplementation(() => {});
 
+        global.window.openStudySession = jest.fn();
+
         // Mock do DOM
         document.body.innerHTML = `
             <div id="studySessionModal" class="hidden opacity-0">
                 <div id="studySessionModalContainer" class="scale-95"></div>
             </div>
-            <button onclick="openStudySession(1)">Iniciar Estudo</button>
-            <button onclick="openStudySession(2)">Iniciar Estudo</button>
+            <button onclick="window.openStudySession(1)">Iniciar Estudo</button>
+            <button onclick="window.openStudySession(2)">Iniciar Estudo</button>
         `;
 
         // Reset do TimerSystem
@@ -213,7 +215,7 @@ describe('TimerSystem - Cronômetro Persistente', () => {
             
             TimerSystem.updateCardVisuals(sessionId);
             
-            const button = document.querySelector(`button[onclick="openStudySession(${sessionId})"]`);
+            const button = document.querySelector(`button[onclick="window.openStudySession(${sessionId})"]`);
             expect(button.innerHTML).toContain('Continuar');
             expect(button.innerHTML).toContain('01:00');
         });
@@ -224,14 +226,14 @@ describe('TimerSystem - Cronômetro Persistente', () => {
             TimerSystem.start(sessionId);
             TimerSystem.updateCardVisuals(sessionId);
             
-            const button = document.querySelector(`button[onclick="openStudySession(${sessionId})"]`);
+            const button = document.querySelector(`button[onclick="window.openStudySession(${sessionId})"]`);
             expect(button.innerHTML).toContain('Estudando');
             expect(button.classList.contains('animate-pulse')).toBe(true);
         });
 
         test('deve aplicar classes CSS corretas baseado no estado do timer', () => {
             const sessionId = 1;
-            const button = document.querySelector(`button[onclick="openStudySession(${sessionId})"]`);
+            const button = document.querySelector(`button[onclick="window.openStudySession(${sessionId})"]`);
             
             // Timer inativo
             TimerSystem.updateCardVisuals(sessionId);

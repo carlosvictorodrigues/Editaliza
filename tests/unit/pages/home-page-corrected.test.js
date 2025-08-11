@@ -351,12 +351,9 @@ describe('Tela Inicial - Testes Funcionais', () => {
     });
 
     describe('Funcionalidades JavaScript Esperadas', () => {
-        test('Deve ter função openStudySession definida', () => {
-            const scripts = document.querySelectorAll('script');
-            const hasFunction = Array.from(scripts).some(script =>
-                script.textContent && script.textContent.includes('openStudySession')
-            );
-            expect(hasFunction).toBe(true);
+        test('Deve ter função window.openStudySession definida', () => {
+            expect(window.openStudySession).toBeDefined();
+            expect(typeof window.openStudySession).toBe('function');
         });
 
         test('Deve ter funções de carregamento de dados', () => {

@@ -131,7 +131,7 @@ describe('Validação Básica da Tela Inicial', () => {
 
     describe('✅ FUNCIONALIDADES JAVASCRIPT', () => {
         test('Deve ter função de abertura de sessão de estudo', () => {
-            expect(htmlContent).toContain('openStudySession');
+            expect(htmlContent).toContain('window.openStudySession');
         });
 
         test('Deve ter funções de carregamento de dados', () => {

@@ -400,9 +400,10 @@
     </main>
 
     <script>
-            let todaySessionsData = [];
-            let allSessionsData = []; // Store all sessions for flexible access
-            
+            // Expose session lists globally
+            window.todaySessionsData = [];
+            window.allSessionsData = []; // Store all sessions for flexible access
+
             // Importar módulo de gamificação se disponível
             if (typeof window.Gamification === 'undefined') {
                 // Tentar carregar o módulo de gamificação
@@ -572,12 +573,12 @@
                 try {
                     const today = new Date().toISOString().split('T')[0];
                     const scheduleData = await app.apiFetch(`/schedules/${planId}/range?startDate=${today}&endDate=${today}`);
-                    todaySessionsData = scheduleData || [];
+                    window.todaySessionsData = scheduleData || [];
                     
                     // Also load all sessions for flexible access (removing date restrictions)
                     await loadAllSessions(planId);
 
-                    if (todaySessionsData.length === 0) {
+                    if (window.todaySessionsData.length === 0) {
                         container.innerHTML = `
                             <div class="text-center py-12">
                                 <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -597,7 +598,7 @@
                             return;
                     }
 
-                    const sessionsHtml = todaySessionsData.map(session => renderIndividualCard(session)).join('');
+                    const sessionsHtml = window.todaySessionsData.map(session => renderIndividualCard(session)).join('');
                     container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">${sessionsHtml}</div>`;
 
                     // Update today's progress card
@@ -637,19 +638,19 @@
                     const endDate = futureDate.toISOString().split('T')[0];
                     
                     const allScheduleData = await app.apiFetch(`/schedules/${planId}/range?startDate=${startDate}&endDate=${endDate}`);
-                    allSessionsData = allScheduleData || [];
-                    
-                    console.log(`📅 Carregadas ${allSessionsData.length} sessões (${startDate} a ${endDate})`);
+                    window.allSessionsData = allScheduleData || [];
+
+                    console.log(`📅 Carregadas ${window.allSessionsData.length} sessões (${startDate} a ${endDate})`);
                 } catch (error) {
                     console.error('Erro ao carregar todas as sessões:', error);
-                    allSessionsData = todaySessionsData; // Fallback to today's sessions
+                    window.allSessionsData = window.todaySessionsData; // Fallback to today's sessions
                 }
             }
 
             function updateTodayProgress() {
                 try {
-                    const total = todaySessionsData.length;
-                    const completed = todaySessionsData.filter(session => {
+                    const total = window.todaySessionsData.length;
+                    const completed = window.todaySessionsData.filter(session => {
                         // Check if session has completed time or is marked as completed
                         return session.completed_at || 
                                session.status === 'completed' || 
@@ -719,7 +720,7 @@
                     
                     if (totalDaysElement) {
                         // Calculate basic total days from today's sessions
-                        const hasCompletedSessions = todaySessionsData.some(session => 
+                        const hasCompletedSessions = window.todaySessionsData.some(session =>
                             session.completed_at || session.status === 'completed' || (session.study_time && session.study_time > 0)
                         );
                         // This is a simplified calculation - in production this should come from the API
@@ -762,23 +763,6 @@
                 }
             }
 
-            function openStudySession(sessionId) {
-                // First try to find in all sessions (removes date restrictions)
-                let session = allSessionsData.find(s => s.id == sessionId);
-                
-                // If not found, try today's sessions as fallback
-                if (!session) {
-                    session = todaySessionsData.find(s => s.id == sessionId);
-                }
-                
-                if (session) {
-                    console.log(`🎯 Abrindo sessão ${sessionId} (Data: ${session.session_date || 'N/A'})`);
-                    StudyChecklist.show(session);
-                } else {
-                    app.showToast('Erro: Sessão não encontrada.', 'error');
-                    console.error(`❌ Sessão ${sessionId} não encontrada em todaySessionsData nem allSessionsData`);
-                }
-            }
 
             // Função para verificar tarefas atrasadas
             async function checkOverdueTasks() {
@@ -1008,7 +992,6 @@
             });
 
             // Make functions globally accessible
-            window.openStudySession = openStudySession;
             window.checkOverdueTasks = checkOverdueTasks;
             window.reinforceSession = reinforceSession;
             window.openPostponeModal = openPostponeModal;

@@ -114,7 +114,7 @@ describe('Timer E2E - Simulação de Interações do Usuário', () => {
             updateDisplay: jest.fn(),
             updateCardVisuals: function(sessionId) {
                 // Simular atualização visual dos cards
-                const button = document.querySelector(`button[onclick="openStudySession(${sessionId})"]`);
+                const button = document.querySelector(`button[onclick="window.openStudySession(${sessionId})"]`);
                 if (button && this.timers[sessionId]) {
                     if (this.timers[sessionId].isRunning) {
                         button.innerHTML = '⏱️ Estudando... ⏸️ Pausar';
@@ -190,14 +190,14 @@ describe('Timer E2E - Simulação de Interações do Usuário', () => {
                 <!-- Cards de sessões de estudo -->
                 <div class="session-card" data-session="1">
                     <h3>Direito Constitucional</h3>
-                    <button onclick="openStudySession(1)" class="bg-blue-600 hover:bg-blue-700">
+                    <button onclick="window.openStudySession(1)" class="bg-blue-600 hover:bg-blue-700">
                         🚀 Iniciar Estudo
                     </button>
                 </div>
                 
                 <div class="session-card" data-session="2">
                     <h3>Direito Administrativo</h3>
-                    <button onclick="openStudySession(2)" class="bg-blue-600 hover:bg-blue-700">
+                    <button onclick="window.openStudySession(2)" class="bg-blue-600 hover:bg-blue-700">
                         🚀 Iniciar Estudo
                     </button>
                 </div>
@@ -212,7 +212,8 @@ describe('Timer E2E - Simulação de Interações do Usuário', () => {
         `;
 
         // Mock das funções globais necessárias
-        global.openStudySession = jest.fn();
+        global.window.openStudySession = jest.fn();
+        global.openStudySession = global.window.openStudySession;
         global.app = {
             apiFetch: jest.fn(() => Promise.resolve()),
             showToast: jest.fn()
@@ -268,7 +269,7 @@ describe('Timer E2E - Simulação de Interações do Usuário', () => {
                 
                 // 4. Verificar se botão do card mostra timer ativo
                 TimerSystem.updateCardVisuals(sessionId);
-                const button = document.querySelector(`button[onclick="openStudySession(${sessionId})"]`);
+                const button = document.querySelector(`button[onclick="window.openStudySession(${sessionId})"]`);
                 expect(button.innerHTML).toContain('Estudando');
                 expect(button.classList.contains('animate-pulse')).toBe(true);
                 
@@ -290,7 +291,7 @@ describe('Timer E2E - Simulação de Interações do Usuário', () => {
                 
                 // 3. Atualizar visual do card
                 TimerSystem.updateCardVisuals(sessionId);
-                const button = document.querySelector(`button[onclick="openStudySession(${sessionId})"]`);
+                const button = document.querySelector(`button[onclick="window.openStudySession(${sessionId})"]`);
                 
                 expect(button.innerHTML).toContain('Continuar');
                 expect(button.classList.contains('bg-yellow-500')).toBe(true);
@@ -398,8 +399,8 @@ describe('Timer E2E - Simulação de Interações do Usuário', () => {
                     TimerSystem.updateCardVisuals(1);
                     TimerSystem.updateCardVisuals(2);
                     
-                    const button1 = document.querySelector(`button[onclick="openStudySession(1)"]`);
-                    const button2 = document.querySelector(`button[onclick="openStudySession(2)"]`);
+                    const button1 = document.querySelector(`button[onclick="window.openStudySession(1)"]`);
+                    const button2 = document.querySelector(`button[onclick="window.openStudySession(2)"]`);
                     
                     // 5. Verificar estados dos botões
                     expect(button1.innerHTML).toContain('Continuar');

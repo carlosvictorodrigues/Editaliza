@@ -38,12 +38,14 @@ describe('TimerSystem - Testes Básicos', () => {
             writable: true
         });
 
+        global.window.openStudySession = jest.fn();
+
         // Mock DOM básico
         document.body.innerHTML = `
             <div id="studySessionModal" class="hidden opacity-0">
                 <div id="studySessionModalContainer" class="scale-95"></div>
             </div>
-            <button onclick="openStudySession(1)">Iniciar Estudo</button>
+            <button onclick="window.openStudySession(1)">Iniciar Estudo</button>
         `;
 
         // Limpar timers entre testes

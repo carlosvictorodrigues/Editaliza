@@ -632,8 +632,14 @@ async function openStudySession(sessionId) {
             return;
         }
 
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = new Date().toLocaleDateString('en-CA');
         if (session.session_date && session.session_date !== todayStr) {
+            const confirmReschedule = confirm('Esta sessão estava marcada para outro dia. Deseja reagendá-la para hoje?');
+            if (!confirmReschedule) {
+                return;
+            }
+
+            const oldDate = session.session_date;
             try {
                 await app.apiFetch(`/schedules/sessions/${sessionId}`, {
                     method: 'PATCH',
@@ -650,12 +656,14 @@ async function openStudySession(sessionId) {
                 }
 
                 if (window.fullSchedule) {
-                    for (const date in window.fullSchedule) {
-                        const sessions = window.fullSchedule[date];
-                        const index = sessions.findIndex(s => s.id == sessionId);
+                    const oldSessions = window.fullSchedule[oldDate];
+                    if (oldSessions) {
+                        const index = oldSessions.findIndex(s => s.id == sessionId);
                         if (index !== -1) {
-                            sessions.splice(index, 1);
-                            break;
+                            oldSessions.splice(index, 1);
+                        }
+                        if (oldSessions.length === 0) {
+                            delete window.fullSchedule[oldDate];
                         }
                     }
 
@@ -672,8 +680,30 @@ async function openStudySession(sessionId) {
                         }
                     }
                 }
+
+                if (window.todaySessionsData) {
+                    const idx = window.todaySessionsData.findIndex(s => s.id == sessionId);
+                    if (idx === -1) {
+                        window.todaySessionsData.push(session);
+                    } else {
+                        window.todaySessionsData[idx] = session;
+                    }
+                }
+
+                if (window.allSessionsData) {
+                    const idx = window.allSessionsData.findIndex(s => s.id == sessionId);
+                    if (idx !== -1) {
+                        window.allSessionsData[idx].session_date = todayStr;
+                    } else {
+                        window.allSessionsData.push(session);
+                    }
+                }
+
+                app.showToast('Sessão reagendada para hoje!', 'success');
             } catch (err) {
                 console.error('❌ Erro ao atualizar data da sessão:', err);
+                app.showToast('Erro ao reagendar sessão.', 'error');
+                return;
             }
         }
 
@@ -709,9 +739,9 @@ async function fetchSessionData(sessionId) {
         }
 
         // Procurar no cronograma completo se disponível
-        if (typeof fullSchedule !== 'undefined') {
-            for (const dateStr in fullSchedule) {
-                const sessions = fullSchedule[dateStr];
+        if (window.fullSchedule) {
+            for (const dateStr in window.fullSchedule) {
+                const sessions = window.fullSchedule[dateStr];
                 const fullSession = sessions.find(s => s.id == sessionId);
                 if (fullSession) {
                     console.log('📚 Sessão encontrada no fullSchedule');

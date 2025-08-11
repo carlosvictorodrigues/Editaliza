@@ -48,7 +48,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="border rounded-lg p-4">
                     <h3 class="font-semibold mb-2">Direito Constitucional</h3>
-                    <button onclick="openStudySession(1)" 
+                    <button onclick="window.openStudySession(1)"
                             class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
                         🚀 Iniciar Estudo
                     </button>
@@ -57,7 +57,7 @@
                 
                 <div class="border rounded-lg p-4">
                     <h3 class="font-semibold mb-2">Direito Administrativo</h3>
-                    <button onclick="openStudySession(2)" 
+                    <button onclick="window.openStudySession(2)"
                             class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
                         🚀 Iniciar Estudo
                     </button>
@@ -331,7 +331,7 @@
         };
 
         // Função para abrir sessão de estudo
-        function openStudySession(sessionId) {
+        window.openStudySession = function(sessionId) {
             const session = { id: sessionId, title: `Sessão ${sessionId}` };
             StudyChecklist.show(session);
         }
@@ -400,7 +400,7 @@
             `;
             
             setTimeout(() => {
-                openStudySession(1);
+                window.openStudySession(1);
                 resultEl.innerHTML += `<p>2. Modal aberto. Clique em "Iniciar" no cronômetro, depois feche o modal.</p>`;
                 
                 setTimeout(() => {
@@ -443,7 +443,7 @@
                 resultEl.innerHTML += `<p>2. Modal fechado. Reabrindo em 2 segundos...</p>`;
                 
                 setTimeout(() => {
-                    openStudySession(1);
+                    window.openStudySession(1);
                     resultEl.innerHTML += `<p>3. Modal reaberto. Verifique se o cronômetro mostra o tempo correto.</p>`;
                 }, 2000);
             }, 2000);

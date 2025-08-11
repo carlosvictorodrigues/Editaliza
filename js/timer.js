@@ -154,7 +154,7 @@ const TimerSystem = {
         if (!timerData) return;
         
         // Atualizar botão do card para mostrar timer ativo
-        const studyButton = document.querySelector(`button[onclick="openStudySession(${sessionId})"]`);
+        const studyButton = document.querySelector(`button[onclick="window.openStudySession(${sessionId})"]`);
         if (studyButton) {
             const isRunning = timerData.isRunning;
             const hasTime = timerData.elapsed > 1000; // Mais de 1 segundo

@@ -407,7 +407,7 @@ describe('Funcionalidades da Tela Inicial - Timer e Checklist', () => {
             
             expect(cardHtml).toContain(mockSession.subject_name);
             expect(cardHtml).toContain(mockSession.topic_description);
-            expect(cardHtml).toContain(`openStudySession(${mockSession.id})`);
+            expect(cardHtml).toContain(`window.openStudySession(${mockSession.id})`);
             expect(cardHtml).toContain('study-card');
         });
 
@@ -439,7 +439,7 @@ describe('Funcionalidades da Tela Inicial - Timer e Checklist', () => {
             TimerSystem.start(sessionId);
             TimerSystem.updateCardVisuals(sessionId);
             
-            const button = document.querySelector(`button[onclick="openStudySession(${sessionId})"]`);
+            const button = document.querySelector(`button[onclick="window.openStudySession(${sessionId})"]`);
             expect(button).toBeTruthy();
             expect(button.innerHTML).toContain('Estudando');
         });

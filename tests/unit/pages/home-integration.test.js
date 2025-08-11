@@ -234,7 +234,7 @@ describe('Validação de Arquivo HTML', () => {
         expect(htmlContent).toContain('loadUserProfile');
         expect(htmlContent).toContain('loadMetrics');
         expect(htmlContent).toContain('loadTodaySchedule');
-        expect(htmlContent).toContain('openStudySession');
+        expect(htmlContent).toContain('window.openStudySession');
     });
 
     test('Deve ter classes CSS customizadas', () => {

@@ -62,7 +62,7 @@ export const SmartButtons = {
     
     // CORREÇÃO: Função para atualizar um botão específico com estado preciso
     updateTimerButton(sessionId) {
-        const buttons = document.querySelectorAll(`button[onclick*="openStudySession(${sessionId})"], .timer-aware-button[onclick*="openStudySession(${sessionId})"]`);
+        const buttons = document.querySelectorAll(`button[onclick*="window.openStudySession(${sessionId})"], .timer-aware-button[onclick*="window.openStudySession(${sessionId})"]`);
         if (buttons.length === 0) return;
         
         buttons.forEach(button => {
