@@ -148,18 +148,18 @@ export const Gamification = {
         const progressPercent = data.topicsToNextLevel > 0 ? 
             Math.max(0, Math.min(100, ((data.completedTopicsCount || 0) / data.topicsToNextLevel) * 100)) : 100;
 
-        const levelIcons = {
-            'Aspirante a Servidor(a)': '🌱',
-            'Concurseiro Iniciante': '📚',
-            'Estudante Dedicado': '💪',
-            'Candidato Persistente': '🎯',
-            'Futuro Aprovado': '⭐',
-            'Servidor de Elite': '🏆',
-            'default': '🎖️'
-        };
+        if (!data.nextLevel) return '';
 
-        const currentLevelIcon = levelIcons[data.levelName] || levelIcons.default;
-        const nextLevelIcon = levelIcons[data.nextLevel.name] || levelIcons.default;
+        const currentIcon = data.levelName.split(' ').pop();
+        const currentTitle = data.levelName.replace(currentIcon, '').trim();
+
+        const nextIcon = data.nextLevel.split(' ').pop();
+        const nextTitle = data.nextLevel.replace(nextIcon, '').trim();
+
+        const totalNeeded = (data.completedTopicsCount || 0) + (data.topicsToNextLevel || 0);
+        const progressPercent = totalNeeded > 0
+            ? Math.max(0, Math.min(100, (data.completedTopicsCount / totalNeeded) * 100))
+            : 0;
 
         return `
             <div class="mt-8">
@@ -169,9 +169,9 @@ export const Gamification = {
                 <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-inner">
                     <div class="flex items-center justify-between mb-4">
                         <div class="text-center">
-                            <div class="text-3xl mb-2">${currentLevelIcon}</div>
+                            <div class="text-3xl mb-2">${currentIcon}</div>
                             <p class="text-sm font-semibold text-gray-700">Nível Atual</p>
-                            <p class="text-xs text-gray-600">${data.levelName}</p>
+                            <p class="text-xs text-gray-600">${currentTitle}</p>
                         </div>
                         <div class="flex-1 mx-6">
                             <div class="relative">
@@ -184,18 +184,15 @@ export const Gamification = {
                             </div>
                         </div>
                         <div class="text-center">
-                            <div class="text-3xl mb-2">${nextLevelIcon}</div>
+                            <div class="text-3xl mb-2">${nextIcon}</div>
                             <p class="text-sm font-semibold text-gray-700">Próximo Nível</p>
-                            <p class="text-xs text-gray-600">${data.nextLevel.name}</p>
+                            <p class="text-xs text-gray-600">${nextTitle}</p>
                         </div>
                     </div>
                     <div class="text-center">
                         <p class="text-sm text-gray-600">
-                            ${data.topicsToNextLevel - (data.completedTopicsCount || 0)} tópicos restantes para o próximo nível
+                            ${data.topicsToNextLevel} tópicos restantes para o próximo nível
                         </p>
-                        ${data.nextLevel.description ? `
-                            <p class="text-xs text-gray-500 mt-1 italic">${data.nextLevel.description}</p>
-                        ` : ''}
                     </div>
                 </div>
             </div>
