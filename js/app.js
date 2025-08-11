@@ -623,27 +623,60 @@ async function openStudySession(sessionId) {
             }
         }
         
-        // CORREÇÃO 2: Buscar dados da sessão (varrendo todo o cronograma antes do servidor)
-        let session = await fetchSessionData(sessionId);
-
-        // Se não encontrado, procurar em todas as datas do cronograma completo
-        if (!session && typeof fullSchedule !== 'undefined') {
-            for (const dateStr in fullSchedule) {
-                const sessions = fullSchedule[dateStr];
-                session = sessions.find(s => s.id == sessionId);
-                if (session) {
-                    console.log('📚 Sessão encontrada no cronograma completo');
-                    break;
-                }
-            }
-        }
+        // CORREÇÃO 2: Buscar dados da sessão do servidor (não do localStorage)
+        const session = await fetchSessionData(sessionId);
 
         if (!session) {
             console.error('❌ Sessão não encontrada:', sessionId);
             app.showToast('Erro: Sessão não encontrada. Recarregue a página.', 'error');
             return;
         }
-        
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (session.session_date && session.session_date !== todayStr) {
+            try {
+                await app.apiFetch(`/schedules/sessions/${sessionId}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ session_date: todayStr })
+                });
+
+                session.session_date = todayStr;
+
+                if (window.sessionsData) {
+                    const idx = window.sessionsData.findIndex(s => s.id == sessionId);
+                    if (idx !== -1) {
+                        window.sessionsData[idx].session_date = todayStr;
+                    }
+                }
+
+                if (window.fullSchedule) {
+                    for (const date in window.fullSchedule) {
+                        const sessions = window.fullSchedule[date];
+                        const index = sessions.findIndex(s => s.id == sessionId);
+                        if (index !== -1) {
+                            sessions.splice(index, 1);
+                            break;
+                        }
+                    }
+
+                    if (!window.fullSchedule[todayStr]) {
+                        window.fullSchedule[todayStr] = [];
+                    }
+                    window.fullSchedule[todayStr].push(session);
+
+                    if (typeof window.renderScheduleDOM === 'function') {
+                        try {
+                            window.renderScheduleDOM(window.activeFilter || 'week');
+                        } catch (err) {
+                            console.warn('Erro ao revalidar cronograma:', err);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('❌ Erro ao atualizar data da sessão:', err);
+            }
+        }
+
         console.log('✅ Sessão carregada, abrindo checklist:', session.subject_name);
         
         // CORREÇÃO 3: Sempre mostrar checklist para novas sessões ou quando usuário escolheu reiniciar
