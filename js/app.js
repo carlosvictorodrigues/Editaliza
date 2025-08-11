@@ -623,9 +623,21 @@ async function openStudySession(sessionId) {
             }
         }
         
-        // CORREÇÃO 2: Buscar dados da sessão do servidor (não do localStorage)
-        const session = await fetchSessionData(sessionId);
-        
+        // CORREÇÃO 2: Buscar dados da sessão (varrendo todo o cronograma antes do servidor)
+        let session = await fetchSessionData(sessionId);
+
+        // Se não encontrado, procurar em todas as datas do cronograma completo
+        if (!session && typeof fullSchedule !== 'undefined') {
+            for (const dateStr in fullSchedule) {
+                const sessions = fullSchedule[dateStr];
+                session = sessions.find(s => s.id == sessionId);
+                if (session) {
+                    console.log('📚 Sessão encontrada no cronograma completo');
+                    break;
+                }
+            }
+        }
+
         if (!session) {
             console.error('❌ Sessão não encontrada:', sessionId);
             app.showToast('Erro: Sessão não encontrada. Recarregue a página.', 'error');
@@ -662,7 +674,19 @@ async function fetchSessionData(sessionId) {
                 return localSession;
             }
         }
-        
+
+        // Procurar no cronograma completo se disponível
+        if (typeof fullSchedule !== 'undefined') {
+            for (const dateStr in fullSchedule) {
+                const sessions = fullSchedule[dateStr];
+                const fullSession = sessions.find(s => s.id == sessionId);
+                if (fullSession) {
+                    console.log('📚 Sessão encontrada no fullSchedule');
+                    return fullSession;
+                }
+            }
+        }
+
         // Se não encontrou localmente, buscar no servidor
         console.log('🌐 Buscando sessão no servidor...');
         const response = await app.apiFetch(`/schedules/sessions/${sessionId}`);
