@@ -228,7 +228,7 @@ const updateSessionStatus = async (sessionId, status, userId) => {
         
         if (session && session.topic_id && session.session_type === 'Novo Tópico') {
             if (status === 'Concluído') {
-                const completionDate = session.session_date || new Date().toISOString().split('T')[0];
+                const completionDate = session.session_date;
                 await dbRun('UPDATE topics SET status = ?, completion_date = ? WHERE id = ?', ['Concluído', completionDate, session.topic_id]);
             } else if (status === 'Pendente') {
                 await dbRun('UPDATE topics SET status = ?, completion_date = NULL WHERE id = ?', ['Pendente', session.topic_id]);
@@ -283,7 +283,7 @@ const batchUpdateSessionStatus = async (sessions, userId) => {
                 sessionUpdates.push({
                     topicId: sessionDetails.topic_id,
                     status: session.status,
-                    completionDate: sessionDetails.session_date || new Date().toISOString().split('T')[0]
+                    completionDate: sessionDetails.session_date
                 });
             }
         }
