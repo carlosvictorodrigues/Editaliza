@@ -115,7 +115,42 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const planId = urlParams.get('id');
+        // CORREÇÃO: Sistema inteligente de detecção de planId
+        function getPlanId() {
+            console.log('🔍 Iniciando detecção de planId...');
+            
+            // Primeiro: tentar da URL
+            const urlPlanId = urlParams.get('id');
+            if (urlPlanId) {
+                console.log('✅ PlanId obtido da URL:', urlPlanId);
+                return urlPlanId;
+            }
+            
+            // Segundo: tentar do localStorage
+            const storedPlanId = localStorage.getItem('selectedPlanId');
+            console.log('🔍 Valor no localStorage:', storedPlanId);
+            console.log('🔍 Todos os itens do localStorage:', {...localStorage});
+            
+            if (storedPlanId) {
+                console.log('✅ PlanId obtido do localStorage:', storedPlanId);
+                // Atualizar URL para manter consistência
+                window.history.replaceState({}, '', `cronograma.html?id=${storedPlanId}`);
+                return storedPlanId;
+            }
+            
+            // Nenhum planId encontrado
+            console.log('❌ Nenhum planId encontrado. Redirecionando para home.html...');
+            console.log('🔍 Debug - URL atual:', window.location.href);
+            return null;
+        }
+        
+        let planId = getPlanId();
+        
+        // Se não encontrou planId, redirecionar para home
+        if (!planId) {
+            window.location.href = 'home.html';
+        }
+        
         let activeFilter = 'week';
         let fullSchedule = {};
         let sessionIdToPostpone = null;
@@ -153,7 +188,7 @@
                 document.getElementById('examDate').textContent = `Data da Prova: ${examDate.toLocaleDateString('pt-BR')}`;
                 
                 const overdueData = await app.apiFetch(`/plans/${planId}/overdue_check`);
-                components.renderOverdueAlert(overdueData.count);
+                components.renderOverdueAlert(overdueData);
                 if (overdueData.count > 0) addReplanListener();
 
                 await fetchAndRenderSchedule(activeFilter);

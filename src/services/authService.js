@@ -86,6 +86,13 @@ const login = async (credentials, req) => {
         throw new Error('Esta conta foi criada com Google. Use o botão \'Entrar com Google\' para fazer login.');
     }
     
+    // Check if user has a password set
+    if (!user.password_hash) {
+        await authRepository.recordLoginAttempt(sanitizedEmail, false, req.ip, req.headers['user-agent']);
+        securityLog('login_attempt_no_password', { email: sanitizedEmail, userId: user.id }, user.id, req);
+        throw new Error('Conta não possui senha definida. Use o botão \'Esqueci minha senha\' para criar uma senha.');
+    }
+
     // Verify password
     if (!await bcrypt.compare(password, user.password_hash)) {
         await authRepository.recordLoginAttempt(sanitizedEmail, false, req.ip, req.headers['user-agent']);

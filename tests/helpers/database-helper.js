@@ -73,24 +73,62 @@ class DatabaseTestHelper {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       )`,
 
-      // Study plans
+      // Study plans - matching production schema
       `CREATE TABLE IF NOT EXISTS study_plans (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
-        name TEXT NOT NULL,
-        description TEXT,
-        target_exam TEXT,
-        duration_weeks INTEGER,
-        weekly_hours INTEGER,
-        subjects TEXT,
-        difficulty_level TEXT,
-        is_active INTEGER DEFAULT 1,
+        plan_name TEXT,
+        exam_date TEXT,
+        study_hours_per_day TEXT,
+        daily_question_goal INTEGER,
+        weekly_question_goal INTEGER,
+        session_duration_minutes INTEGER DEFAULT 50,
+        review_mode TEXT,
+        postponement_count INTEGER DEFAULT 0,
+        has_essay BOOLEAN DEFAULT 0,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id)
       )`,
 
-      // Study schedules
+      // Subjects table
+      `CREATE TABLE IF NOT EXISTS subjects (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        study_plan_id INTEGER,
+        subject_name TEXT,
+        priority_weight INTEGER,
+        FOREIGN KEY (study_plan_id) REFERENCES study_plans (id)
+      )`,
+
+      // Topics table
+      `CREATE TABLE IF NOT EXISTS topics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        subject_id INTEGER,
+        description TEXT NOT NULL,
+        status TEXT DEFAULT "Pendente",
+        completion_date TEXT,
+        FOREIGN KEY (subject_id) REFERENCES subjects (id)
+      )`,
+
+      // Study sessions - matching production schema for rescheduling
+      `CREATE TABLE IF NOT EXISTS study_sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        study_plan_id INTEGER,
+        topic_id INTEGER,
+        subject_name TEXT,
+        topic_description TEXT,
+        session_date TEXT,
+        session_type TEXT,
+        status TEXT DEFAULT 'Pendente',
+        notes TEXT,
+        questions_solved INTEGER DEFAULT 0,
+        time_studied_seconds INTEGER DEFAULT 0,
+        postpone_count INTEGER DEFAULT 0,
+        FOREIGN KEY (study_plan_id) REFERENCES study_plans (id),
+        FOREIGN KEY (topic_id) REFERENCES topics (id)
+      )`,
+
+      // Study schedules - legacy support
       `CREATE TABLE IF NOT EXISTS study_schedules (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
@@ -202,19 +240,24 @@ class DatabaseTestHelper {
   }
 
   /**
-   * Create a test study plan
+   * Create a test study plan - updated for rescheduling tests
    */
   async createTestPlan(planData = {}, userId = 1) {
+    // Set exam date 30 days in the future by default
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 30);
+    
     const defaultData = {
       user_id: userId,
-      name: 'Test Study Plan',
-      description: 'Test description',
-      target_exam: 'Test Exam',
-      duration_weeks: 12,
-      weekly_hours: 20,
-      subjects: JSON.stringify(['Test Subject']),
-      difficulty_level: 'intermediate',
-      is_active: 1,
+      plan_name: 'Test Study Plan',
+      exam_date: futureDate.toISOString().split('T')[0],
+      study_hours_per_day: JSON.stringify({ monday: 2, tuesday: 2, wednesday: 2, thursday: 2, friday: 2, saturday: 3, sunday: 1 }),
+      daily_question_goal: 20,
+      weekly_question_goal: 140,
+      session_duration_minutes: 50,
+      review_mode: 'spaced',
+      postponement_count: 0,
+      has_essay: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
@@ -222,17 +265,173 @@ class DatabaseTestHelper {
     const plan = { ...defaultData, ...planData };
     
     const result = await this.run(`
-      INSERT INTO study_plans (user_id, name, description, target_exam, duration_weeks,
-                              weekly_hours, subjects, difficulty_level, is_active,
-                              created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO study_plans (user_id, plan_name, exam_date, study_hours_per_day,
+                              daily_question_goal, weekly_question_goal, session_duration_minutes,
+                              review_mode, postponement_count, has_essay, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
-      plan.user_id, plan.name, plan.description, plan.target_exam,
-      plan.duration_weeks, plan.weekly_hours, plan.subjects,
-      plan.difficulty_level, plan.is_active, plan.created_at, plan.updated_at
+      plan.user_id, plan.plan_name, plan.exam_date, plan.study_hours_per_day,
+      plan.daily_question_goal, plan.weekly_question_goal, plan.session_duration_minutes,
+      plan.review_mode, plan.postponement_count, plan.has_essay, plan.created_at, plan.updated_at
     ]);
 
     return { ...plan, id: result.id };
+  }
+
+  /**
+   * Create a test subject
+   */
+  async createTestSubject(subjectData = {}, planId = 1) {
+    const defaultData = {
+      study_plan_id: planId,
+      subject_name: 'Test Subject',
+      priority_weight: 1
+    };
+
+    const subject = { ...defaultData, ...subjectData };
+    
+    const result = await this.run(`
+      INSERT INTO subjects (study_plan_id, subject_name, priority_weight)
+      VALUES (?, ?, ?)
+    `, [subject.study_plan_id, subject.subject_name, subject.priority_weight]);
+
+    return { ...subject, id: result.id };
+  }
+
+  /**
+   * Create a test topic
+   */
+  async createTestTopic(topicData = {}, subjectId = 1) {
+    const defaultData = {
+      subject_id: subjectId,
+      description: 'Test Topic',
+      status: 'Pendente',
+      completion_date: null
+    };
+
+    const topic = { ...defaultData, ...topicData };
+    
+    const result = await this.run(`
+      INSERT INTO topics (subject_id, description, status, completion_date)
+      VALUES (?, ?, ?, ?)
+    `, [topic.subject_id, topic.description, topic.status, topic.completion_date]);
+
+    return { ...topic, id: result.id };
+  }
+
+  /**
+   * Create a test study session
+   */
+  async createTestSession(sessionData = {}, planId = 1, topicId = 1) {
+    const defaultData = {
+      study_plan_id: planId,
+      topic_id: topicId,
+      subject_name: 'Test Subject',
+      topic_description: 'Test Topic',
+      session_date: new Date().toISOString().split('T')[0],
+      session_type: 'primeira_vez',
+      status: 'Pendente',
+      notes: null,
+      questions_solved: 0,
+      time_studied_seconds: 0,
+      postpone_count: 0
+    };
+
+    const session = { ...defaultData, ...sessionData };
+    
+    const result = await this.run(`
+      INSERT INTO study_sessions (study_plan_id, topic_id, subject_name, topic_description,
+                                 session_date, session_type, status, notes, questions_solved,
+                                 time_studied_seconds, postpone_count)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      session.study_plan_id, session.topic_id, session.subject_name, session.topic_description,
+      session.session_date, session.session_type, session.status, session.notes,
+      session.questions_solved, session.time_studied_seconds, session.postpone_count
+    ]);
+
+    return { ...session, id: result.id };
+  }
+
+  /**
+   * Create overdue sessions for testing
+   */
+  async createOverdueSessions(planId, subjectConfigs = []) {
+    const sessions = [];
+    
+    // Default subjects if none provided
+    if (subjectConfigs.length === 0) {
+      subjectConfigs = [
+        { name: 'Matemática', overdueCount: 3 },
+        { name: 'Português', overdueCount: 2 },
+        { name: 'História', overdueCount: 2 }
+      ];
+    }
+
+    for (const subjectConfig of subjectConfigs) {
+      // Create subject
+      const subject = await this.createTestSubject({
+        study_plan_id: planId,
+        subject_name: subjectConfig.name,
+        priority_weight: 1
+      });
+
+      // Create overdue sessions for this subject
+      for (let i = 0; i < subjectConfig.overdueCount; i++) {
+        const overdueDate = new Date();
+        overdueDate.setDate(overdueDate.getDate() - (i + 1)); // 1, 2, 3 days ago
+
+        const topic = await this.createTestTopic({
+          subject_id: subject.id,
+          description: `${subjectConfig.name} - Tópico ${i + 1}`
+        });
+
+        const session = await this.createTestSession({
+          study_plan_id: planId,
+          topic_id: topic.id,
+          subject_name: subjectConfig.name,
+          topic_description: `${subjectConfig.name} - Tópico ${i + 1}`,
+          session_date: overdueDate.toISOString().split('T')[0],
+          session_type: i === 0 ? 'primeira_vez' : 'revisao',
+          status: 'Pendente'
+        });
+
+        sessions.push(session);
+      }
+    }
+
+    return sessions;
+  }
+
+  /**
+   * Create future sessions for testing rescheduling constraints
+   */
+  async createFutureSessions(planId, subjectName, sessionCount = 3) {
+    const sessions = [];
+    
+    for (let i = 1; i <= sessionCount; i++) {
+      const futureDate = new Date();
+      futureDate.setDate(futureDate.getDate() + i); // 1, 2, 3 days in the future
+
+      const topic = await this.createTestTopic({
+        subject_id: 1, // Assume subject exists
+        description: `${subjectName} - Future Topic ${i}`
+      });
+
+      const session = await this.createTestSession({
+        study_plan_id: planId,
+        topic_id: topic.id,
+        subject_name: subjectName,
+        topic_description: `${subjectName} - Future Topic ${i}`,
+        session_date: futureDate.toISOString().split('T')[0],
+        session_type: 'primeira_vez',
+        status: 'Pendente'
+      });
+
+      sessions.push(session);
+    }
+
+    return sessions;
   }
 
   /**
@@ -240,6 +439,9 @@ class DatabaseTestHelper {
    */
   async cleanTables() {
     const tables = [
+      'study_sessions',
+      'topics',
+      'subjects',
       'study_progress',
       'study_schedules', 
       'study_plans',

@@ -328,9 +328,13 @@ const components = {
         `;
     },
 
-    renderOverdueAlert(count, containerId = 'overdue-alert-container') {
+    renderOverdueAlert(overdueData, containerId = 'overdue-alert-container') {
         const container = document.getElementById(containerId);
         if (!container) return;
+
+        // Handle both old format (just count) and new format ({count, tasks})
+        const count = typeof overdueData === 'number' ? overdueData : (overdueData.count || 0);
+        const tasks = (typeof overdueData === 'object' && overdueData.tasks) ? overdueData.tasks : [];
 
         if (count > 0) {
             container.innerHTML = `
@@ -356,7 +360,10 @@ const components = {
                                 </span>
                             </div>
                             <p class="text-gray-800 font-bold text-lg mb-3">Você tem ${count} tarefa${count > 1 ? 's' : ''} atrasada${count > 1 ? 's' : ''}.</p>
-                            <p class="text-gray-700 text-base mb-6 leading-relaxed">Não se preocupe! Podemos reorganizar seu cronograma automaticamente para você voltar aos trilhos. 💪</p>
+                            <p class="text-gray-700 text-base mb-4 leading-relaxed">Não se preocupe! Podemos reorganizar seu cronograma automaticamente para você voltar aos trilhos. 💪</p>
+                            
+                            <!-- Detalhes das tarefas atrasadas -->
+                            ${this.renderOverdueTasksDetails(tasks)}
                             
                             <!-- Action Section -->
                             <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
@@ -409,6 +416,92 @@ const components = {
         } else {
             container.innerHTML = '';
         }
+    },
+
+    renderOverdueTasksDetails(tasks) {
+        if (!tasks || tasks.length === 0) return '';
+
+        // Group tasks by subject
+        const tasksBySubject = tasks.reduce((acc, task) => {
+            const subjectName = task.subject_name || 'Sem disciplina';
+            if (!acc[subjectName]) {
+                acc[subjectName] = [];
+            }
+            acc[subjectName].push(task);
+            return acc;
+        }, {});
+
+        const subjectsHtml = Object.keys(tasksBySubject)
+            .sort()
+            .map(subjectName => {
+                const subjectTasks = tasksBySubject[subjectName];
+                const style = app.getSubjectStyle(subjectName);
+                
+                const tasksHtml = subjectTasks.map(task => {
+                    const sessionDate = new Date(task.session_date);
+                    const today = new Date();
+                    const daysDiff = Math.ceil((today - sessionDate) / (1000 * 60 * 60 * 24));
+                    
+                    const sessionTypeIcons = {
+                        'Novo Tópico': '📚',
+                        'Revisão': '🔄',
+                        'Simulado': '📝',
+                        'Simulado Direcionado': '🎯',
+                        'Redação': '✍️'
+                    };
+                    
+                    const icon = sessionTypeIcons[task.session_type] || '📖';
+                    
+                    return `
+                        <div class="flex items-start space-x-3 p-3 bg-white/70 rounded-lg border border-gray-200 mb-2 last:mb-0">
+                            <div class="flex-shrink-0 text-xl">${icon}</div>
+                            <div class="flex-grow min-w-0">
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm font-semibold text-gray-800">${app.sanitizeHtml(task.session_type)}</span>
+                                    <span class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full font-medium">
+                                        ${daysDiff === 1 ? '1 dia' : `${daysDiff} dias`} atrás
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-700 leading-relaxed truncate" title="${app.sanitizeHtml(task.topic_description)}">
+                                    ${app.sanitizeHtml(task.topic_description)}
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Previsto para: ${sessionDate.toLocaleDateString('pt-BR')}
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="mb-4 last:mb-0">
+                        <div class="flex items-center space-x-2 mb-3">
+                            <div class="w-4 h-4 rounded-full" style="background: ${style.primary};"></div>
+                            <h4 class="font-bold text-gray-800">${app.sanitizeHtml(subjectName)}</h4>
+                            <span class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
+                                ${subjectTasks.length} tarefa${subjectTasks.length > 1 ? 's' : ''}
+                            </span>
+                        </div>
+                        <div class="space-y-2">
+                            ${tasksHtml}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+        return `
+            <div class="bg-gradient-to-br from-orange-50 to-red-50 rounded-xl p-4 mb-6 border border-orange-200 shadow-inner">
+                <div class="flex items-center space-x-2 mb-4">
+                    <svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                    </svg>
+                    <h3 class="text-lg font-bold text-orange-800">Tarefas em Atraso</h3>
+                </div>
+                <div class="max-h-64 overflow-y-auto custom-scrollbar">
+                    ${subjectsHtml}
+                </div>
+            </div>
+        `;
     },
 
     

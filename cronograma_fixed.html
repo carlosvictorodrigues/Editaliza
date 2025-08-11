@@ -153,7 +153,7 @@
                 document.getElementById('examDate').textContent = `Data da Prova: ${examDate.toLocaleDateString('pt-BR')}`;
                 
                 const overdueData = await app.apiFetch(`/plans/${planId}/overdue_check`);
-                components.renderOverdueAlert(overdueData.count);
+                components.renderOverdueAlert(overdueData);
                 if (overdueData.count > 0) addReplanListener();
 
                 await fetchAndRenderSchedule(activeFilter);

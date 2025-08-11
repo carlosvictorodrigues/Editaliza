@@ -611,14 +611,23 @@
                 './images/avatars/miniavs/miniav1.svg'
             ];
             
+            console.log('📁 Caminhos de teste:', testPaths);
+            
             for (const path of testPaths) {
                 try {
+                    console.log(`🔍 Testando: ${path}`);
                     const response = await fetch(path);
                     console.log(`${response.ok ? '✅' : '❌'} ${path} - Status: ${response.status}`);
+                    
+                    if (!response.ok) {
+                        console.warn(`⚠️ Caminho não acessível: ${path} - Status: ${response.status}`);
+                    }
                 } catch (error) {
                     console.error(`❌ Erro ao testar ${path}:`, error);
                 }
             }
+            
+            console.log('🏁 Teste de acesso aos avatares concluído');
         }
 
         async function initialize() {
@@ -633,6 +642,7 @@
                 updateProgressBar();
                 showProfileCompletionTips();
                 console.log('✅ Página de perfil inicializada com sucesso!');
+                console.log('🎯 Estado inicial do avatar:', selectedAvatarPath);
             } catch (error) {
                 console.error("❌ Erro na inicialização da página de perfil:", error);
                 app.showToast('Erro fatal ao carregar a página. Tente novamente.', 'error');
@@ -641,8 +651,10 @@
 
         async function loadProfileData() {
             try {
+                console.log('📥 Carregando dados do perfil...');
                 app.showSpinner();
                 const profile = await app.apiFetch('/users/profile');
+                console.log('📋 Dados do perfil recebidos:', profile);
                 
                 // Dados pessoais básicos
                 document.getElementById('name').value = profile.name || '';
@@ -680,11 +692,20 @@
                 document.getElementById('motivationText').value = profile.motivation_text || '';
                 
                 // Check if user has Google avatar or local avatar
+                console.log('🖼️ Carregando avatar do perfil:');
+                console.log('  - profile.google_avatar:', profile.google_avatar);
+                console.log('  - profile.auth_provider:', profile.auth_provider);
+                console.log('  - profile.profile_picture:', profile.profile_picture);
+                
                 if (profile.google_avatar && profile.auth_provider === 'google') {
                     selectedAvatarPath = profile.google_avatar;
+                    console.log('🌐 Usando avatar do Google:', selectedAvatarPath);
                 } else {
                     selectedAvatarPath = profile.profile_picture;
+                    console.log('💾 Usando avatar local:', selectedAvatarPath);
                 }
+                
+                console.log('🎯 Avatar final selecionado:', selectedAvatarPath);
                 updateProfilePhoto(selectedAvatarPath);
                 
                 // Atualizar dados originais para comparação
@@ -708,9 +729,13 @@
                     profile_picture: profile.profile_picture || null
                 };
                 
+                console.log('📝 Dados originais configurados:', originalData);
+                
             } catch (error) {
+                console.error('❌ Erro ao carregar dados do perfil:', error);
                 app.showToast('Erro ao carregar dados do perfil.', 'error');
             } finally {
+                console.log('🏁 Finalizando carregamento dos dados do perfil...');
                 app.hideSpinner();
             }
         }
@@ -720,15 +745,26 @@
             const profilePhoto = document.getElementById('profilePhoto');
             const defaultAvatar = document.getElementById('defaultAvatar');
             
+            if (!profilePhoto || !defaultAvatar) {
+                console.error('❌ Elementos de foto do perfil não encontrados');
+                return;
+            }
+            
             if (path) {
+                console.log('📁 Caminho do avatar:', path);
+                console.log('🔍 Tipo de avatar:', path.startsWith('https://') ? 'Google' : 'Local');
+                
                 // Check if it's a Google avatar (starts with https://)
                 if (path.startsWith('https://')) {
                     // Google avatar - use directly without cache buster
+                    console.log('🌐 Usando avatar do Google:', path);
                     profilePhoto.src = path;
                 } else {
                     // Local avatar - add cache buster to avoid caching issues
                     const cacheBuster = '?t=' + new Date().getTime();
-                    profilePhoto.src = path.startsWith('./') ? path + cacheBuster : './' + path + cacheBuster;
+                    const finalPath = path.startsWith('./') ? path + cacheBuster : './' + path + cacheBuster;
+                    console.log('💾 Usando avatar local com cache buster:', finalPath);
+                    profilePhoto.src = finalPath;
                 }
                 
                 // Handle load success
@@ -745,19 +781,30 @@
                     defaultAvatar.classList.remove('hidden');
                 }, { once: true });
             } else {
+                console.log('🚫 Nenhum avatar definido, mostrando avatar padrão');
                 profilePhoto.classList.add('hidden');
                 defaultAvatar.classList.remove('hidden');
             }
         }
 
         function renderAvatarUI() {
+            console.log('🎨 Renderizando interface de seleção de avatar...');
+            console.log('🎯 Avatar atualmente selecionado:', selectedAvatarPath);
+            
             const container = document.getElementById('avatar-selection-ui');
+            if (!container) {
+                console.error('❌ Elemento avatar-selection-ui não encontrado');
+                return;
+            }
+            
             const tabs = Object.keys(avatarCategories).map(name => 
                 `<button class="avatar-gallery-tab px-4 py-2 text-sm font-semibold rounded-lg border transition-colors" data-category="${avatarCategories[name]}">${name}</button>`
             ).join('');
 
             // Check if user is Google user
             const isGoogleUser = selectedAvatarPath && selectedAvatarPath.startsWith('https://');
+            console.log('🌐 Usuário do Google:', isGoogleUser);
+            
             const googleNotice = isGoogleUser ? 
                 `<div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
                     <p class="text-sm text-blue-700">
@@ -772,8 +819,11 @@
             `;
 
             const tabButtons = container.querySelectorAll('.avatar-gallery-tab');
+            console.log('🔘 Abas de avatar encontradas:', tabButtons.length);
+            
             tabButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
+                    console.log('🔘 Aba clicada:', btn.dataset.category);
                     tabButtons.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     renderAvatarGallery(btn.dataset.category);
@@ -781,12 +831,21 @@
             });
 
             // Load first category by default
-            tabButtons[0].click();
+            if (tabButtons.length > 0) {
+                console.log('🔄 Carregando primeira categoria por padrão...');
+                tabButtons[0].click();
+            } else {
+                console.warn('⚠️ Nenhuma aba de avatar encontrada');
+            }
         }
 
         function renderAvatarGallery(category) {
             console.log('🎨 Renderizando galeria para categoria:', category);
             const gallery = document.getElementById('avatar-gallery');
+            if (!gallery) {
+                console.error('❌ Elemento avatar-gallery não encontrado');
+                return;
+            }
             gallery.innerHTML = '';
             
             for (let i = 1; i <= 6; i++) {
@@ -804,6 +863,7 @@
                 const avatarPath = pathVariations[0]; // Start with relative path
                 
                 console.log(`🖼️ Tentando carregar avatar: ${avatarPath}`);
+                console.log(`📁 Caminhos alternativos disponíveis:`, pathVariations);
                 
                 const avatarContainer = document.createElement('div');
                 avatarContainer.className = 'relative';
@@ -832,6 +892,12 @@
                     console.log(`✅ Avatar carregado com sucesso: ${avatarPath}`);
                     loadingDiv.style.display = 'none';
                     img.style.display = 'block';
+                    
+                    // Verificar se este avatar está selecionado
+                    if (avatarPath === selectedAvatarPath) {
+                        console.log(`🎯 Avatar já selecionado: ${avatarPath}`);
+                        img.classList.add('selected');
+                    }
                 });
                 
                 // Handle load error with fallback paths
@@ -843,6 +909,7 @@
                         img.src = pathVariations[currentPathIndex];
                     } else {
                         console.error(`❌ Todos os caminhos falharam para: ${fileName}${i}`);
+                        console.error(`📁 Caminhos tentados:`, pathVariations);
                         loadingDiv.style.display = 'none';
                         img.style.display = 'none';
                         errorDiv.classList.remove('hidden');
@@ -856,13 +923,33 @@
                 // Initially hide image and show loading
                 img.style.display = 'none';
                 
+                console.log(`🔄 Configurando avatar ${fileName}${i}:`);
+                console.log(`  - Caminho: ${avatarPath}`);
+                console.log(`  - Já selecionado: ${avatarPath === selectedAvatarPath}`);
+                console.log(`  - selectedAvatarPath atual: ${selectedAvatarPath}`);
+                
                 img.addEventListener('click', () => {
                     if (img.style.display !== 'none') {
+                        console.log('🖱️ Avatar clicado:', avatarPath);
+                        console.log('  - Avatar anterior:', selectedAvatarPath);
+                        
                         document.querySelectorAll('.avatar-item.selected').forEach(el => el.classList.remove('selected'));
                         img.classList.add('selected');
                         selectedAvatarPath = avatarPath;
+                        
+                        console.log('  - Novo avatar selecionado:', selectedAvatarPath);
+                        console.log('  - Botão de salvar será habilitado');
+                        
                         document.getElementById('saveBtn').disabled = false;
                         console.log('🎯 Avatar selecionado:', avatarPath);
+                        
+                        // Verificar mudanças para habilitar o botão de salvar
+                        if (typeof checkForChanges === 'function') {
+                            console.log('🔍 Chamando checkForChanges...');
+                            checkForChanges();
+                        } else {
+                            console.warn('⚠️ Função checkForChanges não encontrada');
+                        }
                     }
                 });
                 
@@ -870,6 +957,8 @@
                 avatarContainer.appendChild(img);
                 avatarContainer.appendChild(errorDiv);
                 gallery.appendChild(avatarContainer);
+                
+                console.log(`✅ Avatar ${fileName}${i} adicionado à galeria`);
             }
         }
 
@@ -886,6 +975,7 @@
             ];
             
             function checkForChanges() {
+                console.log('🔍 Verificando mudanças no formulário...');
                 let hasChanges = false;
                 
                 // Verificar campos de input e select
@@ -923,9 +1013,19 @@
                 }
                 
                 // Verificar avatar
+                console.log('🔍 Verificando mudanças no avatar:');
+                console.log('  - selectedAvatarPath:', selectedAvatarPath);
+                console.log('  - originalData.profile_picture:', originalData.profile_picture);
+                console.log('  - São diferentes?', selectedAvatarPath !== originalData.profile_picture);
+                
                 if (selectedAvatarPath !== originalData.profile_picture) {
                     hasChanges = true;
+                    console.log('✅ Mudança detectada no avatar');
                 }
+                
+                console.log('📊 Resumo das mudanças:');
+                console.log('  - hasChanges:', hasChanges);
+                console.log('  - Botão de salvar será:', hasChanges ? 'habilitado' : 'desabilitado');
                 
                 saveBtn.disabled = !hasChanges;
                 updateProgressBar();
@@ -967,6 +1067,9 @@
         }
         
         async function saveProfile() {
+            console.log('💾 Iniciando salvamento do perfil...');
+            console.log('🎯 Avatar selecionado antes de salvar:', selectedAvatarPath);
+            
             const saveBtn = document.getElementById('saveBtn');
             
             // Coletar dados do formulário
@@ -1011,6 +1114,9 @@
                 profile_picture: selectedAvatarPath || null
             };
             
+            console.log('🎯 Avatar selecionado para salvar:', selectedAvatarPath);
+            console.log('📸 Campo profile_picture no updateData:', updateData.profile_picture);
+            
             // Remover campos nulos/vazios para não enviar dados desnecessários
             Object.keys(updateData).forEach(key => {
                 if (updateData[key] === null || updateData[key] === undefined) {
@@ -1029,15 +1135,25 @@
 
             try {
                 console.log('💾 Enviando dados do perfil:', updateData);
+                console.log('📤 Dados sendo enviados para o servidor:', JSON.stringify(updateData, null, 2));
+                
                 const response = await app.apiFetch('/profile', {
                     method: 'PATCH',
                     body: JSON.stringify(updateData)
                 });
                 
                 console.log('✅ Perfil salvo com sucesso:', response);
+                console.log('📥 Resposta do servidor:', JSON.stringify(response, null, 2));
                 
                 // Atualizar dados originais
+                console.log('📝 Atualizando dados originais após salvar:');
+                console.log('  - originalData anterior:', originalData);
+                console.log('  - updateData:', updateData);
+                
                 originalData = { ...originalData, ...updateData };
+                console.log('  - originalData atualizado:', originalData);
+                
+                console.log('🖼️ Atualizando foto do perfil após salvar:', selectedAvatarPath);
                 updateProfilePhoto(selectedAvatarPath);
                 
                 // Atualizar avatar na navegação
@@ -1053,6 +1169,11 @@
                 
             } catch (error) {
                 console.error('❌ Erro ao salvar perfil:', error);
+                console.error('📋 Detalhes do erro:', {
+                    message: error.message,
+                    stack: error.stack,
+                    details: error.details
+                });
                 const errorMessage = error.message || 'Erro ao salvar perfil. Tente novamente.';
                 app.showToast(errorMessage, 'error');
                 saveBtn.disabled = false;
@@ -1061,10 +1182,18 @@
                 if (error.details && Array.isArray(error.details)) {
                     console.warn('Erros de validação:', error.details);
                     error.details.forEach(detail => {
-                        console.warn('- ' + detail.msg + ' (campo: ' + detail.param + ')');
+                        console.warn('- ' + detail.msg + ' (campo: ' + detail.msg + ')');
                     });
                 }
+                
+                // Log adicional para debug
+                console.log('🔍 Estado atual após erro:');
+                console.log('  - selectedAvatarPath:', selectedAvatarPath);
+                console.log('  - originalData.profile_picture:', originalData.profile_picture);
             } finally {
+                console.log('🏁 Finalizando salvamento do perfil...');
+                console.log('🎯 Estado final do avatar:', selectedAvatarPath);
+                
                 app.hideSpinner();
                 saveBtn.innerHTML = `
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

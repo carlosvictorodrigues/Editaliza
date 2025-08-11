@@ -238,7 +238,7 @@ const getWeakTopics = async (planId) => {
 const getOverdueTasks = async (planId) => {
     const today = new Date().toISOString().split('T')[0];
     
-    return await dbAll(`
+    const overdueTasks = await dbAll(`
         SELECT 
             ss.session_type,
             ss.session_date,
@@ -252,6 +252,12 @@ const getOverdueTasks = async (planId) => {
         AND ss.status = 'Pendente'
         ORDER BY ss.session_date ASC
     `, [planId, today]);
+    
+    // Return object with count for frontend compatibility
+    return {
+        count: overdueTasks.length,
+        tasks: overdueTasks
+    };
 };
 
 /**
