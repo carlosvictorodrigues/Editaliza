@@ -384,7 +384,10 @@
                 const text = encodeURIComponent('Editaliza: Estudos do Dia');
                 const details = encodeURIComponent(sessions.map(s => `• ${s.subject_name}: ${s.topic_description}`).join('\n'));
                 const startDate = dateStr.replace(/-/g, '');
-                const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${startDate}/${startDate}&details=${details}`;
+                const endDate = new Date(date);
+                endDate.setDate(date.getDate() + 1);
+                const endDateStr = endDate.toISOString().split('T')[0].replace(/-/g, '');
+                const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${startDate}/${endDateStr}&details=${details}`;
                 
                 const link = document.createElement('a');
                 link.href = calendarUrl;
@@ -399,9 +402,12 @@
                 let icsContent = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Editaliza//App v1.0//PT'];
                 weekDates.forEach(date => {
                     const dateStr = date.toISOString().split('T')[0];
+                    const endDate = new Date(date);
+                    endDate.setDate(date.getDate() + 1);
+                    const startDate = dateStr.replace(/-/g, '');
+                    const endDateStr = endDate.toISOString().split('T')[0].replace(/-/g, '');
                     fullSchedule[dateStr].forEach(session => {
-                        const startDate = dateStr.replace(/-/g, '');
-                        icsContent.push('BEGIN:VEVENT', `UID:${session.id}@editaliza.com`, `DTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '')}Z`, `DTSTART;VALUE=DATE:${startDate}`, `SUMMARY:Estudar: ${session.subject_name || session.session_type}`, `DESCRIPTION:${session.topic_description || 'Revisão geral.'}`, 'END:VEVENT');
+                        icsContent.push('BEGIN:VEVENT', `UID:${session.id}@editaliza.com`, `DTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '')}Z`, `DTSTART;VALUE=DATE:${startDate}`, `DTEND;VALUE=DATE:${endDateStr}`, `SUMMARY:Estudar: ${session.subject_name || session.session_type}`, `DESCRIPTION:${session.topic_description || 'Revisão geral.'}`, 'END:VEVENT');
                     });
                 });
                 icsContent.push('END:VCALENDAR');
