@@ -119,7 +119,7 @@ const InterfaceSystem = {
             }, 10);
 
             // Trap focus
-            this.trapFocus(modal);
+            InterfaceSystem.utils.trapFocus(modal);
             return true;
         },
 
@@ -465,9 +465,7 @@ const InterfaceSystem = {
                     <div class="text-6xl mb-4">${errorConfig.icon}</div>
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">${errorConfig.title}</h3>
                     <p class="text-gray-600 mb-4">${finalMessage}</p>
-                    <button class="retry-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
-                        Tentar Novamente
-                    </button>
+                    <button class="retry-btn bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg">Tentar Novamente</button>
                 </div>
             `;
 
@@ -669,18 +667,21 @@ describe('Sistema de Interface - Testes Unitários', () => {
             expect(modal.classList.contains('hidden')).toBe(false);
         });
 
-        test('deve fechar modal corretamente', () => {
+        test('deve fechar modal corretamente', (done) => {
             InterfaceSystem.components.createModal({ id: 'test-modal' });
             InterfaceSystem.components.openModal('test-modal');
-            
+
             const result = InterfaceSystem.components.closeModal('test-modal');
-            
+
             expect(result).toBe(true);
-            
+
             // Verificar após timeout da animação
             setTimeout(() => {
                 const modal = document.getElementById('test-modal');
-                expect(modal.classList.contains('hidden')).toBe(true);
+                if (modal) {
+                    expect(modal.classList.contains('hidden')).toBe(true);
+                }
+                done();
             }, 350);
         });
 
