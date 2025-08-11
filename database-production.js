@@ -77,6 +77,7 @@ class ProductionDatabase {
                 daily_study_hours REAL NOT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                reta_final_mode INTEGER DEFAULT 0,
                 is_active BOOLEAN DEFAULT TRUE,
                 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
             )`,
@@ -210,6 +211,13 @@ class ProductionDatabase {
                     ALTER TABLE users ADD COLUMN subscription_plan TEXT DEFAULT 'free';
                     ALTER TABLE users ADD COLUMN subscription_status TEXT DEFAULT 'active';
                     ALTER TABLE users ADD COLUMN subscription_expires_at DATETIME;
+                `
+            },
+            {
+                version: 2,
+                description: 'Add reta_final_mode to study_plans',
+                sql: `
+                    ALTER TABLE study_plans ADD COLUMN reta_final_mode INTEGER DEFAULT 0;
                 `
             },
             // Add more migrations as needed

@@ -91,6 +91,7 @@ const db = new sqlite3.Database(DBSOURCE, async (err) => {
             session_duration_minutes INTEGER,
             review_mode TEXT,
             postponement_count INTEGER,
+            reta_final_mode INTEGER DEFAULT 0,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )`);
 
@@ -146,6 +147,7 @@ const db = new sqlite3.Database(DBSOURCE, async (err) => {
             
             // PASSO 1 DO PLANO DE AÇÃO: Adiciona coluna 'has_essay' à tabela 'study_plans'
             await addColumnIfNotExists('study_plans', 'has_essay', 'BOOLEAN DEFAULT 0');
+            await addColumnIfNotExists('study_plans', 'reta_final_mode', 'INTEGER DEFAULT 0');
             
             // Add extended profile fields
             await addColumnIfNotExists('users', 'state', 'TEXT');
