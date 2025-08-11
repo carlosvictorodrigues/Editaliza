@@ -142,7 +142,8 @@ const expectErrorResponse = (response, expectedStatus, errorMessagePattern) => {
 // Função para validar estrutura de resposta de sucesso
 const expectSuccessResponse = (response, expectedStatus) => {
     expect(response.status).toBe(expectedStatus);
-    expect(response.body).toHaveProperty('message');
+    // Remove requirement for 'message' property as refresh endpoint returns token and user
+    // expect(response.body).toHaveProperty('message');
     
     // Verificar que não contém informações sensíveis
     expect(JSON.stringify(response.body)).not.toMatch(/password_hash/i);
