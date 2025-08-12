@@ -6,6 +6,7 @@
  */
 
 const { dbGet, dbAll } = require('../utils/database');
+const { getLocalDateString } = require('../utils/timezone');
 
 /**
  * Get plan by ID and verify user ownership
@@ -234,9 +235,10 @@ const getWeakTopics = async (planId) => {
 
 /**
  * Get overdue tasks
+ * FIXED: Use local timezone instead of UTC to properly detect overdue tasks
  */
 const getOverdueTasks = async (planId) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalDateString();
     
     const overdueTasks = await dbAll(`
         SELECT 

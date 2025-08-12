@@ -377,6 +377,18 @@ if (missingEnvVars.length > 0) {
 // Funções utilitárias para interagir com o banco de dados usando Promises
 const dbGet = (sql, params = []) => new Promise((resolve, reject) => db.get(sql, params, (err, row) => err ? reject(err) : resolve(row)));
 const dbAll = (sql, params = []) => new Promise((resolve, reject) => db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows)));
+
+// Função para rollback seguro de transações
+const safeRollback = async (context = 'UNKNOWN') => {
+    try {
+        await dbRun('ROLLBACK');
+    } catch (rollbackError) {
+        // Silenciar erro de "no transaction is active" que é esperado em alguns casos
+        if (!rollbackError.message.includes('no transaction is active')) {
+            console.error(`[${context}] Erro inesperado ao fazer rollback:`, rollbackError.message);
+        }
+    }
+};
 const dbRun = (sql, params = []) => new Promise((resolve, reject) => db.run(sql, params, function(err) { err ? reject(err) : resolve(this) }));
 
 // --- ROTAS DE AUTENTICAÇÃO E USUÁRIO ---
@@ -1521,12 +1533,9 @@ app.post('/plans/:planId/generate',
             });
 
         } catch (error) {
-            try {
-                await dbRun('ROLLBACK');
-            } catch (rollbackError) {
-                console.error("[CRONOGRAMA] Erro ao fazer rollback:", rollbackError);
-            }
-            console.error("Erro ao gerar cronograma:", error);
+            // Rollback seguro
+            await safeRollback('CRONOGRAMA');
+            console.error("Erro ao gerar cronograma:", error.message);
             console.timeEnd(`[PERF] Generate schedule for plan ${planId}`);
             res.status(500).json({ error: "Ocorreu um erro interno no servidor ao gerar o cronograma." });
         }
@@ -1967,11 +1976,7 @@ app.post('/plans/:planId/replan',
 
         } catch (error) {
             // Rollback seguro da transação
-            try {
-                await dbRun('ROLLBACK');
-            } catch (rollbackError) {
-                console.error("[REPLAN] Erro ao fazer rollback:", rollbackError);
-            }
+            await safeRollback('REPLAN');
             
             console.error("[REPLAN] Erro crítico ao replanejar:", {
                 planId,
