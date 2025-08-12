@@ -7,6 +7,7 @@
 
 const scheduleRepository = require('../repositories/scheduleRepository');
 const { sanitizeHtml } = require('../utils/sanitizer');
+const { isSessionOverdueLocal, getLocalDateString, getDateOffsetLocal, getWeekStartLocal } = require('../utils/timezone');
 
 /**
  * Get complete schedule for a plan
@@ -27,8 +28,8 @@ const getSchedule = async (planId, userId) => {
             subject_name: sanitizeHtml(session.subject_name || ''),
             notes: sanitizeHtml(session.notes || ''),
             session_type: sanitizeHtml(session.session_type || ''),
-            // Add computed fields
-            is_overdue: new Date(session.session_date) < new Date() && session.status === 'Pendente',
+            // Add computed fields - FIXED: Use local timezone for overdue check
+            is_overdue: isSessionOverdueLocal(session.session_date, session.status),
             duration_formatted: formatDuration(session.time_studied_seconds || 0),
             can_postpone: (session.postpone_count || 0) < 3
         }));
@@ -61,7 +62,7 @@ const getScheduleByDateRange = async (planId, userId, startDate, endDate) => {
         topic_description: sanitizeHtml(session.topic_description || ''),
         subject_name: sanitizeHtml(session.subject_name || ''),
         notes: sanitizeHtml(session.notes || ''),
-        is_overdue: new Date(session.session_date) < new Date() && session.status === 'Pendente',
+        is_overdue: isSessionOverdueLocal(session.session_date, session.status),
         duration_formatted: formatDuration(session.time_studied_seconds || 0)
     }));
 };
@@ -87,7 +88,7 @@ const getSession = async (sessionId, userId) => {
         topic_description: sanitizeHtml(session.topic_description || ''),
         subject_name: sanitizeHtml(session.subject_name || ''),
         notes: sanitizeHtml(session.notes || ''),
-        is_overdue: new Date(session.session_date) < new Date() && session.status === 'Pendente',
+        is_overdue: isSessionOverdueLocal(session.session_date, session.status),
         duration_formatted: formatDuration(session.time_studied_seconds || 0),
         can_postpone: (session.postpone_count || 0) < 3,
         time_logs: timeLogs,
@@ -579,14 +580,15 @@ const calculateProductivityScore = (stats) => {
 
 /**
  * Calculate study streak (consecutive days with completed sessions)
+ * FIXED: Use local timezone for proper date calculations
  */
 const calculateStudyStreak = async (planId, userId) => {
     // Simplified implementation - could be enhanced
     const recentSessions = await scheduleRepository.getScheduleByDateRange(
         planId, 
         userId, 
-        new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        new Date().toISOString().split('T')[0]
+        getDateOffsetLocal(-30),
+        getLocalDateString()
     );
 
     const sessionsByDate = recentSessions.reduce((acc, session) => {
@@ -597,12 +599,9 @@ const calculateStudyStreak = async (planId, userId) => {
     }, {});
 
     let streak = 0;
-    const today = new Date();
     
     for (let i = 0; i < 30; i++) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString().split('T')[0];
+        const dateStr = getDateOffsetLocal(-i);
         
         if (sessionsByDate[dateStr]) {
             streak++;
@@ -616,10 +615,10 @@ const calculateStudyStreak = async (planId, userId) => {
 
 /**
  * Calculate weekly progress towards goals
+ * FIXED: Use local timezone for week calculations
  */
 const calculateWeeklyProgress = async (planId, userId) => {
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Start of current week
+    const weekStart = new Date(getWeekStartLocal()); // Start of current week in local timezone
     
     const weeklyData = await scheduleRepository.getWeeklySchedule(planId, userId, weekStart);
     

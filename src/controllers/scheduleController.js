@@ -8,6 +8,7 @@
 const scheduleService = require('../services/scheduleService');
 const { sanitizeHtml } = require('../utils/sanitizer');
 const { createSafeError, securityLog } = require('../utils/security');
+const { getLocalDateString } = require('../utils/timezone');
 
 /**
  * Get complete schedule for a plan
@@ -393,9 +394,9 @@ const getScheduleOverview = async (req, res) => {
             scheduleService.getScheduleAnalytics(planId, userId)
         ]);
 
-        // Calculate overview statistics
+        // Calculate overview statistics - FIXED: Use local timezone
         const allSessions = Object.values(schedule).flat();
-        const todaysSessions = schedule[new Date().toISOString().split('T')[0]] || [];
+        const todaysSessions = schedule[getLocalDateString()] || [];
         const overdueSessions = allSessions.filter(s => s.is_overdue);
         
         const overview = {

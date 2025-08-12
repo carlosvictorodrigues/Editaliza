@@ -148,7 +148,6 @@ const components = {
                     { href: currentPlanId ? `plan_settings.html?id=${currentPlanId}` : 'plan_settings.html', text: 'Configurações' }
                 ]
             },
-            { href: 'profile.html', text: 'Perfil' },
             { href: 'metodologia.html', text: 'Metodologia' },
             { href: 'faq.html', text: 'FAQ' }
         ];

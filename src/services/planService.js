@@ -8,6 +8,7 @@
 const planRepository = require('../repositories/planRepository');
 const { sanitizeHtml } = require('../utils/sanitizer');
 const { dbGet, dbAll } = require('../utils/database');
+const { getLocalDateString, getWeekStartLocal } = require('../utils/timezone');
 
 /**
  * Get schedule preview with simulation calculations
@@ -155,11 +156,9 @@ const getGoalProgress = async (planId, userId) => {
         throw new Error('Plano não encontrado');
     }
 
-    // Calculate daily/weekly goals and progress
-    const today = new Date().toISOString().split('T')[0];
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    const weekStartStr = weekStart.toISOString().split('T')[0];
+    // Calculate daily/weekly goals and progress - FIXED: Use local timezone
+    const today = getLocalDateString();
+    const weekStartStr = getWeekStartLocal();
 
     const dailyProgress = await planRepository.getDailyProgress(planId, today);
     const weeklyProgress = await planRepository.getWeeklyProgress(planId, weekStartStr);
@@ -513,7 +512,7 @@ const getActivitySummary = async (planId, userId, date) => {
         throw new Error('Plano não encontrado');
     }
 
-    return await planRepository.getActivitySummaryByDate(planId, date || new Date().toISOString().split('T')[0]);
+    return await planRepository.getActivitySummaryByDate(planId, date || getLocalDateString());
 };
 
 /**
