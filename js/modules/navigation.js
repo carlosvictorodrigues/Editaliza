@@ -61,8 +61,8 @@ export const Navigation = {
         
         const links = [
             { href: 'home.html', text: 'Painel Principal' },
-            { 
-                href: '#', 
+            {
+                href: '#',
                 text: 'Gerenciar Planos',
                 dropdown: [
                     { href: 'dashboard.html', text: 'Meus Planos' },
@@ -72,7 +72,6 @@ export const Navigation = {
                     { href: currentPlanId ? `plan_settings.html?id=${currentPlanId}` : 'plan_settings.html', text: 'Configurações' }
                 ]
             },
-            { href: 'profile.html', text: 'Perfil' },
             { href: 'metodologia.html', text: 'Metodologia' },
             { href: 'faq.html', text: 'FAQ' }
         ];
