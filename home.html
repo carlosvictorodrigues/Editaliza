@@ -901,7 +901,7 @@
             // Função para reforçar uma sessão (agenda para 3 dias depois)
             async function reinforceSession(sessionId) {
                 try {
-                    const result = await app.apiFetch(`/sessions/${sessionId}/reinforce`, { method: 'POST' });
+                    const result = await app.apiFetch(`/schedules/sessions/${sessionId}/reinforce`, { method: 'POST' });
                     if (result.message) {
                         app.showToast('💪 ' + result.message, 'success');
                         // Recarregar as atividades após o reforço
@@ -945,7 +945,7 @@
                 closePostponeModal();
 
                 try {
-                    const result = await app.apiFetch(`/sessions/${sessionIdToPostpone}/postpone`, {
+                    const result = await app.apiFetch(`/schedules/sessions/${sessionIdToPostpone}/postpone`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ days: days })
