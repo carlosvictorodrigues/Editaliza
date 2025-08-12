@@ -612,8 +612,8 @@ async function openStudySession(sessionId) {
                 const session = await fetchSessionData(sessionId);
                 if (session) {
                     TimerSystem.continueTimer(sessionId);
-                    StudyChecklist.startStudySession(false); // CORREÇÃO: Não iniciar novo timer
                     StudyChecklist.session = session; // Definir sessão para modal
+                    StudyChecklist.startStudySession(false); // CORREÇÃO: Não iniciar novo timer
                     app.showToast('⏱️ Continuando estudos! Timer retomado.', 'success');
                 } else {
                     console.error('❌ Não foi possível carregar dados da sessão');
