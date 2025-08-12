@@ -499,12 +499,15 @@
                     if (userAvatarElement && profile.profile_picture && profile.profile_picture.trim() !== '') {
                         const cacheBuster = '?t=' + new Date().getTime();
                         let avatarUrl;
-                        
+
                         if (profile.profile_picture.startsWith('https://')) {
                             avatarUrl = profile.profile_picture;
+                        } else if (profile.profile_picture.startsWith('/')) {
+                            avatarUrl = profile.profile_picture + cacheBuster;
+                        } else if (profile.profile_picture.startsWith('./')) {
+                            avatarUrl = profile.profile_picture + cacheBuster;
                         } else {
-                            avatarUrl = (profile.profile_picture.startsWith('./') ? 
-                                profile.profile_picture : './' + profile.profile_picture) + cacheBuster;
+                            avatarUrl = './' + profile.profile_picture + cacheBuster;
                         }
                         
                         console.log('🖼️ Carregando avatar:', avatarUrl);

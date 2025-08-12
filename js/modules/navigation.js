@@ -157,8 +157,11 @@ export const Navigation = {
             if (sanitizedAvatarPath.startsWith('https://')) {
                 // Avatar do Google - usar diretamente
                 avatarUrl = sanitizedAvatarPath;
+            } else if (sanitizedAvatarPath.startsWith('/')) {
+                // Avatar local com caminho absoluto
+                avatarUrl = sanitizedAvatarPath + '?t=' + new Date().getTime();
             } else {
-                // Avatar local - adicionar cache buster e caminho relativo
+                // Avatar local relativo - adicionar cache buster e prefixo
                 avatarUrl = (sanitizedAvatarPath.startsWith('./') ? sanitizedAvatarPath : './' + sanitizedAvatarPath) + '?t=' + new Date().getTime();
             }
             
@@ -311,6 +314,9 @@ export const Navigation = {
                 if (sanitizedAvatarPath.startsWith('https://')) {
                     // Google avatar - use directly
                     avatarUrl = sanitizedAvatarPath;
+                } else if (sanitizedAvatarPath.startsWith('/')) {
+                    // Local avatar with absolute path
+                    avatarUrl = sanitizedAvatarPath + '?t=' + new Date().getTime();
                 } else {
                     // Local avatar - add relative path and cache buster
                     avatarUrl = (sanitizedAvatarPath.startsWith('./') ? sanitizedAvatarPath : './' + sanitizedAvatarPath) + '?t=' + new Date().getTime();
