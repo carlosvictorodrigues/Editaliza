@@ -67,8 +67,18 @@ const StudyChecklist = {
             console.log(`✅ Sessão ${this.session.id} marcada como checklist mostrado`);
         }
         
+        const modal = document.getElementById('studySessionModal');
         const modalContainer = document.getElementById('studySessionModalContainer');
+        
         modalContainer.innerHTML = this.getTimerHtml();
+        
+        // CORREÇÃO: Garantir que o modal seja visível
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modalContainer.classList.remove('scale-95');
+        }, 10);
+        
         this.addTimerSessionListeners();
         
         // CORREÇÃO: Verificar se já existe timer ativo antes de iniciar
@@ -164,6 +174,10 @@ const StudyChecklist = {
                     <label for="modal-notes" class="text-sm font-medium text-gray-700">Anotações</label>
                     <textarea id="modal-notes" class="form-input py-2" rows="4" placeholder="Suas anotações...">${safeNotes}</textarea>
                 </div>
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="modal-status" class="w-4 h-4 text-editaliza-blue rounded focus:ring-editaliza-blue" ${this.session.status === 'Concluído' ? 'checked' : ''}>
+                    <label for="modal-status" class="text-sm font-medium text-gray-700">Marcar como concluído</label>
+                </div>
             </div>
 
             <div class="mt-6 pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -202,6 +216,13 @@ const StudyChecklist = {
     },
 
     addTimerSessionListeners() {
+        try {
+            console.log('🔧 Adicionando listeners do timer modal...');
+        } catch (error) {
+            console.error('❌ Erro ao adicionar listeners do timer:', error);
+            throw error;
+        }
+        
         const updateSessionData = app.debounce(async (field, value) => {
             try {
                 // CORREÇÃO 3: Usar endpoint correto e validar dados
@@ -240,9 +261,27 @@ const StudyChecklist = {
             window.addEventListener('beforeunload', () => clearInterval(saveTimer));
         }
 
-        document.getElementById('modal-questions-solved').addEventListener('input', (e) => updateSessionData('questions_solved', e.target.value));
-        document.getElementById('modal-notes').addEventListener('input', (e) => updateSessionData('notes', e.target.value));
-        document.getElementById('modal-status').addEventListener('change', async (e) => {
+        // CORREÇÃO: Adicionar listeners com verificação de existência
+        const questionsElement = document.getElementById('modal-questions-solved');
+        const notesElement = document.getElementById('modal-notes');
+        const statusElement = document.getElementById('modal-status');
+        
+        if (questionsElement) {
+            questionsElement.addEventListener('input', (e) => updateSessionData('questions_solved', e.target.value));
+            console.log('✅ Listener adicionado para modal-questions-solved');
+        } else {
+            console.warn('⚠️ Elemento modal-questions-solved não encontrado');
+        }
+        
+        if (notesElement) {
+            notesElement.addEventListener('input', (e) => updateSessionData('notes', e.target.value));
+            console.log('✅ Listener adicionado para modal-notes');
+        } else {
+            console.warn('⚠️ Elemento modal-notes não encontrado');
+        }
+        
+        if (statusElement) {
+            statusElement.addEventListener('change', async (e) => {
             const newStatus = e.target.checked ? 'Concluído' : 'Pendente';
             try {
                 // CORREÇÃO 3: Usar endpoint correto
@@ -305,7 +344,11 @@ const StudyChecklist = {
                     location.reload(); 
                 }
             }
-        });
+            });
+            console.log('✅ Listener adicionado para modal-status');
+        } else {
+            console.warn('⚠️ Elemento modal-status não encontrado');
+        }
     },
 
     addAnimations() {

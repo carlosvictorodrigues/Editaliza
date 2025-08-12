@@ -595,9 +595,17 @@ async function openStudySession(sessionId) {
         const hasElapsedTime = window.TimerSystem && TimerSystem.getTimerElapsed(sessionId) > 1000; // Mais de 1 segundo
         
         if (hasActiveTimer) {
-            console.log(`⏰ Timer ativo encontrado para sessão ${sessionId} - continuando sem abrir checklist`);
-            TimerSystem.continueTimer(sessionId);
-            app.showToast('⏱️ Timer retomado! Continue estudando.', 'success');
+            console.log(`⏰ Timer ativo encontrado para sessão ${sessionId} - continuando e abrindo modal`);
+            const session = await fetchSessionData(sessionId);
+            if (session) {
+                TimerSystem.continueTimer(sessionId);
+                StudyChecklist.session = session; // Definir sessão para modal
+                StudyChecklist.startStudySession(false); // Não iniciar novo timer, apenas abrir modal
+                app.showToast('⏱️ Timer retomado! Continue estudando.', 'success');
+            } else {
+                console.error('❌ Não foi possível carregar dados da sessão');
+                app.showToast('Erro ao carregar sessão. Tente novamente.', 'error');
+            }
             return;
         }
         
