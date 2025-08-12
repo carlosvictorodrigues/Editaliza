@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Avatar na Navegação - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- NAVEGAÇÃO PRINCIPAL -->
+    <div id="main-nav-container"></div>
+
+    <main class="container mx-auto p-8 max-w-4xl">
+        <div class="bg-white rounded-lg shadow-md p-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">🧪 Teste de Avatar na Navegação</h1>
+            
+            <div class="space-y-6">
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+                    <h3 class="font-semibold text-blue-800 mb-2">✅ Funcionalidade Implementada:</h3>
+                    <ul class="text-blue-700 space-y-1 ml-4">
+                        <li>• Avatar do usuário aparece na navegação superior</li>
+                        <li>• Carregamento automático do avatar do perfil</li>
+                        <li>• Cache de 5 minutos para otimizar performance</li>
+                        <li>• Fallback para ícone padrão se não houver avatar</li>
+                        <li>• Atualização automática quando avatar é alterado no perfil</li>
+                        <li>• Design responsivo (oculta texto "Perfil" em telas menores)</li>
+                    </ul>
+                </div>
+
+                <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                    <h3 class="font-semibold text-green-800 mb-2">🔧 Como Funciona:</h3>
+                    <ol class="text-green-700 space-y-2 ml-4">
+                        <li><strong>1. Carregamento:</strong> A função <code>renderMainNavigation()</code> agora é assíncrona e carrega o avatar do usuário</li>
+                        <li><strong>2. Cache:</strong> Avatar é armazenado em cache por 5 minutos para evitar requisições desnecessárias</li>
+                        <li><strong>3. Estados:</strong> Trata usuários com avatar, sem avatar, e erros de carregamento</li>
+                        <li><strong>4. Atualização:</strong> Quando o perfil é salvo, o avatar na navegação é atualizado automaticamente</li>
+                    </ol>
+                </div>
+
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                    <h3 class="font-semibold text-yellow-800 mb-2">🔄 Arquivos Modificados:</h3>
+                    <ul class="text-yellow-700 space-y-1 ml-4">
+                        <li>• <code>js/components.js</code> - Lógica principal do avatar na navegação</li>
+                        <li>• <code>js/app.js</code> - Função para notificar mudanças no avatar</li>
+                        <li>• <code>home.html</code> - Atualizado para usar função assíncrona</li>
+                        <li>• <code>dashboard.html</code> - Atualizado para usar função assíncrona</li>
+                        <li>• <code>profile.html</code> - Chama atualização do avatar após salvar</li>
+                        <li>• <code>plan.html</code> - Atualizado para usar função assíncrona</li>
+                        <li>• <code>cronograma.html</code> - Atualizado para usar função assíncrona</li>
+                    </ul>
+                </div>
+
+                <div class="bg-purple-50 border-l-4 border-purple-400 p-4">
+                    <h3 class="font-semibold text-purple-800 mb-2">💡 Para Testar:</h3>
+                    <ol class="text-purple-700 space-y-2 ml-4">
+                        <li><strong>1.</strong> Acesse a página de perfil e configure um avatar</li>
+                        <li><strong>2.</strong> Navegue por diferentes páginas e observe o avatar na navegação</li>
+                        <li><strong>3.</strong> Mude o avatar no perfil e veja a atualização automática</li>
+                        <li><strong>4.</strong> Teste em diferentes tamanhos de tela (responsivo)</li>
+                    </ol>
+                </div>
+
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-800 mb-2">🎨 Design Implementado:</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <strong>Com Avatar:</strong>
+                            <div class="mt-2 p-3 bg-white rounded border">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full"></div>
+                                    <span class="text-gray-700">Perfil</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <strong>Sem Avatar:</strong>
+                            <div class="mt-2 p-3 bg-white rounded border">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center text-white">
+                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="text-gray-700">Perfil</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🧪 Inicializando teste de avatar...');
+            
+            try {
+                // Renderizar navegação com avatar
+                await components.renderMainNavigation('test-avatar.html');
+                console.log('✅ Navegação renderizada com sucesso!');
+            } catch (error) {
+                console.error('❌ Erro ao renderizar navegação:', error);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -132,26 +132,14 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // CORREÇÃO DE SEGURANÇA: Buscar token de forma segura via endpoint
+            // Check for OAuth success and extract token from URL
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('auth_success') === '1') {
-                // Buscar token da sessão segura ao invés da URL
-                fetch('/auth/session-token')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.token) {
-                            localStorage.setItem(app.config.tokenKey, data.token);
-                            // Clean URL and redirect
-                            window.history.replaceState({}, document.title, window.location.pathname);
-                            window.location.href = 'home.html';
-                        } else {
-                            throw new Error('Token não encontrado na sessão');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Erro ao recuperar token:', error);
-                        window.location.href = '/login.html?error=token_retrieval_failed';
-                    });
+            if (urlParams.get('auth_success') === '1' && urlParams.get('token')) {
+                const token = urlParams.get('token');
+                localStorage.setItem(app.config.tokenKey, token);
+                // Clean URL and redirect
+                window.history.replaceState({}, document.title, window.location.pathname);
+                window.location.href = 'home.html';
                 return;
             }
             

@@ -4,20 +4,55 @@ const xss = require('xss');
 const jwt = require('jsonwebtoken');
 const { securityLog } = require('./src/utils/security');
 
-// Placeholder middleware for admin-only routes
-const requireAdmin = (req, res, next) => {
-    // In a real application, you would check for an admin role on the user object
-    // For example: if (req.user && req.user.role === 'admin')
-    if (req.user && req.user.isAdmin) { // Assuming an 'isAdmin' flag for now
-        return next();
+// CORREÇÃO DE SEGURANÇA: Middleware administrativo com verificação no banco
+const requireAdmin = async (req, res, next) => {
+    try {
+        // Verificar se usuário está autenticado
+        if (!req.user || !req.user.id) {
+            securityLog('admin_access_denied_no_auth', { 
+                route: req.originalUrl,
+                ip: req.ip 
+            }, null, req);
+            return res.status(401).json({ error: 'Autenticação necessária' });
+        }
+        
+        // Importar função de banco (assumindo que será injetada)
+        if (!global.dbGet) {
+            console.error('[SECURITY] dbGet não disponível para verificação admin');
+            return res.status(500).json({ error: 'Erro na verificação de permissões' });
+        }
+        
+        // Buscar role do usuário no banco
+        const user = await global.dbGet('SELECT role FROM users WHERE id = ?', [req.user.id]);
+        
+        if (!user || user.role !== 'admin') {
+            securityLog('admin_access_denied', { 
+                userId: req.user.id, 
+                userRole: user ? user.role : 'not_found',
+                route: req.originalUrl 
+            }, req.user.id, req);
+            
+            console.warn(`[SECURITY] Tentativa de acesso admin não autorizada: user_id=${req.user.id}, role=${user?.role}, ip=${req.ip}`);
+            return res.status(403).json({ error: "Acesso negado. Permissões administrativas necessárias." });
+        }
+        
+        // Log de acesso admin autorizado
+        securityLog('admin_access_granted', { 
+            userId: req.user.id, 
+            route: req.originalUrl 
+        }, req.user.id, req);
+        
+        next();
+    } catch (error) {
+        console.error('[SECURITY] Erro na verificação de permissões admin:', error);
+        securityLog('admin_check_error', { 
+            userId: req.user ? req.user.id : 'unknown',
+            error: error.message,
+            route: req.originalUrl 
+        }, req.user ? req.user.id : null, req);
+        
+        return res.status(500).json({ error: 'Erro interno do servidor' });
     }
-    
-    securityLog('admin_access_denied', { 
-        userId: req.user ? req.user.id : 'unknown', 
-        route: req.originalUrl 
-    }, req.user ? req.user.id : null, req);
-
-    return res.status(403).json({ error: "Acesso negado. Recurso para administradores." });
 };
 
 // Função para sanitizar inputs contra XSS

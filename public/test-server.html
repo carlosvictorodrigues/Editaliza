@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Servidor - Avatares</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .avatar-test {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .avatar-item {
+            width: 80px;
+            height: 80px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .avatar-item img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Teste de Carregamento de Avatares</h1>
+    
+    <div class="status info">
+        <strong>URL atual:</strong> <span id="current-url"></span><br>
+        <strong>Protocolo:</strong> <span id="protocol"></span><br>
+        <strong>Base path:</strong> <span id="base-path"></span>
+    </div>
+    
+    <div id="test-results"></div>
+    
+    <div class="avatar-test" id="avatar-gallery"></div>
+    
+    <div class="log" id="console-log"></div>
+    
+    <button onclick="runTests()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        🔄 Executar Testes Novamente
+    </button>
+    
+    <script>
+        const log = document.getElementById('console-log');
+        const results = document.getElementById('test-results');
+        const gallery = document.getElementById('avatar-gallery');
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            log.textContent += `[${timestamp}] ${message}\n`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+        
+        function updateStatus() {
+            document.getElementById('current-url').textContent = window.location.href;
+            document.getElementById('protocol').textContent = window.location.protocol;
+            document.getElementById('base-path').textContent = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+        }
+        
+        async function testAvatarPaths() {
+            const testConfigs = [
+                {
+                    category: 'adventurer',
+                    fileName: 'avatar',
+                    count: 6
+                },
+                {
+                    category: 'pixel-art', 
+                    fileName: 'pixel',
+                    count: 6
+                },
+                {
+                    category: 'bots',
+                    fileName: 'bot', 
+                    count: 6
+                },
+                {
+                    category: 'miniavs',
+                    fileName: 'miniav',
+                    count: 6
+                }
+            ];
+            
+            const pathVariations = [
+                (cat, file, i) => `./images/avatars/${cat}/${file}${i}.svg`,
+                (cat, file, i) => `images/avatars/${cat}/${file}${i}.svg`,
+                (cat, file, i) => `/images/avatars/${cat}/${file}${i}.svg`,
+            ];
+            
+            let successCount = 0;
+            let totalTests = 0;
+            
+            results.innerHTML = '';
+            gallery.innerHTML = '';
+            
+            for (const config of testConfigs) {
+                addLog(`🧪 Testando categoria: ${config.category}`);
+                
+                for (let i = 1; i <= config.count; i++) {
+                    for (let pathIndex = 0; pathIndex < pathVariations.length; pathIndex++) {
+                        const pathFunc = pathVariations[pathIndex];
+                        const path = pathFunc(config.category, config.fileName, i);
+                        totalTests++;
+                        
+                        try {
+                            const response = await fetch(path);
+                            if (response.ok) {
+                                addLog(`✅ SUCESSO: ${path}`);
+                                successCount++;
+                                
+                                // Add to gallery
+                                const avatarDiv = document.createElement('div');
+                                avatarDiv.className = 'avatar-item';
+                                avatarDiv.innerHTML = `<img src="${path}" alt="${config.fileName}${i}" title="${path}">`;
+                                gallery.appendChild(avatarDiv);
+                                
+                                break; // Stop trying other paths for this avatar
+                            } else {
+                                addLog(`❌ ERRO ${response.status}: ${path}`);
+                            }
+                        } catch (error) {
+                            addLog(`❌ ERRO FETCH: ${path} - ${error.message}`);
+                        }
+                    }
+                }
+            }
+            
+            const successRate = ((successCount / totalTests) * 100).toFixed(1);
+            const statusClass = successCount > 0 ? 'success' : 'error';
+            
+            results.innerHTML = `
+                <div class="status ${statusClass}">
+                    <strong>Resultado dos Testes:</strong><br>
+                    ✅ Sucessos: ${successCount}<br>
+                    ❌ Falhas: ${totalTests - successCount}<br>
+                    📊 Taxa de sucesso: ${successRate}%<br>
+                    📁 Total de testes: ${totalTests}
+                </div>
+            `;
+            
+            if (successCount === 0) {
+                results.innerHTML += `
+                    <div class="status error">
+                        <strong>⚠️ DIAGNÓSTICO:</strong><br>
+                        • Os arquivos SVG existem na pasta images/avatars/<br>
+                        • Nenhum caminho funcionou - problema de servidor<br>
+                        • Solução: Execute um servidor HTTP local<br>
+                        • Comando: <code>python -m http.server 8000</code> ou <code>npx serve .</code>
+                    </div>
+                `;
+            }
+        }
+        
+        async function runTests() {
+            addLog('🚀 Iniciando testes de carregamento de avatares...');
+            updateStatus();
+            await testAvatarPaths();
+            addLog('✨ Testes concluídos!');
+        }
+        
+        // Run tests on load
+        document.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html>

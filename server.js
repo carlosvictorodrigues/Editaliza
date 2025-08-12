@@ -44,27 +44,64 @@ try {
 }
 
 const app = express();
-// Servir arquivos estáticos (HTML, CSS, JS)
-app.use(express.static(__dirname));
+// CORREÇÃO DE SEGURANÇA: Servir apenas arquivos públicos necessários
+// Anteriormente: app.use(express.static(__dirname)); // ❌ EXPUNHA TODO O PROJETO
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Configurações de segurança - Helmet
+// Servir arquivos específicos ainda no root (compatibilidade temporária)
+app.use('/css', express.static(path.join(__dirname, 'css')));
+app.use('/js', express.static(path.join(__dirname, 'js')));
+
+// CORREÇÃO: Servir avatares de forma segura - apenas imagens da pasta images/avatars
+app.use('/images', express.static(path.join(__dirname, 'images')));
+
+// Servir arquivos HTML específicos
+const allowedHtmlFiles = [
+    'home.html', 'login.html', 'register.html', 'dashboard.html', 
+    'profile.html', 'cronograma.html', 'plan.html', 'notes.html',
+    'metodologia.html', 'faq.html', 'plan_settings.html'
+];
+
+allowedHtmlFiles.forEach(file => {
+    app.get(`/${file}`, (req, res) => {
+        res.sendFile(path.join(__dirname, file));
+    });
+});
+
+// CORREÇÃO DE SEGURANÇA: CSP endurecida sem unsafe-inline
+// Middleware para gerar nonce único por requisição
+app.use((req, res, next) => {
+    res.locals.nonce = require('crypto').randomBytes(16).toString('base64');
+    next();
+});
+
+// Configurações de segurança - Helmet com CSP endurecida
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com", "https://fonts.googleapis.com"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com"],
+            // CORREÇÃO: Remover 'unsafe-inline' e usar nonce
+            styleSrc: ["'self'", "https://cdn.tailwindcss.com", "https://fonts.googleapis.com", (req, res) => `'nonce-${res.locals.nonce}'`],
+            scriptSrc: ["'self'", "https://cdn.tailwindcss.com", (req, res) => `'nonce-${res.locals.nonce}'`],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            imgSrc: ["'self'", "data:", "https:"],
+            imgSrc: ["'self'", "data:", "https:", "https://lh3.googleusercontent.com"], // Google avatars
             connectSrc: ["'self'", "https://accounts.google.com"],
             formAction: ["'self'", "https://accounts.google.com"],
+            objectSrc: ["'none'"], // Bloquear Flash/plugins
+            baseUri: ["'self'"], // Prevenir ataques base href
+            frameAncestors: ["'none'"], // Clickjacking protection
+            upgradeInsecureRequests: [], // Forçar HTTPS
         },
     },
     hsts: {
         maxAge: 31536000,
         includeSubDomains: true,
         preload: true
-    }
+    },
+    // Adicionar headers de segurança extras
+    frameguard: { action: 'deny' },
+    noSniff: true,
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
 }));
 
 // Configuração CORS mais restritiva
@@ -377,6 +414,9 @@ if (missingEnvVars.length > 0) {
 // Funções utilitárias para interagir com o banco de dados usando Promises
 const dbGet = (sql, params = []) => new Promise((resolve, reject) => db.get(sql, params, (err, row) => err ? reject(err) : resolve(row)));
 const dbAll = (sql, params = []) => new Promise((resolve, reject) => db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows)));
+
+// CORREÇÃO DE SEGURANÇA: Disponibilizar dbGet para middleware de admin
+global.dbGet = dbGet;
 const dbRun = (sql, params = []) => new Promise((resolve, reject) => db.run(sql, params, function(err) { err ? reject(err) : resolve(this) }));
 
 // --- ROTAS DE AUTENTICAÇÃO E USUÁRIO ---
@@ -495,14 +535,35 @@ app.get('/auth/google/callback',
             req.session.userId = req.user.id;
             req.session.loginTime = new Date();
             
-            // Redirect to frontend with token in URL fragment (more secure than query param)
-            res.redirect(`/home.html?auth_success=1&token=${encodeURIComponent(token)}`);
+            // CORREÇÃO DE SEGURANÇA: Usar session ao invés de token na URL
+            // Anteriormente: res.redirect(`/home.html?auth_success=1&token=${token}`); // ❌ EXPUNHA TOKEN
+            
+            // Salvar token na sessão segura
+            req.session.authToken = token;
+            req.session.authSuccess = true;
+            
+            // Redirecionar sem expor token na URL
+            res.redirect('/home.html?auth_success=1');
         } catch (error) {
             console.error('Google OAuth callback error:', error);
             res.redirect('/login.html?error=oauth_callback_failed');
         }
     }
 );
+
+// CORREÇÃO DE SEGURANÇA: Endpoint seguro para recuperar token da sessão
+app.get('/auth/session-token', (req, res) => {
+    if (req.session.authSuccess && req.session.authToken) {
+        // Retornar token uma única vez e limpar da sessão
+        const token = req.session.authToken;
+        req.session.authToken = null;
+        req.session.authSuccess = null;
+        
+        res.json({ token, success: true });
+    } else {
+        res.status(401).json({ error: 'Nenhum token de sessão disponível' });
+    }
+});
 
 // Route to check Google OAuth status (for debugging)
 app.get('/auth/google/status', authenticateToken, (req, res) => {

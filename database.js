@@ -169,6 +169,9 @@ const db = new sqlite3.Database(DBSOURCE, async (err) => {
             await addColumnIfNotExists('users', 'auth_provider', 'TEXT DEFAULT "local"');
             await addColumnIfNotExists('users', 'google_avatar', 'TEXT');
             
+            // CORREÇÃO DE SEGURANÇA: Adicionar sistema de roles
+            await addColumnIfNotExists('users', 'role', 'TEXT DEFAULT "user"');
+            
 	    // Adiciona coluna de tempo estudado
 	    await addColumnIfNotExists('study_sessions', 'time_studied_seconds', 'INTEGER DEFAULT 0');
 

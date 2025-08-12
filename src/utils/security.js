@@ -21,24 +21,53 @@ const securityLog = (event, details = {}, userId = null, req = null) => {
 };
 
 // Validação segura de paths de arquivo
+// CORREÇÃO DE SEGURANÇA: Validação robusta de caminhos de arquivo
 const validateFilePath = (filePath, allowedDir = 'uploads') => {
     if (!filePath || typeof filePath !== 'string') {
         throw new Error('Path de arquivo inválido');
     }
     
-    // Normalizar o path para evitar path traversal
-    const normalizedPath = path.normalize(filePath);
-    
-    // Verificar se não contém sequências perigosas
-    const dangerousSequences = ['../', '..\\', '.\\', './'];
-    if (dangerousSequences.some(seq => normalizedPath.includes(seq))) {
-        throw new Error('Path traversal detectado');
+    // Decodificar URL encoding que pode mascarar ataques
+    let decodedPath;
+    try {
+        decodedPath = decodeURIComponent(filePath);
+    } catch (error) {
+        throw new Error('Path contém encoding inválido');
     }
     
-    // Verificar se está dentro do diretório permitido
-    if (!normalizedPath.startsWith(`/${allowedDir}/`) && !normalizedPath.startsWith(allowedDir)) {
-        throw new Error(`Acesso negado: fora do diretório ${allowedDir}`);
+    // Verificar caracteres perigosos ANTES da normalização
+    const dangerousChars = /[<>:"|?*\x00-\x1f]/;
+    if (dangerousChars.test(decodedPath)) {
+        throw new Error('Path contém caracteres perigosos');
     }
+    
+    // Resolver path absoluto para o diretório permitido
+    const baseDir = path.resolve(process.cwd(), allowedDir);
+    const fullPath = path.resolve(baseDir, decodedPath);
+    
+    // CRÍTICO: Verificar se o path resolvido ainda está dentro do diretório base
+    if (!fullPath.startsWith(baseDir + path.sep) && fullPath !== baseDir) {
+        throw new Error(`Path traversal bloqueado: tentativa de acesso a ${fullPath}`);
+    }
+    
+    // Verificar se o path normalizado não contém sequências suspeitas
+    const normalizedPath = path.normalize(decodedPath);
+    const suspiciousPatterns = [
+        /\.\.[\/\\]/g,           // Path traversal
+        /~[\/\\]/g,              // Home directory access
+        /\$[A-Z_]+/g,            // Environment variables
+        /%[0-9A-Fa-f]{2}/g,      // URL encoding residual
+        /\\\\[^\\]+\\[^\\]+/g    // UNC paths
+    ];
+    
+    for (const pattern of suspiciousPatterns) {
+        if (pattern.test(normalizedPath)) {
+            throw new Error(`Padrão suspeito detectado no path: ${pattern.toString()}`);
+        }
+    }
+    
+    // Log de validação bem-sucedida para auditoria
+    console.debug(`[SECURITY] Path validado com sucesso: ${decodedPath} -> ${fullPath}`);
     
     return normalizedPath;
 };

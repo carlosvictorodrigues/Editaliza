@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Sistema de Notificações Contextuais PRO</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .animate-glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+            to { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+        }
+        
+        .bg-editaliza-blue { background-color: #3b82f6; }
+        .text-editaliza-blue { color: #3b82f6; }
+        .bg-editaliza-black { background-color: #1f2937; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto p-8">
+        <div class="bg-white rounded-2xl shadow-xl p-8 mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4 text-center">
+                🎯 Teste do Sistema de Notificações Contextuais PRO
+            </h1>
+            <p class="text-gray-600 text-center mb-8">
+                Este teste valida a implementação segura das notificações contextuais sem interferir no sistema existente.
+            </p>
+        </div>
+
+        <!-- Test Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Basic Toast Tests -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-semibold mb-4 text-blue-800">🔔 Testes de Toast Básico</h3>
+                <div class="space-y-3">
+                    <button onclick="testBasicSuccess()" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Teste Sucesso
+                    </button>
+                    <button onclick="testBasicError()" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Teste Erro
+                    </button>
+                    <button onclick="testBasicInfo()" class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Teste Info
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contextual Notification Tests -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-semibold mb-4 text-purple-800">🎯 Notificações Contextuais</h3>
+                <div class="space-y-3">
+                    <button onclick="testMotivational()" class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Motivacional
+                    </button>
+                    <button onclick="testAchievement()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Conquista
+                    </button>
+                    <button onclick="testCelebration()" class="w-full bg-pink-500 hover:bg-pink-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Celebração
+                    </button>
+                    <button onclick="testReminder()" class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Lembrete
+                    </button>
+                </div>
+            </div>
+
+            <!-- System Integration Tests -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-semibold mb-4 text-orange-800">⚙️ Testes de Integração</h3>
+                <div class="space-y-3">
+                    <button onclick="testSessionComplete()" class="w-full bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Sessão Completa
+                    </button>
+                    <button onclick="testMilestone()" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Marco Atingido
+                    </button>
+                    <button onclick="testStreak()" class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        Sequência
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Status -->
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h3 class="text-xl font-semibold mb-4 text-gray-800">📊 Status do Sistema</h3>
+            <div id="system-status" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-700 mb-2">Sistemas Carregados</h4>
+                    <div id="loaded-systems" class="text-sm text-gray-600">
+                        Verificando...
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h4 class="font-semibold text-gray-700 mb-2">Integrações Ativas</h4>
+                    <div id="active-integrations" class="text-sm text-gray-600">
+                        Verificando...
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4 text-center">
+                <button onclick="updateSystemStatus()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors">
+                    🔄 Atualizar Status
+                </button>
+                <button onclick="runHealthCheck()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg transition-colors ml-2">
+                    🩺 Check de Saúde
+                </button>
+            </div>
+        </div>
+
+        <!-- Log Output -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="text-xl font-semibold mb-4 text-gray-800">📝 Log de Testes</h3>
+            <div id="test-log" class="bg-gray-900 text-green-400 p-4 rounded-lg h-64 overflow-y-auto text-sm font-mono">
+                [INFO] Sistema de testes inicializado...<br>
+            </div>
+            <div class="mt-4 text-center">
+                <button onclick="clearLog()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    🗑️ Limpar Log
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load existing systems first -->
+    <script src="js/modules/ui-core.js" type="module"></script>
+    <script src="js/modules/contextual-notifications.js" type="module"></script>
+    <script src="js/modules/notification-integrations.js" type="module"></script>
+
+    <script>
+        // Test logging function
+        function log(message, type = 'INFO') {
+            const logElement = document.getElementById('test-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const colorClass = {
+                'INFO': 'text-green-400',
+                'SUCCESS': 'text-blue-400', 
+                'ERROR': 'text-red-400',
+                'WARNING': 'text-yellow-400'
+            }[type] || 'text-green-400';
+            
+            logElement.innerHTML += `<span class="${colorClass}">[${timestamp}] [${type}] ${message}</span><br>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Mock app object for testing
+        if (!window.app) {
+            window.app = {
+                showToast: (message, type) => {
+                    log(`Basic Toast: ${message} (${type})`, 'INFO');
+                },
+                apiFetch: async (url) => {
+                    log(`API Call: ${url}`, 'INFO');
+                    return { 
+                        email: 'test@example.com',
+                        study_hours: '2-4h',
+                        timeline_goal: '6 meses'
+                    };
+                },
+                getGamificationData: async (planId) => {
+                    log(`Gamification Data Request: Plan ${planId}`, 'INFO');
+                    return {
+                        studyStreak: 5,
+                        totalStudyDays: 20,
+                        experiencePoints: 1250,
+                        completedTopicsCount: 15,
+                        concurseiroLevel: 'Pagador(a) de Inscrição 💸',
+                        topicsToNextLevel: 25
+                    };
+                }
+            };
+        }
+
+        // Basic toast tests
+        function testBasicSuccess() {
+            log('Testando toast básico de sucesso...', 'INFO');
+            if (window.UICore) {
+                window.UICore.showToast('✅ Teste de sucesso realizado com êxito!', 'success');
+                log('Toast básico de sucesso enviado', 'SUCCESS');
+            } else {
+                log('UICore não disponível', 'ERROR');
+            }
+        }
+
+        function testBasicError() {
+            log('Testando toast básico de erro...', 'INFO');
+            if (window.UICore) {
+                window.UICore.showToast('❌ Teste de erro executado', 'error');
+                log('Toast básico de erro enviado', 'SUCCESS');
+            } else {
+                log('UICore não disponível', 'ERROR');
+            }
+        }
+
+        function testBasicInfo() {
+            log('Testando toast básico de informação...', 'INFO');
+            if (window.app) {
+                window.app.showToast('ℹ️ Esta é uma informação de teste');
+                log('Toast básico de informação enviado', 'SUCCESS');
+            } else {
+                log('App não disponível', 'ERROR');
+            }
+        }
+
+        // Contextual notification tests
+        function testMotivational() {
+            log('Testando notificação motivacional...', 'INFO');
+            if (window.ContextualNotifications) {
+                window.ContextualNotifications.showContextualNotification(
+                    'Você tem tudo que precisa para ser aprovado! Continue focado! 🎯',
+                    'motivational'
+                );
+                log('Notificação motivacional enviada', 'SUCCESS');
+            } else {
+                log('ContextualNotifications não disponível', 'ERROR');
+            }
+        }
+
+        function testAchievement() {
+            log('Testando notificação de conquista...', 'INFO');
+            if (window.ContextualNotifications) {
+                window.ContextualNotifications.showContextualNotification(
+                    '🏆 Parabéns! Você desbloqueou a conquista "Estudante Dedicado"!',
+                    'achievement'
+                );
+                log('Notificação de conquista enviada', 'SUCCESS');
+            } else {
+                log('ContextualNotifications não disponível', 'ERROR');
+            }
+        }
+
+        function testCelebration() {
+            log('Testando notificação de celebração...', 'INFO');
+            if (window.ContextualNotifications) {
+                window.ContextualNotifications.showContextualNotification(
+                    '🎉 Incrível! Você completou mais uma sessão de estudo com sucesso!',
+                    'celebration'
+                );
+                log('Notificação de celebração enviada', 'SUCCESS');
+            } else {
+                log('ContextualNotifications não disponível', 'ERROR');
+            }
+        }
+
+        function testReminder() {
+            log('Testando notificação de lembrete...', 'INFO');
+            if (window.ContextualNotifications) {
+                window.ContextualNotifications.showContextualNotification(
+                    '💡 Lembre-se: fazer pausas regulares ajuda na absorção do conteúdo!',
+                    'reminder'
+                );
+                log('Notificação de lembrete enviada', 'SUCCESS');
+            } else {
+                log('ContextualNotifications não disponível', 'ERROR');
+            }
+        }
+
+        // Integration tests
+        function testSessionComplete() {
+            log('Testando evento de sessão completa...', 'INFO');
+            document.dispatchEvent(new CustomEvent('sessionCompleted', {
+                detail: {
+                    sessionId: 'test-123',
+                    subject: 'Teste de Matéria',
+                    completedAt: new Date()
+                }
+            }));
+            log('Evento sessionCompleted disparado', 'SUCCESS');
+        }
+
+        function testMilestone() {
+            log('Testando evento de marco atingido...', 'INFO');
+            document.dispatchEvent(new CustomEvent('milestoneReached', {
+                detail: {
+                    count: 25,
+                    newTopics: 5
+                }
+            }));
+            log('Evento milestoneReached disparado', 'SUCCESS');
+        }
+
+        function testStreak() {
+            log('Testando evento de sequência...', 'INFO');
+            document.dispatchEvent(new CustomEvent('streakMilestone', {
+                detail: {
+                    streak: 7
+                }
+            }));
+            log('Evento streakMilestone disparado', 'SUCCESS');
+        }
+
+        // System status functions
+        function updateSystemStatus() {
+            log('Atualizando status do sistema...', 'INFO');
+            
+            const loadedSystems = document.getElementById('loaded-systems');
+            const activeIntegrations = document.getElementById('active-integrations');
+            
+            const systems = [
+                { name: 'UICore', available: !!window.UICore },
+                { name: 'ContextualNotifications', available: !!window.ContextualNotifications },
+                { name: 'NotificationIntegrations', available: !!window.NotificationIntegrations },
+                { name: 'App', available: !!window.app },
+                { name: 'Toast Container', available: !!document.getElementById('toast-container') }
+            ];
+            
+            loadedSystems.innerHTML = systems.map(sys => 
+                `<div class="flex items-center justify-between py-1">
+                    <span>${sys.name}</span>
+                    <span class="${sys.available ? 'text-green-600' : 'text-red-600'}">
+                        ${sys.available ? '✅' : '❌'}
+                    </span>
+                </div>`
+            ).join('');
+            
+            // Check integrations
+            if (window.NotificationIntegrations) {
+                const health = window.NotificationIntegrations.healthCheck();
+                activeIntegrations.innerHTML = `
+                    <div class="space-y-1">
+                        <div>Inicializado: ${health.isInitialized ? '✅' : '❌'}</div>
+                        <div>Integrações: ${health.integrationCount}</div>
+                        <div>Timestamp: ${new Date(health.timestamp).toLocaleTimeString()}</div>
+                    </div>
+                `;
+            } else {
+                activeIntegrations.innerHTML = '<div class="text-red-600">NotificationIntegrations não disponível</div>';
+            }
+            
+            log('Status do sistema atualizado', 'SUCCESS');
+        }
+
+        function runHealthCheck() {
+            log('Executando check de saúde completo...', 'INFO');
+            
+            if (window.NotificationIntegrations) {
+                const health = window.NotificationIntegrations.healthCheck();
+                log(`Health Check Result: ${JSON.stringify(health, null, 2)}`, 'INFO');
+                log('Check de saúde concluído', 'SUCCESS');
+            } else {
+                log('NotificationIntegrations não disponível para health check', 'ERROR');
+            }
+            
+            updateSystemStatus();
+        }
+
+        function clearLog() {
+            document.getElementById('test-log').innerHTML = '';
+            log('Log limpo', 'INFO');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            log('Página de testes carregada', 'INFO');
+            
+            // Wait for systems to load
+            setTimeout(() => {
+                updateSystemStatus();
+                log('Status inicial atualizado', 'INFO');
+                
+                // Test basic functionality
+                setTimeout(() => {
+                    if (window.ContextualNotifications) {
+                        window.ContextualNotifications.triggerMotivationalMessage();
+                        log('Mensagem motivacional de boas-vindas enviada', 'INFO');
+                    }
+                }, 1000);
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nossa Metodologia - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <!-- SCRIPTS CENTRALIZADOS -->
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <!-- Config do Tailwind para reconhecer as cores customizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-black': '#0d0d0d',
+                        'editaliza-gray': '#969696',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-gray-800">
+    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
+    <div id="main-nav-container"></div>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-editaliza-blue">A Ciência por Trás do Seu Sucesso</h1>
+            <p class="text-lg text-editaliza-gray mt-2">Entenda como transformamos seu esforço em aprovação.</p>
+        </header>
+
+        <!-- SEÇÃO 1: GUIA RÁPIDO -->
+        <div class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 text-center mb-8">O Guia Rápido do Aprovado</h2>
+            <p class="text-center text-gray-600 mb-10">Nossa plataforma foi desenhada para ser seu cérebro de estudos digital. Siga estes passos para extrair o máximo do seu potencial.</p>
+            
+            <div class="space-y-8 border-l-2 border-blue-200 ml-4 pl-8">
+                <!-- Passo 1 -->
+                <div class="relative">
+                    <div class="absolute -left-11 -top-1 w-8 h-8 bg-editaliza-blue rounded-full text-white flex items-center justify-center font-bold">1</div>
+                    <h3 class="text-xl font-semibold text-editaliza-blue">Crie e Configure seu Plano</h3>
+                    <p class="mt-2 text-gray-700"><strong>Ação:</strong> Vá em <a href="dashboard.html" class="font-bold text-editaliza-blue hover:underline">Gerenciar Planos</a> e crie seu primeiro plano. Dê um nome (ex: "TJCE - Analista Judiciário") e defina a data da sua prova.</p>
+                    <p class="mt-1 text-gray-700"><strong>O Manual:</strong> Nas configurações, ajuste suas <strong>horas de estudo disponíveis</strong> para cada dia da semana. Isso é crucial para que nosso sistema saiba quando você pode estudar. Defina também a <strong>duração de cada sessão</strong> (recomendamos 50 minutos para foco total, no estilo Pomodoro).</p>
+                </div>
+                <!-- Passo 2 -->
+                <div class="relative">
+                    <div class="absolute -left-11 -top-1 w-8 h-8 bg-editaliza-blue rounded-full text-white flex items-center justify-center font-bold">2</div>
+                    <h3 class="text-xl font-semibold text-editaliza-blue">Adicione Suas Disciplinas e Tópicos</h3>
+                    <p class="mt-2 text-gray-700"><strong>Ação:</strong> Dentro das configurações do plano, adicione as disciplinas do seu edital.</p>
+                    <p class="mt-1 text-gray-700"><strong>O Manual:</strong> Para cada disciplina, defina uma <strong>prioridade de 1 a 5</strong>. Isso é o seu "pulo do gato"! Ao dizer que Direito Constitucional tem prioridade 5 e Informática tem prioridade 2, você informa ao nosso algoritmo para dar muito mais atenção à primeira, sem nunca esquecer a segunda. Em seguida, cole a lista de tópicos de cada matéria.</p>
+                </div>
+                <!-- Passo 3 -->
+                <div class="relative">
+                    <div class="absolute -left-11 -top-1 w-8 h-8 bg-editaliza-blue rounded-full text-white flex items-center justify-center font-bold">3</div>
+                    <h3 class="text-xl font-semibold text-editaliza-blue">Gere a Mágica</h3>
+                    <p class="mt-2 text-gray-700"><strong>Ação:</strong> Com suas matérias e horários definidos, clique no botão <strong>"Gerar/Atualizar Cronograma"</strong>.</p>
+                    <p class="mt-1 text-gray-700"><strong>O Manual:</strong> Neste momento, nosso sistema irá cruzar todas as informações: suas prioridades, suas horas disponíveis, a curva do esquecimento e a data da sua prova. Ele montará um cronograma dinâmico e inteligente, distribuindo tópicos novos e agendando todas as revisões necessárias para você.</p>
+                </div>
+                <!-- Passo 4 -->
+                <div class="relative">
+                    <div class="absolute -left-11 -top-1 w-8 h-8 bg-editaliza-blue rounded-full text-white flex items-center justify-center font-bold">4</div>
+                    <h3 class="text-xl font-semibold text-editaliza-blue">Siga o Plano do Dia</h3>
+                    <p class="mt-2 text-gray-700"><strong>Ação:</strong> Acesse o <a href="home.html" class="font-bold text-editaliza-blue hover:underline">Painel Principal</a> todos os dias. Ele é sua bússola.</p>
+                    <p class="mt-1 text-gray-700"><strong>O Manual:</strong> Cumpra as tarefas indicadas. Marque-as como <strong>"Concluído"</strong>, registre a quantidade de <strong>"Questões"</strong> resolvidas e faça anotações importantes. Esses registros alimentam seu painel de desempenho e ajudam o sistema a entender seus pontos fracos.</p>
+                </div>
+                <!-- Passo 5 -->
+                <div class="relative">
+                    <div class="absolute -left-11 -top-1 w-8 h-8 bg-editaliza-blue rounded-full text-white flex items-center justify-center font-bold">5</div>
+                    <h3 class="text-xl font-semibold text-editaliza-blue">Seja Flexível e Acompanhe o Progresso</h3>
+                    <p class="mt-2 text-gray-700"><strong>Ação:</strong> A vida acontece! Se perder um dia, não se desespere.</p>
+                    <p class="mt-1 text-gray-700"><strong>O Manual:</strong> Use o botão <strong>"Replanejar"</strong> que aparecerá no painel para redistribuir tarefas atrasadas. Se um tópico foi difícil, use o botão <strong>"Reforçar"</strong> para agendar uma revisão extra. Visite a tela <strong>"Meu Desempenho"</strong> para ter um diagnóstico completo: você está no ritmo certo? Quais matérias precisam de mais atenção?</p>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-12 border-gray-300">
+
+        <!-- SEÇÃO 2: A CIÊNCIA -->
+        <div class="space-y-10">
+            <div class="content-card">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center"><span class="text-3xl mr-3">🧠</span>1. A Curva do Esquecimento e as Revisões Espaçadas</h2>
+                <p class="mt-4 text-gray-700 leading-relaxed">
+                    Em 1885, o psicólogo Hermann Ebbinghaus descobriu algo fundamental: nosso cérebro esquece informações de forma exponencial. A maior parte do que aprendemos é perdida nas primeiras 24 horas. Assustador, não?
+                </p>
+                <p class="mt-2 text-gray-700 leading-relaxed">
+                    A "vacina" contra o esquecimento é a <strong>revisão espaçada</strong>. Ao revisar um conteúdo em intervalos crescentes, você "informa" ao seu cérebro que aquela informação é importante e deve ser movida para a memória de longo prazo.
+                </p>
+                <p class="mt-4 font-semibold text-gray-800">Como aplicamos:</p>
+                <ul class="list-disc list-inside mt-2 space-y-1 text-gray-700">
+                    <li>Seu cronograma agenda automaticamente revisões de <strong>7, 14 e 30 dias</strong> para cada novo tópico estudado.</li>
+                    <li>O botão <strong>"Preciso Reforçar"</strong> agenda uma revisão extra para tópicos que você sentiu mais dificuldade.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center"><span class="text-3xl mr-3">🚴</span>2. O Ciclo de Estudos Ponderado</h2>
+                <p class="mt-4 text-gray-700 leading-relaxed">
+                    Cronogramas fixos ("toda segunda-feira é dia de Português") são frágeis. Se você perde um dia, todo o planejamento é comprometido. Nosso sistema utiliza um <strong>ciclo de estudos dinâmico</strong>.
+                </p>
+                <p class="mt-4 font-semibold text-gray-800">Como aplicamos:</p>
+                <ul class="list-disc list-inside mt-2 space-y-1 text-gray-700">
+                    <li>As disciplinas são organizadas em um "baralho" que é constantemente embaralhado.</li>
+                    <li>A <strong>prioridade</strong> que você define (de 1 a 5) funciona como um peso. Uma matéria com prioridade 5 aparecerá 5 vezes mais que uma de prioridade 1. Isso garante que as matérias mais importantes apareçam com a frequência certa, sem rigidez.</li>
+                </ul>
+            </div>
+
+            <div class="content-card">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center"><span class="text-3xl mr-3">✍️</span>3. Estudo Ativo e Focado</h2>
+                <p class="mt-4 text-gray-700 leading-relaxed">
+                    Aprender não é um ato passivo. Apenas ler ou assistir a videoaulas tem um baixo poder de retenção. O aprendizado real acontece quando você força seu cérebro a buscar a informação.
+                </p>
+                <p class="mt-4 font-semibold text-gray-800">Como aplicamos:</p>
+                <ul class="list-disc list-inside mt-2 space-y-1 text-gray-700">
+                    <li><strong>Registro de Questões:</strong> Incentivamos que você registre as questões resolvidas para alimentar seu "Radar de Pontos Fracos".</li>
+                    <li><strong>Anotações:</strong> O campo de anotações é seu diário de bordo. Escrever com suas próprias palavras é uma das formas mais eficazes de estudo ativo.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            components.renderMainNavigation('metodologia.html');
+        });
+    </script>
+</body>
+</html>
