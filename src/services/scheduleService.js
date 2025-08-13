@@ -8,6 +8,14 @@
 const scheduleRepository = require('../repositories/scheduleRepository');
 const { sanitizeHtml } = require('../utils/sanitizer');
 
+// CORREÇÃO: Função para obter data atual no horário de Brasília
+const getBrazilianDate = () => {
+    const now = new Date();
+    // Converter para horário de Brasília (UTC-3)
+    const brazilTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+    return brazilTime.toISOString().split('T')[0]; // Retorna apenas a data YYYY-MM-DD
+};
+
 /**
  * Get complete schedule for a plan
  */
@@ -27,8 +35,8 @@ const getSchedule = async (planId, userId) => {
             subject_name: sanitizeHtml(session.subject_name || ''),
             notes: sanitizeHtml(session.notes || ''),
             session_type: sanitizeHtml(session.session_type || ''),
-            // Add computed fields
-            is_overdue: new Date(session.session_date) < new Date() && session.status === 'Pendente',
+            // Add computed fields - CORREÇÃO: usar horário de Brasília
+            is_overdue: session.session_date < getBrazilianDate() && session.status === 'Pendente',
             duration_formatted: formatDuration(session.time_studied_seconds || 0),
             can_postpone: (session.postpone_count || 0) < 3
         }));
@@ -61,7 +69,7 @@ const getScheduleByDateRange = async (planId, userId, startDate, endDate) => {
         topic_description: sanitizeHtml(session.topic_description || ''),
         subject_name: sanitizeHtml(session.subject_name || ''),
         notes: sanitizeHtml(session.notes || ''),
-        is_overdue: new Date(session.session_date) < new Date() && session.status === 'Pendente',
+        is_overdue: session.session_date < getBrazilianDate() && session.status === 'Pendente',
         duration_formatted: formatDuration(session.time_studied_seconds || 0)
     }));
 };
@@ -87,7 +95,7 @@ const getSession = async (sessionId, userId) => {
         topic_description: sanitizeHtml(session.topic_description || ''),
         subject_name: sanitizeHtml(session.subject_name || ''),
         notes: sanitizeHtml(session.notes || ''),
-        is_overdue: new Date(session.session_date) < new Date() && session.status === 'Pendente',
+        is_overdue: session.session_date < getBrazilianDate() && session.status === 'Pendente',
         duration_formatted: formatDuration(session.time_studied_seconds || 0),
         can_postpone: (session.postpone_count || 0) < 3,
         time_logs: timeLogs,

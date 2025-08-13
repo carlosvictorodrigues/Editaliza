@@ -9,6 +9,14 @@ const scheduleService = require('../services/scheduleService');
 const { sanitizeHtml } = require('../utils/sanitizer');
 const { createSafeError, securityLog } = require('../utils/security');
 
+// CORREÇÃO: Função para obter data atual no horário de Brasília
+const getBrazilianDate = () => {
+    const now = new Date();
+    // Converter para horário de Brasília (UTC-3)
+    const brazilTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+    return brazilTime.toISOString().split('T')[0]; // Retorna apenas a data YYYY-MM-DD
+};
+
 /**
  * Get complete schedule for a plan
  * GET /schedules/:planId
@@ -395,7 +403,7 @@ const getScheduleOverview = async (req, res) => {
 
         // Calculate overview statistics
         const allSessions = Object.values(schedule).flat();
-        const todaysSessions = schedule[new Date().toISOString().split('T')[0]] || [];
+        const todaysSessions = schedule[getBrazilianDate()] || [];
         const overdueSessions = allSessions.filter(s => s.is_overdue);
         
         const overview = {
