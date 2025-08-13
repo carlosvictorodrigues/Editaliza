@@ -208,8 +208,9 @@
                                 <h3 class="font-semibold text-yellow-800 mb-2">Primeira vez configurando? Aqui estão algumas dicas!</h3>
                                 <ul class="text-sm text-yellow-700 space-y-1">
                                     <li>• <strong>Disciplinas:</strong> Adicione as matérias do seu edital (ex: Direito Constitucional, Matemática)</li>
-                                    <li>• <strong>Prioridade:</strong> 5 = muito importante, 1 = menos importante</li>
+                                    <li>• <strong>Peso da Disciplina:</strong> 5 = muito importante, 1 = menos importante</li>
                                     <li>• <strong>Tópicos:</strong> Divida cada disciplina em assuntos menores para melhor controle</li>
+                                    <li>• <strong>Peso do Tópico:</strong> Define importância dentro da disciplina (combinado com peso da disciplina)</li>
                                     <li>• <strong>Já estudou?</strong> Marque os tópicos já vistos para ajustar o cronograma</li>
                                 </ul>
                                 <div class="mt-3">
@@ -482,7 +483,7 @@
                                     <input type="checkbox" id="retaFinalMode" class="w-5 h-5 text-red-600 bg-white border-red-300 rounded focus:ring-red-500 focus:ring-2">
                                     <div>
                                         <label for="retaFinalMode" class="text-lg font-bold text-red-700">🚨 Modo Reta Final</label>
-                                        <p class="text-sm text-red-600 mt-2">Prioriza matérias mais importantes quando o tempo é curto. Tópicos menos relevantes podem ficar de fora.</p>
+                                        <p class="text-sm text-red-600 mt-2">Prioriza matérias e tópicos mais importantes quando o tempo é curto. Considera o peso da disciplina combinado com o peso do tópico. Tópicos menos relevantes podem ficar de fora.</p>
                                     </div>
                                 </div>
                             </div>
@@ -728,12 +729,16 @@
                         const isCompleted = topic.status === 'Concluído';
                         const completionDate = topic.completion_date || todayStr;
                         const showDateClass = isCompleted ? 'show-date' : '';
+                        const priorityWeight = topic.priority_weight || 3;
+                        const priorityColors = {5: '🔴', 4: '🟠', 3: '🟡', 2: '🟢', 1: '⚪'};
+                        const priorityColor = priorityColors[priorityWeight] || '🟡';
                         return `
                         <li class="topic-item flex justify-between items-start group p-2 rounded-md hover:bg-gray-50 ${showDateClass}">
                             <div class="flex-grow">
                                 <label class="flex items-center cursor-pointer">
                                     <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue topic-checkbox" data-topic-id="${topic.id}" ${isCompleted ? 'checked' : ''}>
                                     <span class="ml-3">${topic.description}</span>
+                                    <span class="ml-2 text-xs" title="Peso do tópico: ${priorityWeight}">${priorityColor}</span>
                                 </label>
                                 <div class="historic-date-input ml-7 mt-2">
                                     <label class="text-xs text-gray-500">Data de conclusão:</label>
@@ -741,7 +746,7 @@
                                 </div>
                             </div>
                             <div class="space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button class="edit-topic-btn p-1 rounded-md hover:bg-gray-200" data-topic-id="${topic.id}" data-description="${topic.description}">✏️</button>
+                                <button class="edit-topic-btn p-1 rounded-md hover:bg-gray-200" data-topic-id="${topic.id}" data-description="${topic.description}" data-priority="${priorityWeight}">✏️</button>
                                 <button class="delete-topic-btn p-1 rounded-md hover:bg-gray-200" data-topic-id="${topic.id}" data-description="${topic.description}">🗑️</button>
                             </div>
                         </li>`
@@ -806,9 +811,38 @@
             document.getElementById('confirmDeleteSubject').addEventListener('click', submitDeleteSubject);
         }
 
-        function handleEditTopic(id, description) {
+        function handleEditTopic(id, description, priority = 3) {
             document.getElementById('editModalTitle').textContent = 'Editar Tópico';
-            document.getElementById('editModalBody').innerHTML = `<form id="editTopicForm" data-id="${id}" class="space-y-4"><div><label for="edit_topic_description" class="block text-sm font-medium text-gray-700">Descrição</label><textarea id="edit_topic_description" class="form-input" rows="4" required>${description}</textarea></div><div class="flex justify-end space-x-3 pt-4"><button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 btn-cancel">Cancelar</button><button type="submit" class="btn-primary py-2 px-4 text-sm">Salvar</button></div></form>`;
+            document.getElementById('editModalBody').innerHTML = `
+                <form id="editTopicForm" data-id="${id}" class="space-y-4">
+                    <div>
+                        <label for="edit_topic_description" class="block text-sm font-medium text-gray-700">Descrição</label>
+                        <textarea id="edit_topic_description" class="form-input" rows="4" required>${description}</textarea>
+                    </div>
+                    <div>
+                        <label for="edit_topic_priority" class="block text-sm font-medium text-gray-700 mb-1">
+                            Peso do Tópico
+                            <span class="tooltip">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span class="tooltiptext">Define a importância deste tópico dentro da disciplina. É combinado com o peso da disciplina para priorização no cronograma.</span>
+                            </span>
+                        </label>
+                        <select id="edit_topic_priority" class="form-input" required>
+                            <option value="5" ${priority == 5 ? 'selected' : ''}>🔴 5 - Muito Importante</option>
+                            <option value="4" ${priority == 4 ? 'selected' : ''}>🟠 4 - Importante</option>
+                            <option value="3" ${priority == 3 ? 'selected' : ''}>🟡 3 - Médio</option>
+                            <option value="2" ${priority == 2 ? 'selected' : ''}>🟢 2 - Baixo</option>
+                            <option value="1" ${priority == 1 ? 'selected' : ''}>⚪ 1 - Muito Baixo</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 btn-cancel">Cancelar</button>
+                        <button type="submit" class="btn-primary py-2 px-4 text-sm">Salvar</button>
+                    </div>
+                </form>
+            `;
             openModal();
             document.getElementById('editTopicForm').addEventListener('submit', submitEditTopic);
         }
@@ -847,7 +881,10 @@
         async function submitEditTopic(event) {
             event.preventDefault();
             const id = event.target.dataset.id;
-            const body = { description: document.getElementById('edit_topic_description').value };
+            const body = { 
+                description: document.getElementById('edit_topic_description').value,
+                priority_weight: document.getElementById('edit_topic_priority').value
+            };
             await submitApiRequestWrapper(`/topics/${id}`, 'PATCH', body, 'Tópico atualizado!');
         }
         async function submitDeleteTopic(event) {
@@ -949,7 +986,7 @@
                 } else if (button.classList.contains('delete-subject-btn')) {
                     handleDeleteSubject(button.dataset.subjectId, button.dataset.subjectName);
                 } else if (button.classList.contains('edit-topic-btn')) {
-                    handleEditTopic(button.dataset.topicId, button.dataset.description);
+                    handleEditTopic(button.dataset.topicId, button.dataset.description, button.dataset.priority);
                 } else if (button.classList.contains('delete-topic-btn')) {
                     handleDeleteTopic(button.dataset.topicId, button.dataset.description);
                 }

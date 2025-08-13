@@ -177,6 +177,9 @@ const db = new sqlite3.Database(DBSOURCE, async (err) => {
 
 	    // Adiciona coluna de limite de adiamentos
 	    await addColumnIfNotExists('study_sessions', 'postpone_count', 'INTEGER DEFAULT 0');
+
+	    // Adiciona coluna de peso por tópico (prioridade específica dentro da disciplina)
+	    await addColumnIfNotExists('topics', 'priority_weight', 'INTEGER DEFAULT 3');
 	    // Criar tabela de logs de tempo
             db.run(`CREATE TABLE IF NOT EXISTS study_time_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,

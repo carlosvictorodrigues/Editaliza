@@ -1032,8 +1032,11 @@ app.post('/plans/:planId/subjects_with_topics',
             const subjectId = result.lastID;
             
             if (topics.length > 0) {
-                const insertTopicsStmt = db.prepare('INSERT INTO topics (subject_id, description) VALUES (?,?)');
-                topics.forEach(topic => insertTopicsStmt.run(subjectId, topic.substring(0, 500)));
+                const insertTopicsStmt = db.prepare('INSERT INTO topics (subject_id, description, priority_weight) VALUES (?,?,?)');
+                topics.forEach(topic => {
+                    // Tópicos novos recebem peso padrão 3, que pode ser editado depois
+                    insertTopicsStmt.run(subjectId, topic.substring(0, 500), 3);
+                });
                 await new Promise((resolve, reject) => insertTopicsStmt.finalize(err => err ? reject(err) : resolve()));
             }
             
@@ -1109,7 +1112,7 @@ app.get('/subjects/:subjectId/topics',
             `, [req.params.subjectId, req.user.id]);
             if (!subject) return res.status(404).json({ error: "Disciplina não encontrada ou não autorizada." });
 
-            const rows = await dbAll("SELECT id, description, status, completion_date FROM topics WHERE subject_id = ? ORDER BY id ASC", [req.params.subjectId]);
+            const rows = await dbAll("SELECT id, description, status, completion_date, priority_weight FROM topics WHERE subject_id = ? ORDER BY id ASC", [req.params.subjectId]);
             res.json(rows);
         } catch (error) {
             console.error('Erro ao buscar tópicos:', error);
@@ -1157,19 +1160,36 @@ app.patch('/topics/:topicId',
     authenticateToken,
     validators.numericId('topicId'),
     validators.text('description', 1, 500),
+    body('priority_weight').optional().isInt({ min: 1, max: 5 }).withMessage('Peso deve ser um número entre 1 e 5'),
     handleValidationErrors,
     async (req, res) => {
-        const { description } = req.body;
-        const sql = `
-            UPDATE topics SET description = ? 
-            WHERE id = ? AND subject_id IN (
-                SELECT id FROM subjects WHERE study_plan_id IN (
-                    SELECT id FROM study_plans WHERE user_id = ?
+        const { description, priority_weight } = req.body;
+        
+        let sql, params;
+        if (priority_weight !== undefined) {
+            sql = `
+                UPDATE topics SET description = ?, priority_weight = ? 
+                WHERE id = ? AND subject_id IN (
+                    SELECT id FROM subjects WHERE study_plan_id IN (
+                        SELECT id FROM study_plans WHERE user_id = ?
+                    )
                 )
-            )
-        `;
+            `;
+            params = [description, priority_weight, req.params.topicId, req.user.id];
+        } else {
+            sql = `
+                UPDATE topics SET description = ? 
+                WHERE id = ? AND subject_id IN (
+                    SELECT id FROM subjects WHERE study_plan_id IN (
+                        SELECT id FROM study_plans WHERE user_id = ?
+                    )
+                )
+            `;
+            params = [description, req.params.topicId, req.user.id];
+        }
+        
         try {
-            const result = await dbRun(sql, [description, req.params.topicId, req.user.id]);
+            const result = await dbRun(sql, params);
             if (result.changes === 0) return res.status(404).json({ error: "Tópico não encontrado ou não autorizado." });
             res.json({ message: 'Tópico atualizado com sucesso!' });
         } catch (error) {
@@ -1249,11 +1269,12 @@ app.post('/plans/:planId/generate',
             const allTopicsQuery = `
                 SELECT 
                     t.id, t.description, t.status, t.completion_date,
-                    s.subject_name, s.priority_weight as priority
+                    s.subject_name, s.priority_weight as subject_priority,
+                    COALESCE(t.priority_weight, 3) as topic_priority
                 FROM subjects s
                 INNER JOIN topics t ON s.id = t.subject_id
                 WHERE s.study_plan_id = ?
-                ORDER BY s.priority_weight DESC, t.id ASC
+                ORDER BY s.priority_weight DESC, COALESCE(t.priority_weight, 3) DESC, t.id ASC
             `;
             const allTopics = await dbAll(allTopicsQuery, [planId]);
 
@@ -1370,20 +1391,29 @@ app.post('/plans/:planId/generate',
                     });
                 }
 
-                const sortedTopics = [...pendingTopics].sort((a, b) => b.priority - a.priority);
+                // Combinar peso da disciplina e do tópico para priorização no modo reta final
+                const sortedTopics = [...pendingTopics].sort((a, b) => {
+                    const priorityA = (a.subject_priority * 10) + a.topic_priority;
+                    const priorityB = (b.subject_priority * 10) + b.topic_priority;
+                    return priorityB - priorityA;
+                });
                 topicsToSchedule = sortedTopics.slice(0, availableSlots);
                 excludedTopics = sortedTopics.slice(availableSlots);
 
                 const subjectsMap = new Map();
                 topicsToSchedule.forEach(t => {
                     if (!subjectsMap.has(t.subject_name)) {
-                        subjectsMap.set(t.subject_name, { name: t.subject_name, weight: t.priority });
+                        subjectsMap.set(t.subject_name, { name: t.subject_name, weight: t.subject_priority });
                     }
                 });
                 prioritizedSubjects = Array.from(subjectsMap.values());
             }
 
-            const weightedTopics = topicsToSchedule.flatMap(t => Array(t.priority).fill(t));
+            // Usar peso combinado (disciplina + tópico) para distribuir sessões
+            const weightedTopics = topicsToSchedule.flatMap(t => {
+                const combinedPriority = Math.max(1, t.subject_priority + t.topic_priority - 3); // Ajuste para evitar zero
+                return Array(combinedPriority).fill(t);
+            });
             for (let i = weightedTopics.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [weightedTopics[i], weightedTopics[j]] = [weightedTopics[j], weightedTopics[i]];
