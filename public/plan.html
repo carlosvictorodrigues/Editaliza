@@ -10,6 +10,8 @@
     <!-- SCRIPTS CENTRALIZADOS -->
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
+    <script src="js/checklist.js"></script>
+    <script src="js/timer.js"></script>
     <!-- Config do Tailwind para reconhecer as cores customizadas -->
     <script>
         tailwind.config = {
@@ -1124,5 +1126,66 @@
         
         document.addEventListener('DOMContentLoaded', initialize);
     </script>
+
+    <!-- MODAL DE SESSÃO DE ESTUDO -->
+    <div id="studySessionModal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4 opacity-0">
+        <div id="studySessionModalContainer" class="modal-container bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl transform scale-95 max-h-[90vh] overflow-y-auto">
+            <!-- O conteúdo do modal será injetado aqui pelo JavaScript -->
+        </div>
+    </div>
+
+    <!-- RODAPÉ -->
+    <footer class="bg-gray-900 text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Logo e Descrição -->
+                <div class="md:col-span-2">
+                    <div class="flex items-center mb-3">
+                        <svg class="h-6 w-6 mr-2" viewBox="0 0 128.1 101.5" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <style>
+                                    .cls-1 { fill: #0528f2; }
+                                    .cls-3 { fill: #1ad937; }
+                                </style>
+                            </defs>
+                            <g>
+                                <path class="cls-1" d="M58.62,101.5s-12.21-26.73-43.18-21.61v-24.04s29.74,1.62,40.51,31.49c1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                                <path class="cls-3" d="M58.62,101.5c-6.75-32.15-28.77-42.36-43.18-45.57-3.53-.79-6.61-1.16-8.89-1.33-2.37-.18-4.2-2.14-4.2-4.52,0-2.73,2.38-4.84,5.09-4.5,11.47,1.44,39.07,8.39,48.52,41.75,1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                                <path class="cls-1" d="M69.48,101.5s12.21-27.94,43.18-22.83v-22.83s-29.74,1.62-40.51,31.49c-1.21,4.27-2.12,8.98-2.67,14.17Z"/>
+                                <path class="cls-3" d="M69.48,101.5c6.75-32.15,28.77-42.36,43.18-45.57,3.53-.79,6.61-1.16,8.89-1.33,2.37-.18,4.2-2.14,4.2-4.52,0-2.73-2.38-4.84-5.09-4.5-11.47,1.44-39.07,8.39-48.52,41.75-1.21,4.27-2.12,8.98-2.67,14.17Z"/>
+                                <path class="cls-1" d="M92.24,7.72C83.54,2.57,73.8,0,64.05,0c-9.75,0-19.49,2.57-28.19,7.72L1.79,27.87c-2.97,1.76-2.07,6.28,1.35,6.75,12,1.65,31.51,6.67,49.09,21.75,1.7,1.46,3.6,2.57,5.6,3.33,3.99,1.52,8.42,1.52,12.41,0,2-.76,3.9-1.87,5.6-3.33,17.59-15.08,37.1-20.1,49.09-21.75,3.42-.47,4.33-4.99,1.35-6.75L92.24,7.72ZM64.05,48.49c-6.16,0-11.16-5-11.16-11.16s5-11.16,11.16-11.16,11.16,5,11.16,11.16-5,11.16-11.16,11.16Z"/>
+                            </g>
+                        </svg>
+                        <h3 class="text-xl font-bold text-editaliza-blue">Editaliza</h3>
+                    </div>
+                    <p class="text-gray-300 mb-4">Plataforma inteligente para estudos de concursos públicos. Transforme sua preparação com cronogramas personalizados e acompanhamento de desempenho.</p>
+                    <p class="text-sm text-gray-400">CNPJ: 62.189.551/0001-00</p>
+                </div>
+
+                <!-- Links Legais -->
+                <div>
+                    <h4 class="font-semibold mb-3">Legal</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="politica-privacidade.html" class="text-gray-300 hover:text-editaliza-blue transition-colors">Política de Privacidade</a></li>
+                        <li><a href="politica-privacidade.html#termos" class="text-gray-300 hover:text-editaliza-blue transition-colors">Termos de Uso</a></li>
+                    </ul>
+                </div>
+
+                <!-- Suporte -->
+                <div>
+                    <h4 class="font-semibold mb-3">Suporte</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="faq.html" class="text-gray-300 hover:text-editaliza-blue transition-colors">FAQ</a></li>
+                        <li><a href="mailto:suporte@editaliza.com.br" class="text-gray-300 hover:text-editaliza-blue transition-colors">Contato</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-400">
+                <p>&copy; 2025 Editaliza Tecnologia Educacional Ltda. Todos os direitos reservados.</p>
+                <p class="mt-2">Site oficial: <a href="https://www.editaliza.com.br" class="text-editaliza-blue hover:underline">www.editaliza.com.br</a></p>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

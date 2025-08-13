@@ -177,6 +177,10 @@ const db = new sqlite3.Database(DBSOURCE, async (err) => {
 
 	    // Adiciona coluna de limite de adiamentos
 	    await addColumnIfNotExists('study_sessions', 'postpone_count', 'INTEGER DEFAULT 0');
+
+	    // MIGRAÇÃO SEGURA: Adiciona peso específico por tópico (NULL = usa peso da disciplina)
+	    await addColumnIfNotExists('topics', 'topic_weight', 'INTEGER DEFAULT NULL');
+	    
 	    // Criar tabela de logs de tempo
             db.run(`CREATE TABLE IF NOT EXISTS study_time_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,

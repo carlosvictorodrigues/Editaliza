@@ -10,6 +10,8 @@
     <!-- SCRIPTS CENTRALIZADOS -->
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
+    <script src="js/checklist.js"></script>
+    <script src="js/timer.js"></script>
     <script src="js/ux-improvements.js"></script>
     <script src="improvements-implementation.js"></script>
     <!-- Config do Tailwind para reconhecer as cores customizadas -->
@@ -96,6 +98,39 @@
         <!-- ALERTA DE TAREFAS ATRASADAS (GERADO PELO JS) -->
         <div id="overdue-alert-container"></div>
 
+        <!-- INDICADOR MODO RETA FINAL -->
+        <div id="reta-final-indicator" class="hidden bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 border-l-4 border-red-500 p-6 mb-8 rounded-r-xl shadow-lg">
+            <div class="flex items-center space-x-4">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                        <span class="text-2xl animate-pulse">🚨</span>
+                    </div>
+                </div>
+                <div class="flex-grow">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-xl font-bold text-red-800">MODO RETA FINAL ATIVO</h3>
+                        <span class="bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">URGENTE</span>
+                    </div>
+                    <p class="text-red-700 mt-2 font-medium">Este cronograma foi otimizado priorizando disciplinas mais importantes.</p>
+                    <div class="mt-3 flex items-center space-x-4 text-sm">
+                        <div class="flex items-center text-green-700">
+                            <span class="w-4 h-4 bg-green-500 rounded-full mr-2"></span>
+                            <span id="prioritized-count">0 disciplinas priorizadas</span>
+                        </div>
+                        <div class="flex items-center text-red-700">
+                            <span class="w-4 h-4 bg-red-500 rounded-full mr-2"></span>
+                            <span id="excluded-count">0 tópicos excluídos</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    <button id="show-exclusion-report" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md">
+                        📋 Ver Relatório
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Controles de Filtro e Exportação -->
         <div class="bg-white p-4 rounded-xl shadow-md mb-8">
             <div class="flex flex-col sm:flex-row justify-between items-center">
@@ -176,6 +211,151 @@
             }, 300);
         }
 
+        // Funções para modo reta final
+        function showRetaFinalIndicator(retaFinalData = {}) {
+            const indicator = document.getElementById('reta-final-indicator');
+            if (!indicator) return;
+            
+            // Mostrar indicador
+            indicator.classList.remove('hidden');
+            
+            // Atualizar contadores
+            const prioritizedCount = document.getElementById('prioritized-count');
+            const excludedCount = document.getElementById('excluded-count');
+            
+            if (prioritizedCount && retaFinalData.prioritizedSubjects) {
+                prioritizedCount.textContent = `${retaFinalData.prioritizedSubjects.length} disciplinas priorizadas`;
+            }
+            
+            if (excludedCount && retaFinalData.excludedTopics) {
+                excludedCount.textContent = `${retaFinalData.excludedTopics.length} tópicos excluídos`;
+            }
+            
+            // Event listener para relatório
+            const reportBtn = document.getElementById('show-exclusion-report');
+            if (reportBtn && retaFinalData.excludedTopics) {
+                reportBtn.addEventListener('click', () => {
+                    showExclusionReportModal(retaFinalData);
+                });
+            }
+        }
+        
+        function showExclusionReportModal(retaFinalData) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+                    <div class="sticky top-0 bg-white border-b px-6 py-4 rounded-t-xl">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-2xl font-bold text-red-700 flex items-center">
+                                <span class="mr-3">🚨</span>Relatório do Modo Reta Final
+                            </h2>
+                            <button id="close-report-modal" class="text-gray-400 hover:text-gray-600 text-2xl font-bold">×</button>
+                        </div>
+                    </div>
+                    
+                    <div class="p-6 space-y-8">
+                        <!-- Disciplinas Priorizadas -->
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-6">
+                            <h3 class="text-lg font-bold text-green-800 mb-4 flex items-center">
+                                <span class="w-6 h-6 bg-green-500 rounded-full mr-3"></span>
+                                Disciplinas Priorizadas (${retaFinalData.prioritizedSubjects?.length || 0})
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                ${(retaFinalData.prioritizedSubjects || []).map(subject => `
+                                    <div class="bg-white p-4 rounded-lg border border-green-200">
+                                        <div class="flex items-center justify-between">
+                                            <span class="font-semibold text-green-800">${subject.name}</span>
+                                            <span class="bg-green-600 text-white px-2 py-1 rounded text-xs font-bold">PESO ${subject.weight}</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- Tópicos Excluídos -->
+                        <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+                            <h3 class="text-lg font-bold text-red-800 mb-4 flex items-center">
+                                <span class="w-6 h-6 bg-red-500 rounded-full mr-3"></span>
+                                Tópicos Excluídos (${retaFinalData.excludedTopics?.length || 0})
+                            </h3>
+                            ${retaFinalData.excludedTopics?.length > 0 ? `
+                                <div class="space-y-3 max-h-64 overflow-y-auto">
+                                    ${retaFinalData.excludedTopics.map(topic => `
+                                        <div class="bg-white p-4 rounded-lg border border-red-200">
+                                            <div class="flex items-start justify-between">
+                                                <div>
+                                                    <span class="font-semibold text-red-800">${topic.subject_name}</span>
+                                                    <p class="text-red-700 text-sm mt-1">${topic.description}</p>
+                                                </div>
+                                                <span class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs">EXCLUÍDO</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : `
+                                <div class="text-center py-8">
+                                    <span class="text-6xl">🎉</span>
+                                    <p class="text-green-800 font-medium mt-4">Nenhum tópico foi excluído!</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                    
+                    <div class="sticky bottom-0 bg-gray-50 px-6 py-4 rounded-b-xl border-t">
+                        <div class="flex justify-center space-x-4">
+                            <button id="go-to-settings" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+                                ⚙️ Ajustar Configurações
+                            </button>
+                            <button id="close-report-modal-bottom" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition-colors">
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Event listeners
+            const closeButtons = modal.querySelectorAll('#close-report-modal, #close-report-modal-bottom');
+            closeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.body.removeChild(modal);
+                });
+            });
+            
+            const goToSettingsBtn = modal.querySelector('#go-to-settings');
+            if (goToSettingsBtn) {
+                goToSettingsBtn.addEventListener('click', () => {
+                    window.location.href = `plan_settings.html?id=${planId}`;
+                });
+            }
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
+            
+            document.body.appendChild(modal);
+        }
+
+        async function checkRetaFinalMode() {
+            try {
+                const plan = await app.apiFetch(`/plans/${planId}`);
+                if (plan.reta_final_mode) {
+                    try {
+                        const retaFinalData = await app.apiFetch(`/plans/${planId}/reta_final_report`);
+                        showRetaFinalIndicator(retaFinalData);
+                    } catch (error) {
+                        console.warn('Dados de reta final não encontrados:', error);
+                        showRetaFinalIndicator({});
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao verificar modo reta final:', error);
+            }
+        }
+
         async function initialize() {
             await components.renderMainNavigation('cronograma.html');
             if (!planId) { window.location.href = 'dashboard.html'; return; }
@@ -194,6 +374,9 @@
                 if (overdueData.count > 0) addReplanListener();
 
                 await fetchAndRenderSchedule(activeFilter);
+                
+                // Verificar modo reta final após carregar dados
+                await checkRetaFinalMode();
             } catch (error) {
                 app.showToast('Erro ao carregar dados: ' + error.message, 'error');
             } finally {
@@ -508,5 +691,66 @@
         window.postponeSession = openPostponeModal;
         window.reinforceSession = reinforceSession;
     </script>
+
+    <!-- MODAL DE SESSÃO DE ESTUDO -->
+    <div id="studySessionModal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4 opacity-0">
+        <div id="studySessionModalContainer" class="modal-container bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl transform scale-95 max-h-[90vh] overflow-y-auto">
+            <!-- O conteúdo do modal será injetado aqui pelo JavaScript -->
+        </div>
+    </div>
+
+    <!-- RODAPÉ -->
+    <footer class="bg-gray-900 text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Logo e Descrição -->
+                <div class="md:col-span-2">
+                    <div class="flex items-center mb-3">
+                        <svg class="h-6 w-6 mr-2" viewBox="0 0 128.1 101.5" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <style>
+                                    .cls-1 { fill: #0528f2; }
+                                    .cls-3 { fill: #1ad937; }
+                                </style>
+                            </defs>
+                            <g>
+                                <path class="cls-1" d="M58.62,101.5s-12.21-26.73-43.18-21.61v-24.04s29.74,1.62,40.51,31.49c1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                                <path class="cls-3" d="M58.62,101.5c-6.75-32.15-28.77-42.36-43.18-45.57-3.53-.79-6.61-1.16-8.89-1.33-2.37-.18-4.2-2.14-4.2-4.52,0-2.73,2.38-4.84,5.09-4.5,11.47,1.44,39.07,8.39,48.52,41.75,1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                                <path class="cls-1" d="M69.48,101.5s12.21-27.94,43.18-22.83v-22.83s-29.74,1.62-40.51,31.49c-1.21,4.27-2.12,8.98-2.67,14.17Z"/>
+                                <path class="cls-3" d="M69.48,101.5c6.75-32.15,28.77-42.36,43.18-45.57,3.53-.79,6.61-1.16,8.89-1.33,2.37-.18-4.2-2.14,4.2-4.52,0-2.73-2.38-4.84-5.09-4.5-11.47,1.44-39.07,8.39-48.52,41.75-1.21,4.27-2.12,8.98-2.67,14.17Z"/>
+                                <path class="cls-1" d="M92.24,7.72C83.54,2.57,73.8,0,64.05,0c-9.75,0-19.49,2.57-28.19,7.72L1.79,27.87c-2.97,1.76-2.07,6.28,1.35,6.75,12,1.65,31.51,6.67,49.09,21.75,1.7,1.46,3.6,2.57,5.6,3.33,3.99,1.52,8.42,1.52,12.41,0,2-.76,3.9-1.87,5.6-3.33,17.59-15.08,37.1-20.1,49.09-21.75,3.42-.47,4.33-4.99,1.35-6.75L92.24,7.72ZM64.05,48.49c-6.16,0-11.16-5-11.16-11.16s5-11.16,11.16-11.16,11.16,5,11.16,11.16-5,11.16-11.16,11.16Z"/>
+                            </g>
+                        </svg>
+                        <h3 class="text-xl font-bold text-editaliza-blue">Editaliza</h3>
+                    </div>
+                    <p class="text-gray-300 mb-4">Plataforma inteligente para estudos de concursos públicos. Transforme sua preparação com cronogramas personalizados e acompanhamento de desempenho.</p>
+                    <p class="text-sm text-gray-400">CNPJ: 62.189.551/0001-00</p>
+                </div>
+
+                <!-- Links Legais -->
+                <div>
+                    <h4 class="font-semibold mb-3">Legal</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="politica-privacidade.html" class="text-gray-300 hover:text-editaliza-blue transition-colors">Política de Privacidade</a></li>
+                        <li><a href="politica-privacidade.html#termos" class="text-gray-300 hover:text-editaliza-blue transition-colors">Termos de Uso</a></li>
+                    </ul>
+                </div>
+
+                <!-- Suporte -->
+                <div>
+                    <h4 class="font-semibold mb-3">Suporte</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="faq.html" class="text-gray-300 hover:text-editaliza-blue transition-colors">FAQ</a></li>
+                        <li><a href="mailto:suporte@editaliza.com.br" class="text-gray-300 hover:text-editaliza-blue transition-colors">Contato</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-400">
+                <p>&copy; 2025 Editaliza Tecnologia Educacional Ltda. Todos os direitos reservados.</p>
+                <p class="mt-2">Site oficial: <a href="https://www.editaliza.com.br" class="text-editaliza-blue hover:underline">www.editaliza.com.br</a></p>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

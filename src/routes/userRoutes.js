@@ -315,4 +315,19 @@ router.get('/:userId',
     userController.getUserById
 );
 
+// =====================================
+// STUDY STATISTICS ROUTE (LEGACY COMPATIBILITY)
+// =====================================
+
+/**
+ * Get study statistics for a plan
+ * GET /users/study-stats/:planId
+ */
+router.get('/study-stats/:planId',
+    authenticateToken,
+    param('planId').isInt({ min: 1 }).withMessage('ID do plano inválido'),
+    handleValidationErrors,
+    userController.getStudyStats
+);
+
 module.exports = router;

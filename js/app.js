@@ -64,41 +64,28 @@ const app = {
         try {
             console.log('🔔 Inicializando Sistema de Notificações Inteligentes...');
             
-            // Aguardar carregamento dos módulos
-            await this.waitForNotificationModules();
-            
-            // Inicializar sistema de notificações contextuais
+            // Verificar se os módulos existem sem aguardar
             if (window.ContextualNotifications) {
                 await window.ContextualNotifications.init();
                 console.log('✅ ContextualNotifications inicializado');
+            } else {
+                console.log('ℹ️ ContextualNotifications não disponível - pulando inicialização');
             }
             
             // Inicializar integrações de notificação
             if (window.NotificationIntegrations) {
                 await window.NotificationIntegrations.init();
                 console.log('✅ NotificationIntegrations inicializado');
+            } else {
+                console.log('ℹ️ NotificationIntegrations não disponível - pulando inicialização');
             }
             
-            console.log('🎯 Sistema de Notificações Inteligentes ativado com sucesso!');
+            console.log('🎯 Sistema de Notificações configurado!');
             
         } catch (error) {
             console.warn('⚠️ Erro ao inicializar sistema de notificações:', error);
             // Não quebra a aplicação se as notificações falharem
         }
-    },
-
-    // Aguardar módulos de notificação estarem disponíveis
-    async waitForNotificationModules(maxWait = 10000) {
-        const startTime = Date.now();
-        
-        while (Date.now() - startTime < maxWait) {
-            if (window.ContextualNotifications && window.NotificationIntegrations) {
-                return true;
-            }
-            await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        
-        throw new Error('Módulos de notificação não carregaram a tempo');
     },
 
     // Verificar se o token expirou
@@ -612,8 +599,8 @@ async function openStudySession(sessionId) {
                 const session = await fetchSessionData(sessionId);
                 if (session) {
                     TimerSystem.continueTimer(sessionId);
-                    StudyChecklist.startStudySession(false); // CORREÇÃO: Não iniciar novo timer
                     StudyChecklist.session = session; // Definir sessão para modal
+                    StudyChecklist.startStudySession(false); // CORREÇÃO: Não iniciar novo timer
                     app.showToast('⏱️ Continuando estudos! Timer retomado.', 'success');
                 } else {
                     console.error('❌ Não foi possível carregar dados da sessão');

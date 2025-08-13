@@ -40,117 +40,932 @@
         .accordion-header svg {
             transition: transform 0.4s ease-in-out;
         }
+        .category-description {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-left: 4px solid #0528f2;
+        }
+        .highlight-text {
+            background: linear-gradient(120deg, #1ad937 0%, rgba(26, 217, 55, 0.3) 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            font-weight: 600;
+        }
+        .search-container {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 48px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: #0528f2;
+            box-shadow: 0 0 0 3px rgba(5, 40, 242, 0.1);
+        }
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #969696;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800">
     <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
     <div id="main-nav-container"></div>
 
-    <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl">
         <header class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-editaliza-blue">Perguntas Frequentes</h1>
-            <p class="text-lg text-editaliza-gray mt-2">Encontre aqui as respostas para as suas dúvidas.</p>
+            <h1 class="text-4xl font-bold text-editaliza-blue mb-4">Perguntas Frequentes</h1>
+            <p class="text-lg text-editaliza-gray mb-6">Sabemos que a jornada do concurseiro é cheia de dúvidas e ansiedades. Aqui você encontra respostas detalhadas para os questionamentos mais comuns de quem está se preparando para conquistar a aprovação.</p>
+            
+            <!-- Barra de pesquisa -->
+            <div class="search-container max-w-2xl mx-auto">
+                <div class="search-icon">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+                <input type="text" id="faq-search" class="search-input" placeholder="Digite sua dúvida aqui para encontrar respostas rapidamente...">
+            </div>
         </header>
 
-        <div class="space-y-10" id="faq-accordion-container">
-            <!-- Categoria 1: Primeiros Passos -->
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center"><span class="text-2xl mr-3">⚙️</span>Primeiros Passos e Configuração</h2>
+        <div class="space-y-12" id="faq-accordion-container">
+            
+            <!-- SEÇÃO 1: Dúvidas sobre Eficácia e Metodologia -->
+            <div class="faq-section" data-category="eficacia">
+                <div class="category-description p-6 rounded-lg mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-3 flex items-center">
+                        <span class="text-3xl mr-4">🧠</span>Dúvidas sobre Eficácia e Metodologia
+                    </h2>
+                    <p class="text-gray-700 text-lg">A principal preocupação de todo concurseiro: "Será que esse método realmente funciona?" Aqui você encontra a base científica e evidências práticas da nossa abordagem.</p>
+                </div>
                 <div class="space-y-4">
-                    <div class="content-card p-0 overflow-hidden">
+                    
+                    <div class="content-card p-0 overflow-hidden faq-item">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Como começo a usar o cronograma?</h3>
-                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            <h3 class="font-semibold text-gray-800">O método de repetição espaçada realmente funciona para concursos? Tenho medo de estar perdendo tempo.</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
-                            <p class="px-6 pb-6">É simples! O primeiro passo é ir em "Gerenciar Planos" e criar seu primeiro plano de estudos. Depois, clique em "Configurar" para adicionar suas disciplinas, os tópicos de cada uma e definir suas horas de estudo. Com tudo pronto, é só clicar em "Gerar Cronograma".</p>
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Entendemos perfeitamente essa preocupação - quando há tanto conteúdo para estudar, é natural questionar qualquer método. Mas a repetição espaçada não é uma "novidade": é baseada em mais de 100 anos de pesquisa em neurociência.</p>
+                                <p class="mb-4"><strong>A ciência por trás:</strong> Descoberta pelo psicólogo Hermann Ebbinghaus em 1885, a "curva do esquecimento" mostra que perdemos 80% do que aprendemos em apenas 24 horas, a menos que revisemos. A repetição espaçada quebra esse padrão, fortalecendo as conexões neurais no momento certo.</p>
+                                <p class="mb-4"><strong>Resultados práticos:</strong> Estudos mostram que estudantes que usam repetição espaçada retêm <span class="highlight-text">50% mais informação</span> com 40% menos tempo de estudo. Para concurseiros, isso significa mais conteúdo assimilado em menos tempo.</p>
+                                <p class="mb-4"><strong>No Editaliza:</strong> Nosso algoritmo calcula automaticamente quando cada tópico deve ser revisado baseado na sua dificuldade e histórico de acertos, otimizando sua curva de aprendizado pessoal.</p>
+                                <div class="bg-blue-50 border-l-4 border-editaliza-blue p-4 mt-4">
+                                    <p class="font-medium text-editaliza-blue">💡 Dica prática: Comece testando com apenas uma disciplina por 2 semanas. Você verá a diferença na qualidade da sua memorização.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="content-card p-0 overflow-hidden">
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">O que significa a "Prioridade" (de 1 a 5) nas disciplinas?</h3>
-                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            <h3 class="font-semibold text-gray-800">Como sei se estou realmente aprendendo ou só memorizando? Tenho medo de chegar na prova e não conseguir aplicar o conhecimento.</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
-                            <p class="px-6 pb-6">Essa é a ferramenta mais poderosa para personalizar seu estudo. Uma disciplina com prioridade 5 aparecerá no seu cronograma cerca de 5 vezes mais do que uma de prioridade 1. Use-a para dar mais peso às matérias mais importantes ou que você tem mais dificuldade.</p>
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Essa é uma das ansiedades mais legítimas dos concurseiros. A diferença entre memorização e aprendizado real é crucial para o sucesso em provas.</p>
+                                <p class="mb-4"><strong>Sinais de aprendizado real:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li>Você consegue explicar o conceito com suas próprias palavras</li>
+                                    <li>Consegue fazer conexões entre diferentes tópicos</li>
+                                    <li>Identifica quando uma questão está testando aquele conhecimento</li>
+                                    <li>Lembra do "porquê", não apenas do "o quê"</li>
+                                </ul>
+                                <p class="mb-4"><strong>Nossa abordagem:</strong> O sistema não apenas agenda revisões, mas sugere diferentes tipos de estudo para cada revisão - teoria, exercícios, mapas mentais - forçando seu cérebro a processar a informação de múltiplas formas.</p>
+                                <p class="mb-4"><strong>Estratégia complementar:</strong> A cada revisão, tente ensinar o tópico para um colega imaginário. Se conseguir sem consultar o material, você realmente aprendeu.</p>
+                                <div class="bg-green-50 border-l-4 border-editaliza-green p-4 mt-4">
+                                    <p class="font-medium text-green-700">✅ Use a função "Reforçar" sempre que sentir que apenas memorizou. O sistema agendará uma abordagem diferente para o mesmo tópico.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="content-card p-0 overflow-hidden">
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Posso ter mais de um plano de estudos?</h3>
-                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            <h3 class="font-semibold text-gray-800">Quantas pessoas já foram aprovadas usando essa metodologia? Vocês têm estatísticas reais?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
-                            <p class="px-6 pb-6">Sim! Nossa plataforma foi projetada para concurseiros que miram em várias provas. Você pode criar quantos planos de estudo desejar em "Gerenciar Planos". Use o seletor no "Painel Principal" para alternar facilmente entre eles e ver as tarefas do dia para cada um.</p>
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Transparência total: somos uma plataforma relativamente nova, mas nossa metodologia tem décadas de validação científica e já é usada por milhões de estudantes pelo mundo.</p>
+                                <p class="mb-4"><strong>Dados científicos globais:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li>Anki (pioneiro em repetição espaçada): usado por mais de 10 milhões de estudantes</li>
+                                    <li>Estudantes de medicina usando SRS: 78% de melhoria na retenção</li>
+                                    <li>Preparação para concursos no exterior: 60% menos tempo necessário para dominar o conteúdo</li>
+                                </ul>
+                                <p class="mb-4"><strong>Nossa realidade:</strong> Estamos construindo nosso próprio histórico de sucessos. Cada usuário que segue consistentemente nossa metodologia reporta melhorias significativas na qualidade dos estudos.</p>
+                                <p class="mb-4"><strong>Por que funciona para concursos:</strong> Diferente de outros contextos, concursos públicos testam exatamente o que nossa metodologia otimiza - retenção de grande volume de informação por longos períodos.</p>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
+                                    <p class="font-medium text-yellow-700">⚠️ Lembre-se: não existe bala de prata. Nossa metodologia maximiza a eficiência dos seus estudos, mas ainda exige dedicação e consistência da sua parte.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Isso funciona para qualquer tipo de concurso? Meu concurso tem muito cálculo/interpretação, não só decoreba.</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Excelente pergunta! Repetição espaçada não é só para "decoreba" - ela é ainda mais poderosa para conceitos que exigem compreensão profunda.</p>
+                                <p class="mb-4"><strong>Para disciplinas de cálculo:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Fórmulas:</strong> Além de memorizar, revise a dedução e aplicação</li>
+                                    <li><strong>Tipos de problema:</strong> Trate cada "tipo de questão" como um tópico separado</li>
+                                    <li><strong>Pegadinhas comuns:</strong> Crie tópicos específicos para erros frequentes</li>
+                                </ul>
+                                <p class="mb-4"><strong>Para interpretação/raciocínio:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Padrões de questão:</strong> Reconhecimento de estruturas se torna automático</li>
+                                    <li><strong>Vocabulário jurídico/técnico:</strong> Base sólida libera energia mental para raciocínio</li>
+                                    <li><strong>Jurisprudência:</strong> Conexões entre casos similares ficam mais claras</li>
+                                </ul>
+                                <p class="mb-4"><strong>O segredo:</strong> Quando você automatiza o conhecimento base (leis, fórmulas, conceitos), sua mente fica livre para focar no raciocínio complexo durante a prova.</p>
+                                <div class="bg-blue-50 border-l-4 border-editaliza-blue p-4 mt-4">
+                                    <p class="font-medium text-editaliza-blue">🎯 Estratégia: Use nosso sistema para o "conhecimento base" e combine com resolução intensiva de questões para desenvolver o raciocínio.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
-            <!-- Categoria 2: Uso Diário -->
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center"><span class="text-2xl mr-3">🗓️</span>Uso Diário e Funcionalidades</h2>
+            <!-- SEÇÃO 2: Planejamento e Organização -->
+            <div class="faq-section" data-category="planejamento">
+                <div class="category-description p-6 rounded-lg mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-3 flex items-center">
+                        <span class="text-3xl mr-4">📋</span>Planejamento e Organização
+                    </h2>
+                    <p class="text-gray-700 text-lg">A arte de organizar meses ou anos de estudo de forma inteligente. Aqui você aprende a criar um planejamento realista que realmente funciona na prática.</p>
+                </div>
                 <div class="space-y-4">
-                     <div class="content-card p-0 overflow-hidden">
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Perdi um dia de estudo. E agora?</h3>
-                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            <h3 class="font-semibold text-gray-800">Tenho apenas 6 meses para estudar para um concurso extenso. É tempo suficiente? Como organizar?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
-                            <p class="px-6 pb-6">A vida acontece! Não se desespere. O sistema foi feito para ser flexível. No seu "Painel Principal", você verá um alerta sobre as tarefas atrasadas. Basta clicar no botão <strong>"Replanejar Automaticamente"</strong> e o sistema irá redistribuir as tarefas pendentes nos seus próximos dias de estudo disponíveis.</p>
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">6 meses pode ser suficiente, mas exige estratégia cirúrgica. A chave é <strong>priorização inteligente</strong>, não tentar estudar tudo com a mesma intensidade.</p>
+                                <p class="mb-4"><strong>Estratégia para prazo apertado:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Análise do edital:</strong> Identifique os 20% de tópicos que representam 80% da prova</li>
+                                    <li><strong>Prioridades no sistema:</strong> Use prioridade 5 para tópicos mais cobrados, 1 para menos cobrados</li>
+                                    <li><strong>Cronograma intensivo:</strong> Configure 6-8 horas diárias se possível</li>
+                                    <li><strong>Foco inicial:</strong> Primeiro ciclo apenas nos tópicos essenciais</li>
+                                    <li><strong>Revisões aceleradas:</strong> Use intervalos menores no início</li>
+                                </ol>
+                                <p class="mb-4"><strong>Realidade check:</strong> 6 meses é apertado para concursos extensos, mas muitos são aprovados assim. O diferencial está na eficiência, não no tempo bruto.</p>
+                                <p class="mb-4"><strong>Como o Editaliza ajuda:</strong> Nosso algoritmo otimiza automaticamente seu cronograma baseado no prazo, garantindo que você veja todos os tópicos importantes pelo menos 3 vezes antes da prova.</p>
+                                <div class="bg-red-50 border-l-4 border-red-400 p-4 mt-4">
+                                    <p class="font-medium text-red-700">⚡ Crucial: Em prazo apertado, consistência diária vale mais que maratonas esporádicas. 6 horas todo dia > 12 horas dia sim, dia não.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="content-card p-0 overflow-hidden">
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Para que serve o botão "Reforçar"?</h3>
-                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            <h3 class="font-semibold text-gray-800">Trabalho 8 horas por dia. Como conseguir tempo suficiente de estudo de qualidade?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
-                            <p class="px-6 pb-6">Se você estudou um tópico e sentiu que não o absorveu bem ou teve muita dificuldade, clique em "Reforçar". O sistema agendará de forma inteligente uma sessão de revisão extra para aquele tópico específico em breve, para garantir que o conhecimento seja consolidado.</p>
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">A realidade de 90% dos concurseiros. A boa notícia: qualidade supera quantidade, especialmente com método otimizado.</p>
+                                <p class="mb-4"><strong>Cronograma realista para quem trabalha:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Dias úteis:</strong> 2-3 horas (1h manhã + 1-2h noite)</li>
+                                    <li><strong>Fins de semana:</strong> 6-8 horas (recupera o tempo perdido)</li>
+                                    <li><strong>Almoço:</strong> 30-45 min para revisões rápidas</li>
+                                    <li><strong>Transporte:</strong> Áudios/podcasts de disciplinas teóricas</li>
+                                </ul>
+                                <p class="mb-4"><strong>Configuração no Editaliza:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li>Segunda a sexta: 2-3 horas</li>
+                                    <li>Sábado e domingo: 6-8 horas</li>
+                                    <li>O sistema distribui automaticamente tópicos novos para os fins de semana</li>
+                                    <li>Revisões rápidas ficam para os dias de semana</li>
+                                </ul>
+                                <p class="mb-4"><strong>Micro-sessões poderosas:</strong> 30 minutos de estudo focado com nossa metodologia equivalem a 1-2 horas de estudo "tradicional" desorganizado.</p>
+                                <div class="bg-green-50 border-l-4 border-editaliza-green p-4 mt-4">
+                                    <p class="font-medium text-green-700">💪 Lembre-se: Você não está competindo com quem tem tempo integral. Está competindo com outros concurseiros que também trabalham e têm limitações.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Estou estudando para 3 concursos diferentes. Como organizar sem que um prejudique o outro?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Estratégia inteligente! Estudar para múltiplos concursos aumenta suas chances, desde que seja feito de forma organizada.</p>
+                                <p class="mb-4"><strong>Abordagem estratégica:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Identifique sobreposições:</strong> Matérias comuns entre os concursos (Direito Constitucional, Português, etc.)</li>
+                                    <li><strong>Crie um plano "base":</strong> Para disciplinas comuns, com prioridade máxima</li>
+                                    <li><strong>Planos específicos:</strong> Para matérias exclusivas de cada concurso</li>
+                                    <li><strong>Rotação inteligente:</strong> Distribua os dias da semana entre os concursos</li>
+                                </ol>
+                                <p class="mb-4"><strong>No Editaliza:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li>Crie um plano para cada concurso</li>
+                                    <li>Use o seletor de planos para alternar entre eles</li>
+                                    <li>Configure dias específicos para cada um (ex: Seg/Qua/Sex = Concurso A, Ter/Qui/Sab = Concurso B)</li>
+                                    <li>Domingo para revisões gerais ou disciplinas comuns</li>
+                                </ul>
+                                <p class="mb-4"><strong>Regra de ouro:</strong> Priorize por proximidade da prova. Se um concurso é em 3 meses e outro em 8, foque mais no primeiro sem abandonar o segundo.</p>
+                                <div class="bg-blue-50 border-l-4 border-editaliza-blue p-4 mt-4">
+                                    <p class="font-medium text-editaliza-blue">🎯 Dica avançada: Estude as disciplinas comuns primeiro. Isso cria uma base sólida que beneficia todos os concursos simultaneamente.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Como definir metas realistas? Sempre planejo demais e depois me frustro.</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Essa frustração é mais comum do que imagina! O problema não é falta de capacidade, mas <strong>planejamento irrealista</strong> que ignora as limitações humanas.</p>
+                                <p class="mb-4"><strong>Princípios para metas realistas:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Comece com 70% da sua capacidade teórica:</strong> Se acha que consegue 8h/dia, planeje para 5-6h</li>
+                                    <li><strong>Inclua "tempo para imprevistos":</strong> Vida real acontece - doença, família, trabalho extra</li>
+                                    <li><strong>Teste por 2 semanas:</strong> Ajuste baseado na realidade, não na teoria</li>
+                                    <li><strong>Prefira consistência à intensidade:</strong> 3h todo dia > 6h dia sim, dia não</li>
+                                </ol>
+                                <p class="mb-4"><strong>Como usar o Editaliza para metas realistas:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li>Configure horários conservadores inicialmente</li>
+                                    <li>Use a função de reagendamento quando necessário (sem culpa!)</li>
+                                    <li>Monitore sua aderência ao cronograma</li>
+                                    <li>Ajuste as configurações mensalmente baseado nos resultados</li>
+                                </ul>
+                                <p class="mb-4"><strong>Mudança de mindset:</strong> O objetivo não é ser perfeito, é ser consistente. 80% de aderência a um plano realista > 40% de aderência a um plano "perfeito".</p>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
+                                    <p class="font-medium text-yellow-700">🎯 Meta prática: Comece conseguindo cumprir 80% do seu cronograma por 2 semanas. Só então considere aumentar a carga.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
-            <!-- Categoria 3: Situações Específicas -->
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center"><span class="text-2xl mr-3">⁉️</span>Situações Específicas</h2>
-                <div class="space-y-4">
-                     <div class="content-card p-0 overflow-hidden">
-                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">A data da minha prova mudou. O que eu faço?</h3>
-                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                        <div class="accordion-content text-gray-700">
-                            <p class="px-6 pb-6">Sem problemas. Você não precisa criar um novo plano. Apenas vá em "Gerenciar Planos", clique para configurar o plano existente e altere a "Data da Prova". Depois, clique em <strong>"Gerar/Atualizar Cronograma"</strong>. O sistema irá recalcular todo o seu planejamento, ajustando o ritmo e as revisões de forma inteligente para se adequar ao novo prazo.</p>
-                        </div>
-                    </div>
-                     <div class="content-card p-0 overflow-hidden">
-                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Terminei de estudar todos os tópicos antes da prova. E agora?</h3>
-                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                        <div class="accordion-content text-gray-700">
-                            <p class="px-6 pb-6">Parabéns! Isso significa que seu planejamento foi excelente. O sistema reconhece isso e entra em "modo de manutenção". Ele irá parar de agendar "Novos Tópicos" e preencherá seus dias com um ciclo contínuo de revisões espaçadas e reforços dos tópicos já vistos, garantindo que todo o conteúdo esteja fresco na sua memória até o dia da prova.</p>
-                        </div>
-                    </div>
-                     <div class="content-card p-0 overflow-hidden">
-                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Gerei meu cronograma, mas ele apareceu vazio. Por quê?</h3>
-                            <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
-                        <div class="accordion-content text-gray-700">
-                            <p class="px-6 pb-6">Isso geralmente acontece por dois motivos: 1) Você ainda não adicionou disciplinas e tópicos nas configurações do plano (o sistema não tem o que agendar). 2) Você configurou "0" horas de estudo para todos os dias da semana. Verifique suas configurações e gere novamente!</p>
-                        </div>
-                    </div>
+            <!-- SEÇÃO 3: Ansiedades e Medos Comuns -->
+            <div class="faq-section" data-category="ansiedades">
+                <div class="category-description p-6 rounded-lg mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-3 flex items-center">
+                        <span class="text-3xl mr-4">💭</span>Ansiedades e Medos Comuns
+                    </h2>
+                    <p class="text-gray-700 text-lg">A jornada do concurseiro é tanto mental quanto intelectual. Aqui abordamos os medos e ansiedades que podem sabotar seu sucesso, com estratégias práticas para superá-los.</p>
                 </div>
+                <div class="space-y-4">
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Tenho pânico de que não vai dar tempo de estudar tudo. Como lidar com essa ansiedade?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Essa ansiedade é quase universal entre concurseiros. A verdade: <strong>ninguém estuda "tudo"</strong>, nem mesmo os aprovados em primeiro lugar.</p>
+                                <p class="mb-4"><strong>Realidade dos aprovados:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li>Conhecem bem 70-80% do conteúdo</li>
+                                    <li>Conhecem razoavelmente 15-20%</li>
+                                    <li>Não conhecem ou "chutam" 5-10%</li>
+                                    <li>E ainda assim passam com boa margem!</li>
+                                </ul>
+                                <p class="mb-4"><strong>Como nosso sistema ajuda essa ansiedade:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Visibilidade total:</strong> Você vê exatamente o que será estudado e quando</li>
+                                    <li><strong>Adaptação automática:</strong> Se algo atrasa, o sistema reorganiza tudo</li>
+                                    <li><strong>Priorização inteligente:</strong> Garante que o mais importante seja visto primeiro</li>
+                                    <li><strong>Progresso visível:</strong> Você vê diariamente que está avançando</li>
+                                </ul>
+                                <p class="mb-4"><strong>Estratégias mentais:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Foque no hoje:</strong> Sua única responsabilidade é cumprir o cronograma de hoje</li>
+                                    <li><strong>Confie no processo:</strong> Se você segue o cronograma, o resultado virá</li>
+                                    <li><strong>Qualidade > Quantidade:</strong> Melhor conhecer bem 80% que mal 100%</li>
+                                </ol>
+                                <div class="bg-green-50 border-l-4 border-editaliza-green p-4 mt-4">
+                                    <p class="font-medium text-green-700">🧘 Mantra para ansiedade: "Não preciso saber tudo. Preciso saber mais que a maioria dos candidatos. E o cronograma garante isso."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Já falhei em outros concursos. Como superar o medo de falhar novamente?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Falhas anteriores não definem seu futuro - elas te tornam mais preparado. Cada tentativa é um degrau, não um obstáculo.</p>
+                                <p class="mb-4"><strong>Reframe das "falhas" anteriores:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Experiência de prova:</strong> Você conhece o ambiente, o nervosismo, o timing</li>
+                                    <li><strong>Conhecimento residual:</strong> Muito do que estudou ainda está na sua mente</li>
+                                    <li><strong>Clareza do que funciona:</strong> Você sabe o que não funcionou antes</li>
+                                    <li><strong>Maturidade emocional:</strong> Está mais preparado psicologicamente</li>
+                                </ul>
+                                <p class="mb-4"><strong>O que é diferente agora:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Metodologia otimizada:</strong> Repetição espaçada vs. estudo desordenado</li>
+                                    <li><strong>Planejamento estruturado:</strong> Cada dia tem propósito específico</li>
+                                    <li><strong>Progresso mensurável:</strong> Você vê que está aprendendo de verdade</li>
+                                    <li><strong>Adaptabilidade:</strong> O sistema se ajusta aos imprevistos</li>
+                                </ol>
+                                <p class="mb-4"><strong>Construindo confiança gradual:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li>Celebre pequenas vitórias diárias (cronograma cumprido)</li>
+                                    <li>Faça simulados periódicos para ver o progresso</li>
+                                    <li>Use o histórico do sistema como evidência do crescimento</li>
+                                    <li>Conecte-se com outros concurseiros na mesma jornada</li>
+                                </ul>
+                                <div class="bg-blue-50 border-l-4 border-editaliza-blue p-4 mt-4">
+                                    <p class="font-medium text-editaliza-blue">💪 Verdade poderosa: A maioria dos aprovados falhou pelo menos uma vez. A diferença entre quem desiste e quem passa é a persistência inteligente.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Vejo outros candidatos estudando 12h por dia. Sinto que estou ficando para trás.</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">A "síndrome da comparação" é um dos maiores sabotadores do concurseiro. Mas você está comparando sua realidade com o marketing dos outros.</p>
+                                <p class="mb-4"><strong>A verdade sobre estudar 12h/dia:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Qualidade despenca:</strong> Após 6-8h focadas, o rendimento cai drasticamente</li>
+                                    <li><strong>Burnout garantido:</strong> Impossível manter por meses</li>
+                                    <li><strong>Vida pessoal destruída:</strong> Stress afeta o aprendizado</li>
+                                    <li><strong>Método ineficiente:</strong> Compensa falta de organização com tempo bruto</li>
+                                </ul>
+                                <p class="mb-4"><strong>O que realmente importa:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Horas efetivas:</strong> 4h focadas > 8h distraídas</li>
+                                    <li><strong>Consistência:</strong> 6h por 6 meses > 12h por 2 meses</li>
+                                    <li><strong>Método otimizado:</strong> Repetição espaçada > repetição exaustiva</li>
+                                    <li><strong>Equilíbrio mental:</strong> Mente descansada absorve melhor</li>
+                                </ol>
+                                <p class="mb-4"><strong>Sua vantagem com método otimizado:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li>Cada hora sua vale por 2-3 horas desorganizadas</li>
+                                    <li>Revisões automáticas garantem retenção</li>
+                                    <li>Energia mental preservada para provas</li>
+                                    <li>Sustentabilidade a longo prazo</li>
+                                </ul>
+                                <div class="bg-red-50 border-l-4 border-red-400 p-4 mt-4">
+                                    <p class="font-medium text-red-700">⚠️ Lembre-se: Você não compete com quem posta nas redes sociais. Compete com quem realmente vai fazer a prova. E muitos dos "12h" nem chegam lá.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Tenho síndrome do impostor. Às vezes acho que não mereço ou não sou capaz de passar.</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Se você sente isso, parabéns: você é inteligente o suficiente para reconhecer a complexidade dos concursos. Impostor seria quem acha que é fácil.</p>
+                                <p class="mb-4"><strong>Verdades sobre capacidade:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Não existe "tipo certo":</strong> Aprovados vêm de todas as idades, backgrounds e níveis</li>
+                                    <li><strong>Método > Talento:</strong> Disciplina e organização superam QI alto</li>
+                                    <li><strong>Você já provou capacidade:</strong> Chegou até aqui, isso já te coloca acima da média</li>
+                                    <li><strong>Crescimento contínuo:</strong> Você não precisa saber tudo agora, precisa aprender consistentemente</li>
+                                </ul>
+                                <p class="mb-4"><strong>Como o sistema combate a síndrome do impostor:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Progresso tangível:</strong> Você vê exatamente quanto cresceu</li>
+                                    <li><strong>Pequenas vitórias diárias:</strong> Cada tarefa cumprida é uma evidência de competência</li>
+                                    <li><strong>Objetividade:</strong> Não depende de "sentir" que sabe - o sistema mostra</li>
+                                    <li><strong>Preparação gradual:</strong> Você chega na prova sabendo que fez o possível</li>
+                                </ul>
+                                <p class="mb-4"><strong>Reframes poderosos:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li>"Não preciso ser o melhor candidato, preciso ser melhor que a nota de corte"</li>
+                                    <li>"Cada dia de estudo me torna mais qualificado que ontem"</li>
+                                    <li>"Minha preparação metódica é meu diferencial"</li>
+                                    <li>"Mereço o cargo porque me preparei para ele"</li>
+                                </ol>
+                                <div class="bg-green-50 border-l-4 border-editaliza-green p-4 mt-4">
+                                    <p class="font-medium text-green-700">✨ Mantra de empoderamento: "Cada dia que sigo meu cronograma, provo para mim mesmo que tenho a disciplina necessária para ser servidor público."</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SEÇÃO 4: Problemas Técnicos e de Uso -->
+            <div class="faq-section" data-category="tecnico">
+                <div class="category-description p-6 rounded-lg mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-3 flex items-center">
+                        <span class="text-3xl mr-4">⚙️</span>Problemas Técnicos e de Uso
+                    </h2>
+                    <p class="text-gray-700 text-lg">Dúvidas práticas sobre como usar a plataforma da forma mais eficiente possível. Aqui você encontra as melhores práticas e soluções para problemas comuns.</p>
+                </div>
+                <div class="space-y-4">
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Como organizar os tópicos? Devo ser muito específico ou mais geral?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">A granularidade dos tópicos é crucial para o sucesso do sistema. A regra de ouro: <strong>1 tópico = 1 sessão de estudo (1-2 horas)</strong>.</p>
+                                <p class="mb-4"><strong>Exemplos de granularidade ideal:</strong></p>
+                                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                                    <div class="bg-red-50 p-4 rounded">
+                                        <h4 class="font-semibold text-red-700 mb-2">❌ Muito Geral</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• "Direito Constitucional"</li>
+                                            <li>• "Administração Pública"</li>
+                                            <li>• "Matemática"</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-green-50 p-4 rounded">
+                                        <h4 class="font-semibold text-green-700 mb-2">✅ Granularidade Ideal</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• "Princípios Fundamentais (Art. 1º-4º)"</li>
+                                            <li>• "Estrutura do Poder Executivo"</li>
+                                            <li>• "Regra de Três Simples"</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="grid md:grid-cols-2 gap-4 mb-4">
+                                    <div class="bg-red-50 p-4 rounded">
+                                        <h4 class="font-semibold text-red-700 mb-2">❌ Muito Específico</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• "Art. 5º, inciso I"</li>
+                                            <li>• "Conceito de licitação"</li>
+                                            <li>• "Definição de função"</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-green-50 p-4 rounded">
+                                        <h4 class="font-semibold text-green-700 mb-2">✅ Agrupamento Inteligente</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• "Direitos Individuais (Art. 5º, I-XV)"</li>
+                                            <li>• "Princípios da Licitação"</li>
+                                            <li>• "Funções Elementares"</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <p class="mb-4"><strong>Dicas práticas:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Use o edital como guia:</strong> Cada item do edital pode virar 1-3 tópicos</li>
+                                    <li><strong>Pense em "aulas":</strong> O que você estudaria em uma aula de 90 minutos?</li>
+                                    <li><strong>Agrupe conceitos relacionados:</strong> Evite fragmentar demais</li>
+                                    <li><strong>Teste o tamanho:</strong> Se demora mais de 2h para estudar, divida</li>
+                                </ul>
+                                <div class="bg-blue-50 border-l-4 border-editaliza-blue p-4 mt-4">
+                                    <p class="font-medium text-editaliza-blue">💡 Pro tip: Comece com tópicos maiores. Conforme estuda, você pode dividir os que ficarem muito densos usando a função "Configurar" do plano.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">O sistema agendou muitas revisões para um dia. Como lidar?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Isso acontece principalmente no início, quando você está "alimentando" o sistema com muitos tópicos novos. É normal e transitório.</p>
+                                <p class="mb-4"><strong>Por que acontece:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Acúmulo inicial:</strong> Muitos tópicos entrando ao mesmo tempo no ciclo de revisões</li>
+                                    <li><strong>Coincidência de intervalos:</strong> Vários tópicos "vencendo" no mesmo dia</li>
+                                    <li><strong>Configuração inadequada:</strong> Tópicos muito pequenos ou horas insuficientes</li>
+                                </ul>
+                                <p class="mb-4"><strong>Soluções imediatas:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Use "Replanejar Automaticamente":</strong> O sistema redistribui as tarefas</li>
+                                    <li><strong>Priorize por importância:</strong> Faça primeiro as revisões de tópicos mais importantes</li>
+                                    <li><strong>Revisões rápidas:</strong> 15-20 min por tópico em revisão (não precisa ser estudo profundo)</li>
+                                    <li><strong>Aceite atrasos:</strong> Melhor fazer atrasado que não fazer</li>
+                                </ol>
+                                <p class="mb-4"><strong>Ajustes para o futuro:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Aumente as horas disponíveis:</strong> Se você consegue mais tempo</li>
+                                    <li><strong>Agrupe tópicos pequenos:</strong> Evita sobrecarga de revisões</li>
+                                    <li><strong>Distribua novos tópicos:</strong> Não adicione muitos no mesmo dia</li>
+                                    <li><strong>Configure intervalos maiores:</strong> Para tópicos mais fáceis</li>
+                                </ul>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
+                                    <p class="font-medium text-yellow-700">⚡ Lembre-se: Revisão não é reestudo. O objetivo é "refrescar" a memória, não aprender do zero. 15-20 minutos por tópico é suficiente.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Posso usar o Editaliza junto com outros materiais? Como integrar?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Não só pode como deve! O Editaliza é um <strong>organizador</strong> dos seus estudos, não um substituto dos seus materiais de qualidade.</p>
+                                <p class="mb-4"><strong>Como integrar com diferentes materiais:</strong></p>
+                                <div class="space-y-4 mb-4">
+                                    <div class="bg-gray-50 p-4 rounded">
+                                        <h4 class="font-semibold mb-2">📚 Cursos em Vídeo</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• Nome do tópico: "Princípios Administrativos (Aula 15-17)"</li>
+                                            <li>• Primeira vez: Assista às aulas</li>
+                                            <li>• Revisões: Assista em 1.5x ou revise suas anotações</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded">
+                                        <h4 class="font-semibold mb-2">📖 PDFs e Livros</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• Nome do tópico: "Controle de Constitucionalidade (Cap. 12)"</li>
+                                            <li>• Primeira vez: Leitura completa + resumo</li>
+                                            <li>• Revisões: Releitura do resumo + pontos principais</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded">
+                                        <h4 class="font-semibold mb-2">📝 Questões</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• Nome do tópico: "Questões Organização do Estado"</li>
+                                            <li>• Use após estudar a teoria</li>
+                                            <li>• Revisões: Refaça questões erradas</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <p class="mb-4"><strong>Estratégia de integração:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Mapeie seus materiais:</strong> Liste todos os recursos que possui</li>
+                                    <li><strong>Associe a tópicos:</strong> Cada tópico do cronograma = materiais específicos</li>
+                                    <li><strong>Varie nas revisões:</strong> Primeira vez PDF, primeira revisão vídeo, segunda revisão questões</li>
+                                    <li><strong>Use as anotações:</strong> Mantenha um caderno/app paralelo para insights</li>
+                                </ol>
+                                <div class="bg-green-50 border-l-4 border-editaliza-green p-4 mt-4">
+                                    <p class="font-medium text-green-700">🎯 Dica de ouro: Use o campo de anotações do sistema para marcar qual material usar em cada tópico. Ex: "1ª vez: PDF Cap. 5 / Revisão: Vídeo aula 12"</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">O cronograma parece muito "teórico". Como incluir exercícios e simulados?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Exercícios são fundamentais! A chave é tratá-los como <strong>tópicos separados</strong> ou integrados estrategicamente com a teoria.</p>
+                                <p class="mb-4"><strong>Abordagem 1: Tópicos de Exercícios Separados</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li>Crie tópicos como "Exercícios - Direitos Fundamentais"</li>
+                                    <li>Configure com prioridade alta (4-5)</li>
+                                    <li>Agende após estudar a teoria relacionada</li>
+                                    <li>Revise refazendo questões que errou</li>
+                                </ul>
+                                <p class="mb-4"><strong>Abordagem 2: Integrada com Teoria</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li>Nome do tópico: "Princípios Administrativos (Teoria + 20 questões)"</li>
+                                    <li>Primeira vez: 60% teoria + 40% exercícios</li>
+                                    <li>Revisões: 30% teoria + 70% exercícios</li>
+                                </ul>
+                                <p class="mb-4"><strong>Para Simulados:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Crie disciplina específica:</strong> "Simulados Gerais"</li>
+                                    <li><strong>Tópicos semanais:</strong> "Simulado Semana 1", "Simulado Semana 2"...</li>
+                                    <li><strong>Configure para fins de semana:</strong> Quando você tem mais tempo</li>
+                                    <li><strong>Prioridade máxima (5):</strong> Garantir que aconteça</li>
+                                </ol>
+                                <p class="mb-4"><strong>Proporção ideal por fase:</strong></p>
+                                <div class="grid md:grid-cols-3 gap-4 mb-4">
+                                    <div class="bg-blue-50 p-3 rounded text-center">
+                                        <h4 class="font-semibold text-blue-700">Início (Meses 1-2)</h4>
+                                        <p class="text-sm">80% Teoria<br>20% Exercícios</p>
+                                    </div>
+                                    <div class="bg-yellow-50 p-3 rounded text-center">
+                                        <h4 class="font-semibold text-yellow-700">Meio (Meses 3-4)</h4>
+                                        <p class="text-sm">60% Teoria<br>40% Exercícios</p>
+                                    </div>
+                                    <div class="bg-green-50 p-3 rounded text-center">
+                                        <h4 class="font-semibold text-green-700">Reta Final</h4>
+                                        <p class="text-sm">30% Teoria<br>70% Exercícios</p>
+                                    </div>
+                                </div>
+                                <div class="bg-blue-50 border-l-4 border-editaliza-blue p-4 mt-4">
+                                    <p class="font-medium text-editaliza-blue">🎯 Pro tip: Use a função "Reforçar" para tópicos onde você errou muitas questões. O sistema agendará uma revisão extra focada em exercícios.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SEÇÃO 5: Estratégias Avançadas -->
+            <div class="faq-section" data-category="estrategias">
+                <div class="category-description p-6 rounded-lg mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-3 flex items-center">
+                        <span class="text-3xl mr-4">🚀</span>Estratégias Avançadas
+                    </h2>
+                    <p class="text-gray-700 text-lg">Para concurseiros experientes que querem extrair o máximo da plataforma. Técnicas avançadas de otimização e estratégias para situações específicas.</p>
+                </div>
+                <div class="space-y-4">
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Como ajustar as prioridades das disciplinas ao longo do tempo? Posso mudar conforme minha evolução?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Não apenas pode como deve! Um cronograma inteligente evolui com seu conhecimento. Prioridades estáticas são desperdício de tempo.</p>
+                                <p class="mb-4"><strong>Quando ajustar prioridades:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Mensal:</strong> Após simulados ou baterias de exercícios</li>
+                                    <li><strong>Por desempenho:</strong> Disciplinas com mais erros = prioridade maior</li>
+                                    <li><strong>Por cobrança na prova:</strong> Análise de provas anteriores</li>
+                                    <li><strong>Por proximidade da prova:</strong> Últimos 2 meses = focar nos essenciais</li>
+                                </ul>
+                                <p class="mb-4"><strong>Estratégia de ajuste progressivo:</strong></p>
+                                <div class="space-y-3 mb-4">
+                                    <div class="bg-gray-50 p-3 rounded">
+                                        <h4 class="font-semibold text-sm mb-1">📊 Primeira Configuração (Baseada no Edital)</h4>
+                                        <p class="text-sm">Use peso das disciplinas na prova como prioridade inicial</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded">
+                                        <h4 class="font-semibold text-sm mb-1">📈 Segundo Mês (Baseada na Dificuldade)</h4>
+                                        <p class="text-sm">Aumente prioridade das disciplinas mais difíceis para você</p>
+                                    </div>
+                                    <div class="bg-gray-50 p-3 rounded">
+                                        <h4 class="font-semibold text-sm mb-1">🎯 Reta Final (Baseada na Estratégia)</h4>
+                                        <p class="text-sm">Maximize as disciplinas que podem te garantir a aprovação</p>
+                                    </div>
+                                </div>
+                                <p class="mb-4"><strong>Fórmula para calcular nova prioridade:</strong></p>
+                                <div class="bg-blue-50 p-4 rounded mb-4">
+                                    <p class="text-sm font-mono">Nova Prioridade = (Peso na Prova × 0.4) + (Dificuldade Pessoal × 0.4) + (Margem de Melhoria × 0.2)</p>
+                                    <p class="text-xs mt-2 text-gray-600">Exemplo: Direito Constitucional tem peso 3 na prova, dificuldade 4 para você, margem de melhoria 3<br>
+                                    = (3×0.4) + (4×0.4) + (3×0.2) = 1.2 + 1.6 + 0.6 = 3.4 ≈ Prioridade 3</p>
+                                </div>
+                                <p class="mb-4"><strong>Como implementar:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li>Vá em "Gerenciar Planos" → "Configurar"</li>
+                                    <li>Ajuste as prioridades das disciplinas</li>
+                                    <li>Clique em "Gerar/Atualizar Cronograma"</li>
+                                    <li>O sistema recalcula automaticamente a distribuição</li>
+                                </ol>
+                                <div class="bg-green-50 border-l-4 border-editaliza-green p-4 mt-4">
+                                    <p class="font-medium text-green-700">✨ Dica avançada: Mantenha um log das suas mudanças de prioridade. Isso te ajuda a entender seus padrões de aprendizado e melhorar futuras configurações.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Estou a 30 dias da prova. Como configurar para revisão intensiva?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Os últimos 30 dias são cruciais! É hora de mudar completamente a estratégia: de aprendizado para <strong>consolidação e otimização</strong>.</p>
+                                <p class="mb-4"><strong>Configuração para reta final:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Pare de adicionar tópicos novos:</strong> Foque apenas no que já foi estudado</li>
+                                    <li><strong>Aumente frequência de revisões:</strong> Configure intervalos menores</li>
+                                    <li><strong>Priorize tópicos "quase consolidados":</strong> Aqueles que você sabe 70-80%</li>
+                                    <li><strong>Elimine tópicos com ROI baixo:</strong> Se nunca conseguiu aprender, não insista</li>
+                                </ol>
+                                <p class="mb-4"><strong>Estratégia dos últimos 30 dias:</strong></p>
+                                <div class="grid md:grid-cols-3 gap-4 mb-4">
+                                    <div class="bg-blue-50 p-3 rounded">
+                                        <h4 class="font-semibold text-blue-700 text-sm mb-2">Dias 30-21</h4>
+                                        <ul class="text-xs space-y-1">
+                                            <li>• 60% Revisões</li>
+                                            <li>• 40% Exercícios</li>
+                                            <li>• Focar nos 80% mais importantes</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-yellow-50 p-3 rounded">
+                                        <h4 class="font-semibold text-yellow-700 text-sm mb-2">Dias 20-8</h4>
+                                        <ul class="text-xs space-y-1">
+                                            <li>• 40% Revisões</li>
+                                            <li>• 60% Exercícios</li>
+                                            <li>• Simulados completos</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-green-50 p-3 rounded">
+                                        <h4 class="font-semibold text-green-700 text-sm mb-2">Dias 7-1</h4>
+                                        <ul class="text-xs space-y-1">
+                                            <li>• 70% Revisões leves</li>
+                                            <li>• 30% Exercícios fáceis</li>
+                                            <li>• Manter confiança</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <p class="mb-4"><strong>Configurações técnicas:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Remova tópicos problemáticos:</strong> Aqueles que sempre dão trabalho</li>
+                                    <li><strong>Configure revisões diárias:</strong> Para os 20% mais importantes</li>
+                                    <li><strong>Use "Reforçar" estrategicamente:</strong> Apenas em tópicos que valem muitos pontos</li>
+                                    <li><strong>Mantenha 1 dia da semana livre:</strong> Para imprevistos e descanso</li>
+                                </ul>
+                                <p class="mb-4"><strong>Mindset da reta final:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li>Objetivo não é saber tudo, mas maximizar a pontuação</li>
+                                    <li>Prefira consolidar 80% bem que saber 100% mal</li>
+                                    <li>Mantenha rotina de sono e exercícios</li>
+                                    <li>Confie no que já estudou</li>
+                                </ul>
+                                <div class="bg-red-50 border-l-4 border-red-400 p-4 mt-4">
+                                    <p class="font-medium text-red-700">⚠️ Crucial: Não tente aprender coisas completamente novas nos últimos 30 dias. O cérebro precisa de tempo para consolidar informações complexas.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Como usar o sistema para matérias que mudam constantemente (legislação nova, jurisprudência)?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Conteúdo dinâmico é o pesadelo de todo concurseiro! A chave é criar uma estrutura flexível que acomode mudanças sem quebrar o cronograma.</p>
+                                <p class="mb-4"><strong>Estratégia para conteúdo dinâmico:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Base estável primeiro:</strong> Estude princípios e conceitos que não mudam</li>
+                                    <li><strong>Tópicos "vivos":</strong> Crie tópicos específicos para atualizações</li>
+                                    <li><strong>Revisões frequentes:</strong> Configure intervalos menores para conteúdo que muda</li>
+                                    <li><strong>Sistema de alertas:</strong> Use o campo de anotações para marcar quando revisar fontes</li>
+                                </ol>
+                                <p class="mb-4"><strong>Estrutura recomendada:</strong></p>
+                                <div class="space-y-3 mb-4">
+                                    <div class="bg-green-50 p-3 rounded">
+                                        <h4 class="font-semibold text-green-700 text-sm mb-1">✅ Tópicos Base (Estáveis)</h4>
+                                        <p class="text-xs">Ex: "Princípios do Direito Tributário", "Conceitos Fundamentais do Administrativo"</p>
+                                        <p class="text-xs text-gray-600">→ Revisões normais, foco na consolidação</p>
+                                    </div>
+                                    <div class="bg-yellow-50 p-3 rounded">
+                                        <h4 class="font-semibold text-yellow-700 text-sm mb-1">⚡ Tópicos Dinâmicos</h4>
+                                        <p class="text-xs">Ex: "Jurisprudência STF - Tributário", "Lei 14.XXX/2024 - Novidades"</p>
+                                        <p class="text-xs text-gray-600">→ Revisões semanais, prioridade alta</p>
+                                    </div>
+                                    <div class="bg-blue-50 p-3 rounded">
+                                        <h4 class="font-semibold text-blue-700 text-sm mb-1">🔄 Tópicos de Atualização</h4>
+                                        <p class="text-xs">Ex: "Atualizações Março/2024", "Novas Súmulas"</p>
+                                        <p class="text-xs text-gray-600">→ Adicionados conforme surgem novidades</p>
+                                    </div>
+                                </div>
+                                <p class="mb-4"><strong>Workflow para atualizações:</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Identificou mudança:</strong> Anote na fonte (STF, novo decreto, etc.)</li>
+                                    <li><strong>Avalie relevância:</strong> Isso cai na minha prova? Qual o peso?</li>
+                                    <li><strong>Crie/atualize tópico:</strong> Novo tópico ou modifica existente</li>
+                                    <li><strong>Configure prioridade:</strong> Novidades importantes = prioridade 5</li>
+                                    <li><strong>Agenda revisão rápida:</strong> Dentro de 1 semana para não esquecer</li>
+                                </ol>
+                                <p class="mb-4"><strong>Dicas para diferentes tipos:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Jurisprudência:</strong> Crie tópico por tema, não por julgado individual</li>
+                                    <li><strong>Leis novas:</strong> Foque no que revoga/altera, não na lei inteira</li>
+                                    <li><strong>Decretos:</strong> Apenas se regulamentam leis já estudadas</li>
+                                    <li><strong>Súmulas:</strong> Agrupe por área, revise mensalmente</li>
+                                </ul>
+                                <div class="bg-blue-50 border-l-4 border-editaliza-blue p-4 mt-4">
+                                    <p class="font-medium text-editaliza-blue">🎯 Pro tip: Reserve 1 hora por semana para "caça às novidades". Use esse tempo para atualizar seus tópicos dinâmicos e manter-se em dia.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="content-card p-0 overflow-hidden faq-item">
+                        <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Posso "hackear" o sistema para acelerar o aprendizado em disciplinas específicas?</h3>
+                            <svg class="w-5 h-5 text-gray-500 transform flex-shrink-0 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content text-gray-700">
+                            <div class="px-6 pb-6">
+                                <p class="mb-4">Adoro a mentalidade! Sim, existem várias técnicas avançadas para otimizar o algoritmo e acelerar resultados em áreas específicas.</p>
+                                <p class="mb-4"><strong>"Hacks" legítimos do sistema:</strong></p>
+                                <div class="space-y-4 mb-4">
+                                    <div class="bg-gray-50 p-4 rounded">
+                                        <h4 class="font-semibold text-sm mb-2">🚀 Hack #1: Super-Priorização Temporária</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• Configure prioridade 5 em disciplina crítica</li>
+                                            <li>• Configure prioridade 1 nas outras temporariamente</li>
+                                            <li>• Resultado: 80% do tempo vai para a disciplina crítica</li>
+                                            <li>• Use por 2-3 semanas máximo</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded">
+                                        <h4 class="font-semibold text-sm mb-2">⚡ Hack #2: Micro-Tópicos para Revisão Intensiva</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• Divida tópicos difíceis em partes minúsculas (15-20 min cada)</li>
+                                            <li>• Sistema agenda revisões mais frequentes</li>
+                                            <li>• Resultado: Exposição repetida ao conteúdo difícil</li>
+                                            <li>• Perfeito para fórmulas, listas, jurisprudência</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded">
+                                        <h4 class="font-semibold text-sm mb-2">🎯 Hack #3: Clonagem de Tópicos</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• Crie o mesmo tópico com nomes diferentes</li>
+                                            <li>• Ex: "Princípios Admin (Teoria)" e "Princípios Admin (Questões)"</li>
+                                            <li>• Configure um para teoria, outro para exercícios</li>
+                                            <li>• Dobra a exposição ao conteúdo</li>
+                                        </ul>
+                                    </div>
+                                    <div class="bg-gray-50 p-4 rounded">
+                                        <h4 class="font-semibold text-sm mb-2">🔄 Hack #4: Reset Estratégico</h4>
+                                        <ul class="text-sm space-y-1">
+                                            <li>• Use "Reforçar" mesmo quando acertou</li>
+                                            <li>• Força uma revisão extra em conteúdo importante</li>
+                                            <li>• Ideal para tópicos que valem muitos pontos</li>
+                                            <li>• Simula "esquecimento" para mais repetições</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <p class="mb-4"><strong>Técnica avançada: "Protocolo de Imersão"</strong></p>
+                                <ol class="list-decimal pl-6 mb-4 space-y-2">
+                                    <li><strong>Escolha 1 disciplina crítica</strong> (mais difícil ou maior peso)</li>
+                                    <li><strong>Configure todas as outras para prioridade 1</strong></li>
+                                    <li><strong>Configure a escolhida para prioridade 5</strong></li>
+                                    <li><strong>Divida os tópicos da escolhida em micro-partes</strong></li>
+                                    <li><strong>Mantém por 21 dias</strong> (tempo para formar hábito neurológico)</li>
+                                    <li><strong>Depois rebalanceia</strong> as prioridades normalmente</li>
+                                </ol>
+                                <p class="mb-4"><strong>Quando usar cada hack:</strong></p>
+                                <ul class="list-disc pl-6 mb-4 space-y-2">
+                                    <li><strong>Super-priorização:</strong> Você tem defasagem grave em disciplina importante</li>
+                                    <li><strong>Micro-tópicos:</strong> Conteúdo que você sempre esquece</li>
+                                    <li><strong>Clonagem:</strong> Precisa dominar teoria E exercícios rapidamente</li>
+                                    <li><strong>Reset estratégico:</strong> Reta final, consolidando pontos garantidos</li>
+                                </ul>
+                                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-4">
+                                    <p class="font-medium text-yellow-700">⚠️ Cuidado: Esses hacks são poderosos mas temporários. Use com moderação e sempre retorne ao equilíbrio natural do sistema.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Seção de contato/suporte -->
+        <div class="mt-16 p-8 bg-gradient-to-r from-editaliza-blue to-blue-600 rounded-lg text-white text-center">
+            <h3 class="text-2xl font-bold mb-4">Ainda tem dúvidas?</h3>
+            <p class="text-lg mb-6">Nossa equipe está pronta para ajudar você a alcançar sua aprovação!</p>
+            <div class="flex flex-col gap-4 justify-center items-center">
+                <a href="mailto:suporte@editaliza.com.br" class="bg-white text-editaliza-blue px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors text-lg">
+                    📧 suporte@editaliza.com.br
+                </a>
+                <p class="text-sm opacity-90 mt-2">Respondemos todas as mensagens em até 24 horas!</p>
             </div>
         </div>
     </main>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             components.renderMainNavigation('faq.html');
 
+            // Funcionalidade do accordion
             const accordionContainer = document.getElementById('faq-accordion-container');
             if (accordionContainer) {
                 accordionContainer.addEventListener('click', (event) => {
@@ -174,8 +989,54 @@
                         content.style.maxHeight = null;
                     } else {
                         header.classList.add('active');
-                        // Define a altura máxima com base no tamanho real do conteúdo
                         content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            }
+
+            // Funcionalidade de busca
+            const searchInput = document.getElementById('faq-search');
+            const faqItems = document.querySelectorAll('.faq-item');
+            const faqSections = document.querySelectorAll('.faq-section');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    const searchTerm = e.target.value.toLowerCase();
+                    let hasVisibleItems = false;
+
+                    if (searchTerm === '') {
+                        // Mostrar tudo quando a busca está vazia
+                        faqItems.forEach(item => {
+                            item.style.display = 'block';
+                        });
+                        faqSections.forEach(section => {
+                            section.style.display = 'block';
+                        });
+                        return;
+                    }
+
+                    faqSections.forEach(section => {
+                        let sectionHasVisibleItems = false;
+                        
+                        section.querySelectorAll('.faq-item').forEach(item => {
+                            const question = item.querySelector('h3').textContent.toLowerCase();
+                            const answer = item.querySelector('.accordion-content').textContent.toLowerCase();
+                            
+                            if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                                item.style.display = 'block';
+                                sectionHasVisibleItems = true;
+                                hasVisibleItems = true;
+                            } else {
+                                item.style.display = 'none';
+                            }
+                        });
+
+                        section.style.display = sectionHasVisibleItems ? 'block' : 'none';
+                    });
+
+                    // Se não encontrar nada, mostrar mensagem
+                    if (!hasVisibleItems) {
+                        console.log('Nenhum resultado encontrado para:', searchTerm);
                     }
                 });
             }

@@ -455,6 +455,29 @@ const findUserByEmail = async (email) => {
     );
 };
 
+/**
+ * Verify that a plan belongs to a specific user
+ */
+const verifyPlanOwnership = async (userId, planId) => {
+    const result = await dbGet(
+        'SELECT id FROM study_plans WHERE id = ? AND user_id = ?',
+        [planId, userId]
+    );
+    return !!result;
+};
+
+/**
+ * Get completed sessions for a specific user and plan
+ */
+const getCompletedSessions = async (userId, planId) => {
+    return await dbAll(`
+        SELECT DISTINCT session_date, status
+        FROM study_sessions 
+        WHERE study_plan_id = ? AND status = 'Concluído'
+        ORDER BY session_date DESC
+    `, [planId]);
+};
+
 module.exports = {
     getUserProfile,
     getUserWithPassword,
@@ -476,5 +499,7 @@ module.exports = {
     updateLastLogin,
     isUserActive,
     getUserPlanCount,
-    findUserByEmail
+    findUserByEmail,
+    verifyPlanOwnership,
+    getCompletedSessions
 };
