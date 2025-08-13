@@ -7,6 +7,14 @@
 
 const { dbGet, dbAll } = require('../utils/database');
 
+// CORREÇÃO: Função para obter data atual no horário de Brasília
+const getBrazilianDate = () => {
+    const now = new Date();
+    // Converter para horário de Brasília (UTC-3)
+    const brazilTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+    return brazilTime.toISOString().split('T')[0]; // Retorna apenas a data YYYY-MM-DD
+};
+
 /**
  * Get plan by ID and verify user ownership
  */
@@ -236,7 +244,7 @@ const getWeakTopics = async (planId) => {
  * Get overdue tasks
  */
 const getOverdueTasks = async (planId) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getBrazilianDate(); // CORREÇÃO: usar horário de Brasília
     
     const overdueTasks = await dbAll(`
         SELECT 
