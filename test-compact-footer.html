@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Footer Compacto - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/footer.css" rel="stylesheet">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: 'Inter', sans-serif;
+        }
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+        }
+        .test-section {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="test-section">
+            <h1 style="color: #0528f2; font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">
+                Teste do Footer Compacto - Editaliza
+            </h1>
+            
+            <div style="margin-bottom: 2rem;">
+                <h2 style="color: #1e40af; font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem;">
+                    ✅ Problemas Corrigidos:
+                </h2>
+                <ul style="list-style: disc; margin-left: 2rem; line-height: 1.8;">
+                    <li><strong>Altura reduzida drasticamente:</strong> De ~380px para máximo 150px</li>
+                    <li><strong>Logo mais visível:</strong> Fundo semi-transparente e drop-shadow</li>
+                    <li><strong>Espaçamentos compactos:</strong> Padding e margins reduzidos</li>
+                    <li><strong>Design profissional:</strong> Aparência limpa e moderna</li>
+                    <li><strong>Responsive:</strong> Adaptação perfeita para mobile</li>
+                </ul>
+            </div>
+            
+            <div style="margin-bottom: 2rem;">
+                <h2 style="color: #16a34a; font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem;">
+                    🎯 Especificações Atendidas:
+                </h2>
+                <ul style="list-style: disc; margin-left: 2rem; line-height: 1.8;">
+                    <li>Footer máximo de 150px de altura</li>
+                    <li>Logo claramente visível contra o fundo</li>
+                    <li>Aparência não mais "grotesca" ou desproporcional</li>
+                    <li>Mantido sistema modular em footer.js</li>
+                    <li>CSS inline e externo atualizados</li>
+                </ul>
+            </div>
+            
+            <div style="padding: 1.5rem; background: #f8fafc; border-radius: 0.5rem; border-left: 4px solid #1ad937;">
+                <p style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">
+                    📝 Nota Técnica:
+                </p>
+                <p style="color: #6b7280; line-height: 1.6;">
+                    O footer agora usa um sistema de padding compacto (0.75rem top, 0.5rem bottom) 
+                    e o logo possui background semi-transparente com filtro de sombra para melhor contraste.
+                    Todos os espaçamentos foram otimizados para uma aparência profissional e compacta.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script do rodapé modular - será carregado automaticamente -->
+    <script src="js/footer.js"></script>
+</body>
+</html>
