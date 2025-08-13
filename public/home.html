@@ -400,6 +400,14 @@
     </main>
 
     <script>
+            // CORREÇÃO: Função para obter data atual no horário de Brasília
+            function getBrazilianDate() {
+                const now = new Date();
+                // Converter para horário de Brasília (UTC-3)
+                const brazilTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+                return brazilTime.toISOString().split('T')[0]; // Retorna apenas a data YYYY-MM-DD
+            }
+
             // Expose session lists globally
             window.todaySessionsData = [];
             window.allSessionsData = []; // Store all sessions for flexible access
@@ -574,7 +582,7 @@
             async function loadTodaySchedule(planId) {
                 const container = document.getElementById('todaySchedule');
                 try {
-                    const today = new Date().toISOString().split('T')[0];
+                    const today = getBrazilianDate(); // CORREÇÃO: usar horário de Brasília
                     const scheduleData = await app.apiFetch(`/schedules/${planId}/range?startDate=${today}&endDate=${today}`);
                     window.todaySessionsData = scheduleData || [];
                     
@@ -731,7 +739,7 @@
                         let totalDays = parseInt(storedTotalDays);
                         
                         // If user has studied today and it's not already counted
-                        const today = new Date().toISOString().split('T')[0];
+                        const today = getBrazilianDate(); // CORREÇÃO: usar horário de Brasília
                         const lastStudyDate = localStorage.getItem('lastStudyDate');
                         
                         if (hasCompletedSessions && lastStudyDate !== today) {

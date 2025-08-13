@@ -505,6 +505,14 @@
     </main>
 
     <script>
+        // CORREÇÃO: Função para obter data atual no horário de Brasília
+        function getBrazilianDate() {
+            const now = new Date();
+            // Converter para horário de Brasília (UTC-3)
+            const brazilTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+            return brazilTime.toISOString().split('T')[0]; // Retorna apenas a data YYYY-MM-DD
+        }
+
         const urlParams = new URLSearchParams(window.location.search);
         const planId = urlParams.get('id');
         const isNewPlan = urlParams.get('new') === 'true';
@@ -721,7 +729,7 @@
             const list = document.getElementById(`topics-for-${subjectId}`);
             try {
                 const topics = await app.apiFetch(`/subjects/${subjectId}/topics`);
-                const todayStr = new Date().toISOString().split('T')[0];
+                const todayStr = getBrazilianDate(); // CORREÇÃO: usar horário de Brasília
 
                 list.innerHTML = topics.length > 0
                     ? topics.map(topic => {
