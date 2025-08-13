@@ -467,6 +467,23 @@ const StudyChecklist = {
                 window.updateDashboardStats();
             }
             
+            // CORREÇÃO: Atualizar progresso de hoje se estivermos na home
+            if (window.location.pathname.includes('home.html') && typeof window.updateTodayProgress === 'function') {
+                // Atualizar dados da sessão no array global
+                if (window.todaySessionsData) {
+                    const sessionIndex = window.todaySessionsData.findIndex(s => s.id == sessionId);
+                    if (sessionIndex !== -1) {
+                        window.todaySessionsData[sessionIndex].status = 'Concluído';
+                        console.log('📊 Dados da sessão atualizados no todaySessionsData');
+                    }
+                }
+                // Atualizar display do progresso
+                setTimeout(() => {
+                    window.updateTodayProgress();
+                    console.log('🔄 Progresso de hoje atualizado após conclusão da sessão');
+                }, 200);
+            }
+            
             // CORREÇÃO: Atualizar visual do card imediatamente
             setTimeout(() => {
                 TimerSystem.updateCardVisuals(sessionId);

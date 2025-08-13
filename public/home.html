@@ -658,13 +658,14 @@
                 }
             }
 
-            function updateTodayProgress() {
+            // CORREÇÃO: Tornar função global para acesso de outros scripts
+            window.updateTodayProgress = function updateTodayProgress() {
                 try {
                     const total = window.todaySessionsData.length;
                     const completed = window.todaySessionsData.filter(session => {
                         // Check if session has completed time or is marked as completed
                         return session.completed_at || 
-                               session.status === 'completed' || 
+                               session.status === 'Concluído' || 
                                (session.study_time && session.study_time > 0);
                     }).length;
                     
@@ -688,7 +689,7 @@
                 } catch (error) {
                     console.error('Erro ao atualizar progresso de hoje:', error);
                 }
-            }
+            }; // CORREÇÃO: Fechamento correto da função global
 
 
 
