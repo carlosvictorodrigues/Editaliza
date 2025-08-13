@@ -68,11 +68,6 @@ allowedHtmlFiles.forEach(file => {
     });
 });
 
-// Serve improvements-implementation.js file specifically
-app.get('/improvements-implementation.js', (req, res) => {
-    res.sendFile(path.join(__dirname, 'improvements-implementation.js'));
-});
-
 // CORREÇÃO DE SEGURANÇA: CSP endurecida sem unsafe-inline
 // Middleware para gerar nonce único por requisição
 app.use((req, res, next) => {
@@ -1114,7 +1109,7 @@ app.get('/subjects/:subjectId/topics',
             `, [req.params.subjectId, req.user.id]);
             if (!subject) return res.status(404).json({ error: "Disciplina não encontrada ou não autorizada." });
 
-            const rows = await dbAll("SELECT id, description, status, completion_date, topic_weight FROM topics WHERE subject_id = ? ORDER BY id ASC", [req.params.subjectId]);
+            const rows = await dbAll("SELECT id, description, status, completion_date FROM topics WHERE subject_id = ? ORDER BY id ASC", [req.params.subjectId]);
             res.json(rows);
         } catch (error) {
             console.error('Erro ao buscar tópicos:', error);
@@ -1164,13 +1159,9 @@ app.patch('/topics/:topicId',
     validators.text('description', 1, 500),
     handleValidationErrors,
     async (req, res) => {
-        const { description, topic_weight } = req.body;
-        
-        // SEGURO: Convert topic_weight - se vazio/null, usar NULL (herda da disciplina)
-        const safeTopicWeight = topic_weight === "" || topic_weight === null || topic_weight === undefined ? null : parseInt(topic_weight);
-        
+        const { description } = req.body;
         const sql = `
-            UPDATE topics SET description = ?, topic_weight = ? 
+            UPDATE topics SET description = ? 
             WHERE id = ? AND subject_id IN (
                 SELECT id FROM subjects WHERE study_plan_id IN (
                     SELECT id FROM study_plans WHERE user_id = ?
@@ -1178,12 +1169,8 @@ app.patch('/topics/:topicId',
             )
         `;
         try {
-            const result = await dbRun(sql, [description, safeTopicWeight, req.params.topicId, req.user.id]);
+            const result = await dbRun(sql, [description, req.params.topicId, req.user.id]);
             if (result.changes === 0) return res.status(404).json({ error: "Tópico não encontrado ou não autorizado." });
-            
-            // Log da alteração para auditoria
-            console.log(`🔧 [TOPIC WEIGHT] Tópico ${req.params.topicId}: peso específico ${safeTopicWeight || 'removido (herda da disciplina)'}`);
-            
             res.json({ message: 'Tópico atualizado com sucesso!' });
         } catch (error) {
             console.error('Erro ao atualizar tópico:', error);
@@ -1262,15 +1249,11 @@ app.post('/plans/:planId/generate',
             const allTopicsQuery = `
                 SELECT 
                     t.id, t.description, t.status, t.completion_date,
-                    s.subject_name, 
-                    -- NOVA LÓGICA: Use peso específico se definido, senão herda da disciplina
-                    COALESCE(t.topic_weight, s.priority_weight) as priority,
-                    s.priority_weight as subject_priority,
-                    t.topic_weight as topic_priority
+                    s.subject_name, s.priority_weight as priority
                 FROM subjects s
                 INNER JOIN topics t ON s.id = t.subject_id
                 WHERE s.study_plan_id = ?
-                ORDER BY COALESCE(t.topic_weight, s.priority_weight) DESC, t.id ASC
+                ORDER BY s.priority_weight DESC, t.id ASC
             `;
             const allTopics = await dbAll(allTopicsQuery, [planId]);
 
@@ -1387,78 +1370,17 @@ app.post('/plans/:planId/generate',
                     });
                 }
 
-                // MODO RETA FINAL CORRIGIDO: Priorizar TÓPICOS INDIVIDUAIS por peso
-                
-                console.log(`🎯 [RETA FINAL INICIO] ${availableSlots} slots disponíveis para ${pendingTopics.length} tópicos`);
-                
-                // 1. Ordenar TODOS os tópicos por peso (maior primeiro)
-                const sortedTopicsByWeight = [...pendingTopics].sort((a, b) => {
-                    // Primeiro por peso (maior primeiro)
-                    if (b.priority !== a.priority) return b.priority - a.priority;
-                    // Em caso de empate, ordenar por disciplina para consistência
-                    return a.subject_name.localeCompare(b.subject_name);
-                });
-                
-                // 2. Selecionar os N tópicos de maior peso que cabem
-                topicsToSchedule = sortedTopicsByWeight.slice(0, availableSlots);
-                excludedTopics = sortedTopicsByWeight.slice(availableSlots);
-                
-                // 3. Agrupar tópicos selecionados por disciplina para estatísticas
-                const selectedSubjects = {};
-                const excludedSubjects = {};
-                
-                topicsToSchedule.forEach(topic => {
-                    if (!selectedSubjects[topic.subject_name]) {
-                        selectedSubjects[topic.subject_name] = { 
-                            name: topic.subject_name, 
-                            weight: topic.priority, 
-                            topics: 0 
-                        };
+                const sortedTopics = [...pendingTopics].sort((a, b) => b.priority - a.priority);
+                topicsToSchedule = sortedTopics.slice(0, availableSlots);
+                excludedTopics = sortedTopics.slice(availableSlots);
+
+                const subjectsMap = new Map();
+                topicsToSchedule.forEach(t => {
+                    if (!subjectsMap.has(t.subject_name)) {
+                        subjectsMap.set(t.subject_name, { name: t.subject_name, weight: t.priority });
                     }
-                    selectedSubjects[topic.subject_name].topics++;
                 });
-                
-                excludedTopics.forEach(topic => {
-                    if (!excludedSubjects[topic.subject_name]) {
-                        excludedSubjects[topic.subject_name] = { 
-                            name: topic.subject_name, 
-                            weight: topic.priority, 
-                            topics: 0 
-                        };
-                    }
-                    excludedSubjects[topic.subject_name].topics++;
-                });
-                
-                prioritizedSubjects = Object.values(selectedSubjects);
-                
-                // 4. Log detalhado por peso
-                const topicsByWeight = {};
-                sortedTopicsByWeight.forEach(topic => {
-                    if (!topicsByWeight[topic.priority]) {
-                        topicsByWeight[topic.priority] = { selected: 0, excluded: 0, subjects: new Set() };
-                    }
-                    if (topicsToSchedule.includes(topic)) {
-                        topicsByWeight[topic.priority].selected++;
-                    } else {
-                        topicsByWeight[topic.priority].excluded++;
-                    }
-                    topicsByWeight[topic.priority].subjects.add(topic.subject_name);
-                });
-                
-                console.log(`📊 [RETA FINAL ANALISE POR PESO]:`);
-                Object.keys(topicsByWeight).sort((a, b) => b - a).forEach(weight => {
-                    const data = topicsByWeight[weight];
-                    const subjectsList = Array.from(data.subjects).join(', ');
-                    console.log(`  PESO ${weight}: ${data.selected} incluídos, ${data.excluded} excluídos | Disciplinas: ${subjectsList}`);
-                });
-                
-                console.log(`📊 [RETA FINAL RESULTADO POR DISCIPLINA]:`);
-                Object.values(selectedSubjects).forEach(subject => {
-                    const excluded = excludedSubjects[subject.name]?.topics || 0;
-                    console.log(`  ✅ ${subject.name} (peso ${subject.weight}): ${subject.topics} incluídos, ${excluded} excluídos`);
-                });
-                
-                console.log(`🎯 [RETA FINAL RESUMO] ${prioritizedSubjects.length} disciplinas com tópicos, ${topicsToSchedule.length} tópicos agendados, ${excludedTopics.length} tópicos excluídos`);
+                prioritizedSubjects = Array.from(subjectsMap.values());
             }
 
             const weightedTopics = topicsToSchedule.flatMap(t => Array(t.priority).fill(t));

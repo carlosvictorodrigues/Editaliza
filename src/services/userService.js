@@ -631,6 +631,88 @@ const getUserById = async (userId, req) => {
     };
 };
 
+/**
+ * Verify that a plan belongs to a specific user
+ */
+const verifyPlanOwnership = async (userId, planId) => {
+    return await userRepository.verifyPlanOwnership(userId, planId);
+};
+
+/**
+ * Get study statistics for a specific plan
+ */
+const getStudyStatistics = async (userId, planId, req) => {
+    // Get completed sessions data
+    const completedSessions = await userRepository.getCompletedSessions(userId, planId);
+    
+    // Calculate total unique study days
+    const uniqueStudyDays = new Set();
+    completedSessions.forEach(session => {
+        if (session.session_date) {
+            uniqueStudyDays.add(session.session_date);
+        }
+    });
+    
+    const totalStudyDays = uniqueStudyDays.size;
+    
+    // Calculate current study streak
+    const currentStreak = await calculateStudyStreak(completedSessions);
+    
+    return {
+        totalStudyDays,
+        currentStreak
+    };
+};
+
+/**
+ * Calculate the current study streak based on completed sessions
+ */
+const calculateStudyStreak = async (completedSessions) => {
+    if (!completedSessions || completedSessions.length === 0) {
+        return 0;
+    }
+    
+    // Get unique dates and sort them
+    const studyDates = [...new Set(completedSessions.map(s => s.session_date))]
+        .sort((a, b) => new Date(b) - new Date(a)); // Most recent first
+    
+    if (studyDates.length === 0) {
+        return 0;
+    }
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+    
+    const mostRecentDate = new Date(studyDates[0] + 'T00:00:00');
+    
+    // If the most recent study date is neither today nor yesterday, streak is 0
+    if (mostRecentDate.getTime() !== today.getTime() && 
+        mostRecentDate.getTime() !== yesterday.getTime()) {
+        return 0;
+    }
+    
+    let streak = 1;
+    let currentDate = mostRecentDate;
+    
+    // Count consecutive days
+    for (let i = 1; i < studyDates.length; i++) {
+        const previousDay = new Date(currentDate);
+        previousDay.setDate(currentDate.getDate() - 1);
+        const nextStudyDate = new Date(studyDates[i] + 'T00:00:00');
+        
+        if (nextStudyDate.getTime() === previousDay.getTime()) {
+            streak++;
+            currentDate = nextStudyDate;
+        } else {
+            break;
+        }
+    }
+    
+    return streak;
+};
+
 module.exports = {
     getUserProfile,
     updateUserProfile,
@@ -650,5 +732,7 @@ module.exports = {
     updatePrivacySettings,
     searchUsers,
     listUsers,
-    getUserById
+    getUserById,
+    verifyPlanOwnership,
+    getStudyStatistics
 };

@@ -370,6 +370,31 @@ const getUserById = async (req, res) => {
     }
 };
 
+/**
+ * Get study statistics for a specific plan
+ * GET /users/study-stats/:planId
+ */
+const getStudyStats = async (req, res) => {
+    try {
+        const planId = parseInt(req.params.planId);
+        const userId = req.user.id;
+        
+        // Verificar se o plano pertence ao usuário
+        const planExists = await userService.verifyPlanOwnership(userId, planId);
+        if (!planExists) {
+            return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+        }
+        
+        // Calcular estatísticas de estudo
+        const studyStats = await userService.getStudyStatistics(userId, planId, req);
+        res.json(studyStats);
+        
+    } catch (error) {
+        securityLog('get_study_stats_error', error.message, req.user.id, req);
+        res.status(500).json(createSafeError(error, 'Erro ao carregar estatísticas de estudo'));
+    }
+};
+
 module.exports = {
     getProfile,
     updateProfile,
@@ -389,5 +414,6 @@ module.exports = {
     updatePrivacySettings,
     searchUsers,
     listUsers,
-    getUserById
+    getUserById,
+    getStudyStats
 };
