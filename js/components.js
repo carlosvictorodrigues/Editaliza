@@ -81,6 +81,64 @@ const components = {
         document.body.prepend(uiContainer);
     },
 
+    // Renderiza o rodapé com informações da empresa e links úteis
+    renderFooter() {
+        // Evita duplicar caso a página já possua um <footer>
+        if (document.querySelector('footer')) return;
+
+        const footerHtml = `
+        <footer class="bg-editaliza-black text-white py-12 mt-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Editaliza</h4>
+                        <p class="text-gray-300 mb-4">
+                            Sua plataforma inteligente de estudos para concursos públicos.
+                        </p>
+                        <div class="flex space-x-4">
+                            <a href="mailto:contato@editaliza.com" class="text-gray-300 hover:text-white transition-colors">
+                                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Links Úteis</h4>
+                        <ul class="space-y-2">
+                            <li><a href="home.html" class="text-gray-300 hover:text-white transition-colors">Painel Principal</a></li>
+                            <li><a href="metodologia.html" class="text-gray-300 hover:text-white transition-colors">Nossa Metodologia</a></li>
+                            <li><a href="faq.html" class="text-gray-300 hover:text-white transition-colors">FAQ</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Termos de Uso</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="text-lg font-semibold mb-4">Suporte</h4>
+                        <ul class="space-y-2">
+                            <li><a href="mailto:suporte@editaliza.com" class="text-gray-300 hover:text-white transition-colors">Suporte Técnico</a></li>
+                            <li><a href="mailto:privacidade@editaliza.com" class="text-gray-300 hover:text-white transition-colors">Proteção de Dados</a></li>
+                            <li><a href="mailto:dpo@editaliza.com" class="text-gray-300 hover:text-white transition-colors">Encarregado de Dados</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+                    <p class="text-gray-300">
+                        © 2025 Editaliza Tecnologia Educacional Ltda. Todos os direitos reservados.
+                    </p>
+                    <p class="text-gray-400 text-sm mt-2">
+                        Desenvolvido com ❤️ para estudantes de concursos públicos
+                    </p>
+                </div>
+            </div>
+        </footer>`;
+
+        document.body.insertAdjacentHTML('beforeend', footerHtml);
+    },
+
     // Cache do avatar do usuário para evitar múltiplas requisições
     userAvatarCache: null,
     userAvatarCacheTime: null,
@@ -1292,7 +1350,8 @@ const components = {
 
 document.addEventListener('DOMContentLoaded', () => {
     components.renderGlobalUI();
-    
+    components.renderFooter();
+
     // Atualizar botões a cada 5 segundos para refletir timers ativos
     setInterval(() => {
         if (typeof components !== 'undefined' && components.updateAllTimerButtons) {
