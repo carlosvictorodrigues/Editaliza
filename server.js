@@ -948,6 +948,10 @@ app.delete('/plans/:planId',
             if (!plan) return res.status(404).json({ "error": "Plano não encontrado ou você não tem permissão." });
             
             await dbRun('BEGIN TRANSACTION');
+            
+            // CORREÇÃO: Limpar logs de tempo antes de apagar sessões (foreign key dependency)
+            await dbRun('DELETE FROM study_time_logs WHERE session_id IN (SELECT id FROM study_sessions WHERE study_plan_id = ?)', [planId]);
+            
             await dbRun('DELETE FROM study_sessions WHERE study_plan_id = ?', [planId]);
             await dbRun('DELETE FROM topics WHERE subject_id IN (SELECT id FROM subjects WHERE study_plan_id = ?)', [planId]);
             await dbRun('DELETE FROM subjects WHERE study_plan_id = ?', [planId]);
