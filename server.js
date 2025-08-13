@@ -1409,6 +1409,34 @@ app.post('/plans/:planId/generate',
                 prioritizedSubjects = Array.from(subjectsMap.values());
             }
 
+            // Se há exclusões, limpar registros antigos e salvar os novos
+            if (excludedTopics.length > 0) {
+                // Limpar registros antigos de ambas as tabelas
+                await dbRun('DELETE FROM reta_final_exclusions WHERE study_plan_id = ?', [planId]);
+                await dbRun('DELETE FROM reta_final_excluded_topics WHERE study_plan_id = ?', [planId]);
+                
+                for (const excludedTopic of excludedTopics) {
+                    const priorityCombined = (excludedTopic.subject_priority * 10) + excludedTopic.topic_priority;
+                    const reason = `Tópico excluído automaticamente no Modo Reta Final devido à falta de tempo. Prioridade combinada: ${priorityCombined.toFixed(2)}`;
+                    
+                    // Salvar na tabela legada (para compatibilidade)
+                    await dbRun(
+                        'INSERT INTO reta_final_exclusions (study_plan_id, topic_id, subject_name, topic_description, priority_combined) VALUES (?, ?, ?, ?, ?)',
+                        [planId, excludedTopic.id, excludedTopic.subject_name, excludedTopic.description, priorityCombined]
+                    );
+                    
+                    // Salvar na nova tabela com mais detalhes
+                    await dbRun(
+                        'INSERT INTO reta_final_excluded_topics (study_plan_id, subject_name, topic_name, importance, priority_weight, reason) VALUES (?, ?, ?, ?, ?, ?)',
+                        [planId, excludedTopic.subject_name, excludedTopic.description, excludedTopic.topic_priority, priorityCombined, reason]
+                    );
+                }
+            } else {
+                // Se não há exclusões, limpar registros antigos de ambas as tabelas
+                await dbRun('DELETE FROM reta_final_exclusions WHERE study_plan_id = ?', [planId]);
+                await dbRun('DELETE FROM reta_final_excluded_topics WHERE study_plan_id = ?', [planId]);
+            }
+
             // Usar peso combinado (disciplina + tópico) para distribuir sessões
             const weightedTopics = topicsToSchedule.flatMap(t => {
                 const combinedPriority = Math.max(1, t.subject_priority + t.topic_priority - 3); // Ajuste para evitar zero
@@ -1606,8 +1634,19 @@ app.post('/plans/:planId/generate',
                 },
                 retaFinal: {
                     isActive: !!plan.reta_final_mode,
-                    excludedTopics: excludedTopics.map(t => ({ subject_name: t.subject_name, description: t.description })),
-                    prioritizedSubjects
+                    excludedTopics: excludedTopics.map(t => ({
+                        subject_name: t.subject_name,
+                        topic_name: t.description,
+                        importance: t.topic_priority,
+                        priority_weight: (t.subject_priority * 10) + t.topic_priority,
+                        reason: `Tópico excluído automaticamente no Modo Reta Final devido à falta de tempo. Prioridade combinada: ${((t.subject_priority * 10) + t.topic_priority).toFixed(2)}`
+                    })),
+                    prioritizedSubjects,
+                    totalExcluded: excludedTopics.length,
+                    totalIncluded: topicsToSchedule.length,
+                    message: excludedTopics.length > 0 ? 
+                        `⚠️ ${excludedTopics.length} tópicos foram excluídos para adequar o cronograma ao tempo disponível. Consulte os detalhes na aba Transparência.` :
+                        '✅ Todos os tópicos puderam ser incluídos no cronograma.'
                 }
             });
 
@@ -2076,6 +2115,125 @@ app.post('/plans/:planId/replan',
                 error: "Ocorreu um erro interno ao replanejar as tarefas. Nossa equipe foi notificada.",
                 message: process.env.NODE_ENV === 'development' ? error.message : 'Erro interno do servidor'
             });
+        }
+    }
+);
+
+// Obter tópicos excluídos no modo Reta Final (endpoint legado - mantido para compatibilidade)
+app.get('/plans/:planId/exclusions',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    async (req, res) => {
+        try {
+            const planId = req.params.planId;
+            
+            // Verificar se o plano pertence ao usuário
+            const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
+            if (!plan) {
+                return res.status(404).json({ error: "Plano não encontrado ou não autorizado." });
+            }
+            
+            // Buscar exclusões
+            const exclusions = await dbAll(
+                'SELECT * FROM reta_final_exclusions WHERE study_plan_id = ? ORDER BY priority_combined DESC, subject_name, topic_description',
+                [planId]
+            );
+            
+            // Agrupar por disciplina
+            const exclusionsBySubject = exclusions.reduce((acc, exclusion) => {
+                if (!acc[exclusion.subject_name]) {
+                    acc[exclusion.subject_name] = [];
+                }
+                acc[exclusion.subject_name].push({
+                    id: exclusion.id,
+                    topic_id: exclusion.topic_id,
+                    description: exclusion.topic_description,
+                    priority_combined: exclusion.priority_combined,
+                    exclusion_date: exclusion.exclusion_date
+                });
+                return acc;
+            }, {});
+            
+            res.json({
+                isRetaFinalActive: !!plan.reta_final_mode,
+                totalExclusions: exclusions.length,
+                exclusionsBySubject,
+                lastUpdated: exclusions.length > 0 ? exclusions[0].exclusion_date : null
+            });
+            
+        } catch (error) {
+            console.error('Erro ao buscar exclusões:', error);
+            res.status(500).json({ error: "Erro interno do servidor." });
+        }
+    }
+);
+
+// Novo endpoint para consultar tópicos excluídos no modo Reta Final
+app.get('/plans/:planId/excluded-topics',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    async (req, res) => {
+        try {
+            const planId = req.params.planId;
+            
+            // Verificar se o plano pertence ao usuário
+            const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
+            if (!plan) {
+                return res.status(404).json({ error: "Plano não encontrado ou não autorizado." });
+            }
+            
+            // Buscar tópicos excluídos da nova tabela
+            const excludedTopics = await dbAll(
+                'SELECT * FROM reta_final_excluded_topics WHERE study_plan_id = ? ORDER BY priority_weight DESC, subject_name, topic_name',
+                [planId]
+            );
+            
+            // Agrupar por disciplina
+            const exclusionsBySubject = excludedTopics.reduce((acc, topic) => {
+                if (!acc[topic.subject_name]) {
+                    acc[topic.subject_name] = {
+                        subject_name: topic.subject_name,
+                        topics: [],
+                        totalExcluded: 0
+                    };
+                }
+                acc[topic.subject_name].topics.push({
+                    id: topic.id,
+                    topic_name: topic.topic_name,
+                    importance: topic.importance,
+                    priority_weight: topic.priority_weight,
+                    reason: topic.reason,
+                    excluded_at: topic.excluded_at
+                });
+                acc[topic.subject_name].totalExcluded++;
+                return acc;
+            }, {});
+            
+            // Estatísticas gerais
+            const stats = {
+                totalTopicsExcluded: excludedTopics.length,
+                totalSubjectsAffected: Object.keys(exclusionsBySubject).length,
+                lastExclusionDate: excludedTopics.length > 0 ? excludedTopics[0].excluded_at : null,
+                averagePriorityWeight: excludedTopics.length > 0 ? 
+                    (excludedTopics.reduce((sum, t) => sum + t.priority_weight, 0) / excludedTopics.length).toFixed(2) : 0
+            };
+            
+            res.json({
+                isRetaFinalActive: !!plan.reta_final_mode,
+                planName: plan.name,
+                stats,
+                exclusionsBySubject: Object.values(exclusionsBySubject),
+                rawExclusions: excludedTopics,
+                message: excludedTopics.length > 0 ? 
+                    `📊 ${excludedTopics.length} tópicos foram excluídos no Modo Reta Final para adequar o cronograma ao tempo disponível.` :
+                    '✅ Nenhum tópico foi excluído. Todos os conteúdos cabem no tempo disponível.'
+            });
+            
+        } catch (error) {
+            console.error('Erro ao buscar tópicos excluídos:', error);
+            res.status(500).json({ error: "Erro interno do servidor." });
         }
     }
 );
