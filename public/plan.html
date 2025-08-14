@@ -1418,7 +1418,10 @@
                 }
                 
                 // Inicializar container de visualização híbrida
-                if (!timeAnalysisContainer.innerHTML || timeAnalysisContainer.innerHTML.includes('Carregando')) {
+                if (!timeAnalysisContainer.innerHTML || 
+                    timeAnalysisContainer.innerHTML.includes('Container será preenchido') ||
+                    timeAnalysisContainer.innerHTML.trim() === '') {
+                    console.log('📊 Inicializando container de visualização de tempo...');
                     timeAnalysisContainer.innerHTML = TimeVisualization.createVisualizationContainer();
                 }
                 

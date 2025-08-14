@@ -414,12 +414,24 @@ const TimeVisualization = {
     updateVisualization(data, formatTime, sanitizeHtml) {
         // Verificar se o container principal existe
         const mainContainer = document.getElementById('timeAnalysisContainer');
-        if (!mainContainer || !mainContainer.querySelector('#chartVisualization')) {
-            console.warn('⚠️ Container de visualização não encontrado, pulando atualização');
+        if (!mainContainer) {
+            console.warn('⚠️ Container principal não encontrado');
             return;
         }
         
+        // Se não encontrar o chartVisualization, tentar criar o container
+        if (!mainContainer.querySelector('#chartVisualization')) {
+            console.log('📊 Criando estrutura de visualização...');
+            mainContainer.innerHTML = this.createVisualizationContainer();
+        }
+        
         // Filtrar disciplinas com tempo
+        console.log('📊 Dados recebidos para visualização:', {
+            totalProgress: data.totalProgress,
+            subjectCount: data.subjectDetails?.length || 0,
+            withTime: data.subjectDetails?.filter(s => s.totalTime > 0).length || 0
+        });
+        
         const subjectsWithTime = data.subjectDetails.filter(s => s.totalTime > 0);
         
         if (subjectsWithTime.length > 0) {
@@ -476,10 +488,19 @@ const TimeVisualization = {
         }
         
         // Sempre renderizar acordeão (mesmo sem tempo)
-        this.renderEnhancedAccordion(data.subjectDetails, sanitizeHtml, formatTime);
+        if (data.subjectDetails && data.subjectDetails.length > 0) {
+            console.log('📋 Renderizando acordeão com', data.subjectDetails.length, 'disciplinas');
+            this.renderEnhancedAccordion(data.subjectDetails, sanitizeHtml, formatTime);
+        } else {
+            console.log('⚠️ Sem disciplinas para renderizar');
+            const accordionContainer = document.getElementById('detailedProgressAccordion');
+            if (accordionContainer) {
+                accordionContainer.innerHTML = '<p class="text-gray-500 text-center">Nenhuma disciplina para exibir. Adicione disciplinas e tópicos para ver a análise.</p>';
+            }
+        }
         
         // Restaurar preferência de visualização
-        const preference = localStorage.getItem('timeVisualizationPreference') || 'chart';
+        const preference = localStorage.getItem('timeVisualizationPreference') || 'detail'; // Mudar padrão para detail
         this.toggleView(preference);
     }
 };
