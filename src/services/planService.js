@@ -284,16 +284,88 @@ const getGamification = async (planId, userId) => {
     `, [planId]);
     const completedTopicsCount = completedTopicsResult.count || 0;
 
-    // Define level system (same as backup)
+    // Define sophisticated 8-tier ranking system (League of Legends inspired)
     const levels = [
-        { threshold: 0, title: 'Aspirante a Servidor(a) 🌱' },
-        { threshold: 11, title: 'Pagador(a) de Inscrição 💸' },
-        { threshold: 31, title: 'Acima da Nota de Corte (nos simulados) 😉' },
-        { threshold: 51, title: 'Mestre dos Grupos de WhatsApp de Concurso 📲' },
-        { threshold: 101, title: 'Gabaritador(a) da prova de Português da FGV 🎯' },
-        { threshold: 201, title: 'Terror do Cespe/Cebraspe 👹' },
-        { threshold: 351, title: 'Veterano(a) de 7 Bancas Diferentes 😎' },
-        { threshold: 501, title: '✨ Lenda Viva: Assinante Vitalício do Diário Oficial ✨' }
+        { 
+            threshold: 0, 
+            title: 'Bronze 🥉', 
+            subtitle: 'Iniciante',
+            description: 'Todo grande concurseiro começou aqui. Primeiro passo dado!',
+            color: '#CD7F32',
+            bgColor: '#FFF8DC',
+            icon: '🥉',
+            motivationalText: 'Sua jornada rumo à aprovação começou!'
+        },
+        { 
+            threshold: 11, 
+            title: 'Silver 🥈', 
+            subtitle: 'Novato',
+            description: 'Você está ganhando momentum! Continue assim.',
+            color: '#C0C0C0',
+            bgColor: '#F8F8FF',
+            icon: '🥈',
+            motivationalText: 'O conhecimento está se acumulando!'
+        },
+        { 
+            threshold: 31, 
+            title: 'Gold 🥇', 
+            subtitle: 'Competente',
+            description: 'Nível sólido de conhecimento. Você está no caminho certo!',
+            color: '#FFD700',
+            bgColor: '#FFFACD',
+            icon: '🥇',
+            motivationalText: 'Você já tem uma base dourada de conhecimento!'
+        },
+        { 
+            threshold: 61, 
+            title: 'Platinum 💎', 
+            subtitle: 'Avançado',
+            description: 'Conhecimento refinado e consistente. Parabéns!',
+            color: '#E5E4E2',
+            bgColor: '#F0F8FF',
+            icon: '💎',
+            motivationalText: 'Seu conhecimento brilha como platina!'
+        },
+        { 
+            threshold: 101, 
+            title: 'Diamond 💍', 
+            subtitle: 'Especialista',
+            description: 'Elite do conhecimento. Poucos chegam até aqui!',
+            color: '#B9F2FF',
+            bgColor: '#E0FFFF',
+            icon: '💍',
+            motivationalText: 'Você é precioso como um diamante!'
+        },
+        { 
+            threshold: 201, 
+            title: 'Master 👑', 
+            subtitle: 'Mestre',
+            description: 'Maestria absoluta. Você domina o conhecimento!',
+            color: '#9932CC',
+            bgColor: '#E6E6FA',
+            icon: '👑',
+            motivationalText: 'Você reina sobre o conhecimento!'
+        },
+        { 
+            threshold: 501, 
+            title: 'Grandmaster ⚡', 
+            subtitle: 'Lendário',
+            description: 'Lenda viva! Seu conhecimento é impressionante.',
+            color: '#FF4500',
+            bgColor: '#FFE4E1',
+            icon: '⚡',
+            motivationalText: 'Você transcendeu os limites do conhecimento!'
+        },
+        { 
+            threshold: 1000, 
+            title: 'Challenger 🏆', 
+            subtitle: 'Apex',
+            description: 'O ápice absoluto! Você é um verdadeiro fenômeno.',
+            color: '#FF0000',
+            bgColor: '#FFCCCB',
+            icon: '🏆',
+            motivationalText: 'Você desafia os próprios limites! Lendário!'
+        }
     ];
 
     // Calculate current and next level
@@ -316,17 +388,102 @@ const getGamification = async (planId, userId) => {
     const uniqueStudyDays = calculateUniqueStudyDays(completedSessions);
     const currentStreak = calculateStudyStreak(completedSessions);
     
-    // Calculate achievements based on real data
+    // Calculate achievements based on real data with proper structure
     const achievements = [];
-    if (completedTopicsCount >= 1) achievements.push("🌟 Primeiro Tópico");
-    if (completedTopicsCount >= 5) achievements.push("📚 Estudioso");
-    if (completedTopicsCount >= 10) achievements.push("🎯 Focado");
-    if (completedTopicsCount >= 11) achievements.push("💸 Pagador de Inscrição");
-    if (currentStreak >= 3) achievements.push("🔥 Consistente");
-    if (currentStreak >= 7) achievements.push("💪 Disciplinado");
-    if (currentStreak >= 14) achievements.push("🏆 Dedicado");
-    if (completedSessions.length >= 20) achievements.push("📈 Persistente");
-    if (completedSessions.length >= 50) achievements.push("⭐ Veterano");
+    const now = new Date();
+    
+    // Helper function to create achievement objects
+    const createAchievement = (title, description, earnedDate = now) => ({
+        title,
+        description,
+        achieved_date: earnedDate.toISOString(),
+        earned_at: earnedDate.toISOString() // Extra compatibility
+    });
+    
+    // Topic-based achievements
+    if (completedTopicsCount >= 1) {
+        achievements.push(createAchievement(
+            "Primeiro Estudo", 
+            "Parabéns! Você concluiu seu primeiro tópico de estudo.",
+            completedSessions.length > 0 ? new Date(completedSessions[0].completed_at || completedSessions[0].created_at) : now
+        ));
+    }
+    if (completedTopicsCount >= 5) {
+        achievements.push(createAchievement(
+            "Estudioso Iniciante", 
+            "Você já domina 5 tópicos! Continue nessa pegada."
+        ));
+    }
+    if (completedTopicsCount >= 10) {
+        achievements.push(createAchievement(
+            "10 Tópicos Concluídos", 
+            "Excelente progresso! 10 tópicos já estão no seu cinturão."
+        ));
+    }
+    if (completedTopicsCount >= 25) {
+        achievements.push(createAchievement(
+            "Quarteto de Conhecimento", 
+            "25 tópicos! Você está construindo uma base sólida."
+        ));
+    }
+    if (completedTopicsCount >= 50) {
+        achievements.push(createAchievement(
+            "50 Tópicos Concluídos", 
+            "Meio centenário de conhecimento! Você é imparável."
+        ));
+    }
+    if (completedTopicsCount >= 100) {
+        achievements.push(createAchievement(
+            "Centurião do Conhecimento", 
+            "100 tópicos! Você alcançou um marco histórico."
+        ));
+    }
+    
+    // Streak-based achievements
+    if (currentStreak >= 3) {
+        achievements.push(createAchievement(
+            "Sequência de 3 dias", 
+            "Três dias consecutivos de estudo! A consistência está se formando."
+        ));
+    }
+    if (currentStreak >= 7) {
+        achievements.push(createAchievement(
+            "Sequência de 7 dias", 
+            "Uma semana inteira de dedicação! Você está no caminho certo."
+        ));
+    }
+    if (currentStreak >= 14) {
+        achievements.push(createAchievement(
+            "Duas Semanas Seguidas", 
+            "14 dias consecutivos! Sua disciplina é admirável."
+        ));
+    }
+    if (currentStreak >= 30) {
+        achievements.push(createAchievement(
+            "Mês de Dedicação", 
+            "30 dias seguidos! Você transformou estudo em hábito."
+        ));
+    }
+    
+    // Session-based achievements
+    if (completedSessions.length >= 20) {
+        achievements.push(createAchievement(
+            "20 Sessões Completadas", 
+            "Vinte sessões de estudo! Sua persistência está dando frutos."
+        ));
+    }
+    if (completedSessions.length >= 50) {
+        achievements.push(createAchievement(
+            "Veterano de Estudos", 
+            "50 sessões! Você é oficialmente um veterano dos estudos."
+        ));
+    }
+    if (completedSessions.length >= 100) {
+        achievements.push(createAchievement(
+            "Centurião das Sessões", 
+            "100 sessões completadas! Você é uma máquina de estudar."
+        ));
+    }
     
     const experiencePoints = completedTopicsCount * 10 + uniqueStudyDays * 5; // XP system
     
@@ -365,6 +522,12 @@ const getGamification = async (planId, userId) => {
         achievements: achievements,
         completedTopicsCount: completedTopicsCount,
         totalCompletedSessions: completedSessions.length,
+        
+        // Enhanced ranking system data
+        currentRank: currentLevel,
+        nextRank: nextLevel,
+        rankProgress: nextLevel ? 
+            Math.min(100, ((completedTopicsCount - currentLevel.threshold) / (nextLevel.threshold - currentLevel.threshold)) * 100) : 100,
         
         // Compatibilidade com versões anteriores
         currentStreak: currentStreak,
