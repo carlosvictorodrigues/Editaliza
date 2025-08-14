@@ -412,6 +412,13 @@ const TimeVisualization = {
      * Atualiza visualização com dados
      */
     updateVisualization(data, formatTime, sanitizeHtml) {
+        // Verificar se o container principal existe
+        const mainContainer = document.getElementById('timeAnalysisContainer');
+        if (!mainContainer || !mainContainer.querySelector('#chartVisualization')) {
+            console.warn('⚠️ Container de visualização não encontrado, pulando atualização');
+            return;
+        }
+        
         // Filtrar disciplinas com tempo
         const subjectsWithTime = data.subjectDetails.filter(s => s.totalTime > 0);
         
@@ -428,24 +435,38 @@ const TimeVisualization = {
                 ? (totalTopicsStudied / (totalTimeSeconds / 3600)).toFixed(1)
                 : '0';
             
-            // Atualizar cards de resumo
-            document.getElementById('totalTimeStudied').textContent = formatTime(totalTimeSeconds).substring(0, 5) + 'h';
-            document.getElementById('topSubject').textContent = topSubject.name;
-            document.getElementById('topSubjectTime').textContent = `${((topSubject.totalTime / totalTimeSeconds) * 100).toFixed(1)}% do tempo total`;
-            document.getElementById('avgTimePerSubject').textContent = formatTime(avgTimeSeconds).substring(0, 5) + 'h';
-            document.getElementById('subjectCount').textContent = `${subjectsWithTime.length} disciplina${subjectsWithTime.length > 1 ? 's' : ''}`;
-            document.getElementById('productivityRate').textContent = productivityRate;
+            // Atualizar cards de resumo com verificação de null
+            const totalTimeElement = document.getElementById('totalTimeStudied');
+            const topSubjectElement = document.getElementById('topSubject');
+            const topSubjectTimeElement = document.getElementById('topSubjectTime');
+            const avgTimeElement = document.getElementById('avgTimePerSubject');
+            const subjectCountElement = document.getElementById('subjectCount');
+            const productivityElement = document.getElementById('productivityRate');
+            
+            if (totalTimeElement) totalTimeElement.textContent = formatTime(totalTimeSeconds).substring(0, 5) + 'h';
+            if (topSubjectElement) topSubjectElement.textContent = topSubject.name;
+            if (topSubjectTimeElement) topSubjectTimeElement.textContent = `${((topSubject.totalTime / totalTimeSeconds) * 100).toFixed(1)}% do tempo total`;
+            if (avgTimeElement) avgTimeElement.textContent = formatTime(avgTimeSeconds).substring(0, 5) + 'h';
+            if (subjectCountElement) subjectCountElement.textContent = `${subjectsWithTime.length} disciplina${subjectsWithTime.length > 1 ? 's' : ''}`;
+            if (productivityElement) productivityElement.textContent = productivityRate;
             
             // Renderizar gráfico
             this.renderDoughnutChart(subjectsWithTime);
         } else {
-            // Sem dados de tempo
-            document.getElementById('totalTimeStudied').textContent = '00:00h';
-            document.getElementById('topSubject').textContent = '-';
-            document.getElementById('topSubjectTime').textContent = '0% do tempo total';
-            document.getElementById('avgTimePerSubject').textContent = '00:00h';
-            document.getElementById('subjectCount').textContent = '0 disciplinas';
-            document.getElementById('productivityRate').textContent = '-';
+            // Sem dados de tempo - usar as mesmas variáveis com verificação
+            const totalTimeElement = document.getElementById('totalTimeStudied');
+            const topSubjectElement = document.getElementById('topSubject');
+            const topSubjectTimeElement = document.getElementById('topSubjectTime');
+            const avgTimeElement = document.getElementById('avgTimePerSubject');
+            const subjectCountElement = document.getElementById('subjectCount');
+            const productivityElement = document.getElementById('productivityRate');
+            
+            if (totalTimeElement) totalTimeElement.textContent = '00:00h';
+            if (topSubjectElement) topSubjectElement.textContent = '-';
+            if (topSubjectTimeElement) topSubjectTimeElement.textContent = '0% do tempo total';
+            if (avgTimeElement) avgTimeElement.textContent = '00:00h';
+            if (subjectCountElement) subjectCountElement.textContent = '0 disciplinas';
+            if (productivityElement) productivityElement.textContent = '-';
             
             // Mostrar mensagem no lugar do gráfico
             const chartContainer = document.getElementById('chartVisualization');
