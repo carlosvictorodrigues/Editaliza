@@ -137,8 +137,8 @@ const components = {
         
         const links = [
             { href: 'home.html', text: 'Painel Principal' },
-            { 
-                href: '#', 
+            {
+                href: '#',
                 text: 'Gerenciar Planos',
                 dropdown: [
                     { href: 'dashboard.html', text: 'Meus Planos' },
