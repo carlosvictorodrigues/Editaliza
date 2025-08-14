@@ -407,6 +407,9 @@
                 document.getElementById('examDate').textContent = `Data da Prova: ${examDate.toLocaleDateString('pt-BR')}`;
                 
                 app.invalidatePlanCache(planId);
+                
+                // Pequeno delay para garantir que os módulos sejam carregados
+                await new Promise(resolve => setTimeout(resolve, 100));
 
                 // CORREÇÃO: Carregar todas as métricas com dados frescos
                 await Promise.all([
@@ -1307,6 +1310,77 @@
             container.innerHTML = html;
         }
 
+        // Função de fallback para renderizar acordeão padrão
+        function renderDefaultAccordion(data) {
+            const accordionContainer = document.getElementById('timeAnalysisContainer');
+            if (!accordionContainer) return;
+            
+            // Criar estrutura básica se não existir
+            if (!accordionContainer.innerHTML || accordionContainer.innerHTML.includes('Container será preenchido')) {
+                accordionContainer.innerHTML = `
+                    <div class="mt-6">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center">
+                            <span class="text-lg mr-2">🔬</span>Análise Detalhada por Disciplina
+                        </h3>
+                        <div id="detailedProgressAccordion" class="space-y-2">
+                            <div class="text-gray-500 text-center p-4">Carregando análise detalhada...</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const detailedAccordion = document.getElementById('detailedProgressAccordion');
+            if (!detailedAccordion) return;
+            
+            detailedAccordion.innerHTML = data.subjectDetails.map(subject => {
+                const subjectPercentage = subject.progress.toFixed(1);
+                const subjectTimeDisplay = subject.totalTime > 0
+                    ? formatTime(subject.totalTime).substring(0, 5) + 'h'
+                    : '–';
+                
+                const topicsHtml = subject.topics.length > 0 ? subject.topics.map(topic => {
+                    const timeDisplay = formatTime(topic.timeStudied, '–');
+                    const timeClass = topic.timeStudied > 0 ? 'text-gray-500' : 'text-gray-400';
+                    
+                    return `
+                    <li class="flex justify-between items-center text-sm py-1 px-2 rounded hover:bg-slate-100">
+                        <span class="text-gray-600">${app.sanitizeHtml(topic.description)}</span>
+                        <span class="font-medium ${timeClass}">${timeDisplay}</span>
+                    </li>
+                `}).join('') : '<li class="text-sm text-gray-500 px-2">Nenhum tópico cadastrado.</li>';
+                
+                return `
+                    <div class="border border-gray-200 rounded-lg">
+                        <div class="accordion-header p-4 cursor-pointer flex justify-between items-center hover:bg-gray-50">
+                            <div class="flex-grow">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-gray-800">${app.sanitizeHtml(subject.name)}</span>
+                                    <span class="text-sm font-bold text-editaliza-blue">${subjectTimeDisplay}</span>
+                                </div>
+                                <div class="progress-bar-container mt-2"><div class="progress-bar-compact bg-editaliza-blue" style="width: ${subjectPercentage}%;"></div></div>
+                            </div>
+                            <svg class="w-5 h-5 text-gray-500 ml-4 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
+                        <div class="accordion-content bg-white border-t border-gray-100">
+                            <ul class="p-4 space-y-1">
+                                ${topicsHtml}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Adicionar event listeners
+            detailedAccordion.addEventListener('click', (event) => {
+                const header = event.target.closest('.accordion-header');
+                if (header) {
+                    header.classList.toggle('open');
+                    const content = header.nextElementSibling;
+                    content.style.maxHeight = header.classList.contains('open') ? `${content.scrollHeight}px` : null;
+                }
+            });
+        }
+        
         // CORREÇÃO: Função de progresso detalhado com dados em tempo real e visualização híbrida
         async function loadDetailedProgress(forceRefresh = false) {
             const progressDashboard = document.getElementById('progressDashboard');
@@ -1333,13 +1407,26 @@
                     </div>
                 `;
 
+                // Verificar se o módulo TimeVisualization está carregado
+                if (typeof TimeVisualization === 'undefined') {
+                    console.warn('⚠️ Módulo TimeVisualization não carregado, usando visualização padrão');
+                    // Fallback para o código antigo se o módulo não estiver disponível
+                    if (data && data.subjectDetails) {
+                        renderDefaultAccordion(data);
+                    }
+                    return;
+                }
+                
                 // Inicializar container de visualização híbrida
                 if (!timeAnalysisContainer.innerHTML || timeAnalysisContainer.innerHTML.includes('Carregando')) {
                     timeAnalysisContainer.innerHTML = TimeVisualization.createVisualizationContainer();
                 }
                 
                 if (!data.subjectDetails || data.subjectDetails.length === 0) {
-                    document.getElementById('detailedProgressAccordion').innerHTML = '<p class="text-gray-500 text-center">Nenhuma disciplina para exibir. Adicione disciplinas e tópicos para ver a análise.</p>';
+                    const accordionElement = document.getElementById('detailedProgressAccordion');
+                    if (accordionElement) {
+                        accordionElement.innerHTML = '<p class="text-gray-500 text-center">Nenhuma disciplina para exibir. Adicione disciplinas e tópicos para ver a análise.</p>';
+                    }
                     return;
                 }
 
@@ -1398,6 +1485,7 @@
                 */
 
             } catch (error) {
+                console.error('❌ Erro ao carregar progresso detalhado:', error);
                 progressDashboard.innerHTML = `<p class="text-red-500 text-center">Não foi possível carregar o progresso.</p>`;
                 if (timeAnalysisContainer) {
                     timeAnalysisContainer.innerHTML = `<p class="text-red-500 text-center">Não foi possível carregar a análise detalhada.</p>`;

@@ -63,8 +63,8 @@ const NotificationIntegrations = {
         // Observer para início de sessões
         this.observeSessionStarts();
 
-        // Monitor de tempo de estudo
-        this.monitorStudyTime();
+        // Monitor de tempo de estudo - Desabilitado temporariamente
+        // this.monitorStudyTime(); // TODO: Implementar função de monitoramento
     },
 
     observeSessionCompletions() {
