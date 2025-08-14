@@ -43,11 +43,57 @@ const {
     bodySizeLimit
 } = require('./middleware.js');
 
+// Importar utilitários de segurança e performance
+const {
+    strictRateLimit,
+    moderateRateLimit,
+    sanitizeInput,
+    validateApiInput,
+    csrfProtection,
+    generateCSRFToken,
+    securityLog
+} = require('./src/utils/security');
+
+// Importar sistema de error handling
+const {
+    AppError,
+    ERROR_TYPES,
+    errorHandler,
+    asyncHandler,
+    handleDatabaseError,
+    setupGlobalErrorHandling
+} = require('./src/utils/error-handler');
+
+// Importar sistema de backup
+const BackupManager = require('./src/utils/backup-manager');
+
+// Importar otimizações de banco
+const {
+    fetchTopicsWithSubjects,
+    fetchSessionsWithRelatedData,
+    executeCachedQuery,
+    globalCache
+} = require('./src/utils/database-optimization');
+
 
 // ============================================================================
 // VALIDAÇÃO DE SEGURANÇA EM PRODUÇÃO
 // ============================================================================
-const { validateProductionSecrets } = require('./src/utils/security');
+function validateProductionSecrets() {
+    if (process.env.NODE_ENV === 'production') {
+        const requiredSecrets = [
+            'SESSION_SECRET',
+            'JWT_SECRET',
+            'JWT_REFRESH_SECRET'
+        ];
+        
+        for (const secret of requiredSecrets) {
+            if (!process.env[secret] || process.env[secret].length < 32) {
+                throw new Error(`${secret} deve ter pelo menos 32 caracteres em produção`);
+            }
+        }
+    }
+}
 
 // Validar secrets em produção antes de inicializar
 try {
@@ -95,9 +141,17 @@ allowedHtmlFiles.forEach(file => {
 });
 
 // CORREÇÃO DE SEGURANÇA: CSP endurecida sem unsafe-inline
-// Middleware para gerar nonce único por requisição
+// Middleware para gerar nonce único por requisição e CSRF token
 app.use((req, res, next) => {
     res.locals.nonce = require('crypto').randomBytes(16).toString('base64');
+    
+    // Gerar CSRF token para sessões autenticadas
+    if (req.session && !req.session.csrfToken) {
+        req.session.csrfToken = generateCSRFToken();
+    }
+    
+    // Disponibilizar CSRF token para templates
+    res.locals.csrfToken = req.session?.csrfToken || '';
     next();
 });
 
@@ -359,20 +413,91 @@ app.post('/profile/upload-photo', authenticateToken, (req, res) => {
 
 
 
-// Middleware para parsing e sanitização
-app.use(express.json({ limit: '10mb' }));
-app.use(bodySizeLimit('10mb'));
+// CORREÇÃO: Rate limiting aplicado antes do parsing
+app.use('/login', strictRateLimit);
+app.use('/register', strictRateLimit);
+app.use('/forgot-password', strictRateLimit);
+app.use('/reset-password', strictRateLimit);
+app.use('/api/', moderateRateLimit);
+
+// CSRF Protection para rotas POST/PUT/DELETE (exceto auth pública)
+app.use((req, res, next) => {
+    // Pular CSRF para algumas rotas públicas essenciais
+    const skipCSRF = [
+        '/login',
+        '/register', 
+        '/auth/google',
+        '/auth/google/callback'
+    ];
+    
+    // Pular CSRF para APIs autenticadas com JWT
+    const isAPIRoute = req.path.startsWith('/schedules') || req.path.startsWith('/plans') || req.path.startsWith('/users');
+    
+    if (skipCSRF.includes(req.path) || req.method === 'GET' || isAPIRoute) {
+        return next();
+    }
+    
+    return csrfProtection()(req, res, next);
+});
+
+// Body parsing com sanitização
+app.use(express.json({ 
+    limit: '2mb', // Reduzido para segurança
+    verify: (req, res, buf) => {
+        // Log suspeito de payloads muito grandes
+        if (buf.length > 1024 * 1024) {
+            securityLog('large_payload_detected', {
+                size: buf.length,
+                ip: req.ip,
+                endpoint: req.path
+            });
+        }
+    }
+}));
+app.use(express.urlencoded({ 
+    extended: true, 
+    limit: '2mb',
+    parameterLimit: 100 // Limitar número de parâmetros
+}));
+app.use(bodySizeLimit('2mb'));
+
+// Middleware de sanitização global
+app.use((req, res, next) => {
+    // Sanitizar body
+    if (req.body) {
+        for (const key in req.body) {
+            if (typeof req.body[key] === 'string') {
+                req.body[key] = sanitizeInput(req.body[key]);
+            }
+        }
+    }
+    
+    // Sanitizar query params
+    if (req.query) {
+        for (const key in req.query) {
+            if (typeof req.query[key] === 'string') {
+                req.query[key] = sanitizeInput(req.query[key]);
+            }
+        }
+    }
+    
+    next();
+});
 app.use(sanitizeMiddleware);
 
-// Rate limiting global
+// Rate limiting geral para outras rotas
 const globalLimiter = rateLimit({
     windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 500,
-    message: { error: 'Muitas requisições. Por favor, tente novamente mais tarde.' },
+    max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 300, // Reduzido
+    message: { 
+        error: 'Muitas requisições. Por favor, tente novamente mais tarde.',
+        code: 'RATE_LIMIT_GENERAL' 
+    },
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => {
         const skipPaths = [
+            '/health', '/ready', // Health checks
             '/gamification',
             '/schedule', 
             '/overdue_check',
@@ -3312,19 +3437,51 @@ app.get('/ready', (req, res) => {
     res.status(200).json({ status: 'ready', timestamp: Date.now() });
 });
 
-app.use((err, req, res, next) => {
-    if (err.message === 'Not allowed by CORS') {
-        return res.status(403).json({ error: 'Origem não permitida' });
-    }
-    console.error('Erro não tratado:', err);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+// Configurar error handling global
+setupGlobalErrorHandling();
+
+// Middleware de tratamento de erros robusto
+app.use(errorHandler);
+
+// Inicializar sistema de backup
+const backupManager = new BackupManager({
+    dbPath: path.join(__dirname, 'db.sqlite'),
+    backupDir: path.join(__dirname, 'backups'),
+    maxBackups: 30,
+    compression: true
 });
 
+// Agendar backup automático a cada 6 horas
+if (process.env.NODE_ENV === 'production') {
+    backupManager.scheduleAutoBackup(6);
+} else {
+    // Em desenvolvimento, backup diário
+    backupManager.scheduleAutoBackup(24);
+}
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Health check disponível em: http://localhost:${PORT}/health`);
+    console.log(`Sistema de backup automático ativado`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM recebido, fechando servidor graciosamente...');
+    server.close(() => {
+        console.log('Servidor fechado.');
+        process.exit(0);
+    });
+});
+
+process.on('SIGINT', () => {
+    console.log('SIGINT recebido, fechando servidor graciosamente...');
+    server.close(() => {
+        console.log('Servidor fechado.');
+        process.exit(0);
+    });
 });
 // TIMEZONE SERVIDOR CORRIGIDO - Wed, Aug 13, 2025 10:13:36 PM
 // TIMEZONE BRASILEIRO FINAL CORRIGIDO - Wed, Aug 13, 2025 10:15:49 PM

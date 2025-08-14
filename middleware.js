@@ -73,9 +73,15 @@ const sanitizeInput = (input) => {
 
 // Middleware para sanitizar todos os inputs
 const sanitizeMiddleware = (req, res, next) => {
-    req.body = sanitizeInput(req.body);
-    req.query = sanitizeInput(req.query);
-    req.params = sanitizeInput(req.params);
+    if (req.body !== undefined) {
+        req.body = sanitizeInput(req.body);
+    }
+    if (req.query !== undefined) {
+        req.query = sanitizeInput(req.query);
+    }
+    if (req.params !== undefined) {
+        req.params = sanitizeInput(req.params);
+    }
     next();
 };
 

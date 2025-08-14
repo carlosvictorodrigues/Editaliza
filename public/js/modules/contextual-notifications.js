@@ -9,6 +9,8 @@ const ContextualNotifications = {
     // Estado interno
     initialized: false,
     userData: null,
+    recentNotifications: new Map(), // Deduplicação de notificações
+    notificationCooldowns: new Map(), // Cooldowns por tipo
     patterns: {
         lastSessionTime: null,
         studyStreak: 0,
@@ -35,8 +37,20 @@ const ContextualNotifications = {
             console.log('🔔 Inicializando Sistema de Notificações Contextuais...');
             
             // Verificar dependências
-            if (!window.app || !window.app.showToast) {
-                throw new Error('Dependências não encontradas');
+            if (!window.app) {
+                throw new Error('App principal não encontrado');
+            }
+            
+            // Garantir que showToast existe
+            if (!window.app.showToast && !window.app.showMessage) {
+                console.warn('⚠️ showToast não encontrado, usando fallback');
+                window.app.showToast = function(message, type) {
+                    if (window.app.showMessage) {
+                        window.app.showMessage(message, type);
+                    } else {
+                        console.log(`📱 ${message} (${type})`);
+                    }
+                };
             }
 
             // Carregar dados do usuário
@@ -52,7 +66,29 @@ const ContextualNotifications = {
             console.log('✅ Sistema de Notificações Contextuais inicializado com sucesso');
             
             // Notificação de boas-vindas (se não for primeira vez hoje)
-            setTimeout(() => this.showWelcomeMessage(), 2000);
+            const today = new Date().toDateString();
+            const lastWelcome = localStorage.getItem('lastWelcomeDate');
+            
+            if (this.config.showWelcome && lastWelcome !== today) {
+                setTimeout(() => {
+                    console.log('🔔 Disparando mensagem de boas-vindas...');
+                    this.showWelcomeMessage();
+                    localStorage.setItem('lastWelcomeDate', today);
+                }, 3000);
+            }
+            
+            // Teste imediato (apenas em desenvolvimento)
+            if (window.location.hostname === 'localhost' && this.config.debug) {
+                setTimeout(() => {
+                    console.log('🔔 TESTE: Notificação de desenvolvimento');
+                    this.showContextualToast({
+                        type: 'info',
+                        title: '🧪 Sistema Ativo',
+                        message: 'Notificações Inteligentes funcionando perfeitamente!',
+                        duration: 4000
+                    });
+                }, 5000);
+            }
             
         } catch (error) {
             console.error('❌ Erro na inicialização das notificações contextuais:', error);
@@ -129,12 +165,40 @@ const ContextualNotifications = {
     handleSessionCompleted(sessionData) {
         if (!this.isEnabled()) return;
 
-        const { sessionType, duration, subject, difficulty } = sessionData;
+        const { sessionType, duration, subject, difficulty, sessionId } = sessionData;
+        
+        // Criar chave única para deduplicação
+        const notificationKey = `session_completed_${sessionId || Date.now()}_${subject}`;
+        
+        // Verificar se já processamos esta notificação recentemente
+        if (this.recentNotifications.has(notificationKey)) {
+            console.log('🔔 Notificação de sessão já processada, ignorando duplicata:', notificationKey);
+            return;
+        }
+        
+        // Verificar cooldown para notificações de sessão (30 segundos)
+        const cooldownKey = 'session_completion';
+        const lastNotification = this.notificationCooldowns.get(cooldownKey);
+        const now = Date.now();
+        
+        if (lastNotification && (now - lastNotification) < 30000) {
+            console.log('🔔 Cooldown ativo para notificações de sessão, ignorando');
+            return;
+        }
+        
+        // Registrar notificação para deduplicação
+        this.recentNotifications.set(notificationKey, now);
+        this.notificationCooldowns.set(cooldownKey, now);
+        
+        // Limpar notificações antigas (manter apenas últimas 5 minutos)
+        this.cleanupOldNotifications();
         
         // Atualizar padrões
-        this.patterns.lastSessionTime = Date.now();
+        this.patterns.lastSessionTime = now;
         this.patterns.lastSubjectStudied = subject;
         this.procrastinationCount = 0; // Reset procrastination counter
+        
+        console.log('🔔 Processando notificação de sessão concluída:', { sessionType, duration, subject, sessionId });
         
         // Mensagem contextual baseada no tipo de sessão
         setTimeout(() => {
@@ -177,8 +241,20 @@ const ContextualNotifications = {
     // === TIPOS DE MENSAGENS ===
 
     showSessionCompletionMessage(sessionType, duration, subject, difficulty) {
+        // Verificação adicional para evitar duplicatas na exibição
+        const messageKey = `completion_message_${Date.now()}`;
+        
+        if (this.recentNotifications.has(messageKey)) {
+            console.log('🔔 Mensagem de conclusão já exibida, evitando duplicata');
+            return;
+        }
+        
+        this.recentNotifications.set(messageKey, Date.now());
+        
         const messages = this.getSessionMessages(sessionType, subject, difficulty, duration);
         const message = this.selectRandomMessage(messages);
+        
+        console.log('🔔 Exibindo mensagem de conclusão de sessão:', { sessionType, subject, message });
         
         this.showContextualToast({
             type: 'celebration',
@@ -255,6 +331,8 @@ const ContextualNotifications = {
             message: welcomeMessage,
             duration: 6000
         });
+        
+        console.log('🔔 Mensagem de boas-vindas exibida:', welcomeMessage);
     },
 
     // === DETECÇÃO DE PADRÕES ===
@@ -389,33 +467,49 @@ const ContextualNotifications = {
     // === UTILITÁRIOS ===
 
     showContextualToast(options) {
+        console.log('🔔 Exibindo notificação contextual:', options);
+        
+        // Fallback para app.showToast se não encontrar container
+        if (!document.getElementById('toast-container') && window.app && window.app.showToast) {
+            console.log('🔔 Usando fallback app.showToast');
+            const emoji = options.type === 'celebration' ? '🎉' : options.type === 'achievement' ? '🏆' : '💡';
+            window.app.showToast(`${emoji} ${options.message}`, 'success');
+            return;
+        }
+        
         const container = document.getElementById('toast-container') || this.createToastContainer();
 
         const toast = document.createElement('div');
-        toast.className = 'bg-white rounded-xl shadow-2xl p-4 w-full max-w-sm transform transition-all duration-500 opacity-0 -translate-y-12';
+        toast.className = 'bg-white rounded-lg shadow-lg border p-4 max-w-sm w-full transform transition-all duration-300 opacity-0 translate-x-full';
 
         const typeClasses = {
-            celebration: 'border-yellow-400',
-            achievement: 'border-purple-500',
-            motivational: 'border-blue-500',
-            reminder: 'border-red-500',
-            info: 'border-gray-400'
+            celebration: 'border-l-4 border-yellow-400 bg-yellow-50',
+            achievement: 'border-l-4 border-purple-500 bg-purple-50',
+            motivational: 'border-l-4 border-blue-500 bg-blue-50',
+            reminder: 'border-l-4 border-red-500 bg-red-50',
+            info: 'border-l-4 border-gray-400 bg-gray-50'
         };
 
+        // Extrair emoji do título
+        const titleParts = options.title.split(' ');
+        const emoji = titleParts[0];
+        const titleText = titleParts.slice(1).join(' ');
+
         toast.innerHTML = `
-            <div class="border-l-4 ${typeClasses[options.type] || 'border-gray-400'} pl-4">
-                <div class="flex items-start">
-                    <div class="flex-shrink-0 pt-0.5">
-                        <span class="text-2xl">${options.title.split(' ')[0]}</span>
+            <div class="${typeClasses[options.type] || typeClasses.info} rounded-lg p-3">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <span class="text-2xl" role="img" aria-hidden="true">${emoji}</span>
                     </div>
-                    <div class="ml-3 w-0 flex-1">
-                        <p class="text-md font-bold text-gray-900">${options.title}</p>
-                        <p class="mt-1 text-sm text-gray-600">${options.message}</p>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-semibold text-gray-900 mb-1">${titleText}</h4>
+                        <p class="text-sm text-gray-700 leading-relaxed">${options.message}</p>
                     </div>
-                    <div class="ml-4 flex-shrink-0 flex">
-                        <button class="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none">
-                            <span class="sr-only">Close</span>
-                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                    <div class="flex-shrink-0">
+                        <button type="button" class="inline-flex items-center justify-center w-6 h-6 text-gray-400 hover:text-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" aria-label="Fechar notificação">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
                         </button>
                     </div>
                 </div>
@@ -424,16 +518,16 @@ const ContextualNotifications = {
 
         const closeButton = toast.querySelector('button');
         const close = () => {
-            toast.classList.add('opacity-0', 'translate-y-full');
-            setTimeout(() => toast.remove(), 500);
+            toast.classList.add('opacity-0', 'translate-x-full');
+            setTimeout(() => toast.remove(), 300);
         };
         closeButton.addEventListener('click', close);
 
         container.appendChild(toast);
 
-        // Animate in
+        // Animate in (slide from right)
         requestAnimationFrame(() => {
-            toast.classList.remove('opacity-0', '-translate-y-12');
+            toast.classList.remove('opacity-0', 'translate-x-full');
         });
 
         setTimeout(close, options.duration || 6000);
@@ -550,14 +644,61 @@ const ContextualNotifications = {
         localStorage.setItem('editaliza_notification_patterns', JSON.stringify(this.patterns));
     },
 
+    // Limpar notificações antigas para evitar vazamento de memória
+    cleanupOldNotifications() {
+        const fiveMinutesAgo = Date.now() - (5 * 60 * 1000);
+        
+        // Limpar notificações antigas
+        for (const [key, timestamp] of this.recentNotifications.entries()) {
+            if (timestamp < fiveMinutesAgo) {
+                this.recentNotifications.delete(key);
+            }
+        }
+        
+        // Limpar cooldowns antigos
+        for (const [key, timestamp] of this.notificationCooldowns.entries()) {
+            if (timestamp < fiveMinutesAgo) {
+                this.notificationCooldowns.delete(key);
+            }
+        }
+    },
+
     // === DEBUG ===
     getStatus() {
         return {
             initialized: this.initialized,
             enabled: this.config.enabled,
             patterns: this.patterns,
-            userData: this.userData ? 'Loaded' : 'Not loaded'
+            userData: this.userData ? 'Loaded' : 'Not loaded',
+            recentNotifications: this.recentNotifications.size,
+            cooldowns: this.notificationCooldowns.size
         };
+    },
+
+    // Método para teste manual
+    testSessionCompletion(sessionId = 3625) {
+        console.log('🧪 TESTE: Simulando conclusão de sessão', sessionId);
+        
+        // Limpar notificações anteriores para este teste
+        const testKey = `session_completed_${sessionId}_Teste`;
+        this.recentNotifications.delete(testKey);
+        this.notificationCooldowns.delete('session_completion');
+        
+        // Simular evento de conclusão
+        this.handleSessionCompleted({
+            sessionType: 'Novo Tópico',
+            duration: 25,
+            subject: 'Direito Constitucional',
+            difficulty: 3,
+            sessionId: sessionId
+        });
+    },
+
+    // Limpar todos os caches de notificação (para teste)
+    clearNotificationCache() {
+        this.recentNotifications.clear();
+        this.notificationCooldowns.clear();
+        console.log('🔄 Cache de notificações limpo');
     }
 };
 

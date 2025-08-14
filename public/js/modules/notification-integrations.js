@@ -10,6 +10,7 @@ const NotificationIntegrations = {
     observers: [],
     listeners: [],
     intervals: [],
+    processedEvents: new Set(), // Rastrear eventos já processados
 
     // Inicialização segura
     async init() {
@@ -355,17 +356,37 @@ const NotificationIntegrations = {
     triggerSessionCompleted(sessionData) {
         if (!window.ContextualNotifications) return;
 
+        // Criar chave única para deduplicação
+        const eventKey = `session_completed_${sessionData.sessionId || Date.now()}_${sessionData.subject}`;
+        
+        // Verificar se já processamos este evento
+        if (this.processedEvents.has(eventKey)) {
+            console.log('🔔 Evento de sessão já processado, evitando duplicata:', eventKey);
+            return;
+        }
+        
+        // Marcar como processado
+        this.processedEvents.add(eventKey);
+        
+        console.log('🔔 Triggering session completed event:', sessionData);
+
         const event = new CustomEvent('sessionCompleted', {
             detail: {
                 sessionType: sessionData.type || 'Estudo',
                 duration: sessionData.duration || 25,
                 subject: sessionData.subject || 'Matéria',
                 difficulty: sessionData.difficulty || 3,
+                sessionId: sessionData.sessionId,
                 timestamp: Date.now()
             }
         });
 
         document.dispatchEvent(event);
+        
+        // Limpar eventos antigos para evitar vazamento de memória
+        setTimeout(() => {
+            this.cleanupProcessedEvents();
+        }, 300000); // 5 minutos
     },
 
     triggerPomodoroComplete() {
@@ -577,14 +598,50 @@ const NotificationIntegrations = {
     },
 
     // === CONTROLES ===
+    
+    cleanupProcessedEvents() {
+        // Limpar eventos antigos (manter apenas últimos 50)
+        if (this.processedEvents.size > 50) {
+            const eventsArray = Array.from(this.processedEvents);
+            const toKeep = eventsArray.slice(-25); // Manter últimos 25
+            this.processedEvents.clear();
+            toKeep.forEach(event => this.processedEvents.add(event));
+            console.log('🔔 Limpeza de eventos processados realizada');
+        }
+    },
 
     getStatus() {
         return {
             initialized: this.initialized,
             observers: this.observers.length,
             listeners: this.listeners.length,
-            intervals: this.intervals.length
+            intervals: this.intervals.length,
+            processedEvents: this.processedEvents.size
         };
+    },
+
+    // Método para teste de integração
+    testSessionCompletionIntegration(sessionId = 3625) {
+        console.log('🧪 TESTE: Triggering session completion integration para sessão', sessionId);
+        
+        // Limpar eventos processados para teste
+        const eventKey = `session_completed_${sessionId}_Direito Constitucional`;
+        this.processedEvents.delete(eventKey);
+        
+        // Simular trigger
+        this.triggerSessionCompleted({
+            type: 'Novo Tópico',
+            duration: 25,
+            subject: 'Direito Constitucional',
+            difficulty: 3,
+            sessionId: sessionId
+        });
+    },
+
+    // Limpar cache de eventos processados
+    clearProcessedEventsCache() {
+        this.processedEvents.clear();
+        console.log('🔄 Cache de eventos processados limpo');
     },
 
     // Rollback completo - remove todas as integrações
@@ -616,6 +673,7 @@ const NotificationIntegrations = {
         this.observers = [];
         this.listeners = [];
         this.intervals = [];
+        this.processedEvents.clear();
 
         this.initialized = false;
         

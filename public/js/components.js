@@ -3,30 +3,6 @@
  * @description Funções para renderizar componentes de UI reutilizáveis com a nova identidade visual.
  */
 
-// UTILITÁRIO PARA TIMEZONE BRASILEIRO
-const BrazilianDateUtils = {
-    // Obter data atual no timezone brasileiro
-    getBrazilianToday() {
-        const now = new Date();
-        const brazilTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
-        brazilTime.setHours(0, 0, 0, 0);
-        return brazilTime;
-    },
-    
-    // Verificar se uma data está atrasada considerando timezone brasileiro
-    isDateOverdue(sessionDateStr) {
-        const sessionDate = new Date(sessionDateStr + 'T00:00:00');
-        const today = this.getBrazilianToday();
-        return sessionDate < today;
-    },
-    
-    // Obter string de data no formato ISO considerando timezone brasileiro
-    getBrazilianDateString() {
-        const today = this.getBrazilianToday();
-        return today.toISOString().split('T')[0];
-    }
-};
-
 const components = {
     // CORREÇÃO: Gerar botão inteligente baseado no estado preciso do timer
     generateSmartButton(sessionId, defaultText = 'Iniciar Estudo', sessionData = null) {
@@ -288,14 +264,14 @@ const components = {
                     <div class="flex justify-between items-center h-16">
                         <div class="flex items-center">
                             <a href="home.html" class="flex-shrink-0 flex items-center">
-                                <svg id="logo-header-fixed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 510.24 101.5" class="h-8 w-auto" style="filter: brightness(1.05); opacity: 1; visibility: visible;">
+                                <svg id="logo-header" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 510.24 101.5" class="h-8 w-auto">
                                   <defs>
                                     <style>
                                       .cls-1 {
                                         fill: #0528f2;
                                       }
                                       .cls-2 {
-                                        fill: #1a1a1a !important;
+                                        fill: #0d0d0d;
                                       }
                                       .cls-3 {
                                         fill: #1ad937;
@@ -492,9 +468,8 @@ const components = {
                 const style = app.getSubjectStyle(subjectName);
                 
                 const tasksHtml = subjectTasks.map(task => {
-                    const sessionDate = new Date(task.session_date + 'T00:00:00');
-                    // Usar timezone brasileiro para calcular "hoje"
-                    const today = BrazilianDateUtils.getBrazilianToday();
+                    const sessionDate = new Date(task.session_date);
+                    const today = new Date();
                     const daysDiff = Math.ceil((today - sessionDate) / (1000 * 60 * 60 * 24));
                     
                     const sessionTypeIcons = {
@@ -1313,7 +1288,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Expor componentes globalmente
 window.components = components;
-/* Cache buster: 1755133227 */
-// Logo atualizado em Wed, Aug 13, 2025 10:00:48 PM
-/* TEXTO EDITALIZA CORRIGIDO - 1755133373 */
-// TIMEZONE BRASILEIRO CORRIGIDO - Wed, Aug 13, 2025 10:10:13 PM

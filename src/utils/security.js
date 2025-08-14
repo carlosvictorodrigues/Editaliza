@@ -1,185 +1,334 @@
-// src/utils/security.js
-const path = require('path');
-const crypto = require('crypto');
-
 /**
- * Utilitários de segurança centralizados
+ * UTILITÁRIOS DE SEGURANÇA - EDITALIZA
+ * Implementação de funções críticas para prevenir vulnerabilidades
  */
 
-// Logging de auditoria seguro
-const securityLog = (event, details = {}, userId = null, req = null) => {
-    const logEntry = {
-        timestamp: new Date().toISOString(),
-        event,
-        userId,
-        ip: req?.ip || 'unknown',
-        userAgent: req?.headers['user-agent'] || 'unknown',
-        details: typeof details === 'object' ? details : { message: details }
-    };
-    
-    console.log('[SECURITY]', JSON.stringify(logEntry));
-};
+const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
+const validator = require('validator');
 
-// Validação segura de paths de arquivo
-// CORREÇÃO DE SEGURANÇA: Validação robusta de caminhos de arquivo
-const validateFilePath = (filePath, allowedDir = 'uploads') => {
-    if (!filePath || typeof filePath !== 'string') {
-        throw new Error('Path de arquivo inválido');
-    }
-    
-    // Decodificar URL encoding que pode mascarar ataques
-    let decodedPath;
-    try {
-        decodedPath = decodeURIComponent(filePath);
-    } catch (error) {
-        throw new Error('Path contém encoding inválido');
-    }
-    
-    // Verificar caracteres perigosos ANTES da normalização
-    const dangerousChars = /[<>:"|?*\x00-\x1f]/;
-    if (dangerousChars.test(decodedPath)) {
-        throw new Error('Path contém caracteres perigosos');
-    }
-    
-    // Resolver path absoluto para o diretório permitido
-    const baseDir = path.resolve(process.cwd(), allowedDir);
-    const fullPath = path.resolve(baseDir, decodedPath);
-    
-    // CRÍTICO: Verificar se o path resolvido ainda está dentro do diretório base
-    if (!fullPath.startsWith(baseDir + path.sep) && fullPath !== baseDir) {
-        throw new Error(`Path traversal bloqueado: tentativa de acesso a ${fullPath}`);
-    }
-    
-    // Verificar se o path normalizado não contém sequências suspeitas
-    const normalizedPath = path.normalize(decodedPath);
-    const suspiciousPatterns = [
-        /\.\.[\/\\]/g,           // Path traversal
-        /~[\/\\]/g,              // Home directory access
-        /\$[A-Z_]+/g,            // Environment variables
-        /%[0-9A-Fa-f]{2}/g,      // URL encoding residual
-        /\\\\[^\\]+\\[^\\]+/g    // UNC paths
-    ];
-    
-    for (const pattern of suspiciousPatterns) {
-        if (pattern.test(normalizedPath)) {
-            throw new Error(`Padrão suspeito detectado no path: ${pattern.toString()}`);
-        }
-    }
-    
-    // Log de validação bem-sucedida para auditoria
-    console.debug(`[SECURITY] Path validado com sucesso: ${decodedPath} -> ${fullPath}`);
-    
-    return normalizedPath;
-};
-
-// Validação de nome de tabela para queries PRAGMA
-const validateTableName = (tableName) => {
-    if (!tableName || typeof tableName !== 'string') {
-        throw new Error('Nome de tabela inválido');
-    }
-    
-    // Apenas permitir caracteres alfanuméricos e underscores
-    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tableName)) {
-        throw new Error('Nome de tabela contém caracteres inválidos');
-    }
-    
-    // Lista de tabelas permitidas (whitelist)
+/**
+ * Validar nomes de tabela para prevenir SQL Injection
+ * @param {string} tableName - Nome da tabela a ser validado
+ * @returns {string} - Nome validado da tabela
+ */
+function validateTableName(tableName) {
+    // Lista de tabelas permitidas no sistema
     const allowedTables = [
-        'users', 'user_plans', 'user_plan_subjects', 'user_sessions',
-        'user_daily_progress', 'user_study_streaks', 'questoes',
-        'topics', 'subjects', 'study_plans', 'study_sessions', 'user_activities',
-        'login_attempts'
+        'users', 'study_plans', 'subjects', 'topics', 'study_sessions',
+        'user_activities', 'user_settings', 'user_preferences', 'privacy_settings',
+        'login_attempts', 'reta_final_excluded_topics', 'reta_final_exclusions',
+        'study_time_logs'
     ];
     
     if (!allowedTables.includes(tableName)) {
-        throw new Error('Tabela não autorizada');
+        throw new Error(`Tabela '${tableName}' não é permitida no sistema`);
+    }
+    
+    // Validar caracteres alfanuméricos e underscore apenas
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tableName)) {
+        throw new Error(`Nome de tabela '${tableName}' contém caracteres inválidos`);
     }
     
     return tableName;
-};
+}
 
-// Error handler seguro - remove informações sensíveis
-const createSafeError = (error, userMessage = 'Erro interno do servidor') => {
-    const isProduction = process.env.NODE_ENV === 'production';
+/**
+ * Sanitizar entrada de dados para prevenir XSS
+ * @param {string} input - Dados de entrada
+ * @returns {string} - Dados sanitizados
+ */
+function sanitizeInput(input) {
+    if (typeof input !== 'string') {
+        return input;
+    }
     
-    return {
-        error: userMessage,
-        details: isProduction ? undefined : error.message,
-        timestamp: new Date().toISOString()
+    // Remove tags HTML e scripts maliciosos
+    let sanitized = input
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/<[^>]*>/g, '')
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+=/gi, '');
+    
+    // Escapar caracteres especiais
+    sanitized = validator.escape(sanitized);
+    
+    return sanitized.trim();
+}
+
+/**
+ * Validar email com regras rigorosas
+ * @param {string} email - Email a ser validado
+ * @returns {boolean} - Se o email é válido
+ */
+function isValidEmail(email) {
+    if (!email || typeof email !== 'string') {
+        return false;
+    }
+    
+    // Usar validator.js para validação rigorosa
+    return validator.isEmail(email, {
+        allow_display_name: false,
+        require_display_name: false,
+        allow_utf8_local_part: false,
+        require_tld: true
+    });
+}
+
+/**
+ * Validar senha com critérios de segurança
+ * @param {string} password - Senha a ser validada
+ * @returns {object} - Resultado da validação
+ */
+function validatePassword(password) {
+    const result = {
+        isValid: false,
+        errors: []
     };
-};
-
-// Rate limiting por usuário
-const userRateLimiters = new Map();
-
-const checkUserRateLimit = (userId, action, maxAttempts = 5, windowMs = 15 * 60 * 1000) => {
-    const key = `${userId}:${action}`;
-    const now = Date.now();
     
-    if (!userRateLimiters.has(key)) {
-        userRateLimiters.set(key, {
-            attempts: 1,
-            resetTime: now + windowMs
-        });
-        return true;
+    if (!password || typeof password !== 'string') {
+        result.errors.push('Senha é obrigatória');
+        return result;
     }
     
-    const limiter = userRateLimiters.get(key);
-    
-    // Reset se passou o tempo limite
-    if (now > limiter.resetTime) {
-        limiter.attempts = 1;
-        limiter.resetTime = now + windowMs;
-        return true;
+    if (password.length < 8) {
+        result.errors.push('Senha deve ter pelo menos 8 caracteres');
     }
     
-    // Verificar se excedeu limite
-    if (limiter.attempts >= maxAttempts) {
-        return false;
+    if (!/[a-z]/.test(password)) {
+        result.errors.push('Senha deve conter pelo menos uma letra minúscula');
     }
     
-    limiter.attempts++;
-    return true;
-};
+    if (!/[A-Z]/.test(password)) {
+        result.errors.push('Senha deve conter pelo menos uma letra maiúscula');
+    }
+    
+    if (!/\d/.test(password)) {
+        result.errors.push('Senha deve conter pelo menos um número');
+    }
+    
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+        result.errors.push('Senha deve conter pelo menos um caractere especial');
+    }
+    
+    result.isValid = result.errors.length === 0;
+    return result;
+}
 
-// Validador de session secret em produção
-const validateProductionSecrets = () => {
-    if (process.env.NODE_ENV === 'production') {
-        if (!process.env.SESSION_SECRET) {
-            throw new Error('SESSION_SECRET é obrigatório em produção');
-        }
-        if (!process.env.JWT_SECRET) {
-            throw new Error('JWT_SECRET é obrigatório em produção');
-        }
-        if (process.env.SESSION_SECRET.length < 32) {
-            throw new Error('SESSION_SECRET deve ter pelo menos 32 caracteres');
-        }
-    }
-};
-
-// Gerador de token CSRF
-const generateCSRFToken = () => {
+/**
+ * Gerar token seguro para reset de senha
+ * @returns {string} - Token criptograficamente seguro
+ */
+function generateSecureToken() {
     return crypto.randomBytes(32).toString('hex');
-};
+}
 
-// Validador de token CSRF
-const validateCSRFToken = (token, sessionToken) => {
-    if (!token || !sessionToken) {
-        return false;
+/**
+ * Hash seguro de senha com salt
+ * @param {string} password - Senha a ser hasheada
+ * @returns {Promise<string>} - Hash da senha
+ */
+async function hashPassword(password) {
+    const bcrypt = require('bcrypt');
+    const saltRounds = 12; // Aumentado para maior segurança
+    return await bcrypt.hash(password, saltRounds);
+}
+
+/**
+ * Verificar senha contra hash
+ * @param {string} password - Senha em texto plano
+ * @param {string} hash - Hash armazenado
+ * @returns {Promise<boolean>} - Se a senha é válida
+ */
+async function verifyPassword(password, hash) {
+    const bcrypt = require('bcrypt');
+    return await bcrypt.compare(password, hash);
+}
+
+/**
+ * Rate limiting rigoroso para APIs críticas
+ */
+const strictRateLimit = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 5, // máximo 5 tentativas por IP
+    message: {
+        error: 'Muitas tentativas. Tente novamente em 15 minutos.',
+        code: 'RATE_LIMIT_EXCEEDED'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res) => {
+        securityLog('rate_limit_exceeded', {
+            ip: req.ip,
+            endpoint: req.path,
+            userAgent: req.get('User-Agent')
+        });
+        res.status(429).json({
+            error: 'Muitas tentativas. Tente novamente em 15 minutos.',
+            code: 'RATE_LIMIT_EXCEEDED'
+        });
     }
-    return crypto.timingSafeEqual(
-        Buffer.from(token, 'hex'),
-        Buffer.from(sessionToken, 'hex')
-    );
-};
+});
+
+/**
+ * Rate limiting moderado para outras APIs
+ */
+const moderateRateLimit = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 100, // máximo 100 tentativas por IP
+    message: {
+        error: 'Limite de requisições excedido. Tente novamente em 15 minutos.',
+        code: 'RATE_LIMIT_EXCEEDED'
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+/**
+ * Logging de eventos de segurança
+ * @param {string} event - Tipo do evento
+ * @param {object} metadata - Dados adicionais
+ */
+function securityLog(event, metadata = {}) {
+    const timestamp = new Date().toISOString();
+    const logEntry = {
+        timestamp,
+        event,
+        severity: 'SECURITY',
+        ...metadata
+    };
+    
+    // Em produção, enviar para sistema de monitoramento
+    if (process.env.NODE_ENV === 'production') {
+        console.log('[SECURITY]', JSON.stringify(logEntry));
+    } else {
+        console.log('[SECURITY]', event, metadata);
+    }
+}
+
+/**
+ * Validar parâmetros de entrada de API
+ * @param {object} data - Dados a serem validados
+ * @param {object} schema - Schema de validação
+ * @returns {object} - Resultado da validação
+ */
+function validateApiInput(data, schema) {
+    const result = {
+        isValid: true,
+        errors: [],
+        sanitizedData: {}
+    };
+    
+    for (const [field, rules] of Object.entries(schema)) {
+        const value = data[field];
+        
+        // Verificar se campo é obrigatório
+        if (rules.required && (value === undefined || value === null || value === '')) {
+            result.errors.push(`Campo '${field}' é obrigatório`);
+            result.isValid = false;
+            continue;
+        }
+        
+        // Se campo não é obrigatório e está vazio, pular validação
+        if (!rules.required && (value === undefined || value === null || value === '')) {
+            continue;
+        }
+        
+        // Validação de tipo
+        if (rules.type && typeof value !== rules.type) {
+            result.errors.push(`Campo '${field}' deve ser do tipo ${rules.type}`);
+            result.isValid = false;
+            continue;
+        }
+        
+        // Sanitizar string
+        if (typeof value === 'string') {
+            result.sanitizedData[field] = sanitizeInput(value);
+            
+            // Validação de comprimento mínimo
+            if (rules.minLength && result.sanitizedData[field].length < rules.minLength) {
+                result.errors.push(`Campo '${field}' deve ter pelo menos ${rules.minLength} caracteres`);
+                result.isValid = false;
+            }
+            
+            // Validação de comprimento máximo
+            if (rules.maxLength && result.sanitizedData[field].length > rules.maxLength) {
+                result.errors.push(`Campo '${field}' deve ter no máximo ${rules.maxLength} caracteres`);
+                result.isValid = false;
+            }
+            
+            // Validação de email
+            if (rules.format === 'email' && !isValidEmail(result.sanitizedData[field])) {
+                result.errors.push(`Campo '${field}' deve ser um email válido`);
+                result.isValid = false;
+            }
+        } else {
+            result.sanitizedData[field] = value;
+        }
+        
+        // Validação customizada
+        if (rules.validator && typeof rules.validator === 'function') {
+            const customValidation = rules.validator(result.sanitizedData[field]);
+            if (!customValidation.isValid) {
+                result.errors.push(...customValidation.errors);
+                result.isValid = false;
+            }
+        }
+    }
+    
+    return result;
+}
+
+/**
+ * Middleware para validação CSRF
+ */
+function csrfProtection() {
+    return (req, res, next) => {
+        // Métodos seguros não precisam de validação CSRF
+        if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
+            return next();
+        }
+        
+        const token = req.headers['x-csrf-token'] || req.body?._token;
+        const sessionToken = req.session?.csrfToken;
+        
+        if (!token || !sessionToken || token !== sessionToken) {
+            securityLog('csrf_validation_failed', {
+                ip: req.ip,
+                userAgent: req.get('User-Agent'),
+                endpoint: req.path
+            });
+            
+            return res.status(403).json({
+                error: 'Token CSRF inválido',
+                code: 'CSRF_TOKEN_INVALID'
+            });
+        }
+        
+        next();
+    };
+}
+
+/**
+ * Gerar token CSRF para sessão
+ * @returns {string} - Token CSRF
+ */
+function generateCSRFToken() {
+    return crypto.randomBytes(32).toString('hex');
+}
 
 module.exports = {
-    securityLog,
-    validateFilePath,
     validateTableName,
-    createSafeError,
-    checkUserRateLimit,
-    validateProductionSecrets,
-    generateCSRFToken,
-    validateCSRFToken
+    sanitizeInput,
+    isValidEmail,
+    validatePassword,
+    generateSecureToken,
+    hashPassword,
+    verifyPassword,
+    strictRateLimit,
+    moderateRateLimit,
+    securityLog,
+    validateApiInput,
+    csrfProtection,
+    generateCSRFToken
 };
