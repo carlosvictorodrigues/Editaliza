@@ -240,23 +240,102 @@ const ContextualNotifications = {
 
     showWelcomeMessage() {
         const streak = this.patterns.studyStreak;
-        let welcomeMessage;
-
-        if (streak === 0) {
-            welcomeMessage = "Que bom te ver de volta! Vamos retomar os estudos com força total! 💪";
-        } else if (streak < 3) {
-            welcomeMessage = `Você tem ${streak} ${streak === 1 ? 'dia' : 'dias'} de sequência! Continue construindo seu hábito! 🔥`;
-        } else if (streak < 7) {
-            welcomeMessage = `Incrível! ${streak} dias consecutivos! Você está criando um hábito sólido! ⭐`;
+        const currentHour = new Date().getHours();
+        
+        // Determinar período do dia para saudação
+        let greeting, timeEmoji;
+        if (currentHour < 12) {
+            greeting = "Bom dia";
+            timeEmoji = "☀️";
+        } else if (currentHour < 18) {
+            greeting = "Boa tarde";
+            timeEmoji = "🌤️";
         } else {
-            welcomeMessage = `Que constância! ${streak} dias de sequência! Você é um exemplo de disciplina! 🏆`;
+            greeting = "Boa noite";
+            timeEmoji = "🌙";
+        }
+
+        // Mensagens humoradas baseadas na sequência
+        let welcomeMessage, title;
+        
+        if (streak === 0) {
+            const funnyMessages = [
+                "Olha quem voltou! Como um ex que aparece depois de meses... mas dessa vez é bem-vindo! 😂",
+                "Sentimos sua falta! Os livros estavam perguntando onde você estava! 📚😢",
+                "Eita! Alguém lembrou que tem concurso para passar! Bem-vindo de volta, campeão! 🎯",
+                "Como um Phoenix renascendo das cinzas... só que das cinzas da procrastinação! 🔥",
+                "Voltou! Agora é hora de transformar o Netflix em 'Studyflix'! 🍿➡️📖"
+            ];
+            title = `${timeEmoji} ${greeting}, Ressuscitado(a)!`;
+            welcomeMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+        } else if (streak === 1) {
+            const funnyMessages = [
+                "1 dia de sequência! É o começo de algo lindo... como uma plantinha que acabou de brotar! 🌱",
+                "Primeiro dia da nova vida! Hoje você é estudante, amanhã será aprovado(a)! ⭐",
+                "Um dia! É pouco? Não! Todo império começou com uma única pedra! 🏰",
+                "1 dia de estudos! Você está 1% mais próximo da aprovação! (matemática motivacional) 📊",
+                "Dia 1 da operação 'Bye bye vida social, hello aprovação!' 🎯"
+            ];
+            title = `${timeEmoji} ${greeting}, Iniciante Determinado(a)!`;
+            welcomeMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+        } else if (streak < 7) {
+            const funnyMessages = [
+                `${streak} dias! Você está mais consistente que minha internet! E isso é muito! 📶`,
+                `${streak} dias seguidos! Parabéns, você está viciado(a)... em coisa boa! 🎮➡️📚`,
+                `${streak} dias! Já pode se considerar um(a) 'Estudante em Série'! 📺➡️📖`,
+                `${streak} dias de sequência! Tá mais regular que remédio pra pressão! 💊`,
+                `${streak} dias! Você está no modo 'Tartaruga Ninja dos Estudos'! 🐢🥷`
+            ];
+            title = `${timeEmoji} ${greeting}, Viciado(a) em Sucesso!`;
+            welcomeMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+        } else if (streak < 21) {
+            const funnyMessages = [
+                `${streak} dias! Você é mais constante que a gravidade! Newton ficaria orgulhoso! 🍎`,
+                `${streak} dias! Tá mais disciplinado(a) que militar em continência! 🫡`,
+                `${streak} dias seguidos! Você virou o 'The Rock' dos estudos! 💪`,
+                `${streak} dias! Até o YouTube já deve estar com ciúmes da sua dedicação! 📱➡️📚`,
+                `${streak} dias! Você é o(a) 'John Wick dos Concursos' - focado, determinado e implacável! 🎯`
+            ];
+            title = `${timeEmoji} ${greeting}, Máquina de Estudar!`;
+            welcomeMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+        } else if (streak < 30) {
+            const funnyMessages = [
+                `${streak} dias! Você transcendeu! Já pode dar aula de disciplina no YouTube! 🎓`,
+                `${streak} dias! Tá mais fiel aos estudos que cachorro com o dono! 🐕💙`,
+                `${streak} dias! Você é o(a) 'Sensei dos Estudos' - mestre em consistência! 🥋`,
+                `${streak} dias! Netflix chora, TikTok sofre, mas o concurso sorri! 😊`,
+                `${streak} dias! Você virou lenda urbana: 'a pessoa que estuda todo dia!' 🦄`
+            ];
+            title = `${timeEmoji} ${greeting}, Lenda Viva!`;
+            welcomeMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
+        } else {
+            const funnyMessages = [
+                `${streak} dias! Você não é humano(a), é um(a) cyborg programado(a) para a aprovação! 🤖`,
+                `${streak} dias! Até o Einstein faria reverência para essa dedicação! 🧠👑`,
+                `${streak} dias! Você é o(a) 'Chuck Norris dos Concursos'! 💥`,
+                `${streak} dias! Parabéns, você quebrou a matrix da procrastinação! 🕶️`,
+                `${streak} dias! Você é oficialmente um(a) 'Deus(Deusa) dos Estudos'! ⚡👑`
+            ];
+            title = `${timeEmoji} ${greeting}, Divindade dos Estudos!`;
+            welcomeMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
         }
 
         this.showContextualToast({
             type: 'motivational',
-            title: '👋 Olá!',
+            title: title,
             message: welcomeMessage,
-            duration: 6000
+            duration: 8000,
+            actions: [
+                {
+                    text: streak > 0 ? 'Vamos Continuar! 🚀' : 'Bora Estudar! 💪',
+                    action: () => {
+                        // Redirecionar para página de estudos se não estiver lá
+                        if (!window.location.pathname.includes('home.html')) {
+                            window.location.href = 'home.html';
+                        }
+                    }
+                }
+            ]
         });
     },
 
@@ -352,38 +431,79 @@ const ContextualNotifications = {
     // === MENSAGENS CONTEXTUAIS ===
 
     getSessionMessages(sessionType, subject, difficulty, duration) {
-        const baseMessages = {
+        const funnyBaseMessages = {
             'Novo Tópico': [
-                `Excelente! Você expandiu seu conhecimento em ${subject}! O aprendizado de novos conceitos fortalece conexões neurais! 🧠`,
-                `Novo tópico dominado! Em ${subject}, você está construindo uma base sólida para a aprovação! 📚`,
-                `Parabéns por explorar ${subject}! Cada novo tópico é um passo rumo ao seu objetivo! 🎯`
+                `${subject} desbravado! Seu cérebro acabou de ganhar uma nova habilidade! Level up! 🎮`,
+                `Novo tópico de ${subject} dominado! Você está coletando conhecimento como quem coleta cartas Pokémon! 📚✨`,
+                `${subject} conquistado! Seu QI acabou de fazer um 'upgrade' de software! 🧠⬆️`,
+                `Mais um tópico de ${subject}! Você está acumulando sabedoria como esquilo acumula castanhas! 🐿️🌰`,
+                `${subject} destravado! Achievement unlocked: 'Desbravador de Conhecimento'! 🏆`
             ],
             'Revisão': [
-                `Revisão concluída! A repetição espaçada em ${subject} aumenta sua retenção em até 90%! 🔄`,
-                `Ótima revisão! Você está solidificando ${subject} na memória de longo prazo! 💾`,
-                `Revisão perfeita! Em ${subject}, você está aplicando a ciência da aprendizagem! 🔬`
+                `Revisão de ${subject} completa! Seu cérebro agradece pela 'atualização de software'! 🔄💾`,
+                `${subject} revisado! Você está martelando o conhecimento na cabeça... literalmente! 🔨🧠`,
+                `Revisão finalizada! ${subject} agora está mais fixo que chiclete no cabelo! 💪`,
+                `${subject} revisado com sucesso! Sua memória acabou de virar HD externo! 💾✨`,
+                `Revisão concluída! ${subject} agora está gravado em 4K na sua mente! 📽️`
             ],
             'Simulado': [
-                `Simulado finalizado! Testar ${subject} na prática é essencial para o sucesso na prova! ✅`,
-                `Bem feito! O simulado de ${subject} te prepara para o formato real da prova! 📝`,
-                `Simulado concluído! Você está medindo e melhorando seu desempenho em ${subject}! 📊`
+                `Simulado de ${subject} finalizado! Você acabou de fazer um 'test drive' na aprovação! 🚗💨`,
+                `${subject} testado! Você está mais preparado que Boy Scout em acampamento! ⛺`,
+                `Simulado concluído! ${subject} foi posto à prova e você saiu vitorioso! 🥊🏆`,
+                `${subject} simulado! Você está treinando como Rocky Balboa dos concursos! 🥊`,
+                `Simulado finalizado! ${subject} foi testado e aprovado no 'laboratório mental'! 🔬✅`
+            ],
+            'Exercícios': [
+                `Exercícios de ${subject} finalizados! Você está mais ativo mentalmente que personal trainer! 💪🧠`,
+                `${subject} exercitado! Seu cérebro acabou de fazer uma sessão na 'academia mental'! 🏋️‍♂️`,
+                `Exercícios concluídos! ${subject} foi à academia e voltou sarado! 💪`,
+                `${subject} malhado! Você está bombando os músculos cerebrais! 🧠💪`,
+                `Exercícios finalizados! ${subject} fez cardio e musculação mental! 🏃‍♂️🏋️‍♀️`
             ]
         };
 
-        let messages = baseMessages[sessionType] || [
-            `Sessão de ${subject} concluída! Você está no caminho certo! 🚀`,
-            `Excelente trabalho em ${subject}! Cada minuto conta para sua aprovação! ⏰`,
-            `Parabéns! Mais uma sessão produtiva de ${subject} finalizada! 🎉`
+        let messages = funnyBaseMessages[sessionType] || [
+            `Sessão de ${subject} concluída! Você está mais focado que sniper em missão! 🎯`,
+            `${subject} finalizado! Você está acumulando conhecimento como colecionador de raridades! 🎨`,
+            `Mais uma de ${subject}! Você é tipo Netflix... sempre tem conteúdo novo! 📺✨`,
+            `${subject} completed! Seu progresso está mais consistente que gravidade! 🌍`,
+            `Sessão finalizada! ${subject} foi mais uma vitória no seu currículo de aprovação! 📜🏆`
         ];
 
-        // Adicionar contexto de duração
-        if (duration > 60) {
-            messages = messages.map(msg => msg + ` Impressionante foco por ${Math.round(duration)} minutos!`);
+        // Contexto humorado de duração
+        if (duration > 90) {
+            const longDurationMessages = [
+                ` Uau! ${Math.round(duration)} minutos! Você tem mais resistência que maratonista! 🏃‍♂️`,
+                ` ${Math.round(duration)} minutos de foco! Monge tibetano ficaria com inveja! 🧘‍♂️`,
+                ` ${Math.round(duration)} minutos! Você quebrou o recorde de concentração da casa! 🏆`,
+                ` ${Math.round(duration)} minutos straight! Você é o(a) 'The Rock' dos estudos! 💪`,
+                ` ${Math.round(duration)} minutos! Sua concentração é mais sólida que concreto! 🏗️`
+            ];
+            const extraMsg = longDurationMessages[Math.floor(Math.random() * longDurationMessages.length)];
+            messages = messages.map(msg => msg + extraMsg);
+        } else if (duration > 50) {
+            const mediumDurationMessages = [
+                ` ${Math.round(duration)} minutos de dedicação! Parabéns, guerreiro(a)! ⚔️`,
+                ` ${Math.round(duration)} minutos! Você está mais constante que relógio suíço! ⏰`,
+                ` ${Math.round(duration)} minutos! Sua disciplina é inspiradora! 🌟`,
+                ` ${Math.round(duration)} minutos de foco total! Ninja dos estudos! 🥷`,
+                ` ${Math.round(duration)} minutos! Você é exemplo de persistência! 🏅`
+            ];
+            const extraMsg = mediumDurationMessages[Math.floor(Math.random() * mediumDurationMessages.length)];
+            messages = messages.map(msg => msg + extraMsg);
         }
 
-        // Adicionar contexto de dificuldade
+        // Contexto humorado de dificuldade
         if (difficulty && difficulty >= 4) {
-            messages = messages.map(msg => msg + ` Tópico desafiador dominado! 💪`);
+            const difficultyMessages = [
+                ` E ainda por cima era tópico difícil! Você é brabo(a) mesmo! 😎`,
+                ` Tópico level hard dominado! Boss fight vencida! 🎮👑`,
+                ` Conteúdo difícil conquistado! Você não teme desafio! 💪⚔️`,
+                ` Tópico pesado detonado! Você é o(a) Hulk dos estudos! 💚💥`,
+                ` Matéria difícil? Pra você é fichinha! Legend mode! 🏆✨`
+            ];
+            const extraMsg = difficultyMessages[Math.floor(Math.random() * difficultyMessages.length)];
+            messages = messages.map(msg => msg + extraMsg);
         }
 
         return messages;
