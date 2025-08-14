@@ -164,6 +164,12 @@ const StudyChecklist = {
                     <label for="modal-notes" class="text-sm font-medium text-gray-700">Anotações</label>
                     <textarea id="modal-notes" class="form-input py-2" rows="4" placeholder="Suas anotações...">${safeNotes}</textarea>
                 </div>
+                <div>
+                    <label for="modal-status" class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" id="modal-status" class="w-5 h-5 text-editaliza-blue rounded focus:ring-editaliza-blue">
+                        <span class="text-sm font-medium text-gray-700">Marcar como concluído</span>
+                    </label>
+                </div>
             </div>
 
             <div class="mt-6 pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -240,72 +246,91 @@ const StudyChecklist = {
             window.addEventListener('beforeunload', () => clearInterval(saveTimer));
         }
 
-        document.getElementById('modal-questions-solved').addEventListener('input', (e) => updateSessionData('questions_solved', e.target.value));
-        document.getElementById('modal-notes').addEventListener('input', (e) => updateSessionData('notes', e.target.value));
-        document.getElementById('modal-status').addEventListener('change', async (e) => {
-            const newStatus = e.target.checked ? 'Concluído' : 'Pendente';
-            try {
-                // CORREÇÃO 3: Usar endpoint correto
-                const endpoint = `/schedules/sessions/${this.session.id}`;
-                console.log('Atualizando status da sessão:', { sessionId: this.session.id, status: newStatus });
-                
-                await app.apiFetch(endpoint, {
-                    method: 'PATCH',
-                    body: JSON.stringify({ 'status': newStatus })
-                });
-                console.log('Status atualizado com sucesso');
-            } catch (error) {
-                console.error('Erro ao atualizar status:', error);
-                app.showToast('Erro ao salvar status: ' + error.message, 'error');
-                e.target.checked = !e.target.checked; // Reverter checkbox em caso de erro
-                return;
-            }
+        // CORREÇÃO: Verificar se os elementos existem antes de adicionar event listeners
+        const questionsElement = document.getElementById('modal-questions-solved');
+        const notesElement = document.getElementById('modal-notes');
+        const statusElement = document.getElementById('modal-status');
 
-            // ***** CORREÇÃO APLICADA AQUI *****
-            // Invalida o cache do plano para que a tela de Desempenho busque os novos dados.
-            app.invalidatePlanCache(this.session.study_plan_id);
-            
-            // CORREÇÃO: Disparar evento de atualização de métricas
-            app.triggerMetricsUpdate(this.session.study_plan_id, 'session_status_changed');
-            
-            // CORREÇÃO: Atualizar TODAS as métricas quando sessão é concluída
-            if (newStatus === 'Concluído') {
-                console.log('✅ Sessão concluída - atualizando estatísticas...');
-                app.invalidatePlanCache(this.session.study_plan_id, 'gamification');
+        if (questionsElement) {
+            questionsElement.addEventListener('input', (e) => updateSessionData('questions_solved', e.target.value));
+        } else {
+            console.warn('⚠️ Elemento modal-questions-solved não encontrado');
+        }
+
+        if (notesElement) {
+            notesElement.addEventListener('input', (e) => updateSessionData('notes', e.target.value));
+        } else {
+            console.warn('⚠️ Elemento modal-notes não encontrado');
+        }
+
+        if (statusElement) {
+            statusElement.addEventListener('change', async (e) => {
+                const newStatus = e.target.checked ? 'Concluído' : 'Pendente';
+                try {
+                    // CORREÇÃO 3: Usar endpoint correto
+                    const endpoint = `/schedules/sessions/${this.session.id}`;
+                    console.log('Atualizando status da sessão:', { sessionId: this.session.id, status: newStatus });
+                    
+                    await app.apiFetch(endpoint, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ 'status': newStatus })
+                    });
+                    console.log('Status atualizado com sucesso');
+                } catch (error) {
+                    console.error('Erro ao atualizar status:', error);
+                    app.showToast('Erro ao salvar status: ' + error.message, 'error');
+                    e.target.checked = !e.target.checked; // Reverter checkbox em caso de erro
+                    return;
+                }
+
+                // ***** CORREÇÃO APLICADA AQUI *****
+                // Invalida o cache do plano para que a tela de Desempenho busque os novos dados.
+                app.invalidatePlanCache(this.session.study_plan_id);
                 
-                // CORREÇÃO: Atualizar TODAS as métricas se estivermos na tela plan.html
-                if (window.location.pathname.includes('plan.html')) {
-                    try {
-                        if (typeof window.refreshAllMetrics === 'function') {
-                            console.log('🔄 Atualizando todas as métricas após conclusão da sessão...');
-                            setTimeout(() => {
-                                window.refreshAllMetrics();
-                            }, 1000); // Delay para garantir que backend processou
-                        } else if (typeof window.refreshGamificationData === 'function') {
-                            // Fallback para função antiga
-                            setTimeout(() => {
-                                window.refreshGamificationData();
-                            }, 500);
+                // CORREÇÃO: Disparar evento de atualização de métricas
+                app.triggerMetricsUpdate(this.session.study_plan_id, 'session_status_changed');
+                
+                // CORREÇÃO: Atualizar TODAS as métricas quando sessão é concluída
+                if (newStatus === 'Concluído') {
+                    console.log('✅ Sessão concluída - atualizando estatísticas...');
+                    app.invalidatePlanCache(this.session.study_plan_id, 'gamification');
+                    
+                    // CORREÇÃO: Atualizar TODAS as métricas se estivermos na tela plan.html
+                    if (window.location.pathname.includes('plan.html')) {
+                        try {
+                            if (typeof window.refreshAllMetrics === 'function') {
+                                console.log('🔄 Atualizando todas as métricas após conclusão da sessão...');
+                                setTimeout(() => {
+                                    window.refreshAllMetrics();
+                                }, 1000); // Delay para garantir que backend processou
+                            } else if (typeof window.refreshGamificationData === 'function') {
+                                // Fallback para função antiga
+                                setTimeout(() => {
+                                    window.refreshGamificationData();
+                                }, 500);
+                            }
+                        } catch (error) {
+                            console.error('Erro ao atualizar métricas:', error);
                         }
-                    } catch (error) {
-                        console.error('Erro ao atualizar métricas:', error);
                     }
                 }
-            }
 
-            app.showToast(newStatus === 'Concluído' ? 'Sessão concluída! 🎉 As métricas serão atualizadas...' : 'Status da tarefa atualizado!', 'success');
-            
-            // CORREÇÃO: Não atualizar painéis aqui, deixar para a função global fazer isso
-            // O refresh será feito pela função refreshAllMetrics() chamada acima
-            
-            if (e.target.checked) {
-                this.close();
-                // Não precisa mais recarregar a página inteira, já atualizamos os painéis
-                if (!window.location.pathname.includes('plan.html')) {
-                    location.reload(); 
+                app.showToast(newStatus === 'Concluído' ? 'Sessão concluída! 🎉 As métricas serão atualizadas...' : 'Status da tarefa atualizado!', 'success');
+                
+                // CORREÇÃO: Não atualizar painéis aqui, deixar para a função global fazer isso
+                // O refresh será feito pela função refreshAllMetrics() chamada acima
+                
+                if (e.target.checked) {
+                    this.close();
+                    // Não precisa mais recarregar a página inteira, já atualizamos os painéis
+                    if (!window.location.pathname.includes('plan.html')) {
+                        location.reload(); 
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            console.warn('⚠️ Elemento modal-status não encontrado');
+        }
     },
 
     addAnimations() {
