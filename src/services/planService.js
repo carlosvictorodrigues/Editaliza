@@ -392,20 +392,48 @@ const getGamification = async (planId, userId) => {
     const achievements = [];
     const now = new Date();
     
-    // Helper function to create achievement objects
-    const createAchievement = (title, description, earnedDate = now) => ({
-        title,
-        description,
-        achieved_date: earnedDate.toISOString(),
-        earned_at: earnedDate.toISOString() // Extra compatibility
-    });
+    // Helper function to create achievement objects with safe date handling
+    const createAchievement = (title, description, earnedDate = now) => {
+        // Ensure we have a valid date
+        let safeDate = now;
+        if (earnedDate) {
+            if (earnedDate instanceof Date && !isNaN(earnedDate.getTime())) {
+                safeDate = earnedDate;
+            } else if (typeof earnedDate === 'string') {
+                const parsed = new Date(earnedDate);
+                if (!isNaN(parsed.getTime())) {
+                    safeDate = parsed;
+                }
+            }
+        }
+        
+        return {
+            title,
+            description,
+            achieved_date: safeDate.toISOString(),
+            earned_at: safeDate.toISOString() // Extra compatibility
+        };
+    };
     
     // Topic-based achievements
     if (completedTopicsCount >= 1) {
+        // Safely get the date from the first completed session
+        let achievementDate = now;
+        if (completedSessions.length > 0) {
+            const firstSession = completedSessions[0];
+            const sessionDate = firstSession.session_date;
+            if (sessionDate) {
+                const parsedDate = new Date(sessionDate);
+                if (!isNaN(parsedDate.getTime())) {
+                    achievementDate = parsedDate;
+                }
+            }
+        }
+        
         achievements.push(createAchievement(
             "Primeiro Estudo", 
             "Parabéns! Você concluiu seu primeiro tópico de estudo.",
-            completedSessions.length > 0 ? new Date(completedSessions[0].completed_at || completedSessions[0].created_at) : now
+            achievementDate
         ));
     }
     if (completedTopicsCount >= 5) {

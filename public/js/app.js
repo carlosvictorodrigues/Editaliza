@@ -328,7 +328,8 @@ const app = {
         const safeMessage = this.sanitizeHtml(message);
         
         toast.className = `p-4 rounded-lg text-white shadow-lg ${bgColor} transform transition-all duration-300 translate-x-full opacity-0 flex items-center space-x-2`;
-        toast.innerHTML = `<span class="text-xl">${icon}</span><span>${safeMessage}</span>`;
+        toast.style.cssText = 'min-width: 280px; max-width: 380px; white-space: normal; word-wrap: break-word;';
+        toast.innerHTML = `<span class="text-xl flex-shrink-0">${icon}</span><span style="white-space: normal; word-wrap: break-word;">${safeMessage}</span>`;
         
         toastContainer.appendChild(toast);
         

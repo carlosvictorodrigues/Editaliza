@@ -116,8 +116,8 @@ export const Navigation = {
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-16">
                         <div class="flex items-center">
-                            <a href="home.html" class="flex-shrink-0 flex items-center">
-                                ${this.getLogoSvg()}
+                            <a href="home.html" class="flex items-center">
+                                <img src="logotipo.svg" alt="Editaliza" class="h-10 w-auto" style="max-width: 200px;">
                             </a>
                         </div>
                         <nav class="hidden md:flex items-center space-x-1">
@@ -230,7 +230,7 @@ export const Navigation = {
     // Logo SVG da Editaliza
     getLogoSvg() {
         return `
-            <svg id="logo-header" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 510.24 101.5" class="h-8 w-auto">
+            <svg id="logo-header" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 510.24 101.5" style="height: 40px; width: auto; max-width: 200px;">
                 <defs>
                     <style>
                       .cls-1 { fill: #0528f2; }

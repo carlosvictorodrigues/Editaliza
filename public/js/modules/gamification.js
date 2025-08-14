@@ -42,17 +42,13 @@ const Gamification = {
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Rank Atual Aprimorado -->
-                    <div class="bg-gradient-to-br from-slate-50 to-gray-100 border border-gray-200 p-6 rounded-xl shadow-lg text-center hover:shadow-xl transition-all duration-300">
-                        <div class="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                            <span class="text-2xl drop-shadow">${levelIcon}</span>
+                    <!-- Nível Atual -->
+                    <div class="bg-slate-50 border border-gray-200 p-6 rounded-xl shadow-inner text-center">
+                        <div class="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl">${levelIcon}</span>
                         </div>
-                        <p class="text-lg font-semibold text-orange-800 uppercase tracking-wider mb-1">Rank Atual</p>
-                        <p class="text-xl font-bold text-orange-600 leading-tight">${levelTitle}</p>
-                        <div class="mt-2 text-xs text-gray-600 bg-orange-50 rounded-full px-3 py-1 inline-block">
-                            <span class="w-2 h-2 bg-orange-500 rounded-full inline-block mr-1 animate-pulse"></span>
-                            ${safeData.completedTopicsCount} tópicos
-                        </div>
+                        <p class="text-lg font-semibold text-orange-800 uppercase tracking-wider mb-1">Nível Atual</p>
+                        <p class="text-2xl font-bold text-orange-600">${levelTitle}</p>
                     </div>
                     
                     <!-- Total de Dias de Estudo -->
@@ -99,91 +95,30 @@ const Gamification = {
         }
     },
 
-    // Renderizar conquistas obtidas com estrutura aprimorada
+    // Renderizar conquistas obtidas
     renderAchievements(achievements) {
-        // Verificar se achievements é válido e não vazio
-        if (!achievements || !Array.isArray(achievements) || achievements.length === 0) {
-            return `
-                <div class="mt-8">
-                    <h4 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                        <span class="text-2xl mr-3">🏅</span>Suas Conquistas
-                    </h4>
-                    <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
-                        <span class="text-4xl mb-4 block">🎆</span>
-                        <p class="text-gray-600 font-medium mb-2">Nenhuma conquista ainda</p>
-                        <p class="text-sm text-gray-500">Complete seus primeiros estudos para desbloquear conquistas!</p>
-                    </div>
-                </div>
-            `;
-        }
-
         const achievementCards = achievements.slice(0, 6).map(achievement => {
-            // Verificar se o achievement tem a estrutura correta
-            let title, description, achievedDate;
-            
-            if (typeof achievement === 'string') {
-                // Fallback para achievements antigos (formato string)
-                title = achievement;
-                description = "Conquista desbloqueada";
-                achievedDate = "Data não disponível";
-            } else if (achievement && typeof achievement === 'object') {
-                // Novo formato de objeto
-                title = achievement.title || 'Conquista';
-                description = achievement.description || 'Parabéns pela conquista!';
-                
-                // Tratar datas de forma segura
-                try {
-                    const dateValue = achievement.achieved_date || achievement.earned_at || new Date();
-                    const dateObj = new Date(dateValue);
-                    
-                    if (isNaN(dateObj.getTime())) {
-                        achievedDate = "Data inválida";
-                    } else {
-                        achievedDate = dateObj.toLocaleDateString('pt-BR', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric'
-                        });
-                    }
-                } catch (error) {
-                    console.warn('⚠️ Erro ao processar data da conquista:', error);
-                    achievedDate = "Data não disponível";
-                }
-            } else {
-                // Fallback para casos inesperados
-                title = "Conquista desconhecida";
-                description = "Dados da conquista incompletos";
-                achievedDate = "Data não disponível";
-            }
-
-            // Ícones aprimorados para conquistas
             const achievementIcons = {
                 'Primeiro Estudo': '🌟',
                 'Sequência de 3 dias': '🔥',
                 'Sequência de 7 dias': '💪',
-                'Duas Semanas Seguidas': '🔥',
-                'Mês de Dedicação': '🎆',
                 'Primeiro Simulado': '🎯',
                 '10 Tópicos Concluídos': '📚',
-                '20 Sessões Completadas': '📈',
                 '50 Tópicos Concluídos': '🏆',
-                'Veterano de Estudos': '⭐',
-                'Centurião do Conhecimento': '🏅',
-                'Estudioso Iniciante': '📚',
-                'Quarteto de Conhecimento': '📈',
-                'Centurião das Sessões': '🏆',
+                'Nível Avançado': '⭐',
                 'default': '🏅'
             };
 
-            const icon = achievementIcons[title] || achievementIcons.default;
+            const icon = achievementIcons[achievement.title] || achievementIcons.default;
+            const achievedDate = new Date(achievement.achieved_date).toLocaleDateString('pt-BR');
 
             return `
-                <div class="achievement-card bg-white border-2 border-yellow-200 rounded-xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 group">
-                    <div class="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:from-yellow-500 group-hover:to-orange-600 transition-all duration-300">
+                <div class="achievement-card bg-white border-2 border-yellow-200 rounded-xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                    <div class="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
                         <span class="text-2xl">${icon}</span>
                     </div>
-                    <h4 class="font-bold text-gray-800 text-sm mb-1 leading-tight">${title}</h4>
-                    <p class="text-xs text-gray-600 mb-2 leading-relaxed">${description}</p>
+                    <h4 class="font-bold text-gray-800 text-sm mb-1">${achievement.title}</h4>
+                    <p class="text-xs text-gray-600 mb-2">${achievement.description}</p>
                     <p class="text-xs text-yellow-600 font-medium">${achievedDate}</p>
                 </div>
             `;
@@ -206,99 +141,54 @@ const Gamification = {
         `;
     },
 
-    // Renderizar progresso aprimorado para próximo rank
+    // Renderizar progresso para próximo nível
     renderLevelProgress(data) {
-        if (!data.nextLevel && !data.nextRank) return '';
+        if (!data.nextLevel) return '';
 
-        // Usar dados do novo sistema de ranking se disponível
-        const currentRank = data.currentRank || {
-            icon: data.levelName?.split(' ').pop() || '🌱',
-            title: data.levelName?.replace(/[\ud83c-\ud83f][\ud83c-\ud83f]?/g, '').trim() || 'Iniciante',
-            color: '#CD7F32',
-            bgColor: '#FFF8DC'
-        };
-        
-        const nextRank = data.nextRank || {
-            icon: data.nextLevel?.split(' ').pop() || '❓',
-            title: data.nextLevel?.replace(/[\ud83c-\ud83f][\ud83c-\ud83f]?/g, '').trim() || 'Próximo Nível',
-            color: '#C0C0C0',
-            bgColor: '#F8F8FF'
-        };
+        const currentIcon = data.levelName.split(' ').pop();
+        const currentTitle = data.levelName.replace(currentIcon, '').trim();
 
-        // Calcular progresso com mais precisão
-        let progressPercent = 0;
-        if (data.rankProgress !== undefined) {
-            progressPercent = Math.max(0, Math.min(100, data.rankProgress));
-        } else {
-            const totalNeeded = (data.completedTopicsCount || 0) + (data.topicsToNextLevel || 0);
-            progressPercent = totalNeeded > 0 
-                ? Math.max(0, Math.min(100, ((data.completedTopicsCount || 0) / totalNeeded) * 100))
-                : 0;
-        }
+        const nextIcon = data.nextLevel.split(' ').pop();
+        const nextTitle = data.nextLevel.replace(nextIcon, '').trim();
+
+        const totalNeeded = (data.completedTopicsCount || 0) + (data.topicsToNextLevel || 0);
+        const progressPercent = totalNeeded > 0
+            ? Math.max(0, Math.min(100, (data.completedTopicsCount / totalNeeded) * 100))
+            : 0;
 
         return `
             <div class="mt-8">
                 <h4 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-                    <span class="text-2xl mr-3">🎖️</span>Progresso de Ranking
+                    <span class="text-2xl mr-3">🎖️</span>Progresso de Nível
                 </h4>
-                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-lg" style="background: linear-gradient(135deg, ${currentRank.bgColor || '#FFF8DC'} 0%, ${nextRank.bgColor || '#F8F8FF'} 100%)">
-                    <div class="flex items-center justify-between mb-6">
-                        <!-- Rank Atual -->
-                        <div class="text-center flex-1">
-                            <div class="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center" style="background: linear-gradient(135deg, ${currentRank.color || '#CD7F32'}, ${currentRank.color || '#CD7F32'}88); box-shadow: 0 4px 12px ${currentRank.color || '#CD7F32'}44;">
-                                <span class="text-3xl drop-shadow-lg">${currentRank.icon}</span>
-                            </div>
-                            <p class="text-sm font-bold text-gray-800">Rank Atual</p>
-                            <p class="text-lg font-bold" style="color: ${currentRank.color || '#CD7F32'}">${currentRank.title}</p>
-                            ${currentRank.subtitle ? `<p class="text-xs text-gray-600 mt-1">${currentRank.subtitle}</p>` : ''}
+                <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-inner">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="text-center">
+                            <div class="text-3xl mb-2">${currentIcon}</div>
+                            <p class="text-sm font-semibold text-gray-700">Nível Atual</p>
+                            <p class="text-xs text-gray-600">${currentTitle}</p>
                         </div>
-                        
-                        <!-- Barra de Progresso Aprimorada -->
-                        <div class="flex-2 mx-8">
+                        <div class="flex-1 mx-6">
                             <div class="relative">
-                                <div class="w-full bg-gray-300 rounded-full h-6 shadow-inner">
-                                    <div class="h-6 rounded-full transition-all duration-1000 ease-out flex items-center justify-end pr-2" 
-                                         style="width: ${progressPercent}%; background: linear-gradient(90deg, ${currentRank.color || '#CD7F32'}, ${nextRank.color || '#C0C0C0'});">
-                                        ${progressPercent > 15 ? `<span class="text-xs text-white font-bold drop-shadow">${progressPercent.toFixed(1)}%</span>` : ''}
-                                    </div>
+                                <div class="w-full bg-gray-200 rounded-full h-4">
+                                    <div class="bg-gradient-to-r from-editaliza-blue to-purple-600 h-4 rounded-full transition-all duration-500" style="width: ${progressPercent}%"></div>
                                 </div>
-                                ${progressPercent <= 15 ? `
-                                    <div class="text-center mt-2">
-                                        <span class="text-sm font-bold" style="color: ${currentRank.color || '#CD7F32'}">${progressPercent.toFixed(1)}%</span>
-                                    </div>
-                                ` : ''}
-                            </div>
-                            
-                            <!-- Indicador de Progresso -->
-                            <div class="mt-3 text-center">
-                                <div class="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-full px-3 py-1 shadow-md">
-                                    <span class="w-2 h-2 rounded-full animate-pulse" style="background-color: ${nextRank.color || '#C0C0C0'}"></span>
-                                    <span class="text-xs text-gray-700 font-medium">${data.topicsToNextLevel || 0} tópicos restantes</span>
+                                <div class="text-center mt-2">
+                                    <span class="text-sm font-bold text-editaliza-blue">${progressPercent.toFixed(1)}%</span>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Próximo Rank -->
-                        <div class="text-center flex-1">
-                            <div class="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center opacity-75 hover:opacity-100 transition-opacity duration-300" style="background: linear-gradient(135deg, ${nextRank.color || '#C0C0C0'}, ${nextRank.color || '#C0C0C0'}88); box-shadow: 0 4px 12px ${nextRank.color || '#C0C0C0'}44;">
-                                <span class="text-3xl drop-shadow-lg">${nextRank.icon}</span>
-                            </div>
-                            <p class="text-sm font-bold text-gray-800">Próximo Rank</p>
-                            <p class="text-lg font-bold" style="color: ${nextRank.color || '#C0C0C0'}">${nextRank.title}</p>
-                            ${nextRank.subtitle ? `<p class="text-xs text-gray-600 mt-1">${nextRank.subtitle}</p>` : ''}
+                        <div class="text-center">
+                            <div class="text-3xl mb-2">${nextIcon}</div>
+                            <p class="text-sm font-semibold text-gray-700">Próximo Nível</p>
+                            <p class="text-xs text-gray-600">${nextTitle}</p>
                         </div>
                     </div>
-                    
-                    <!-- Motivação -->
-                    ${currentRank.motivationalText || nextRank.motivationalText ? `
-                        <div class="text-center pt-4 border-t border-gray-200/50">
-                            <p class="text-sm font-medium text-gray-700 italic">
-                                ${progressPercent >= 75 ? 
-                                    (nextRank.motivationalText || 'Você está quase lá! Continue assim!') : 
-                                    (currentRank.motivationalText || 'Continue progredindo, você está no caminho certo!')}
-                            </p>
-                        </div>
-                    ` : ''}
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">
+                            ${data.topicsToNextLevel} tópicos restantes para o próximo nível
+                        </p>
+                    </div>
                 </div>
             </div>
         `;
@@ -389,25 +279,16 @@ const Gamification = {
         }
     },
 
-    // Sistema de métricas em tempo real com detecção de mudanças
+    // Sistema de métricas em tempo real
     async updateMetrics(planId, forceRefresh = false) {
         if (!planId) return null;
 
         try {
-            const previousData = this._lastGamificationData;
             const data = window.app?.getGamificationData ? 
                 await window.app.getGamificationData(planId, forceRefresh) : null;
             
             if (data) {
-                // Detectar mudanças e exibir notificações
-                this._detectAndNotifyChanges(previousData, data);
-                
-                // Renderizar dashboard atualizado
                 this.renderGamificationDashboard(data, 'gamification-dashboard');
-                
-                // Armazenar dados para próxima comparação
-                this._lastGamificationData = { ...data };
-                
                 return data;
             }
         } catch (error) {
@@ -417,95 +298,33 @@ const Gamification = {
         return null;
     },
 
-    // Detectar mudanças e exibir notificações apropriadas
-    _detectAndNotifyChanges(previousData, newData) {
-        if (!previousData || !newData) return;
-
-        // Detectar mudança de rank
-        const previousRank = previousData.currentRank || { title: previousData.concurseiroLevel };
-        const newRank = newData.currentRank || { title: newData.concurseiroLevel };
-        
-        if (previousRank.title !== newRank.title) {
-            console.log('🎊 Rank up detectado!', previousRank.title, '→', newRank.title);
-            this.showRankUpNotification(previousRank, newRank);
-        }
-
-        // Detectar novas conquistas
-        const previousAchievements = previousData.achievements || [];
-        const newAchievements = newData.achievements || [];
-        
-        if (newAchievements.length > previousAchievements.length) {
-            const achievementsDiff = newAchievements.length - previousAchievements.length;
-            console.log(`🏅 ${achievementsDiff} nova(s) conquista(s) detectada(s)!`);
-            
-            // Mostrar notificação para as novas conquistas
-            const latestAchievements = newAchievements.slice(-achievementsDiff);
-            latestAchievements.forEach((achievement, index) => {
-                setTimeout(() => {
-                    this.showAchievementNotification(achievement);
-                }, index * 1000); // Espaçar notificações em 1 segundo
-            });
-        }
-
-        // Detectar ganho significativo de XP
-        const previousXP = previousData.experiencePoints || 0;
-        const newXP = newData.experiencePoints || 0;
-        const xpGained = newXP - previousXP;
-        
-        if (xpGained > 0) {
-            this.animateXPGain(xpGained, newXP);
-        }
-    },
-
-    // Sistema aprimorado de notificações de conquistas
+    // Sistema de notificações de conquistas
     showAchievementNotification(achievement) {
         const notification = document.createElement('div');
         notification.className = 'fixed top-20 right-5 z-50 bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-6 rounded-2xl shadow-2xl transform translate-x-full opacity-0 transition-all duration-500';
         
-        // Verificar se o achievement tem estrutura de objeto
-        let title, description, icon;
-        if (typeof achievement === 'object' && achievement.title) {
-            title = achievement.title;
-            description = achievement.description || 'Conquista desbloqueada!';
-        } else if (typeof achievement === 'string') {
-            title = achievement;
-            description = 'Conquista desbloqueada!';
-        } else {
-            title = 'Nova Conquista';
-            description = 'Parabéns pelo seu progresso!';
-        }
-
         const achievementIcons = {
             'Primeiro Estudo': '🌟',
             'Sequência de 3 dias': '🔥',
             'Sequência de 7 dias': '💪',
-            'Duas Semanas Seguidas': '🔥',
-            'Mês de Dedicação': '🎆',
             'Primeiro Simulado': '🎯',
             '10 Tópicos Concluídos': '📚',
-            '20 Sessões Completadas': '📈',
             '50 Tópicos Concluídos': '🏆',
-            'Veterano de Estudos': '⭐',
-            'Centurião do Conhecimento': '🏅',
-            'Estudioso Iniciante': '📚',
-            'Quarteto de Conhecimento': '📈',
-            'Centurião das Sessões': '🏆',
             'default': '🏅'
         };
 
-        icon = achievementIcons[title] || achievementIcons.default;
+        const icon = achievementIcons[achievement.title] || achievementIcons.default;
 
         notification.innerHTML = `
             <div class="flex items-center space-x-4">
-                <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center animate-bounce">
+                <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
                     <span class="text-3xl">${icon}</span>
                 </div>
                 <div>
                     <h4 class="font-bold text-lg mb-1">🎉 Nova Conquista!</h4>
-                    <p class="font-semibold">${title}</p>
-                    <p class="text-sm opacity-90">${description}</p>
+                    <p class="font-semibold">${achievement.title}</p>
+                    <p class="text-sm opacity-90">${achievement.description}</p>
                 </div>
-                <button onclick="this.parentElement.parentElement.remove()" class="text-white/80 hover:text-white text-xl ml-2">×</button>
             </div>
         `;
 
@@ -516,7 +335,7 @@ const Gamification = {
             notification.classList.remove('translate-x-full', 'opacity-0');
         });
 
-        // Remover após 7 segundos
+        // Remover após 5 segundos
         setTimeout(() => {
             notification.classList.add('translate-x-full', 'opacity-0');
             setTimeout(() => {
@@ -524,7 +343,7 @@ const Gamification = {
                     notification.remove();
                 }
             }, 500);
-        }, 7000);
+        }, 5000);
 
         // Som de conquista (se suportado)
         if ('speechSynthesis' in window) {
@@ -533,76 +352,6 @@ const Gamification = {
             utterance.rate = 1.2;
             speechSynthesis.speak(utterance);
         }
-    },
-
-    // Sistema de notificação de rank-up
-    showRankUpNotification(currentRank, newRank) {
-        if (!newRank || !newRank.title) return;
-
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-700 text-white p-8 rounded-3xl shadow-2xl opacity-0 scale-75 transition-all duration-700';
-        
-        notification.innerHTML = `
-            <div class="text-center">
-                <div class="mb-6">
-                    <h2 class="text-3xl font-bold mb-2">🎊 RANK UP! 🎊</h2>
-                    <p class="text-xl opacity-90">Parabéns! Você subiu de rank!</p>
-                </div>
-                
-                <div class="flex items-center justify-center space-x-8 mb-6">
-                    <div class="text-center opacity-70">
-                        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                            <span class="text-2xl">${currentRank?.icon || '🥉'}</span>
-                        </div>
-                        <p class="text-sm">${currentRank?.title || 'Rank Anterior'}</p>
-                    </div>
-                    
-                    <div class="text-4xl animate-pulse">➡️</div>
-                    
-                    <div class="text-center">
-                        <div class="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-2 animate-bounce shadow-lg">
-                            <span class="text-3xl">${newRank.icon}</span>
-                        </div>
-                        <p class="text-lg font-bold">${newRank.title}</p>
-                        <p class="text-sm opacity-90">${newRank.subtitle || ''}</p>
-                    </div>
-                </div>
-                
-                <div class="bg-white/10 rounded-2xl p-4 mb-6">
-                    <p class="text-sm italic">"${newRank.motivationalText || newRank.description || 'Continue assim!'}"</p>
-                </div>
-                
-                <button onclick="this.parentElement.parentElement.remove()" class="bg-white/20 hover:bg-white/30 text-white px-6 py-2 rounded-full transition-all duration-300 font-medium">
-                    Continuar 🚀
-                </button>
-            </div>
-        `;
-
-        document.body.appendChild(notification);
-
-        // Animar entrada
-        requestAnimationFrame(() => {
-            notification.classList.remove('opacity-0', 'scale-75');
-            notification.classList.add('opacity-100', 'scale-100');
-        });
-
-        // Som de rank up
-        if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(`Parabéns! Você alcançou o rank ${newRank.title}!`);
-            utterance.volume = 0.2;
-            utterance.rate = 1.1;
-            speechSynthesis.speak(utterance);
-        }
-
-        // Remover após 10 segundos
-        setTimeout(() => {
-            notification.classList.add('opacity-0', 'scale-75');
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.remove();
-                }
-            }, 700);
-        }, 10000);
     },
 
     // Animação de progressão de XP

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head><title>Favicon 16x16</title></head>
+<body style="margin:0; padding:20px; font-family: Arial;">
+    <h3>Favicon 16x16 - Editaliza</h3>
+    <div style="display: inline-block; border: 1px solid #ccc; background: white;">
+        <?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .bg { fill: #0528f2; }
+      .text { fill: white; font-family: Arial, sans-serif; font-weight: bold; text-anchor: middle; }
+    </style>
+  </defs>
+  <rect x="1" y="1" width="14" height="14" rx="1.6" class="bg"/>
+  <text x="8" y="11.2" font-size="9.6" class="text">E</text>
+</svg>
+    </div>
+    <br><br>
+    <canvas id="canvas" width="16" height="16" style="border: 1px solid #ccc; image-rendering: pixelated; zoom: 10;"></canvas>
+    <br><br>
+    <button onclick="downloadPNG()" style="background: #0528f2; color: white; border: none; padding: 10px 20px; cursor: pointer;">
+        Download 16x16 PNG
+    </button>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Draw favicon
+        ctx.fillStyle = '#0528f2';
+        ctx.fillRect(1, 1, 14, 14);
+        
+        // Draw text
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 9.6px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('E', 8, 8);
+        
+        function downloadPNG() {
+            const link = document.createElement('a');
+            link.download = 'favicon-16x16.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>

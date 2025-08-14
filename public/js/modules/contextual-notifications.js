@@ -36,7 +36,10 @@ const ContextualNotifications = {
             
             // Verificar dependências
             if (!window.app || !window.app.showToast) {
-                throw new Error('Dependências não encontradas');
+                console.warn('⚠️ ContextualNotifications: Dependências não encontradas (app ou showToast)');
+                // Não lançar erro, apenas avisar
+            } else {
+                console.log('✅ ContextualNotifications: Dependências encontradas');
             }
 
             // Carregar dados do usuário
@@ -392,7 +395,8 @@ const ContextualNotifications = {
         const container = document.getElementById('toast-container') || this.createToastContainer();
 
         const toast = document.createElement('div');
-        toast.className = 'bg-white rounded-xl shadow-2xl p-4 w-full max-w-sm transform transition-all duration-500 opacity-0 -translate-y-12';
+        toast.className = 'bg-white rounded-xl shadow-2xl p-4 transform transition-all duration-500 opacity-0';
+        toast.style.cssText = 'pointer-events: auto !important; margin-bottom: 10px !important; width: 380px !important; min-width: 320px !important;';
 
         const typeClasses = {
             celebration: 'border-yellow-400',
@@ -406,11 +410,11 @@ const ContextualNotifications = {
             <div class="border-l-4 ${typeClasses[options.type] || 'border-gray-400'} pl-4">
                 <div class="flex items-start">
                     <div class="flex-shrink-0 pt-0.5">
-                        <span class="text-2xl">${options.title.split(' ')[0]}</span>
+                        <span class="text-2xl">${options.icon || '📢'}</span>
                     </div>
-                    <div class="ml-3 w-0 flex-1">
-                        <p class="text-md font-bold text-gray-900">${options.title}</p>
-                        <p class="mt-1 text-sm text-gray-600">${options.message}</p>
+                    <div class="ml-3 flex-1" style="min-width: 0;">
+                        <p class="text-md font-bold text-gray-900" style="white-space: normal; word-wrap: break-word;">${options.title}</p>
+                        <p class="mt-1 text-sm text-gray-600" style="white-space: normal; word-wrap: break-word;">${options.message}</p>
                     </div>
                     <div class="ml-4 flex-shrink-0 flex">
                         <button class="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none">
@@ -431,9 +435,11 @@ const ContextualNotifications = {
 
         container.appendChild(toast);
 
-        // Animate in
+        // Animate in with better desktop support
         requestAnimationFrame(() => {
-            toast.classList.remove('opacity-0', '-translate-y-12');
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            toast.style.transform = 'translateX(0)';
         });
 
         setTimeout(close, options.duration || 6000);
@@ -445,7 +451,8 @@ const ContextualNotifications = {
 
         container = document.createElement('div');
         container.id = 'toast-container';
-        container.className = 'fixed top-5 right-5 z-50 space-y-3';
+        container.className = 'fixed z-50 space-y-3';
+        container.style.cssText = 'position: fixed !important; top: 20px !important; right: 20px !important; z-index: 9999 !important; max-width: 400px !important; pointer-events: none !important;';
         document.body.appendChild(container);
         return container;
     },
@@ -558,6 +565,17 @@ const ContextualNotifications = {
             patterns: this.patterns,
             userData: this.userData ? 'Loaded' : 'Not loaded'
         };
+    },
+
+    // Debug method for testing
+    testNotification() {
+        console.log('🧪 Testando sistema de notificações...');
+        this.showContextualToast({
+            type: 'celebration',
+            title: '🧪 Teste de Notificação',
+            message: 'Se você está vendo esta mensagem, o sistema de notificações está funcionando!',
+            duration: 5000
+        });
     }
 };
 

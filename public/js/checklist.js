@@ -419,6 +419,28 @@ const StudyChecklist = {
             
             console.log(`✅ Sessão ${sessionId} finalizada:`, updateData);
             
+            // CORREÇÃO: Disparar evento para sistema de notificações inteligentes
+            try {
+                const sessionCompletedEvent = new CustomEvent('sessionCompleted', {
+                    detail: {
+                        sessionType: this.session.topic_type || 'Estudo',
+                        duration: studyTimeSeconds > 0 ? Math.round(studyTimeSeconds / 60) : 25, // Convert to minutes
+                        subject: this.session.subject_name || 'Matéria',
+                        difficulty: this.session.difficulty_level || 3,
+                        timestamp: Date.now(),
+                        sessionId: sessionId,
+                        studyTimeSeconds: studyTimeSeconds,
+                        questions_solved: questionsSolved,
+                        notes: notes
+                    }
+                });
+                
+                document.dispatchEvent(sessionCompletedEvent);
+                console.log('🔔 Evento sessionCompleted disparado para notificações inteligentes');
+            } catch (error) {
+                console.warn('⚠️ Erro ao disparar evento de notificação:', error);
+            }
+            
             // Update dashboard stats if available
             if (window.updateDashboardStats) {
                 window.updateDashboardStats();

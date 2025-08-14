@@ -317,6 +317,64 @@ function generateCSRFToken() {
     return crypto.randomBytes(32).toString('hex');
 }
 
+/**
+ * Criar erro seguro para resposta ao cliente
+ * @param {Error} error - Erro original
+ * @param {string} defaultMessage - Mensagem padrão segura
+ * @returns {object} - Objeto de erro seguro
+ */
+function createSafeError(error, defaultMessage = 'Erro interno do servidor') {
+    // Em produção, não expor detalhes do erro
+    if (process.env.NODE_ENV === 'production') {
+        return { error: defaultMessage };
+    }
+    
+    // Em desenvolvimento, incluir mais detalhes
+    return {
+        error: error.message || defaultMessage,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    };
+}
+
+/**
+ * Verificar limite de taxa para usuário
+ * @param {string} userId - ID do usuário
+ * @param {string} action - Ação sendo realizada
+ * @param {number} maxAttempts - Máximo de tentativas permitidas
+ * @param {number} windowMs - Janela de tempo em ms
+ * @returns {boolean} - True se dentro do limite, false se excedido
+ */
+const userRateLimits = new Map();
+
+function checkUserRateLimit(userId, action, maxAttempts = 5, windowMs = 900000) {
+    const key = `${userId}:${action}`;
+    const now = Date.now();
+    
+    if (!userRateLimits.has(key)) {
+        userRateLimits.set(key, { attempts: 1, resetTime: now + windowMs });
+        return true;
+    }
+    
+    const limit = userRateLimits.get(key);
+    
+    // Resetar se a janela de tempo passou
+    if (now > limit.resetTime) {
+        userRateLimits.set(key, { attempts: 1, resetTime: now + windowMs });
+        return true;
+    }
+    
+    // Incrementar tentativas
+    limit.attempts++;
+    
+    // Verificar se excedeu o limite
+    if (limit.attempts > maxAttempts) {
+        return false;
+    }
+    
+    userRateLimits.set(key, limit);
+    return true;
+}
+
 module.exports = {
     validateTableName,
     sanitizeInput,
@@ -330,5 +388,7 @@ module.exports = {
     securityLog,
     validateApiInput,
     csrfProtection,
-    generateCSRFToken
+    generateCSRFToken,
+    createSafeError,
+    checkUserRateLimit
 };

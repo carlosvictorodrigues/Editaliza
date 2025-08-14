@@ -425,7 +425,9 @@ app.use((req, res, next) => {
     // Pular CSRF para algumas rotas públicas essenciais
     const skipCSRF = [
         '/login',
-        '/register', 
+        '/register',
+        '/auth/login',
+        '/auth/register', 
         '/auth/google',
         '/auth/google/callback'
     ];

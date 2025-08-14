@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Favicon - Editaliza</title>
+    
+    <!-- Enhanced favicon setup -->
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=4">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=4">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png?v=4">
+    <link rel="shortcut icon" href="favicon.ico?v=4">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=4">
+    <meta name="theme-color" content="#0528f2">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .icon-preview {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        .icon-preview img {
+            border: 1px solid #ddd;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .brand-color {
+            color: #0528f2;
+        }
+        .success {
+            color: #1ad937;
+        }
+        .error {
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1 class="brand-color">🔍 Teste de Favicon - Editaliza</h1>
+        <p>Esta página testa se os favicons estão funcionando corretamente.</p>
+        
+        <h2>✅ Verificações:</h2>
+        <ul>
+            <li>Verifique se o ícone "E" azul aparece na aba do navegador</li>
+            <li>O título deve mostrar "Teste Favicon - Editaliza"</li>
+            <li>Em navegadores modernos, você deve ver o ícone PNG</li>
+            <li>Em navegadores antigos, você deve ver o ícone ICO</li>
+        </ul>
+        
+        <h2>📱 Preview dos Ícones:</h2>
+        <div style="background: #f0f0f0; padding: 20px; border-radius: 8px;">
+            <div class="icon-preview">
+                <img src="favicon-16x16.png" alt="16x16" style="width: 16px; height: 16px;">
+                <br><small>16x16</small>
+            </div>
+            <div class="icon-preview">
+                <img src="favicon-32x32.png" alt="32x32" style="width: 32px; height: 32px;">
+                <br><small>32x32</small>
+            </div>
+            <div class="icon-preview">
+                <img src="favicon-48x48.png" alt="48x48" style="width: 48px; height: 48px;">
+                <br><small>48x48</small>
+            </div>
+            <div class="icon-preview">
+                <img src="favicon-192.png" alt="192x192" style="width: 64px; height: 64px;">
+                <br><small>192x192</small>
+            </div>
+        </div>
+        
+        <h2>🎯 Instruções de Teste:</h2>
+        <ol>
+            <li><strong>Chrome/Edge:</strong> Deve mostrar o ícone PNG com "E" branco em fundo azul</li>
+            <li><strong>Firefox:</strong> Deve mostrar o ícone SVG ou PNG</li>
+            <li><strong>Safari:</strong> Deve mostrar o ícone PNG</li>
+            <li><strong>Internet Explorer:</strong> Deve mostrar o favicon.ico</li>
+        </ol>
+        
+        <h2>🔧 Cache:</h2>
+        <p>Se não ver o novo ícone:</p>
+        <ul>
+            <li>Pressione <strong>Ctrl+F5</strong> (ou Cmd+Shift+R no Mac) para recarregar</li>
+            <li>Limpe o cache do navegador</li>
+            <li>Feche e reabra o navegador</li>
+        </ul>
+        
+        <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 6px;">
+            <p><strong>✅ Se você vê o ícone "E" azul na aba do navegador, o favicon está funcionando!</strong></p>
+        </div>
+    </div>
+    
+    <script>
+        // Verificação JavaScript adicional
+        console.log('🔍 Favicon Test Page Loaded');
+        console.log('📋 Title:', document.title);
+        console.log('🎨 Theme color:', document.querySelector('meta[name="theme-color"]')?.content);
+        
+        // Verificar se os ícones carregam
+        const icons = document.querySelectorAll('link[rel*="icon"]');
+        console.log('🖼️ Favicon links found:', icons.length);
+        icons.forEach((icon, index) => {
+            console.log(`Icon ${index + 1}:`, icon.href, `(${icon.type || 'no type'})`);
+        });
+    </script>
+</body>
+</html>
