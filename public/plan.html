@@ -22,6 +22,7 @@
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
     <script src="js/modules/gamification.js"></script>
+    <script src="js/modules/time-visualization.js"></script>
     
     <!-- SMART NOTIFICATION MODULES -->
     <script src="js/modules/contextual-notifications.js"></script>
@@ -340,14 +341,9 @@
                     <div class="text-gray-500 text-center p-4">Carregando progresso...</div>
                 </div>
                 
-                <!-- Análise Detalhada Integrada -->
-                <div class="mt-6">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center">
-                        <span class="text-lg mr-2">🔬</span>Análise Detalhada por Disciplina
-                    </h3>
-                    <div id="detailedProgressAccordion" class="space-y-2">
-                        <div class="text-gray-500 text-center p-4">Carregando análise detalhada...</div>
-                    </div>
+                <!-- Análise Detalhada Integrada com Visualização Híbrida -->
+                <div id="timeAnalysisContainer" class="mt-6">
+                    <!-- Container será preenchido pelo módulo TimeVisualization -->
                 </div>
             </div>
             
@@ -1311,10 +1307,10 @@
             container.innerHTML = html;
         }
 
-        // CORREÇÃO: Função de progresso detalhado com dados em tempo real
+        // CORREÇÃO: Função de progresso detalhado com dados em tempo real e visualização híbrida
         async function loadDetailedProgress(forceRefresh = false) {
             const progressDashboard = document.getElementById('progressDashboard');
-            const accordionContainer = document.getElementById('detailedProgressAccordion');
+            const timeAnalysisContainer = document.getElementById('timeAnalysisContainer');
             
             try {
                 // CORREÇÃO: Invalidar cache para dados frescos
@@ -1337,11 +1333,20 @@
                     </div>
                 `;
 
+                // Inicializar container de visualização híbrida
+                if (!timeAnalysisContainer.innerHTML || timeAnalysisContainer.innerHTML.includes('Carregando')) {
+                    timeAnalysisContainer.innerHTML = TimeVisualization.createVisualizationContainer();
+                }
+                
                 if (!data.subjectDetails || data.subjectDetails.length === 0) {
-                    accordionContainer.innerHTML = '<p class="text-gray-500 text-center">Nenhuma disciplina para exibir. Adicione disciplinas e tópicos para ver a análise.</p>';
+                    document.getElementById('detailedProgressAccordion').innerHTML = '<p class="text-gray-500 text-center">Nenhuma disciplina para exibir. Adicione disciplinas e tópicos para ver a análise.</p>';
                     return;
                 }
 
+                // Usar o novo módulo de visualização híbrida
+                TimeVisualization.updateVisualization(data, formatTime, app.sanitizeHtml);
+                
+                /* Código antigo do acordeão comentado - mantido para referência
                 accordionContainer.innerHTML = data.subjectDetails.map(subject => {
                     const subjectPercentage = subject.progress.toFixed(1);
                     // Exibir tempo total da disciplina formatado
@@ -1390,10 +1395,13 @@
                         content.style.maxHeight = header.classList.contains('open') ? `${content.scrollHeight}px` : null;
                     }
                 });
+                */
 
             } catch (error) {
                 progressDashboard.innerHTML = `<p class="text-red-500 text-center">Não foi possível carregar o progresso.</p>`;
-                accordionContainer.innerHTML = `<p class="text-red-500 text-center">Não foi possível carregar a análise detalhada.</p>`;
+                if (timeAnalysisContainer) {
+                    timeAnalysisContainer.innerHTML = `<p class="text-red-500 text-center">Não foi possível carregar a análise detalhada.</p>`;
+                }
             }
         }
 
