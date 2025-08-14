@@ -284,87 +284,87 @@ const getGamification = async (planId, userId) => {
     `, [planId]);
     const completedTopicsCount = completedTopicsResult.count || 0;
 
-    // Define sophisticated 8-tier ranking system (League of Legends inspired)
+    // Sistema de ranks com humor concurseiro
     const levels = [
         { 
             threshold: 0, 
-            title: 'Bronze 🥉', 
-            subtitle: 'Iniciante',
-            description: 'Todo grande concurseiro começou aqui. Primeiro passo dado!',
-            color: '#CD7F32',
-            bgColor: '#FFF8DC',
-            icon: '🥉',
-            motivationalText: 'Sua jornada rumo à aprovação começou!'
+            title: 'Pagador de Inscrição 💸', 
+            subtitle: 'Nível 1',
+            description: 'Primeira vez que paga pra sofrer? Bem-vindo ao clube!',
+            color: '#8B8B8B', // Cinza apagado
+            bgColor: '#F5F5F5', // Bege
+            icon: '💸',
+            motivationalText: 'A jornada dos mil editais começa com o primeiro boleto!'
         },
         { 
             threshold: 11, 
-            title: 'Silver 🥈', 
-            subtitle: 'Novato',
-            description: 'Você está ganhando momentum! Continue assim.',
-            color: '#C0C0C0',
-            bgColor: '#F8F8FF',
-            icon: '🥈',
-            motivationalText: 'O conhecimento está se acumulando!'
+            title: 'Sobrevivente do Primeiro PDF 📄', 
+            subtitle: 'Nível 2',
+            description: 'Abriu o edital e não desmaiou! Você é corajoso(a)!',
+            color: '#A0A0A0', // Cinza mais vivo
+            bgColor: '#FAFAFA',
+            icon: '📄',
+            motivationalText: '700 páginas? É só o aquecimento!'
         },
         { 
             threshold: 31, 
-            title: 'Gold 🥇', 
-            subtitle: 'Competente',
-            description: 'Nível sólido de conhecimento. Você está no caminho certo!',
-            color: '#FFD700',
-            bgColor: '#FFFACD',
-            icon: '🥇',
-            motivationalText: 'Você já tem uma base dourada de conhecimento!'
+            title: 'Caçador de Questões 🎯', 
+            subtitle: 'Nível 3',
+            description: 'Já sabe diferenciar CESPE de FCC no escuro!',
+            color: '#4A90E2', // Azul médio
+            bgColor: '#E8F4FD',
+            icon: '🎯',
+            motivationalText: 'Questões anuladas são suas melhores amigas agora!'
         },
         { 
             threshold: 61, 
-            title: 'Platinum 💎', 
-            subtitle: 'Avançado',
-            description: 'Conhecimento refinado e consistente. Parabéns!',
-            color: '#E5E4E2',
-            bgColor: '#F0F8FF',
-            icon: '💎',
-            motivationalText: 'Seu conhecimento brilha como platina!'
+            title: 'Estrategista de Chute 🎲', 
+            subtitle: 'Nível 4',
+            description: 'Desenvolveu técnicas avançadas de eliminação!',
+            color: '#6B46C1', // Roxo vibrante
+            bgColor: '#F3E8FF',
+            icon: '🎲',
+            motivationalText: 'Entre A e C, sempre vai na B... ou não!'
         },
         { 
             threshold: 101, 
-            title: 'Diamond 💍', 
-            subtitle: 'Especialista',
-            description: 'Elite do conhecimento. Poucos chegam até aqui!',
-            color: '#B9F2FF',
-            bgColor: '#E0FFFF',
-            icon: '💍',
-            motivationalText: 'Você é precioso como um diamante!'
+            title: 'Fiscal de Gabarito 🔍', 
+            subtitle: 'Nível 5',
+            description: 'Já decorou jurisprudência suficiente pra abrir um escritório!',
+            color: '#10B981', // Verde vibrante
+            bgColor: '#D1FAE5',
+            icon: '🔍',
+            motivationalText: 'Súmula vinculante é seu segundo nome!'
         },
         { 
             threshold: 201, 
-            title: 'Master 👑', 
-            subtitle: 'Mestre',
-            description: 'Maestria absoluta. Você domina o conhecimento!',
-            color: '#9932CC',
-            bgColor: '#E6E6FA',
-            icon: '👑',
-            motivationalText: 'Você reina sobre o conhecimento!'
+            title: 'Sensei dos Simulados 🥋', 
+            subtitle: 'Nível 6',
+            description: 'Faz prova de olhos fechados e ainda gabarita metade!',
+            color: '#F59E0B', // Laranja vibrante
+            bgColor: '#FEF3C7',
+            icon: '🥋',
+            motivationalText: 'Simulado no domingo de manhã? Rotina!'
         },
         { 
             threshold: 501, 
-            title: 'Grandmaster ⚡', 
-            subtitle: 'Lendário',
-            description: 'Lenda viva! Seu conhecimento é impressionante.',
-            color: '#FF4500',
-            bgColor: '#FFE4E1',
-            icon: '⚡',
-            motivationalText: 'Você transcendeu os limites do conhecimento!'
+            title: 'Quase Servidor(a) 🎓', 
+            subtitle: 'Nível 7',
+            description: 'Tá quase lá! Já pode sentir o cheiro da estabilidade!',
+            color: '#DC2626', // Vermelho vibrante
+            bgColor: '#FEE2E2',
+            icon: '🎓',
+            motivationalText: 'A posse está logo ali... ou no próximo concurso!'
         },
         { 
             threshold: 1000, 
-            title: 'Challenger 🏆', 
-            subtitle: 'Apex',
-            description: 'O ápice absoluto! Você é um verdadeiro fenômeno.',
-            color: '#FF0000',
-            bgColor: '#FFCCCB',
-            icon: '🏆',
-            motivationalText: 'Você desafia os próprios limites! Lendário!'
+            title: 'Lenda Viva dos Concursos 👑', 
+            subtitle: 'Nível 8',
+            description: 'Você é a pessoa que todos pedem dicas no grupo do WhatsApp!',
+            color: '#FFD700', // Ouro brilhante
+            bgColor: '#FFF9C4',
+            icon: '👑',
+            motivationalText: 'Editais tremem quando você abre o navegador!'
         }
     ];
 
@@ -415,7 +415,7 @@ const getGamification = async (planId, userId) => {
         };
     };
     
-    // Topic-based achievements
+    // Conquistas com humor concurseiro
     if (completedTopicsCount >= 1) {
         // Safely get the date from the first completed session
         let achievementDate = now;
@@ -431,85 +431,128 @@ const getGamification = async (planId, userId) => {
         }
         
         achievements.push(createAchievement(
-            "Primeiro Estudo", 
-            "Parabéns! Você concluiu seu primeiro tópico de estudo.",
+            "Primeira Lapada no Edital 📖", 
+            "Abriu o PDF e não chorou (muito)! Guerreiro(a)!",
             achievementDate
         ));
     }
     if (completedTopicsCount >= 5) {
         achievements.push(createAchievement(
-            "Estudioso Iniciante", 
-            "Você já domina 5 tópicos! Continue nessa pegada."
+            "Maratonista do PDF 🏃", 
+            "5 tópicos estudados e ainda tem café na xícara!"
         ));
     }
     if (completedTopicsCount >= 10) {
         achievements.push(createAchievement(
-            "10 Tópicos Concluídos", 
-            "Excelente progresso! 10 tópicos já estão no seu cinturão."
+            "Concurseiro(a) Raiz 🌳", 
+            "10 tópicos! Já tá decorando lei enquanto dorme!"
         ));
     }
     if (completedTopicsCount >= 25) {
         achievements.push(createAchievement(
-            "Quarteto de Conhecimento", 
-            "25 tópicos! Você está construindo uma base sólida."
+            "Doutor(a) Google de Legislação 🔎", 
+            "25 tópicos! Seus amigos já te procuram pra tirar dúvidas!"
         ));
     }
     if (completedTopicsCount >= 50) {
         achievements.push(createAchievement(
-            "50 Tópicos Concluídos", 
-            "Meio centenário de conhecimento! Você é imparável."
+            "Guru dos Grifos 🖍️", 
+            "50 tópicos! Seu marca-texto já pediu aposentadoria!"
         ));
     }
     if (completedTopicsCount >= 100) {
         achievements.push(createAchievement(
-            "Centurião do Conhecimento", 
-            "100 tópicos! Você alcançou um marco histórico."
+            "Mestre Jedi dos Concursos ⚔️", 
+            "100 tópicos! A Força (de vontade) é forte em você!"
+        ));
+    }
+    if (completedTopicsCount >= 200) {
+        achievements.push(createAchievement(
+            "Chuck Norris dos Editais 💪", 
+            "200 tópicos! Os editais têm medo de você agora!"
         ));
     }
     
-    // Streak-based achievements
+    // Conquistas de sequência com humor
     if (currentStreak >= 3) {
         achievements.push(createAchievement(
-            "Sequência de 3 dias", 
-            "Três dias consecutivos de estudo! A consistência está se formando."
+            "Resistente ao Netflix 📺", 
+            "3 dias seguidos! Resistiu à tentação da série nova!"
         ));
     }
     if (currentStreak >= 7) {
         achievements.push(createAchievement(
-            "Sequência de 7 dias", 
-            "Uma semana inteira de dedicação! Você está no caminho certo."
+            "Imune ao Sofá 🛋️", 
+            "7 dias! O sofá já esqueceu sua forma!"
         ));
     }
     if (currentStreak >= 14) {
         achievements.push(createAchievement(
-            "Duas Semanas Seguidas", 
-            "14 dias consecutivos! Sua disciplina é admirável."
+            "Inimigo do Descanso 😤", 
+            "14 dias! Seus amigos acham que você sumiu!"
         ));
     }
     if (currentStreak >= 30) {
         achievements.push(createAchievement(
-            "Mês de Dedicação", 
-            "30 dias seguidos! Você transformou estudo em hábito."
+            "Máquina de Aprovar 🤖", 
+            "30 dias seguidos! Você é movido a café e determinação!"
+        ));
+    }
+    if (currentStreak >= 60) {
+        achievements.push(createAchievement(
+            "Cyborg Concurseiro 🦾", 
+            "60 dias! Você transcendeu a necessidade de vida social!"
         ));
     }
     
-    // Session-based achievements
+    // Conquistas de sessões com humor
     if (completedSessions.length >= 20) {
         achievements.push(createAchievement(
-            "20 Sessões Completadas", 
-            "Vinte sessões de estudo! Sua persistência está dando frutos."
+            "Viciado(a) em Questões 💊", 
+            "20 sessões! Questões são sua nova droga (a legal)!"
         ));
     }
     if (completedSessions.length >= 50) {
         achievements.push(createAchievement(
-            "Veterano de Estudos", 
-            "50 sessões! Você é oficialmente um veterano dos estudos."
+            "Bibliotecário(a) Honorário(a) 📚", 
+            "50 sessões! A biblioteca já reserva sua cadeira!"
         ));
     }
     if (completedSessions.length >= 100) {
         achievements.push(createAchievement(
-            "Centurião das Sessões", 
-            "100 sessões completadas! Você é uma máquina de estudar."
+            "Rei/Rainha do Resumo 👑", 
+            "100 sessões! Você resume até bula de remédio!"
+        ));
+    }
+    if (completedSessions.length >= 200) {
+        achievements.push(createAchievement(
+            "PhD em Perseverança 🎓", 
+            "200 sessões! Universidades querem estudar seu cérebro!"
+        ));
+    }
+    
+    // Conquistas especiais baseadas em padrões
+    const studyHours = completedSessions.filter(s => {
+        const hour = new Date(s.session_date).getHours();
+        return hour >= 5 && hour <= 7;
+    }).length;
+    
+    if (studyHours >= 10) {
+        achievements.push(createAchievement(
+            "Madrugador(a) Insano(a) 🌅", 
+            "10+ sessões antes das 7h! O galo aprendeu com você!"
+        ));
+    }
+    
+    const weekendSessions = completedSessions.filter(s => {
+        const day = new Date(s.session_date).getDay();
+        return day === 0 || day === 6;
+    }).length;
+    
+    if (weekendSessions >= 20) {
+        achievements.push(createAchievement(
+            "Destruidor(a) de Finais de Semana 🎉", 
+            "20+ sessões no fim de semana! Churrasco? Não conheço!"
         ));
     }
     
