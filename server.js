@@ -433,7 +433,7 @@ app.use((req, res, next) => {
     ];
     
     // Pular CSRF para APIs autenticadas com JWT
-    const isAPIRoute = req.path.startsWith('/schedules') || req.path.startsWith('/plans') || req.path.startsWith('/users');
+    const isAPIRoute = req.path.startsWith('/schedules') || req.path.startsWith('/plans') || req.path.startsWith('/users') || req.path.startsWith('/topics');
     
     if (skipCSRF.includes(req.path) || req.method === 'GET' || isAPIRoute) {
         return next();
@@ -1251,6 +1251,55 @@ app.delete('/subjects/:subjectId',
     }
 );
 
+app.get('/plans/:planId/subjects_with_topics', 
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    async (req, res) => {
+        const { planId } = req.params;
+        const { id: userId } = req.user;
+
+        try {
+            const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+            if (!plan) {
+                return res.status(404).json({ "error": "Plano não encontrado ou não autorizado." });
+            }
+
+            const subjects = await dbAll("SELECT * FROM subjects WHERE study_plan_id = ? ORDER BY id DESC", [planId]);
+            const subjectIds = subjects.map(s => s.id);
+
+            if (subjectIds.length === 0) {
+                return res.json([]);
+            }
+
+            const topics = await dbAll(`
+                SELECT id, subject_id, description, status, completion_date, priority_weight 
+                FROM topics 
+                WHERE subject_id IN (${subjectIds.map(() => '?').join(',')}) 
+                ORDER BY id ASC
+            `, subjectIds);
+
+            const topicsBySubjectId = new Map();
+            topics.forEach(topic => {
+                if (!topicsBySubjectId.has(topic.subject_id)) {
+                    topicsBySubjectId.set(topic.subject_id, []);
+                }
+                topicsBySubjectId.get(topic.subject_id).push(topic);
+            });
+
+            const result = subjects.map(subject => ({
+                ...subject,
+                topics: topicsBySubjectId.get(subject.id) || []
+            }));
+
+            res.json(result);
+        } catch (error) {
+            console.error('Erro ao buscar disciplinas com tópicos:', error);
+            res.status(500).json({ "error": "Erro ao buscar disciplinas e tópicos" });
+        }
+    }
+);
+
 app.get('/subjects/:subjectId/topics', 
     authenticateToken,
     validators.numericId('subjectId'),
@@ -1278,30 +1327,127 @@ app.patch('/topics/batch_update',
     body('topics.*.id').isInt().withMessage('ID do tópico inválido'),
     body('topics.*.status').isIn(['Pendente', 'Concluído']).withMessage('Status inválido'),
     body('topics.*.completion_date').optional({ nullable: true }).isISO8601().withMessage('Data de conclusão inválida'),
+    body('topics.*.description').optional().isString().isLength({ min: 1, max: 500 }),
+    body('topics.*.priority_weight').optional().isInt({ min: 1, max: 5 }),
     handleValidationErrors,
     async (req, res) => {
         const { topics } = req.body;
 
         try {
             await dbRun('BEGIN TRANSACTION');
-            const stmt = db.prepare(`
-                UPDATE topics SET status = ?, completion_date = ? 
-                WHERE id = ? AND subject_id IN (
-                    SELECT id FROM subjects WHERE study_plan_id IN (
-                        SELECT id FROM study_plans WHERE user_id = ?
-                    )
-                )
-            `);
+            
             for (const topic of topics) {
-                const completionDate = topic.status === 'Concluído' ? topic.completion_date : null;
-                await new Promise((resolve, reject) => stmt.run(topic.status, completionDate, topic.id, req.user.id, err => err ? reject(err) : resolve()));
+                const { id, status, completion_date, description, priority_weight } = topic;
+                
+                // Construir consulta dinâmica baseada nos campos presentes
+                const updates = [];
+                const values = [];
+                
+                if (status !== undefined) {
+                    updates.push('status = ?');
+                    values.push(status);
+                }
+                
+                if (completion_date !== undefined) {
+                    updates.push('completion_date = ?');
+                    const completionDate = status === 'Concluído' ? completion_date : null;
+                    values.push(completionDate);
+                }
+                
+                if (description !== undefined) {
+                    updates.push('description = ?');
+                    values.push(description);
+                }
+                
+                if (priority_weight !== undefined) {
+                    updates.push('priority_weight = ?');
+                    values.push(priority_weight);
+                }
+                
+                if (updates.length === 0) {
+                    continue; // Pular se não há nada para atualizar
+                }
+                
+                values.push(id);
+                values.push(req.user.id);
+                
+                const sql = `
+                    UPDATE topics 
+                    SET ${updates.join(', ')}
+                    WHERE id = ? AND subject_id IN (
+                        SELECT id FROM subjects WHERE study_plan_id IN (
+                            SELECT id FROM study_plans WHERE user_id = ?
+                        )
+                    )
+                `;
+                
+                await dbRun(sql, values);
             }
-            await new Promise((resolve, reject) => stmt.finalize(err => err ? reject(err) : resolve()));
+            
             await dbRun('COMMIT');
             res.json({ message: "Progresso dos tópicos atualizado com sucesso!" });
         } catch (error) {
             await dbRun('ROLLBACK');
             console.error('Erro ao atualizar tópicos:', error);
+            res.status(500).json({ "error": "Erro ao atualizar os tópicos." });
+        }
+    }
+);
+
+app.patch('/topics/batch_update_details',
+    authenticateToken,
+    body('topics').isArray().withMessage('O corpo deve conter um array de tópicos'),
+    body('topics.*.id').isInt().withMessage('ID do tópico inválido'),
+    body('topics.*.description').optional().isString().isLength({ min: 1, max: 500 }),
+    body('topics.*.priority_weight').optional().isInt({ min: 1, max: 5 }),
+    handleValidationErrors,
+    async (req, res) => {
+        const { topics } = req.body;
+        const userId = req.user.id;
+
+        try {
+            await dbRun('BEGIN TRANSACTION');
+
+            for (const topic of topics) {
+                const { id, description, priority_weight } = topic;
+
+                const updates = [];
+                const values = [];
+
+                if (description !== undefined) {
+                    updates.push('description = ?');
+                    values.push(description);
+                }
+                if (priority_weight !== undefined) {
+                    updates.push('priority_weight = ?');
+                    values.push(priority_weight);
+                }
+
+                if (updates.length === 0) {
+                    continue; 
+                }
+
+                values.push(id);
+                values.push(userId);
+
+                const sql = `
+                    UPDATE topics
+                    SET ${updates.join(', ')}
+                    WHERE id = ? AND subject_id IN (
+                        SELECT id FROM subjects WHERE study_plan_id IN (
+                            SELECT id FROM study_plans WHERE user_id = ?
+                        )
+                    )
+                `;
+
+                await dbRun(sql, values);
+            }
+
+            await dbRun('COMMIT');
+            res.json({ message: "Tópicos atualizados com sucesso!" });
+        } catch (error) {
+            await dbRun('ROLLBACK');
+            console.error('Erro ao atualizar tópicos em lote:', error);
             res.status(500).json({ "error": "Erro ao atualizar os tópicos." });
         }
     }
@@ -1357,13 +1503,21 @@ app.delete('/topics/:topicId',
     async (req, res) => {
         const topicId = req.params.topicId;
         try {
+            console.log(`[DELETE_TOPIC] Tentando excluir tópico ${topicId} para usuário ${req.user.id}`);
+            
             const topic = await dbGet(`
                 SELECT t.id FROM topics t 
                 JOIN subjects s ON t.subject_id = s.id
                 JOIN study_plans sp ON s.study_plan_id = sp.id 
                 WHERE t.id = ? AND sp.user_id = ?
             `, [topicId, req.user.id]);
-            if (!topic) return res.status(404).json({ error: "Tópico não encontrado ou não autorizado." });
+            
+            console.log(`[DELETE_TOPIC] Resultado da consulta:`, topic);
+            
+            if (!topic) {
+                console.log(`[DELETE_TOPIC] Tópico ${topicId} não encontrado para usuário ${req.user.id}`);
+                return res.status(404).json({ error: "Tópico não encontrado ou não autorizado." });
+            }
 
             await dbRun('BEGIN TRANSACTION');
             await dbRun('DELETE FROM study_sessions WHERE topic_id = ?', [topicId]);
@@ -1395,13 +1549,28 @@ app.post('/plans/:planId/generate',
         
         console.time(`[PERF] Generate schedule for plan ${planId}`);
         const startTime = Date.now();
+        
+        // LOGS DETALHADOS PARA DEBUGGING
+        console.log(`[CRONOGRAMA] Iniciando geração de cronograma para plano ${planId}`);
+        console.log(`[CRONOGRAMA] Usuário: ${req.user.id}`);
+        console.log(`[CRONOGRAMA] Parâmetros:`, {
+            daily_question_goal,
+            weekly_question_goal,
+            session_duration_minutes,
+            study_hours_per_day,
+            has_essay,
+            reta_final_mode
+        });
 
         try {
             await dbRun('BEGIN IMMEDIATE TRANSACTION');
+            console.log(`[CRONOGRAMA] ✅ Transação iniciada para plano ${planId}`);
             
             const hoursJson = JSON.stringify(study_hours_per_day);
+            console.log(`[CRONOGRAMA] ✅ Atualizando plano ${planId} com parâmetros`);
             await dbRun('UPDATE study_plans SET daily_question_goal = ?, weekly_question_goal = ?, session_duration_minutes = ?, study_hours_per_day = ?, has_essay = ?, reta_final_mode = ? WHERE id = ? AND user_id = ?',
                 [daily_question_goal, weekly_question_goal, session_duration_minutes, hoursJson, has_essay, reta_final_mode ? 1 : 0, planId, req.user.id]);
+            console.log(`[CRONOGRAMA] ✅ Plano ${planId} atualizado com sucesso`);
             
             const plan = await dbGet('SELECT * FROM study_plans WHERE id = ?', [planId]);
             if (!plan) {
@@ -1415,7 +1584,9 @@ app.post('/plans/:planId/generate',
                 return res.status(400).json({ error: "O cronograma não pode ser gerado porque não há horas de estudo definidas." });
             }
 
+            console.log(`[CRONOGRAMA] ✅ Removendo sessões antigas do plano ${planId}`);
             await dbRun("DELETE FROM study_sessions WHERE study_plan_id = ?", [planId]);
+            console.log(`[CRONOGRAMA] ✅ Sessões antigas removidas`);
 
             const allTopicsQuery = `
                 SELECT 
@@ -1570,17 +1741,38 @@ app.post('/plans/:planId/generate',
                     const priorityCombined = (excludedTopic.subject_priority * 10) + excludedTopic.topic_priority;
                     const reason = `Tópico excluído automaticamente no Modo Reta Final devido à falta de tempo. Prioridade combinada: ${priorityCombined.toFixed(2)}`;
                     
-                    // Salvar na tabela legada (para compatibilidade)
-                    await dbRun(
-                        'INSERT INTO reta_final_exclusions (study_plan_id, topic_id, subject_name, topic_description, priority_combined) VALUES (?, ?, ?, ?, ?)',
-                        [planId, excludedTopic.id, excludedTopic.subject_name, excludedTopic.description, priorityCombined]
-                    );
-                    
-                    // Salvar na nova tabela com mais detalhes
-                    await dbRun(
-                        'INSERT INTO reta_final_excluded_topics (study_plan_id, subject_name, topic_name, importance, priority_weight, reason) VALUES (?, ?, ?, ?, ?, ?)',
-                        [planId, excludedTopic.subject_name, excludedTopic.description, excludedTopic.topic_priority, priorityCombined, reason]
-                    );
+                    // CORREÇÃO CRÍTICA: Verificar se o topic_id é válido antes da inserção
+                    try {
+                        console.log(`[CRONOGRAMA] 🔍 Processando exclusão: ${excludedTopic.subject_name} - ${excludedTopic.description}`);
+                        
+                        // Verificar se o tópico existe na tabela topics
+                        const topicExists = await dbGet('SELECT id FROM topics WHERE id = ?', [excludedTopic.id]);
+                        
+                        if (topicExists) {
+                            console.log(`[CRONOGRAMA] ✅ Tópico ${excludedTopic.id} encontrado, inserindo em reta_final_exclusions`);
+                            // Salvar na tabela legada (para compatibilidade) apenas se o tópico existir
+                            await dbRun(
+                                'INSERT INTO reta_final_exclusions (study_plan_id, topic_id, subject_name, topic_description, priority_combined) VALUES (?, ?, ?, ?, ?)',
+                                [planId, excludedTopic.id, excludedTopic.subject_name, excludedTopic.description, priorityCombined]
+                            );
+                            console.log(`[CRONOGRAMA] ✅ Inserção em reta_final_exclusions concluída`);
+                        } else {
+                            console.warn(`[CRONOGRAMA] ⚠️ Tópico com ID ${excludedTopic.id} não encontrado na tabela topics, pulando inserção na reta_final_exclusions`);
+                        }
+                        
+                        console.log(`[CRONOGRAMA] ✅ Inserindo em reta_final_excluded_topics`);
+                        // Salvar na nova tabela com mais detalhes (não depende de FOREIGN KEY para topic_id)
+                        await dbRun(
+                            'INSERT INTO reta_final_excluded_topics (study_plan_id, subject_name, topic_name, importance, priority_weight, reason) VALUES (?, ?, ?, ?, ?, ?)',
+                            [planId, excludedTopic.subject_name, excludedTopic.description, excludedTopic.topic_priority, priorityCombined, reason]
+                        );
+                        console.log(`[CRONOGRAMA] ✅ Inserção em reta_final_excluded_topics concluída`);
+                        
+                    } catch (insertError) {
+                        console.error(`[CRONOGRAMA] ❌ ERRO CRÍTICO na inserção do tópico ${excludedTopic.id}:`, insertError.message);
+                        console.error(`[CRONOGRAMA] ❌ Stack trace:`, insertError.stack);
+                        throw insertError; // Re-throw para parar o processo e capturar onde está falhando
+                    }
                 }
             } else {
                 // Se não há exclusões, limpar registros antigos de ambas as tabelas
@@ -1588,16 +1780,99 @@ app.post('/plans/:planId/generate',
                 await dbRun('DELETE FROM reta_final_excluded_topics WHERE study_plan_id = ?', [planId]);
             }
 
-            // Usar peso combinado (disciplina + tópico) para distribuir sessões
-            const weightedTopics = topicsToSchedule.flatMap(t => {
-                const combinedPriority = Math.max(1, t.subject_priority + t.topic_priority - 3); // Ajuste para evitar zero
-                return Array(combinedPriority).fill(t);
-            });
-            for (let i = weightedTopics.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [weightedTopics[i], weightedTopics[j]] = [weightedTopics[j], weightedTopics[i]];
+            // CORREÇÃO CRÍTICA: Algoritmo simplificado e robusto
+            console.log(`[CRONOGRAMA] Iniciando distribuição de ${topicsToSchedule.length} tópicos`);
+            
+            // CORREÇÃO: Validar se há tópicos para processar
+            if (!topicsToSchedule || topicsToSchedule.length === 0) {
+                console.log('[CRONOGRAMA] Nenhum tópico pendente encontrado');
+                await dbRun('COMMIT');
+                console.timeEnd(`[PERF] Generate schedule for plan ${planId}`);
+                return res.json({ message: "Cronograma gerado com sucesso!" });
             }
-            const uniquePendingTopicsInOrder = [...new Map(weightedTopics.map(item => [item.id, item])).values()];
+
+            // ORDENAÇÃO SIMPLES POR PESO: (peso_disciplina × 10) + peso_assunto
+            const sortedByPriority = [...topicsToSchedule].sort((a, b) => {
+                // VALIDAÇÃO: Garantir que os objetos têm as propriedades necessárias
+                if (!a || !b || !a.subject_name || !b.subject_name) {
+                    console.warn('[CRONOGRAMA] Tópico inválido encontrado durante ordenação');
+                    return 0;
+                }
+                
+                const priorityA = ((a.subject_priority || 3) * 10) + (a.topic_priority || 3);
+                const priorityB = ((b.subject_priority || 3) * 10) + (b.topic_priority || 3);
+                console.log(`[CRONOGRAMA] ${a.subject_name}: ${priorityA} vs ${b.subject_name}: ${priorityB}`);
+                return priorityB - priorityA; // Maior peso primeiro
+            });
+            
+            // Adicionar tópicos na ordem de prioridade, mas com distribuição intercalada por disciplina
+            const disciplineGroups = new Map();
+            const uniquePendingTopicsInOrder = [];
+            const seenTopics = new Set();
+            sortedByPriority.forEach(topic => {
+                // VALIDAÇÃO: Verificar se o tópico é válido antes de agrupá-lo
+                if (!topic || !topic.subject_name || !topic.id) {
+                    console.warn('[CRONOGRAMA] Tópico inválido ignorado durante agrupamento:', topic);
+                    return;
+                }
+                
+                if (!disciplineGroups.has(topic.subject_name)) {
+                    disciplineGroups.set(topic.subject_name, []);
+                }
+                disciplineGroups.get(topic.subject_name).push(topic);
+            });
+            
+            // Round-robin entre disciplinas, respeitando ordem de prioridade dentro de cada uma
+            const disciplineNames = [...disciplineGroups.keys()].sort((a, b) => {
+                // Ordenar disciplinas por peso (maior primeiro)
+                const topicsA = disciplineGroups.get(a);
+                const topicsB = disciplineGroups.get(b);
+                const weightA = topicsA.length > 0 ? topicsA[0].subject_priority : 0;
+                const weightB = topicsB.length > 0 ? topicsB[0].subject_priority : 0;
+                return weightB - weightA;
+            });
+            
+            console.log(`[CRONOGRAMA] Distribuindo tópicos entre ${disciplineNames.length} disciplinas: ${disciplineNames.join(', ')}`);
+            
+            // Intercalar tópicos entre disciplinas
+            const disciplineTopicsArrays = [...disciplineGroups.values()];
+            
+            // VALIDAÇÃO: Verificar se há disciplinas válidas
+            if (disciplineTopicsArrays.length === 0) {
+                console.error('[CRONOGRAMA] Nenhuma disciplina válida encontrada após agrupamento');
+                await dbRun('ROLLBACK');
+                return res.status(500).json({ error: "Erro na organização dos tópicos por disciplina" });
+            }
+            
+            let maxTopicsInAnyDiscipline = Math.max(...disciplineTopicsArrays.map(topics => topics.length));
+            
+            for (let round = 0; round < maxTopicsInAnyDiscipline; round++) {
+                for (const disciplineName of disciplineNames) {
+                    const disciplineTopics = disciplineGroups.get(disciplineName);
+                    if (disciplineTopics && round < disciplineTopics.length) {
+                        const topic = disciplineTopics[round];
+                        
+                        // VALIDAÇÃO: Verificar se o tópico é válido antes de adicioná-lo
+                        if (topic && topic.id && !seenTopics.has(topic.id)) {
+                            uniquePendingTopicsInOrder.push(topic);
+                            seenTopics.add(topic.id);
+                            
+                            const description = topic.description ? topic.description.substring(0, 40) : 'Sem descrição';
+                            console.log(`[CRONOGRAMA] Adicionado (round ${round + 1}): ${topic.subject_name} - ${description}...`);
+                        }
+                    }
+                }
+            }
+            
+            console.log(`[CRONOGRAMA] Distribuição final: ${uniquePendingTopicsInOrder.length} tópicos ordenados`);
+            
+            // VALIDAÇÃO FINAL: Verificar se há tópicos para agendar
+            if (uniquePendingTopicsInOrder.length === 0) {
+                console.log('[CRONOGRAMA] Nenhum tópico válido encontrado para agendamento');
+                await dbRun('COMMIT');
+                console.timeEnd(`[PERF] Generate schedule for plan ${planId}`);
+                return res.json({ message: "Cronograma gerado com sucesso!" });
+            }
 
             let currentDateForNewTopics = new Date(today);
             let lastNewTopicDate = null;
@@ -1745,6 +2020,26 @@ app.post('/plans/:planId/generate',
             console.log(`[PERF] Creating ${sessionsToCreate.length} sessions in batch`);
 
             if (sessionsToCreate.length > 0) {
+                // CORREÇÃO CRÍTICA: Pre-validar todos os topic_ids antes da inserção em batch
+                console.log('[CRONOGRAMA] Validando topic_ids antes da inserção...');
+                
+                // Coletar todos os topic_ids únicos que não são null
+                const uniqueTopicIds = [...new Set(
+                    sessionsToCreate
+                        .map(s => s.topicId)
+                        .filter(id => id !== null && id !== undefined)
+                )];
+                
+                // Verificar quais topic_ids existem
+                const validTopicIds = new Set();
+                if (uniqueTopicIds.length > 0) {
+                    const placeholders = uniqueTopicIds.map(() => '?').join(',');
+                    const existingTopics = await dbAll(`SELECT id FROM topics WHERE id IN (${placeholders})`, uniqueTopicIds);
+                    existingTopics.forEach(topic => validTopicIds.add(topic.id));
+                    
+                    console.log(`[CRONOGRAMA] Dos ${uniqueTopicIds.length} topic_ids únicos, ${validTopicIds.size} são válidos`);
+                }
+                
                 const insertSql = 'INSERT INTO study_sessions (study_plan_id, topic_id, subject_name, topic_description, session_date, session_type, status) VALUES (?, ?, ?, ?, ?, ?, ?)';
                 const stmt = db.prepare(insertSql);
                 
@@ -1752,15 +2047,36 @@ app.post('/plans/:planId/generate',
                 for (let i = 0; i < sessionsToCreate.length; i += BATCH_SIZE) {
                     const chunk = sessionsToCreate.slice(i, i + BATCH_SIZE);
                     for (const sessionData of chunk) {
-                        stmt.run(
-                            planId,
-                            sessionData.topicId,
-                            sessionData.subjectName,
-                            sessionData.topicDescription,
-                            sessionData.session_date,
-                            sessionData.sessionType,
-                            'Pendente'
-                        );
+                        // Validar topic_id usando o cache de IDs válidos
+                        let validTopicId = sessionData.topicId;
+                        
+                        if (validTopicId !== null && validTopicId !== undefined) {
+                            if (!validTopicIds.has(validTopicId)) {
+                                console.warn(`[CRONOGRAMA] Topic ID ${validTopicId} não encontrado, definindo como null`);
+                                validTopicId = null;
+                            }
+                        }
+                        
+                        try {
+                            stmt.run(
+                                planId,
+                                validTopicId,
+                                sessionData.subjectName,
+                                sessionData.topicDescription,
+                                sessionData.session_date,
+                                sessionData.sessionType,
+                                'Pendente'
+                            );
+                        } catch (sessionError) {
+                            console.error(`[CRONOGRAMA] ❌ ERRO na inserção de sessão:`, {
+                                planId,
+                                validTopicId,
+                                subjectName: sessionData.subjectName,
+                                sessionType: sessionData.sessionType,
+                                error: sessionError.message
+                            });
+                            throw sessionError;
+                        }
                     }
                 }
                 
@@ -1807,9 +2123,45 @@ app.post('/plans/:planId/generate',
             } catch (rollbackError) {
                 console.error("[CRONOGRAMA] Erro ao fazer rollback:", rollbackError);
             }
-            console.error("Erro ao gerar cronograma:", error);
+            
+            // LOGS DETALHADOS PARA DEBUGGING
+            console.error("[CRONOGRAMA] ⚠️ ERRO CAPTURADO - Linha exata:", error.stack?.split('\n')[1]?.trim());
+            console.error("[CRONOGRAMA] Erro ao gerar cronograma para plano:", planId);
+            console.error("[CRONOGRAMA] Detalhes do erro:", {
+                message: error.message,
+                stack: error.stack,
+                name: error.name,
+                code: error.code,
+                errno: error.errno,
+                planId: planId,
+                userId: req.user.id,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Log dos parâmetros recebidos para análise
+            console.error("[CRONOGRAMA] Parâmetros recebidos:", {
+                daily_question_goal,
+                weekly_question_goal,
+                session_duration_minutes,
+                study_hours_per_day,
+                has_essay,
+                reta_final_mode
+            });
+            
             console.timeEnd(`[PERF] Generate schedule for plan ${planId}`);
-            res.status(500).json({ error: "Ocorreu um erro interno no servidor ao gerar o cronograma." });
+            
+            // Retornar erro mais detalhado em desenvolvimento
+            if (process.env.NODE_ENV === 'development') {
+                res.status(500).json({ 
+                    error: "Ocorreu um erro interno no servidor ao gerar o cronograma.",
+                    debug: {
+                        message: error.message,
+                        stack: error.stack
+                    }
+                });
+            } else {
+                res.status(500).json({ error: "Ocorreu um erro interno no servidor ao gerar o cronograma." });
+            }
         }
     }
 );

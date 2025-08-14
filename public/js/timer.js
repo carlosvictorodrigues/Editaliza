@@ -33,16 +33,44 @@ const TimerSystem = {
     // O `createTimerUI` foi movido para checklist.js para um controle centralizado do modal
     createTimerUI(sessionId) {
         const sessionDuration = 50; // Duração padrão, pode ser aprimorado para buscar do plano
+        
+        // Verificar se já existe tempo decorrido para esta sessão e se está rodando
+        const hasElapsedTime = this.timers[sessionId] && this.timers[sessionId].elapsed > 100;
+        const isRunning = this.timers[sessionId] && this.timers[sessionId].isRunning;
+        
+        // Determinar texto e ícone do botão baseado no estado
+        let buttonText, buttonIcon, buttonClass;
+        
+        if (isRunning) {
+            // Timer está rodando - mostrar "Pausar"
+            buttonText = 'Pausar';
+            buttonIcon = '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
+            buttonClass = 'bg-orange-500 hover:bg-orange-600';
+        } else if (hasElapsedTime) {
+            // Timer pausado mas tem tempo - mostrar "Continuar"
+            buttonText = 'Continuar';
+            buttonIcon = '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>';
+            buttonClass = 'bg-editaliza-blue hover:bg-blue-600';
+        } else {
+            // Timer novo - mostrar "Iniciar"
+            buttonText = 'Iniciar';
+            buttonIcon = '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>';
+            buttonClass = 'bg-editaliza-blue hover:bg-blue-600';
+        }
+        
+        // Obter o tempo já decorrido formatado
+        const currentTime = hasElapsedTime ? this.formatTime(this.timers[sessionId].elapsed) : '00:00:00';
+        
         // Este HTML é gerado dentro do modal pela `checklist.js` agora.
         return `
             <div class="timer-container mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
-                        <div class="timer-display text-3xl font-mono font-bold text-editaliza-blue" data-session="${sessionId}">00:00:00</div>
+                        <div class="timer-display text-3xl font-mono font-bold text-editaliza-blue" data-session="${sessionId}">${currentTime}</div>
                     </div>
                     <div class="timer-controls flex items-center space-x-2">
-                        <button onclick="TimerSystem.toggle(${sessionId})" class="btn-timer-toggle px-4 py-2 bg-editaliza-blue text-white rounded-lg hover:bg-blue-600 transition-colors shadow-md flex items-center space-x-2" data-session="${sessionId}">
-                           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg><span>Iniciar</span>
+                        <button onclick="TimerSystem.toggle(${sessionId})" class="btn-timer-toggle px-4 py-2 ${buttonClass} text-white rounded-lg transition-colors shadow-md flex items-center space-x-2" data-session="${sessionId}">
+                           ${buttonIcon}<span>${buttonText}</span>
                         </button>
                     </div>
                 </div>

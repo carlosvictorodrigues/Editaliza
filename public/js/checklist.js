@@ -6,6 +6,25 @@
 const StudyChecklist = {
     session: null, // Armazena o objeto completo da sessão
     checklistShownSessions: new Set(), // Track sessions that have already shown checklist
+    
+    // Método para verificar dependências e estado do sistema
+    checkSystemReadiness() {
+        console.log('🔧 Verificando prontidão do sistema...');
+        
+        const checks = {
+            modalElementsExist: !!(document.getElementById('studySessionModal') && document.getElementById('studySessionModalContainer')),
+            timerSystemExists: !!window.TimerSystem,
+            appExists: !!window.app,
+            domReady: document.readyState === 'complete' || document.readyState === 'interactive'
+        };
+        
+        console.log('📋 Verificações do sistema:', checks);
+        
+        const allChecksPass = Object.values(checks).every(check => check);
+        console.log(allChecksPass ? '✅ Sistema pronto' : '❌ Sistema não está pronto');
+        
+        return { checks, allReady: allChecksPass };
+    },
 
     items: [
         { id: 'hydration', icon: '💧', text: 'Água por perto?', tip: 'Mantenha-se hidratado!' },
@@ -86,6 +105,114 @@ const StudyChecklist = {
         // Atualizar display imediatamente
         TimerSystem.updateDisplay(this.session.id);
     },
+    
+    // Método para mostrar apenas o modal do cronômetro - COM DEBUGGING ROBUSTO
+    showTimerModal() {
+        console.log('🔥 showTimerModal() INICIADO');
+        
+        // Verificar prontidão do sistema primeiro
+        const systemCheck = this.checkSystemReadiness();
+        if (!systemCheck.allReady) {
+            console.error('❌ Sistema não está pronto para abrir modal');
+            console.error('Falhas encontradas:', Object.entries(systemCheck.checks).filter(([key, value]) => !value));
+            
+            // Tentar aguardar e tentar novamente
+            setTimeout(() => {
+                console.log('🔄 Tentando novamente após 500ms...');
+                this.showTimerModal();
+            }, 500);
+            return;
+        }
+        
+        console.log('📊 Estado atual:', {
+            sessionExists: !!this.session,
+            sessionId: this.session?.id,
+            sessionSubject: this.session?.subject_name
+        });
+        
+        if (!this.session) {
+            console.error('❌ Nenhuma sessão definida para mostrar o modal do cronômetro');
+            console.error('💡 Dica: Chame StudyChecklist.session = sessionObject antes de showTimerModal()');
+            return;
+        }
+        
+        console.log('✅ Sessão encontrada:', this.session.subject_name);
+        
+        const modal = document.getElementById('studySessionModal');
+        const modalContainer = document.getElementById('studySessionModalContainer');
+        
+        console.log('🔍 Elementos do DOM:', {
+            modalExists: !!modal,
+            modalContainerExists: !!modalContainer,
+            modalClasses: modal?.className,
+            containerClasses: modalContainer?.className
+        });
+        
+        if (!modal || !modalContainer) {
+            console.error('❌ Elementos do modal não encontrados no DOM');
+            console.error('🔍 Elementos procurados:', {
+                studySessionModal: document.getElementById('studySessionModal'),
+                studySessionModalContainer: document.getElementById('studySessionModalContainer')
+            });
+            console.error('📋 Todos os IDs no DOM:', 
+                Array.from(document.querySelectorAll('[id]')).map(el => el.id)
+            );
+            return;
+        }
+        
+        console.log('🎨 Gerando HTML do timer...');
+        try {
+            const timerHtml = this.getTimerHtml();
+            console.log('✅ HTML gerado com sucesso');
+            modalContainer.innerHTML = timerHtml;
+            console.log('✅ HTML inserido no container');
+        } catch (error) {
+            console.error('❌ Erro ao gerar HTML do timer:', error);
+            return;
+        }
+        
+        console.log('👁️ Removendo classe hidden...');
+        modal.classList.remove('hidden');
+        console.log('✅ Modal não está mais hidden');
+        
+        setTimeout(() => {
+            console.log('🎭 Aplicando animações...');
+            modal.classList.remove('opacity-0');
+            modalContainer.classList.remove('scale-95');
+            console.log('✅ Animações aplicadas');
+        }, 10);
+        
+        console.log('🎧 Adicionando listeners...');
+        try {
+            this.addTimerSessionListeners();
+            console.log('✅ Listeners adicionados');
+        } catch (error) {
+            console.error('❌ Erro ao adicionar listeners:', error);
+        }
+        
+        // Atualizar display do timer
+        if (this.session.id) {
+            console.log('⏰ Atualizando display do timer...');
+            try {
+                TimerSystem.updateDisplay(this.session.id);
+                // O botão já tem o estado correto definido no createTimerUI
+                console.log('✅ Display do timer atualizado');
+            } catch (error) {
+                console.error('❌ Erro ao atualizar display:', error);
+            }
+        }
+        
+        console.log('🎉 showTimerModal() CONCLUÍDO COM SUCESSO!');
+        
+        // Verificação final
+        setTimeout(() => {
+            const isVisible = !modal.classList.contains('hidden') && !modal.classList.contains('opacity-0');
+            console.log('🔍 Verificação final - Modal visível:', isVisible);
+            if (!isVisible) {
+                console.error('⚠️ ALERTA: Modal pode não estar visível após 100ms');
+            }
+        }, 100);
+    },
 
     close() {
         // CORREÇÃO: NÃO parar o timer automaticamente
@@ -97,11 +224,22 @@ const StudyChecklist = {
         const modal = document.getElementById('studySessionModal');
         const modalContainer = document.getElementById('studySessionModalContainer');
         
-        modal.classList.add('opacity-0');
-        modalContainer.classList.add('scale-95');
+        if (modal) {
+            modal.classList.add('opacity-0');
+        }
+        
+        if (modalContainer) {
+            modalContainer.classList.add('scale-95');
+        }
+        
         setTimeout(() => {
-            modal.classList.add('hidden');
-            modalContainer.innerHTML = '';
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+            // CORREÇÃO: Não limpar o innerHTML imediatamente para permitir reabertura
+            // O innerHTML será substituído quando o modal for aberto novamente
+            // modalContainer.innerHTML = '';
+            
             // NÃO limpar this.session para permitir reconexão
             // this.session = null;
         }, 300);
@@ -240,9 +378,21 @@ const StudyChecklist = {
             window.addEventListener('beforeunload', () => clearInterval(saveTimer));
         }
 
-        document.getElementById('modal-questions-solved').addEventListener('input', (e) => updateSessionData('questions_solved', e.target.value));
-        document.getElementById('modal-notes').addEventListener('input', (e) => updateSessionData('notes', e.target.value));
-        document.getElementById('modal-status').addEventListener('change', async (e) => {
+        // Adicionar listeners apenas se os elementos existirem
+        const questionsInput = document.getElementById('modal-questions-solved');
+        const notesInput = document.getElementById('modal-notes');
+        const statusCheckbox = document.getElementById('modal-status');
+        
+        if (questionsInput) {
+            questionsInput.addEventListener('input', (e) => updateSessionData('questions_solved', e.target.value));
+        }
+        
+        if (notesInput) {
+            notesInput.addEventListener('input', (e) => updateSessionData('notes', e.target.value));
+        }
+        
+        if (statusCheckbox) {
+            statusCheckbox.addEventListener('change', async (e) => {
             const newStatus = e.target.checked ? 'Concluído' : 'Pendente';
             try {
                 // CORREÇÃO 3: Usar endpoint correto
@@ -306,6 +456,7 @@ const StudyChecklist = {
                 }
             }
         });
+        }
     },
 
     addAnimations() {
@@ -471,3 +622,6 @@ const StudyChecklist = {
         return this.markAsCompleted();
     }
 };
+
+// Expor StudyChecklist globalmente
+window.StudyChecklist = StudyChecklist;

@@ -113,12 +113,22 @@ const getSubjectProgressDetails = async (planId) => {
 
     const subjects = await dbAll(query, [planId]);
 
-    // Get topics for each subject with time studied
+    // Get topics for each subject with time studied and completion status
     for (const subject of subjects) {
         subject.topics = await dbAll(`
             SELECT
+                t.id,
                 t.description as description,
-                COALESCE(SUM(ss.time_studied_seconds), 0) as timeStudied
+                COALESCE(SUM(ss.time_studied_seconds), 0) as timeStudied,
+                CASE 
+                    WHEN EXISTS (
+                        SELECT 1 FROM study_sessions ss2
+                        WHERE ss2.topic_id = t.id 
+                        AND ss2.session_type = 'Novo Tópico'
+                        AND ss2.status = 'Concluído'
+                    ) THEN 1
+                    ELSE 0
+                END as isCompleted
             FROM topics t
             LEFT JOIN study_sessions ss ON ss.topic_id = t.id AND ss.status = 'Concluído'
             WHERE t.subject_id = ?

@@ -490,9 +490,6 @@
                                         Adicionar Disciplina
                                     </span>
                                 </button>
-                                <button type="button" id="previewBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-3 rounded-lg font-medium transition-colors">
-                                    👁️ Preview
-                                </button>
                             </div>
                         </form>
                     </div>
@@ -1071,11 +1068,24 @@
 
         // Função para rastrear mudanças em tópicos
         function trackTopicChange(subjectId, event) {
-            const topicId = event.target.dataset.topicId;
-            if (!topicId) return;
+            // PRIMEIRO: Lidar com toggle de data para checkboxes (funciona independente do topicId)
+            if (event.target.classList.contains('topic-checkbox')) {
+                const topicItemDiv = event.target.closest('.topic-item');
+                if (topicItemDiv) {
+                    topicItemDiv.classList.toggle('show-date', event.target.checked);
+                }
+            }
+            
+            // SEGUNDO: Fazer o tracking de mudanças (precisa do topicId)
+            const topicId = event.target.dataset.topicId || event.target.getAttribute('data-topic-id');
+            if (!topicId) {
+                return; // Sem topicId, não conseguimos fazer tracking, mas o toggle de data já funcionou
+            }
 
             const topicItem = document.querySelector(`[data-topic-id="${topicId}"]`);
-            if (!topicItem) return;
+            if (!topicItem) {
+                return;
+            }
 
             // Obter valores atuais
             const checkbox = topicItem.querySelector('.topic-checkbox');
@@ -1119,14 +1129,6 @@
             // Atualizar interface visual
             updateTopicVisualState(topicId, hasChanges);
             updateSubjectSaveButton(subjectId);
-
-            // Mostrar/ocultar campo de data se checkbox mudou
-            if (event.target.classList.contains('topic-checkbox')) {
-                const topicItemDiv = event.target.closest('.topic-item');
-                if (topicItemDiv) {
-                    topicItemDiv.classList.toggle('show-date', event.target.checked);
-                }
-            }
         }
 
         // Função para atualizar estado visual do tópico
@@ -1291,7 +1293,7 @@
         async function deleteTopic(topicId) {
             app.showSpinner();
             try {
-                await app.apiFetch(`/plans/topics/${topicId}`, { method: 'DELETE' });
+                await app.apiFetch(`/topics/${topicId}`, { method: 'DELETE' });
                 app.showToast('Tópico excluído com sucesso!', 'success');
                 
                 // Recarregar a disciplina que contém este tópico

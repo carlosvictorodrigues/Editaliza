@@ -33,6 +33,14 @@ const app = {
             showAchievements: true
         }
     },
+    
+    // Método para sanitizar HTML e prevenir XSS
+    sanitizeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    },
 
     async init() {
         // Limpar token se expirado
@@ -601,9 +609,24 @@ async function openStudySession(sessionId) {
         const hasElapsedTime = window.TimerSystem && TimerSystem.getTimerElapsed(sessionId) > 1000; // Mais de 1 segundo
         
         if (hasActiveTimer) {
-            console.log(`⏰ Timer ativo encontrado para sessão ${sessionId} - continuando sem abrir checklist`);
-            TimerSystem.continueTimer(sessionId);
-            app.showToast('⏱️ Timer retomado! Continue estudando.', 'success');
+            console.log(`⏰ Timer ativo encontrado para sessão ${sessionId} - abrindo modal do timer`);
+            
+            // Buscar dados da sessão
+            const session = await fetchSessionData(sessionId);
+            if (session) {
+                // Definir sessão no StudyChecklist
+                StudyChecklist.session = session;
+                
+                // Continuar o timer
+                TimerSystem.continueTimer(sessionId);
+                
+                // Abrir o modal do cronômetro
+                if (window.StudyChecklist && StudyChecklist.showTimerModal) {
+                    StudyChecklist.showTimerModal();
+                }
+                
+                app.showToast('⏱️ Timer retomado! Continue estudando.', 'success');
+            }
             return;
         }
         
@@ -617,9 +640,83 @@ async function openStudySession(sessionId) {
                 // Continuar timer sem abrir checklist
                 const session = await fetchSessionData(sessionId);
                 if (session) {
+                    // CORREÇÃO: Definir sessão ANTES de chamar qualquer método
+                    StudyChecklist.session = session;
+                    
+                    // Continuar o timer
                     TimerSystem.continueTimer(sessionId);
-                    StudyChecklist.startStudySession(false); // CORREÇÃO: Não iniciar novo timer
-                    StudyChecklist.session = session; // Definir sessão para modal
+                    
+                    // AGUARDAR UM POUCO PARA GARANTIR QUE TUDO ESTEJA CARREGADO
+                    setTimeout(() => {
+                        // Abrir o modal do cronômetro - COM DEBUGGING ROBUSTO
+                    console.log('🎯 Tentando abrir modal do cronômetro...');
+                    console.log('📊 Estados:', {
+                        windowStudyChecklist: !!window.StudyChecklist,
+                        showTimerModalExists: !!(window.StudyChecklist && StudyChecklist.showTimerModal),
+                        sessionDefined: !!StudyChecklist.session,
+                        sessionId: StudyChecklist.session?.id
+                    });
+                    
+                    if (window.StudyChecklist && StudyChecklist.showTimerModal) {
+                        console.log('✅ Condições atendidas - chamando showTimerModal()');
+                        try {
+                            StudyChecklist.showTimerModal();
+                            console.log('🎉 showTimerModal() executado com sucesso');
+                        } catch (error) {
+                            console.error('❌ Erro ao executar showTimerModal():', error);
+                            app.showToast('Erro ao abrir modal do cronômetro', 'error');
+                        }
+                    } else {
+                        console.error('❌ PROBLEMA IDENTIFICADO:');
+                        if (!window.StudyChecklist) {
+                            console.error('   - window.StudyChecklist não existe');
+                        } else if (!StudyChecklist.showTimerModal) {
+                            console.error('   - StudyChecklist.showTimerModal não existe');
+                            console.error('   - Métodos disponíveis:', Object.keys(StudyChecklist));
+                        }
+                        
+                        // Fallback: tentar abrir de outra forma
+                        console.log('🔄 Tentando fallback...');
+                        if (window.StudyChecklist) {
+                            // Verificar se modal existe no DOM
+                            const modal = document.getElementById('studySessionModal');
+                            const modalContainer = document.getElementById('studySessionModalContainer');
+                            
+                            if (modal && modalContainer) {
+                                console.log('✅ Elementos do modal encontrados - forçando abertura');
+                                
+                                // Forçar abertura manual do modal
+                                modalContainer.innerHTML = `
+                                    <div class="text-center p-8">
+                                        <h2 class="text-2xl font-bold mb-4">Cronômetro de Estudos</h2>
+                                        <p class="text-gray-600 mb-6">${session.subject_name}</p>
+                                        <div class="text-3xl font-mono font-bold text-blue-600 mb-6">Carregando...</div>
+                                        <button onclick="StudyChecklist.close()" class="btn-secondary px-4 py-2 rounded">Fechar</button>
+                                    </div>
+                                `;
+                                modal.classList.remove('hidden', 'opacity-0');
+                                modalContainer.classList.remove('scale-95');
+                                
+                                app.showToast('Modal aberto manualmente - funcionalidade limitada', 'warning');
+                            } else {
+                                console.error('❌ Elementos do modal não encontrados no DOM');
+                                app.showToast('Erro crítico: Modal não encontrado no DOM', 'error');
+                            }
+                        } else {
+                            // Último recurso: usar função de força
+                            console.log('🚨 Usando função de força como último recurso');
+                            if (window.forceOpenTimerModal) {
+                                const success = forceOpenTimerModal(sessionId, session);
+                                if (success) {
+                                    app.showToast('Modal aberto em modo de emergência', 'warning');
+                                } else {
+                                    app.showToast('Falha crítica ao abrir modal', 'error');
+                                }
+                            }
+                        }
+                    }
+                    }, 100); // Aguardar 100ms para garantir carregamento
+                    
                     app.showToast('⏱️ Continuando estudos! Timer retomado.', 'success');
                 } else {
                     console.error('❌ Não foi possível carregar dados da sessão');
@@ -852,6 +949,83 @@ function showContinueStudyModal(sessionId) {
         };
     });
 }
+
+// Função global robusta para forçar abertura do modal do cronômetro
+window.forceOpenTimerModal = function(sessionId, sessionData) {
+    console.log('🚨 FORÇANDO abertura do modal do cronômetro...');
+    
+    const modal = document.getElementById('studySessionModal');
+    const modalContainer = document.getElementById('studySessionModalContainer');
+    
+    if (!modal || !modalContainer) {
+        console.error('❌ Elementos críticos do modal não encontrados');
+        app.showToast('Erro crítico: Interface do modal não encontrada', 'error');
+        return false;
+    }
+    
+    // Gerar conteúdo básico do modal
+    const safeSubjectName = app.sanitizeHtml(sessionData.subject_name || 'Matéria Desconhecida');
+    const safeTopicDescription = app.sanitizeHtml(sessionData.topic_description || 'Tópico não especificado');
+    
+    modalContainer.innerHTML = `
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                <span class="text-3xl mr-3">📚</span>${safeSubjectName}
+            </h2>
+            <button onclick="document.getElementById('studySessionModal').classList.add('hidden')" 
+                    class="text-gray-400 hover:text-gray-600 text-3xl font-light">×</button>
+        </div>
+        
+        <p class="mb-6 text-gray-600">${safeTopicDescription}</p>
+        
+        <div class="timer-container mt-3 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+            <div class="text-center">
+                <div class="text-4xl font-mono font-bold text-blue-600 mb-4" id="timer-display-${sessionId}">
+                    00:00:00
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button onclick="TimerSystem.toggle(${sessionId})" 
+                            class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                        ▶️ Iniciar/Pausar
+                    </button>
+                    <button onclick="TimerSystem.stop(${sessionId})" 
+                            class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
+                        ⏹️ Parar
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-6 flex justify-center">
+            <button onclick="document.getElementById('studySessionModal').classList.add('hidden')" 
+                    class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-semibold">
+                Fechar Modal
+            </button>
+        </div>
+        
+        <div class="mt-4 text-center text-sm text-amber-600 bg-amber-50 p-3 rounded">
+            ⚠️ Modal aberto em modo de emergência - algumas funcionalidades podem estar limitadas
+        </div>
+    `;
+    
+    // Forçar abertura
+    modal.classList.remove('hidden', 'opacity-0');
+    modalContainer.classList.remove('scale-95');
+    
+    // Atualizar timer se possível
+    if (window.TimerSystem && sessionId) {
+        try {
+            setTimeout(() => {
+                TimerSystem.updateDisplay(sessionId);
+            }, 100);
+        } catch (error) {
+            console.warn('⚠️ Erro ao atualizar display do timer:', error);
+        }
+    }
+    
+    console.log('✅ Modal forçado com sucesso!');
+    return true;
+};
 
 // CORREÇÃO: Expor funções globalmente
 window.app = app;
