@@ -53,3 +53,17 @@ nul
 
 # Gemini-specific files
 .gemini*
+
+# Organized folders for development
+/temp/
+/docs/archive/
+/tests/legacy/
+
+# Backup and temporary files
+home_backup.html
+*_backup.*
+temp_*.js
+debug-*.html
+test-*.html
+teste-*.html
+footer-direto.html

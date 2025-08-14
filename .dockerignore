@@ -1,29 +1,39 @@
-# Dependencies
-node_modules
+# =========================================
+# DOCKER IGNORE - EDITALIZA
+# =========================================
+
+# === DEPENDENCIES ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# === ENVIRONMENT FILES ===
+.env
+.env.*
+!.env.example
+
+# === GIT ===
+.git/
+.gitignore
+.gitattributes
+
+# === LOGS ===
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Development files
-.env.local
-.env.development
-.env.test
-*.env.example
+# === TEMPORARY FILES ===
+tmp/
+temp/
+.tmp/
+.temp/
 
-# Testing
-coverage
-tests
-*.test.js
-jest.config.js
-
-# Development tools
-.vscode
-.idea
-*.swp
-*.swo
-*~
-
-# OS generated files
+# === OS GENERATED FILES ===
 .DS_Store
 .DS_Store?
 ._*
@@ -31,60 +41,140 @@ jest.config.js
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# Git
-.git
-.gitignore
-.gitattributes
+# === IDE / EDITOR ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# CI/CD
-.github
-.gitlab-ci.yml
-.travis.yml
-.circleci
+# === COVERAGE ===
+coverage/
+.nyc_output/
 
-# Documentation
-README.md
-CHANGELOG.md
-LICENSE
-docs/
-
-# Temporary files
-.tmp.*
-*.tmp
-*.temp
-
-# Logs
-logs
-*.log
-
-# Runtime data
-pids
+# === RUNTIME ===
+pids/
 *.pid
 *.seed
 *.pid.lock
 
-# Database files (will be mounted as volume)
-*.db
-*.sqlite
-*.sqlite3
-
-# Backup files
-*.bak
-*.backup
-
-# Cache directories
-.npm
-.eslintcache
-.cache
-
-# Production build artifacts that shouldn't be in base image
+# === BUILD ARTIFACTS ===
 dist/
 build/
+.next/
+out/
 
-# Windows specific
-desktop.ini
+# === DATABASE FILES (for development) ===
+*.sqlite
+*.sqlite3
+*.db
+db_backup_*
+sessions.db
 
-# Cloud specific
-.aws
-.gcp
+# === UPLOAD FILES ===
+uploads/*
+!uploads/.gitkeep
+
+# === CACHE ===
+.cache/
+.parcel-cache/
+
+# === DOCUMENTATION ===
+docs/
+*.md
+!README.md
+RELATORIO*.md
+GUIA*.md
+STATUS*.md
+CORRECAO*.md
+IMPLEMENTATION*.md
+DESIGN*.md
+AUDIT*.md
+
+# === TEST FILES ===
+test/
+tests/
+*.test.js
+*.spec.js
+__tests__/
+jest.config.js
+jest-setup.js
+
+# === DEVELOPMENT TOOLS ===
+.eslintrc*
+.prettierrc*
+babel.config.js
+tailwind.config.js
+nodemon.json
+eslint.config.js
+
+# === BACKUP FILES ===
+*.bak
+*.backup
+*_backup.*
+backup_*/
+.git_backup/
+*_backup_*
+
+# === DEBUG/TEST FILES ESPECÍFICOS DO PROJETO ===
+debug-*.html
+test-*.html
+teste-*.html
+temp_*.js
+check-*.js
+create-*.js
+validate_*.js
+simple_test.js
+performance_*.js
+*-test.html
+nul
+
+# === DOCKER ===
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+k8s-*.yaml
+deploy*.sh
+maintenance.*
+nginx.conf
+
+# === CI/CD ===
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# === SCRIPTS DE DESENVOLVIMENTO ===
+*.bat
+baixar_avatares.sh
+deploy.sh
+dev-start.*
+start-server.*
+setup-deploy.sh
+
+# === ARQUIVOS ESPECÍFICOS DO PROJETO ===
+agents/
+components/
+secrets/
+ssl/
+cost_benefit_analysis.js
+weighted-distribution-solution.js
+schedule-validation-solution.js
+security-*.js
+server-*.js
+add-role-column.js
+
+# === PATCHES E ANÁLISES ===
+*.patch
+gemini.md
+relatorio*.md
+
+# === MISC ===
+.editorconfig
+.nvmrc
+.node-version
+LOGOTIPO.txt
+*.svg
+logo.pdf

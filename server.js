@@ -3,6 +3,9 @@
 // CONFIGURAÇÃO DE FUSO HORÁRIO BRASILEIRO
 process.env.TZ = 'America/Sao_Paulo';
 
+// Carregar configurações de ambiente
+const config = require('./src/config/environment');
+
 // FUNÇÃO UTILITÁRIA PARA DATA BRASILEIRA
 function getBrazilianDateString() {
     const now = new Date();
