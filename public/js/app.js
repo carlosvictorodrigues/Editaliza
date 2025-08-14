@@ -10,12 +10,7 @@ const app = {
         plans: [],
         activePlanId: null,
         activePlanData: {}, 
-        overdueTasks: { count: 0, checked: false },
-        loading: {
-            global: false,
-            buttons: new Set(),
-            forms: new Set()
-        }
+        overdueTasks: { count: 0, checked: false }
     },
 
     // Configurações de segurança
@@ -62,18 +57,12 @@ const app = {
 
         // 🔔 INICIALIZAR SISTEMA DE NOTIFICAÇÕES INTELIGENTES
         await this.initializeNotificationSystem();
-        
-        // 🎹 INICIALIZAR NAVEGAÇÃO POR TECLADO
-        this.setupKeyboardNavigation();
     },
 
     // 🔔 Sistema de Notificações Inteligentes
     async initializeNotificationSystem() {
         try {
             console.log('🔔 Inicializando Sistema de Notificações Inteligentes...');
-            
-            // Garantir que toast container existe
-            this.ensureToastContainer();
             
             // Aguardar carregamento dos módulos
             const modulesLoaded = await this.waitForNotificationModules();
@@ -106,23 +95,6 @@ const app = {
     async waitForNotificationModules(maxWait = 10000) {
         const startTime = Date.now();
         
-        // Carregar módulos dinamicamente se não existirem
-        if (!window.ContextualNotifications) {
-            try {
-                await this.loadScript('/js/modules/contextual-notifications.js');
-            } catch (error) {
-                console.warn('⚠️ Erro ao carregar contextual-notifications:', error);
-            }
-        }
-        
-        if (!window.NotificationIntegrations) {
-            try {
-                await this.loadScript('/js/modules/notification-integrations.js');
-            } catch (error) {
-                console.warn('⚠️ Erro ao carregar notification-integrations:', error);
-            }
-        }
-        
         while (Date.now() - startTime < maxWait) {
             if (window.ContextualNotifications && window.NotificationIntegrations) {
                 return true;
@@ -130,19 +102,8 @@ const app = {
             await new Promise(resolve => setTimeout(resolve, 100));
         }
         
-        console.warn('⚠️ Módulos de notificação não carregaram completamente');
-        return window.ContextualNotifications || window.NotificationIntegrations; // Parcial OK
-    },
-
-    // Carregar script dinamicamente
-    loadScript(src) {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
+        console.warn('⚠️ Módulos de notificação não carregaram, usando fallback');
+        return false; // Retorna false em vez de erro
     },
 
     // Verificar se o token expirou
@@ -177,124 +138,6 @@ const app = {
         const temp = document.createElement('div');
         temp.textContent = str;
         return temp.innerHTML;
-    },
-
-    // ====== SISTEMA DE LOADING STATES ======
-    showLoading(target, type = 'global') {
-        if (type === 'button' && target) {
-            target.classList.add('btn-loading');
-            target.disabled = true;
-            this.state.loading.buttons.add(target);
-        } else if (type === 'form' && target) {
-            target.classList.add('form-loading');
-            const inputs = target.querySelectorAll('input, textarea, select, button');
-            inputs.forEach(input => input.disabled = true);
-            this.state.loading.forms.add(target);
-        } else {
-            this.state.loading.global = true;
-            if (target) target.classList.add('loading');
-        }
-    },
-
-    hideLoading(target = null, type = 'global') {
-        if (type === 'button' && target) {
-            target.classList.remove('btn-loading');
-            target.disabled = false;
-            this.state.loading.buttons.delete(target);
-        } else if (type === 'form' && target) {
-            target.classList.remove('form-loading');
-            const inputs = target.querySelectorAll('input, textarea, select, button');
-            inputs.forEach(input => input.disabled = false);
-            this.state.loading.forms.delete(target);
-        } else {
-            this.state.loading.global = false;
-            if (target) target.classList.remove('loading');
-        }
-    },
-
-    // ====== SISTEMA DE MENSAGENS PADRONIZADAS ======
-    showMessage(message, type = 'info', duration = 5000) {
-        const messageMap = {
-            'success': { icon: '✅', class: 'alert-success' },
-            'error': { icon: '❌', class: 'alert-danger' },
-            'warning': { icon: '⚠️', class: 'alert-warning' },
-            'info': { icon: 'ℹ️', class: 'alert-info' }
-        };
-
-        const config = messageMap[type] || messageMap['info'];
-        
-        // Remover mensagens existentes
-        document.querySelectorAll('.alert-message').forEach(el => el.remove());
-        
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert ${config.class} alert-message`;
-        alertDiv.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            max-width: 400px;
-            padding: 16px 20px;
-            border-radius: 8px;
-            font-weight: 500;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            animation: slideInRight 0.3s ease-out;
-        `;
-        alertDiv.innerHTML = `${config.icon} ${message}`;
-        
-        document.body.appendChild(alertDiv);
-        
-        setTimeout(() => {
-            alertDiv.style.animation = 'slideOutRight 0.3s ease-in';
-            setTimeout(() => alertDiv.remove(), 300);
-        }, duration);
-    },
-
-    // ====== KEYBOARD NAVIGATION ======
-    setupKeyboardNavigation() {
-        document.addEventListener('keydown', (e) => {
-            // ESC para fechar modais
-            if (e.key === 'Escape') {
-                const modal = document.querySelector('.modal:not([style*="display: none"])');
-                if (modal) {
-                    modal.style.display = 'none';
-                }
-            }
-            
-            // Enter em botões
-            if (e.key === 'Enter' && e.target.tagName === 'BUTTON') {
-                e.target.click();
-            }
-            
-            // Tab navigation melhorada
-            if (e.key === 'Tab') {
-                const focusableElements = document.querySelectorAll(
-                    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-                );
-                
-                const firstElement = focusableElements[0];
-                const lastElement = focusableElements[focusableElements.length - 1];
-                
-                if (e.shiftKey && document.activeElement === firstElement) {
-                    e.preventDefault();
-                    lastElement.focus();
-                } else if (!e.shiftKey && document.activeElement === lastElement) {
-                    e.preventDefault();
-                    firstElement.focus();
-                }
-            }
-        });
-    },
-
-    // ====== GARANTIR TOAST CONTAINER ======
-    ensureToastContainer() {
-        if (!document.getElementById('toast-container')) {
-            const container = document.createElement('div');
-            container.id = 'toast-container';
-            container.className = 'fixed top-5 right-5 z-50 space-y-3';
-            document.body.appendChild(container);
-            console.log('📱 Toast container criado automaticamente');
-        }
     },
 
     // Validar URL antes de redirecionar

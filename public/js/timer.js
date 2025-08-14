@@ -112,11 +112,6 @@ const TimerSystem = {
             this.timers[sessionId].lastPomodoroNotified = completedPomodoros;
             this.notifyPomodoroComplete();
             this.saveTimersToStorage(); // Salvar progresso
-            
-            // 🔔 DISPARAR EVENTO PARA NOTIFICAÇÕES INTELIGENTES
-            if (window.NotificationIntegrations) {
-                window.NotificationIntegrations.triggerPomodoroComplete();
-            }
         }
     },
 

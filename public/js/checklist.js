@@ -377,26 +377,6 @@ const StudyChecklist = {
                 TimerSystem.clearStoredTimer(sessionId);
                 
                 console.log(`⏱️ Timer parado e sessão marcada como concluída. Tempo capturado: ${studyTimeSeconds} segundos`);
-                
-                // 🔔 DISPARAR EVENTO DE SESSÃO CONCLUÍDA para notificações inteligentes (APENAS UMA VEZ)
-                const notificationKey = `session_${sessionId}_notification_sent`;
-                const alreadySent = sessionStorage.getItem(notificationKey);
-                
-                if (window.NotificationIntegrations && !alreadySent) {
-                    // Marcar como enviado no sessionStorage para persistir durante a sessão
-                    sessionStorage.setItem(notificationKey, 'true');
-                    
-                    console.log('🔔 Disparando evento de sessão concluída para notificações:', sessionId);
-                    window.NotificationIntegrations.triggerSessionCompleted({
-                        type: this.session.session_type || 'Novo Tópico',
-                        duration: Math.floor(studyTimeSeconds / 60) || 25,
-                        subject: this.session.subject_name || 'Matéria',
-                        difficulty: this.session.difficulty || 3,
-                        sessionId: sessionId
-                    });
-                } else if (alreadySent) {
-                    console.log('🔔 Notificação de sessão já enviada para:', sessionId);
-                }
             }
             
             // Get notes and questions from modal
@@ -426,31 +406,18 @@ const StudyChecklist = {
                 updateData.questions_solved = questionsSolved;
             }
             
-            // Save to database with error handling
+            // Save to database
             const endpoint = `/schedules/sessions/${sessionId}`;
-            try {
-                const response = await app.apiFetch(endpoint, {
-                    method: 'PATCH',
-                    body: JSON.stringify(updateData)
-                });
-                
-                console.log(`✅ Sessão ${sessionId} atualizada no servidor:`, response);
-                
-                // Show appropriate success message APENAS se API deu certo
-                const timeMessage = studyTimeSeconds > 0 ? ` (${TimerSystem.formatTime(studyTimeSeconds * 1000)} estudados)` : '';
-                app.showToast(`✅ Sessão marcada como concluída${timeMessage}!`, 'success');
-                
-            } catch (error) {
-                console.error(`❌ Erro ao marcar sessão ${sessionId} como concluída:`, error);
-                app.showToast(`❌ Erro ao salvar no servidor. Tente novamente.`, 'error');
-                
-                // Reverter flag de notificação se erro na API
-                const notificationKey = `session_${sessionId}_notification_sent`;
-                sessionStorage.removeItem(notificationKey);
-                
-                console.log('🔄 Flag de notificação revertida devido ao erro na API');
-                return; // Não continuar se erro na API
-            }
+            await app.apiFetch(endpoint, {
+                method: 'PATCH',
+                body: JSON.stringify(updateData)
+            });
+            
+            // Show appropriate success message
+            const timeMessage = studyTimeSeconds > 0 ? ` (${TimerSystem.formatTime(studyTimeSeconds * 1000)} estudados)` : '';
+            app.showToast(`✅ Sessão marcada como concluída${timeMessage}!`, 'success');
+            
+            console.log(`✅ Sessão ${sessionId} finalizada:`, updateData);
             
             // Update dashboard stats if available
             if (window.updateDashboardStats) {
@@ -465,9 +432,9 @@ const StudyChecklist = {
             // Close modal
             this.close();
             
-            // Reload page if not on plan.html (com delay menor)
+            // Reload page if not on plan.html
             if (!window.location.pathname.includes('plan.html')) {
-                setTimeout(() => location.reload(), 500);
+                setTimeout(() => location.reload(), 1000);
             }
             
         } catch (error) {
