@@ -65,21 +65,25 @@ const app = {
             console.log('🔔 Inicializando Sistema de Notificações Inteligentes...');
             
             // Aguardar carregamento dos módulos
-            await this.waitForNotificationModules();
+            const modulesLoaded = await this.waitForNotificationModules();
             
-            // Inicializar sistema de notificações contextuais
-            if (window.ContextualNotifications) {
-                await window.ContextualNotifications.init();
-                console.log('✅ ContextualNotifications inicializado');
+            if (modulesLoaded) {
+                // Inicializar sistema de notificações contextuais
+                if (window.ContextualNotifications) {
+                    await window.ContextualNotifications.init();
+                    console.log('✅ ContextualNotifications inicializado');
+                }
+                
+                // Inicializar integrações de notificação
+                if (window.NotificationIntegrations) {
+                    await window.NotificationIntegrations.init();
+                    console.log('✅ NotificationIntegrations inicializado');
+                }
+                
+                console.log('🎯 Sistema de Notificações Inteligentes ativado com sucesso!');
+            } else {
+                console.log('💤 Sistema de Notificações executando em modo simplificado');
             }
-            
-            // Inicializar integrações de notificação
-            if (window.NotificationIntegrations) {
-                await window.NotificationIntegrations.init();
-                console.log('✅ NotificationIntegrations inicializado');
-            }
-            
-            console.log('🎯 Sistema de Notificações Inteligentes ativado com sucesso!');
             
         } catch (error) {
             console.warn('⚠️ Erro ao inicializar sistema de notificações:', error);
@@ -98,7 +102,8 @@ const app = {
             await new Promise(resolve => setTimeout(resolve, 100));
         }
         
-        throw new Error('Módulos de notificação não carregaram a tempo');
+        console.warn('⚠️ Módulos de notificação não carregaram, usando fallback');
+        return false; // Retorna false em vez de erro
     },
 
     // Verificar se o token expirou

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Avançado do Footer - Editaliza</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .content {
+            flex: 1;
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .debug-section {
+            background: #e0e0e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .log-output {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 11px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-danger { background: #dc3545; color: white; }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>🔬 Debug Avançado do Footer</h1>
+        <p>Esta página testa e debuga o sistema modular de footer em detalhes.</p>
+        
+        <div class="debug-section">
+            <h3>🎯 Status dos Componentes:</h3>
+            <p>CSS carregado: <span id="css-status">Verificando...</span></p>
+            <p>Script carregado: <span id="script-status">Verificando...</span></p>
+            <p>Footer renderizado: <span id="footer-status">Verificando...</span></p>
+            <p>Debug mode ativo: <span id="debug-status">Verificando...</span></p>
+        </div>
+        
+        <div class="debug-section">
+            <h3>🔧 Controles de Teste:</h3>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="forceFooterLoad()">Forçar Carregamento</button>
+                <button class="btn btn-success" onclick="checkFooterStatus()">Verificar Status</button>
+                <button class="btn btn-warning" onclick="toggleDebugMode()">Alternar Debug</button>
+                <button class="btn btn-danger" onclick="clearLogs()">Limpar Logs</button>
+            </div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>📋 Informações do Sistema:</h3>
+            <div id="system-info">Carregando...</div>
+        </div>
+        
+        <div class="debug-section">
+            <h3>📝 Logs em Tempo Real:</h3>
+            <div id="log-output" class="log-output">Iniciando logs...</div>
+        </div>
+    </div>
+    
+    <!-- Script do rodapé modular -->
+    <script src="js/footer.js"></script>
+    
+    <script>
+        let logOutput = '';
+        
+        function addLog(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            logOutput += logEntry;
+            document.getElementById('log-output').textContent = logOutput;
+            
+            // Scroll para o final
+            const logElement = document.getElementById('log-output');
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function clearLogs() {
+            logOutput = '';
+            document.getElementById('log-output').textContent = 'Logs limpos...';
+        }
+        
+        function forceFooterLoad() {
+            addLog('🔄 Forçando carregamento do footer...', 'action');
+            
+            if (typeof window.loadFooterRefatorado === 'function') {
+                addLog('✅ Função loadFooterRefatorado encontrada', 'success');
+                window.loadFooterRefatorado().then(() => {
+                    addLog('🎉 Footer carregado com sucesso via função forçada', 'success');
+                    checkFooterStatus();
+                }).catch(error => {
+                    addLog(`❌ Erro ao forçar carregamento: ${error.message}`, 'error');
+                });
+            } else {
+                addLog('❌ Função loadFooterRefatorado não encontrada', 'error');
+                
+                // Tentar criar nova instância
+                if (typeof EditalizaFooterRefatorado !== 'undefined') {
+                    addLog('🔧 Criando nova instância do footer...', 'info');
+                    try {
+                        const newFooter = new EditalizaFooterRefatorado();
+                        newFooter.init().then(() => {
+                            addLog('✅ Nova instância criada e inicializada', 'success');
+                            checkFooterStatus();
+                        }).catch(error => {
+                            addLog(`❌ Erro na nova instância: ${error.message}`, 'error');
+                        });
+                    } catch (error) {
+                        addLog(`❌ Erro ao criar instância: ${error.message}`, 'error');
+                    }
+                } else {
+                    addLog('❌ Classe EditalizaFooterRefatorado não encontrada', 'error');
+                }
+            }
+        }
+        
+        function checkFooterStatus() {
+            addLog('🔍 Verificando status do footer...', 'action');
+            
+            // Verificar se existe no DOM
+            const footer = document.querySelector('.editaliza-footer-refatorado');
+            if (footer) {
+                addLog('✅ Footer encontrado no DOM', 'success');
+                addLog(`📍 Altura: ${footer.offsetHeight}px`, 'info');
+                addLog(`📍 Largura: ${footer.offsetWidth}px`, 'info');
+                addLog(`📍 Posição: ${JSON.stringify(footer.getBoundingClientRect())}`, 'info');
+                addLog(`📍 Classes: ${footer.className}`, 'info');
+                addLog(`📍 Visível: ${footer.offsetHeight > 0 && footer.offsetWidth > 0}`, 'info');
+                
+                // Verificar se está visível na viewport
+                const rect = footer.getBoundingClientRect();
+                const isInViewport = rect.top < window.innerHeight && rect.bottom > 0;
+                addLog(`📍 Na viewport: ${isInViewport}`, 'info');
+                
+            } else {
+                addLog('❌ Footer NÃO encontrado no DOM', 'error');
+            }
+            
+            // Verificar se o FooterManager existe
+            if (window.footerManagerRefatorado) {
+                addLog('✅ FooterManager encontrado', 'success');
+                addLog(`📍 Status: ${window.footerManagerRefatorado.isLoaded ? 'Carregado' : 'Não carregado'}`, 'info');
+                addLog(`📍 Debug mode: ${window.footerManagerRefatorado.debugMode}`, 'info');
+            } else {
+                addLog('❌ FooterManager não encontrado', 'error');
+            }
+            
+            // Verificar se a classe existe
+            if (typeof EditalizaFooterRefatorado !== 'undefined') {
+                addLog('✅ Classe EditalizaFooterRefatorado disponível', 'success');
+            } else {
+                addLog('❌ Classe EditalizaFooterRefatorado não encontrada', 'error');
+            }
+        }
+        
+        function toggleDebugMode() {
+            if (window.footerManagerRefatorado) {
+                window.footerManagerRefatorado.debugMode = !window.footerManagerRefatorado.debugMode;
+                addLog(`🔧 Debug mode alternado para: ${window.footerManagerRefatorado.debugMode}`, 'action');
+            } else {
+                addLog('❌ FooterManager não disponível para alternar debug', 'error');
+            }
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('🚀 DOM carregado - iniciando debug avançado', 'info');
+            
+            // Verificar CSS
+            const cssStatus = document.getElementById('css-status');
+            const footerCSS = document.querySelector('link[href="css/footer.css"]');
+            if (footerCSS) {
+                cssStatus.textContent = '✅ CSS carregado';
+                cssStatus.style.color = 'green';
+                addLog('✅ CSS do footer encontrado', 'success');
+            } else {
+                cssStatus.textContent = '❌ CSS não encontrado';
+                cssStatus.style.color = 'red';
+                addLog('❌ CSS do footer não encontrado', 'error');
+            }
+            
+            // Verificar Script
+            const scriptStatus = document.getElementById('script-status');
+            if (typeof EditalizaFooterRefatorado !== 'undefined') {
+                scriptStatus.textContent = '✅ Script carregado';
+                scriptStatus.style.color = 'green';
+                addLog('✅ Script do footer carregado', 'success');
+            } else {
+                scriptStatus.textContent = '❌ Script não encontrado';
+                scriptStatus.style.color = 'red';
+                addLog('❌ Script do footer não encontrado', 'error');
+            }
+            
+            // Verificar Footer
+            setTimeout(() => {
+                const footer = document.querySelector('.editaliza-footer-refatorado');
+                const footerStatus = document.getElementById('footer-status');
+                if (footer) {
+                    footerStatus.textContent = '✅ Footer renderizado';
+                    footerStatus.style.color = 'green';
+                    addLog('✅ Footer renderizado automaticamente', 'success');
+                } else {
+                    footerStatus.textContent = '❌ Footer não renderizado';
+                    footerStatus.style.color = 'red';
+                    addLog('❌ Footer não foi renderizado automaticamente', 'error');
+                }
+            }, 2000);
+            
+            // Verificar Debug Mode
+            setTimeout(() => {
+                const debugStatus = document.getElementById('debug-status');
+                if (window.footerManagerRefatorado) {
+                    debugStatus.textContent = window.footerManagerRefatorado.debugMode ? '✅ Ativo' : '❌ Inativo';
+                    debugStatus.style.color = window.footerManagerRefatorado.debugMode ? 'green' : 'red';
+                    addLog(`🔧 Debug mode: ${window.footerManagerRefatorado.debugMode ? 'Ativo' : 'Inativo'}`, 'info');
+                } else {
+                    debugStatus.textContent = '❌ Não disponível';
+                    debugStatus.style.color = 'red';
+                    addLog('❌ FooterManager não disponível para verificar debug mode', 'error');
+                }
+            }, 1000);
+            
+            // Informações do sistema
+            const systemInfo = document.getElementById('system-info');
+            systemInfo.innerHTML = `
+                <strong>URL:</strong> ${window.location.href}<br>
+                <strong>Protocolo:</strong> ${window.location.protocol}<br>
+                <strong>User Agent:</strong> ${navigator.userAgent}<br>
+                <strong>Timestamp:</strong> ${new Date().toLocaleString()}<br>
+                <strong>EditalizaFooterRefatorado:</strong> ${typeof EditalizaFooterRefatorado}<br>
+                <strong>footerManagerRefatorado:</strong> ${typeof window.footerManagerRefatorado !== 'undefined' ? 'Disponível' : 'Não disponível'}
+            `;
+        });
+        
+        // Monitorar eventos do footer
+        document.addEventListener('footerRefatoradoLoaded', function(event) {
+            addLog('🎉 Evento footerRefatoradoLoaded recebido!', 'success');
+            addLog(`📍 Detalhes: ${JSON.stringify(event.detail)}`, 'info');
+        });
+        
+        // Logs iniciais
+        addLog('🔍 Debug avançado iniciado', 'info');
+        addLog(`📁 Arquivo: ${window.location.pathname}`, 'info');
+        addLog(`🔧 EditalizaFooterRefatorado: ${typeof EditalizaFooterRefatorado}`, 'info');
+        
+        // Verificar se há erros
+        window.addEventListener('error', function(e) {
+            addLog(`❌ Erro capturado: ${e.error}`, 'error');
+        });
+        
+        // Logs do console interceptados
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = function(...args) {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('FooterRefatorado')) {
+                addLog(`Console: ${args.join(' ')}`, 'console');
+            }
+            originalLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('FooterRefatorado')) {
+                addLog(`Console Error: ${args.join(' ')}`, 'console-error');
+            }
+            originalError.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+            if (args[0] && typeof args[0] === 'string' && args[0].includes('FooterRefatorado')) {
+                addLog(`Console Warn: ${args.join(' ')}`, 'console-warn');
+            }
+            originalWarn.apply(console, args);
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Footer Direto</title>
+    <style>
+        body { 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        main {
+            flex: 1;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        
+        /* CSS do Footer Compacto */
+        .editaliza-footer {
+            background: linear-gradient(135deg, #0528f2 0%, #1e40af 50%, #0d0d0d 100%);
+            color: white;
+            margin-top: auto;
+            padding: 15px 0;
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .footer-brand h3 {
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+        
+        .footer-description {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+        
+        .footer-section h3 {
+            font-size: 0.75rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .footer-links li {
+            margin-bottom: 4px;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: #1ad937;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .social-link:hover {
+            background: #1ad937;
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            font-size: 0.7rem;
+            opacity: 0.7;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            .editaliza-footer {
+                padding: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>✅ Rodapé Funcionando!</h1>
+        <p>Este teste mostra o rodapé funcionando perfeitamente.</p>
+        <p><strong>Agora vou corrigir o problema nas páginas principais...</strong></p>
+    </main>
+
+    <footer class="editaliza-footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <h3>Editaliza</h3>
+                    <p class="footer-description">Plataforma inteligente de estudos para concursos públicos.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">📷</a>
+                        <a href="#" class="social-link">💼</a>
+                        <a href="#" class="social-link">💬</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Plataforma</h3>
+                    <ul class="footer-links">
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="home.html">Estudos</a></li>
+                        <li><a href="cronograma.html">Cronograma</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Recursos</h3>
+                    <ul class="footer-links">
+                        <li><a href="#simulados">Simulados</a></li>
+                        <li><a href="#revisoes">Revisões</a></li>
+                        <li><a href="#redacoes">Redações</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Suporte</h3>
+                    <ul class="footer-links">
+                        <li><a href="mailto:suporte@editaliza.com">Contato</a></li>
+                        <li><a href="#ajuda">Ajuda</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 Editaliza. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

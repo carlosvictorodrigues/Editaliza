@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <link href="css/footer.css" rel="stylesheet">
     <!-- SCRIPTS CENTRALIZADOS -->
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
@@ -29,11 +30,19 @@
         /* Estilos específicos da página (se houver) podem ficar aqui */
         .modal-overlay { transition: opacity 0.3s ease; }
         .modal-container { transition: transform 0.3s ease; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800">
     <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
     <div id="main-nav-container"></div>
+    
+    <!-- Main content wrapper with flex-1 to push footer to bottom -->
+    <div class="flex-1">
 
     <!-- Modal de Confirmação para Exclusão -->
     <div id="deleteConfirmationModal" class="modal-overlay hidden fixed inset-0 bg-editaliza-black bg-opacity-70 z-50 flex items-center justify-center p-4 opacity-0">
@@ -316,5 +325,11 @@
 
         document.addEventListener('DOMContentLoaded', initialize);
     </script>
+    
+    </div> <!-- End main content wrapper -->
+    
+    <!-- Script do rodapé modular -->
+    <script src="js/footer.js"></script>
+    <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
 </body>
 </html>

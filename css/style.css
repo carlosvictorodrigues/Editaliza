@@ -25,6 +25,14 @@ body {
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
     color: #1e293b; /* slate-800 */
     line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Garante que o conteúdo principal ocupe o espaço disponível */
+main {
+    flex: 1;
 }
 
 /* Utilitários para cores da marca */

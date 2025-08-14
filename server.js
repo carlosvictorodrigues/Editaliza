@@ -1,4 +1,18 @@
 // server.js - Versão com correções de segurança
+
+// CONFIGURAÇÃO DE FUSO HORÁRIO BRASILEIRO
+process.env.TZ = 'America/Sao_Paulo';
+
+// FUNÇÃO UTILITÁRIA PARA DATA BRASILEIRA
+function getBrazilianDateString() {
+    const now = new Date();
+    // Criar objeto Date diretamente no timezone brasileiro
+    const year = parseInt(now.toLocaleString("en-CA", {timeZone: "America/Sao_Paulo", year: "numeric"}));
+    const month = String(parseInt(now.toLocaleString("en-CA", {timeZone: "America/Sao_Paulo", month: "numeric"}))).padStart(2, '0');
+    const day = String(parseInt(now.toLocaleString("en-CA", {timeZone: "America/Sao_Paulo", day: "numeric"}))).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 const express = require('express');
 const db = require('./database.js');
 const bcrypt = require('bcryptjs');
@@ -44,6 +58,15 @@ try {
 }
 
 const app = express();
+
+// Middleware para configurar MIME types corretos
+app.use((req, res, next) => {
+    if (req.path.endsWith('.js')) {
+        res.setHeader('Content-Type', 'application/javascript');
+    }
+    next();
+});
+
 // CORREÇÃO DE SEGURANÇA: Servir apenas arquivos públicos necessários
 // Anteriormente: app.use(express.static(__dirname)); // ❌ EXPUNHA TODO O PROJETO
 app.use(express.static(path.join(__dirname, 'public')));
@@ -642,7 +665,6 @@ app.post('/reset-password',
 );
 */
 
-/*
 // --- ROTAS DE PERFIL DO USUÁRIO ---
 // Rota para obter dados do perfil do usuário logado
 app.get('/profile', authenticateToken, async (req, res) => {
@@ -875,7 +897,6 @@ app.patch('/profile',
         }
     }
 );
-*/
 
 
 // --- ROTAS DE PLANOS (CRUD E CONFIGURAÇÕES) ---
@@ -1676,7 +1697,7 @@ app.get('/plans/:planId/replan-preview',
             const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
             if (!plan) return res.status(404).json({ error: "Plano não encontrado." });
 
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getBrazilianDateString();
             const overdueSessions = await dbAll("SELECT * FROM study_sessions WHERE study_plan_id = ? AND status = 'Pendente' AND session_date < ? ORDER BY session_date, id", [planId, todayStr]);
             
             if (overdueSessions.length === 0) {
@@ -1837,7 +1858,7 @@ app.post('/plans/:planId/replan',
             const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
             if (!plan) return res.status(404).json({ error: "Plano não encontrado." });
 
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getBrazilianDateString();
             const overdueSessions = await dbAll("SELECT * FROM study_sessions WHERE study_plan_id = ? AND status = 'Pendente' AND session_date < ? ORDER BY session_date, id", [planId, todayStr]);
             
             if (overdueSessions.length === 0) {
@@ -2249,7 +2270,7 @@ app.get('/plans/:planId/overdue_check',
             const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [req.params.planId, req.user.id]);
             if (!plan) return res.status(404).json({ "error": "Plano não encontrado ou não autorizado." });
 
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getBrazilianDateString();
             const result = await dbGet("SELECT COUNT(id) as count FROM study_sessions WHERE study_plan_id = ? AND status = 'Pendente' AND session_date < ?", [req.params.planId, todayStr]);
             res.json(result);
         } catch (error) {
@@ -2474,8 +2495,10 @@ app.get('/plans/:planId/goal_progress',
     handleValidationErrors,
     async (req, res) => {
         const planId = req.params.planId;
-        const today = new Date().toISOString().split('T')[0];
-        const dayOfWeek = new Date().getDay();
+        const today = getBrazilianDateString();
+        // Usar data brasileira para calcular dia da semana
+        const brazilDate = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+        const dayOfWeek = brazilDate.getDay();
         const firstDayOfWeek = new Date();
         firstDayOfWeek.setDate(firstDayOfWeek.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
         const firstDayOfWeekStr = firstDayOfWeek.toISOString().split('T')[0];
@@ -2504,7 +2527,7 @@ app.get('/plans/:planId/question_radar',
     validators.numericId('planId'),
     handleValidationErrors,
     async (req, res) => {
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getBrazilianDateString();
         const sql = `
             SELECT t.description as topic_description, s.subject_name, COALESCE(SUM(ss.questions_solved), 0) as total_questions
             FROM topics t
@@ -3081,7 +3104,7 @@ app.get('/plans/:planId/gamification',
                 }
             }
             
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getBrazilianDateString();
             const todayTasksResult = await dbGet(`
                 SELECT 
                     COUNT(id) as total, 
@@ -3300,3 +3323,5 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Health check disponível em: http://localhost:${PORT}/health`);
 });
+// TIMEZONE SERVIDOR CORRIGIDO - Wed, Aug 13, 2025 10:13:36 PM
+// TIMEZONE BRASILEIRO FINAL CORRIGIDO - Wed, Aug 13, 2025 10:15:49 PM

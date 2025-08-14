@@ -4,7 +4,7 @@
  * @version 2.0 - Modularized for performance
  */
 
-export const Gamification = {
+const Gamification = {
     // Dashboard de gamificação com métricas precisas
     renderGamificationDashboard(gamificationData, containerId) {
         const container = document.getElementById(containerId);
@@ -143,11 +143,6 @@ export const Gamification = {
 
     // Renderizar progresso para próximo nível
     renderLevelProgress(data) {
-        if (!data.nextLevel) return '';
-
-        const progressPercent = data.topicsToNextLevel > 0 ? 
-            Math.max(0, Math.min(100, ((data.completedTopicsCount || 0) / data.topicsToNextLevel) * 100)) : 100;
-
         if (!data.nextLevel) return '';
 
         const currentIcon = data.levelName.split(' ').pop();

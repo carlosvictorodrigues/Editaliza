@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 FOOTER REFATORADO - Editaliza</title>
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        main {
+            flex: 1;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #0832f5, #1AD937);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero p {
+            font-size: 1.125rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .feature-card h3 {
+            color: #1e293b;
+            margin-bottom: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .feature-card p {
+            color: #64748b;
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        .status {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #1AD937;
+        }
+        
+        .status h3 {
+            color: #1e293b;
+            margin: 0 0 12px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .check {
+            color: #22c55e;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            main {
+                padding: 20px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="hero">
+            <h1>🎨 Footer Refatorado</h1>
+            <p>
+                Novo design moderno, limpo e integrado ao logotipo. 
+                Estrutura em duas faixas com gradientes otimizados e tipografia profissional.
+            </p>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <h3>🎨 Design System</h3>
+                <p>Sistema de tokens centralizados para cores, espaçamentos e tipografia. Gradiente que realça o logo sem conflitar com suas cores.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>📐 Estrutura em Duas Faixas</h3>
+                <p>Faixa principal com gradiente azul→verde e faixa inferior para direitos autorais com fundo mais escuro.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🔤 Logo Otimizado</h3>
+                <p>Espaçamento seguro, fundo semi-transparente com backdrop-filter e drop-shadow para máximo contraste.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>📱 Responsivo</h3>
+                <p>Layout fluido que se adapta perfeitamente a qualquer tamanho de tela, do desktop ao mobile.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>♿ Acessível</h3>
+                <p>HTML semântico, ARIA labels, contraste otimizado e navegação por teclado funcional.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>⚡ Modular</h3>
+                <p>Sistema 100% modular com auto-inicialização, fallback inteligente e integração simples.</p>
+            </div>
+        </div>
+        
+        <div class="status">
+            <h3>✅ Especificações Atendidas</h3>
+            <div class="status-item">
+                <span class="check">✓</span>
+                <span>Altura reduzida (32px padding vertical)</span>
+            </div>
+            <div class="status-item">
+                <span class="check">✓</span>
+                <span>Gradiente suave azul→verde (sem conflito com logo)</span>
+            </div>
+            <div class="status-item">
+                <span class="check">✓</span>
+                <span>Logo com espaçamento seguro e contraste</span>
+            </div>
+            <div class="status-item">
+                <span class="check">✓</span>
+                <span>Estrutura em duas faixas</span>
+            </div>
+            <div class="status-item">
+                <span class="check">✓</span>
+                <span>Tipografia limpa e consistente</span>
+            </div>
+            <div class="status-item">
+                <span class="check">✓</span>
+                <span>Layout fluido e responsivo</span>
+            </div>
+            <div class="status-item">
+                <span class="check">✓</span>
+                <span>Sistema de tokens (sem cores hardcoded)</span>
+            </div>
+            <div class="status-item">
+                <span class="check">✓</span>
+                <span>HTML semântico e acessível</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER REFATORADO -->
+    <script src="js/footer-refatorado.js"></script>
+    
+    <script>
+        // Listen for footer loaded event
+        document.addEventListener('footerRefatoradoLoaded', (e) => {
+            console.log('🎉 Footer refatorado carregado!', e.detail);
+            
+            // Add success indicator
+            const statusDiv = document.querySelector('.status');
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = 'margin-top: 16px; padding: 12px; background: #dcfce7; border-radius: 8px; color: #166534; font-weight: 500; text-align: center;';
+            successDiv.textContent = '🎉 Footer Refatorado Carregado com Sucesso!';
+            statusDiv.appendChild(successDiv);
+        });
+        
+        // Auto scroll to footer after load
+        setTimeout(() => {
+            const footer = document.querySelector('.editaliza-footer-refatorado');
+            if (footer) {
+                footer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

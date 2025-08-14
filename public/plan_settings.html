@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <link href="css/footer.css" rel="stylesheet">
     <!-- SCRIPTS CENTRALIZADOS -->
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
@@ -208,9 +209,8 @@
                                 <h3 class="font-semibold text-yellow-800 mb-2">Primeira vez configurando? Aqui estão algumas dicas!</h3>
                                 <ul class="text-sm text-yellow-700 space-y-1">
                                     <li>• <strong>Disciplinas:</strong> Adicione as matérias do seu edital (ex: Direito Constitucional, Matemática)</li>
-                                    <li>• <strong>Peso da Disciplina:</strong> 5 = muito importante, 1 = menos importante</li>
+                                    <li>• <strong>Prioridade:</strong> 5 = muito importante, 1 = menos importante</li>
                                     <li>• <strong>Tópicos:</strong> Divida cada disciplina em assuntos menores para melhor controle</li>
-                                    <li>• <strong>Peso do Tópico:</strong> Define importância dentro da disciplina (combinado com peso da disciplina)</li>
                                     <li>• <strong>Já estudou?</strong> Marque os tópicos já vistos para ajustar o cronograma</li>
                                 </ul>
                                 <div class="mt-3">
@@ -483,7 +483,7 @@
                                     <input type="checkbox" id="retaFinalMode" class="w-5 h-5 text-red-600 bg-white border-red-300 rounded focus:ring-red-500 focus:ring-2">
                                     <div>
                                         <label for="retaFinalMode" class="text-lg font-bold text-red-700">🚨 Modo Reta Final</label>
-                                        <p class="text-sm text-red-600 mt-2">Prioriza matérias e tópicos mais importantes quando o tempo é curto. Considera o peso da disciplina combinado com o peso do tópico. Tópicos menos relevantes podem ficar de fora.</p>
+                                        <p class="text-sm text-red-600 mt-2">Prioriza matérias mais importantes quando o tempo é curto. Tópicos menos relevantes podem ficar de fora.</p>
                                     </div>
                                 </div>
                             </div>
@@ -580,6 +580,30 @@
             });
         }
         
+        // Função para determinar cores dos badges de peso dos tópicos
+        function getTopicWeightColor(weight) {
+            switch (weight) {
+                case 5: return 'bg-red-100 text-red-700'; // Muito Alto - Vermelho
+                case 4: return 'bg-orange-100 text-orange-700'; // Alto - Laranja  
+                case 3: return 'bg-yellow-100 text-yellow-700'; // Médio - Amarelo
+                case 2: return 'bg-green-100 text-green-700'; // Baixo - Verde
+                case 1: return 'bg-gray-100 text-gray-600'; // Muito Baixo - Cinza
+                default: return 'bg-yellow-100 text-yellow-700'; // Padrão médio
+            }
+        }
+
+        // Função para determinar cores dos badges de peso das disciplinas
+        function getSubjectWeightColor(weight) {
+            switch (weight) {
+                case 5: return 'bg-red-100 text-red-800 font-semibold'; // Muito Alto - Vermelho
+                case 4: return 'bg-orange-100 text-orange-800 font-semibold'; // Alto - Laranja  
+                case 3: return 'bg-yellow-100 text-yellow-800 font-medium'; // Médio - Amarelo
+                case 2: return 'bg-green-100 text-green-800'; // Baixo - Verde
+                case 1: return 'bg-gray-100 text-gray-700'; // Muito Baixo - Cinza
+                default: return 'bg-yellow-100 text-yellow-800 font-medium'; // Padrão médio
+            }
+        }
+
         // Iniciar tour guiado
         function startGuide() {
             guideState.isActive = true;
@@ -641,6 +665,14 @@
                 document.getElementById('weekly_goal').value = plan.weekly_question_goal;
                 document.getElementById('session_duration').value = plan.session_duration_minutes;
                 document.getElementById('has_essay').checked = !!plan.has_essay;
+                
+                // Carregar o valor do Modo Reta Final
+                const retaFinalCheckbox = document.getElementById('retaFinalMode');
+                if (retaFinalCheckbox) {
+                    const isRetaFinal = plan.reta_final_mode === 1 || plan.reta_final_mode === true || plan.reta_final_mode === '1';
+                    retaFinalCheckbox.checked = isRetaFinal;
+                    console.log('🔍 Plan_settings - Carregando modo Reta Final:', plan.reta_final_mode, '-> checkbox:', isRetaFinal);
+                }
 
                 if (plan.study_hours_per_day) {
                     const hoursInputs = document.querySelectorAll('.hours-input');
@@ -670,7 +702,15 @@
             `).join('');
         }
 
+        let loadingSubjects = false;
         async function loadSubjects() {
+            // Evitar múltiplas chamadas simultâneas
+            if (loadingSubjects) {
+                console.log('🔄 LoadSubjects já em execução, ignorando...');
+                return;
+            }
+            
+            loadingSubjects = true;
             try {
                 const subjects = await app.apiFetch(`/plans/${planId}/subjects`);
                 const container = document.getElementById('subjectsContainer');
@@ -688,7 +728,10 @@
                         <div class="accordion-header flex justify-between items-center p-4 cursor-pointer hover:bg-slate-50 rounded-t-xl">
                             <div class="flex-grow">
                                 <h3 class="text-lg font-semibold text-gray-800">${subject.subject_name}</h3>
-                                <span class="text-sm text-editaliza-gray">Prioridade: ${subject.priority_weight}</span>
+                                <div class="flex items-center mt-1">
+                                    <span class="text-sm text-editaliza-gray mr-2">Prioridade:</span>
+                                    <span class="text-xs px-2 py-1 rounded-full ${getSubjectWeightColor(subject.priority_weight)}">${subject.priority_weight}</span>
+                                </div>
                             </div>
                             <div class="flex items-center space-x-2 flex-shrink-0">
                                 <button class="edit-subject-btn p-2 rounded-md hover:bg-gray-200" data-subject-id="${subject.id}" data-subject-name="${subject.subject_name}" data-priority="${subject.priority_weight}" title="Editar Disciplina">✏️</button>
@@ -710,11 +753,18 @@
                     container.appendChild(subjectDiv);
                 });
 
-                for (const subject of subjects) {
-                    await loadTopicsForSubject(subject.id);
+                // Carregar tópicos com delay para evitar muitas requisições simultâneas
+                for (let i = 0; i < subjects.length; i++) {
+                    const subject = subjects[i];
+                    // Adicionar delay de 200ms entre cada requisição
+                    setTimeout(() => {
+                        loadTopicsForSubject(subject.id);
+                    }, i * 200);
                 }
             } catch (error) {
                 app.showToast('Erro ao carregar disciplinas.', 'error');
+            } finally {
+                loadingSubjects = false;
             }
         }
 
@@ -729,16 +779,13 @@
                         const isCompleted = topic.status === 'Concluído';
                         const completionDate = topic.completion_date || todayStr;
                         const showDateClass = isCompleted ? 'show-date' : '';
-                        const priorityWeight = topic.priority_weight || 3;
-                        const priorityColors = {5: '🔴', 4: '🟠', 3: '🟡', 2: '🟢', 1: '⚪'};
-                        const priorityColor = priorityColors[priorityWeight] || '🟡';
                         return `
                         <li class="topic-item flex justify-between items-start group p-2 rounded-md hover:bg-gray-50 ${showDateClass}">
                             <div class="flex-grow">
                                 <label class="flex items-center cursor-pointer">
                                     <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue topic-checkbox" data-topic-id="${topic.id}" ${isCompleted ? 'checked' : ''}>
                                     <span class="ml-3">${topic.description}</span>
-                                    <span class="ml-2 text-xs" title="Peso do tópico: ${priorityWeight}">${priorityColor}</span>
+                                    <span class="ml-2 text-xs px-2 py-1 rounded-full ${getTopicWeightColor(topic.priority_weight || 3)}">P${topic.priority_weight || 3}</span>
                                 </label>
                                 <div class="historic-date-input ml-7 mt-2">
                                     <label class="text-xs text-gray-500">Data de conclusão:</label>
@@ -746,7 +793,7 @@
                                 </div>
                             </div>
                             <div class="space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button class="edit-topic-btn p-1 rounded-md hover:bg-gray-200" data-topic-id="${topic.id}" data-description="${topic.description}" data-priority="${priorityWeight}">✏️</button>
+                                <button class="edit-topic-btn p-1 rounded-md hover:bg-gray-200" data-topic-id="${topic.id}" data-description="${topic.description}" data-priority="${topic.priority_weight || 3}">✏️</button>
                                 <button class="delete-topic-btn p-1 rounded-md hover:bg-gray-200" data-topic-id="${topic.id}" data-description="${topic.description}">🗑️</button>
                             </div>
                         </li>`
@@ -774,27 +821,157 @@
         function showRetaFinalReport(excludedTopics, prioritizedSubjects) {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4';
+            
+            // Agrupar tópicos excluídos por disciplina
+            const excludedBySubject = excludedTopics.reduce((acc, topic) => {
+                if (!acc[topic.subject_name]) {
+                    acc[topic.subject_name] = [];
+                }
+                acc[topic.subject_name].push(topic.description);
+                return acc;
+            }, {});
+            
+            const totalIncluded = (prioritizedSubjects.length > 0) ? 'Calculando...' : 'N/A';
+            const totalExcluded = excludedTopics.length;
+            
             modal.innerHTML = `
-                <div class="bg-white rounded-xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto">
-                    <h2 class="text-xl font-bold text-red-700 mb-4">Relatório Modo Reta Final</h2>
-                    <div class="mb-4">
-                        <h3 class="font-semibold text-green-800">Disciplinas Priorizadas</h3>
-                        <ul class="list-disc pl-5 text-sm text-green-700">
-                            ${prioritizedSubjects.map(s => `<li>${s.name} (peso ${s.weight})</li>`).join('')}
-                        </ul>
+                <div class="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-red-700 flex items-center">
+                            🎯 Relatório do Modo Reta Final
+                        </h2>
+                        <button class="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
                     </div>
-                    <div class="mb-4">
-                        <h3 class="font-semibold text-red-800">Tópicos Excluídos</h3>
-                        <ul class="list-disc pl-5 text-sm text-red-700 max-h-40 overflow-y-auto">
-                            ${excludedTopics.map(t => `<li>${t.subject_name}: ${t.description}</li>`).join('')}
-                        </ul>
+                    
+                    <!-- Resumo Estatístico -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                            <div class="text-2xl font-bold text-green-600">${totalIncluded}</div>
+                            <div class="text-sm text-green-700">Tópicos Priorizados</div>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                            <div class="text-2xl font-bold text-red-600">${totalExcluded}</div>
+                            <div class="text-sm text-red-700">Tópicos Excluídos</div>
+                        </div>
                     </div>
-                    <div class="text-center mt-4">
-                        <button class="btn-primary px-4 py-2">Fechar</button>
+                    
+                    <!-- Alerta Informativo -->
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                        <h3 class="font-semibold text-blue-800 mb-2">💡 Como funciona a priorização?</h3>
+                        <p class="text-sm text-blue-700">O algoritmo usa a fórmula: <strong>(Peso da Disciplina × 10) + Peso do Assunto</strong></p>
+                        <p class="text-xs text-blue-600 mt-1">Exemplo: Direito Constitucional (peso 5) + Direitos Fundamentais (prioridade 5) = 55 pontos</p>
+                    </div>
+                    
+                    ${prioritizedSubjects.length > 0 ? `
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-green-800 mb-3 flex items-center">
+                                ✅ Disciplinas Priorizadas
+                            </h3>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    ${prioritizedSubjects.map(s => `
+                                        <div class="flex items-center justify-between bg-white p-2 rounded border">
+                                            <span class="text-sm text-green-800 font-medium">${s.name}</span>
+                                            <span class="text-xs bg-green-200 text-green-700 px-2 py-1 rounded">Peso ${s.weight}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    ${totalExcluded > 0 ? `
+                        <div class="mb-6">
+                            <h3 class="text-lg font-semibold text-red-800 mb-3 flex items-center">
+                                ⚠️ Tópicos Excluídos por Tempo Limitado
+                            </h3>
+                            <div class="space-y-3">
+                                ${Object.entries(excludedBySubject).map(([subject, topics]) => `
+                                    <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                                        <h4 class="font-semibold text-red-800 mb-2">${subject} (${topics.length} tópicos)</h4>
+                                        <div class="max-h-32 overflow-y-auto">
+                                            <ul class="space-y-1">
+                                                ${topics.map(topic => `<li class="text-sm text-red-700">• ${topic}</li>`).join('')}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <!-- Dicas de Otimização -->
+                        <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6">
+                            <h3 class="font-semibold text-yellow-800 mb-2">📝 Estratégias de Estudo</h3>
+                            <ul class="text-sm text-yellow-700 space-y-1">
+                                <li>• <strong>Prioridade máxima:</strong> Foque nos tópicos do cronograma</li>
+                                <li>• <strong>Tempo extra:</strong> Estude os excluídos nas disciplinas mais importantes</li>
+                                <li>• <strong>Revisão rápida:</strong> Faça leitura dinâmica dos tópicos excluídos</li>
+                                <li>• <strong>Questões:</strong> Resolva questões dos tópicos excluídos se sobrar tempo</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Botões de Ação -->
+                        <div class="flex flex-col sm:flex-row gap-3 mb-4">
+                            <button id="exportExclusionsCsv" class="btn-secondary text-sm px-4 py-2">
+                                📄 Exportar Lista (CSV)
+                            </button>
+                            <button id="viewOnSchedule" class="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+                                📅 Ver no Cronograma
+                            </button>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="text-center">
+                        <button id="closeModal" class="btn-primary px-6 py-2">Entendi, Fechar</button>
                     </div>
                 </div>`;
-            modal.querySelector('button').addEventListener('click', () => modal.remove());
+                
+            // Event listeners
+            const closeBtn = modal.querySelector('#closeModal');
+            const xBtn = modal.querySelector('button');
+            const exportBtn = modal.querySelector('#exportExclusionsCsv');
+            const viewBtn = modal.querySelector('#viewOnSchedule');
+            
+            const closeModal = () => modal.remove();
+            
+            closeBtn?.addEventListener('click', closeModal);
+            xBtn?.addEventListener('click', closeModal);
+            
+            if (exportBtn) {
+                exportBtn.addEventListener('click', () => {
+                    exportExclusionsAsCsv(excludedTopics);
+                });
+            }
+            
+            if (viewBtn) {
+                viewBtn.addEventListener('click', () => {
+                    window.open(`cronograma.html?id=${planId}`, '_blank');
+                });
+            }
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+            
             document.body.appendChild(modal);
+        }
+        
+        function exportExclusionsAsCsv(excludedTopics) {
+            let csvContent = 'Disciplina,Tópico,Motivo\n';
+            
+            excludedTopics.forEach(topic => {
+                csvContent += `"${topic.subject_name}","${topic.description}","Tempo insuficiente - Modo Reta Final"\n`;
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `topicos_excluidos_reta_final_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            app.showToast('📄 Lista exportada com sucesso!', 'success');
         }
         
         function handleEditSubject(id, name, priority) {
@@ -813,36 +990,27 @@
 
         function handleEditTopic(id, description, priority = 3) {
             document.getElementById('editModalTitle').textContent = 'Editar Tópico';
-            document.getElementById('editModalBody').innerHTML = `
-                <form id="editTopicForm" data-id="${id}" class="space-y-4">
-                    <div>
-                        <label for="edit_topic_description" class="block text-sm font-medium text-gray-700">Descrição</label>
-                        <textarea id="edit_topic_description" class="form-input" rows="4" required>${description}</textarea>
-                    </div>
-                    <div>
-                        <label for="edit_topic_priority" class="block text-sm font-medium text-gray-700 mb-1">
-                            Peso do Tópico
-                            <span class="tooltip">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span class="tooltiptext">Define a importância deste tópico dentro da disciplina. É combinado com o peso da disciplina para priorização no cronograma.</span>
-                            </span>
-                        </label>
-                        <select id="edit_topic_priority" class="form-input" required>
-                            <option value="5" ${priority == 5 ? 'selected' : ''}>🔴 5 - Muito Importante</option>
-                            <option value="4" ${priority == 4 ? 'selected' : ''}>🟠 4 - Importante</option>
-                            <option value="3" ${priority == 3 ? 'selected' : ''}>🟡 3 - Médio</option>
-                            <option value="2" ${priority == 2 ? 'selected' : ''}>🟢 2 - Baixo</option>
-                            <option value="1" ${priority == 1 ? 'selected' : ''}>⚪ 1 - Muito Baixo</option>
-                        </select>
-                    </div>
-                    <div class="flex justify-end space-x-3 pt-4">
-                        <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 btn-cancel">Cancelar</button>
-                        <button type="submit" class="btn-primary py-2 px-4 text-sm">Salvar</button>
-                    </div>
-                </form>
-            `;
+            document.getElementById('editModalBody').innerHTML = `<form id="editTopicForm" data-id="${id}" class="space-y-4">
+                <div>
+                    <label for="edit_topic_description" class="block text-sm font-medium text-gray-700">Descrição</label>
+                    <textarea id="edit_topic_description" class="form-input" rows="4" required>${description}</textarea>
+                </div>
+                <div>
+                    <label for="edit_topic_priority" class="block text-sm font-medium text-gray-700">Peso do Assunto</label>
+                    <select id="edit_topic_priority" class="form-input" required>
+                        <option value="1" ${priority == 1 ? 'selected' : ''}>1 - Muito Baixa</option>
+                        <option value="2" ${priority == 2 ? 'selected' : ''}>2 - Baixa</option>
+                        <option value="3" ${priority == 3 ? 'selected' : ''}>3 - Média</option>
+                        <option value="4" ${priority == 4 ? 'selected' : ''}>4 - Alta</option>
+                        <option value="5" ${priority == 5 ? 'selected' : ''}>5 - Muito Alta</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Define o peso específico deste assunto dentro da disciplina (1-5)</p>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 btn-cancel">Cancelar</button>
+                    <button type="submit" class="btn-primary py-2 px-4 text-sm">Salvar</button>
+                </div>
+            </form>`;
             openModal();
             document.getElementById('editTopicForm').addEventListener('submit', submitEditTopic);
         }
@@ -883,7 +1051,7 @@
             const id = event.target.dataset.id;
             const body = { 
                 description: document.getElementById('edit_topic_description').value,
-                priority_weight: document.getElementById('edit_topic_priority').value
+                priority_weight: parseInt(document.getElementById('edit_topic_priority').value)
             };
             await submitApiRequestWrapper(`/topics/${id}`, 'PATCH', body, 'Tópico atualizado!');
         }
@@ -922,6 +1090,14 @@
             newContentForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 const form = event.target;
+                const submitBtn = form.querySelector('button[type="submit"]');
+                
+                // Evitar submissões múltiplas
+                if (submitBtn.disabled) return;
+                submitBtn.disabled = true;
+                const originalBtnText = submitBtn.textContent;
+                submitBtn.textContent = 'Adicionando...';
+                
                 const body = { subject_name: document.getElementById('subject_name').value, priority_weight: document.getElementById('priority_weight').value, topics_list: document.getElementById('topics_list').value };
                 app.showSpinner();
                 try {
@@ -933,6 +1109,9 @@
                     app.showToast(error.message, 'error');
                 } finally {
                     app.hideSpinner();
+                    // Restaurar botão
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalBtnText;
                 }
             });
 
@@ -951,6 +1130,13 @@
 
                 if (button.classList.contains('save-progress-btn')) {
                     event.preventDefault();
+                    
+                    // Evitar cliques múltiplos
+                    if (button.disabled) return;
+                    button.disabled = true;
+                    const originalText = button.textContent;
+                    button.textContent = 'Salvando...';
+                    
                     const subjectId = button.dataset.subjectId;
                     const topicsList = document.getElementById(`topics-for-${subjectId}`);
                     const topicsToUpdate = Array.from(topicsList.querySelectorAll('.topic-item')).map(item => {
@@ -980,6 +1166,9 @@
                         app.showToast(error.message, 'error');
                     } finally {
                         app.hideSpinner();
+                        // Restaurar botão
+                        button.disabled = false;
+                        button.textContent = originalText;
                     }
                 } else if (button.classList.contains('edit-subject-btn')) {
                     handleEditSubject(button.dataset.subjectId, button.dataset.subjectName, button.dataset.priority);
@@ -1167,13 +1356,24 @@
                 });
             }
             
-            // Atualizar progresso quando houver mudanças
-            document.addEventListener('change', updateProgress);
-            document.addEventListener('input', updateProgress);
+            // Debounce para updateProgress para evitar chamadas excessivas
+            let updateProgressTimeout;
+            const debouncedUpdateProgress = () => {
+                clearTimeout(updateProgressTimeout);
+                updateProgressTimeout = setTimeout(updateProgress, 300);
+            };
+            
+            // Atualizar progresso quando houver mudanças (com debounce)
+            document.addEventListener('change', debouncedUpdateProgress);
+            document.addEventListener('input', debouncedUpdateProgress);
             
             // Atualizar progresso inicial
             setTimeout(updateProgress, 1000);
         });
     </script>
+    
+    <!-- Script do rodapé modular -->
+    <script src="js/footer.js"></script>
+    <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
 </body>
 </html>

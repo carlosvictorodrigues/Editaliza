@@ -7,6 +7,15 @@
 
 const { dbGet, dbAll } = require('../utils/database');
 
+// Função para obter data brasileira
+function getBrazilianDateString() {
+    const now = new Date();
+    const year = parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', year: 'numeric'}));
+    const month = String(parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', month: 'numeric'}))).padStart(2, '0');
+    const day = String(parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', day: 'numeric'}))).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 /**
  * Get plan by ID and verify user ownership
  */
@@ -236,7 +245,7 @@ const getWeakTopics = async (planId) => {
  * Get overdue tasks
  */
 const getOverdueTasks = async (planId) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getBrazilianDateString();
     
     const overdueTasks = await dbAll(`
         SELECT 

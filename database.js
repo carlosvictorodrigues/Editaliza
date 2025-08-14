@@ -249,6 +249,19 @@ const db = new sqlite3.Database(DBSOURCE, async (err) => {
                 attempt_time DATETIME
             )`);
 
+            // Tabela para armazenar tópicos excluídos no modo Reta Final
+            db.run(`CREATE TABLE IF NOT EXISTS reta_final_excluded_topics (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                study_plan_id INTEGER,
+                subject_name TEXT,
+                topic_name TEXT,
+                importance INTEGER,
+                priority_weight REAL,
+                reason TEXT,
+                excluded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (study_plan_id) REFERENCES study_plans (id)
+            )`);
+
             db.run(`CREATE TABLE IF NOT EXISTS user_activities (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER,
@@ -303,6 +316,19 @@ const db = new sqlite3.Database(DBSOURCE, async (err) => {
                 attempt_time DATETIME
             )`);
 
+            // Tabela para armazenar tópicos excluídos no modo Reta Final
+            db.run(`CREATE TABLE IF NOT EXISTS reta_final_exclusions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                study_plan_id INTEGER,
+                topic_id INTEGER,
+                subject_name TEXT,
+                topic_description TEXT,
+                priority_combined REAL,
+                exclusion_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (study_plan_id) REFERENCES study_plans (id),
+                FOREIGN KEY (topic_id) REFERENCES topics (id)
+            )`);
+
 
             // OTIMIZAÇÕES DE PERFORMANCE: Criar índices otimizados
             console.log('Criando índices otimizados para performance...');
@@ -346,6 +372,10 @@ const db = new sqlite3.Database(DBSOURCE, async (err) => {
             
             // Índices para planos de estudo
             db.run('CREATE INDEX IF NOT EXISTS idx_study_plans_user_id ON study_plans(user_id)');
+            
+            // Índices para exclusões do modo Reta Final
+            db.run('CREATE INDEX IF NOT EXISTS idx_reta_final_exclusions_plan_id ON reta_final_exclusions(study_plan_id)');
+            db.run('CREATE INDEX IF NOT EXISTS idx_reta_final_exclusions_date ON reta_final_exclusions(exclusion_date)');
             
             console.log('Índices criados com sucesso.');
             console.log('Banco de dados configurado com sucesso.');
