@@ -20,6 +20,8 @@
     <!-- SCRIPTS CENTRALIZADOS -->
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
+    <script src="js/checklist.js"></script>
+    <script src="js/timer.js"></script>
     <script src="js/ux-improvements.js"></script>
     
     <!-- SMART NOTIFICATION MODULES -->
@@ -99,6 +101,95 @@
             0% { background-position: -200% 0; }
             100% { background-position: 200% 0; }
         }
+        
+        /* Estilos para modal de comparação avançado */
+        .comparison-modal {
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .comparison-tabs {
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .comparison-tab {
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .comparison-tab.active {
+            color: #0528f2;
+            border-bottom-color: #0528f2;
+            background-color: #f8fafc;
+        }
+        
+        .topic-item {
+            transition: all 0.2s ease;
+        }
+        
+        .topic-item:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .priority-indicator {
+            width: 4px;
+            height: 100%;
+            border-radius: 2px;
+        }
+        
+        .priority-high { background-color: #dc2626; }
+        .priority-medium { background-color: #f59e0b; }
+        .priority-low { background-color: #10b981; }
+        
+        /* Alerta proativo no topo */
+        .proactive-alert {
+            animation: slideInFromTop 0.5s ease-out;
+        }
+        
+        @keyframes slideInFromTop {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Gráficos personalizados */
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+        
+        .donut-chart {
+            width: 120px;
+            height: 120px;
+        }
+        
+        /* Cores para gráficos */
+        .chart-included { color: #10b981; }
+        .chart-excluded { color: #dc2626; }
+        .chart-reduced { color: #f59e0b; }
+        
+        /* Filtros e busca */
+        .filter-chip {
+            transition: all 0.2s ease;
+        }
+        
+        .filter-chip.active {
+            background-color: #0528f2;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .search-highlight {
+            background-color: #fef3c7;
+            padding: 1px 3px;
+            border-radius: 3px;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800">
@@ -119,6 +210,152 @@
             </div>
             <div class="mt-6 text-center">
                 <button id="cancelPostponeButton" class="text-sm text-gray-500 hover:text-gray-700 font-medium">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Comparação Avançado -->
+    <div id="advancedComparisonModal" class="modal-overlay hidden fixed inset-0 bg-editaliza-black bg-opacity-70 z-40 flex items-center justify-center p-4 opacity-0">
+        <div class="modal-container comparison-modal bg-white rounded-2xl shadow-2xl w-full max-w-6xl transform scale-95">
+            <div class="p-6">
+                <!-- Cabeçalho -->
+                <div class="flex justify-between items-center mb-6">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-800">Análise Comparativa Completa</h2>
+                            <p class="text-sm text-gray-600">Visão detalhada de todos os tópicos incluídos vs excluídos</p>
+                        </div>
+                    </div>
+                    <button id="closeAdvancedComparison" class="text-gray-500 hover:text-gray-700 text-2xl transition-colors">&times;</button>
+                </div>
+                
+                <!-- Dashboard de Estatísticas -->
+                <div id="comparisonDashboard" class="mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div class="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
+                            <div class="text-3xl font-bold text-green-600" id="dashIncludedCount">-</div>
+                            <div class="text-sm text-green-700 font-medium">Tópicos Incluídos</div>
+                            <div class="text-xs text-green-600 mt-1" id="dashIncludedPercent">-%</div>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-lg border border-red-200 text-center">
+                            <div class="text-3xl font-bold text-red-600" id="dashExcludedCount">-</div>
+                            <div class="text-sm text-red-700 font-medium">Tópicos Excluídos</div>
+                            <div class="text-xs text-red-600 mt-1" id="dashExcludedPercent">-%</div>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
+                            <div class="text-3xl font-bold text-blue-600" id="dashSubjectsCount">-</div>
+                            <div class="text-sm text-blue-700 font-medium">Disciplinas Afetadas</div>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg border border-purple-200 text-center">
+                            <div class="text-3xl font-bold text-purple-600" id="dashCoverageRate">-%</div>
+                            <div class="text-sm text-purple-700 font-medium">Taxa de Cobertura</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfico de Distribuição -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <div class="flex items-center justify-center space-x-8">
+                            <div class="text-center">
+                                <canvas id="distributionChart" class="donut-chart mx-auto"></canvas>
+                                <p class="text-sm text-gray-600 mt-2 font-medium">Distribuição Geral</p>
+                            </div>
+                            <div class="space-y-2">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-4 h-4 bg-green-500 rounded"></div>
+                                    <span class="text-sm text-gray-700">Incluídos no cronograma</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-4 h-4 bg-red-500 rounded"></div>
+                                    <span class="text-sm text-gray-700">Excluídos pela otimização</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-4 h-4 bg-yellow-500 rounded"></div>
+                                    <span class="text-sm text-gray-700">Priorizados para revisão</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Controles e Filtros -->
+                <div class="mb-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+                        <!-- Busca -->
+                        <div class="relative flex-1 max-w-md">
+                            <input type="text" id="comparisonSearch" 
+                                placeholder="Buscar tópico ou disciplina..." 
+                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <svg class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        
+                        <!-- Filtros -->
+                        <div class="flex space-x-2">
+                            <button data-filter="all" class="filter-chip active px-3 py-2 text-xs font-semibold rounded-full border border-gray-300 transition-all">
+                                Todos
+                            </button>
+                            <button data-filter="high" class="filter-chip px-3 py-2 text-xs font-semibold rounded-full border border-gray-300 transition-all">
+                                Alta Prioridade
+                            </button>
+                            <button data-filter="medium" class="filter-chip px-3 py-2 text-xs font-semibold rounded-full border border-gray-300 transition-all">
+                                Média Prioridade
+                            </button>
+                            <button data-filter="low" class="filter-chip px-3 py-2 text-xs font-semibold rounded-full border border-gray-300 transition-all">
+                                Baixa Prioridade
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tabs de Comparação -->
+                <div class="comparison-tabs mb-6">
+                    <div class="flex space-x-6">
+                        <button data-tab="side-by-side" class="comparison-tab active px-4 py-3 text-sm font-semibold">
+                            Lado a Lado
+                        </button>
+                        <button data-tab="by-subject" class="comparison-tab px-4 py-3 text-sm font-semibold">
+                            Por Disciplina
+                        </button>
+                        <button data-tab="by-priority" class="comparison-tab px-4 py-3 text-sm font-semibold">
+                            Por Prioridade
+                        </button>
+                        <button data-tab="timeline" class="comparison-tab px-4 py-3 text-sm font-semibold">
+                            Timeline
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Conteúdo das Tabs -->
+                <div id="comparisonContent" class="min-h-96 max-h-96 overflow-y-auto">
+                    <!-- Conteúdo será preenchido dinamicamente -->
+                </div>
+                
+                <!-- Ações -->
+                <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+                    <div class="flex space-x-3">
+                        <button id="exportComparisonPDF" class="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                            Baixar PDF
+                        </button>
+                        <button id="exportComparisonCSV" class="flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L4.414 9H17a1 1 0 100-2H4.414l1.879-1.879z" clip-rule="evenodd"></path>
+                            </svg>
+                            Exportar CSV
+                        </button>
+                    </div>
+                    <button id="closeComparisonModal" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                        Fechar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -161,6 +398,29 @@
         
         <!-- ALERTA DE MODO RETA FINAL -->
         <div id="reta-final-alert-container"></div>
+        
+        <!-- ALERTA PROATIVO DE MUITAS EXCLUSÕES -->
+        <div id="proactive-exclusion-alert" class="proactive-alert" style="display: none;">
+            <div class="bg-gradient-to-r from-red-600 to-orange-600 text-white p-4 rounded-lg shadow-lg mb-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div>
+                            <h3 class="font-bold text-lg">Atenção: Alta Exclusão de Conteúdo</h3>
+                            <p class="text-sm opacity-90" id="proactive-alert-text">Uma quantidade significativa de tópicos foi excluída do seu cronograma.</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="viewTransparencyFromAlert" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                            Ver Detalhes
+                        </button>
+                        <button id="dismissProactiveAlert" class="text-white hover:text-gray-200 text-xl font-bold">×</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Controles de Filtro e Exportação -->
         <div class="bg-white p-4 rounded-xl shadow-md mb-8">
@@ -234,8 +494,32 @@
                             <!-- Será preenchido dinamicamente -->
                         </div>
                         
+                        <!-- Ranking de Disciplinas Mais Afetadas -->
+                        <div id="subjectRankingContainer" class="mb-4">
+                            <!-- Será preenchido dinamicamente -->
+                        </div>
+                        
+                        <!-- Recomendações Inteligentes -->
+                        <div id="intelligentRecommendations" class="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-4">
+                            <h4 class="font-semibold text-blue-800 mb-2 flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                </svg>
+                                Estratégias Recomendadas
+                            </h4>
+                            <div id="recommendationsList" class="text-sm text-blue-700">
+                                <!-- Será preenchido dinamicamente -->
+                            </div>
+                        </div>
+
                         <!-- Ações Melhoradas -->
                         <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-red-200">
+                            <button id="openAdvancedComparison" class="flex items-center justify-center btn-primary text-sm px-4 py-2 hover:scale-105 transition-transform">
+                                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                Análise Comparativa Completa
+                            </button>
                             <button id="viewFullReportBtn" class="flex items-center justify-center btn-secondary text-sm px-4 py-2 hover:scale-105 transition-transform">
                                 <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -250,7 +534,7 @@
                             </button>
                             <button id="toggleTransparencyBtn" class="flex items-center justify-center bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 text-sm px-4 py-2 rounded-lg transition-all hover:scale-105">
                                 <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464a1.414 1.414 0 00-2 2l1.414 1.414zm4.242 4.242L12.708 15.5a1.414 1.414 0 002 2l1.414-1.414z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464a1.414 1.414 0 00-2 2l1.414 1.414zm4.242 4.242L12.708 15.5a1 1 0 002 2l1.414-1.414z" />
                                 </svg>
                                 Minimizar
                             </button>
@@ -668,6 +952,12 @@
             // Calcular tópicos incluídos do cronograma atual
             const includedTopicsCount = calculateIncludedTopics();
             
+            // Verificar se deve mostrar alerta proativo (mais de 20% excluído)
+            const exclusionRate = (data.totalExclusions / (includedTopicsCount + data.totalExclusions)) * 100;
+            if (exclusionRate > 20) {
+                showProactiveExclusionAlert(exclusionRate, data.totalExclusions);
+            }
+            
             // Atualizar contadores com animação
             setTimeout(() => {
                 includedCount.textContent = includedTopicsCount;
@@ -679,6 +969,12 @@
             
             excludedList.innerHTML = listHTML;
             
+            // Gerar ranking de disciplinas mais afetadas
+            generateSubjectRanking(data);
+            
+            // Gerar recomendações inteligentes
+            generateIntelligentRecommendations(data, exclusionRate);
+            
             // Exibir seção
             section.style.display = 'block';
             
@@ -689,9 +985,15 @@
             }, 400);
             
             // Configurar botões
+            document.getElementById('openAdvancedComparison').onclick = () => openAdvancedComparisonModal(data);
             document.getElementById('viewFullReportBtn').onclick = () => showFullTransparencyReport(data);
             document.getElementById('exportExclusionsBtn').onclick = () => exportExclusionsList(data);
             document.getElementById('toggleTransparencyBtn').onclick = () => toggleTransparencySection();
+            
+            // Salvar dados globalmente para uso nos modais
+            window.transparencyData = data;
+            window.transparencyData.includedTopicsCount = includedTopicsCount;
+            window.transparencyData.exclusionRate = exclusionRate;
         }
         
         function calculateIncludedTopics() {
@@ -999,6 +1301,140 @@
                     setTimeout(() => calendarModal.classList.add('hidden'), 300);
                 }
             });
+            
+            // ============ EVENT LISTENERS PARA FUNCIONALIDADES AVANÇADAS DE TRANSPARÊNCIA ============
+            
+            // Modal de Comparação Avançado
+            const advancedModal = document.getElementById('advancedComparisonModal');
+            
+            // Fechar modal
+            document.getElementById('closeAdvancedComparison').addEventListener('click', closeAdvancedModal);
+            document.getElementById('closeComparisonModal').addEventListener('click', closeAdvancedModal);
+            advancedModal.addEventListener('click', (event) => {
+                if (event.target === advancedModal) {
+                    closeAdvancedModal();
+                }
+            });
+            
+            function closeAdvancedModal() {
+                advancedModal.classList.add('opacity-0');
+                advancedModal.querySelector('.modal-container').classList.add('scale-95');
+                setTimeout(() => advancedModal.classList.add('hidden'), 300);
+            }
+            
+            // Tabs de comparação
+            advancedModal.addEventListener('click', (event) => {
+                if (event.target.classList.contains('comparison-tab')) {
+                    const activeTab = advancedModal.querySelector('.comparison-tab.active');
+                    if (activeTab) activeTab.classList.remove('active');
+                    event.target.classList.add('active');
+                    
+                    const tabType = event.target.dataset.tab;
+                    if (window.transparencyData) {
+                        loadComparisonContent(tabType, window.transparencyData);
+                    }
+                }
+            });
+            
+            // Filtros de prioridade
+            advancedModal.addEventListener('click', (event) => {
+                if (event.target.classList.contains('filter-chip')) {
+                    const activeFilter = advancedModal.querySelector('.filter-chip.active');
+                    if (activeFilter) activeFilter.classList.remove('active');
+                    event.target.classList.add('active');
+                    
+                    // Implementar filtro (funcionalidade adicional)
+                    filterTopicsByPriority(event.target.dataset.filter);
+                }
+            });
+            
+            // Busca
+            const searchInput = document.getElementById('comparisonSearch');
+            if (searchInput) {
+                searchInput.addEventListener('input', app.debounce((event) => {
+                    highlightSearchResults(event.target.value);
+                }, 300));
+            }
+            
+            // Exportação CSV/PDF
+            document.getElementById('exportComparisonCSV').addEventListener('click', () => {
+                if (window.transparencyData) {
+                    exportComparisonToCSV(window.transparencyData);
+                    app.showToast('Comparação exportada em CSV!', 'success');
+                }
+            });
+            
+            document.getElementById('exportComparisonPDF').addEventListener('click', () => {
+                app.showToast('Funcionalidade de PDF em desenvolvimento', 'info');
+            });
+            
+            // Funções auxiliares para filtros e busca
+            function filterTopicsByPriority(priority) {
+                const topicItems = advancedModal.querySelectorAll('.topic-item');
+                topicItems.forEach(item => {
+                    if (priority === 'all') {
+                        item.style.display = 'block';
+                    } else {
+                        const priorityElement = item.querySelector('[class*="priority-"]');
+                        if (priorityElement && priorityElement.classList.contains(`priority-${priority}`)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    }
+                });
+            }
+            
+            function highlightSearchResults(searchTerm) {
+                if (!searchTerm || searchTerm.length < 2) {
+                    // Remover highlights existentes
+                    advancedModal.querySelectorAll('.search-highlight').forEach(el => {
+                        el.outerHTML = el.innerHTML;
+                    });
+                    return;
+                }
+                
+                const topicItems = advancedModal.querySelectorAll('.topic-item');
+                topicItems.forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    const hasMatch = text.includes(searchTerm.toLowerCase());
+                    
+                    if (hasMatch) {
+                        item.style.display = 'block';
+                        // Destacar termo encontrado
+                        const regex = new RegExp(`(${searchTerm})`, 'gi');
+                        const textNodes = getTextNodes(item);
+                        textNodes.forEach(node => {
+                            if (node.textContent.toLowerCase().includes(searchTerm.toLowerCase())) {
+                                const highlighted = node.textContent.replace(regex, '<span class="search-highlight">$1</span>');
+                                const wrapper = document.createElement('div');
+                                wrapper.innerHTML = highlighted;
+                                node.parentNode.replaceChild(wrapper.firstChild, node);
+                            }
+                        });
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+            
+            function getTextNodes(element) {
+                const textNodes = [];
+                const walker = document.createTreeWalker(
+                    element,
+                    NodeFilter.SHOW_TEXT,
+                    null,
+                    false
+                );
+                
+                let node;
+                while (node = walker.nextNode()) {
+                    if (node.textContent.trim()) {
+                        textNodes.push(node);
+                    }
+                }
+                return textNodes;
+            }
         });
 
         // Função para minimizar/expandir seção de transparência
@@ -1064,9 +1500,484 @@
             }
         }
 
+        // ============ NOVAS FUNCIONALIDADES DE TRANSPARÊNCIA AVANÇADA ============
+        
+        // Mostrar alerta proativo quando há muitas exclusões
+        function showProactiveExclusionAlert(exclusionRate, totalExclusions) {
+            const alertContainer = document.getElementById('proactive-exclusion-alert');
+            const alertText = document.getElementById('proactive-alert-text');
+            
+            if (exclusionRate > 40) {
+                alertText.textContent = `${Math.round(exclusionRate)}% dos tópicos foram excluídos. Considere revisar seu plano para garantir cobertura adequada.`;
+            } else if (exclusionRate > 30) {
+                alertText.textContent = `${Math.round(exclusionRate)}% dos tópicos foram excluídos. Foque nos tópicos priorizados e mantenha disciplina.`;
+            } else {
+                alertText.textContent = `${Math.round(exclusionRate)}% dos tópicos foram excluídos. Otimização realizada para maximizar seu desempenho.`;
+            }
+            
+            alertContainer.style.display = 'block';
+            
+            // Event listeners
+            document.getElementById('viewTransparencyFromAlert').onclick = () => {
+                document.getElementById('transparencySection').scrollIntoView({behavior: 'smooth', block: 'center'});
+            };
+            
+            document.getElementById('dismissProactiveAlert').onclick = () => {
+                alertContainer.style.display = 'none';
+                localStorage.setItem('dismissedProactiveAlert', Date.now());
+            };
+            
+            // Auto-hide após 10 segundos se não interagir
+            setTimeout(() => {
+                if (alertContainer.style.display !== 'none') {
+                    alertContainer.style.opacity = '0.7';
+                }
+            }, 10000);
+        }
+        
+        // Gerar ranking de disciplinas mais afetadas
+        function generateSubjectRanking(data) {
+            const container = document.getElementById('subjectRankingContainer');
+            const subjects = Object.keys(data.exclusionsBySubject);
+            
+            if (subjects.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            // Ordenar por quantidade de exclusões
+            const sortedSubjects = subjects.sort((a, b) => 
+                data.exclusionsBySubject[b].length - data.exclusionsBySubject[a].length
+            ).slice(0, 5); // Top 5
+            
+            let html = `
+                <div class="bg-white p-4 rounded-lg border border-gray-200 mb-4">
+                    <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                        <svg class="w-4 h-4 mr-2 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Disciplinas Mais Afetadas
+                    </h4>
+                    <div class="space-y-2">
+            `;
+            
+            sortedSubjects.forEach((subject, index) => {
+                const count = data.exclusionsBySubject[subject].length;
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}°`;
+                
+                html += `
+                    <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                        <div class="flex items-center">
+                            <span class="text-sm font-bold mr-2">${medal}</span>
+                            <span class="text-sm font-medium text-gray-700">${subject}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-sm text-red-600 font-bold mr-2">${count} tópicos</span>
+                            <div class="w-12 h-2 bg-gray-200 rounded-full">
+                                <div class="h-2 bg-red-500 rounded-full" style="width: ${Math.min((count / 10) * 100, 100)}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div></div>`;
+            container.innerHTML = html;
+        }
+        
+        // Gerar recomendações inteligentes
+        function generateIntelligentRecommendations(data, exclusionRate) {
+            const container = document.getElementById('recommendationsList');
+            let recommendations = [];
+            
+            if (exclusionRate > 40) {
+                recommendations.push('⚠️ Taxa de exclusão muito alta. Considere estender o prazo de estudos se possível.');
+                recommendations.push('🎯 Foque exclusivamente nos tópicos de maior peso nas provas anteriores.');
+                recommendations.push('📚 Use técnicas de estudo acelerado: mapas mentais, fichas resumo, vídeos em velocidade 1.5x.');
+            } else if (exclusionRate > 25) {
+                recommendations.push('⏰ Mantenha disciplina rigorosa no cronograma estabelecido.');
+                recommendations.push('🔄 Se concluir um tópico rapidamente, revise outros da mesma disciplina.');
+                recommendations.push('📊 Priorize simulados para identificar pontos fracos restantes.');
+            } else {
+                recommendations.push('✅ Cronograma otimizado com boa cobertura de conteúdo.');
+                recommendations.push('📈 Dedique tempo extra para aprofundamento em disciplinas de maior peso.');
+                recommendations.push('🎲 Se sobrar tempo, revise tópicos excluídos por ordem de prioridade.');
+            }
+            
+            // Adicionar recomendações específicas por disciplina mais afetada
+            const subjects = Object.keys(data.exclusionsBySubject);
+            if (subjects.length > 0) {
+                const mostAffected = subjects.reduce((a, b) => 
+                    data.exclusionsBySubject[a].length > data.exclusionsBySubject[b].length ? a : b
+                );
+                recommendations.push(`📋 Disciplina mais afetada: ${mostAffected}. Considere material complementar específico.`);
+            }
+            
+            container.innerHTML = recommendations.map(rec => `<div class="mb-2">${rec}</div>`).join('');
+        }
+        
+        // Abrir modal de comparação avançado
+        function openAdvancedComparisonModal(data) {
+            const modal = document.getElementById('advancedComparisonModal');
+            const includedCount = calculateIncludedTopics();
+            const totalTopics = includedCount + data.totalExclusions;
+            
+            // Atualizar dashboard
+            document.getElementById('dashIncludedCount').textContent = includedCount;
+            document.getElementById('dashExcludedCount').textContent = data.totalExclusions;
+            document.getElementById('dashIncludedPercent').textContent = Math.round((includedCount / totalTopics) * 100) + '%';
+            document.getElementById('dashExcludedPercent').textContent = Math.round((data.totalExclusions / totalTopics) * 100) + '%';
+            document.getElementById('dashSubjectsCount').textContent = Object.keys(data.exclusionsBySubject).length;
+            document.getElementById('dashCoverageRate').textContent = Math.round((includedCount / totalTopics) * 100) + '%';
+            
+            // Renderizar gráfico de distribuição
+            renderDistributionChart(includedCount, data.totalExclusions);
+            
+            // Carregar conteúdo inicial (lado a lado)
+            loadComparisonContent('side-by-side', data);
+            
+            // Mostrar modal
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.modal-container').classList.remove('scale-95');
+            }, 10);
+        }
+        
+        // Renderizar gráfico de distribuição (usando Chart.js se disponível, senão CSS puro)
+        function renderDistributionChart(included, excluded) {
+            const canvas = document.getElementById('distributionChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Limpar canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Usar CSS para criar um gráfico simples se Chart.js não estiver disponível
+            const total = included + excluded;
+            const includedAngle = (included / total) * 2 * Math.PI;
+            const excludedAngle = (excluded / total) * 2 * Math.PI;
+            
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = 50;
+            const innerRadius = 30;
+            
+            // Desenhar arco incluído (verde)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -Math.PI/2, -Math.PI/2 + includedAngle);
+            ctx.arc(centerX, centerY, innerRadius, -Math.PI/2 + includedAngle, -Math.PI/2, true);
+            ctx.closePath();
+            ctx.fillStyle = '#10b981';
+            ctx.fill();
+            
+            // Desenhar arco excluído (vermelho)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, -Math.PI/2 + includedAngle, -Math.PI/2 + includedAngle + excludedAngle);
+            ctx.arc(centerX, centerY, innerRadius, -Math.PI/2 + includedAngle + excludedAngle, -Math.PI/2 + includedAngle, true);
+            ctx.closePath();
+            ctx.fillStyle = '#dc2626';
+            ctx.fill();
+        }
+        
+        // Carregar conteúdo das tabs de comparação
+        function loadComparisonContent(tab, data) {
+            const container = document.getElementById('comparisonContent');
+            
+            switch(tab) {
+                case 'side-by-side':
+                    container.innerHTML = generateSideBySideView(data);
+                    break;
+                case 'by-subject':
+                    container.innerHTML = generateBySubjectView(data);
+                    break;
+                case 'by-priority':
+                    container.innerHTML = generateByPriorityView(data);
+                    break;
+                case 'timeline':
+                    container.innerHTML = generateTimelineView(data);
+                    break;
+            }
+        }
+        
+        // Gerar visualização lado a lado
+        function generateSideBySideView(data) {
+            const includedTopics = getIncludedTopicsDetails();
+            
+            return `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+                    <!-- Tópicos Incluídos -->
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <h3 class="font-bold text-green-800 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            Tópicos Incluídos (${includedTopics.length})
+                        </h3>
+                        <div class="space-y-2 max-h-80 overflow-y-auto">
+                            ${includedTopics.map(topic => `
+                                <div class="bg-white p-3 rounded border border-green-200 topic-item">
+                                    <div class="flex items-start">
+                                        <div class="priority-indicator priority-high mr-3"></div>
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-gray-800">${topic.subject}</div>
+                                            <div class="text-sm text-gray-600">${topic.description}</div>
+                                            <div class="text-xs text-green-700 mt-1">✅ Agendado para ${topic.date}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <!-- Tópicos Excluídos -->
+                    <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                        <h3 class="font-bold text-red-800 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                            </svg>
+                            Tópicos Excluídos (${data.totalExclusions})
+                        </h3>
+                        <div class="space-y-2 max-h-80 overflow-y-auto">
+                            ${Object.entries(data.exclusionsBySubject).map(([subject, topics]) => 
+                                topics.map(topic => `
+                                    <div class="bg-white p-3 rounded border border-red-200 topic-item">
+                                        <div class="flex items-start">
+                                            <div class="priority-indicator ${getPriorityClass(topic.priority_combined)} mr-3"></div>
+                                            <div class="flex-1">
+                                                <div class="text-sm font-medium text-gray-800">${subject}</div>
+                                                <div class="text-sm text-gray-600">${topic.description}</div>
+                                                <div class="flex items-center mt-1 space-x-2">
+                                                    <span class="text-xs bg-gray-100 px-2 py-1 rounded">Prioridade ${topic.priority_combined}</span>
+                                                    <span class="text-xs text-red-600">❌ Excluído</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')
+                            ).flat().join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Gerar visualização por disciplina
+        function generateBySubjectView(data) {
+            const allSubjects = [...new Set([
+                ...Object.keys(data.exclusionsBySubject),
+                ...getIncludedTopicsDetails().map(t => t.subject)
+            ])];
+            
+            return `
+                <div class="space-y-6">
+                    ${allSubjects.map(subject => {
+                        const excluded = data.exclusionsBySubject[subject] || [];
+                        const included = getIncludedTopicsDetails().filter(t => t.subject === subject);
+                        
+                        return `
+                            <div class="bg-white p-4 rounded-lg border border-gray-200">
+                                <h3 class="font-bold text-gray-800 mb-4">${subject}</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-green-700 mb-2">Incluídos (${included.length})</h4>
+                                        <div class="space-y-1 max-h-32 overflow-y-auto">
+                                            ${included.map(topic => `
+                                                <div class="text-xs bg-green-50 p-2 rounded border border-green-200">
+                                                    ${topic.description}
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-red-700 mb-2">Excluídos (${excluded.length})</h4>
+                                        <div class="space-y-1 max-h-32 overflow-y-auto">
+                                            ${excluded.map(topic => `
+                                                <div class="text-xs bg-red-50 p-2 rounded border border-red-200">
+                                                    ${topic.description}
+                                                    <span class="ml-2 text-red-600">(P: ${topic.priority_combined})</span>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+        
+        // Gerar visualização por prioridade
+        function generateByPriorityView(data) {
+            const allExcluded = Object.values(data.exclusionsBySubject).flat();
+            const priorityGroups = {
+                high: allExcluded.filter(t => t.priority_combined >= 7),
+                medium: allExcluded.filter(t => t.priority_combined >= 4 && t.priority_combined < 7),
+                low: allExcluded.filter(t => t.priority_combined < 4)
+            };
+            
+            return `
+                <div class="space-y-6">
+                    <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                        <h3 class="font-bold text-red-800 mb-4">Alta Prioridade Excluídos (${priorityGroups.high.length})</h3>
+                        <p class="text-sm text-red-700 mb-3">⚠️ Tópicos importantes que foram excluídos devido a restrições de tempo.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            ${priorityGroups.high.map(topic => `
+                                <div class="bg-white p-3 rounded border border-red-300">
+                                    <div class="text-sm font-medium">${getSubjectByTopicId(topic.topic_id, data)}</div>
+                                    <div class="text-sm text-gray-600">${topic.description}</div>
+                                    <div class="text-xs text-red-600 mt-1">Prioridade ${topic.priority_combined}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                        <h3 class="font-bold text-yellow-800 mb-4">Média Prioridade Excluídos (${priorityGroups.medium.length})</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                            ${priorityGroups.medium.map(topic => `
+                                <div class="bg-white p-2 rounded border border-yellow-300 text-sm">
+                                    <div class="font-medium">${getSubjectByTopicId(topic.topic_id, data)}</div>
+                                    <div class="text-gray-600 text-xs">${topic.description}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <h3 class="font-bold text-green-800 mb-4">Baixa Prioridade Excluídos (${priorityGroups.low.length})</h3>
+                        <p class="text-sm text-green-700 mb-3">✅ Exclusões apropriadas - tópicos de menor impacto na prova.</p>
+                        <div class="text-sm text-gray-600">
+                            ${priorityGroups.low.slice(0, 10).map(topic => 
+                                `${getSubjectByTopicId(topic.topic_id, data)}: ${topic.description}`
+                            ).join(' • ')}
+                            ${priorityGroups.low.length > 10 ? ` • ... e mais ${priorityGroups.low.length - 10} tópicos` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Gerar visualização de timeline
+        function generateTimelineView(data) {
+            const allExcluded = Object.values(data.exclusionsBySubject).flat();
+            const groupedByDate = allExcluded.reduce((acc, topic) => {
+                const date = topic.exclusion_date ? topic.exclusion_date.split('T')[0] : 'Data desconhecida';
+                if (!acc[date]) acc[date] = [];
+                acc[date].push(topic);
+                return acc;
+            }, {});
+            
+            const sortedDates = Object.keys(groupedByDate).sort().reverse();
+            
+            return `
+                <div class="space-y-4">
+                    <div class="text-center text-sm text-gray-600 mb-6">
+                        Timeline das exclusões realizadas pelo algoritmo de otimização
+                    </div>
+                    ${sortedDates.map((date, index) => `
+                        <div class="flex items-start">
+                            <div class="flex flex-col items-center mr-4">
+                                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                ${index < sortedDates.length - 1 ? '<div class="w-0.5 h-16 bg-gray-300 mt-2"></div>' : ''}
+                            </div>
+                            <div class="flex-1 pb-8">
+                                <div class="font-semibold text-gray-800 mb-2">
+                                    ${date === 'Data desconhecida' ? date : new Date(date + 'T00:00:00').toLocaleDateString('pt-BR')}
+                                </div>
+                                <div class="text-sm text-gray-600 mb-2">
+                                    ${groupedByDate[date].length} tópicos excluídos
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                    ${groupedByDate[date].slice(0, 6).map(topic => `
+                                        <div class="bg-gray-50 p-2 rounded text-xs">
+                                            <div class="font-medium">${getSubjectByTopicId(topic.topic_id, data)}</div>
+                                            <div class="text-gray-500">${topic.description}</div>
+                                        </div>
+                                    `).join('')}
+                                    ${groupedByDate[date].length > 6 ? `
+                                        <div class="bg-gray-100 p-2 rounded text-xs text-center text-gray-500">
+                                            +${groupedByDate[date].length - 6} outros
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        // Funções auxiliares
+        function getIncludedTopicsDetails() {
+            const topics = [];
+            Object.entries(fullSchedule).forEach(([date, sessions]) => {
+                sessions.forEach(session => {
+                    if (session.session_type === 'Novo Tópico') {
+                        topics.push({
+                            subject: session.subject_name,
+                            description: session.topic_description,
+                            date: new Date(date + 'T00:00:00').toLocaleDateString('pt-BR')
+                        });
+                    }
+                });
+            });
+            return topics;
+        }
+        
+        function getPriorityClass(priority) {
+            if (priority >= 7) return 'priority-high';
+            if (priority >= 4) return 'priority-medium';
+            return 'priority-low';
+        }
+        
+        function getSubjectByTopicId(topicId, data) {
+            for (const [subject, topics] of Object.entries(data.exclusionsBySubject)) {
+                if (topics.find(t => t.topic_id === topicId)) {
+                    return subject;
+                }
+            }
+            return 'Disciplina desconhecida';
+        }
+        
+        // Exportar comparação para CSV
+        function exportComparisonToCSV(data) {
+            const includedTopics = getIncludedTopicsDetails();
+            let csvContent = 'Status,Disciplina,Tópico,Prioridade,Data,Observações\\n';
+            
+            // Adicionar tópicos incluídos
+            includedTopics.forEach(topic => {
+                csvContent += `"Incluído","${topic.subject}","${topic.description}","Alta","${topic.date}","Agendado no cronograma"\\n`;
+            });
+            
+            // Adicionar tópicos excluídos
+            Object.entries(data.exclusionsBySubject).forEach(([subject, topics]) => {
+                topics.forEach(topic => {
+                    const exclusionDate = topic.exclusion_date ? new Date(topic.exclusion_date).toLocaleDateString('pt-BR') : 'N/A';
+                    csvContent += `"Excluído","${subject}","${topic.description}","${topic.priority_combined}","${exclusionDate}","Excluído pela otimização"\\n`;
+                });
+            });
+            
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `comparacao_completa_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         window.postponeSession = openPostponeModal;
         window.reinforceSession = reinforceSession;
     </script>
+    
+    <!-- MODAL DE SESSÃO DE ESTUDO -->
+    <div id="studySessionModal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4 opacity-0">
+        <div id="studySessionModalContainer" class="modal-container bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl transform scale-95 max-h-[90vh] overflow-y-auto">
+            <!-- O conteúdo do modal será injetado aqui pelo JavaScript -->
+        </div>
+    </div>
     
     <!-- Script do rodapé modular -->
     <script src="js/footer.js"></script>
