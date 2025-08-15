@@ -1,8 +1,11 @@
 const { createTransport } = require('nodemailer');
 const path = require('path');
+const EmailProviders = require('./emailProviders');
+const { logger } = require('../utils/logger');
 
 class EmailService {
     constructor() {
+        this.provider = new EmailProviders();
         this.transporter = null;
         this.isConfigured = false;
         this.initializeTransporter();
@@ -11,34 +14,25 @@ class EmailService {
     /**
      * Initialize nodemailer transporter with Gmail SMTP
      */
-    initializeTransporter() {
+    async initializeTransporter() {
         try {
-            const { EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS } = process.env;
+            this.transporter = await this.provider.initializeTransporter();
+            this.isConfigured = !!this.transporter;
             
-            // Check if email configuration is available
-            if (!EMAIL_USER || !EMAIL_PASS || EMAIL_USER === 'seu_email@gmail.com' || EMAIL_PASS === 'sua_senha_de_app') {
-                console.warn('⚠️  Email service not configured. Password recovery emails will be simulated.');
-                this.isConfigured = false;
-                return;
+            if (this.isConfigured) {
+                const status = await this.provider.getStatus();
+                logger.info('Email service initialized', {
+                    provider: status.provider,
+                    limits: status.limits
+                });
+            } else {
+                logger.warn('Email service not configured - emails will be simulated');
             }
-
-            this.transporter = createTransport({
-                host: EMAIL_HOST || 'smtp.gmail.com',
-                port: parseInt(EMAIL_PORT) || 587,
-                secure: false, // true for 465, false for other ports
-                auth: {
-                    user: EMAIL_USER,
-                    pass: EMAIL_PASS
-                },
-                tls: {
-                    rejectUnauthorized: false // For development only
-                }
-            });
-
-            this.isConfigured = true;
-            console.log('✅ Email service configured successfully');
         } catch (error) {
-            console.error('❌ Failed to configure email service:', error.message);
+            logger.error('Failed to initialize email service', null, {
+                error: error.message,
+                provider: process.env.EMAIL_PROVIDER || 'gmail'
+            });
             this.isConfigured = false;
         }
     }
