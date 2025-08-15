@@ -205,12 +205,12 @@ const getRealityCheck = async (planId, userId) => {
     }
 
     // Get all sessions and topics for analysis
-    const sessions = await dbAll("SELECT status, topic_id, session_date, session_type FROM study_sessions WHERE study_plan_id = ?", [planId]);
+    const sessions = await dbAll('SELECT status, topic_id, session_date, session_type FROM study_sessions WHERE study_plan_id = ?', [planId]);
     const totalTopicsResult = await dbGet('SELECT COUNT(t.id) as total FROM topics t JOIN subjects s ON t.subject_id = s.id WHERE s.study_plan_id = ?', [planId]);
     const totalTopics = totalTopicsResult.total;
 
     if (totalTopics === 0) {
-        return { message: "Adicione tópicos ao seu plano para ver as projeções." };
+        return { message: 'Adicione tópicos ao seu plano para ver as projeções.' };
     }
 
     const today = new Date(); 
@@ -232,7 +232,7 @@ const getRealityCheck = async (planId, userId) => {
     const isMaintenanceMode = totalTopics > 0 && futureNewTopics.length === 0;
 
     // Calculate study pace
-    const firstSessionDateResult = await dbGet("SELECT MIN(session_date) as first_date FROM study_sessions WHERE study_plan_id = ? AND session_type = 'Novo Tópico' AND status = 'Concluído'", [planId]);
+    const firstSessionDateResult = await dbGet('SELECT MIN(session_date) as first_date FROM study_sessions WHERE study_plan_id = ? AND session_type = \'Novo Tópico\' AND status = \'Concluído\'', [planId]);
     const firstSessionDate = firstSessionDateResult.first_date ? new Date(firstSessionDateResult.first_date + 'T00:00:00') : today;
 
     const daysSinceStart = Math.max(1, Math.ceil((today - firstSessionDate) / (1000 * 60 * 60 * 24)));
@@ -274,7 +274,7 @@ const getRealityCheck = async (planId, userId) => {
     }
 
     return {
-        requiredPace: isFinite(requiredPace) ? `${requiredPace.toFixed(1)} tópicos/dia` : "N/A",
+        requiredPace: isFinite(requiredPace) ? `${requiredPace.toFixed(1)} tópicos/dia` : 'N/A',
         postponementCount: plan.postponement_count || 0,
         status,
         primaryMessage,
@@ -454,103 +454,103 @@ const getGamification = async (planId, userId) => {
         }
         
         achievements.push(createAchievement(
-            "Primeira Lapada no Edital 📖", 
-            "Abriu o PDF e não chorou (muito)! Guerreiro(a)!",
+            'Primeira Lapada no Edital 📖', 
+            'Abriu o PDF e não chorou (muito)! Guerreiro(a)!',
             achievementDate
         ));
     }
     if (completedTopicsCount >= 5) {
         achievements.push(createAchievement(
-            "Maratonista do PDF 🏃", 
-            "5 tópicos estudados e ainda tem café na xícara!"
+            'Maratonista do PDF 🏃', 
+            '5 tópicos estudados e ainda tem café na xícara!'
         ));
     }
     if (completedTopicsCount >= 10) {
         achievements.push(createAchievement(
-            "Concurseiro(a) Raiz 🌳", 
-            "10 tópicos! Já tá decorando lei enquanto dorme!"
+            'Concurseiro(a) Raiz 🌳', 
+            '10 tópicos! Já tá decorando lei enquanto dorme!'
         ));
     }
     if (completedTopicsCount >= 25) {
         achievements.push(createAchievement(
-            "Doutor(a) Google de Legislação 🔎", 
-            "25 tópicos! Seus amigos já te procuram pra tirar dúvidas!"
+            'Doutor(a) Google de Legislação 🔎', 
+            '25 tópicos! Seus amigos já te procuram pra tirar dúvidas!'
         ));
     }
     if (completedTopicsCount >= 50) {
         achievements.push(createAchievement(
-            "Guru dos Grifos 🖍️", 
-            "50 tópicos! Seu marca-texto já pediu aposentadoria!"
+            'Guru dos Grifos 🖍️', 
+            '50 tópicos! Seu marca-texto já pediu aposentadoria!'
         ));
     }
     if (completedTopicsCount >= 100) {
         achievements.push(createAchievement(
-            "Mestre Jedi dos Concursos ⚔️", 
-            "100 tópicos! A Força (de vontade) é forte em você!"
+            'Mestre Jedi dos Concursos ⚔️', 
+            '100 tópicos! A Força (de vontade) é forte em você!'
         ));
     }
     if (completedTopicsCount >= 200) {
         achievements.push(createAchievement(
-            "Chuck Norris dos Editais 💪", 
-            "200 tópicos! Os editais têm medo de você agora!"
+            'Chuck Norris dos Editais 💪', 
+            '200 tópicos! Os editais têm medo de você agora!'
         ));
     }
     
     // Conquistas de sequência com humor
     if (currentStreak >= 3) {
         achievements.push(createAchievement(
-            "Resistente ao Netflix 📺", 
-            "3 dias seguidos! Resistiu à tentação da série nova!"
+            'Resistente ao Netflix 📺', 
+            '3 dias seguidos! Resistiu à tentação da série nova!'
         ));
     }
     if (currentStreak >= 7) {
         achievements.push(createAchievement(
-            "Imune ao Sofá 🛋️", 
-            "7 dias! O sofá já esqueceu sua forma!"
+            'Imune ao Sofá 🛋️', 
+            '7 dias! O sofá já esqueceu sua forma!'
         ));
     }
     if (currentStreak >= 14) {
         achievements.push(createAchievement(
-            "Inimigo do Descanso 😤", 
-            "14 dias! Seus amigos acham que você sumiu!"
+            'Inimigo do Descanso 😤', 
+            '14 dias! Seus amigos acham que você sumiu!'
         ));
     }
     if (currentStreak >= 30) {
         achievements.push(createAchievement(
-            "Máquina de Aprovar 🤖", 
-            "30 dias seguidos! Você é movido a café e determinação!"
+            'Máquina de Aprovar 🤖', 
+            '30 dias seguidos! Você é movido a café e determinação!'
         ));
     }
     if (currentStreak >= 60) {
         achievements.push(createAchievement(
-            "Cyborg Concurseiro 🦾", 
-            "60 dias! Você transcendeu a necessidade de vida social!"
+            'Cyborg Concurseiro 🦾', 
+            '60 dias! Você transcendeu a necessidade de vida social!'
         ));
     }
     
     // Conquistas de sessões com humor
     if (completedSessions.length >= 20) {
         achievements.push(createAchievement(
-            "Viciado(a) em Questões 💊", 
-            "20 sessões! Questões são sua nova droga (a legal)!"
+            'Viciado(a) em Questões 💊', 
+            '20 sessões! Questões são sua nova droga (a legal)!'
         ));
     }
     if (completedSessions.length >= 50) {
         achievements.push(createAchievement(
-            "Bibliotecário(a) Honorário(a) 📚", 
-            "50 sessões! A biblioteca já reserva sua cadeira!"
+            'Bibliotecário(a) Honorário(a) 📚', 
+            '50 sessões! A biblioteca já reserva sua cadeira!'
         ));
     }
     if (completedSessions.length >= 100) {
         achievements.push(createAchievement(
-            "Rei/Rainha do Resumo 👑", 
-            "100 sessões! Você resume até bula de remédio!"
+            'Rei/Rainha do Resumo 👑', 
+            '100 sessões! Você resume até bula de remédio!'
         ));
     }
     if (completedSessions.length >= 200) {
         achievements.push(createAchievement(
-            "PhD em Perseverança 🎓", 
-            "200 sessões! Universidades querem estudar seu cérebro!"
+            'PhD em Perseverança 🎓', 
+            '200 sessões! Universidades querem estudar seu cérebro!'
         ));
     }
     
@@ -562,8 +562,8 @@ const getGamification = async (planId, userId) => {
     
     if (studyHours >= 10) {
         achievements.push(createAchievement(
-            "Madrugador(a) Insano(a) 🌅", 
-            "10+ sessões antes das 7h! O galo aprendeu com você!"
+            'Madrugador(a) Insano(a) 🌅', 
+            '10+ sessões antes das 7h! O galo aprendeu com você!'
         ));
     }
     
@@ -574,12 +574,30 @@ const getGamification = async (planId, userId) => {
     
     if (weekendSessions >= 20) {
         achievements.push(createAchievement(
-            "Destruidor(a) de Finais de Semana 🎉", 
-            "20+ sessões no fim de semana! Churrasco? Não conheço!"
+            'Destruidor(a) de Finais de Semana 🎉', 
+            '20+ sessões no fim de semana! Churrasco? Não conheço!'
         ));
     }
     
     const experiencePoints = completedTopicsCount * 10 + uniqueStudyDays * 5; // XP system
+    
+    // Calcular tempo total de estudo agregando de ambas as tabelas
+    const totalTimeResult = await dbGet(`
+        SELECT COALESCE(SUM(time_value), 0) as total_time
+        FROM (
+            SELECT time_studied_seconds as time_value
+            FROM study_sessions
+            WHERE study_plan_id = ? AND status = 'Concluído' AND time_studied_seconds IS NOT NULL
+            UNION ALL
+            SELECT stl.duration_seconds as time_value
+            FROM study_time_logs stl
+            JOIN study_sessions ss ON stl.session_id = ss.id
+            WHERE ss.study_plan_id = ?
+        )
+    `, [planId, planId]);
+    
+    const totalStudyTime = totalTimeResult?.total_time || 0;
+    console.log(`📊 Tempo total de estudo para plano ${planId}: ${totalStudyTime} segundos`);
     
     // Implementar logging inteligente - só logar se dados mudaram significativamente
     const gamificationKey = `${planId}_gamification`;
@@ -609,6 +627,7 @@ const getGamification = async (planId, userId) => {
         // Dados principais de gamificação
         studyStreak: currentStreak,
         totalStudyDays: uniqueStudyDays,
+        totalStudyTime: totalStudyTime, // TEMPO TOTAL AGREGADO DE AMBAS AS TABELAS
         experiencePoints: experiencePoints,
         concurseiroLevel: currentLevel.title,
         nextLevel: nextLevel ? nextLevel.title : null,
