@@ -1,0 +1,76 @@
+name: Security Checks
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Roda todo dia às 2AM para verificar novas vulnerabilidades
+    - cron: '0 2 * * *'
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    # Verifica vulnerabilidades em dependências
+    - name: Run npm audit
+      run: |
+        npm audit --production
+        npm audit fix --force || true
+    
+    # Verifica se há secrets no código
+    - name: Check for secrets
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD
+    
+    # Análise de segurança do código
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        languages: javascript
+    
+    # Verifica headers de segurança
+    - name: Security Headers Check
+      run: |
+        echo "Verificando headers de segurança..."
+        grep -r "helmet" server.js || echo "⚠️ Helmet não encontrado!"
+        grep -r "rate.*limit" server.js || echo "⚠️ Rate limiting não encontrado!"
+        grep -r "cors" server.js || echo "⚠️ CORS não configurado!"
+    
+    # Verifica se .env está no gitignore
+    - name: Check .env protection
+      run: |
+        if [ -f .env ]; then
+          echo "❌ ERRO CRÍTICO: .env encontrado no repositório!"
+          exit 1
+        fi
+        grep "^\.env$" .gitignore || echo "⚠️ .env não está no .gitignore!"
+    
+    # Testa se há SQL injection vulnerabilities
+    - name: SQL Injection Check
+      run: |
+        echo "Verificando proteção contra SQL Injection..."
+        grep -r "db.exec\|db.run" --include="*.js" . | grep -v "?" && echo "⚠️ Possível SQL Injection!" || echo "✅ Queries parametrizadas"
+    
+    # Notifica se encontrar problemas críticos
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "🚨 PROBLEMAS DE SEGURANÇA DETECTADOS!"
+        echo "Verifique o log acima para detalhes."

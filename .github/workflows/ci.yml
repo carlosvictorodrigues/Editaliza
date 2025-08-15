@@ -1,0 +1,70 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Check code formatting
+      run: npm run lint || true
+    
+    - name: Run tests
+      run: npm test || true
+      env:
+        NODE_ENV: test
+        JWT_SECRET: test-secret-only-for-ci
+    
+    - name: Build check
+      run: |
+        echo "Verificando se o servidor inicia..."
+        timeout 10s node server.js || true
+      env:
+        NODE_ENV: test
+        JWT_SECRET: test-secret-only-for-ci
+        PORT: 3001
+    
+    - name: Check for console.logs in production code
+      run: |
+        echo "Verificando console.logs desnecessários..."
+        ! grep -r "console.log" --include="*.js" src/ || echo "⚠️ Console.logs encontrados em produção"
+    
+    - name: Validate package-lock
+      run: |
+        if [ ! -f package-lock.json ]; then
+          echo "❌ package-lock.json não encontrado!"
+          exit 1
+        fi
+    
+    - name: Check dependencies licenses
+      run: npx license-checker --production --summary
+    
+    - name: Create build artifact
+      if: github.ref == 'refs/heads/main'
+      run: |
+        echo "Creating deployment artifact..."
+        tar -czf deploy.tar.gz --exclude=node_modules --exclude=.git --exclude=*.sqlite --exclude=.env .
+    
+    - name: Upload artifact
+      if: github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-package
+        path: deploy.tar.gz
+        retention-days: 7

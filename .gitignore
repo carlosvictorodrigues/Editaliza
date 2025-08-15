@@ -1,9 +1,28 @@
 # Dependencies
 /node_modules
 
-# Environment variables
+# Environment variables - CRÍTICO: NUNCA REMOVA
+.env
 .env*
 !.env.example
+.env.local
+.env.production
+.env.development
+*.env
+
+# Chaves e certificados - SEGURANÇA MÁXIMA
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+private.key
+public.key
+id_rsa*
+*.ppk
+JWT_SECRET*
+*_SECRET*
 
 # Databases & Sessions
 *.db
