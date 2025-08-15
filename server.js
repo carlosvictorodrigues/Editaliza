@@ -1638,7 +1638,8 @@ app.post('/plans/:planId/generate',
 
             const agenda = new Map();
             const addSessionToAgenda = (date, session) => {
-                const dateStr = date.toISOString().split('T')[0];
+                // Usar horário de Brasília corretamente
+                const dateStr = date.toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
                 if (!agenda.has(dateStr)) {
                     agenda.set(dateStr, []);
                 }
@@ -1660,7 +1661,8 @@ app.post('/plans/:planId/generate',
             const findNextAvailableSlot = (startDate, isWeekdayOnly = false) => {
                 const availableDates = getAvailableDates(startDate, examDate, isWeekdayOnly);
                 for (const dateInfo of availableDates) {
-                    const dateStr = dateInfo.date.toISOString().split('T')[0];
+                    // Usar horário de Brasília corretamente
+                    const dateStr = dateInfo.date.toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
                     const currentSessions = agenda.get(dateStr)?.length || 0;
                     if (currentSessions < dateInfo.maxSessions) return dateInfo.date;
                 }
@@ -1670,7 +1672,8 @@ app.post('/plans/:planId/generate',
             const getNextSaturdayForReview = (date) => {
                 const saturdayDates = getAvailableDates(date, examDate).filter(d => d.dayOfWeek === 6);
                 for (const dateInfo of saturdayDates) {
-                    const dateStr = dateInfo.date.toISOString().split('T')[0];
+                    // Usar horário de Brasília corretamente
+                    const dateStr = dateInfo.date.toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
                     if ((agenda.get(dateStr)?.length || 0) < dateInfo.maxSessions) return dateInfo.date;
                 }
                 return null;

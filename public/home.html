@@ -667,7 +667,8 @@
                 console.log('📅 Carregando cronograma para planId:', planId);
                 
                 try {
-                    const today = new Date().toISOString().split('T')[0];
+                    // Usar horário de Brasília corretamente
+                    const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
                     console.log('📅 Data de hoje:', today);
                     
                     const scheduleData = await app.apiFetch(`/schedules/${planId}/range?startDate=${today}&endDate=${today}`);
@@ -836,7 +837,8 @@
                         let totalDays = parseInt(storedTotalDays);
                         
                         // If user has studied today and it's not already counted
-                        const today = new Date().toISOString().split('T')[0];
+                        // Usar horário de Brasília corretamente
+                        const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
                         const lastStudyDate = localStorage.getItem('lastStudyDate');
                         
                         if (hasCompletedSessions && lastStudyDate !== today) {

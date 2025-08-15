@@ -638,7 +638,8 @@ async function openStudySession(sessionId) {
         }
 
         let sessionRescheduled = false;
-        const todayStr = new Date().toISOString().split('T')[0];
+        // Usar horário de Brasília corretamente
+        const todayStr = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
         if (session.session_date && session.session_date !== todayStr) {
             const confirmReschedule = confirm('Esta sessão estava marcada para outro dia. Deseja reagendá-la para hoje?');
             if (!confirmReschedule) {
