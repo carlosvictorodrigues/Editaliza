@@ -194,8 +194,9 @@ const requestPasswordReset = async (email, req) => {
         securityLog('password_reset_requested', { email: sanitizedEmail, userId: user.id }, user.id, req);
         
         // In development, log the reset link
+        const appUrl = process.env.APP_URL || 'http://localhost:3000';
         if (process.env.NODE_ENV !== 'production') {
-            console.log(`SIMULAÇÃO DE E-MAIL: Link de recuperação para ${user.email}: http://localhost:3000/reset-password.html?token=${token}`);
+            console.log(`SIMULAÇÃO DE E-MAIL: Link de recuperação para ${user.email}: ${appUrl}/reset-password.html?token=${token}`);
         }
     }
     

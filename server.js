@@ -34,6 +34,10 @@ const fs = require('fs');
 const passport = require('./src/config/passport');
 require('dotenv').config();
 
+// Import email services
+const emailService = require('./src/services/emailService');
+const { emailRateLimitService, createPasswordRecoveryRateLimit } = require('./src/services/emailRateLimitService');
+
 // CACKTO INTEGRATION DISABLED - Causing database errors
 // TODO: Re-enable after proper database migration
 /*
@@ -500,7 +504,9 @@ app.use((req, res, next) => {
         '/auth/login',
         '/auth/register', 
         '/auth/google',
-        '/auth/google/callback'
+        '/auth/google/callback',
+        '/request-password-reset',
+        '/reset-password'
     ];
     
     // Pular CSRF para APIs autenticadas com JWT
@@ -811,12 +817,28 @@ app.post('/logout', authenticateToken, (req, res) => {
 
 // Rota para solicitar redefinição de senha
 app.post('/request-password-reset',
+    createPasswordRecoveryRateLimit(), // Add rate limiting middleware
     validators.email,
     handleValidationErrors,
     async (req, res) => {
         const { email } = req.body;
+        const clientIP = req.ip || req.connection.remoteAddress;
+        
         try {
+            // Check rate limits for email and IP
+            const rateLimitCheck = emailRateLimitService.checkLimits(email, clientIP);
+            if (!rateLimitCheck.allowed) {
+                return res.status(429).json({ 
+                    error: rateLimitCheck.message,
+                    retryAfter: rateLimitCheck.cooldownMinutes * 60 // Convert to seconds
+                });
+            }
+
+            // Always record the attempt for rate limiting (prevents user enumeration)
+            emailRateLimitService.recordEmailAttempt(email, clientIP);
+            
             const user = await dbGet('SELECT * FROM users WHERE email = ?', [email]);
+            
             if (user) {
                 // Check if user is a Google OAuth user
                 if (user.auth_provider === 'google') {
@@ -825,15 +847,45 @@ app.post('/request-password-reset',
                     });
                 }
                 
+                // Generate secure reset token
                 const token = crypto.randomBytes(32).toString('hex');
-                const expires = Date.now() + 3600000; // 1 hora
-                await dbRun('UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?', [token, expires, user.id]);
-                console.log(`SIMULAÇÃO DE E-MAIL: Link de recuperação para ${user.email}: http://localhost:3000/reset-password.html?token=${token}`);
+                const expires = Date.now() + 3600000; // 1 hour
+                
+                // Save token to database
+                await dbRun('UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?', 
+                    [token, expires, user.id]);
+                
+                // Get base URL for links
+                const protocol = req.headers['x-forwarded-proto'] || req.protocol;
+                const host = req.headers['x-forwarded-host'] || req.get('host');
+                const baseUrl = `${protocol}://${host}`;
+                
+                // Send password recovery email
+                try {
+                    const emailResult = await emailService.sendPasswordRecoveryEmail(
+                        user.email, 
+                        user.name, 
+                        token, 
+                        baseUrl
+                    );
+                    
+                    console.log(`✅ Password recovery ${emailResult.simulated ? 'simulated' : 'sent'} for ${user.email}`);
+                } catch (emailError) {
+                    console.error('Email sending failed, but continuing with security response:', emailError.message);
+                }
             }
-            res.json({ message: "Se um usuário com este e-mail existir, um link de recuperação foi enviado." });
+            
+            // Always return the same response to prevent user enumeration
+            res.json({ 
+                message: "Se um usuário com este e-mail existir, um link de recuperação foi enviado.",
+                info: "Verifique sua caixa de entrada e spam. O link expira em 1 hora."
+            });
+            
         } catch (error) {
             console.error('Erro na recuperação de senha:', error);
-            res.status(500).json({ "error": "Erro no servidor ao processar a solicitação." });
+            res.status(500).json({ 
+                error: "Erro no servidor ao processar a solicitação." 
+            });
         }
     }
 );
@@ -3899,6 +3951,74 @@ if (process.env.NODE_ENV === 'production') {
     // Em desenvolvimento, backup diário
     backupManager.scheduleAutoBackup(24);
 }
+
+// --- EMAIL SERVICE ADMINISTRATIVE ROUTES ---
+// Email service status endpoint
+app.get('/admin/email/status', authenticateToken, (req, res) => {
+    try {
+        const status = emailService.getStatus();
+        const rateLimitStats = emailRateLimitService.getStats();
+        
+        res.json({
+            emailService: status,
+            rateLimiting: rateLimitStats,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error getting email status:', error);
+        res.status(500).json({ error: 'Failed to get email status' });
+    }
+});
+
+// Test email endpoint (for administrators)
+app.post('/admin/email/test', 
+    authenticateToken,
+    validators.email,
+    handleValidationErrors,
+    async (req, res) => {
+        try {
+            const { email } = req.body;
+            const result = await emailService.sendTestEmail(email);
+            
+            res.json({
+                success: true,
+                message: 'Test email sent successfully',
+                messageId: result.messageId
+            });
+        } catch (error) {
+            console.error('Test email failed:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Failed to send test email',
+                details: process.env.NODE_ENV === 'development' ? error.message : undefined
+            });
+        }
+    }
+);
+
+// Reset rate limits for specific email (admin function)
+app.post('/admin/email/reset-limits',
+    authenticateToken,
+    validators.email,
+    handleValidationErrors,
+    async (req, res) => {
+        try {
+            const { email } = req.body;
+            emailRateLimitService.resetEmailLimits(email);
+            
+            res.json({
+                success: true,
+                message: `Rate limits reset for ${email}`
+            });
+        } catch (error) {
+            console.error('Failed to reset rate limits:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Failed to reset rate limits'
+            });
+        }
+    }
+);
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, '0.0.0.0', () => {
