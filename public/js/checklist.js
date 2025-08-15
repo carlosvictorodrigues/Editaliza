@@ -577,10 +577,12 @@ const StudyChecklist = {
             
             // CORREÇÃO: Disparar evento para sistema de notificações inteligentes
             try {
+                const durationMinutes = studyTimeSeconds > 0 ? Math.round(studyTimeSeconds / 60) : 25;
+                
                 const sessionCompletedEvent = new CustomEvent('sessionCompleted', {
                     detail: {
                         sessionType: this.session.topic_type || 'Estudo',
-                        duration: studyTimeSeconds > 0 ? Math.round(studyTimeSeconds / 60) : 25, // Convert to minutes
+                        duration: durationMinutes, // Em minutos
                         subject: this.session.subject_name || 'Matéria',
                         difficulty: this.session.difficulty_level || 3,
                         timestamp: Date.now(),
@@ -592,7 +594,13 @@ const StudyChecklist = {
                 });
                 
                 document.dispatchEvent(sessionCompletedEvent);
-                console.log('🔔 Evento sessionCompleted disparado para notificações inteligentes');
+                console.log(`🔔 Evento sessionCompleted disparado: ${durationMinutes} minutos estudados`);
+                
+                // NOVO: Notificar sistema de metas sobre tempo estudado
+                if (window.StudyGoalsNotifications && durationMinutes > 0) {
+                    window.StudyGoalsNotifications.addStudyTime(durationMinutes);
+                }
+                
             } catch (error) {
                 console.warn('⚠️ Erro ao disparar evento de notificação:', error);
             }

@@ -504,14 +504,14 @@
                     if (updatedPlanId === planId) {
                         console.log('🔄 Atualizando métricas automaticamente...');
                         
-                        // Delay pequeno para garantir que backend processou
+                        // CORREÇÃO: Reduzir delay para atualização mais rápida (era 1500ms)
                         setTimeout(() => {
                             if (window.refreshAllMetrics) {
                                 window.refreshAllMetrics();
                                 // Atualizar timestamp também
                                 window.lastMetricsUpdate = Date.now();
                             }
-                        }, 1500);
+                        }, 500);
                     }
                 });
                 

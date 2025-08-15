@@ -556,8 +556,8 @@
                         </div>
                         
                         <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                            <span class="text-sm font-medium text-purple-700">Tempo total de estudo</span>
-                            <span class="font-bold text-purple-900" id="totalStudyTime">0h</span>
+                            <span class="text-sm font-medium text-purple-700">XP Total Conquistado</span>
+                            <span class="font-bold text-purple-900" id="totalXP">0 XP</span>
                         </div>
                     </div>
                 </div>
@@ -837,7 +837,10 @@
                         try {
                             const planData = await window.app.getGamificationData(plan.id);
                             if (planData) {
-                                globalStats.totalStudyTime += planData.totalStudyTime || 0;
+                                // Usar totalStudyTime que vem direto da resposta do endpoint
+                                const planTotalTime = planData.totalStudyTime || 0;
+                                globalStats.totalStudyTime += planTotalTime;
+                                console.log(`📊 Plano ${plan.id}: tempo total = ${planTotalTime} segundos (${formatStudyTime(planTotalTime)})`);
                                 globalStats.totalTopics += planData.completedTopicsCount || 0;
                                 globalStats.totalSessions += planData.totalCompletedSessions || 0;
                                 globalStats.totalXP += planData.experiencePoints || 0;
@@ -875,6 +878,7 @@
                 
                 // Update global metrics
                 document.getElementById('totalPlansCount').textContent = globalStats.totalPlans;
+                console.log(`📊 Tempo total global: ${globalStats.totalStudyTime} segundos (${formatStudyTime(globalStats.totalStudyTime)})`);
                 document.getElementById('globalStudyTime').textContent = formatStudyTime(globalStats.totalStudyTime);
                 document.getElementById('globalTopicsCount').textContent = globalStats.totalTopics;
                 document.getElementById('streakDays').textContent = `${globalStats.studyStreak || 0} dias`;
@@ -1090,21 +1094,15 @@
             // Global study stats
             document.getElementById('totalSessions').textContent = globalStats.totalSessions || 0;
             document.getElementById('completedTopics').textContent = globalStats.totalTopics || 0;
-            document.getElementById('totalStudyTime').textContent = formatStudyTime(globalStats.totalStudyTime || 0);
+            document.getElementById('totalXP').textContent = `${(globalStats.totalXP || 0).toLocaleString()} XP`;
         }
         
-        function formatStudyTime(minutes) {
-            const hours = Math.floor(minutes / 60);
-            const remainingMinutes = minutes % 60;
+        function formatStudyTime(timeValue) {
+            if (!timeValue || timeValue === 0) return '0h';
             
-            if (hours > 0) {
-                return `${hours}h${remainingMinutes > 0 ? ` ${remainingMinutes}min` : ''}`;
-            }
-            return `${minutes}min`;
-        }
-        
-        function formatStudyTime(minutes) {
-            if (!minutes || minutes === 0) return '0h';
+            // Se o valor for maior que 1000, assumir que são segundos; senão, minutos
+            const isSeconds = timeValue > 1000;
+            const minutes = isSeconds ? Math.floor(timeValue / 60) : timeValue;
             
             const hours = Math.floor(minutes / 60);
             const remainingMinutes = minutes % 60;

@@ -100,12 +100,25 @@ const NotificationIntegrations = {
 
     checkForSessionCompletion(element) {
         // Verificar se é uma notificação de sessão concluída
-        if (element.classList?.contains('toast-success') || 
-            element.textContent?.includes('Sessão concluída') ||
-            element.textContent?.includes('Parabéns')) {
+        // CORREÇÃO: Ignorar notificações de Pomodoro para evitar falsos positivos
+        const text = element.textContent || '';
+        
+        // Se for notificação de Pomodoro, não processar como sessão concluída
+        if (text.includes('Pomodoro completo') || 
+            text.includes('🍅') ||
+            text.includes('pausa de 5 minutos')) {
+            console.log('🔍 Ignorando notificação de Pomodoro:', text);
+            return;
+        }
+        
+        if (element.classList?.contains('toast-success') && 
+            (text.includes('Sessão concluída') ||
+             text.includes('marcada como concluída') ||
+             text.includes('Parabéns'))) {
             
             // Extrair dados da sessão se possível
             const sessionData = this.extractSessionData(element);
+            console.log('✅ Sessão realmente concluída detectada:', sessionData);
             this.triggerSessionCompleted(sessionData);
         }
     },
@@ -241,20 +254,27 @@ const NotificationIntegrations = {
         const pomodoroObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 const target = mutation.target;
+                const text = target.textContent || '';
                 
-                // Verificar se pomodoro foi concluído
-                if (target.textContent?.includes('Pomodoro concluído') ||
-                    target.textContent?.includes('Tempo esgotado') ||
-                    target.classList?.contains('timer-finished')) {
+                // CORREÇÃO: Detectar apenas Pomodoros realmente completos
+                if (text.includes('Pomodoro completo') ||
+                    text.includes('🍅') ||
+                    text.includes('pausa de 5 minutos')) {
                     
+                    console.log('🍅 Pomodoro completo detectado:', text);
                     this.triggerPomodoroComplete();
+                    // NÃO disparar sessão concluída aqui!
                 }
             });
         });
 
-        // Observar elementos de timer
-        const timerElements = document.querySelectorAll('.timer, .pomodoro, .countdown');
-        timerElements.forEach(element => {
+        // Observar elementos de timer e toasts
+        const elementsToObserve = [
+            ...document.querySelectorAll('.timer, .pomodoro, .countdown'),
+            ...document.querySelectorAll('.toast-container, #toast-container')
+        ];
+        
+        elementsToObserve.forEach(element => {
             pomodoroObserver.observe(element, {
                 childList: true,
                 subtree: true,
@@ -369,14 +389,20 @@ const NotificationIntegrations = {
     },
 
     triggerPomodoroComplete() {
+        console.log('🍅 Disparando evento pomodoroComplete (NÃO sessionCompleted)');
+        
         const event = new CustomEvent('pomodoroComplete', {
             detail: {
                 duration: 25,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                type: 'pomodoro' // Marcar explicitamente como pomodoro
             }
         });
 
         document.dispatchEvent(event);
+        
+        // IMPORTANTE: NÃO disparar sessionCompleted aqui!
+        // Pomodoro ≠ Sessão Concluída
     },
 
     triggerStreakMilestone(streak) {

@@ -91,9 +91,16 @@ const ContextualNotifications = {
 
     // Configuração de event listeners não invasivos
     setupEventListeners() {
-        // Listener para conclusão de sessões
+        // Listener para conclusão de sessões (APENAS quando realmente concluídas)
         document.addEventListener('sessionCompleted', (event) => {
+            console.log('🔔 Evento sessionCompleted recebido:', event.detail);
             this.handleSessionCompleted(event.detail);
+        });
+
+        // CORREÇÃO: Listener específico para Pomodoros (NÃO são sessões concluídas)
+        document.addEventListener('pomodoroComplete', (event) => {
+            console.log('🍅 Evento pomodoroComplete recebido (pausa time!):', event.detail);
+            this.handlePomodoroComplete(event.detail);
         });
 
         // Listener para conquistas
@@ -177,6 +184,18 @@ const ContextualNotifications = {
         }, 2000);
     },
 
+    // CORREÇÃO: Handler específico para Pomodoros (diferente de sessão concluída)
+    handlePomodoroComplete(pomodoroData) {
+        if (!this.isEnabled()) return;
+        
+        console.log('🍅 Processando Pomodoro completo (pausa time!)');
+        
+        // Mensagem específica para pausa do Pomodoro
+        setTimeout(() => {
+            this.showPomodoroMessage();
+        }, 500);
+    },
+
     // === TIPOS DE MENSAGENS ===
 
     showSessionCompletionMessage(sessionType, duration, subject, difficulty) {
@@ -233,6 +252,43 @@ const ContextualNotifications = {
                 {
                     text: 'Ver Progresso',
                     action: () => this.openProgressPanel()
+                }
+            ]
+        });
+    },
+
+    // CORREÇÃO: Mensagem específica para Pomodoros (pausa, não conclusão)
+    showPomodoroMessage() {
+        const pauseMessages = [
+            'Pomodoro completo! Hora da pausa merecida! Seus neurônios agradecem! 🧠✨',
+            'Ding ding! 25 minutos focados! Agora é hora de relaxar e recarregar as energias! ☔️',
+            'Parabéns! Mais um Pomodoro conquistado! Faça uma pausa e volte com tudo! 💪',
+            'Timer zerado! Você é uma máquina de concentração! Hora de respirar fundo! 🌿',
+            '25 minutos de foco puro! Agora relaxe, hidrate-se e prepare-se para o próximo round! 💧'
+        ];
+        
+        const message = this.selectRandomMessage(pauseMessages);
+        
+        this.showContextualToast({
+            type: 'info',
+            title: '🍅 Pomodoro Completo!',
+            message: message,
+            duration: 6000,
+            actions: [
+                {
+                    text: 'Continuar Estudando',
+                    action: () => {
+                        // Fechar modal se estiver aberto ou continuar
+                        const modal = document.getElementById('studySessionModal');
+                        if (modal && !modal.classList.contains('hidden')) {
+                            // Modal já está aberto, usuário pode continuar
+                        } else {
+                            // Voltar para página de estudos
+                            if (!window.location.pathname.includes('home.html')) {
+                                window.location.href = 'home.html';
+                            }
+                        }
+                    }
                 }
             ]
         });
@@ -466,7 +522,7 @@ const ContextualNotifications = {
             `Sessão de ${subject} concluída! Você está mais focado que sniper em missão! 🎯`,
             `${subject} finalizado! Você está acumulando conhecimento como colecionador de raridades! 🎨`,
             `Mais uma de ${subject}! Você é tipo Netflix... sempre tem conteúdo novo! 📺✨`,
-            `${subject} completed! Seu progresso está mais consistente que gravidade! 🌍`,
+            `${subject} concluído! Seu progresso está mais consistente que gravidade! 🌍`,
             `Sessão finalizada! ${subject} foi mais uma vitória no seu currículo de aprovação! 📜🏆`
         ];
 

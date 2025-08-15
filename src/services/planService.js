@@ -9,6 +9,15 @@ const planRepository = require('../repositories/planRepository');
 const { sanitizeHtml } = require('../utils/sanitizer');
 const { dbGet, dbAll } = require('../utils/database');
 
+// CORREÇÃO: Função unificada para data brasileira
+function getBrazilianDateString() {
+    const now = new Date();
+    const year = parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', year: 'numeric'}));
+    const month = String(parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', month: 'numeric'}))).padStart(2, '0');
+    const day = String(parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', day: 'numeric'}))).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 /**
  * Get schedule preview with simulation calculations
  */
@@ -108,6 +117,7 @@ const getSchedulePreview = async (planId, userId) => {
 
 /**
  * Get basic plan progress
+ * CORREÇÃO: Usar método unificado para contagem de tópicos concluídos
  */
 const getProgress = async (planId, userId) => {
     const plan = await planRepository.getPlanByIdAndUser(planId, userId);
@@ -115,10 +125,20 @@ const getProgress = async (planId, userId) => {
         throw new Error('Plano não encontrado');
     }
 
+    // CORREÇÃO: Usar contagem unificada via sessões concluídas (método confiável)
+    const completedResult = await dbGet(`
+        SELECT COUNT(DISTINCT topic_id) as count 
+        FROM study_sessions 
+        WHERE study_plan_id = ? AND session_type = 'Novo Tópico' AND status = 'Concluído' AND topic_id IS NOT NULL
+    `, [planId]);
+    
     const topics = await planRepository.getTopicsWithStatus(planId);
-    const completed = topics.filter(t => t.status === 'Concluído').length;
+    const completed = completedResult.count || 0;
     const total = topics.length;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+    // CORREÇÃO: Log para debug dos cálculos
+    console.log(`📊 [PROGRESSO] Plano ${planId}: ${completed}/${total} tópicos (${percentage}%)`);
 
     return {
         completed,
@@ -155,10 +175,13 @@ const getGoalProgress = async (planId, userId) => {
         throw new Error('Plano não encontrado');
     }
 
-    // Calculate daily/weekly goals and progress
-    const today = new Date().toISOString().split('T')[0];
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    // CORREÇÃO: Usar timezone brasileiro para cálculos de data
+    const today = getBrazilianDateString();
+    // CORREÇÃO: Calcular início da semana em timezone brasileiro
+    const brazilDate = new Date(new Date().toLocaleString('en-US', {timeZone: 'America/Sao_Paulo'}));
+    const dayOfWeek = brazilDate.getDay();
+    const weekStart = new Date(brazilDate);
+    weekStart.setDate(weekStart.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
     const weekStartStr = weekStart.toISOString().split('T')[0];
 
     const dailyProgress = await planRepository.getDailyProgress(planId, today);

@@ -153,7 +153,21 @@ const TimerSystem = {
         this.timers[sessionId].elapsed = Date.now() - this.timers[sessionId].startTime;
         this.updateDisplay(sessionId);
         
-        // CORREÇÃO 3: Melhorar detecção de pomodoros completos
+        // CORREÇÃO: Disparar evento timerUpdate para sistema de metas
+        try {
+            const timerUpdateEvent = new CustomEvent('timerUpdate', {
+                detail: {
+                    sessionId: sessionId,
+                    elapsed: this.timers[sessionId].elapsed,
+                    timestamp: Date.now()
+                }
+            });
+            document.dispatchEvent(timerUpdateEvent);
+        } catch (error) {
+            // Falha silenciosa para não quebrar o timer
+        }
+        
+        // CORREÇÃO: Melhorar detecção de pomodoros completos
         const completedPomodoros = Math.floor((this.timers[sessionId].elapsed / 60000) / 25);
         const lastNotified = this.timers[sessionId].lastPomodoroNotified || 0;
         
@@ -305,10 +319,12 @@ const TimerSystem = {
     },
     
     notifyPomodoroComplete() {
-        // CORREÇÃO 3: Notificação mais robusta
-        console.log('🍅 Executando notificação de Pomodoro completo...');
+        // CORREÇÃO: Notificação de Pomodoro (NÃO é sessão concluída)
+        console.log('🍅 Executando notificação de Pomodoro completo (PAUSA TIME!)...');
         
-        // Notificação visual
+        // IMPORTANTE: Pomodoro completo = pausa, NÃO = sessão concluída
+        
+        // Notificação visual para PAUSA
         app.showToast('🍅 Pomodoro completo! Parabéns! Hora de uma pausa de 5 minutos.', 'success');
         
         // Vibração (se suportada)
@@ -325,15 +341,30 @@ const TimerSystem = {
         
         // Notificação do sistema (se permitida)
         this.showSystemNotification();
+        
+        // CORREÇÃO: Disparar evento de Pomodoro (NÃO sessionCompleted)
+        try {
+            const pomodoroEvent = new CustomEvent('pomodoroComplete', {
+                detail: {
+                    duration: 25,
+                    timestamp: Date.now(),
+                    type: 'break_time' // Indica que é hora da pausa
+                }
+            });
+            document.dispatchEvent(pomodoroEvent);
+            console.log('🍅 Evento pomodoroComplete disparado (pausa time!)');
+        } catch (error) {
+            console.warn('⚠️ Erro ao disparar evento de Pomodoro:', error);
+        }
     },
     
     showSystemNotification() {
         if ('Notification' in window && Notification.permission === 'granted') {
             try {
-                new Notification('🍅 Pomodoro Completo!', {
-                    body: 'Parabéns! Você completou 25 minutos de estudo focado. Hora da pausa!',
+                new Notification('🍅 Hora da Pausa!', {
+                    body: 'Pomodoro completo! 25 minutos de foco conquistados. Faça uma pausa de 5 minutos para recarregar.',
                     icon: '/favicon.ico',
-                    tag: 'pomodoro-complete'
+                    tag: 'pomodoro-break-time'
                 });
             } catch (e) {
                 console.warn('⚠️ Notificação do sistema falhou:', e.message);

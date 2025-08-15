@@ -142,25 +142,30 @@ const getSubjectProgressDetails = async (planId) => {
 
 /**
  * Get total progress across all subjects
+ * CORREÇÃO: Usar contagem DISTINCT para evitar duplicatas
  */
 const getTotalProgress = async (planId) => {
-    const result = await dbGet(`
-        SELECT
-            COUNT(t.id) as total,
-            COUNT(
-                CASE WHEN EXISTS (
-                    SELECT 1 FROM study_sessions ss
-                    WHERE ss.topic_id = t.id
-                    AND ss.session_type = 'Novo Tópico'
-                    AND ss.status = 'Concluído'
-                ) THEN 1 END
-            ) as completed
+    // CORREÇÃO: Usar método unificado com DISTINCT topic_id
+    const completedResult = await dbGet(`
+        SELECT COUNT(DISTINCT topic_id) as count 
+        FROM study_sessions 
+        WHERE study_plan_id = ? AND session_type = 'Novo Tópico' AND status = 'Concluído' AND topic_id IS NOT NULL
+    `, [planId]);
+    
+    const totalResult = await dbGet(`
+        SELECT COUNT(t.id) as total
         FROM topics t
         JOIN subjects s ON t.subject_id = s.id
         WHERE s.study_plan_id = ?
     `, [planId]);
     
-    return result.total > 0 ? Math.round((result.completed / result.total) * 100) : 0;
+    const total = totalResult.total || 0;
+    const completed = completedResult.count || 0;
+    
+    // CORREÇÃO: Log para debug
+    console.log(`📊 [TOTAL_PROGRESS] Plano ${planId}: ${completed}/${total} tópicos`);
+    
+    return total > 0 ? Math.round((completed / total) * 100) : 0;
 };
 
 /**

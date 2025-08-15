@@ -34,6 +34,15 @@ const fs = require('fs');
 const passport = require('./src/config/passport');
 require('dotenv').config();
 
+// Importar integração CACKTO
+const { 
+    CacktoRoutes,
+    initialize: initializeCackto,
+    checkCacktoSubscription,
+    requirePremiumFeature,
+    addSubscriptionInfo
+} = require('./src/cackto-integration');
+
 // Importar middleware de segurança
 const {
     sanitizeMiddleware,
@@ -418,6 +427,43 @@ app.use('/login', strictRateLimit);
 app.use('/register', strictRateLimit);
 app.use('/forgot-password', strictRateLimit);
 app.use('/reset-password', strictRateLimit);
+
+
+// ==========================================
+// INTEGRAÇÃO CACKTO
+// ==========================================
+
+// Inicializar integração CACKTO
+(async () => {
+    try {
+        const result = await initializeCackto({
+            enableCache: true,
+            enableMetrics: true,
+            syncOnInit: false
+        });
+        console.log('✅ Integração CACKTO inicializada:', result.message);
+    } catch (error) {
+        console.error('❌ Erro ao inicializar CACKTO:', error.message);
+    }
+})();
+
+// Adicionar informações de assinatura a todas as rotas autenticadas
+app.use(authenticateToken, addSubscriptionInfo());
+
+// Rotas de webhook CACKTO (ANTES do rate limiting para APIs)
+app.use('/api/webhooks', CacktoRoutes);
+
+// Middleware para rotas que precisam de assinatura ativa
+const requireActiveSubscription = checkCacktoSubscription({
+    redirectToPlans: false,
+    strict: true
+});
+
+// Middleware para funcionalidades premium específicas
+const requirePDFDownload = requirePremiumFeature('pdf_download');
+const requireAdvancedSearch = requirePremiumFeature('advanced_search');
+const requireOfflineAccess = requirePremiumFeature('offline_access');
+
 app.use('/api/', moderateRateLimit);
 
 // CSRF Protection para rotas POST/PUT/DELETE (exceto auth pública)
@@ -621,7 +667,6 @@ app.use('/schedules', scheduleRoutes);
 // LEGACY ROUTES - TO BE REFACTORED
 // ============================================================================
 
-/*
 // Rota para login de usuário
 app.post('/login', 
     loginLimiter,
@@ -663,9 +708,7 @@ app.post('/login',
         }
     }
 );
-*/
 
-/*
 // Google OAuth Routes
 // Route to start Google OAuth
 app.get('/auth/google',
@@ -730,9 +773,7 @@ app.get('/auth/google/status', authenticateToken, (req, res) => {
         }
     });
 });
-*/
 
-/*
 // Rota para logout
 app.post('/logout', authenticateToken, (req, res) => {
     req.session.destroy((err) => {
@@ -793,7 +834,6 @@ app.post('/reset-password',
         }
     }
 );
-*/
 
 // --- ROTAS DE PERFIL DO USUÁRIO ---
 // Rota para obter dados do perfil do usuário logado
@@ -3208,7 +3248,15 @@ app.get('/plans/:planId/detailed_progress',
                                    activityBreakdown.revisoes_14d.timeSpent + 
                                    activityBreakdown.revisoes_28d.timeSpent;
             const totalNewContentTime = activityBreakdown.novos_topicos.timeSpent;
-            const totalStudyTime = totalReviewTime + totalNewContentTime;
+            
+            // CORREÇÃO: Incluir TODOS os tipos de sessão no tempo total
+            const totalStudyTime = totalReviewTime + 
+                                 totalNewContentTime + 
+                                 activityBreakdown.simulados_direcionados.timeSpent + 
+                                 activityBreakdown.simulados_completos.timeSpent + 
+                                 activityBreakdown.redacoes.timeSpent;
+            
+            console.log(`📊 Tempo total calculado: revisões=${totalReviewTime}s, novos=${totalNewContentTime}s, simulados_dir=${activityBreakdown.simulados_direcionados.timeSpent}s, simulados_comp=${activityBreakdown.simulados_completos.timeSpent}s, redações=${activityBreakdown.redacoes.timeSpent}s, TOTAL=${totalStudyTime}s`);
 
             // CORREÇÃO: Melhorar cálculo de tempo total por disciplina incluindo tempo adicional
             const subjectData = subjects.map(subject => {
@@ -3628,6 +3676,16 @@ app.get('/plans/:planId/gamification',
             `, [planId]);
             const totalStudyDays = uniqueStudyDaysResult.count || 0;
 
+            // Calcular tempo total de estudo (soma de todas as sessões)
+            const totalStudyTimeResult = await dbGet(`
+                SELECT SUM(COALESCE(time_studied_seconds, 0)) as total_time
+                FROM study_sessions 
+                WHERE study_plan_id = ? AND status = 'Concluído'
+            `, [planId]);
+            const totalStudyTime = totalStudyTimeResult.total_time || 0;
+            
+            console.log(`📊 Endpoint gamificação - Plano ${planId}: tempo total = ${totalStudyTime} segundos`);
+
             res.json({
                 completedTopicsCount,
                 concurseiroLevel: currentLevel.title,
@@ -3639,7 +3697,8 @@ app.get('/plans/:planId/gamification',
                 experiencePoints,
                 achievements,
                 totalStudyDays,
-                totalCompletedSessions
+                totalCompletedSessions,
+                totalStudyTime
             });
 
         } catch (error) {
