@@ -9,6 +9,9 @@ const ContextualNotifications = {
     // Estado interno
     initialized: false,
     userData: null,
+    // CRITICAL FIX: Add notification tracking to prevent duplicates
+    shownNotifications: new Set(),
+    lastNotificationTime: 0,
     patterns: {
         lastSessionTime: null,
         studyStreak: 0,
@@ -22,6 +25,8 @@ const ContextualNotifications = {
         enabled: true,
         maxNotificationsPerDay: 6,
         notificationCooldown: 300000, // 5 minutos
+        // CRITICAL FIX: Reduce cooldown to prevent infinite loops
+        globalNotificationCooldown: 10000, // 10 seconds global cooldown
         procrastinationThreshold: 3,
         streakMilestones: [3, 7, 14, 21, 30],
         debug: true
@@ -91,17 +96,22 @@ const ContextualNotifications = {
 
     // Configuração de event listeners não invasivos
     setupEventListeners() {
-        // Listener para conclusão de sessões (APENAS quando realmente concluídas)
-        document.addEventListener('sessionCompleted', (event) => {
-            console.log('🔔 Evento sessionCompleted recebido:', event.detail);
+        // CRITICAL FIX: Add debounced event listeners to prevent infinite loops
+        const debouncedSessionCompleted = this.debounce((event) => {
+            console.log('🔔 Evento sessionCompleted recebido (debounced):', event.detail);
             this.handleSessionCompleted(event.detail);
-        });
+        }, 2000);
+        
+        const debouncedPomodoroComplete = this.debounce((event) => {
+            console.log('🍅 Evento pomodoroComplete recebido (debounced):', event.detail);
+            this.handlePomodoroComplete(event.detail);
+        }, 5000); // Longer debounce for pomodoro to prevent loops
+        
+        // Listener para conclusão de sessões (APENAS quando realmente concluídas)
+        document.addEventListener('sessionCompleted', debouncedSessionCompleted);
 
         // CORREÇÃO: Listener específico para Pomodoros (NÃO são sessões concluídas)
-        document.addEventListener('pomodoroComplete', (event) => {
-            console.log('🍅 Evento pomodoroComplete recebido (pausa time!):', event.detail);
-            this.handlePomodoroComplete(event.detail);
-        });
+        document.addEventListener('pomodoroComplete', debouncedPomodoroComplete);
 
         // Listener para conquistas
         document.addEventListener('achievementUnlocked', (event) => {
@@ -188,7 +198,16 @@ const ContextualNotifications = {
     handlePomodoroComplete(pomodoroData) {
         if (!this.isEnabled()) return;
         
+        // CRITICAL FIX: Check global cooldown to prevent infinite notifications
+        if (!this.canShowNotification('pomodoro')) {
+            console.log('🛑 Pomodoro notification blocked by cooldown (preventing infinite loop)');
+            return;
+        }
+        
         console.log('🍅 Processando Pomodoro completo (pausa time!)');
+        
+        // Mark this notification as shown
+        this.markNotificationShown('pomodoro');
         
         // Mensagem específica para pausa do Pomodoro
         setTimeout(() => {
@@ -568,6 +587,15 @@ const ContextualNotifications = {
     // === UTILITÁRIOS ===
 
     showContextualToast(options) {
+        // CRITICAL FIX: Add final safety check before showing toast
+        if (!this.canShowNotification('toast')) {
+            console.log('🛑 Toast blocked by global cooldown');
+            return;
+        }
+        
+        // Mark notification as shown
+        this.markNotificationShown('toast');
+        
         const container = document.getElementById('toast-container') || this.createToastContainer();
 
         const toast = document.createElement('div');
@@ -734,12 +762,62 @@ const ContextualNotifications = {
     },
 
     // === DEBUG ===
+    // CRITICAL FIX: Add debounce utility function
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    },
+    
+    // CRITICAL FIX: Add notification cooldown checks
+    canShowNotification(type) {
+        const now = Date.now();
+        const cooldown = this.config.globalNotificationCooldown;
+        
+        if (now - this.lastNotificationTime < cooldown) {
+            return false;
+        }
+        
+        // Check if this specific notification was recently shown
+        const notificationKey = `${type}_${Math.floor(now / 60000)}`; // Per minute
+        if (this.shownNotifications.has(notificationKey)) {
+            return false;
+        }
+        
+        return true;
+    },
+    
+    markNotificationShown(type) {
+        const now = Date.now();
+        this.lastNotificationTime = now;
+        
+        const notificationKey = `${type}_${Math.floor(now / 60000)}`;
+        this.shownNotifications.add(notificationKey);
+        
+        // Clean old notifications (keep only last 10 minutes)
+        const tenMinutesAgo = Math.floor((now - 600000) / 60000);
+        this.shownNotifications.forEach(key => {
+            const keyTime = parseInt(key.split('_')[1]);
+            if (keyTime < tenMinutesAgo) {
+                this.shownNotifications.delete(key);
+            }
+        });
+    },
+    
     getStatus() {
         return {
             initialized: this.initialized,
             enabled: this.config.enabled,
             patterns: this.patterns,
-            userData: this.userData ? 'Loaded' : 'Not loaded'
+            userData: this.userData ? 'Loaded' : 'Not loaded',
+            shownNotifications: this.shownNotifications.size,
+            lastNotificationTime: this.lastNotificationTime
         };
     },
 

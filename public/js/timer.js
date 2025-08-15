@@ -6,6 +6,9 @@
 const TimerSystem = {
     timers: {}, // { sessionId: { startTime, elapsed, isRunning, pomodoros } }
     _cachedPlanDuration: null, // Cache para duração do plano
+    // CRITICAL FIX: Add notification tracking to prevent infinite loops
+    lastPomodoroNotifications: {},
+    pomodoroNotificationCooldown: 30000, // 30 seconds
     
     // Novos métodos para persistência
     getActiveTimer(sessionId) {
@@ -167,16 +170,25 @@ const TimerSystem = {
             // Falha silenciosa para não quebrar o timer
         }
         
-        // CORREÇÃO: Melhorar detecção de pomodoros completos
+        // CORREÇÃO: Melhorar detecção de pomodoros completos com debounce
         const completedPomodoros = Math.floor((this.timers[sessionId].elapsed / 60000) / 25);
         const lastNotified = this.timers[sessionId].lastPomodoroNotified || 0;
         
         if (completedPomodoros > lastNotified && completedPomodoros > 0) {
-            console.log(`🍅 Pomodoro ${completedPomodoros} completado para sessão ${sessionId}`);
-            this.timers[sessionId].pomodoros = completedPomodoros;
-            this.timers[sessionId].lastPomodoroNotified = completedPomodoros;
-            this.notifyPomodoroComplete();
-            this.saveTimersToStorage(); // Salvar progresso
+            // CRITICAL FIX: Add cooldown check to prevent infinite notifications
+            const now = Date.now();
+            const lastNotificationTime = this.lastPomodoroNotifications[sessionId] || 0;
+            
+            if (now - lastNotificationTime >= this.pomodoroNotificationCooldown) {
+                console.log(`🍅 Pomodoro ${completedPomodoros} completado para sessão ${sessionId}`);
+                this.timers[sessionId].pomodoros = completedPomodoros;
+                this.timers[sessionId].lastPomodoroNotified = completedPomodoros;
+                this.lastPomodoroNotifications[sessionId] = now;
+                this.notifyPomodoroComplete();
+                this.saveTimersToStorage(); // Salvar progresso
+            } else {
+                console.log(`🛑 Pomodoro notification blocked by cooldown for session ${sessionId}`);
+            }
         }
     },
 
@@ -322,10 +334,15 @@ const TimerSystem = {
         // CORREÇÃO: Notificação de Pomodoro (NÃO é sessão concluída)
         console.log('🍅 Executando notificação de Pomodoro completo (PAUSA TIME!)...');
         
+        // IMPORTANT: Check if we can safely show this notification
+        const now = Date.now();
+        
         // IMPORTANTE: Pomodoro completo = pausa, NÃO = sessão concluída
         
-        // Notificação visual para PAUSA
-        app.showToast('🍅 Pomodoro completo! Parabéns! Hora de uma pausa de 5 minutos.', 'success');
+        // Notificação visual para PAUSA (only if app is available)
+        if (window.app && typeof window.app.showToast === 'function') {
+            app.showToast('🍅 Pomodoro completo! Parabéns! Hora de uma pausa de 5 minutos.', 'success');
+        }
         
         // Vibração (se suportada)
         if ('vibrate' in navigator) {
@@ -342,17 +359,21 @@ const TimerSystem = {
         // Notificação do sistema (se permitida)
         this.showSystemNotification();
         
-        // CORREÇÃO: Disparar evento de Pomodoro (NÃO sessionCompleted)
+        // CORREÇÃO: Disparar evento de Pomodoro (NÃO sessionCompleted) - ONCE ONLY
         try {
-            const pomodoroEvent = new CustomEvent('pomodoroComplete', {
-                detail: {
-                    duration: 25,
-                    timestamp: Date.now(),
-                    type: 'break_time' // Indica que é hora da pausa
-                }
-            });
-            document.dispatchEvent(pomodoroEvent);
-            console.log('🍅 Evento pomodoroComplete disparado (pausa time!)');
+            // CRITICAL FIX: Delay event dispatch to prevent immediate re-triggering
+            setTimeout(() => {
+                const pomodoroEvent = new CustomEvent('pomodoroComplete', {
+                    detail: {
+                        duration: 25,
+                        timestamp: Date.now(),
+                        type: 'break_time', // Indica que é hora da pausa
+                        source: 'timer_system' // Mark the source
+                    }
+                });
+                document.dispatchEvent(pomodoroEvent);
+                console.log('🍅 Evento pomodoroComplete disparado (pausa time!) - delayed to prevent loops');
+            }, 1000); // 1 second delay
         } catch (error) {
             console.warn('⚠️ Erro ao disparar evento de Pomodoro:', error);
         }

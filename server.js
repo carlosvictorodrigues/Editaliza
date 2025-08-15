@@ -34,6 +34,9 @@ const fs = require('fs');
 const passport = require('./src/config/passport');
 require('dotenv').config();
 
+// CACKTO INTEGRATION DISABLED - Causing database errors
+// TODO: Re-enable after proper database migration
+/*
 // Importar integração CACKTO
 const { 
     CacktoRoutes,
@@ -42,6 +45,7 @@ const {
     requirePremiumFeature,
     addSubscriptionInfo
 } = require('./src/cackto-integration');
+*/
 
 // Importar middleware de segurança
 const {
@@ -430,8 +434,15 @@ app.use('/reset-password', strictRateLimit);
 
 
 // ==========================================
-// INTEGRAÇÃO CACKTO
+// INTEGRAÇÃO CACKTO - TEMPORARIAMENTE DESABILITADA
 // ==========================================
+
+/* 
+// CACKTO INTEGRATION TEMPORARILY DISABLED
+// Reason: Missing database tables and columns causing 500 errors
+// Tables needed: integration_metrics, cackto_cache  
+// Column needed: subscriptions.cackto_transaction_id (currently has kiwify_transaction_id)
+// TODO: Run migration script and re-enable
 
 // Inicializar integração CACKTO
 (async () => {
@@ -458,11 +469,25 @@ const requireActiveSubscription = checkCacktoSubscription({
     redirectToPlans: false,
     strict: true
 });
+*/
 
-// Middleware para funcionalidades premium específicas
+// TEMPORARY FALLBACK - Simple subscription check without Cackto
+const requireActiveSubscription = (req, res, next) => {
+    // For now, allow all authenticated users until Cackto is properly configured
+    next();
+};
+
+// Middleware para funcionalidades premium específicas - DISABLED WITH CACKTO
+/*
 const requirePDFDownload = requirePremiumFeature('pdf_download');
 const requireAdvancedSearch = requirePremiumFeature('advanced_search');
 const requireOfflineAccess = requirePremiumFeature('offline_access');
+*/
+
+// TEMPORARY FALLBACK - Allow all features until Cackto is properly configured
+const requirePDFDownload = (req, res, next) => next();
+const requireAdvancedSearch = (req, res, next) => next();
+const requireOfflineAccess = (req, res, next) => next();
 
 app.use('/api/', moderateRateLimit);
 
