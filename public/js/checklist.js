@@ -79,7 +79,7 @@ const StudyChecklist = {
         this.addModalClickListener(); // CORREÇÃO 1: Fechar modal ao clicar fora
     },
 
-    startStudySession(shouldStartTimer = true) { // CORREÇÃO 2: Controla se deve iniciar o timer
+    async startStudySession(shouldStartTimer = true) { // CORREÇÃO 2: Controla se deve iniciar o timer
         // Mark this session as having shown the checklist
         if (this.session && this.session.id) {
             this.checklistShownSessions.add(this.session.id);
@@ -87,7 +87,8 @@ const StudyChecklist = {
         }
         
         const modalContainer = document.getElementById('studySessionModalContainer');
-        modalContainer.innerHTML = this.getTimerHtml();
+        // CORREÇÃO: Aguardar HTML do timer com duração correta
+        modalContainer.innerHTML = await this.getTimerHtml();
         this.addTimerSessionListeners();
         
         // CORREÇÃO: Verificar se já existe timer ativo antes de iniciar
@@ -107,7 +108,7 @@ const StudyChecklist = {
     },
     
     // Método para mostrar apenas o modal do cronômetro - COM DEBUGGING ROBUSTO
-    showTimerModal() {
+    async showTimerModal() {
         console.log('🔥 showTimerModal() INICIADO');
         
         // Verificar prontidão do sistema primeiro
@@ -162,7 +163,7 @@ const StudyChecklist = {
         
         console.log('🎨 Gerando HTML do timer...');
         try {
-            const timerHtml = this.getTimerHtml();
+            const timerHtml = await this.getTimerHtml();
             console.log('✅ HTML gerado com sucesso');
             modalContainer.innerHTML = timerHtml;
             console.log('✅ HTML inserido no container');
@@ -276,7 +277,7 @@ const StudyChecklist = {
         `;
     },
 
-    getTimerHtml() {
+    async getTimerHtml() {
         // Sanitize data before rendering
         const safeSubjectName = app.sanitizeHtml(this.session.subject_name);
         const safeTopicDescription = app.sanitizeHtml(this.session.topic_description);
@@ -284,6 +285,10 @@ const StudyChecklist = {
         const safeQuestionsSolved = app.sanitizeHtml(this.session.questions_solved || '');
 
         const style = app.getSubjectStyle(this.session.subject_name);
+        
+        // CORREÇÃO: Aguardar criação do timer UI com duração correta
+        const timerHtml = await TimerSystem.createTimerUI(this.session.id);
+        
         return `
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold text-gray-800 flex items-center"><span class="text-3xl mr-3">${style.icon}</span>${safeSubjectName}</h2>
@@ -291,7 +296,7 @@ const StudyChecklist = {
             </div>
             <p class="mb-6 text-gray-600">${safeTopicDescription}</p>
             
-            ${TimerSystem.createTimerUI(this.session.id)}
+            ${timerHtml}
 
             <div class="mt-6 space-y-4">
                  <div>

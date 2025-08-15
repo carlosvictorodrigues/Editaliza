@@ -5,6 +5,7 @@
 
 const TimerSystem = {
     timers: {}, // { sessionId: { startTime, elapsed, isRunning, pomodoros } }
+    _cachedPlanDuration: null, // Cache para duração do plano
     
     // Novos métodos para persistência
     getActiveTimer(sessionId) {
@@ -31,8 +32,30 @@ const TimerSystem = {
     },
     
     // O `createTimerUI` foi movido para checklist.js para um controle centralizado do modal
-    createTimerUI(sessionId) {
-        const sessionDuration = 50; // Duração padrão, pode ser aprimorado para buscar do plano
+    async createTimerUI(sessionId) {
+        // CORREÇÃO: Buscar duração real configurada pelo usuário do plano ativo
+        let sessionDuration = 50; // Duração padrão como fallback
+        
+        try {
+            const activePlanId = localStorage.getItem(app?.config?.planKey);
+            if (activePlanId) {
+                const plan = await app.apiFetch(`/plans/${activePlanId}`);
+                if (plan && plan.session_duration_minutes) {
+                    sessionDuration = plan.session_duration_minutes;
+                    // CORREÇÃO: Armazenar duração em cache para uso posterior
+                    this._cachedPlanDuration = sessionDuration;
+                    console.log(`⏰ Duração do cronômetro configurada: ${sessionDuration} minutos`);
+                } else {
+                    console.log(`⚠️ Usando duração padrão: ${sessionDuration} minutos`);
+                }
+            }
+        } catch (error) {
+            console.warn('⚠️ Erro ao buscar configuração de duração, usando padrão:', error);
+            // Garantir que sessionDuration tenha um valor válido
+            sessionDuration = sessionDuration || 50;
+        }
+        
+        console.log(`🎯 Duração final configurada para sessão ${sessionId}: ${sessionDuration} minutos`);
         
         // Verificar se já existe tempo decorrido para esta sessão e se está rodando
         const hasElapsedTime = this.timers[sessionId] && this.timers[sessionId].elapsed > 100;
@@ -165,7 +188,21 @@ const TimerSystem = {
         
         if (progressBar && statusText) {
             const minutes = Math.floor(timerData.elapsed / 60000);
-            const sessionDuration = parseInt(statusText.dataset.duration) || 50;
+            // CORREÇÃO: Buscar duração real do plano se não estiver no dataset
+            let sessionDuration = parseInt(statusText.dataset.duration) || 50;
+            
+            // Se ainda está usando valor padrão, tenta buscar do plano
+            if (sessionDuration === 50) {
+                try {
+                    const activePlanId = localStorage.getItem(app?.config?.planKey);
+                    if (activePlanId && this._cachedPlanDuration) {
+                        sessionDuration = this._cachedPlanDuration;
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Erro ao buscar duração em cache');
+                }
+            }
+            
             const progress = Math.min((minutes / sessionDuration) * 100, 100);
             progressBar.style.width = `${progress}%`;
             statusText.textContent = `${minutes} / ${sessionDuration} min`;
@@ -580,6 +617,12 @@ const TimerSystem = {
         } catch (error) {
             console.error('❌ Erro ao limpar timer:', error);
         }
+    },
+
+    // CORREÇÃO: Método para limpar cache de duração quando plano for alterado
+    clearPlanDurationCache() {
+        this._cachedPlanDuration = null;
+        console.log('🗑️ Cache de duração do plano limpo');
     },
 
     async saveTimeToDatabase(sessionId, seconds) {

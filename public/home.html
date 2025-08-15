@@ -38,6 +38,9 @@
     <script src="js/checklist.js"></script>
     <script src="js/timer.js"></script>
     <script src="js/modules/gamification.js"></script>
+    <!-- SMART NOTIFICATION MODULES -->
+    <script src="js/modules/contextual-notifications.js"></script>
+    <script src="js/modules/notification-integrations.js"></script>
     <!-- <script src="js/ux-improvements.js"></script> -->
     <!-- Config do Tailwind para cores da marca -->
     <script>
@@ -534,6 +537,21 @@
                     }
 
                     // Rodapé agora está inline no HTML - carregamento garantido
+                    
+                    // Inicializar sistema de notificações inteligentes
+                    console.log('🔔 Inicializando notificações inteligentes na home...');
+                    if (window.ContextualNotifications && !window.ContextualNotifications.initialized) {
+                        try {
+                            await window.ContextualNotifications.init();
+                            console.log('✅ Notificações contextuais ativadas na home');
+                        } catch (notifError) {
+                            console.warn('⚠️ Erro ao inicializar notificações:', notifError);
+                        }
+                    } else if (window.ContextualNotifications) {
+                        console.log('✅ Notificações contextuais já estavam inicializadas');
+                    } else {
+                        console.warn('⚠️ Sistema de notificações não encontrado');
+                    }
 
                 } catch (error) {
                     console.error("Erro ao inicializar a página:", error);
@@ -1191,6 +1209,11 @@
                         try {
                             localStorage.setItem(app.config.planKey, newPlanId);
                             
+                            // CORREÇÃO: Limpar cache de duração do timer quando plano for alterado
+                            if (window.TimerSystem && TimerSystem.clearPlanDurationCache) {
+                                TimerSystem.clearPlanDurationCache();
+                            }
+                            
                             // Atualizar indicador de Reta Final dinamicamente
                             const newPlan = await app.apiFetch(`/plans/${newPlanId}`);
                             const isRetaFinalMode = newPlan.reta_final_mode === 1 || newPlan.reta_final_mode === true || newPlan.reta_final_mode === '1';
@@ -1221,6 +1244,16 @@
 
             // Make functions globally accessible
             window.checkOverdueTasks = checkOverdueTasks;
+            
+            // Função para testar notificações (disponível no console)
+            window.testNotifications = function() {
+                console.log('🧪 Testando sistema de notificações...');
+                if (window.ContextualNotifications) {
+                    window.ContextualNotifications.testNotification();
+                } else {
+                    console.error('❌ Sistema de notificações não disponível');
+                }
+            };
             window.reinforceSession = reinforceSession;
             window.openPostponeModal = openPostponeModal;
             window.closePostponeModal = closePostponeModal;
