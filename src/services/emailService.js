@@ -57,7 +57,7 @@ class EmailService {
     /**
      * Generate HTML email template for password recovery
      */
-    generatePasswordResetHTML(userName, resetLink, logoUrl, expirationTime = '1 hora') {
+    generatePasswordResetHTML(userName, resetLink, expirationTime = '1 hora') {
         return `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -291,7 +291,7 @@ class EmailService {
                 <div class="logo-fallback">Editaliza</div>
                 <![endif]-->
                 <!--[if !mso]><!-->
-                <img src="${logoUrl}" alt="Editaliza" class="logo" style="display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <img src="cid:logo" alt="Editaliza" class="logo" style="display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                 <div class="logo-fallback" style="display: none;">Editaliza</div>
                 <!--<![endif]-->
             </a>
@@ -406,10 +406,12 @@ Equipe Editaliza
                 throw new Error('Failed to verify email connection');
             }
 
-            const logoUrl = `${appUrl}/logotipo.png`;
-            const htmlContent = this.generatePasswordResetHTML(userName, resetLink, logoUrl, expirationTime);
+            const htmlContent = this.generatePasswordResetHTML(userName, resetLink, expirationTime);
             const textContent = this.generatePasswordResetText(userName, resetLink, expirationTime);
 
+            // Update HTML to use CID for logo
+            const htmlWithCid = htmlContent.replace('${logoUrl}', 'cid:logo');
+            
             const mailOptions = {
                 from: {
                     name: 'Editaliza',
@@ -418,12 +420,17 @@ Equipe Editaliza
                 to: email,
                 subject: '🔐 Recuperação de Senha - Editaliza',
                 text: textContent,
-                html: htmlContent,
+                html: htmlWithCid,
                 priority: 'high',
                 headers: {
                     'X-Mailer': 'Editaliza Password Recovery System',
                     'X-Priority': '1'
-                }
+                },
+                attachments: [{
+                    filename: 'logo.png',
+                    path: path.join(__dirname, '../../public/logotipo.png'),
+                    cid: 'logo' // Same CID as referenced in HTML
+                }]
             };
 
             const result = await this.transporter.sendMail(mailOptions);
@@ -465,7 +472,7 @@ Equipe Editaliza
     /**
      * Generate HTML email template for welcome email
      */
-    generateWelcomeHTML(userName, userEmail, logoUrl) {
+    generateWelcomeHTML(userName, userEmail) {
         return `
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -784,7 +791,7 @@ Equipe Editaliza
                 <div class="logo-fallback">Editaliza</div>
                 <![endif]-->
                 <!--[if !mso]><!-->
-                <img src="${logoUrl}" alt="Editaliza" class="logo" style="display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <img src="cid:logo" alt="Editaliza" class="logo" style="display: block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                 <div class="logo-fallback" style="display: none;">Editaliza</div>
                 <!--<![endif]-->
             </a>
@@ -946,9 +953,11 @@ Equipe Editaliza
             }
 
             const appUrl = process.env.APP_URL || 'http://localhost:3000';
-            const logoUrl = `${appUrl}/logotipo.png`;
-            const htmlContent = this.generateWelcomeHTML(userName, email, logoUrl);
+            const htmlContent = this.generateWelcomeHTML(userName, email);
             const textContent = this.generateWelcomeText(userName, email);
+            
+            // Update HTML to use CID for logo
+            const htmlWithCid = htmlContent.replace('${logoUrl}', 'cid:logo');
 
             const mailOptions = {
                 from: {
@@ -958,12 +967,17 @@ Equipe Editaliza
                 to: email,
                 subject: '🎉 Bem-vindo ao Editaliza - Sua jornada começa agora!',
                 text: textContent,
-                html: htmlContent,
+                html: htmlWithCid,
                 priority: 'normal',
                 headers: {
                     'X-Mailer': 'Editaliza Welcome System',
                     'List-Unsubscribe': '<mailto:unsubscribe@editaliza.com>'
-                }
+                },
+                attachments: [{
+                    filename: 'logo.png',
+                    path: path.join(__dirname, '../../public/logotipo.png'),
+                    cid: 'logo' // Same CID as referenced in HTML
+                }]
             };
 
             const result = await this.transporter.sendMail(mailOptions);
