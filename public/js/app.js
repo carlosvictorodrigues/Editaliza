@@ -736,7 +736,7 @@ async function openStudySession(sessionId) {
         }
 
         let sessionRescheduled = false;
-        const todayStr = new Date().toLocaleDateString('en-CA');
+        const todayStr = new Date().toISOString().split('T')[0];
         if (session.session_date && session.session_date !== todayStr) {
             const confirmReschedule = confirm('Esta sessão estava marcada para outro dia. Deseja reagendá-la para hoje?');
             if (!confirmReschedule) {
