@@ -429,6 +429,197 @@ html[data-theme="dark"] .section {
 .m-lg { margin: var(--space-lg); }
 .m-xl { margin: var(--space-xl); }
 
+/* ===============================================
+ * FORÇA BRUTA - DARK MODE OVERRIDE
+ * Garante que tokens vençam hardcodes e Tailwind
+ * =============================================== */
+
+/* 1) Garanta data-theme no HTML */
+html:not([data-theme]) { color-scheme: light dark; }
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) { 
+    --theme-detected: "dark";
+  }
+}
+
+/* 2) Reset de cores hardcoded mais comuns em dark */
+html[data-theme="dark"] body {
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .box,
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .dropdown,
+html[data-theme="dark"] .table,
+html[data-theme="dark"] .toast,
+html[data-theme="dark"] .content-card,
+html[data-theme="dark"] .bg-white {
+  background-color: var(--surface-1) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+
+/* 3) Títulos e links: sair do neon */
+html[data-theme="dark"] h1, 
+html[data-theme="dark"] h2, 
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5,
+html[data-theme="dark"] h6,
+html[data-theme="dark"] .heading,
+html[data-theme="dark"] .text-gray-900,
+html[data-theme="dark"] .text-gray-800,
+html[data-theme="dark"] .text-black { 
+  color: var(--text) !important;
+}
+
+html[data-theme="dark"] a:not(.button):not(.btn),
+html[data-theme="dark"] .link {
+  color: var(--link) !important;
+}
+html[data-theme="dark"] a:not(.button):not(.btn):hover,
+html[data-theme="dark"] .link:hover {
+  color: var(--link-hover) !important;
+  text-decoration: underline;
+}
+
+/* 4) Botões primários azuis */
+html[data-theme="dark"] .btn-primary,
+html[data-theme="dark"] .button--primary,
+html[data-theme="dark"] .bg-blue-600,
+html[data-theme="dark"] .bg-blue-500 {
+  background: var(--primary) !important;
+  color: var(--on-primary) !important;
+  border-color: transparent !important;
+}
+html[data-theme="dark"] .btn-primary:hover,
+html[data-theme="dark"] .button--primary:hover { 
+  background: var(--primary-400) !important; 
+}
+html[data-theme="dark"] .btn-primary:active,
+html[data-theme="dark"] .button--primary:active { 
+  background: var(--primary-600) !important; 
+}
+
+/* 5) Botões neutros */
+html[data-theme="dark"] .btn-secondary,
+html[data-theme="dark"] .button--secondary,
+html[data-theme="dark"] .bg-gray-100,
+html[data-theme="dark"] .bg-gray-200 {
+  background: var(--secondary) !important;
+  color: var(--on-secondary) !important;
+  border-color: var(--border) !important;
+}
+
+/* 6) Badges de status (adeus pastel fluorescente) */
+html[data-theme="dark"] .badge-success,
+html[data-theme="dark"] .bg-green-100 { 
+  background: var(--success-surface) !important; 
+  color: var(--success) !important; 
+}
+html[data-theme="dark"] .badge-warning,
+html[data-theme="dark"] .bg-yellow-100,
+html[data-theme="dark"] .bg-amber-100 { 
+  background: var(--warning-surface) !important; 
+  color: var(--warning) !important; 
+}
+html[data-theme="dark"] .badge-error,
+html[data-theme="dark"] .bg-red-100 { 
+  background: var(--error-surface) !important; 
+  color: var(--error) !important; 
+}
+html[data-theme="dark"] .badge-info,
+html[data-theme="dark"] .bg-blue-100 { 
+  background: var(--info-surface) !important; 
+  color: var(--info) !important; 
+}
+
+/* 7) Cards de disciplinas: remover fundo "glow", usar borda esquerda */
+html[data-theme="dark"] .card-disciplina {
+  background: var(--surface-1) !important;
+  position: relative; 
+  border: 1px solid var(--border) !important;
+}
+
+/* 8) Inputs, selects, textarea */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] .input,
+html[data-theme="dark"] .select,
+html[data-theme="dark"] .textarea {
+  background: var(--surface-1) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+}
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus,
+html[data-theme="dark"] textarea:focus { 
+  outline: 2px solid var(--ring) !important; 
+  outline-offset: 2px; 
+  border-color: var(--primary) !important;
+}
+
+/* 9) Footer - trocar linha azul gritante */
+html[data-theme="dark"] .footer,
+html[data-theme="dark"] footer,
+html[data-theme="dark"] .editaliza-footer,
+html[data-theme="dark"] .editaliza-footer-refatorado {
+  background: var(--surface-2) !important;
+  border-top: 1px solid var(--surface-3) !important;
+  color: var(--text-muted) !important;
+}
+
+/* 10) Text colors common overrides */
+html[data-theme="dark"] .text-gray-600,
+html[data-theme="dark"] .text-gray-700 {
+  color: var(--text-muted) !important;
+}
+
+html[data-theme="dark"] .text-gray-500,
+html[data-theme="dark"] .text-gray-400 {
+  color: var(--text-disabled) !important;
+}
+
+/* 11) Border colors */
+html[data-theme="dark"] .border-gray-200,
+html[data-theme="dark"] .border-gray-300,
+html[data-theme="dark"] .border-gray-100 {
+  border-color: var(--border) !important;
+}
+
+/* 12) Espaçamento extra no dark para não virar paredão de caixas */
+html[data-theme="dark"] .section,
+html[data-theme="dark"] .space-y-4 > *,
+html[data-theme="dark"] .space-y-6 > * {
+  margin-block: calc(var(--space-lg) + 4px) !important;
+}
+
+/* 13) Remove gradientes hardcoded que ficam horríveis no dark */
+html[data-theme="dark"] .bg-gradient-to-r,
+html[data-theme="dark"] .bg-gradient-to-br,
+html[data-theme="dark"] .bg-gradient-to-b {
+  background: var(--surface-1) !important;
+  border-left: 4px solid var(--primary) !important;
+}
+
+/* 14) Tailwind slate overrides */
+html[data-theme="dark"] .bg-slate-50,
+html[data-theme="dark"] .bg-slate-100 {
+  background: var(--bg) !important;
+}
+
+/* 15) Force navigation to use tokens */
+html[data-theme="dark"] .nav,
+html[data-theme="dark"] nav,
+html[data-theme="dark"] header {
+  background: var(--surface-2) !important;
+  border-color: var(--border) !important;
+}
+
 /* Accessibility - Contrast Requirements */
 @media (prefers-contrast: high) {
   :root {
