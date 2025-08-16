@@ -670,8 +670,9 @@
                 console.log('📅 Carregando cronograma para planId:', planId);
                 
                 try {
-                    const today = new Date().toISOString().split('T')[0];
-                    console.log('📅 Data de hoje:', today);
+                    // CORREÇÃO: Usar horário de Brasília ao invés de UTC
+                    const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
+                    console.log('📅 Data de hoje (Brasília):', today);
                     
                     const scheduleData = await app.apiFetch(`/schedules/${planId}/range?startDate=${today}&endDate=${today}`);
                     console.log('📅 Dados do cronograma recebidos:', scheduleData);

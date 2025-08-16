@@ -1,3 +1,6 @@
+/* eslint-env browser */
+/* global app, TimerSystem */
+
 /**
  * @file js/components.js
  * @description Funções para renderizar componentes de UI reutilizáveis com a nova identidade visual.
@@ -92,24 +95,24 @@ const components = {
         const now = Date.now();
         if (this.userAvatarCache && this.userAvatarCacheTime && 
             (now - this.userAvatarCacheTime) < this.userAvatarCacheTimeout) {
-            console.log('🎯 Usando avatar do cache:', this.userAvatarCache);
+            // Avatar cached
             return this.userAvatarCache;
         }
 
         try {
-            console.log('🔄 Carregando avatar do servidor...');
+            // Loading avatar from server
             const userProfile = await app.apiFetch('/users/profile'); // CORREÇÃO 5: Usar endpoint correto
             
             // Check if user has Google avatar or local avatar
             let avatar = null;
             if (userProfile.google_avatar && userProfile.auth_provider === 'google') {
                 avatar = userProfile.google_avatar;
-                console.log('✅ Avatar do Google carregado:', avatar);
+                // Google avatar loaded
             } else if (userProfile.profile_picture) {
                 avatar = userProfile.profile_picture;
-                console.log('✅ Avatar local carregado:', avatar);
+                // Local avatar loaded
             } else {
-                console.log('⚠️ Nenhum avatar encontrado no perfil');
+                // No avatar found
             }
             
             this.userAvatarCache = avatar;
@@ -160,14 +163,14 @@ const components = {
                 ).join('');
                 
                 return `
-                    <div class="relative group">
-                        <button class="nav-link-default px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-50 flex items-center">
+                    <div class="relative dropdown-container">
+                        <button class="nav-link-default dropdown-trigger px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-50 flex items-center">
                             ${link.text}
-                            <svg class="inline w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="inline w-4 h-4 ml-1 dropdown-arrow transition-transform" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                         </button>
-                        <div class="absolute left-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div class="dropdown-menu absolute left-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible transition-all duration-200 z-50">
                             ${dropdownItems}
                         </div>
                     </div>
@@ -275,7 +278,7 @@ const components = {
                                         fill: #0528f2;
                                       }
                                       .cls-2 {
-                                        fill: #0d0d0d;
+                                        fill: #0d0d0d !important; /* Force black text in logo */
                                       }
                                       .cls-3 {
                                         fill: #1ad937;
@@ -314,13 +317,13 @@ const components = {
                         <div class="flex items-center space-x-3">
                             ${profileHtml}
                             <!-- Theme Toggle -->
-                            <div class="theme-toggle-nav" data-tooltip="Alternar tema">
-                                <div class="theme-switch" title="Alternar modo escuro">
-                                    <svg class="theme-icon sun-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <div class="theme-toggle-nav" data-tooltip="Alternar tema" style="display: inline-flex; align-items: center; margin-left: 12px;">
+                                <div class="theme-switch" title="Alternar modo escuro" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; background: white; transition: all 0.3s;">
+                                    <svg class="theme-icon sun-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px; color: #64748b;">
                                         <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
                                     </svg>
                                     
-                                    <svg class="theme-icon moon-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                    <svg class="theme-icon moon-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px; color: #64748b; display: none;">
                                         <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
                                     </svg>
                                 </div>
@@ -343,13 +346,112 @@ const components = {
         const themeToggle = document.querySelector('.theme-toggle-nav .theme-switch');
         if (themeToggle) {
             themeToggle.addEventListener('click', () => {
-                if (window.editalizeTheme && window.editalizeTheme.toggle) {
-                    window.editalizeTheme.toggle();
-                } else if (window.toggleTheme) {
-                    window.toggleTheme();
+                const html = document.documentElement;
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('editaliza-theme', newTheme);
+                
+                // Toggle icons
+                const sunIcon = themeToggle.querySelector('.sun-icon');
+                const moonIcon = themeToggle.querySelector('.moon-icon');
+                if (newTheme === 'dark') {
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                } else {
+                    sunIcon.style.display = 'block';
+                    moonIcon.style.display = 'none';
                 }
             });
         }
+        
+        // Initialize theme on load
+        const savedTheme = localStorage.getItem('editaliza-theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        // Set initial icon state
+        setTimeout(() => {
+            const toggle = document.querySelector('.theme-toggle-nav .theme-switch');
+            if (toggle) {
+                const sunIcon = toggle.querySelector('.sun-icon');
+                const moonIcon = toggle.querySelector('.moon-icon');
+                if (savedTheme === 'dark') {
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                } else {
+                    sunIcon.style.display = 'block';
+                    moonIcon.style.display = 'none';
+                }
+            }
+        }, 100);
+        
+        // Add dropdown functionality with consistent behavior
+        this.initializeDropdowns();
+    },
+    
+    initializeDropdowns() {
+        // Wait for DOM to be ready
+        setTimeout(() => {
+            const dropdowns = document.querySelectorAll('.dropdown-container');
+            
+            dropdowns.forEach(dropdown => {
+                const trigger = dropdown.querySelector('.dropdown-trigger');
+                const menu = dropdown.querySelector('.dropdown-menu');
+                const arrow = dropdown.querySelector('.dropdown-arrow');
+                let isOpen = false;
+                let hoverTimeout;
+                
+                // Toggle on click
+                trigger.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    isOpen = !isOpen;
+                    
+                    if (isOpen) {
+                        menu.classList.remove('opacity-0', 'invisible');
+                        menu.classList.add('opacity-100', 'visible');
+                        arrow.style.transform = 'rotate(180deg)';
+                    } else {
+                        menu.classList.add('opacity-0', 'invisible');
+                        menu.classList.remove('opacity-100', 'visible');
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                });
+                
+                // Show on hover with delay
+                dropdown.addEventListener('mouseenter', () => {
+                    clearTimeout(hoverTimeout);
+                    hoverTimeout = setTimeout(() => {
+                        if (!isOpen) {
+                            menu.classList.remove('opacity-0', 'invisible');
+                            menu.classList.add('opacity-100', 'visible');
+                            arrow.style.transform = 'rotate(180deg)';
+                        }
+                    }, 200); // Small delay to prevent accidental opening
+                });
+                
+                // Hide on mouse leave with delay
+                dropdown.addEventListener('mouseleave', () => {
+                    clearTimeout(hoverTimeout);
+                    hoverTimeout = setTimeout(() => {
+                        if (!isOpen) {
+                            menu.classList.add('opacity-0', 'invisible');
+                            menu.classList.remove('opacity-100', 'visible');
+                            arrow.style.transform = 'rotate(0deg)';
+                        }
+                    }, 300); // Delay to allow moving to submenu
+                });
+                
+                // Close when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!dropdown.contains(e.target)) {
+                        isOpen = false;
+                        menu.classList.add('opacity-0', 'invisible');
+                        menu.classList.remove('opacity-100', 'visible');
+                        arrow.style.transform = 'rotate(0deg)';
+                    }
+                });
+            });
+        }, 200);
     },
     
     renderPlanHeader(planId, planName, activePage) {
@@ -596,7 +698,7 @@ const components = {
             </div>
         `;
         
-        console.log('🚨 Alerta de Reta Final renderizado');
+        // Final stretch alert rendered
     },
 
     // Renderiza indicador compacto de Reta Final (para home)
@@ -606,10 +708,10 @@ const components = {
         
         if (isActive) {
             indicator.classList.remove('hidden');
-            console.log('🚨 Modo Reta Final ativo - indicador exibido');
+            // Final stretch mode active
         } else {
             indicator.classList.add('hidden');
-            console.log('✅ Modo Reta Final inativo - indicador oculto');
+            // Final stretch mode inactive
         }
     },
 
@@ -1298,7 +1400,7 @@ const components = {
             const classArray = smartButton.classes.split(' ').filter(c => c.trim());
             button.classList.add(...classArray);
             
-            console.log(`🔄 Botão da sessão ${sessionId} atualizado:`, smartButton.text);
+            // Button updated for session
         });
     }
 };

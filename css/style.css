@@ -8,7 +8,7 @@
  * EDITALIZA DESIGN SYSTEM - DUAL THEME SUPPORT
  * =============================================== */
 
-/* Light Theme Variables (Default) */
+/* Light Theme Variables (Default) - ORIGINAL COLORS RESTORED */
 :root {
     /* Brand Colors - Consistent across themes */
     --editaliza-blue: #0528f2;
@@ -18,7 +18,7 @@
     --editaliza-green-light: #c8f000;
     --editaliza-green-dark: #88c100;
     
-    /* Semantic Colors - Light Theme */
+    /* Semantic Colors - Light Theme - KEEP ORIGINAL */
     --bg-primary: #f8fafc;           /* Main background */
     --bg-secondary: #ffffff;          /* Card backgrounds */
     --bg-tertiary: #f1f5f9;          /* Subtle backgrounds */
@@ -780,6 +780,22 @@ a:focus {
     color: #9bb5f0;
 }
 
+/* Logo SVG - Keep original colors */
+#logo-header .cls-1 {
+    fill: #0528f2 !important; /* Blue parts */
+}
+#logo-header .cls-2 {
+    fill: #0d0d0d !important; /* Black text - always black */
+}
+#logo-header .cls-3 {
+    fill: #1ad937 !important; /* Green parts */
+}
+
+/* Dark mode - Logo text should be white */
+[data-theme="dark"] #logo-header .cls-2 {
+    fill: #f0ede8 !important; /* White text in dark mode */
+}
+
 /* Screen reader only content */
 .sr-only {
     position: absolute;
@@ -1073,4 +1089,62 @@ a:focus {
 [data-theme="dark"] a:focus {
     outline: 2px solid var(--editaliza-blue-dark-mode);
     box-shadow: 0 0 0 4px rgba(79, 148, 255, 0.2);
+}
+
+/* CRITICAL FIX: Button text must be white/off-white in dark mode */
+[data-theme="dark"] button,
+[data-theme="dark"] .btn,
+[data-theme="dark"] .btn-primary,
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] .btn-danger,
+[data-theme="dark"] .btn-action-sm,
+[data-theme="dark"] [class*="btn-"] {
+    color: #f0ede8 !important; /* Off-white for readability */
+}
+
+/* Ensure Tailwind button classes also get white text */
+[data-theme="dark"] .bg-blue-600,
+[data-theme="dark"] .bg-blue-700,
+[data-theme="dark"] .bg-indigo-600,
+[data-theme="dark"] .bg-indigo-700,
+[data-theme="dark"] .bg-purple-600,
+[data-theme="dark"] .bg-purple-700,
+[data-theme="dark"] .bg-gray-700,
+[data-theme="dark"] .bg-gray-800,
+[data-theme="dark"] .bg-slate-700,
+[data-theme="dark"] .bg-slate-800 {
+    color: #f0ede8 !important;
+}
+
+/* Fix text on any dark background in dark mode */
+[data-theme="dark"] [class*="bg-blue-"],
+[data-theme="dark"] [class*="bg-indigo-"],
+[data-theme="dark"] [class*="bg-purple-"],
+[data-theme="dark"] [class*="bg-gray-"],
+[data-theme="dark"] [class*="bg-slate-"] {
+    color: #f0ede8 !important;
+}
+
+/* EXCEPTION: Keep dark text on green backgrounds for readability */
+[data-theme="dark"] [class*="bg-green-"],
+[data-theme="dark"] .bg-editaliza-green,
+[data-theme="dark"] [class*="bg-emerald-"],
+[data-theme="dark"] [class*="bg-lime-"],
+[data-theme="dark"] [class*="bg-yellow-"] {
+    color: #1e293b !important; /* Keep dark text on light backgrounds */
+}
+
+/* Fix for cards with green gradients */
+[data-theme="dark"] .bg-gradient-to-br.from-green-400,
+[data-theme="dark"] .bg-gradient-to-br.from-emerald-400,
+[data-theme="dark"] .bg-gradient-to-br.from-lime-400 {
+    color: #1e293b !important;
+}
+
+/* Ensure all text inside green cards stays dark */
+[data-theme="dark"] [class*="bg-green-"] *,
+[data-theme="dark"] .bg-editaliza-green *,
+[data-theme="dark"] [class*="bg-emerald-"] *,
+[data-theme="dark"] [class*="bg-lime-"] * {
+    color: #1e293b !important;
 }
