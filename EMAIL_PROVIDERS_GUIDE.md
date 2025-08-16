@@ -25,8 +25,8 @@ O sistema Editaliza suporta múltiplos provedores de email para garantir alta di
 ### 🔧 Desenvolvimento
 ```env
 EMAIL_PROVIDER=gmail
-EMAIL_USER=suporte@editaliza.com.br
-EMAIL_PASS=usrb wdbu ciny kgku
+EMAIL_USER=seu_email@exemplo.com
+EMAIL_PASS=sua_senha_de_app_aqui
 ```
 **Limites**: 500 emails/dia, 5 emails/segundo
 
@@ -59,8 +59,8 @@ Continue com **Amazon SES** com configurações avançadas:
 ### Gmail (Atual)
 ```env
 EMAIL_PROVIDER=gmail
-EMAIL_USER=suporte@editaliza.com.br
-EMAIL_PASS=usrb wdbu ciny kgku
+EMAIL_USER=seu_email@exemplo.com
+EMAIL_PASS=sua_senha_de_app_aqui
 ```
 
 ⚠️ **Importante**: 
