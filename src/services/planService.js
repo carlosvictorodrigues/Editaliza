@@ -581,20 +581,27 @@ const getGamification = async (planId, userId) => {
     
     const experiencePoints = completedTopicsCount * 10 + uniqueStudyDays * 5; // XP system
     
-    // Calcular tempo total de estudo agregando de ambas as tabelas
+    // CORREÇÃO: Calcular tempo total sem duplicação
+    // Para cada sessão, usar APENAS o maior valor entre:
+    // 1. time_studied_seconds da sessão
+    // 2. O último/maior time log da sessão
     const totalTimeResult = await dbGet(`
-        SELECT COALESCE(SUM(time_value), 0) as total_time
+        SELECT COALESCE(SUM(session_time), 0) as total_time
         FROM (
-            SELECT time_studied_seconds as time_value
-            FROM study_sessions
-            WHERE study_plan_id = ? AND status = 'Concluído' AND time_studied_seconds IS NOT NULL
-            UNION ALL
-            SELECT stl.duration_seconds as time_value
-            FROM study_time_logs stl
-            JOIN study_sessions ss ON stl.session_id = ss.id
-            WHERE ss.study_plan_id = ?
+            SELECT 
+                ss.id,
+                CASE 
+                    WHEN MAX(stl.duration_seconds) > ss.time_studied_seconds 
+                    THEN MAX(stl.duration_seconds)
+                    ELSE COALESCE(ss.time_studied_seconds, 0)
+                END as session_time
+            FROM study_sessions ss
+            LEFT JOIN study_time_logs stl ON stl.session_id = ss.id
+            WHERE ss.study_plan_id = ? 
+                AND (ss.status = 'Concluído' OR ss.time_studied_seconds > 0)
+            GROUP BY ss.id
         )
-    `, [planId, planId]);
+    `, [planId]);
     
     const totalStudyTime = totalTimeResult?.total_time || 0;
     console.log(`📊 Tempo total de estudo para plano ${planId}: ${totalStudyTime} segundos`);
