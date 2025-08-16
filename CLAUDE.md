@@ -50,8 +50,37 @@ npm test           # Se existir
   /services     - Serviços
   /routes       - Rotas
   /utils        - Utilitários
-/public         - Arquivos públicos
+/public         - Arquivos públicos (IMPORTANTE: veja nota abaixo)
+/css            - Estilos CSS (duplicados em /public/css)
+/js             - Scripts JS (duplicados em /public/js)
 ```
+
+### ⚠️ IMPORTANTE - DUPLICAÇÃO DE ARQUIVOS ESTÁTICOS:
+O servidor serve arquivos estáticos de DUAS localizações:
+1. **Pasta raiz** (`/css`, `/js`) - Arquivos HTML referenciam estes
+2. **Pasta public** (`/public/css`, `/public/js`, `/public/*.html`)
+
+**SEMPRE QUE MODIFICAR:**
+- Arquivos CSS: Copie para AMBAS `/css` e `/public/css`
+- Arquivos JS: Copie para AMBAS `/js` e `/public/js`  
+- Arquivos HTML: Copie para `/public/`
+
+**Exemplo após modificar um arquivo:**
+```bash
+# Após modificar style.css
+cp css/style.css public/css/style.css
+
+# Após modificar app.js
+cp js/app.js public/js/app.js
+
+# Após modificar login.html
+cp login.html public/login.html
+```
+
+**Por que isso acontece:**
+- O servidor mapeia `/css` → `./css` e `/js` → `./js` (compatibilidade)
+- Também serve `/public` como pasta estática
+- Mudanças só aparecem quando arquivos estão em AMBOS os lugares
 
 ## 🐛 DEBUGGING:
 
@@ -92,4 +121,6 @@ npm test           # Se existir
 
 ---
 **Última atualização:** 16/08/2025
-**Motivo:** Prevenção de exposição de credenciais após incidente de segurança
+**Motivos:** 
+- Prevenção de exposição de credenciais após incidente de segurança
+- Documentação sobre duplicação de arquivos estáticos (pasta public)
