@@ -233,33 +233,37 @@ const components = {
         navContainer.innerHTML = `
             <style>
                 .nav-link-active {
-                    background: linear-gradient(135deg, #0528f2, #3b82f6);
-                    color: white;
+                    background: var(--nav-active-bg);
+                    color: var(--nav-active-text);
                     border-radius: 0.5rem;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 .nav-link-default {
-                    color: #374151;
+                    color: var(--nav-text);
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 .nav-link-default:hover {
-                    background-color: #f3f4f6;
-                    color: #111827;
+                    background-color: var(--nav-background-hover);
+                    color: var(--nav-text-hover);
+                    border-radius: 0.5rem;
                 }
                 .btn-secondary {
-                    background: white;
-                    color: #374151;
-                    border: 1px solid #d1d5db;
+                    background: var(--surface-secondary);
+                    color: var(--text-primary);
+                    border: 1px solid var(--border-primary);
                     border-radius: 0.5rem;
                     padding: 0.5rem 1rem;
                     font-weight: 500;
                     cursor: pointer;
-                    transition: all 0.3s ease;
+                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 .btn-secondary:hover {
-                    background: #f9fafb;
-                    border-color: #9ca3af;
+                    background: var(--surface-elevated);
+                    border-color: var(--border-secondary);
+                    transform: translateY(-1px);
                 }
             </style>
-            <header class="bg-white border-b border-gray-200 shadow-sm">
+            <header class="border-b shadow-sm" style="background: var(--nav-background); border-color: var(--nav-border);">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-16">
                         <div class="flex items-center">
@@ -309,6 +313,18 @@ const components = {
                         </nav>
                         <div class="flex items-center space-x-3">
                             ${profileHtml}
+                            <!-- Theme Toggle -->
+                            <div class="theme-toggle-nav" data-tooltip="Alternar tema">
+                                <div class="theme-switch" title="Alternar modo escuro">
+                                    <svg class="theme-icon sun-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    
+                                    <svg class="theme-icon moon-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                                    </svg>
+                                </div>
+                            </div>
                             <button id="logoutButton" class="btn-secondary flex items-center space-x-2 text-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -322,6 +338,18 @@ const components = {
         `;
         
         document.getElementById('logoutButton').addEventListener('click', () => app.logout());
+        
+        // Add theme toggle functionality
+        const themeToggle = document.querySelector('.theme-toggle-nav .theme-switch');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                if (window.editalizeTheme && window.editalizeTheme.toggle) {
+                    window.editalizeTheme.toggle();
+                } else if (window.toggleTheme) {
+                    window.toggleTheme();
+                }
+            });
+        }
     },
     
     renderPlanHeader(planId, planName, activePage) {
@@ -338,8 +366,8 @@ const components = {
 
         let linksHtml = links.map(link => {
             const isActive = activePage === link.href.split('?')[0];
-            const activeClass = 'bg-editaliza-blue text-white cursor-default';
-            const defaultClass = 'bg-white hover:bg-gray-100 text-gray-700';
+            const activeClass = 'cursor-default nav-link-active';
+            const defaultClass = 'nav-link-default';
             return `<a id="${link.id}" href="${link.href}" class="px-4 py-2 text-sm font-semibold rounded-lg border border-gray-200 shadow-sm transition-colors ${isActive ? activeClass : defaultClass}">${link.text}</a>`;
         }).join('');
 

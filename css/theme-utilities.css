@@ -1,0 +1,374 @@
+/* ===============================================
+ * EDITALIZA THEME UTILITIES
+ * Quick helper classes for theme-aware development
+ * =============================================== */
+
+/* =============================================== 
+ * ADAPTIVE COLOR HELPERS
+ * =============================================== */
+
+/* Text Colors */
+.text-adaptive { color: var(--text-primary) !important; }
+.text-adaptive-secondary { color: var(--text-secondary) !important; }
+.text-adaptive-tertiary { color: var(--text-tertiary) !important; }
+.text-adaptive-inverse { color: var(--text-inverse) !important; }
+
+/* Background Colors */
+.bg-adaptive { background-color: var(--bg-secondary) !important; }
+.bg-adaptive-primary { background-color: var(--bg-primary) !important; }
+.bg-adaptive-tertiary { background-color: var(--bg-tertiary) !important; }
+
+/* Border Colors */
+.border-adaptive { border-color: var(--border-primary) !important; }
+.border-adaptive-secondary { border-color: var(--border-secondary) !important; }
+
+/* =============================================== 
+ * THEME-AWARE COMPONENT STATES
+ * =============================================== */
+
+/* Interactive States */
+.interactive-element {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.interactive-element:hover {
+    background-color: var(--bg-tertiary);
+    transform: translateY(-1px);
+}
+
+.interactive-element:active {
+    transform: translateY(0);
+}
+
+/* Focus Styles */
+.focus-adaptive:focus {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(79, 148, 255, 0.2);
+}
+
+[data-theme="dark"] .focus-adaptive:focus {
+    box-shadow: 0 0 0 4px rgba(79, 148, 255, 0.3);
+}
+
+/* =============================================== 
+ * GLASS MORPHISM UTILITIES
+ * =============================================== */
+
+.glass-subtle {
+    background: var(--bg-glass-subtle);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border);
+}
+
+.glass-medium {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+}
+
+.glass-strong {
+    background: var(--bg-secondary);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--border-primary);
+    box-shadow: var(--glass-shadow);
+}
+
+/* =============================================== 
+ * BRAND COLOR UTILITIES
+ * =============================================== */
+
+/* Brand Blue Variants */
+.text-brand-blue { color: var(--editaliza-blue) !important; }
+.bg-brand-blue { background-color: var(--editaliza-blue) !important; }
+.border-brand-blue { border-color: var(--editaliza-blue) !important; }
+
+[data-theme="dark"] .text-brand-blue { color: var(--editaliza-blue-dark-mode) !important; }
+[data-theme="dark"] .bg-brand-blue { background-color: var(--editaliza-blue-dark-mode) !important; }
+[data-theme="dark"] .border-brand-blue { border-color: var(--editaliza-blue-dark-mode) !important; }
+
+/* Brand Green Variants */
+.text-brand-green { color: var(--editaliza-green) !important; }
+.bg-brand-green { background-color: var(--editaliza-green) !important; }
+.border-brand-green { border-color: var(--editaliza-green) !important; }
+
+[data-theme="dark"] .text-brand-green { color: var(--editaliza-green-dark-mode) !important; }
+[data-theme="dark"] .bg-brand-green { background-color: var(--editaliza-green-dark-mode) !important; }
+[data-theme="dark"] .border-brand-green { border-color: var(--editaliza-green-dark-mode) !important; }
+
+/* =============================================== 
+ * STATUS COLOR UTILITIES
+ * =============================================== */
+
+/* Success Colors */
+.text-success { color: var(--success) !important; }
+.bg-success-subtle { background-color: rgba(16, 185, 129, 0.1) !important; }
+.border-success { border-color: var(--success) !important; }
+
+[data-theme="dark"] .bg-success-subtle { background-color: rgba(16, 185, 129, 0.15) !important; }
+
+/* Warning Colors */
+.text-warning { color: var(--warning) !important; }
+.bg-warning-subtle { background-color: rgba(245, 158, 11, 0.1) !important; }
+.border-warning { border-color: var(--warning) !important; }
+
+[data-theme="dark"] .bg-warning-subtle { background-color: rgba(245, 158, 11, 0.15) !important; }
+
+/* Error Colors */
+.text-error { color: var(--error) !important; }
+.bg-error-subtle { background-color: rgba(239, 68, 68, 0.1) !important; }
+.border-error { border-color: var(--error) !important; }
+
+[data-theme="dark"] .bg-error-subtle { background-color: rgba(239, 68, 68, 0.15) !important; }
+
+/* Info Colors */
+.text-info { color: var(--info) !important; }
+.bg-info-subtle { background-color: rgba(5, 40, 242, 0.1) !important; }
+.border-info { border-color: var(--info) !important; }
+
+[data-theme="dark"] .text-info { color: var(--editaliza-blue-dark-mode) !important; }
+[data-theme="dark"] .bg-info-subtle { background-color: rgba(79, 148, 255, 0.15) !important; }
+
+/* =============================================== 
+ * SHADOW UTILITIES
+ * =============================================== */
+
+.shadow-adaptive-sm {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-adaptive-md {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-adaptive-lg {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.shadow-adaptive-xl {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] .shadow-adaptive-sm { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); }
+[data-theme="dark"] .shadow-adaptive-md { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+[data-theme="dark"] .shadow-adaptive-lg { box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); }
+[data-theme="dark"] .shadow-adaptive-xl { box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4); }
+
+/* =============================================== 
+ * CARD UTILITIES
+ * =============================================== */
+
+.card-adaptive {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-adaptive:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] .card-adaptive {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="dark"] .card-adaptive:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* =============================================== 
+ * BUTTON UTILITIES
+ * =============================================== */
+
+.btn-adaptive {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-primary);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.btn-adaptive:hover {
+    background: var(--border-primary);
+    transform: translateY(-1px);
+}
+
+.btn-adaptive:active {
+    transform: translateY(0);
+}
+
+/* =============================================== 
+ * FORM UTILITIES
+ * =============================================== */
+
+.input-adaptive {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    width: 100%;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.input-adaptive:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(79, 148, 255, 0.1);
+}
+
+[data-theme="dark"] .input-adaptive:focus {
+    box-shadow: 0 0 0 3px rgba(79, 148, 255, 0.2);
+}
+
+.input-adaptive::placeholder {
+    color: var(--text-tertiary);
+}
+
+/* =============================================== 
+ * DIVIDER UTILITIES
+ * =============================================== */
+
+.divider-adaptive {
+    height: 1px;
+    background: var(--border-primary);
+    border: none;
+    margin: 1rem 0;
+}
+
+.divider-vertical-adaptive {
+    width: 1px;
+    background: var(--border-primary);
+    height: 100%;
+}
+
+/* =============================================== 
+ * ANIMATION UTILITIES
+ * =============================================== */
+
+.fade-in-adaptive {
+    animation: fadeInAdaptive 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInAdaptive {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pulse-adaptive {
+    animation: pulseAdaptive 2s infinite;
+}
+
+@keyframes pulseAdaptive {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* =============================================== 
+ * ACCESSIBILITY UTILITIES
+ * =============================================== */
+
+.sr-only-adaptive {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.focus-visible-adaptive:focus-visible {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+/* =============================================== 
+ * RESPONSIVE UTILITIES
+ * =============================================== */
+
+@media (max-width: 768px) {
+    .mobile-stack-adaptive {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .mobile-full-width-adaptive {
+        width: 100%;
+    }
+    
+    .mobile-hide-adaptive {
+        display: none;
+    }
+}
+
+@media (min-width: 769px) {
+    .desktop-hide-adaptive {
+        display: none;
+    }
+}
+
+/* =============================================== 
+ * PRINT UTILITIES
+ * =============================================== */
+
+@media print {
+    .no-print-adaptive {
+        display: none !important;
+    }
+    
+    .print-adaptive {
+        background: white !important;
+        color: black !important;
+        box-shadow: none !important;
+    }
+}
+
+/* =============================================== 
+ * MOTION PREFERENCE UTILITIES
+ * =============================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .motion-safe-adaptive {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* =============================================== 
+ * HIGH CONTRAST UTILITIES
+ * =============================================== */
+
+@media (prefers-contrast: high) {
+    .high-contrast-adaptive {
+        border: 2px solid var(--text-primary) !important;
+    }
+    
+    .high-contrast-text-adaptive {
+        font-weight: 700 !important;
+    }
+}

@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Principal - Editaliza</title>
-    <!-- Favicon and Web App Icons - Enhanced for better browser compatibility -->
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=4">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=4">
-    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png?v=4">
-    <link rel="shortcut icon" href="favicon.ico?v=4">
-    <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
-    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=4">
+    
+    <!-- Favicon and Web App Icons -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0528f2">
-
+    
     <!-- SCRIPT DE TESTE INICIAL -->
     <script>
         console.log('🚨🚨🚨 TESTE INICIAL - FUNCIONANDO! 🚨🚨🚨');
@@ -38,9 +38,7 @@
     <script src="js/checklist.js"></script>
     <script src="js/timer.js"></script>
     <script src="js/modules/gamification.js"></script>
-    <!-- SMART NOTIFICATION MODULES -->
-    <script src="js/modules/contextual-notifications.js"></script>
-    <script src="js/modules/notification-integrations.js"></script>
+    <script src="js/modules/study-goals-notifications.js"></script>
     <!-- <script src="js/ux-improvements.js"></script> -->
     <!-- Config do Tailwind para cores da marca -->
     <script>
@@ -262,10 +260,10 @@
             background: #94a3b8;
         }
     </style>
+    <link rel="stylesheet" href="/css/theme-utilities.css">
+    <script src="/js/theme-toggle.js" defer></script>
 </head>
 <body class="bg-slate-50 text-gray-800">
-    <!-- Container de Toast para Notificações -->
-    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3"></div>
 
     <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
     <div id="main-nav-container"></div>
@@ -423,8 +421,10 @@
                     </div>
                 </div>
 
+                
             </div>
         </div>
+
 
         <!-- Atividades do dia -->
         <div class="bg-white rounded-xl shadow-md mb-8 fade-in">
@@ -537,21 +537,6 @@
                     }
 
                     // Rodapé agora está inline no HTML - carregamento garantido
-                    
-                    // Inicializar sistema de notificações inteligentes
-                    console.log('🔔 Inicializando notificações inteligentes na home...');
-                    if (window.ContextualNotifications && !window.ContextualNotifications.initialized) {
-                        try {
-                            await window.ContextualNotifications.init();
-                            console.log('✅ Notificações contextuais ativadas na home');
-                        } catch (notifError) {
-                            console.warn('⚠️ Erro ao inicializar notificações:', notifError);
-                        }
-                    } else if (window.ContextualNotifications) {
-                        console.log('✅ Notificações contextuais já estavam inicializadas');
-                    } else {
-                        console.warn('⚠️ Sistema de notificações não encontrado');
-                    }
 
                 } catch (error) {
                     console.error("Erro ao inicializar a página:", error);
@@ -685,8 +670,7 @@
                 console.log('📅 Carregando cronograma para planId:', planId);
                 
                 try {
-                    // Usar horário de Brasília corretamente
-                    const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
+                    const today = new Date().toISOString().split('T')[0];
                     console.log('📅 Data de hoje:', today);
                     
                     const scheduleData = await app.apiFetch(`/schedules/${planId}/range?startDate=${today}&endDate=${today}`);
@@ -725,6 +709,7 @@
                     
                     // Update study statistics cards
                     updateStudyStatistics(planId);
+                    
 
                 } catch (error) {
                     console.error('Erro ao carregar cronograma de hoje:', error);
@@ -771,11 +756,8 @@
                     const completed = window.todaySessionsData.filter(session => {
                         // Check if session has completed time or is marked as completed
                         return session.completed_at || 
-                               session.status === 'Concluído' || 
                                session.status === 'completed' || 
-                               (session.study_time && session.study_time > 0) ||
-                               (session.time_studied_seconds && session.time_studied_seconds > 0) ||
-                               (session.study_time_seconds && session.study_time_seconds > 0);
+                               (session.study_time && session.study_time > 0);
                     }).length;
                     
                     const progressElement = document.getElementById('todayProgressText');
@@ -799,6 +781,8 @@
                     console.error('Erro ao atualizar progresso de hoje:', error);
                 }
             }
+
+
 
             async function updateStudyStatistics(planId) {
                 try {
@@ -843,20 +827,14 @@
                     if (totalDaysElement) {
                         // Calculate basic total days from today's sessions
                         const hasCompletedSessions = window.todaySessionsData.some(session =>
-                            session.completed_at || 
-                            session.status === 'Concluído' || 
-                            session.status === 'completed' || 
-                            (session.study_time && session.study_time > 0) ||
-                            (session.time_studied_seconds && session.time_studied_seconds > 0) ||
-                            (session.study_time_seconds && session.study_time_seconds > 0)
+                            session.completed_at || session.status === 'completed' || (session.study_time && session.study_time > 0)
                         );
                         // This is a simplified calculation - in production this should come from the API
                         const storedTotalDays = localStorage.getItem('totalStudyDays') || '0';
                         let totalDays = parseInt(storedTotalDays);
                         
                         // If user has studied today and it's not already counted
-                        // Usar horário de Brasília corretamente
-                        const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
+                        const today = new Date().toISOString().split('T')[0];
                         const lastStudyDate = localStorage.getItem('lastStudyDate');
                         
                         if (hasCompletedSessions && lastStudyDate !== today) {
@@ -890,6 +868,7 @@
                         return components.createSessionCard(session);
                 }
             }
+
 
             // Função para verificar tarefas atrasadas
             async function checkOverdueTasks() {
@@ -1209,11 +1188,6 @@
                         try {
                             localStorage.setItem(app.config.planKey, newPlanId);
                             
-                            // CORREÇÃO: Limpar cache de duração do timer quando plano for alterado
-                            if (window.TimerSystem && TimerSystem.clearPlanDurationCache) {
-                                TimerSystem.clearPlanDurationCache();
-                            }
-                            
                             // Atualizar indicador de Reta Final dinamicamente
                             const newPlan = await app.apiFetch(`/plans/${newPlanId}`);
                             const isRetaFinalMode = newPlan.reta_final_mode === 1 || newPlan.reta_final_mode === true || newPlan.reta_final_mode === '1';
@@ -1244,16 +1218,6 @@
 
             // Make functions globally accessible
             window.checkOverdueTasks = checkOverdueTasks;
-            
-            // Função para testar notificações (disponível no console)
-            window.testNotifications = function() {
-                console.log('🧪 Testando sistema de notificações...');
-                if (window.ContextualNotifications) {
-                    window.ContextualNotifications.testNotification();
-                } else {
-                    console.error('❌ Sistema de notificações não disponível');
-                }
-            };
             window.reinforceSession = reinforceSession;
             window.openPostponeModal = openPostponeModal;
             window.closePostponeModal = closePostponeModal;

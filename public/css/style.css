@@ -52,38 +52,41 @@
     --info: var(--editaliza-blue);
 }
 
-/* Dark Theme Variables */
+/* Dark Theme Variables - Sophisticated & Professional */
 [data-theme="dark"] {
-    /* Backgrounds - Dark Theme (Soft, not pure black) */
-    --bg-primary: #0f0f23;           /* Main background - deep navy */
-    --bg-secondary: #1a1a2e;         /* Card backgrounds - slightly lighter */
-    --bg-tertiary: #16213e;          /* Subtle backgrounds - blue tint */
-    --bg-glass: rgba(26, 26, 46, 0.95);
-    --bg-glass-subtle: rgba(255, 255, 255, 0.05);
+    /* Sophisticated Dark Backgrounds - Charcoals & Slate Grays */
+    --bg-primary: #1a1b23;           /* Sophisticated charcoal - primary background */
+    --bg-secondary: #242530;         /* Card backgrounds - slightly lighter charcoal */
+    --bg-tertiary: #2d2e3f;          /* Elevated elements - subtle slate */
+    --bg-glass: rgba(36, 37, 48, 0.95);
+    --bg-glass-subtle: rgba(255, 255, 255, 0.03);
     
-    /* Text Colors - Dark Theme (Warm, not pure white) */
-    --text-primary: #e8e6e3;         /* Main text - warm white */
-    --text-secondary: #d4d4d4;       /* Secondary text - neutral gray */
-    --text-tertiary: #a1a1aa;        /* Muted text - darker gray */
-    --text-inverse: #1e293b;         /* Text on light backgrounds */
+    /* Warm, Comfortable Text Colors */
+    --text-primary: #f0ede8;         /* Warm white - easy on eyes */
+    --text-secondary: #b8b4ad;       /* Muted warm gray - secondary text */
+    --text-tertiary: #8a8680;        /* Subtle warm gray - tertiary text */
+    --text-inverse: #1e293b;         /* Dark text for light backgrounds */
     
-    /* Border Colors - Dark Theme */
-    --border-primary: #2d3748;
-    --border-secondary: #4a5568;
-    --border-focus: #4f94ff;         /* Slightly brighter blue for dark mode */
+    /* Subtle, Professional Borders */
+    --border-primary: #3a3b4a;       /* Barely visible definition */
+    --border-secondary: #4a4b5a;     /* Slightly more visible */
+    --border-focus: #5b8def;         /* Softer focus blue */
     
-    /* Glass Morphism - Dark Theme */
-    --glass-bg: rgba(26, 26, 46, 0.95);
-    --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    /* Refined Glass Morphism */
+    --glass-bg: rgba(36, 37, 48, 0.95);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
     
-    /* Gradients - Dark Theme */
-    --gradient-bg: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-    --gradient-card: linear-gradient(135deg, rgba(26,26,46,0.95), rgba(22,33,62,0.8));
+    /* Sophisticated Gradients */
+    --gradient-bg: linear-gradient(135deg, #1a1b23 0%, #242530 50%, #2d2e3f 100%);
+    --gradient-card: linear-gradient(135deg, rgba(36,37,48,0.95), rgba(45,46,63,0.8));
     
-    /* Enhanced colors for dark mode visibility */
-    --editaliza-blue-dark-mode: #4f94ff;  /* Brighter blue for dark backgrounds */
-    --editaliza-green-dark-mode: #7dd3fc; /* Adjusted green for better contrast */
+    /* Professional Accent Colors */
+    --editaliza-blue-dark-mode: #5b8def;  /* Softer blue for sophistication */
+    --editaliza-green-dark-mode: #6ba644; /* Natural green, not neon */
+    --success: #6ba644;               /* Natural success green */
+    --warning: #d4a645;               /* Warm amber warning */
+    --error: #c85a54;                 /* Refined error red */
 }
 
 /* Theme transition for smooth switching */
@@ -719,12 +722,13 @@ a:focus {
     }
 }
 
-/* Alert styles */
+/* Alert styles with theme support */
 .alert {
     border: 1px solid transparent;
     border-radius: 8px;
     padding: 12px 16px;
     margin-bottom: 16px;
+    transition: all 0.3s ease;
 }
 
 .alert-success {
@@ -749,6 +753,31 @@ a:focus {
     background-color: #dbeafe;
     border-color: var(--editaliza-blue);
     color: #1e40af;
+}
+
+/* Dark mode alert styles - Professional & Readable */
+[data-theme="dark"] .alert-success {
+    background-color: rgba(107, 166, 68, 0.15);
+    border-color: var(--success);
+    color: #a8d17a;
+}
+
+[data-theme="dark"] .alert-danger {
+    background-color: rgba(200, 90, 84, 0.15);
+    border-color: var(--error);
+    color: #e29d99;
+}
+
+[data-theme="dark"] .alert-warning {
+    background-color: rgba(212, 166, 69, 0.15);
+    border-color: var(--warning);
+    color: #e6c488;
+}
+
+[data-theme="dark"] .alert-info {
+    background-color: rgba(91, 141, 239, 0.15);
+    border-color: var(--editaliza-blue-dark-mode);
+    color: #9bb5f0;
 }
 
 /* Screen reader only content */
@@ -820,114 +849,95 @@ a:focus {
 }
 
 /* ===============================================
- * DARK MODE THEME TOGGLE COMPONENT
+ * SOPHISTICATED THEME TOGGLE - MINIMAL & INTEGRATED
  * =============================================== */
 
-/* Theme Toggle Switch Container */
+/* Minimal Theme Toggle - Integrated into Navigation */
 .theme-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    padding: 8px 12px;
-    border-radius: 50px;
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.theme-toggle:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-}
-
-/* Toggle Switch */
-.theme-switch {
-    position: relative;
-    width: 52px;
-    height: 28px;
-    background: var(--bg-tertiary);
-    border-radius: 50px;
-    border: 2px solid var(--border-primary);
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: 1px solid var(--border-primary);
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
+    position: relative;
     overflow: hidden;
 }
 
-.theme-switch::before {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 20px;
-    height: 20px;
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    border-radius: 50%;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-/* Dark mode active state */
-[data-theme="dark"] .theme-switch {
+.theme-toggle:hover {
     background: var(--bg-tertiary);
     border-color: var(--border-secondary);
 }
 
-[data-theme="dark"] .theme-switch::before {
-    transform: translateX(24px);
-    background: linear-gradient(135deg, #1e293b, #0f172a);
-    box-shadow: 0 0 10px rgba(79, 148, 255, 0.3), 0 2px 6px rgba(0, 0, 0, 0.3);
+.theme-toggle:active {
+    transform: scale(0.95);
 }
 
-/* Icons */
-.theme-icon {
-    width: 18px;
-    height: 18px;
+/* Discrete Icon Styling */
+.theme-toggle-icon {
+    width: 20px;
+    height: 20px;
     color: var(--text-secondary);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
+    stroke-width: 1.5;
 }
 
-.theme-icon.active {
-    color: var(--editaliza-blue);
-    transform: scale(1.1);
+.theme-toggle:hover .theme-toggle-icon {
+    color: var(--text-primary);
 }
 
-[data-theme="dark"] .theme-icon.active {
-    color: var(--editaliza-blue-dark-mode);
+/* Dark mode active state */
+[data-theme="dark"] .theme-toggle {
+    border-color: var(--border-primary);
 }
 
-/* Mobile positioning */
+[data-theme="dark"] .theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-secondary);
+}
+
+[data-theme="dark"] .theme-toggle-icon {
+    color: var(--text-secondary);
+}
+
+[data-theme="dark"] .theme-toggle:hover .theme-toggle-icon {
+    color: var(--text-primary);
+}
+
+/* Focus states for accessibility */
+.theme-toggle:focus {
+    outline: 2px solid var(--border-focus);
+    outline-offset: 2px;
+}
+
+/* Mobile responsive */
 @media (max-width: 768px) {
     .theme-toggle {
-        top: 10px;
-        right: 10px;
-        padding: 6px 10px;
+        width: 36px;
+        height: 36px;
     }
     
-    .theme-switch {
-        width: 44px;
-        height: 24px;
+    .theme-toggle-icon {
+        width: 18px;
+        height: 18px;
     }
-    
-    .theme-switch::before {
-        width: 16px;
-        height: 16px;
-    }
-    
-    [data-theme="dark"] .theme-switch::before {
-        transform: translateX(20px);
-    }
-    
-    .theme-icon {
-        width: 16px;
-        height: 16px;
-    }
+}
+
+/* Integration with navigation bar */
+.nav-theme-toggle {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+/* When used in header/nav context */
+.header .theme-toggle,
+.navbar .theme-toggle {
+    position: static;
+    margin-left: auto;
 }
 
 /* ===============================================
@@ -958,15 +968,15 @@ a:focus {
     color: var(--text-primary);
 }
 
-/* Enhanced button styles for dark mode */
+/* Enhanced button styles for dark mode - Professional & Sophisticated */
 [data-theme="dark"] .btn-primary {
-    background: linear-gradient(135deg, var(--editaliza-blue-dark-mode), #3730a3);
-    box-shadow: 0 4px 15px rgba(79, 148, 255, 0.3);
+    background: linear-gradient(135deg, var(--editaliza-blue-dark-mode), #4c6faf);
+    box-shadow: 0 4px 15px rgba(91, 141, 239, 0.2);
 }
 
 [data-theme="dark"] .btn-primary:hover {
-    background: linear-gradient(135deg, #6366f1, var(--editaliza-blue-dark-mode));
-    box-shadow: 0 8px 25px rgba(79, 148, 255, 0.4);
+    background: linear-gradient(135deg, #6b94f2, var(--editaliza-blue-dark-mode));
+    box-shadow: 0 8px 25px rgba(91, 141, 239, 0.3);
 }
 
 [data-theme="dark"] .btn-secondary {
@@ -976,7 +986,17 @@ a:focus {
 }
 
 [data-theme="dark"] .btn-secondary:hover {
-    background-color: var(--border-secondary);
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: var(--border-secondary);
+}
+
+[data-theme="dark"] .btn-danger {
+    background-color: var(--error);
+    color: var(--text-primary);
+}
+
+[data-theme="dark"] .btn-danger:hover {
+    background-color: #d86b66;
 }
 
 /* Text readability helpers */
