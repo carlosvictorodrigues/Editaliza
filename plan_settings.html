@@ -4,10 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Configurações do Plano - Editaliza</title>
+    <!-- Favicon and Web App Icons - Enhanced for better browser compatibility -->
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=4">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=4">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png?v=4">
+    <link rel="shortcut icon" href="favicon.ico?v=4">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=4">
+    <meta name="theme-color" content="#0528f2">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/design-tokens.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/footer.css" rel="stylesheet">
+    <script src="js/theme-system.js"></script>
     <!-- SCRIPTS CENTRALIZADOS -->
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
@@ -66,6 +77,123 @@
         .historic-date-input { display: none; }
         .topic-item.show-date .historic-date-input { display: block; }
         
+        /* Estilos para edição inline */
+        .topic-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 120px 80px;
+            gap: 12px;
+            align-items: start;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .topic-row:hover {
+            background-color: #f8fafc;
+        }
+        
+        .topic-row.modified {
+            background-color: #fef3c7;
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .topic-name-input {
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 14px;
+            background: white;
+            transition: border-color 0.2s ease;
+        }
+        
+        .topic-name-input:focus {
+            outline: none;
+            border-color: #0528f2;
+            box-shadow: 0 0 0 3px rgba(5, 40, 242, 0.1);
+        }
+        
+        .topic-name-input.modified {
+            border-color: #f59e0b;
+            background-color: #fffbeb;
+        }
+        
+        .priority-select {
+            width: 100%;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 12px;
+            background: white;
+        }
+        
+        .priority-select:focus {
+            outline: none;
+            border-color: #0528f2;
+        }
+        
+        .priority-select.modified {
+            border-color: #f59e0b;
+            background-color: #fffbeb;
+        }
+        
+        .topic-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .delete-topic-btn {
+            padding: 6px;
+            border-radius: 4px;
+            border: none;
+            background: transparent;
+            color: #ef4444;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .delete-topic-btn:hover {
+            background-color: #fef2f2;
+        }
+        
+        .changes-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #f59e0b;
+        }
+        
+        @media (max-width: 768px) {
+            .topic-row {
+                grid-template-columns: 30px 1fr;
+                gap: 8px;
+                padding: 16px 12px;
+            }
+            
+            .topic-weight-mobile,
+            .topic-actions-mobile {
+                grid-column: 1 / -1;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 8px;
+                padding-top: 8px;
+                border-top: 1px solid #e5e7eb;
+            }
+            
+            .topic-name-input {
+                font-size: 16px; /* Evita zoom em iOS */
+            }
+            
+            .priority-select {
+                font-size: 16px; /* Evita zoom em iOS */
+            }
+        }
+        
         /* Estilos para o guia e progress indicators */
         .step-highlight {
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
@@ -116,6 +244,9 @@
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800">
+    <!-- Container de Toast para Notificações -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3"></div>
+
     <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
     <div id="main-nav-container"></div>
 
@@ -361,21 +492,21 @@
                                         Adicionar Disciplina
                                     </span>
                                 </button>
-                                <button type="button" id="previewBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-3 rounded-lg font-medium transition-colors">
-                                    👁️ Preview
-                                </button>
                             </div>
                         </form>
                     </div>
 
-                    <div id="batch-save-container" class="hidden sticky top-2 z-10 mb-4">
-                        <button id="batch-save-topics-btn" class="w-full btn-primary py-3 px-4 text-lg font-bold shadow-lg animate-pulse">
-                            Salvar Alterações nos Tópicos
-                        </button>
-                    </div>
                     <h3 class="text-xl font-semibold text-gray-700 mt-8 mb-2">Disciplinas Cadastradas</h3>
                     <p class="text-sm text-gray-500 mb-4">
-                        Marque os tópicos que você já estudou e informe a data de conclusão para que o sistema ajuste seu cronograma e estatísticas. Lembre-se de salvar o progresso para cada disciplina.
+                        Configure seus tópicos: marque os já estudados, ajuste os <strong>pesos</strong> (1=baixa prioridade, 5=alta prioridade), 
+                        edite os nomes e informe datas de conclusão. O sistema usa essas informações para gerar seu cronograma personalizado.
+                        <span class="inline-block mt-1 text-xs">
+                            <span class="bg-red-100 text-red-700 px-2 py-1 rounded mr-1">5-Alta</span>
+                            <span class="bg-orange-100 text-orange-700 px-2 py-1 rounded mr-1">4-Média+</span>
+                            <span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded mr-1">3-Média</span>
+                            <span class="bg-green-100 text-green-700 px-2 py-1 rounded mr-1">2-Média-</span>
+                            <span class="bg-gray-100 text-gray-600 px-2 py-1 rounded">1-Baixa</span>
+                        </span>
                     </p>
                     <div id="subjectsContainer" class="space-y-4"></div>
                  </div>
@@ -517,8 +648,6 @@
         const hasGuide = urlParams.get('guide') === 'true';
         const editModal = document.getElementById('editModal');
         
-        let pendingTopicChanges = {};
-
         // Estado do guia e progresso
         let guideState = {
             isActive: false,
@@ -533,7 +662,7 @@
             const progressText = document.getElementById('progress-text');
             const progressIndicator = document.getElementById('progress-indicator');
             
-            if (!progressBar) return; 
+            if (!progressBar) return;
             
             let completedCount = 0;
             
@@ -711,22 +840,24 @@
 
         let loadingSubjects = false;
         async function loadSubjects() {
+            // Evitar múltiplas chamadas simultâneas
             if (loadingSubjects) {
                 console.log('🔄 LoadSubjects já em execução, ignorando...');
                 return;
             }
+            
             loadingSubjects = true;
             try {
-                const subjectsWithTopics = await app.apiFetch(`/plans/${planId}/subjects_with_topics`);
+                const subjects = await app.apiFetch(`/plans/${planId}/subjects`);
                 const container = document.getElementById('subjectsContainer');
                 container.innerHTML = '';
 
-                if (subjectsWithTopics.length === 0) {
+                if (subjects.length === 0) {
                     container.innerHTML = `<div class="text-center p-6 bg-yellow-50 border border-yellow-200 rounded-lg"><p class="text-yellow-800">Nenhuma disciplina cadastrada.</p></div>`;
                     return;
                 }
 
-                subjectsWithTopics.forEach(subject => {
+                subjects.forEach(subject => {
                     const subjectDiv = document.createElement('div');
                     subjectDiv.className = 'bg-white rounded-xl border border-gray-200 shadow-sm';
                     subjectDiv.innerHTML = `
@@ -746,52 +877,444 @@
                         </div>
                         <div class="accordion-content">
                             <div class="p-4">
-                                <ul id="topics-for-${subject.id}" class="space-y-2 text-gray-700"></ul>
+                                <div class="hidden" id="topics-header-${subject.id}" role="table">
+                                    <div class="hidden md:grid grid-cols-4 gap-3 text-xs font-medium text-gray-500 mb-3 pb-2 border-b" role="row">
+                                        <div role="columnheader">Concluído</div>
+                                        <div role="columnheader">Nome do Tópico</div>
+                                        <div class="text-center" role="columnheader">Peso</div>
+                                        <div class="text-center" role="columnheader">Ações</div>
+                                    </div>
+                                    <div class="md:hidden text-xs text-gray-500 mb-3 pb-2 border-b">
+                                        <div class="font-medium" role="heading" aria-level="4">Tópicos da Disciplina</div>
+                                        <div class="text-xs text-gray-400 mt-1">Toque nos campos para editar. Use os botões no final para salvar ou cancelar.</div>
+                                    </div>
+                                </div>
+                                <div id="topics-for-${subject.id}" class="space-y-1 text-gray-700"><div class="text-center py-4 text-gray-500">Carregando...</div></div>
                             </div>
-                             <div class="p-4 mt-4 border-t bg-slate-50 rounded-b-xl">
-                                <button class="save-progress-btn w-full bg-editaliza-green hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow" data-subject-id="${subject.id}">
-                                    Salvar Progresso da Disciplina
-                                </button>
+                             <div class="p-4 mt-4 border-t bg-slate-50 rounded-b-xl relative">
+                                <div id="changes-indicator-${subject.id}" class="changes-indicator hidden"></div>
+                                
+                                <!-- Botões de ação -->
+                                <div class="flex flex-col space-y-2">
+                                    <button class="save-changes-btn w-full bg-editaliza-green hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed" data-subject-id="${subject.id}" disabled>
+                                        <span class="flex items-center justify-center">
+                                            <span class="mr-2">💾</span>
+                                            <span class="save-btn-text">Salvar Alterações</span>
+                                            <span class="changes-count ml-2 hidden bg-white bg-opacity-20 px-2 py-1 rounded-full text-xs"></span>
+                                        </span>
+                                    </button>
+                                    
+                                    <button class="cancel-changes-btn hidden w-full bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-colors text-sm" data-subject-id="${subject.id}">
+                                        <span class="flex items-center justify-center">
+                                            <span class="mr-2">↶</span>
+                                            Cancelar Alterações
+                                        </span>
+                                    </button>
+                                </div>
+                                
+                                <div class="mt-2 text-xs text-center text-gray-500">
+                                    <span class="changes-summary">Nenhuma alteração pendente</span>
+                                </div>
                             </div>
                         </div>
                     `;
                     container.appendChild(subjectDiv);
-
-                    const list = subjectDiv.querySelector(`#topics-for-${subject.id}`);
-                    const topics = subject.topics;
-                    const todayStr = new Date().toISOString().split('T')[0];
-
-                    list.innerHTML = topics.length > 0
-                        ? topics.map(topic => {
-                            const isCompleted = topic.status === 'Concluído';
-                            const completionDate = topic.completion_date || todayStr;
-                            const showDateClass = isCompleted ? 'show-date' : '';
-                            return `
-                            <li class="topic-item flex justify-between items-start group p-2 rounded-md hover:bg-gray-50 ${showDateClass}" data-topic-id="${topic.id}">
-                                <div class="flex-grow">
-                                    <label class="flex items-center cursor-pointer">
-                                        <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue topic-checkbox" data-topic-id="${topic.id}" ${isCompleted ? 'checked' : ''}>
-                                        <span class="ml-3 topic-description">${topic.description}</span>
-                                        <span class="ml-2 text-xs px-2 py-1 rounded-full topic-priority-badge ${getTopicWeightColor(topic.priority_weight || 3)}">P${topic.priority_weight || 3}</span>
-                                    </label>
-                                    <div class="historic-date-input ml-7 mt-2">
-                                        <label class="text-xs text-gray-500">Data de conclusão:</label>
-                                        <input type="date" value="${completionDate}" class="form-input p-1 max-w-xs" data-topic-id="${topic.id}">
-                                    </div>
-                                </div>
-                                <div class="space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button class="edit-topic-btn p-1 rounded-md hover:bg-gray-200" data-topic-id="${topic.id}" data-description="${topic.description}" data-priority="${topic.priority_weight || 3}">✏️</button>
-                                    <button class="delete-topic-btn p-1 rounded-md hover:bg-gray-200" data-topic-id="${topic.id}" data-description="${topic.description}">🗑️</button>
-                                </div>
-                            </li>`
-                        }).join('')
-                        : '<li class="text-gray-500 list-none">Nenhum tópico adicionado.</li>';
                 });
 
+                // Carregar tópicos com delay para evitar muitas requisições simultâneas
+                for (let i = 0; i < subjects.length; i++) {
+                    const subject = subjects[i];
+                    // Adicionar delay de 200ms entre cada requisição
+                    setTimeout(() => {
+                        loadTopicsForSubject(subject.id);
+                    }, i * 200);
+                }
             } catch (error) {
                 app.showToast('Erro ao carregar disciplinas.', 'error');
             } finally {
                 loadingSubjects = false;
+            }
+        }
+
+        // Estado para tracking de mudanças por disciplina
+        let subjectChanges = {};
+        let originalTopicsData = {};
+
+        async function loadTopicsForSubject(subjectId) {
+            const container = document.getElementById(`topics-for-${subjectId}`);
+            const header = document.getElementById(`topics-header-${subjectId}`);
+            
+            try {
+                const topics = await app.apiFetch(`/subjects/${subjectId}/topics`);
+                const todayStr = new Date().toISOString().split('T')[0];
+
+                // Salvar dados originais para comparação
+                originalTopicsData[subjectId] = topics.map(topic => ({
+                    id: topic.id,
+                    description: topic.description,
+                    priority_weight: topic.priority_weight || 3,
+                    status: topic.status,
+                    completion_date: topic.completion_date
+                }));
+
+                // Inicializar tracking de mudanças
+                subjectChanges[subjectId] = {};
+
+                if (topics.length > 0) {
+                    // Mostrar header apenas se houver tópicos
+                    header.classList.remove('hidden');
+                    
+                    container.innerHTML = topics.map(topic => {
+                        const isCompleted = topic.status === 'Concluído';
+                        const completionDate = topic.completion_date || todayStr;
+                        const showDateClass = isCompleted ? 'show-date' : '';
+                        
+                        return `
+                        <div class="topic-item topic-row ${showDateClass}" data-topic-id="${topic.id}">
+                            <div class="flex items-center">
+                                <input type="checkbox" 
+                                       class="h-4 w-4 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue topic-checkbox" 
+                                       data-topic-id="${topic.id}" 
+                                       data-original-status="${topic.status}"
+                                       ${isCompleted ? 'checked' : ''}>
+                            </div>
+                            
+                            <div class="flex flex-col">
+                                <input type="text" 
+                                       class="topic-name-input" 
+                                       data-topic-id="${topic.id}"
+                                       data-original-value="${topic.description}"
+                                       value="${topic.description}"
+                                       placeholder="Nome do tópico"
+                                       aria-label="Nome do tópico">
+                                <div class="historic-date-input mt-2">
+                                    <label class="text-xs text-gray-500 mb-1 block">Data de conclusão:</label>
+                                    <input type="date" 
+                                           value="${completionDate}" 
+                                           class="form-input p-2 text-sm completion-date-input" 
+                                           data-topic-id="${topic.id}">
+                                </div>
+                            </div>
+                            
+                            <div class="hidden md:block">
+                                <select class="priority-select" 
+                                        data-topic-id="${topic.id}"
+                                        data-original-value="${topic.priority_weight || 3}"
+                                        aria-label="Peso do tópico">
+                                    <option value="1" ${(topic.priority_weight || 3) == 1 ? 'selected' : ''}>1 - Baixa</option>
+                                    <option value="2" ${(topic.priority_weight || 3) == 2 ? 'selected' : ''}>2 - Média-</option>
+                                    <option value="3" ${(topic.priority_weight || 3) == 3 ? 'selected' : ''}>3 - Média</option>
+                                    <option value="4" ${(topic.priority_weight || 3) == 4 ? 'selected' : ''}>4 - Média+</option>
+                                    <option value="5" ${(topic.priority_weight || 3) == 5 ? 'selected' : ''}>5 - Alta</option>
+                                </select>
+                            </div>
+                            
+                            <div class="topic-actions hidden md:flex">
+                                <button class="delete-topic-btn" 
+                                        data-topic-id="${topic.id}" 
+                                        data-description="${topic.description}"
+                                        title="Excluir tópico"
+                                        aria-label="Excluir tópico">
+                                    🗑️
+                                </button>
+                            </div>
+                            
+                            <!-- Mobile controls -->
+                            <div class="topic-weight-mobile md:hidden">
+                                <div class="flex items-center space-x-2">
+                                    <label class="text-xs text-gray-500">Peso:</label>
+                                    <select class="priority-select flex-1" 
+                                            data-topic-id="${topic.id}"
+                                            data-original-value="${topic.priority_weight || 3}">
+                                        <option value="1" ${(topic.priority_weight || 3) == 1 ? 'selected' : ''}>1</option>
+                                        <option value="2" ${(topic.priority_weight || 3) == 2 ? 'selected' : ''}>2</option>
+                                        <option value="3" ${(topic.priority_weight || 3) == 3 ? 'selected' : ''}>3</option>
+                                        <option value="4" ${(topic.priority_weight || 3) == 4 ? 'selected' : ''}>4</option>
+                                        <option value="5" ${(topic.priority_weight || 3) == 5 ? 'selected' : ''}>5</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="topic-actions-mobile md:hidden">
+                                <button class="delete-topic-btn text-sm px-3 py-1 rounded bg-red-50 hover:bg-red-100" 
+                                        data-topic-id="${topic.id}" 
+                                        data-description="${topic.description}">
+                                    🗑️ Excluir
+                                </button>
+                            </div>
+                        </div>`;
+                    }).join('');
+                } else {
+                    header.classList.add('hidden');
+                    container.innerHTML = '<div class="text-center py-8 text-gray-500">Nenhum tópico adicionado ainda.</div>';
+                }
+                
+                // Aplicar event listeners para tracking de mudanças
+                setupChangeTracking(subjectId);
+                
+            } catch (error) {
+                header.classList.add('hidden');
+                container.innerHTML = '<div class="text-center py-8 text-red-500">Erro ao carregar tópicos.</div>';
+            }
+        }
+
+        // Função para configurar o tracking de mudanças em uma disciplina
+        function setupChangeTracking(subjectId) {
+            const container = document.getElementById(`topics-for-${subjectId}`);
+            if (!container) return;
+
+            // Event listeners para detectar mudanças
+            container.addEventListener('input', (e) => trackTopicChange(subjectId, e));
+            container.addEventListener('change', (e) => trackTopicChange(subjectId, e));
+        }
+
+        // Função para rastrear mudanças em tópicos
+        function trackTopicChange(subjectId, event) {
+            // PRIMEIRO: Lidar com toggle de data para checkboxes (funciona independente do topicId)
+            if (event.target.classList.contains('topic-checkbox')) {
+                const topicItemDiv = event.target.closest('.topic-item');
+                if (topicItemDiv) {
+                    topicItemDiv.classList.toggle('show-date', event.target.checked);
+                }
+            }
+            
+            // SEGUNDO: Fazer o tracking de mudanças (precisa do topicId)
+            const topicId = event.target.dataset.topicId || event.target.getAttribute('data-topic-id');
+            if (!topicId) {
+                return; // Sem topicId, não conseguimos fazer tracking, mas o toggle de data já funcionou
+            }
+
+            const topicItem = document.querySelector(`[data-topic-id="${topicId}"]`);
+            if (!topicItem) {
+                return;
+            }
+
+            // Obter valores atuais
+            const checkbox = topicItem.querySelector('.topic-checkbox');
+            const nameInput = topicItem.querySelector('.topic-name-input');
+            const prioritySelect = topicItem.querySelector('.priority-select');
+            const dateInput = topicItem.querySelector('.completion-date-input');
+
+            const currentValues = {
+                status: checkbox ? (checkbox.checked ? 'Concluído' : 'Pendente') : 'Pendente',
+                description: nameInput ? nameInput.value : '',
+                priority_weight: prioritySelect ? parseInt(prioritySelect.value) : 3,
+                completion_date: (checkbox && checkbox.checked && dateInput) ? dateInput.value : null
+            };
+
+            // Obter valores originais
+            const originalData = originalTopicsData[subjectId]?.find(t => t.id === topicId);
+            if (!originalData) return;
+
+            const originalValues = {
+                status: originalData.status,
+                description: originalData.description,
+                priority_weight: originalData.priority_weight,
+                completion_date: originalData.completion_date
+            };
+
+            // Verificar se houve mudanças
+            const hasChanges = (
+                currentValues.status !== originalValues.status ||
+                currentValues.description !== originalValues.description ||
+                currentValues.priority_weight !== originalValues.priority_weight ||
+                currentValues.completion_date !== originalValues.completion_date
+            );
+
+            // Atualizar tracking de mudanças
+            if (hasChanges) {
+                subjectChanges[subjectId][topicId] = currentValues;
+            } else {
+                delete subjectChanges[subjectId][topicId];
+            }
+
+            // Atualizar interface visual
+            updateTopicVisualState(topicId, hasChanges);
+            updateSubjectSaveButton(subjectId);
+        }
+
+        // Função para atualizar estado visual do tópico
+        function updateTopicVisualState(topicId, hasChanges) {
+            const topicRow = document.querySelector(`[data-topic-id="${topicId}"]`);
+            if (!topicRow) return;
+
+            const nameInput = topicRow.querySelector('.topic-name-input');
+            const prioritySelect = topicRow.querySelector('.priority-select');
+
+            if (hasChanges) {
+                topicRow.classList.add('modified');
+                nameInput?.classList.add('modified');
+                prioritySelect?.classList.add('modified');
+            } else {
+                topicRow.classList.remove('modified');
+                nameInput?.classList.remove('modified');
+                prioritySelect?.classList.remove('modified');
+            }
+        }
+
+        // Função para atualizar o botão de salvar da disciplina
+        function updateSubjectSaveButton(subjectId) {
+            const saveBtn = document.querySelector(`[data-subject-id="${subjectId}"].save-changes-btn`);
+            const cancelBtn = document.querySelector(`[data-subject-id="${subjectId}"].cancel-changes-btn`);
+            const changesIndicator = document.getElementById(`changes-indicator-${subjectId}`);
+            const changesCount = document.querySelector(`[data-subject-id="${subjectId}"] .changes-count`);
+            const changesSummary = document.querySelector(`[data-subject-id="${subjectId}"] .changes-summary`);
+            const saveBtnText = document.querySelector(`[data-subject-id="${subjectId}"] .save-btn-text`);
+
+            if (!saveBtn) return;
+
+            const changesForSubject = subjectChanges[subjectId] || {};
+            const changeCount = Object.keys(changesForSubject).length;
+            const hasChanges = changeCount > 0;
+
+            // Atualizar botões
+            saveBtn.disabled = !hasChanges;
+            
+            if (hasChanges) {
+                saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                cancelBtn?.classList.remove('hidden');
+                changesIndicator?.classList.remove('hidden');
+                changesCount?.classList.remove('hidden');
+                changesCount.textContent = `${changeCount}`;
+                changesSummary.textContent = `${changeCount} alteração${changeCount > 1 ? 'ões' : ''} pendente${changeCount > 1 ? 's' : ''}`;
+                saveBtnText.textContent = 'Salvar Alterações';
+            } else {
+                saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                cancelBtn?.classList.add('hidden');
+                changesIndicator?.classList.add('hidden');
+                changesCount?.classList.add('hidden');
+                changesSummary.textContent = 'Nenhuma alteração pendente';
+                saveBtnText.textContent = 'Salvar Alterações';
+            }
+        }
+
+        // Função para salvar alterações em lote
+        async function saveSubjectChanges(subjectId) {
+            const changesForSubject = subjectChanges[subjectId] || {};
+            const topicsToUpdate = Object.entries(changesForSubject).map(([topicId, changes]) => ({
+                id: topicId,
+                ...changes
+            }));
+
+            if (topicsToUpdate.length === 0) {
+                app.showToast('Nenhuma alteração para salvar.', 'info');
+                return;
+            }
+
+            const saveBtn = document.querySelector(`[data-subject-id="${subjectId}"].save-changes-btn`);
+            const saveBtnText = saveBtn?.querySelector('.save-btn-text');
+            
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                const originalText = saveBtnText?.textContent || 'Salvar Alterações';
+                if (saveBtnText) saveBtnText.textContent = 'Salvando...';
+
+                app.showSpinner();
+                try {
+                    const response = await app.apiFetch('/topics/batch_update', {
+                        method: 'PATCH',
+                        body: JSON.stringify({ topics: topicsToUpdate })
+                    });
+
+                    app.showToast(`✅ ${topicsToUpdate.length} tópico${topicsToUpdate.length > 1 ? 's' : ''} atualizado${topicsToUpdate.length > 1 ? 's' : ''} com sucesso!`, 'success');
+                    
+                    // Invalidar cache e limpar mudanças
+                    app.invalidatePlanCache(planId);
+                    subjectChanges[subjectId] = {};
+                    
+                    // Recarregar tópicos para sincronizar com servidor
+                    await loadTopicsForSubject(subjectId);
+                    
+                } catch (error) {
+                    app.showToast(`❌ Erro ao salvar: ${error.message}`, 'error');
+                } finally {
+                    app.hideSpinner();
+                    if (saveBtn && saveBtnText) {
+                        saveBtn.disabled = false;
+                        saveBtnText.textContent = originalText;
+                    }
+                }
+            }
+        }
+
+        // Função para cancelar alterações de uma disciplina
+        function cancelSubjectChanges(subjectId) {
+            // Limpar tracking de mudanças
+            subjectChanges[subjectId] = {};
+            
+            // Restaurar valores originais para todos os tópicos
+            const originalTopics = originalTopicsData[subjectId] || [];
+            
+            originalTopics.forEach(topic => {
+                const topicRow = document.querySelector(`[data-topic-id="${topic.id}"]`);
+                if (!topicRow) return;
+
+                // Restaurar checkbox
+                const checkbox = topicRow.querySelector('.topic-checkbox');
+                if (checkbox) {
+                    checkbox.checked = topic.status === 'Concluído';
+                }
+
+                // Restaurar nome
+                const nameInput = topicRow.querySelector('.topic-name-input');
+                if (nameInput) {
+                    nameInput.value = topic.description;
+                }
+
+                // Restaurar prioridade
+                const prioritySelects = topicRow.querySelectorAll('.priority-select');
+                prioritySelects.forEach(select => {
+                    select.value = topic.priority_weight || 3;
+                });
+
+                // Restaurar data
+                const dateInput = topicRow.querySelector('.completion-date-input');
+                if (dateInput) {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    dateInput.value = topic.completion_date || todayStr;
+                }
+
+                // Restaurar estado visual
+                topicRow.classList.remove('modified');
+                const nameInputElement = topicRow.querySelector('.topic-name-input');
+                const prioritySelectElement = topicRow.querySelector('.priority-select');
+                nameInputElement?.classList.remove('modified');
+                prioritySelectElement?.classList.remove('modified');
+
+                // Restaurar campo de data
+                topicRow.classList.toggle('show-date', topic.status === 'Concluído');
+            });
+
+            // Atualizar botões
+            updateSubjectSaveButton(subjectId);
+            
+            app.showToast('Alterações canceladas com sucesso!', 'info');
+        }
+
+        // Função para deletar um tópico
+        async function deleteTopic(topicId) {
+            app.showSpinner();
+            try {
+                await app.apiFetch(`/topics/${topicId}`, { method: 'DELETE' });
+                app.showToast('Tópico excluído com sucesso!', 'success');
+                
+                // Recarregar a disciplina que contém este tópico
+                const topicElement = document.querySelector(`[data-topic-id="${topicId}"]`);
+                if (topicElement) {
+                    const container = topicElement.closest('[id^="topics-for-"]');
+                    if (container) {
+                        const subjectId = container.id.replace('topics-for-', '');
+                        await loadTopicsForSubject(subjectId);
+                    }
+                }
+                
+                // Invalidar cache do plano
+                app.invalidatePlanCache(planId);
+                
+            } catch (error) {
+                app.showToast(`Erro ao excluir tópico: ${error.message}`, 'error');
+            } finally {
+                app.hideSpinner();
             }
         }
         
@@ -809,11 +1332,11 @@
             });
             return settings;
         }
-
         function showRetaFinalReport(excludedTopics, prioritizedSubjects) {
             const modal = document.createElement('div');
             modal.className = 'fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4';
             
+            // Agrupar tópicos excluídos por disciplina
             const excludedBySubject = excludedTopics.reduce((acc, topic) => {
                 if (!acc[topic.subject_name]) {
                     acc[topic.subject_name] = [];
@@ -828,9 +1351,13 @@
             modal.innerHTML = `
                 <div class="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-red-700 flex items-center">🎯 Relatório do Modo Reta Final</h2>
+                        <h2 class="text-2xl font-bold text-red-700 flex items-center">
+                            🎯 Relatório do Modo Reta Final
+                        </h2>
                         <button class="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
                     </div>
+                    
+                    <!-- Resumo Estatístico -->
                     <div class="grid grid-cols-2 gap-4 mb-6">
                         <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
                             <div class="text-2xl font-bold text-green-600">${totalIncluded}</div>
@@ -841,14 +1368,19 @@
                             <div class="text-sm text-red-700">Tópicos Excluídos</div>
                         </div>
                     </div>
+                    
+                    <!-- Alerta Informativo -->
                     <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
                         <h3 class="font-semibold text-blue-800 mb-2">💡 Como funciona a priorização?</h3>
                         <p class="text-sm text-blue-700">O algoritmo usa a fórmula: <strong>(Peso da Disciplina × 10) + Peso do Assunto</strong></p>
                         <p class="text-xs text-blue-600 mt-1">Exemplo: Direito Constitucional (peso 5) + Direitos Fundamentais (prioridade 5) = 55 pontos</p>
                     </div>
+                    
                     ${prioritizedSubjects.length > 0 ? `
                         <div class="mb-6">
-                            <h3 class="text-lg font-semibold text-green-800 mb-3 flex items-center">✅ Disciplinas Priorizadas</h3>
+                            <h3 class="text-lg font-semibold text-green-800 mb-3 flex items-center">
+                                ✅ Disciplinas Priorizadas
+                            </h3>
                             <div class="bg-green-50 p-4 rounded-lg">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                     ${prioritizedSubjects.map(s => `
@@ -861,9 +1393,12 @@
                             </div>
                         </div>
                     ` : ''}
+                    
                     ${totalExcluded > 0 ? `
                         <div class="mb-6">
-                            <h3 class="text-lg font-semibold text-red-800 mb-3 flex items-center">⚠️ Tópicos Excluídos por Tempo Limitado</h3>
+                            <h3 class="text-lg font-semibold text-red-800 mb-3 flex items-center">
+                                ⚠️ Tópicos Excluídos por Tempo Limitado
+                            </h3>
                             <div class="space-y-3">
                                 ${Object.entries(excludedBySubject).map(([subject, topics]) => `
                                     <div class="bg-red-50 p-4 rounded-lg border border-red-200">
@@ -877,6 +1412,8 @@
                                 `).join('')}
                             </div>
                         </div>
+                        
+                        <!-- Dicas de Otimização -->
                         <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6">
                             <h3 class="font-semibold text-yellow-800 mb-2">📝 Estratégias de Estudo</h3>
                             <ul class="text-sm text-yellow-700 space-y-1">
@@ -886,40 +1423,60 @@
                                 <li>• <strong>Questões:</strong> Resolva questões dos tópicos excluídos se sobrar tempo</li>
                             </ul>
                         </div>
+                        
+                        <!-- Botões de Ação -->
                         <div class="flex flex-col sm:flex-row gap-3 mb-4">
-                            <button id="exportExclusionsCsv" class="btn-secondary text-sm px-4 py-2">📄 Exportar Lista (CSV)</button>
-                            <button id="viewOnSchedule" class="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-lg transition-colors">📅 Ver no Cronograma</button>
+                            <button id="exportExclusionsCsv" class="btn-secondary text-sm px-4 py-2">
+                                📄 Exportar Lista (CSV)
+                            </button>
+                            <button id="viewOnSchedule" class="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-lg transition-colors">
+                                📅 Ver no Cronograma
+                            </button>
                         </div>
                     ` : ''}
+                    
                     <div class="text-center">
                         <button id="closeModal" class="btn-primary px-6 py-2">Entendi, Fechar</button>
                     </div>
                 </div>`;
                 
+            // Event listeners
             const closeBtn = modal.querySelector('#closeModal');
             const xBtn = modal.querySelector('button');
             const exportBtn = modal.querySelector('#exportExclusionsCsv');
             const viewBtn = modal.querySelector('#viewOnSchedule');
+            
             const closeModal = () => modal.remove();
+            
             closeBtn?.addEventListener('click', closeModal);
             xBtn?.addEventListener('click', closeModal);
+            
             if (exportBtn) {
-                exportBtn.addEventListener('click', () => exportExclusionsAsCsv(excludedTopics));
+                exportBtn.addEventListener('click', () => {
+                    exportExclusionsAsCsv(excludedTopics);
+                });
             }
+            
             if (viewBtn) {
-                viewBtn.addEventListener('click', () => window.open(`cronograma.html?id=${planId}`, '_blank'));
+                viewBtn.addEventListener('click', () => {
+                    window.open(`cronograma.html?id=${planId}`, '_blank');
+                });
             }
+            
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) closeModal();
             });
+            
             document.body.appendChild(modal);
         }
         
         function exportExclusionsAsCsv(excludedTopics) {
             let csvContent = 'Disciplina,Tópico,Motivo\n';
+            
             excludedTopics.forEach(topic => {
                 csvContent += `"${topic.subject_name}","${topic.description}","Tempo insuficiente - Modo Reta Final"\n`;
             });
+            
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -927,6 +1484,7 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+            
             app.showToast('📄 Lista exportada com sucesso!', 'success');
         }
         
@@ -945,42 +1503,30 @@
         }
 
         function handleEditTopic(id, description, priority = 3) {
-            originalTopicState = { id, description, priority };
             document.getElementById('editModalTitle').textContent = 'Editar Tópico';
-            const modalBody = document.getElementById('editModalBody');
-            modalBody.innerHTML = `
-                <form id="editTopicForm" data-id="${id}" class="space-y-4">
-                    <div>
-                        <label for="edit_topic_description" class="block text-sm font-medium text-gray-700">Descrição</label>
-                        <textarea id="edit_topic_description" class="form-input" rows="4" required>${description}</textarea>
-                    </div>
-                    <div>
-                        <label for="edit_topic_priority" class="block text-sm font-medium text-gray-700">Peso do Assunto</label>
-                        <select id="edit_topic_priority" class="form-input" required>
-                            <option value="1" ${priority == 1 ? 'selected' : ''}>1 - Muito Baixa</option>
-                            <option value="2" ${priority == 2 ? 'selected' : ''}>2 - Baixa</option>
-                            <option value="3" ${priority == 3 ? 'selected' : ''}>3 - Média</option>
-                            <option value="4" ${priority == 4 ? 'selected' : ''}>4 - Alta</option>
-                            <option value="5" ${priority == 5 ? 'selected' : ''}>5 - Muito Alta</option>
-                        </select>
-                        <p class="text-xs text-gray-500 mt-1">Define o peso específico deste assunto dentro da disciplina (1-5)</p>
-                    </div>
-                    <div class="flex justify-end space-x-3 pt-4">
-                        <button type="button" id="cancelEditTopic" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300">Cancelar</button>
-                        <button type="submit" class="btn-primary py-2 px-4 text-sm">Salvar</button>
-                    </div>
-                </form>
-            `;
+            document.getElementById('editModalBody').innerHTML = `<form id="editTopicForm" data-id="${id}" class="space-y-4">
+                <div>
+                    <label for="edit_topic_description" class="block text-sm font-medium text-gray-700">Descrição</label>
+                    <textarea id="edit_topic_description" class="form-input" rows="4" required>${description}</textarea>
+                </div>
+                <div>
+                    <label for="edit_topic_priority" class="block text-sm font-medium text-gray-700">Peso do Assunto</label>
+                    <select id="edit_topic_priority" class="form-input" required>
+                        <option value="1" ${priority == 1 ? 'selected' : ''}>1 - Muito Baixa</option>
+                        <option value="2" ${priority == 2 ? 'selected' : ''}>2 - Baixa</option>
+                        <option value="3" ${priority == 3 ? 'selected' : ''}>3 - Média</option>
+                        <option value="4" ${priority == 4 ? 'selected' : ''}>4 - Alta</option>
+                        <option value="5" ${priority == 5 ? 'selected' : ''}>5 - Muito Alta</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Define o peso específico deste assunto dentro da disciplina (1-5)</p>
+                </div>
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 btn-cancel">Cancelar</button>
+                    <button type="submit" class="btn-primary py-2 px-4 text-sm">Salvar</button>
+                </div>
+            </form>`;
             openModal();
-
-            // Conectar o formulário com a função submitEditTopic
-            const form = modalBody.querySelector('#editTopicForm');
-            form.addEventListener('submit', submitEditTopic);
-
-            modalBody.querySelector('#cancelEditTopic').addEventListener('click', () => {
-                originalTopicState = null;
-                closeModal();
-            });
+            document.getElementById('editTopicForm').addEventListener('submit', submitEditTopic);
         }
 
         function handleDeleteTopic(id, description) {
@@ -990,70 +1536,14 @@
             document.getElementById('confirmDeleteTopic').addEventListener('click', submitDeleteTopic);
         }
         
-        function updatePendingChange(topicId, newDescription, newPriority) {
-            pendingTopicChanges[topicId] = {
-                id: topicId,
-                description: newDescription,
-                priority_weight: newPriority
-            };
-
-            const topicElement = document.querySelector(`.topic-item[data-topic-id="${topicId}"]`);
-            if (topicElement) {
-                topicElement.style.backgroundColor = '#fef9c3'; // yellow-100
-                topicElement.querySelector('.topic-description').textContent = newDescription;
-                const badge = topicElement.querySelector('.topic-priority-badge');
-                badge.textContent = `P${newPriority}`;
-                badge.className = `ml-2 text-xs px-2 py-1 rounded-full topic-priority-badge ${getTopicWeightColor(newPriority)}`;
-            }
-
-            document.getElementById('batch-save-container').classList.remove('hidden');
-        }
-
-        async function submitPendingTopicChanges() {
-            const changes = Object.values(pendingTopicChanges);
-            if (changes.length === 0) {
-                app.showToast('Nenhuma alteração para salvar.', 'info');
-                return;
-            }
-
-            app.showSpinner();
-            try {
-                await app.apiFetch('/topics/batch_update_details', {
-                    method: 'PATCH',
-                    body: JSON.stringify({ topics: changes })
-                });
-                app.showToast('Todas as alterações nos tópicos foram salvas!', 'success');
-                
-                Object.keys(pendingTopicChanges).forEach(topicId => {
-                    const topicElement = document.querySelector(`.topic-item[data-topic-id="${topicId}"]`);
-                    if (topicElement) {
-                        topicElement.style.backgroundColor = '';
-                    }
-                });
-
-                pendingTopicChanges = {};
-                document.getElementById('batch-save-container').classList.add('hidden');
-
-            } catch (error) {
-                app.showToast(error.message, 'error');
-            } finally {
-                app.hideSpinner();
-            }
-        }
-
-        async function submitApiRequestWrapper(url, method, body, successMessage, reloadSubjects = true) {
+        async function submitApiRequestWrapper(url, method, body, successMessage) {
             app.showSpinner();
             try {
                 const data = await app.apiFetch(url, { method, body: body ? JSON.stringify(body) : undefined });
                 app.showToast(successMessage || data.message, 'success');
                 closeModal();
-                if (reloadSubjects) {
-                    await loadSubjects();
-                }
-                const generateButton = document.getElementById('generateButton');
-                if (generateButton) {
-                    generateButton.disabled = false;
-                }
+                await loadSubjects();
+                document.getElementById('generateButton').disabled = false;
             } catch (error) {
                 app.showToast(error.message, 'error');
             } finally {
@@ -1067,53 +1557,25 @@
             const body = { subject_name: document.getElementById('edit_subject_name').value, priority_weight: document.getElementById('edit_priority_weight').value };
             await submitApiRequestWrapper(`/subjects/${id}`, 'PATCH', body, 'Disciplina atualizada!');
         }
-
         async function submitDeleteSubject(event) {
             await submitApiRequestWrapper(`/subjects/${event.target.dataset.id}`, 'DELETE', null, 'Disciplina apagada!');
         }
-
         async function submitEditTopic(event) {
             event.preventDefault();
             const id = event.target.dataset.id;
-            const body = {
+            const body = { 
                 description: document.getElementById('edit_topic_description').value,
                 priority_weight: parseInt(document.getElementById('edit_topic_priority').value)
             };
-            await submitApiRequestWrapper(`/topics/${id}`, 'PATCH', body, 'Tópico atualizado!', false);
-
-            // Atualizar o DOM diretamente para evitar recarregar toda a lista
-            const topicItem = document.querySelector(`.topic-item[data-topic-id="${id}"]`);
-            if (topicItem) {
-                const descSpan = topicItem.querySelector('.topic-description');
-                if (descSpan) descSpan.textContent = body.description;
-                
-                const weightSpan = topicItem.querySelector('.topic-priority-badge');
-                if (weightSpan) {
-                    weightSpan.textContent = `P${body.priority_weight}`;
-                    weightSpan.className = `ml-2 text-xs px-2 py-1 rounded-full ${getTopicWeightColor(body.priority_weight)}`;
-                }
-
-                // Atualizar os dados do botão de edição
-                const editBtn = topicItem.querySelector('.edit-topic-btn');
-                if (editBtn) {
-                    editBtn.dataset.description = body.description;
-                    editBtn.dataset.priority = body.priority_weight;
-                }
-            }
+            await submitApiRequestWrapper(`/topics/${id}`, 'PATCH', body, 'Tópico atualizado!');
         }
-
         async function submitDeleteTopic(event) {
-            await submitApiRequestWrapper(`/topics/${event.target.dataset.id}`, 'DELETE', null, 'Tópico apagado!');
+            await submitApiRequestWrapper(`/plans/topics/${event.target.dataset.id}`, 'DELETE', null, 'Tópico apagado!');
         }
         
         document.addEventListener('DOMContentLoaded', () => {
             initialize();
             
-            const batchSaveBtn = document.getElementById('batch-save-topics-btn');
-            if(batchSaveBtn) {
-                batchSaveBtn.addEventListener('click', submitPendingTopicChanges);
-            }
-
             const generateButton = document.getElementById('generateButton');
             const generalSettingsForm = document.getElementById('generalSettingsForm');
             const newContentForm = document.getElementById('newContentForm');
@@ -1125,25 +1587,14 @@
             generalSettingsForm.addEventListener('input', enableGenerateButton);
             newContentForm.addEventListener('submit', enableGenerateButton);
 
-            document.getElementById('subjectsContainer').addEventListener('change', (event) => {
-                if (event.target.classList.contains('topic-checkbox')) {
-                    const topicItem = event.target.closest('.topic-item');
-                    if (topicItem) {
-                        topicItem.classList.toggle('show-date', event.target.checked);
-                        const accordionContent = topicItem.closest('.accordion-content');
-                        const accordionHeader = accordionContent.previousElementSibling;
-                        if (accordionHeader.classList.contains('open')) {
-                           accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
-                        }
-                    }
-                }
-            });
+            // Event listener removido - agora integrado no sistema de tracking de mudanças
 
             newContentForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
                 const form = event.target;
                 const submitBtn = form.querySelector('button[type="submit"]');
                 
+                // Evitar submissões múltiplas
                 if (submitBtn.disabled) return;
                 submitBtn.disabled = true;
                 const originalBtnText = submitBtn.textContent;
@@ -1160,6 +1611,7 @@
                     app.showToast(error.message, 'error');
                 } finally {
                     app.hideSpinner();
+                    // Restaurar botão
                     submitBtn.disabled = false;
                     submitBtn.textContent = originalBtnText;
                 }
@@ -1178,50 +1630,34 @@
                     return;
                 }
 
-                if (button.classList.contains('save-progress-btn')) {
+                if (button.classList.contains('save-changes-btn')) {
                     event.preventDefault();
                     
+                    // Evitar cliques múltiplos
                     if (button.disabled) return;
-                    button.disabled = true;
-                    const originalText = button.textContent;
-                    button.textContent = 'Salvando...';
                     
                     const subjectId = button.dataset.subjectId;
-                    const topicsList = document.getElementById(`topics-for-${subjectId}`);
-                    const topicsToUpdate = Array.from(topicsList.querySelectorAll('.topic-item')).map(item => {
-                        const checkbox = item.querySelector('.topic-checkbox');
-                        const dateInput = item.querySelector('.historic-date-input input');
-                        return {
-                            id: checkbox.dataset.topicId,
-                            status: checkbox.checked ? 'Concluído' : 'Pendente',
-                            completion_date: checkbox.checked ? dateInput.value : null
-                        };
-                    });
-
-                    app.showSpinner();
-                    try {
-                        await app.apiFetch('/topics/batch_update', {
-                            method: 'PATCH',
-                            body: JSON.stringify({ topics: topicsToUpdate })
-                        });
-
-                        app.showToast('Progresso salvo com sucesso!', 'success');
-                        enableGenerateButton();
-                    } catch (error) {
-                        app.showToast(error.message, 'error');
-                    } finally {
-                        app.hideSpinner();
-                        button.disabled = false;
-                        button.textContent = originalText;
+                    await saveSubjectChanges(subjectId);
+                    enableGenerateButton();
+                } else if (button.classList.contains('cancel-changes-btn')) {
+                    event.preventDefault();
+                    
+                    const subjectId = button.dataset.subjectId;
+                    if (confirm('Tem certeza que deseja cancelar todas as alterações? Esta ação não pode ser desfeita.')) {
+                        cancelSubjectChanges(subjectId);
                     }
                 } else if (button.classList.contains('edit-subject-btn')) {
                     handleEditSubject(button.dataset.subjectId, button.dataset.subjectName, button.dataset.priority);
                 } else if (button.classList.contains('delete-subject-btn')) {
                     handleDeleteSubject(button.dataset.subjectId, button.dataset.subjectName);
-                } else if (button.classList.contains('edit-topic-btn')) {
-                    handleEditTopic(button.dataset.topicId, button.dataset.description, button.dataset.priority);
                 } else if (button.classList.contains('delete-topic-btn')) {
-                    handleDeleteTopic(button.dataset.topicId, button.dataset.description);
+                    // Nova confirmação simplificada para exclusão de tópicos
+                    const topicId = button.dataset.topicId;
+                    const description = button.dataset.description;
+                    
+                    if (confirm(`Tem certeza que deseja excluir o tópico "${description}"?\n\nEsta ação não pode ser desfeita.`)) {
+                        await deleteTopic(topicId);
+                    }
                 }
             });
 
@@ -1274,6 +1710,9 @@
                 }
             });
             
+            // Event Listeners para novas funcionalidades
+            
+            // Botões do welcome message
             const startGuideBtn = document.getElementById('startGuideBtn');
             const skipGuideBtn = document.getElementById('skipGuideBtn');
             
@@ -1290,6 +1729,7 @@
                 });
             }
             
+            // Templates de disciplinas
             const loadTemplateBtn = document.getElementById('loadTemplateBtn');
             const disciplineTemplates = document.getElementById('disciplineTemplates');
             
@@ -1299,6 +1739,7 @@
                 });
             }
             
+            // Event listener para templates de disciplina
             document.querySelectorAll('.template-discipline-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const name = this.dataset.name;
@@ -1309,16 +1750,21 @@
                     document.getElementById('priority_weight').value = priority;
                     document.getElementById('topics_list').value = topics;
                     
+                    // Feedback visual
                     this.classList.add('bg-blue-100', 'border-blue-300');
                     setTimeout(() => {
                         this.classList.remove('bg-blue-100', 'border-blue-300');
                     }, 1000);
                     
+                    // Fechar templates
                     disciplineTemplates.classList.add('hidden');
+                    
+                    // Atualizar contador de tópicos
                     updateTopicCounter();
                 });
             });
             
+            // Contador de tópicos
             function updateTopicCounter() {
                 const topicsTextarea = document.getElementById('topics_list');
                 const topicCounter = document.getElementById('topicCount');
@@ -1329,11 +1775,13 @@
                 }
             }
             
+            // Event listener para atualizar contador
             const topicsTextarea = document.getElementById('topics_list');
             if (topicsTextarea) {
                 topicsTextarea.addEventListener('input', updateTopicCounter);
             }
             
+            // Botão de exemplo
             const showExampleBtn = document.getElementById('showExampleBtn');
             const exampleModal = document.getElementById('exampleModal');
             const closeExampleBtn = document.getElementById('closeExampleBtn');
@@ -1350,6 +1798,7 @@
                 });
             }
             
+            // Fechar modal clicando fora
             if (exampleModal) {
                 exampleModal.addEventListener('click', (e) => {
                     if (e.target === exampleModal) {
@@ -1358,6 +1807,7 @@
                 });
             }
             
+            // Presets de metas
             document.querySelectorAll('.goal-preset').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const daily = this.dataset.daily;
@@ -1366,6 +1816,7 @@
                     document.getElementById('daily_goal').value = daily;
                     document.getElementById('weekly_goal').value = weekly;
                     
+                    // Feedback visual
                     this.classList.add('bg-blue-200');
                     setTimeout(() => {
                         this.classList.remove('bg-blue-200');
@@ -1373,6 +1824,7 @@
                 });
             });
             
+            // Atualizar meta semanal automaticamente
             const dailyGoalInput = document.getElementById('daily_goal');
             const weeklyGoalInput = document.getElementById('weekly_goal');
             
@@ -1384,15 +1836,18 @@
                 });
             }
             
+            // Debounce para updateProgress para evitar chamadas excessivas
             let updateProgressTimeout;
             const debouncedUpdateProgress = () => {
                 clearTimeout(updateProgressTimeout);
                 updateProgressTimeout = setTimeout(updateProgress, 300);
             };
             
+            // Atualizar progresso quando houver mudanças (com debounce)
             document.addEventListener('change', debouncedUpdateProgress);
             document.addEventListener('input', debouncedUpdateProgress);
             
+            // Atualizar progresso inicial
             setTimeout(updateProgress, 1000);
         });
     </script>

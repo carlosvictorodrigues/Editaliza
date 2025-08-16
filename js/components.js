@@ -155,16 +155,35 @@ const components = {
             { href: 'faq.html', text: 'FAQ' }
         ];
 
-        let linksHtml = links.map(link => {
+        const linksHtml = links.map(link => {
             if (link.dropdown) {
+                // Check if any dropdown item is active
+                const hasActiveItem = link.dropdown.some(item => {
+                    const itemPage = item.href.split('?')[0];
+                    return activePage === itemPage;
+                });
+                
                 // Dropdown menu
-                const dropdownItems = link.dropdown.map(item => 
-                    `<a href="${item.href}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-editaliza-blue transition-colors">${item.text}</a>`
-                ).join('');
+                const dropdownItems = link.dropdown.map(item => {
+                    // Check if this dropdown item is the active page
+                    const itemPage = item.href.split('?')[0]; // Get page without query params
+                    const isItemActive = activePage === itemPage;
+                    const itemStyle = isItemActive 
+                        ? 'background: linear-gradient(135deg, #0528f2 0%, #3b82f6 100%); color: white;' 
+                        : '';
+                    const itemClass = isItemActive 
+                        ? 'block px-4 py-2 text-sm font-semibold transition-colors' 
+                        : 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-editaliza-blue transition-colors';
+                    return `<a href="${item.href}" class="${itemClass}" style="${itemStyle}">${item.text}</a>`;
+                }).join('');
+                
+                // Apply active styling to dropdown trigger if any item is active
+                const dropdownTriggerClass = hasActiveItem ? 'nav-link-active' : 'nav-link-default';
+                const dropdownTriggerStyle = hasActiveItem ? 'background: linear-gradient(135deg, #0528f2 0%, #3b82f6 100%); color: white;' : '';
                 
                 return `
                     <div class="relative dropdown-container">
-                        <button class="nav-link-default dropdown-trigger px-4 py-2 rounded-lg text-sm font-medium transition-colors hover:bg-gray-50 flex items-center">
+                        <button class="${dropdownTriggerClass} dropdown-trigger px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center" style="${dropdownTriggerStyle}">
                             ${link.text}
                             <svg class="inline w-4 h-4 ml-1 dropdown-arrow transition-transform" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -179,7 +198,8 @@ const components = {
                 // Regular link
                 const isActive = activePage === link.href;
                 const linkClass = isActive ? 'nav-link-active' : 'nav-link-default';
-                return `<a href="${link.href}" class="${linkClass} px-4 py-2 rounded-lg text-sm font-medium transition-colors">${link.text}</a>`;
+                const linkStyle = isActive ? 'background: linear-gradient(135deg, #0528f2 0%, #3b82f6 100%); color: white;' : '';
+                return `<a href="${link.href}" class="${linkClass} px-4 py-2 rounded-lg text-sm font-medium transition-colors" style="${linkStyle}">${link.text}</a>`;
             }
         }).join('');
         
@@ -317,17 +337,15 @@ const components = {
                         <div class="flex items-center space-x-3">
                             ${profileHtml}
                             <!-- Theme Toggle -->
-                            <div class="theme-toggle-nav" data-tooltip="Alternar tema" style="display: inline-flex; align-items: center; margin-left: 12px;">
-                                <div class="theme-switch" title="Alternar modo escuro" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; background: white; transition: all 0.3s;">
-                                    <svg class="theme-icon sun-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px; color: #64748b;">
-                                        <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
-                                    </svg>
-                                    
-                                    <svg class="theme-icon moon-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px; color: #64748b; display: none;">
-                                        <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-                                    </svg>
-                                </div>
-                            </div>
+                            <button data-theme-toggle class="button button--secondary" onclick="toggleTheme()" aria-label="Toggle theme" style="padding: 0.5rem; min-width: auto;">
+                                <svg class="sun-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px;">
+                                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+                                </svg>
+                                
+                                <svg class="moon-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px; display: none;">
+                                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                                </svg>
+                            </button>
                             <button id="logoutButton" class="btn-secondary flex items-center space-x-2 text-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -341,49 +359,6 @@ const components = {
         `;
         
         document.getElementById('logoutButton').addEventListener('click', () => app.logout());
-        
-        // Add theme toggle functionality
-        const themeToggle = document.querySelector('.theme-toggle-nav .theme-switch');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                const html = document.documentElement;
-                const currentTheme = html.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                html.setAttribute('data-theme', newTheme);
-                localStorage.setItem('editaliza-theme', newTheme);
-                
-                // Toggle icons
-                const sunIcon = themeToggle.querySelector('.sun-icon');
-                const moonIcon = themeToggle.querySelector('.moon-icon');
-                if (newTheme === 'dark') {
-                    sunIcon.style.display = 'none';
-                    moonIcon.style.display = 'block';
-                } else {
-                    sunIcon.style.display = 'block';
-                    moonIcon.style.display = 'none';
-                }
-            });
-        }
-        
-        // Initialize theme on load
-        const savedTheme = localStorage.getItem('editaliza-theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        
-        // Set initial icon state
-        setTimeout(() => {
-            const toggle = document.querySelector('.theme-toggle-nav .theme-switch');
-            if (toggle) {
-                const sunIcon = toggle.querySelector('.sun-icon');
-                const moonIcon = toggle.querySelector('.moon-icon');
-                if (savedTheme === 'dark') {
-                    sunIcon.style.display = 'none';
-                    moonIcon.style.display = 'block';
-                } else {
-                    sunIcon.style.display = 'block';
-                    moonIcon.style.display = 'none';
-                }
-            }
-        }, 100);
         
         // Add dropdown functionality with consistent behavior
         this.initializeDropdowns();
@@ -466,7 +441,7 @@ const components = {
             { id: 'navSettings', href: `plan_settings.html?id=${planId}`, text: 'Configurar Plano' }
         ];
 
-        let linksHtml = links.map(link => {
+        const linksHtml = links.map(link => {
             const isActive = activePage === link.href.split('?')[0];
             const activeClass = 'cursor-default nav-link-active';
             const defaultClass = 'nav-link-default';

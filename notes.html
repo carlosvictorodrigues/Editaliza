@@ -4,10 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minhas Anotações - Editaliza</title>
+    <!-- Favicon and Web App Icons - Enhanced for better browser compatibility -->
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=4">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=4">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png?v=4">
+    <link rel="shortcut icon" href="favicon.ico?v=4">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=4">
+    <meta name="theme-color" content="#0528f2">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/design-tokens.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/footer.css" rel="stylesheet">
+    <script src="js/theme-system.js"></script>
     <!-- SCRIPTS CENTRALIZADOS -->
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
@@ -72,6 +83,9 @@
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800">
+    <!-- Container de Toast para Notificações -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3"></div>
+
     <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
     <div id="main-nav-container"></div>
 
