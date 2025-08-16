@@ -28,12 +28,12 @@ APP_URL=https://www.editaliza.com.br
 # Email já configurado com Google Workspace
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
-EMAIL_USER=suporte@editaliza.com.br
-EMAIL_PASS=usrb wdbu ciny kgku
+EMAIL_USER=seu_email@exemplo.com
+EMAIL_PASS=sua_senha_de_app_aqui
 
 # Google OAuth
-GOOGLE_CLIENT_ID=453039775824-ckr0plfuqqn32t2h9pt6vgob8fi78m5g.apps.googleusercontent.com
-GOOGLE_CLIENT_SECRET=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
+GOOGLE_CLIENT_ID=seu_client_id_aqui
+GOOGLE_CLIENT_SECRET=seu_client_secret_aqui
 GOOGLE_CALLBACK_URL=https://www.editaliza.com.br/auth/google/callback
 ```
 

@@ -679,21 +679,34 @@ const TimerSystem = {
 
     async saveTimeToDatabase(sessionId, seconds) {
         if(seconds < 10) return; // Não salvar tempos muito curtos
+        
         try {
-            // CORREÇÃO: Usar nova rota modular e formato correto
+            // CORREÇÃO: Tentar nova rota primeiro, depois fallback para legacy
             const now = new Date();
             const startTime = new Date(now.getTime() - seconds * 1000);
             
-            await app.apiFetch(`/schedules/sessions/${sessionId}/time`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    start_time: startTime.toISOString(),
-                    end_time: now.toISOString()
-                })
-            });
-            console.log(`💾 Tempo salvo no banco: ${seconds}s para sessão ${sessionId}`);
+            try {
+                // Tentar nova rota modular primeiro
+                await app.apiFetch(`/schedules/sessions/${sessionId}/time`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        start_time: startTime.toISOString(),
+                        end_time: now.toISOString()
+                    })
+                });
+                console.log(`💾 Tempo salvo no banco (nova rota): ${seconds}s para sessão ${sessionId}`);
+            } catch (newRouteError) {
+                console.warn('⚠️ Nova rota falhou, tentando rota legacy:', newRouteError.message);
+                
+                // Fallback para rota legacy
+                await app.apiFetch(`/sessions/${sessionId}/time`, {
+                    method: 'POST',
+                    body: JSON.stringify({ seconds: seconds })
+                });
+                console.log(`💾 Tempo salvo no banco (rota legacy): ${seconds}s para sessão ${sessionId}`);
+            }
         } catch (error) { 
-            console.error('❌ Erro ao salvar tempo:', error); 
+            console.error('❌ Erro ao salvar tempo (ambas as rotas falharam):', error); 
         }
     }
 };

@@ -80,7 +80,7 @@ EMAIL_PASS=sua_senha_de_app_aqui
 ```env
 EMAIL_PROVIDER=sendgrid
 SENDGRID_API_KEY=SG.xxxxxxxxxxxxxxxxxxxx
-EMAIL_USER=suporte@editaliza.com.br  # Seu email verificado
+EMAIL_USER=seu_email@exemplo.com  # Seu email verificado
 ```
 
 4. **Verificar domínio** (opcional mas recomendado):
@@ -114,7 +114,7 @@ EMAIL_PROVIDER=ses
 AWS_REGION=us-east-1
 AWS_SES_ACCESS_KEY_ID=AKIAXXXXXXXXXXXXXXXXX
 AWS_SES_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-EMAIL_USER=suporte@editaliza.com.br
+EMAIL_USER=seu_email@exemplo.com
 ```
 
 ### Mailgun
@@ -137,7 +137,7 @@ MAILGUN_PASS=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 3. **Configurar .env**:
 ```env
 EMAIL_PROVIDER=elastic
-ELASTIC_EMAIL_USER=suporte@editaliza.com.br
+ELASTIC_EMAIL_USER=seu_email@exemplo.com
 ELASTIC_EMAIL_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
@@ -145,7 +145,7 @@ ELASTIC_EMAIL_API_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 ```env
 EMAIL_PROVIDER=outlook
-OUTLOOK_USER=suporte@editaliza.com.br
+OUTLOOK_USER=seu_email@exemplo.com
 OUTLOOK_PASS=sua_senha_aqui
 ```
 
@@ -160,7 +160,7 @@ EMAIL_PROVIDER=smtp
 SMTP_HOST=mail.editaliza.com.br
 SMTP_PORT=587
 SMTP_SECURE=false
-SMTP_USER=suporte@editaliza.com.br
+SMTP_USER=seu_email@exemplo.com
 SMTP_PASS=sua_senha_aqui
 SMTP_MAX_CONNECTIONS=5
 SMTP_MAX_MESSAGES=100
@@ -251,8 +251,8 @@ Erro: "Rate limit exceeded"
    ```env
    # Comentar configuração antiga
    # EMAIL_PROVIDER=gmail
-   # EMAIL_USER=suporte@editaliza.com.br
-   # EMAIL_PASS=usrb wdbu ciny kgku
+   # EMAIL_USER=seu_email@exemplo.com
+   # EMAIL_PASS=sua_senha_aqui
    
    # Nova configuração
    EMAIL_PROVIDER=sendgrid
