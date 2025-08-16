@@ -53,6 +53,33 @@ module.exports = [
         }
     },
     {
+        files: ['public/js/**/*.js'],
+        languageOptions: {
+            sourceType: 'script',
+            globals: {
+                console: 'readonly',
+                document: 'readonly',
+                window: 'readonly',
+                localStorage: 'readonly',
+                sessionStorage: 'readonly',
+                navigator: 'readonly',
+                fetch: 'readonly',
+                CustomEvent: 'readonly',
+                define: 'readonly',
+                HTMLElement: 'readonly',
+                Event: 'readonly',
+                XMLHttpRequest: 'readonly',
+                FormData: 'readonly',
+                setTimeout: 'readonly',
+                clearTimeout: 'readonly',
+                setInterval: 'readonly',
+                clearInterval: 'readonly',
+                requestAnimationFrame: 'readonly',
+                cancelAnimationFrame: 'readonly'
+            }
+        }
+    },
+    {
         files: ['tests/**/*.test.js', 'tests/**/*.spec.js'],
         languageOptions: {
             globals: {
