@@ -112,7 +112,7 @@ export const Navigation = {
         
         navContainer.innerHTML = `
             ${this.getNavigationStyles()}
-            <header class="bg-white border-b border-gray-200 shadow-sm">
+            <header class="bg-white border-b border-gray-300 shadow-sm">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-16">
                         <div class="flex items-center">
@@ -199,7 +199,7 @@ export const Navigation = {
             <style>
                 .nav-link-active {
                     background: linear-gradient(135deg, #0528f2, #3b82f6);
-                    color: white;
+                    color: white !important;
                     border-radius: 0.5rem;
                 }
                 .nav-link-default {
@@ -279,9 +279,9 @@ export const Navigation = {
 
         let linksHtml = links.map(link => {
             const isActive = activePage === link.href.split('?')[0];
-            const activeClass = 'bg-editaliza-blue text-white cursor-default';
+            const activeClass = 'bg-editaliza-blue cursor-default';
             const defaultClass = 'bg-white hover:bg-gray-100 text-gray-700';
-            return `<a id="${link.id}" href="${link.href}" class="px-4 py-2 text-sm font-semibold rounded-lg border border-gray-200 shadow-sm transition-colors ${isActive ? activeClass : defaultClass}">${link.text}</a>`;
+            return `<a id="${link.id}" href="${link.href}" class="px-4 py-2 text-sm font-semibold rounded-lg border border-gray-200 shadow-sm transition-colors ${isActive ? activeClass : defaultClass}" ${isActive ? 'style="color: white !important;"' : ''}>${link.text}</a>`;
         }).join('');
 
         headerContainer.innerHTML = `

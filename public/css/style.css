@@ -8,113 +8,109 @@
  * EDITALIZA DESIGN SYSTEM - DUAL THEME SUPPORT
  * =============================================== */
 
-/* Light Theme Variables (Default) - ORIGINAL COLORS RESTORED */
+/* Padronized Design Tokens - Light Theme (Default) */
 :root {
-    /* Brand Colors - Consistent across themes */
+    /* Brand Colors - Mantidos para compatibilidade */
     --editaliza-blue: #0528f2;
-    --editaliza-blue-light: #3b82f6;
-    --editaliza-blue-dark: #0422c8;
     --editaliza-green: #adeb00;
-    --editaliza-green-light: #c8f000;
-    --editaliza-green-dark: #88c100;
     
-    /* Semantic Colors - Light Theme - KEEP ORIGINAL */
-    --bg-primary: #f8fafc;           /* Main background */
-    --bg-secondary: #ffffff;          /* Card backgrounds */
-    --bg-tertiary: #f1f5f9;          /* Subtle backgrounds */
-    --bg-glass: rgba(255, 255, 255, 0.95);
-    --bg-glass-subtle: rgba(255, 255, 255, 0.15);
+    /* New Standardized Design Tokens */
+    --bg: #F7FAFC;
+    --surface-1: #FFFFFF;
+    --surface-2: #F2F4F7;
+    --surface-3: #EDEFF3;
+    --border: #E5E7EB;
     
-    /* Text Colors - Light Theme */
-    --text-primary: #1e293b;         /* Main text */
-    --text-secondary: #475569;       /* Secondary text */
-    --text-tertiary: #64748b;        /* Muted text */
-    --text-inverse: #ffffff;         /* Text on dark backgrounds */
+    --text: #111827;
+    --text-muted: #4B5563;
+    --text-disabled: #9CA3AF;
     
-    /* Border Colors - Light Theme */
-    --border-primary: #e2e8f0;
-    --border-secondary: #cbd5e1;
-    --border-focus: var(--editaliza-blue);
+    --primary: #2563EB;
+    --primary-600: #1D4ED8;
+    --primary-400: #60A5FA;
+    --on-primary: #FFFFFF;
     
-    /* Glass Morphism - Light Theme */
-    --glass-bg: rgba(255, 255, 255, 0.95);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.15);
+    --secondary: #374151;
+    --secondary-hover: #4B5563;
+    --on-secondary: #E5E7EB;
     
-    /* Gradients - Light Theme */
-    --gradient-bg: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    --gradient-card: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.8));
+    --success: #16A34A;
+    --warning: #EAB308;
+    --error: #EF4444;
+    --info: #06B6D4;
     
-    /* Status Colors */
-    --success: #10b981;
-    --warning: #f59e0b;
-    --error: #ef4444;
-    --info: var(--editaliza-blue);
+    --success-surface: #DCFCE7;
+    --warning-surface: #FEF9C3;
+    --error-surface: #FEE2E2;
+    --info-surface: #CFFAFE;
     
-    /* Navigation Specific - Light Theme */
-    --nav-background: #ffffff;
-    --nav-border: #e2e8f0;           /* Light gray border instead of black */
-    --nav-text: #475569;
-    --nav-text-hover: var(--editaliza-blue);
-    --nav-active-bg: linear-gradient(135deg, #0528f2 0%, #3b82f6 100%);
-    --nav-active-text: #ffffff;
-    --nav-background-hover: #f8fafc;
+    --link: #2563EB;
+    --link-hover: #1D4ED8;
+    --ring: rgba(59,130,246,.5);
     
-    /* Surface Colors - Light Theme */
-    --surface-primary: #ffffff;
-    --surface-secondary: #f8fafc;
-    --surface-elevated: #f1f5f9
+    --shadow-1: 0 1px 2px rgba(0,0,0,.06);
+    --shadow-2: 0 4px 12px rgba(0,0,0,.08);
+    
+    --radius: 14px;
+    
+    /* Legacy mappings for compatibility */
+    --bg-primary: var(--bg);
+    --bg-secondary: var(--surface-1);
+    --bg-tertiary: var(--surface-2);
+    --text-primary: var(--text);
+    --text-secondary: var(--text-muted);
+    --text-tertiary: var(--text-disabled);
+    --border-primary: var(--border);
+    --border-focus: var(--primary);
 }
 
-/* Dark Theme Variables - Sophisticated & Professional */
+/* Dark Theme Variables - Professional & Consistent */
 [data-theme="dark"] {
-    /* Sophisticated Dark Backgrounds - Charcoals & Slate Grays */
-    --bg-primary: #1a1b23;           /* Sophisticated charcoal - primary background */
-    --bg-secondary: #242530;         /* Card backgrounds - slightly lighter charcoal */
-    --bg-tertiary: #2d2e3f;          /* Elevated elements - subtle slate */
-    --bg-glass: rgba(36, 37, 48, 0.95);
-    --bg-glass-subtle: rgba(255, 255, 255, 0.03);
+    --bg: #0F0F0F;
+    --surface-1: #1A1A1A;
+    --surface-2: #262626;
+    --surface-3: #2F2F2F;
+    --border: #404040;
     
-    /* Warm, Comfortable Text Colors */
-    --text-primary: #f0ede8;         /* Warm white - easy on eyes */
-    --text-secondary: #b8b4ad;       /* Muted warm gray - secondary text */
-    --text-tertiary: #8a8680;        /* Subtle warm gray - tertiary text */
-    --text-inverse: #1e293b;         /* Dark text for light backgrounds */
+    --text: #F5F5F5;
+    --text-muted: #A3A3A3;
+    --text-disabled: #737373;
     
-    /* Subtle, Professional Borders */
-    --border-primary: #3a3b4a;       /* Barely visible definition */
-    --border-secondary: #4a4b5a;     /* Slightly more visible */
-    --border-focus: #5b8def;         /* Softer focus blue */
+    --primary: #3B82F6;
+    --primary-600: #2563EB;
+    --primary-400: #60A5FA;
+    --on-primary: #FFFFFF;
     
-    /* Refined Glass Morphism */
-    --glass-bg: rgba(36, 37, 48, 0.95);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    --secondary: #262626;
+    --secondary-hover: #2F2F2F;
+    --on-secondary: #F5F5F5;
     
-    /* Sophisticated Gradients */
-    --gradient-bg: linear-gradient(135deg, #1a1b23 0%, #242530 50%, #2d2e3f 100%);
-    --gradient-card: linear-gradient(135deg, rgba(36,37,48,0.95), rgba(45,46,63,0.8));
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --info: #06B6D4;
     
-    /* Professional Accent Colors */
-    --editaliza-blue-dark-mode: #5b8def;  /* Softer blue for sophistication */
-    --editaliza-green-dark-mode: #6ba644; /* Natural green, not neon */
-    --success: #6ba644;               /* Natural success green */
-    --warning: #d4a645;               /* Warm amber warning */
-    --error: #c85a54;                 /* Refined error red */
+    --success-surface: #064E3B;
+    --warning-surface: #78350F;
+    --error-surface: #7F1D1D;
+    --info-surface: #164E63;
     
-    /* Navigation Specific - Dark Theme */
-    --nav-background: #242530;
-    --nav-border: #3a3b4a;
-    --nav-text: #b8b4ad;
-    --nav-text-hover: #5b8def;
-    --nav-active-bg: linear-gradient(135deg, #5b8def 0%, #4a7dd8 100%);
-    --nav-active-text: #ffffff;
-    --nav-background-hover: #2d2e3f;
+    --link: #60A5FA;
+    --link-hover: #93C5FD;
+    --ring: rgba(96,165,250,.45);
     
-    /* Surface Colors - Dark Theme */
-    --surface-primary: #242530;
-    --surface-secondary: #2d2e3f;
-    --surface-elevated: #363748
+    --shadow-1: 0 1px 2px rgba(0,0,0,.35);
+    --shadow-2: 0 8px 28px rgba(0,0,0,.35);
+    
+    /* Legacy mappings for compatibility */
+    --bg-primary: var(--bg);
+    --bg-secondary: var(--surface-1);
+    --bg-tertiary: var(--surface-2);
+    --text-primary: var(--text);
+    --text-secondary: var(--text-muted);
+    --text-tertiary: var(--text-disabled);
+    --border-primary: var(--border);
+    --border-focus: var(--primary);
 }
 
 /* Theme transition for smooth switching */
@@ -163,6 +159,65 @@ button, input, textarea, select {
     font-family: inherit;
 }
 
+/* CRITICAL FIX: Ensure ALL buttons have readable text and proper styling */
+button {
+    color: inherit !important;
+    font-family: inherit !important;
+    cursor: pointer !important;
+}
+
+/* Primary buttons - Always visible with white text */
+button.btn-primary,
+.btn-primary {
+    background: linear-gradient(135deg, var(--editaliza-blue), #0422c8) !important;
+    color: white !important;
+    border: none !important;
+    font-weight: 600 !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 0.75rem !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(5, 40, 242, 0.2) !important;
+}
+
+button.btn-primary:hover,
+.btn-primary:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(5, 40, 242, 0.3) !important;
+}
+
+/* Secondary buttons */
+button.btn-secondary,
+.btn-secondary {
+    background-color: #334155 !important;
+    color: white !important;
+    border: 1px solid #475569 !important;
+    font-weight: 500 !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.3s ease !important;
+}
+
+button.btn-secondary:hover,
+.btn-secondary:hover {
+    background-color: #1e293b !important;
+    color: white !important;
+}
+
+/* Default buttons - Ensure visibility */
+button:not(.btn-primary):not(.btn-secondary):not(.btn-danger):not(.btn-danger-outline) {
+    background-color: #f8fafc !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.3s ease !important;
+}
+
+button:not(.btn-primary):not(.btn-secondary):not(.btn-danger):not(.btn-danger-outline):hover {
+    background-color: #e2e8f0 !important;
+    color: #0f172a !important;
+}
+
 /* Typography with Theme Support */
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Inter', sans-serif;
@@ -179,8 +234,8 @@ h1, h2, h3, h4, h5, h6 {
 /* Botão Primário (Azul Editaliza) */
 .btn-primary {
     width: 100%;
-    background: linear-gradient(135deg, var(--editaliza-blue), var(--editaliza-blue-dark));
-    color: white;
+    background: linear-gradient(135deg, var(--editaliza-blue), #0422c8) !important;
+    color: white !important;
     font-weight: 700;
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
@@ -208,7 +263,6 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, var(--editaliza-blue-dark), var(--editaliza-blue));
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(5, 40, 242, 0.3);
 }
@@ -311,12 +365,10 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 0 0 2px rgba(79, 148, 255, 0.3);
 }
 
-[data-theme="dark"] .form-input {
     border-color: var(--border-primary);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 }
 
-[data-theme="dark"] .form-input:focus {
     box-shadow: 0 0 0 2px rgba(79, 148, 255, 0.4);
 }
 
@@ -337,31 +389,30 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-[data-theme="dark"] .content-card:hover {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* Navigation with Theme Support */
+/* Navigation with Theme Support - Usando Design Tokens Padronizados */
 .nav-link-active {
-    background-color: rgba(79, 148, 255, 0.1);
-    color: var(--editaliza-blue);
-    font-weight: 700;
+    background-color: var(--primary-surface, rgba(37, 99, 235, 0.1)) !important;
+    color: var(--primary) !important;
+    font-weight: 700 !important;
 }
 .nav-link-default {
-    color: var(--text-secondary);
+    color: var(--text-muted) !important;
 }
 .nav-link-default:hover {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
+    background-color: var(--surface-2) !important;
+    color: var(--text) !important;
 }
 
-[data-theme="dark"] .nav-link-active {
-    background-color: rgba(79, 148, 255, 0.15);
-    color: var(--editaliza-blue-dark-mode);
+/* Dark mode navigation - usando tokens padronizados */
+    background-color: var(--primary-surface, rgba(59, 130, 246, 0.15)) !important;
+    color: var(--primary) !important;
 }
 
-[data-theme="dark"] .nav-link-default:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--surface-3) !important;
+    color: var(--text) !important;
 }
 
 /*
@@ -387,7 +438,6 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid var(--border-primary);
 }
 
-[data-theme="dark"] .stats-card {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
@@ -416,7 +466,6 @@ h1, h2, h3, h4, h5, h6 {
     border: 1px solid var(--border-primary);
 }
 
-[data-theme="dark"] .study-card {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -424,6 +473,45 @@ h1, h2, h3, h4, h5, h6 {
 .force-white-bg {
     background: white !important;
     background-color: white !important;
+}
+
+/* CRITICAL: Ensure all interactive elements are visible */
+input, select, textarea {
+    background: white !important;
+    color: #1e293b !important;
+    border: 1px solid #d1d5db !important;
+    padding: 0.75rem !important;
+    border-radius: 0.5rem !important;
+    font-size: 1rem !important;
+    transition: border-color 0.3s ease !important;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none !important;
+    border-color: var(--editaliza-blue) !important;
+    box-shadow: 0 0 0 3px rgba(5, 40, 242, 0.1) !important;
+}
+
+/* Fix form inputs class */
+.form-input {
+    margin-top: 0.25rem !important;
+    display: block !important;
+    width: 100% !important;
+    padding: 0.75rem 1rem !important;
+    background-color: white !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    color: #1e293b !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.form-input:focus {
+    outline: 2px solid transparent !important;
+    outline-offset: 2px !important;
+    border-color: var(--editaliza-blue) !important;
+    box-shadow: 0 0 0 3px rgba(5, 40, 242, 0.1) !important;
 }
 
 .study-card:hover {
@@ -784,27 +872,22 @@ a:focus {
 }
 
 /* Dark mode alert styles - Professional & Readable */
-[data-theme="dark"] .alert-success {
     background-color: rgba(107, 166, 68, 0.15);
     border-color: var(--success);
     color: #a8d17a;
 }
 
-[data-theme="dark"] .alert-danger {
     background-color: rgba(200, 90, 84, 0.15);
     border-color: var(--error);
     color: #e29d99;
 }
 
-[data-theme="dark"] .alert-warning {
     background-color: rgba(212, 166, 69, 0.15);
     border-color: var(--warning);
     color: #e6c488;
 }
 
-[data-theme="dark"] .alert-info {
     background-color: rgba(91, 141, 239, 0.15);
-    border-color: var(--editaliza-blue-dark-mode);
     color: #9bb5f0;
 }
 
@@ -820,8 +903,6 @@ a:focus {
 }
 
 /* Dark mode - Logo text should be white */
-[data-theme="dark"] #logo-header .cls-2 {
-    fill: #f0ede8 !important; /* White text in dark mode */
 }
 
 /* Screen reader only content */
@@ -849,14 +930,14 @@ a:focus {
     }
     
     .btn-primary {
-        background-color: #000;
-        color: #fff;
-        border: 2px solid #000;
+        background-color: var(--text);
+        color: var(--surface-1);
+        border: 2px solid var(--text);
     }
     
     .btn-primary:hover {
-        background-color: #fff;
-        color: #000;
+        background-color: var(--surface-1);
+        color: var(--text);
     }
 }
 
@@ -935,20 +1016,16 @@ a:focus {
 }
 
 /* Dark mode active state */
-[data-theme="dark"] .theme-toggle {
     border-color: var(--border-primary);
 }
 
-[data-theme="dark"] .theme-toggle:hover {
     background: rgba(255, 255, 255, 0.05);
     border-color: var(--border-secondary);
 }
 
-[data-theme="dark"] .theme-toggle-icon {
     color: var(--text-secondary);
 }
 
-[data-theme="dark"] .theme-toggle:hover .theme-toggle-icon {
     color: var(--text-primary);
 }
 
@@ -984,64 +1061,68 @@ a:focus {
     margin-left: auto;
 }
 
+/* Correção para TODOS os botões na navegação */
+nav button,
+.navbar button,
+.navigation button,
+header button {
+    background: var(--surface-1) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    transition: all 0.3s ease !important;
+}
+
+nav button:hover,
+.navbar button:hover,
+.navigation button:hover,
+header button:hover {
+    background: var(--surface-2) !important;
+    border-color: var(--primary) !important;
+    color: var(--primary) !important;
+}
+
+/* Botões primários na navegação */
+nav .btn-primary,
+.navbar .btn-primary,
+.navigation .btn-primary,
+header .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-600)) !important;
+    color: var(--on-primary) !important;
+    border: none !important;
+}
+
+nav .btn-primary:hover,
+.navbar .btn-primary:hover,
+.navigation .btn-primary:hover,
+header .btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-400), var(--primary)) !important;
+    transform: translateY(-1px) !important;
+}
+
 /* ===============================================
  * ENHANCED DARK MODE SPECIFIC STYLES
  * =============================================== */
 
-/* Scrollbar styling for dark mode */
-[data-theme="dark"] ::-webkit-scrollbar {
     width: 8px;
 }
 
-[data-theme="dark"] ::-webkit-scrollbar-track {
     background: var(--bg-primary);
 }
 
-[data-theme="dark"] ::-webkit-scrollbar-thumb {
     background: var(--border-secondary);
     border-radius: 4px;
 }
 
-[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
     background: var(--text-tertiary);
 }
 
-/* Selection color for dark mode */
-[data-theme="dark"] ::selection {
     background: rgba(79, 148, 255, 0.3);
     color: var(--text-primary);
 }
 
-/* Enhanced button styles for dark mode - Professional & Sophisticated */
-[data-theme="dark"] .btn-primary {
-    background: linear-gradient(135deg, var(--editaliza-blue-dark-mode), #4c6faf);
-    box-shadow: 0 4px 15px rgba(91, 141, 239, 0.2);
-}
-
-[data-theme="dark"] .btn-primary:hover {
-    background: linear-gradient(135deg, #6b94f2, var(--editaliza-blue-dark-mode));
-    box-shadow: 0 8px 25px rgba(91, 141, 239, 0.3);
-}
-
-[data-theme="dark"] .btn-secondary {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-primary);
-}
-
-[data-theme="dark"] .btn-secondary:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    border-color: var(--border-secondary);
-}
-
-[data-theme="dark"] .btn-danger {
-    background-color: var(--error);
-    color: var(--text-primary);
-}
-
-[data-theme="dark"] .btn-danger:hover {
-    background-color: #d86b66;
-}
+/* Dark mode button overrides - Removed to prevent conflicts */
+/* All button styling now handled by unified design tokens above */
 
 /* Text readability helpers */
 .text-adaptive {
@@ -1087,92 +1168,281 @@ a:focus {
 }
 
 /* Dark mode specific adjustments for existing components */
-[data-theme="dark"] .force-white-bg {
     background: var(--bg-secondary) !important;
     background-color: var(--bg-secondary) !important;
 }
 
-[data-theme="dark"] .motivation-text {
-    background: linear-gradient(45deg, var(--editaliza-blue-dark-mode), var(--editaliza-green-dark-mode));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     color: transparent;
 }
 
-/* Loading states for dark mode */
-[data-theme="dark"] .loading::after {
-    border: 2px solid var(--editaliza-blue-dark-mode);
 }
 
-[data-theme="dark"] .skeleton {
     background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--border-primary) 50%, var(--bg-tertiary) 75%);
 }
 
-/* Focus states for dark mode */
-[data-theme="dark"] button:focus,
-[data-theme="dark"] input:focus,
-[data-theme="dark"] textarea:focus,
-[data-theme="dark"] select:focus,
-[data-theme="dark"] a:focus {
-    outline: 2px solid var(--editaliza-blue-dark-mode);
     box-shadow: 0 0 0 4px rgba(79, 148, 255, 0.2);
 }
 
-/* CRITICAL FIX: Button text must be white/off-white in dark mode */
-[data-theme="dark"] button,
-[data-theme="dark"] .btn,
-[data-theme="dark"] .btn-primary,
-[data-theme="dark"] .btn-secondary,
-[data-theme="dark"] .btn-danger,
-[data-theme="dark"] .btn-action-sm,
-[data-theme="dark"] [class*="btn-"] {
-    color: #f0ede8 !important; /* Off-white for readability */
+/* BUTTON TEXT: Use design tokens for consistency */
+    color: var(--on-primary) !important;
+}
+    color: var(--on-secondary) !important;
+}
+    color: #ffffff !important;
+}
+    color: var(--text) !important;
 }
 
-/* Ensure Tailwind button classes also get white text */
-[data-theme="dark"] .bg-blue-600,
-[data-theme="dark"] .bg-blue-700,
-[data-theme="dark"] .bg-indigo-600,
-[data-theme="dark"] .bg-indigo-700,
-[data-theme="dark"] .bg-purple-600,
-[data-theme="dark"] .bg-purple-700,
-[data-theme="dark"] .bg-gray-700,
-[data-theme="dark"] .bg-gray-800,
-[data-theme="dark"] .bg-slate-700,
-[data-theme="dark"] .bg-slate-800 {
-    color: #f0ede8 !important;
+    color: var(--text) !important;
 }
 
-/* Fix text on any dark background in dark mode */
-[data-theme="dark"] [class*="bg-blue-"],
-[data-theme="dark"] [class*="bg-indigo-"],
-[data-theme="dark"] [class*="bg-purple-"],
-[data-theme="dark"] [class*="bg-gray-"],
-[data-theme="dark"] [class*="bg-slate-"] {
-    color: #f0ede8 !important;
-}
-
-/* EXCEPTION: Keep dark text on green backgrounds for readability */
-[data-theme="dark"] [class*="bg-green-"],
-[data-theme="dark"] .bg-editaliza-green,
-[data-theme="dark"] [class*="bg-emerald-"],
-[data-theme="dark"] [class*="bg-lime-"],
-[data-theme="dark"] [class*="bg-yellow-"] {
-    color: #1e293b !important; /* Keep dark text on light backgrounds */
 }
 
 /* Fix for cards with green gradients */
-[data-theme="dark"] .bg-gradient-to-br.from-green-400,
-[data-theme="dark"] .bg-gradient-to-br.from-emerald-400,
-[data-theme="dark"] .bg-gradient-to-br.from-lime-400 {
     color: #1e293b !important;
 }
 
-/* Ensure all text inside green cards stays dark */
-[data-theme="dark"] [class*="bg-green-"] *,
-[data-theme="dark"] .bg-editaliza-green *,
-[data-theme="dark"] [class*="bg-emerald-"] *,
-[data-theme="dark"] [class*="bg-lime-"] * {
     color: #1e293b !important;
+}
+
+/* =========================================================================
+   PATCH DE COMPONENTES PADRONIZADOS - APLICADO AO FINAL PARA ESPECIFICIDADE
+   ========================================================================= */
+
+/* Base */
+body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* Cards / painéis */
+.card, .panel, .box {
+    background: var(--surface-1);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-1);
+}
+
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    position: relative;
+}
+    border-left: 4px solid var(--primary);
+}
+    border-left: 4px solid var(--success);
+}
+
+/* Botões - Padronizados com design tokens consistentes */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-600)) !important;
+    color: var(--on-primary) !important;
+    border: none !important;
+    font-weight: 700 !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 0.75rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: var(--shadow-2) !important;
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-600), var(--primary)) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3) !important;
+}
+.btn-primary:active {
+    transform: translateY(0) !important;
+    background: linear-gradient(135deg, var(--primary-600), #1e40af) !important;
+}
+
+.btn-secondary {
+    background: var(--secondary) !important;
+    color: var(--on-secondary) !important;
+    border: 1px solid var(--border) !important;
+    font-weight: 600 !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 0.75rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.btn-secondary:hover {
+    background: var(--secondary-hover) !important;
+    border-color: var(--primary) !important;
+    color: var(--on-secondary) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Inputs */
+input, select, textarea {
+    background: var(--surface-1) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+}
+input:focus, select:focus, textarea:focus {
+    outline: 2px solid var(--ring) !important;
+    outline-offset: 2px !important;
+}
+
+/* Links padrão - Ajustado para manter cores do site */
+a {
+    color: var(--editaliza-blue) !important;
+}
+a:hover {
+    color: #0422c8 !important;
+    text-decoration: underline !important;
+}
+
+/* Links no modo escuro */
+    color: #8AB4FF !important;
+}
+    color: #A7C4FF !important;
+}
+
+/* -------------------------
+   Rodapé (FOCUS DESTE PATCH)
+   ------------------------- */
+
+/* Fundo e borda do rodapé: discreto, sem azul elétrico */
+footer {
+    background: var(--surface-2) !important;
+    border-top: 1px solid var(--surface-3) !important;
+    box-shadow: none !important;
+}
+
+/* Tipografia do rodapé: mais sutil */
+footer, footer * {
+    color: var(--text-muted) !important;
+}
+
+/* Títulos do rodapé podem ter leve reforço */
+footer h4, footer h5, footer .heading {
+    color: var(--text) !important;
+    font-weight: 600 !important;
+}
+
+/* Links do rodapé: sem fundo, sem padding, sem borda/badge */
+footer a {
+    background: transparent !important;
+    color: var(--link) !important;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+footer a:hover {
+    color: var(--link-hover) !important;
+    text-decoration: underline !important;
+}
+
+/* Remover traço azul ou qualquer "glow" residual no rodapé */
+footer::before, footer::after,
+.footer::before, .footer::after {
+    content: none !important;
+}
+
+/* ========================================
+   REMOVER BARRA BRANCA FIXA DO TEMA
+   ======================================== */
+
+/* Esconder APENAS toggles flutuantes/fixos, manter os de navegação */
+.theme-toggle[style*="position: fixed"],
+.fab-theme,
+.floating-theme {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Remover barras fixas na parte inferior que sejam especificamente para tema */
+*[style*="position: fixed"][style*="bottom: 0"].theme-toggle,
+*[style*="position: fixed"][style*="bottom:0"].theme-toggle,
+.fixed.bottom-0.theme-toggle,
+.position-fixed.bottom-0.theme-toggle {
+    display: none !important;
+}
+
+/* Permitir theme-toggle-nav e theme-switch normais (navegação) */
+.theme-toggle-nav,
+.theme-switch {
+    display: inline-flex !important;
+}
+
+/* Estilos para o toggle de navegação */
+.theme-toggle-nav {
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-toggle-nav:hover {
+    background: var(--surface-2);
+    border-color: var(--border);
+}
+
+.theme-switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.theme-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--text-muted);
+    transition: all 0.3s ease;
+}
+
+.theme-toggle-nav:hover .theme-icon {
+    color: var(--text);
+}
+
+/* Hide/show icons based on theme */
+    display: block;
+}
+
+    display: none;
+}
+
+    display: block;
+}
+
+    display: none;
+}
+
+/* Garantir que modals tenham z-index alto para não serem sobrepostos */
+.modal,
+[role="dialog"],
+#studySessionModal,
+[id*="modal"],
+[class*="modal"] {
+    z-index: 9999 !important;
+}
+
+/* Garantir que backdrop tenha z-index apropriado */
+.modal-backdrop,
+.backdrop,
+[class*="backdrop"] {
+    z-index: 9998 !important;
+}
+
+/* Rodapé deve ter z-index baixo para não sobrepor modals */
+footer {
+    z-index: 10 !important;
+    position: relative !important;
 }

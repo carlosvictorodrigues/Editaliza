@@ -256,24 +256,24 @@ const components = {
         navContainer.innerHTML = `
             <style>
                 .nav-link-active {
-                    background: var(--nav-active-bg);
-                    color: var(--nav-active-text);
+                    background: linear-gradient(135deg, #0528f2, #3b82f6) !important;
+                    color: white !important;
                     border-radius: 0.5rem;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 .nav-link-default {
-                    color: var(--nav-text);
+                    color: #374151;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 .nav-link-default:hover {
-                    background-color: var(--nav-background-hover);
-                    color: var(--nav-text-hover);
+                    background-color: #f3f4f6;
+                    color: #111827;
                     border-radius: 0.5rem;
                 }
                 .btn-secondary {
-                    background: var(--surface-secondary);
-                    color: var(--text-primary);
-                    border: 1px solid var(--border-primary);
+                    background: transparent;
+                    color: #374151;
+                    border: 1px solid #d1d5db;
                     border-radius: 0.5rem;
                     padding: 0.5rem 1rem;
                     font-weight: 500;
@@ -281,12 +281,12 @@ const components = {
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 .btn-secondary:hover {
-                    background: var(--surface-elevated);
-                    border-color: var(--border-secondary);
+                    background: #f9fafb;
+                    border-color: #9ca3af;
                     transform: translateY(-1px);
                 }
             </style>
-            <header class="border-b shadow-sm" style="background: var(--nav-background); border-color: var(--nav-border);">
+            <header class="border-b shadow-sm" style="background: white; border-bottom: 1px solid #d1d5db;">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-16">
                         <div class="flex items-center">
@@ -336,16 +336,7 @@ const components = {
                         </nav>
                         <div class="flex items-center space-x-3">
                             ${profileHtml}
-                            <!-- Theme Toggle -->
-                            <button data-theme-toggle class="button button--secondary" onclick="toggleTheme()" aria-label="Toggle theme" style="padding: 0.5rem; min-width: auto;">
-                                <svg class="sun-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px;">
-                                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
-                                </svg>
-                                
-                                <svg class="moon-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg" style="width: 20px; height: 20px; display: none;">
-                                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-                                </svg>
-                            </button>
+                            <!-- Theme toggle removed - light mode only -->
                             <button id="logoutButton" class="btn-secondary flex items-center space-x-2 text-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -494,15 +485,15 @@ const components = {
                                     <span class="text-lg">🚨</span>
                                 </span>
                             </div>
-                            <p class="text-gray-800 font-bold text-lg mb-3">Você tem ${count} tarefa${count > 1 ? 's' : ''} atrasada${count > 1 ? 's' : ''}.</p>
-                            <p class="text-gray-700 text-base mb-4 leading-relaxed">Não se preocupe! Podemos reorganizar seu cronograma automaticamente para você voltar aos trilhos. 💪</p>
+                            <p class="text-gray-900 font-bold text-lg mb-3">Você tem ${count} tarefa${count > 1 ? 's' : ''} atrasada${count > 1 ? 's' : ''}.</p>
+                            <p class="text-gray-800 text-base mb-4 leading-relaxed">Não se preocupe! Podemos reorganizar seu cronograma automaticamente para você voltar aos trilhos. 💪</p>
                             
                             <!-- Detalhes das tarefas atrasadas -->
                             ${this.renderOverdueTasksDetails(tasks)}
                             
                             <!-- Action Section -->
                             <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                                <button id="showReplanDetailsButton" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold px-6 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-3 border-2 border-blue-200">
+                                <button id="showReplanDetailsButton" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 font-bold px-6 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-3 border-2 border-blue-200" style="color: white !important;">
                                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                                     </svg>
@@ -510,7 +501,7 @@ const components = {
                                     <span class="text-xl">📋</span>
                                 </button>
                                 
-                                <button id="replanButton" class="flex-1 bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 hover:from-red-700 hover:via-orange-700 hover:to-amber-700 text-white font-bold px-6 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-3 border-2 border-red-200 animate-pulse">
+                                <button id="replanButton" class="flex-1 bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 hover:from-red-700 hover:via-orange-700 hover:to-amber-700 font-bold px-6 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-3 border-2 border-red-200 animate-pulse" style="color: white !important;">
                                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
                                     </svg>
@@ -592,15 +583,15 @@ const components = {
                             <div class="flex-shrink-0 text-xl">${icon}</div>
                             <div class="flex-grow min-w-0">
                                 <div class="flex items-center justify-between mb-1">
-                                    <span class="text-sm font-semibold text-gray-800">${app.sanitizeHtml(task.session_type)}</span>
+                                    <span class="text-sm font-bold text-gray-900" style="color: #111827 !important;">${app.sanitizeHtml(task.session_type)}</span>
                                     <span class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded-full font-medium">
                                         ${daysDiff === 1 ? '1 dia' : `${daysDiff} dias`} atrás
                                     </span>
                                 </div>
-                                <p class="text-sm text-gray-700 leading-relaxed truncate" title="${app.sanitizeHtml(task.topic_description)}">
+                                <p class="text-sm text-gray-900 font-medium leading-relaxed truncate" title="${app.sanitizeHtml(task.topic_description)}" style="color: #111827 !important;">
                                     ${app.sanitizeHtml(task.topic_description)}
                                 </p>
-                                <p class="text-xs text-gray-500 mt-1">
+                                <p class="text-xs text-gray-700 mt-1" style="color: #374151 !important;">
                                     Previsto para: ${sessionDate.toLocaleDateString('pt-BR')}
                                 </p>
                             </div>
@@ -740,7 +731,7 @@ const components = {
                                     <span class="text-2xl">${style.icon}</span>
                                 </div>
                                 <div class="flex-1">
-                                    <h3 class="font-bold text-lg ${isCompleted ? 'text-gray-600' : 'text-gray-800'} group-hover:text-gray-900 transition-colors">
+                                    <h3 class="font-bold text-lg ${isCompleted ? 'text-gray-700' : 'text-gray-900'} group-hover:text-gray-900 transition-colors">
                                         ${safeSubjectName}
                                     </h3>
                                 </div>
@@ -750,7 +741,7 @@ const components = {
                     </div>
                     
                     <!-- Description -->
-                    <p class="text-sm ${isCompleted ? 'text-gray-500' : 'text-gray-600'} leading-relaxed mb-4">
+                    <p class="text-base ${isCompleted ? 'text-gray-800' : 'text-gray-900'} font-medium leading-relaxed mb-4" style="color: #374151 !important;">
                         ${safeTopicDescription}
                     </p>
                     
@@ -772,34 +763,34 @@ const components = {
                         </button>
                         <!-- Botões secundários para sessão concluída -->
                         <div class="flex space-x-2">
-                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 text-sm">
-                                <span class="text-lg">💪</span>
-                                <span>Reforçar</span>
+                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 text-sm" style="color: white !important;">
+                                <span class="text-lg" style="color: white !important;">💪</span>
+                                <span style="color: white !important;">Reforçar</span>
                             </button>
-                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 text-sm">
-                                <span class="text-lg">📅</span>
-                                <span>Adiar</span>
+                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 text-sm" style="color: white !important;">
+                                <span class="text-lg" style="color: white !important;">📅</span>
+                                <span style="color: white !important;">Adiar</span>
                             </button>
                         </div>
                     ` : `
-                        <button ${this.generateSmartButton(session.id, 'Iniciar Estudo', session).disabled ? 'disabled' : `onclick='window.openStudySession(${session.id})'`} data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Estudo', session).classes} text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 mb-3">
+                        <button ${this.generateSmartButton(session.id, 'Iniciar Estudo', session).disabled ? 'disabled' : `onclick='window.openStudySession(${session.id})'`} data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Estudo', session).classes} font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 mb-3" style="color: white !important;">
                             <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
                                 </svg>
                             </div>
-                            <span class="text-lg button-text">${this.generateSmartButton(session.id, 'Iniciar Estudo', session).text}</span>
-                            <span class="text-xl group-hover/btn:animate-bounce button-icon">${this.generateSmartButton(session.id, 'Iniciar Estudo', session).icon}</span>
+                            <span class="text-lg button-text" style="color: white !important;">${this.generateSmartButton(session.id, 'Iniciar Estudo', session).text}</span>
+                            <span class="text-xl group-hover/btn:animate-bounce button-icon" style="color: white !important;">${this.generateSmartButton(session.id, 'Iniciar Estudo', session).icon}</span>
                         </button>
                         <!-- Botões secundários -->
                         <div class="flex space-x-2">
-                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 text-sm">
-                                <span class="text-lg">💪</span>
-                                <span>Reforçar</span>
+                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 text-sm" style="color: white !important;">
+                                <span class="text-lg" style="color: white !important;">💪</span>
+                                <span style="color: white !important;">Reforçar</span>
                             </button>
-                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 text-sm">
-                                <span class="text-lg">📅</span>
-                                <span>Adiar</span>
+                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-2 px-3 rounded-lg transition-all duration-300 flex items-center justify-center space-x-2 text-sm" style="color: white !important;">
+                                <span class="text-lg" style="color: white !important;">📅</span>
+                                <span style="color: white !important;">Adiar</span>
                             </button>
                         </div>
                     `}
@@ -1015,13 +1006,13 @@ const components = {
                         </button>
                         <!-- Botões secundários -->
                         <div class="flex space-x-3">
-                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <span class="text-xl">💪</span>
-                                <span>Reforçar</span>
+                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2" style="color: white !important;">
+                                <span class="text-xl" style="color: white !important;">💪</span>
+                                <span style="color: white !important;">Reforçar</span>
                             </button>
-                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <span class="text-xl">📅</span>
-                                <span>Adiar</span>
+                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2" style="color: white !important;">
+                                <span class="text-xl" style="color: white !important;">📅</span>
+                                <span style="color: white !important;">Adiar</span>
                             </button>
                         </div>
                     ` : `
@@ -1036,13 +1027,13 @@ const components = {
                         </button>
                         <!-- Botões secundários -->
                         <div class="flex space-x-3">
-                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <span class="text-xl">💪</span>
-                                <span>Reforçar</span>
+                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2" style="color: white !important;">
+                                <span class="text-xl" style="color: white !important;">💪</span>
+                                <span style="color: white !important;">Reforçar</span>
                             </button>
-                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <span class="text-xl">📅</span>
-                                <span>Adiar</span>
+                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2" style="color: white !important;">
+                                <span class="text-xl" style="color: white !important;">📅</span>
+                                <span style="color: white !important;">Adiar</span>
                             </button>
                         </div>
                     `}
@@ -1118,13 +1109,13 @@ const components = {
                         </button>
                         <!-- Botões secundários -->
                         <div class="flex space-x-3">
-                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <span class="text-xl">💪</span>
-                                <span>Reforçar</span>
+                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2" style="color: white !important;">
+                                <span class="text-xl" style="color: white !important;">💪</span>
+                                <span style="color: white !important;">Reforçar</span>
                             </button>
-                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <span class="text-xl">📅</span>
-                                <span>Adiar</span>
+                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2" style="color: white !important;">
+                                <span class="text-xl" style="color: white !important;">📅</span>
+                                <span style="color: white !important;">Adiar</span>
                             </button>
                         </div>
                     ` : `
@@ -1139,13 +1130,13 @@ const components = {
                          </button>
                          <!-- Botões secundários -->
                         <div class="flex space-x-3">
-                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <span class="text-xl">💪</span>
-                                <span>Reforçar</span>
+                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2" style="color: white !important;">
+                                <span class="text-xl" style="color: white !important;">💪</span>
+                                <span style="color: white !important;">Reforçar</span>
                             </button>
-                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <span class="text-xl">📅</span>
-                                <span>Adiar</span>
+                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2" style="color: white !important;">
+                                <span class="text-xl" style="color: white !important;">📅</span>
+                                <span style="color: white !important;">Adiar</span>
                             </button>
                         </div>
                     `}
@@ -1253,13 +1244,13 @@ const components = {
                         </button>
                         <!-- Botões secundários -->
                         <div class="flex space-x-3">
-                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <span class="text-xl">💪</span>
-                                <span>Reforçar</span>
+                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2" style="color: white !important;">
+                                <span class="text-xl" style="color: white !important;">💪</span>
+                                <span style="color: white !important;">Reforçar</span>
                             </button>
-                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <span class="text-xl">📅</span>
-                                <span>Adiar</span>
+                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2" style="color: white !important;">
+                                <span class="text-xl" style="color: white !important;">📅</span>
+                                <span style="color: white !important;">Adiar</span>
                             </button>
                         </div>
                     ` : `
@@ -1274,13 +1265,13 @@ const components = {
                         </button>
                         <!-- Botões secundários -->
                         <div class="flex space-x-3">
-                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <span class="text-xl">💪</span>
-                                <span>Reforçar</span>
+                            <button onclick='reinforceSession(${session.id})' class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2" style="color: white !important;">
+                                <span class="text-xl" style="color: white !important;">💪</span>
+                                <span style="color: white !important;">Reforçar</span>
                             </button>
-                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
-                                <span class="text-xl">📅</span>
-                                <span>Adiar</span>
+                            <button onclick='openPostponeModal(${session.id})' class="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2" style="color: white !important;">
+                                <span class="text-xl" style="color: white !important;">📅</span>
+                                <span style="color: white !important;">Adiar</span>
                             </button>
                         </div>
                     `}

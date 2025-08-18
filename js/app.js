@@ -195,6 +195,27 @@ const app = {
         }
     },
 
+    // Check if user is authenticated
+    isAuthenticated() {
+        const token = localStorage.getItem(this.config.tokenKey);
+        if (!token) return false;
+        
+        try {
+            // Decode JWT payload to check expiry
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const expiryTime = payload.exp * 1000; // convert to ms
+            
+            if (Date.now() > expiryTime) {
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            // Invalid token
+            return false;
+        }
+    },
+
     logout() {
         // Limpar todos os dados sensíveis
         localStorage.removeItem(this.config.tokenKey);
@@ -641,20 +662,28 @@ async function openStudySession(sessionId) {
         // Usar horário de Brasília corretamente
         const todayStr = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
         if (session.session_date && session.session_date !== todayStr) {
-            const confirmReschedule = confirm('Esta sessão estava marcada para outro dia. Deseja reagendá-la para hoje?');
+            const originalDate = new Date(session.session_date + 'T00:00:00').toLocaleDateString('pt-BR');
+            const confirmReschedule = confirm(`Esta sessão estava marcada para ${originalDate}. Deseja realocá-la para hoje?`);
             if (!confirmReschedule) {
                 return;
             }
 
             const oldDate = session.session_date;
+            console.log(`🔄 Realocando sessão ${sessionId} de ${originalDate} para hoje...`);
+            
             try {
-                await app.apiFetch(`/schedules/sessions/${sessionId}`, {
+                // Mostrar feedback imediato
+                app.showToast('Realocando sessão...', 'info');
+                
+                const response = await app.apiFetch(`/schedules/sessions/${sessionId}`, {
                     method: 'PATCH',
                     body: JSON.stringify({ session_date: todayStr })
                 });
 
+                console.log('✅ Sessão realocada com sucesso no servidor');
                 session.session_date = todayStr;
 
+                // Atualizar dados locais para evitar inconsistências
                 if (window.sessionsData) {
                     const idx = window.sessionsData.findIndex(s => s.id == sessionId);
                     if (idx !== -1) {
@@ -679,11 +708,13 @@ async function openStudySession(sessionId) {
                     }
                     window.fullSchedule[todayStr].push(session);
 
+                    // Revalidar cronograma com melhor tratamento de erro
                     if (typeof window.renderScheduleDOM === 'function') {
                         try {
                             window.renderScheduleDOM(window.activeFilter || 'week');
+                            console.log('✅ Cronograma atualizado com nova data da sessão');
                         } catch (err) {
-                            console.warn('Erro ao revalidar cronograma:', err);
+                            console.warn('⚠️ Erro ao revalidar cronograma (não crítico):', err);
                         }
                     }
                 }
@@ -707,9 +738,26 @@ async function openStudySession(sessionId) {
                 }
 
                 sessionRescheduled = true;
+                console.log('✅ Todos os dados locais atualizados com sucesso');
+                
             } catch (err) {
                 console.error('❌ Erro ao atualizar data da sessão:', err);
-                app.showToast('Erro ao reagendar sessão.', 'error');
+                
+                // Mensagem de erro mais específica baseada no tipo de erro
+                let errorMessage = 'Erro ao realocar sessão.';
+                if (err.message) {
+                    if (err.message.includes('network') || err.message.includes('fetch')) {
+                        errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
+                    } else if (err.message.includes('session') || err.message.includes('não encontrada')) {
+                        errorMessage = 'Sessão não encontrada. Recarregue a página e tente novamente.';
+                    } else if (err.message.includes('permission') || err.message.includes('unauthorized')) {
+                        errorMessage = 'Erro de permissão. Faça login novamente.';
+                    } else {
+                        errorMessage = `Erro ao realocar sessão: ${err.message}`;
+                    }
+                }
+                
+                app.showToast(errorMessage, 'error');
                 return;
             }
         }
@@ -738,7 +786,7 @@ async function openStudySession(sessionId) {
         StudyChecklist.show(session);
 
         if (sessionRescheduled) {
-            app.showToast('Sessão reagendada para hoje!', 'success');
+            app.showToast('✅ Sessão realocada para hoje com sucesso!', 'success');
         }
         
     } catch (error) {

@@ -18,7 +18,7 @@
     <link href="css/design-tokens.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/footer.css" rel="stylesheet">
-    <script src="js/theme-system.js"></script>
+    <!-- Theme system removed - light mode only -->
     <!-- SCRIPTS CENTRALIZADOS -->
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
@@ -1352,12 +1352,17 @@
                 progressText.textContent = percentage + '%';
                 
                 // Mudar cor baseada no progresso
+                const successColor = getComputedStyle(document.documentElement).getPropertyValue('--success').trim();
+                const warningColor = getComputedStyle(document.documentElement).getPropertyValue('--warning').trim();
+                const errorColor = getComputedStyle(document.documentElement).getPropertyValue('--error').trim();
+                const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+                
                 if (percentage >= 80) {
-                    progressBar.style.background = `linear-gradient(90deg, #10b981 ${percentage}%, #e5e7eb ${percentage}%)`;
+                    progressBar.style.background = `linear-gradient(90deg, ${successColor} ${percentage}%, ${borderColor} ${percentage}%)`;
                 } else if (percentage >= 50) {
-                    progressBar.style.background = `linear-gradient(90deg, #f59e0b ${percentage}%, #e5e7eb ${percentage}%)`;
+                    progressBar.style.background = `linear-gradient(90deg, ${warningColor} ${percentage}%, ${borderColor} ${percentage}%)`;
                 } else {
-                    progressBar.style.background = `linear-gradient(90deg, #ef4444 ${percentage}%, #e5e7eb ${percentage}%)`;
+                    progressBar.style.background = `linear-gradient(90deg, ${errorColor} ${percentage}%, ${borderColor} ${percentage}%)`;
                 }
             }
         }

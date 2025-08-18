@@ -174,23 +174,88 @@ class EditalizeThemeManager {
      * Ensure toggle button exists and is properly configured
      */
     ensureToggleButton() {
-        let toggleButton = document.querySelector('.theme-toggle');
+        // Remove ONLY floating/fixed theme toggles, keep navigation ones
+        const floatingToggles = document.querySelectorAll('.theme-toggle[style*="position: fixed"], .fab-theme, .floating-theme');
+        floatingToggles.forEach(toggle => {
+            toggle.remove();
+        });
+
+        // Remove any fixed bottom bars that are specifically theme bars
+        const fixedElements = document.querySelectorAll('[style*="position: fixed"][style*="bottom: 0"]');
+        fixedElements.forEach(element => {
+            if (element.classList.toString().includes('theme') && 
+                (element.classList.toString().includes('fab') || element.classList.toString().includes('floating'))) {
+                element.remove();
+            }
+        });
+
+        // Look for navigation toggle
+        let navToggle = document.querySelector('.theme-toggle-nav');
         
-        if (!toggleButton) {
-            // Create toggle button if it doesn't exist
-            toggleButton = this.createToggleButton();
-            document.body.appendChild(toggleButton);
+        if (!navToggle) {
+            // Try to find the navigation container to add toggle
+            const navContainer = this.findNavigationContainer();
+            if (navContainer) {
+                navToggle = this.createNavigationToggle();
+                navContainer.appendChild(navToggle);
+            }
         }
         
         // Ensure click handler is attached
-        const switchElement = toggleButton.querySelector('.theme-switch');
-        if (switchElement) {
-            switchElement.addEventListener('click', () => this.toggleTheme());
+        if (navToggle) {
+            const switchElement = navToggle.querySelector('.theme-switch');
+            if (switchElement) {
+                switchElement.addEventListener('click', () => this.toggleTheme());
+            }
         }
     }
 
     /**
-     * Create the theme toggle button HTML
+     * Find the best place to insert the navigation toggle
+     */
+    findNavigationContainer() {
+        // Try to find the navigation actions container (where profile and logout buttons are)
+        const candidates = [
+            document.querySelector('.flex.items-center.space-x-3'), // Profile/logout container
+            document.querySelector('nav.hidden.md\\:flex'), // Main navigation
+            document.querySelector('.flex.justify-between.items-center.h-16'), // Header container
+            document.querySelector('header .container'), // Header container
+            document.querySelector('header') // Last resort: header element
+        ];
+        
+        for (const candidate of candidates) {
+            if (candidate) {
+                return candidate;
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Create the navigation-integrated theme toggle
+     */
+    createNavigationToggle() {
+        const toggleContainer = document.createElement('div');
+        toggleContainer.className = 'theme-toggle-nav';
+        toggleContainer.setAttribute('data-tooltip', 'Alternar tema');
+        toggleContainer.innerHTML = `
+            <div class="theme-switch" title="Alternar modo escuro">
+                <svg class="theme-icon sun-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+                </svg>
+                
+                <svg class="theme-icon moon-icon" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                </svg>
+            </div>
+        `;
+        
+        return toggleContainer;
+    }
+
+    /**
+     * Create the theme toggle button HTML (legacy fallback)
      */
     createToggleButton() {
         const toggleContainer = document.createElement('div');
@@ -299,6 +364,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Legacy function names for backward compatibility
     window.toggleTheme = () => editalizeTheme.toggleTheme();
     window.setTheme = (theme) => editalizeTheme.setTheme(theme);
+    
+    // Re-initialize toggle after navigation loads
+    setTimeout(() => {
+        editalizeTheme.ensureToggleButton();
+    }, 100);
+});
+
+// Also listen for navigation changes (in case navigation is loaded dynamically)
+window.addEventListener('load', () => {
+    if (editalizeTheme) {
+        setTimeout(() => {
+            editalizeTheme.ensureToggleButton();
+        }, 200);
+    }
 });
 
 // Handle page visibility changes to sync theme across tabs

@@ -112,12 +112,12 @@ export const Navigation = {
         
         navContainer.innerHTML = `
             ${this.getNavigationStyles()}
-            <header class="bg-white border-b border-gray-200 shadow-sm">
+            <header class="bg-white border-b border-gray-300 shadow-sm">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-16">
                         <div class="flex items-center">
-                            <a href="home.html" class="flex items-center">
-                                <img src="logotipo.svg" alt="Editaliza" class="h-10 w-auto" style="max-width: 200px;">
+                            <a href="home.html" class="flex-shrink-0 flex items-center">
+                                ${this.getLogoSvg()}
                             </a>
                         </div>
                         <nav class="hidden md:flex items-center space-x-1">
@@ -199,7 +199,7 @@ export const Navigation = {
             <style>
                 .nav-link-active {
                     background: linear-gradient(135deg, #0528f2, #3b82f6);
-                    color: white;
+                    color: white !important;
                     border-radius: 0.5rem;
                 }
                 .nav-link-default {
@@ -230,7 +230,7 @@ export const Navigation = {
     // Logo SVG da Editaliza
     getLogoSvg() {
         return `
-            <svg id="logo-header" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 510.24 101.5" style="height: 40px; width: auto; max-width: 200px;">
+            <svg id="logo-header" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 510.24 101.5" class="h-8 w-auto">
                 <defs>
                     <style>
                       .cls-1 { fill: #0528f2; }
@@ -279,9 +279,9 @@ export const Navigation = {
 
         let linksHtml = links.map(link => {
             const isActive = activePage === link.href.split('?')[0];
-            const activeClass = 'bg-editaliza-blue text-white cursor-default';
+            const activeClass = 'bg-editaliza-blue cursor-default';
             const defaultClass = 'bg-white hover:bg-gray-100 text-gray-700';
-            return `<a id="${link.id}" href="${link.href}" class="px-4 py-2 text-sm font-semibold rounded-lg border border-gray-200 shadow-sm transition-colors ${isActive ? activeClass : defaultClass}">${link.text}</a>`;
+            return `<a id="${link.id}" href="${link.href}" class="px-4 py-2 text-sm font-semibold rounded-lg border border-gray-200 shadow-sm transition-colors ${isActive ? activeClass : defaultClass}" ${isActive ? 'style="color: white !important;"' : ''}>${link.text}</a>`;
         }).join('');
 
         headerContainer.innerHTML = `

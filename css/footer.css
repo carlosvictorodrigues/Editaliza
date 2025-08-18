@@ -34,7 +34,7 @@ html body .editaliza-footer-refatorado {
     text-align: left !important;
     
     /* Cores base */
-    color: #ffffff !important;
+    color: var(--text-muted) !important;
     background: transparent !important;
     
     /* Bordas */
@@ -68,7 +68,7 @@ html body .editaliza-footer-refatorado {
 /* ESTRUTURA PRINCIPAL - LIGHT THEME */
 body .editaliza-footer-refatorado .footer-main-section,
 html body .editaliza-footer-refatorado .footer-main-section {
-    background: linear-gradient(135deg, #041d8a 0%, #ffffff 100%) !important;
+    background: linear-gradient(135deg, #0528f2 0%, #0d0d0d 100%) !important;
     width: 100% !important;
     position: relative !important;
     overflow: hidden !important;
@@ -85,7 +85,7 @@ html body .editaliza-footer-refatorado .footer-main-section {
 
 body .editaliza-footer-refatorado .footer-copyright-section,
 html body .editaliza-footer-refatorado .footer-copyright-section {
-    background: linear-gradient(90deg, #0a1e4a 0%, #1a2332 100%) !important;
+    background: linear-gradient(90deg, #0528f2 0%, #041d8a 100%) !important;
     border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
     width: 100% !important;
     display: block !important;
@@ -208,7 +208,7 @@ html body .editaliza-footer-refatorado .social-link {
     height: 36px !important;
     background: rgba(255, 255, 255, 0.1) !important;
     border-radius: 6px !important;
-    color: #ffffff !important;
+    color: var(--text-muted) !important;
     text-decoration: none !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     backdrop-filter: blur(8px) !important;
@@ -253,7 +253,7 @@ body .editaliza-footer-refatorado .footer-nav-title,
 html body .editaliza-footer-refatorado .footer-nav-title {
     font-size: 0.875rem !important;
     font-weight: 600 !important;
-    color: #ffffff !important;
+    color: var(--text-muted) !important;
     margin: 0 0 12px 0 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.025em !important;
@@ -275,10 +275,11 @@ html body .editaliza-footer-refatorado .footer-nav-title::after {
     display: block !important;
 }
 
-/* DARK MODE - Nav title accent */
+/* DARK MODE - Nav title accent - Sutil e discreto */
 [data-theme="dark"] body .editaliza-footer-refatorado .footer-nav-title::after,
 [data-theme="dark"] html body .editaliza-footer-refatorado .footer-nav-title::after {
-    background: #5b8def !important;
+    background: #6B7280 !important; /* Cinza neutro discreto */
+    opacity: 0.6 !important;
 }
 
 body .editaliza-footer-refatorado .footer-nav-list,
@@ -301,6 +302,9 @@ html body .editaliza-footer-refatorado .footer-nav-link {
     display: inline-block !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 body .editaliza-footer-refatorado .footer-nav-link:hover,
@@ -311,12 +315,18 @@ html body .editaliza-footer-refatorado .footer-nav-link:focus {
     transform: translateX(4px) !important;
 }
 
-/* DARK MODE - Nav links hover */
+/* DARK MODE - Nav links hover - Sutil */
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-nav-link,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-nav-link {
+    color: #D1D5DB !important; /* Cinza claro no dark mode */
+    background: transparent !important;
+}
 [data-theme="dark"] body .editaliza-footer-refatorado .footer-nav-link:hover,
 [data-theme="dark"] body .editaliza-footer-refatorado .footer-nav-link:focus,
 [data-theme="dark"] html body .editaliza-footer-refatorado .footer-nav-link:hover,
 [data-theme="dark"] html body .editaliza-footer-refatorado .footer-nav-link:focus {
-    color: #5b8def !important;
+    color: #F3F4F6 !important; /* Branco suave ao hover */
+    background: transparent !important;
 }
 
 /* COPYRIGHT - ALTA ESPECIFICIDADE */
@@ -370,12 +380,18 @@ html body .editaliza-footer-refatorado .footer-legal-link:focus {
     color: #1AD937 !important;
 }
 
-/* DARK MODE - Legal links hover */
+/* DARK MODE - Legal links hover - Consistente */
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-legal-link,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-legal-link {
+    color: #9CA3AF !important; /* Cinza médio */
+    background: transparent !important;
+}
 [data-theme="dark"] body .editaliza-footer-refatorado .footer-legal-link:hover,
 [data-theme="dark"] body .editaliza-footer-refatorado .footer-legal-link:focus,
 [data-theme="dark"] html body .editaliza-footer-refatorado .footer-legal-link:hover,
 [data-theme="dark"] html body .editaliza-footer-refatorado .footer-legal-link:focus {
-    color: #5b8def !important;
+    color: #D1D5DB !important; /* Cinza claro ao hover */
+    background: transparent !important;
 }
 
 /* RESPONSIVIDADE - ALTA ESPECIFICIDADE */

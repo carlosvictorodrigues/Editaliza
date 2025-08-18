@@ -1,0 +1,70 @@
+/* 
+ * EDITALIZA - LIGHT MODE ONLY CSS
+ * This file enforces light mode across the platform
+ */
+
+/* Force light mode variables */
+:root {
+    --bg: #F7FAFC !important;
+    --surface-1: #FFFFFF !important;
+    --surface-2: #F2F4F7 !important;
+    --surface-3: #EDEFF3 !important;
+    --border: #E5E7EB !important;
+    
+    --text: #111827 !important;
+    --text-muted: #4B5563 !important;
+    --text-disabled: #9CA3AF !important;
+    
+    --primary: #0528f2 !important;
+    --primary-600: #0422c8 !important;
+    --primary-400: #60A5FA !important;
+    --on-primary: #FFFFFF !important;
+    
+    --secondary: #374151 !important;
+    --secondary-hover: #4B5563 !important;
+    --on-secondary: #E5E7EB !important;
+}
+
+/* Force light mode body */
+body {
+    background: #F7FAFC !important;
+    color: #111827 !important;
+}
+
+/* Disable any dark mode selectors */
+[data-theme="dark"] {
+    display: none !important;
+}
+
+/* Hide any dark mode toggles */
+.theme-toggle,
+.dark-mode-toggle,
+[data-theme-toggle] {
+    display: none !important;
+}
+
+/* Ensure all text is readable */
+* {
+    color: inherit !important;
+}
+
+/* Force light backgrounds on all major elements */
+.card, .panel, .box, .content-card, .study-card {
+    background: white !important;
+    color: #111827 !important;
+    border: 1px solid #E5E7EB !important;
+}
+
+/* Ensure navigation is light */
+nav, .navbar, .navigation, header {
+    background: white !important;
+    color: #111827 !important;
+    border-bottom: 1px solid #E5E7EB !important;
+}
+
+/* Force footer to be light */
+footer {
+    background: #f8fafc !important;
+    color: #6b7280 !important;
+    border-top: 1px solid #e5e7eb !important;
+}

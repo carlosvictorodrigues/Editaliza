@@ -3,18 +3,22 @@
  * Sistema modular com design moderno e integração perfeita do logotipo
  */
 
+// LOG DE EMERGÊNCIA - CONFIRMAR QUE O ARQUIVO FOI CARREGADO
+console.log('🚨🚨🚨 FOOTER.JS CARREGADO! 🚨🚨🚨');
+console.log('🚨🚨🚨 Arquivo:', window.location.href);
+console.log('🚨🚨🚨 Timestamp:', new Date().toISOString());
 
 class EditalizaFooterRefatorado {
     constructor() {
         this.footerElement = null;
         this.isLoaded = false;
-        this.debugMode = false;
+        this.debugMode = true;
         
         // Tokens de design centralizados
         this.designTokens = {
             colors: {
-                gradientPrimary: 'linear-gradient(135deg, #041d8a 0%, #ffffff 100%)',
-                gradientSecondary: 'linear-gradient(90deg, #0a1e4a 0%, #1a2332 100%)',
+                gradientPrimary: 'linear-gradient(135deg, #0528f2 0%, #0d0d0d 100%)',
+                gradientSecondary: 'linear-gradient(90deg, #0528f2 0%, #041d8a 100%)',
                 textPrimary: '#ffffff',
                 textSecondary: 'rgba(255, 255, 255, 0.85)',
                 textMuted: 'rgba(255, 255, 255, 0.65)',
@@ -52,7 +56,8 @@ class EditalizaFooterRefatorado {
     
     log(message, data = null) {
         if (!this.debugMode) return;
-        // Logs silenciados para produção
+        const timestamp = new Date().toLocaleTimeString();
+        console.log(`🦶 [FooterRefatorado ${timestamp}] ${message}`, data || '');
     }
     
     /**
@@ -78,6 +83,9 @@ class EditalizaFooterRefatorado {
      */
     async init() {
         try {
+            console.log('🚨🚨🚨 FOOTER REFATORADO INICIANDO! 🚨🚨🚨');
+            console.log('🚨🚨🚨 URL:', window.location.href);
+            console.log('🚨🚨🚨 Protocolo:', window.location.protocol);
             this.log('🚀 Iniciando carregamento do rodapé refatorado...');
             this.log('📍 URL atual:', window.location.href);
             this.log('📍 Protocolo:', window.location.protocol);
@@ -162,14 +170,13 @@ class EditalizaFooterRefatorado {
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-                background: linear-gradient(135deg, #041d8a 0%, #ffffff 100%) !important;
+                background: linear-gradient(135deg, #0528f2 0%, #0d0d0d 100%) !important;
                 min-height: 200px !important;
-                border: 3px solid red !important;
             }
             
             /* FAIXA PRINCIPAL - Gradiente full-bleed */
             .footer-main-section {
-                background: ${colors.gradientPrimary} !important;
+                background: linear-gradient(135deg, #0528f2 0%, #041d8a 100%) !important;
                 width: 100% !important;
                 position: relative !important;
                 overflow: hidden !important;
@@ -177,7 +184,6 @@ class EditalizaFooterRefatorado {
                 visibility: visible !important;
                 opacity: 1 !important;
                 min-height: 150px !important;
-                border: 2px solid blue !important;
             }
             
             /* FAIXA INFERIOR - Direitos autorais full-bleed */
@@ -225,12 +231,13 @@ class EditalizaFooterRefatorado {
             .footer-logo {
                 display: inline-flex;
                 align-items: center;
-                padding: 12px 16px;
-                background: ${effects.logoBackground};
-                backdrop-filter: ${effects.logoBackdrop};
-                border-radius: ${effects.borderRadius};
+                padding: 16px 20px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 12px;
                 width: fit-content;
                 margin-bottom: ${spacing.gapSmall};
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
             }
             
             .footer-logo-icon {
@@ -454,13 +461,13 @@ class EditalizaFooterRefatorado {
         const footerHTML = `
             <footer class="editaliza-footer-refatorado" role="contentinfo" aria-label="Rodapé do site">
                 <!-- FAIXA PRINCIPAL -->
-                <div class="footer-main-section">
+                <div class="footer-main-section" style="background: linear-gradient(135deg, #0528f2 0%, #041d8a 100%) !important;">
                     <div class="footer-container">
                         <div class="footer-main-container">
                             <div class="footer-main-grid">
                             <!-- SEÇÃO DA MARCA -->
                             <div class="footer-brand">
-                                <div class="footer-logo">
+                                <div class="footer-logo" style="background: rgba(255, 255, 255, 0.95) !important; padding: 16px 20px !important; border-radius: 12px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;">
                                     <svg class="footer-logo-icon" viewBox="0 0 510.24 101.5" xmlns="http://www.w3.org/2000/svg">
                                         <defs>
                                             <style>
@@ -510,7 +517,7 @@ class EditalizaFooterRefatorado {
                                         </a>
                                         <a href="#" class="social-link" title="WhatsApp" aria-label="Contato via WhatsApp">
                                             <svg fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
+                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488"/>
                                             </svg>
                                         </a>
                                     </div>
@@ -554,7 +561,7 @@ class EditalizaFooterRefatorado {
                 </div>
                 
                 <!-- FAIXA INFERIOR - DIREITOS AUTORAIS -->
-                <div class="footer-copyright-section">
+                <div class="footer-copyright-section" style="background: linear-gradient(90deg, #0528f2 0%, #041d8a 100%) !important; border-top: 1px solid rgba(255, 255, 255, 0.1) !important;">
                     <div class="footer-container">
                         <div class="footer-copyright-container">
                             <div class="footer-copyright-content">
@@ -638,6 +645,9 @@ window.EditalizaFooterRefatorado = EditalizaFooterRefatorado;
 
 // Função de inicialização
 function initFooterRefatorado() {
+    console.log('🚨🚨🚨 INIT FOOTER REFATORADO CHAMADO! 🚨🚨🚨');
+    console.log('🚨🚨🚨 Timestamp:', new Date().toISOString());
+    console.log('🚀 [FOOTER REFATORADO] Iniciando...');
     
     // Verificar se já existe
     if (document.querySelector('.editaliza-footer-refatorado')) {
@@ -646,7 +656,9 @@ function initFooterRefatorado() {
     }
     
     try {
+        console.log('🚨🚨🚨 CRIANDO INSTÂNCIA DO FOOTER! 🚨🚨🚨');
         window.footerManagerRefatorado = new EditalizaFooterRefatorado();
+        console.log('🚨🚨🚨 INSTÂNCIA CRIADA, CHAMANDO INIT! 🚨🚨🚨');
         window.footerManagerRefatorado.init();
     } catch (error) {
         console.error('❌ [FOOTER REFATORADO] Erro:', error);
@@ -654,9 +666,14 @@ function initFooterRefatorado() {
 }
 
 // Auto-inicialização
+console.log('🚨🚨🚨 AUTO-INICIALIZAÇÃO DO FOOTER! 🚨🚨🚨');
+console.log('🚨🚨🚨 Document readyState:', document.readyState);
+
 if (document.readyState === 'loading') {
+    console.log('🚨🚨🚨 DOM ainda carregando, aguardando DOMContentLoaded...');
     document.addEventListener('DOMContentLoaded', initFooterRefatorado);
 } else {
+    console.log('🚨🚨🚨 DOM já carregado, iniciando imediatamente...');
     initFooterRefatorado();
 }
 
