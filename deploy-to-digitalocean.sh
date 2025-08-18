@@ -39,7 +39,7 @@ fi
 
 # 5. Verificar variáveis críticas no .env.prod
 echo -e "${YELLOW}4. Verificando configurações...${NC}"
-if grep -q "seu_jwt_secret_aqui" .env.prod; then
+if grep -q "GERAR_STRING_ALEATORIA\|SEU_\|SUA_\|SENHA_DE_APP_DO_GMAIL" .env.prod; then
     echo -e "${RED}❌ .env.prod contém valores de exemplo!${NC}"
     echo "Por favor, edite .env.prod com credenciais reais."
     echo "Execute: nano .env.prod"

@@ -148,12 +148,29 @@ SESSION_SECRET=<mínimo 32 caracteres aleatórios>
 - [Express Security Best Practices](https://expressjs.com/en/advanced/best-practice-security.html)
 - [JWT Best Practices](https://tools.ietf.org/html/rfc8725)
 
+## 🚨 INCIDENTES DE SEGURANÇA RESOLVIDOS
+
+### 18/08/2025 - Falsos Positivos GitGuardian
+- **Problema:** Script `fix_production.sh` continha valores de exemplo que pareciam credenciais reais
+- **Detecção:** GitGuardian detectou como "Generic High Entropy Secret" e "SMTP credentials"
+- **Solução:** 
+  - Arquivo removido do repositório
+  - Padrões de exemplo atualizados para usar placeholders mais claros
+  - `.env.prod.example` atualizado com valores claramente falsos
+- **Status:** ✅ Resolvido - Eram apenas exemplos, não credenciais reais
+
+### 15/08/2025 - Exposição de Credenciais
+- **Problema:** Arquivo `.env` com credenciais reais foi commitado acidentalmente
+- **Solução:** Credenciais revogadas e regeneradas
+- **Status:** ✅ Resolvido
+
 ## 🤝 Programa de Bug Bounty
 
 Atualmente não temos um programa formal de bug bounty, mas agradecemos todos os pesquisadores de segurança que reportam vulnerabilidades responsavelmente.
 
 ### Hall of Fame
 *Lista de pesquisadores que ajudaram a melhorar nossa segurança:*
+- GitGuardian (Detecção automática de secrets)
 - (Seu nome pode estar aqui!)
 
 ## 📞 Contato de Emergência
