@@ -195,6 +195,27 @@ const app = {
         }
     },
 
+    // Check if user is authenticated
+    isAuthenticated() {
+        const token = localStorage.getItem(this.config.tokenKey);
+        if (!token) return false;
+        
+        try {
+            // Decode JWT payload to check expiry
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const expiryTime = payload.exp * 1000; // convert to ms
+            
+            if (Date.now() > expiryTime) {
+                return false;
+            }
+            
+            return true;
+        } catch (error) {
+            // Invalid token
+            return false;
+        }
+    },
+
     logout() {
         // Limpar todos os dados sensíveis
         localStorage.removeItem(this.config.tokenKey);
