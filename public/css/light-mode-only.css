@@ -1,70 +1,153 @@
-/* 
- * EDITALIZA - LIGHT MODE ONLY CSS
- * This file enforces light mode across the platform
- */
+/* ================================================
+   EDITALIZA - FORÇAR LIGHT MODE APENAS (FORÇA BRUTA)
+   ================================================ */
 
-/* Force light mode variables */
-:root {
-    --bg: #F7FAFC !important;
-    --surface-1: #FFFFFF !important;
-    --surface-2: #F2F4F7 !important;
-    --surface-3: #EDEFF3 !important;
-    --border: #E5E7EB !important;
-    
-    --text: #111827 !important;
-    --text-muted: #4B5563 !important;
-    --text-disabled: #9CA3AF !important;
-    
-    --primary: #0528f2 !important;
-    --primary-600: #0422c8 !important;
-    --primary-400: #60A5FA !important;
-    --on-primary: #FFFFFF !important;
-    
-    --secondary: #374151 !important;
-    --secondary-hover: #4B5563 !important;
-    --on-secondary: #E5E7EB !important;
-}
-
-/* Force light mode body */
-body {
+/* REMOVER COMPLETAMENTE QUALQUER DATA-THEME */
+html,
+body,
+html[data-theme],
+body[data-theme],
+html[data-theme="dark"],
+body[data-theme="dark"],
+html[data-theme="light"],
+body[data-theme="light"],
+[data-theme],
+[data-theme="dark"],
+[data-theme="light"] {
     background: #F7FAFC !important;
     color: #111827 !important;
 }
 
-/* Disable any dark mode selectors */
-[data-theme="dark"] {
-    display: none !important;
-}
-
-/* Hide any dark mode toggles */
+/* REMOVER TODOS OS TOGGLES DE TEMA */
 .theme-toggle,
-.dark-mode-toggle,
-[data-theme-toggle] {
+.theme-toggle-nav,
+.theme-switch,
+.fab-theme,
+.floating-theme,
+button[onclick*="toggleTheme"],
+button[onclick*="theme"],
+[data-theme-toggle],
+.btn-theme,
+.theme-btn,
+.sun-icon,
+.moon-icon,
+.theme-icon {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
-/* Ensure all text is readable */
-* {
-    color: inherit !important;
+/* SESSÕES DE ESTUDO - TÍTULOS SEMPRE PRETOS */
+.study-session-title,
+.session-title,
+.study-card h3,
+.study-card .text-xl,
+.session-card h3,
+.session-card .text-xl,
+.study-card .font-bold,
+.session-card .font-bold,
+.text-gray-800 {
+    color: #000000 !important;
+    font-weight: 700 !important;
 }
 
-/* Force light backgrounds on all major elements */
-.card, .panel, .box, .content-card, .study-card {
-    background: white !important;
-    color: #111827 !important;
+/* BOTÕES DE SESSÃO - TEXTO SEMPRE BRANCO */
+.btn-study-start,
+.btn-study-reinforce,
+.btn-study-postpone,
+.btn-replanejar,
+.btn-ver-detalhes,
+button[onclick*="iniciarEstudo"],
+button[onclick*="reforcar"],
+button[onclick*="adiar"],
+button[onclick*="replanejar"],
+button[onclick*="verDetalhes"],
+.btn-primary {
+    color: #FFFFFF !important;
+    background-color: #0528f2 !important;
+    font-weight: 600 !important;
+}
+
+/* BOTÕES DE SESSÃO ATRASADA - TEXTO BRANCO */
+.btn-replanejar-agora,
+.btn-ver-detalhes-atraso,
+.btn-danger {
+    color: #FFFFFF !important;
+    background-color: #EF4444 !important;
+    font-weight: 600 !important;
+}
+
+/* BOTÕES SECUNDÁRIOS - TEXTO BRANCO */
+.btn-secondary {
+    color: #FFFFFF !important;
+    background-color: #334155 !important;
+    font-weight: 600 !important;
+}
+
+/* RODAPÉ - FUNDO BRANCO DO CARD DO LOGO */
+.footer-logo,
+.editaliza-footer-refatorado .footer-logo,
+body .editaliza-footer-refatorado .footer-logo,
+html body .editaliza-footer-refatorado .footer-logo {
+    background: #FFFFFF !important;
+    backdrop-filter: none !important;
     border: 1px solid #E5E7EB !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
 }
 
-/* Ensure navigation is light */
-nav, .navbar, .navigation, header {
-    background: white !important;
-    color: #111827 !important;
-    border-bottom: 1px solid #E5E7EB !important;
+/* RODAPÉ - TÍTULOS BRANCOS */
+.footer-nav-title,
+.editaliza-footer-refatorado .footer-nav-title,
+body .editaliza-footer-refatorado .footer-nav-title,
+html body .editaliza-footer-refatorado .footer-nav-title {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
 }
 
-/* Force footer to be light */
-footer {
-    background: #f8fafc !important;
-    color: #6b7280 !important;
-    border-top: 1px solid #e5e7eb !important;
+/* RODAPÉ - LINKS MANTIDOS COMO ESTÃO */
+.footer-nav-link,
+.editaliza-footer-refatorado .footer-nav-link,
+body .editaliza-footer-refatorado .footer-nav-link,
+html body .editaliza-footer-refatorado .footer-nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    background: transparent !important;
+    border: none !important;
+    text-decoration: none !important;
+}
+
+/* GARANTIR CORES PADRÃO */
+.text-white {
+    color: #FFFFFF !important;
+}
+
+.text-black {
+    color: #000000 !important;
+}
+
+.bg-white {
+    background-color: #FFFFFF !important;
+}
+
+.bg-black {
+    background-color: #000000 !important;
+}
+
+/* FORÇAR LIGHT MODE EM ELEMENTOS ESPECÍFICOS */
+.modal,
+.card,
+.panel,
+.box,
+.navbar,
+.nav,
+header,
+main,
+section,
+article,
+aside {
+    background: var(--surface-1, #FFFFFF) !important;
+    color: var(--text, #111827) !important;
 }

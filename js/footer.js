@@ -17,8 +17,8 @@ class EditalizaFooterRefatorado {
         // Tokens de design centralizados
         this.designTokens = {
             colors: {
-                gradientPrimary: 'linear-gradient(135deg, #041d8a 0%, #ffffff 100%)',
-                gradientSecondary: 'linear-gradient(90deg, #0a1e4a 0%, #1a2332 100%)',
+                gradientPrimary: 'linear-gradient(135deg, #0528f2 0%, #0d0d0d 100%)',
+                gradientSecondary: 'linear-gradient(90deg, #0528f2 0%, #041d8a 100%)',
                 textPrimary: '#ffffff',
                 textSecondary: 'rgba(255, 255, 255, 0.85)',
                 textMuted: 'rgba(255, 255, 255, 0.65)',
@@ -170,14 +170,13 @@ class EditalizaFooterRefatorado {
                 display: block !important;
                 visibility: visible !important;
                 opacity: 1 !important;
-                background: linear-gradient(135deg, #041d8a 0%, #ffffff 100%) !important;
+                background: linear-gradient(135deg, #0528f2 0%, #0d0d0d 100%) !important;
                 min-height: 200px !important;
-                border: 3px solid red !important;
             }
             
             /* FAIXA PRINCIPAL - Gradiente full-bleed */
             .footer-main-section {
-                background: ${colors.gradientPrimary} !important;
+                background: linear-gradient(135deg, #0528f2 0%, #041d8a 100%) !important;
                 width: 100% !important;
                 position: relative !important;
                 overflow: hidden !important;
@@ -185,7 +184,6 @@ class EditalizaFooterRefatorado {
                 visibility: visible !important;
                 opacity: 1 !important;
                 min-height: 150px !important;
-                border: 2px solid blue !important;
             }
             
             /* FAIXA INFERIOR - Direitos autorais full-bleed */
@@ -233,12 +231,13 @@ class EditalizaFooterRefatorado {
             .footer-logo {
                 display: inline-flex;
                 align-items: center;
-                padding: 12px 16px;
-                background: ${effects.logoBackground};
-                backdrop-filter: ${effects.logoBackdrop};
-                border-radius: ${effects.borderRadius};
+                padding: 16px 20px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 12px;
                 width: fit-content;
                 margin-bottom: ${spacing.gapSmall};
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
             }
             
             .footer-logo-icon {
@@ -462,13 +461,13 @@ class EditalizaFooterRefatorado {
         const footerHTML = `
             <footer class="editaliza-footer-refatorado" role="contentinfo" aria-label="Rodapé do site">
                 <!-- FAIXA PRINCIPAL -->
-                <div class="footer-main-section">
+                <div class="footer-main-section" style="background: linear-gradient(135deg, #0528f2 0%, #041d8a 100%) !important;">
                     <div class="footer-container">
                         <div class="footer-main-container">
                             <div class="footer-main-grid">
                             <!-- SEÇÃO DA MARCA -->
                             <div class="footer-brand">
-                                <div class="footer-logo">
+                                <div class="footer-logo" style="background: rgba(255, 255, 255, 0.95) !important; padding: 16px 20px !important; border-radius: 12px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;">
                                     <svg class="footer-logo-icon" viewBox="0 0 510.24 101.5" xmlns="http://www.w3.org/2000/svg">
                                         <defs>
                                             <style>
@@ -562,7 +561,7 @@ class EditalizaFooterRefatorado {
                 </div>
                 
                 <!-- FAIXA INFERIOR - DIREITOS AUTORAIS -->
-                <div class="footer-copyright-section">
+                <div class="footer-copyright-section" style="background: linear-gradient(90deg, #0528f2 0%, #041d8a 100%) !important; border-top: 1px solid rgba(255, 255, 255, 0.1) !important;">
                     <div class="footer-container">
                         <div class="footer-copyright-container">
                             <div class="footer-copyright-content">
