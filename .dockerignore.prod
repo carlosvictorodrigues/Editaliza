@@ -1,0 +1,187 @@
+# =========================================
+# DOCKER IGNORE - PRODUÇÃO OTIMIZADA
+# =========================================
+
+# === DEPENDENCIES ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === ENVIRONMENT FILES ===
+.env
+.env.*
+!.env.example
+!.env.prod.example
+
+# === GIT ===
+.git/
+.gitignore
+.gitattributes
+
+# === DEVELOPMENT FILES ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === LOGS ===
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === TEMPORARY FILES ===
+tmp/
+temp/
+.tmp/
+.temp/
+
+# === OS GENERATED FILES ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# === TEST FILES E COBERTURA ===
+test/
+tests/
+*.test.js
+*.spec.js
+__tests__/
+coverage/
+.nyc_output/
+jest.config.js
+jest-setup.js
+
+# === DEVELOPMENT TOOLS ===
+.eslintrc*
+.prettierrc*
+babel.config.js
+nodemon.json
+eslint.config.js
+
+# === HUSKY E GIT HOOKS ===
+.husky/
+.pre-commit-config.yaml
+
+# === DATABASE DE DESENVOLVIMENTO ===
+*.sqlite
+*.sqlite3
+*.db
+db_backup_*
+sessions.db
+
+# === UPLOADS LOCAIS ===
+uploads/*
+!uploads/.gitkeep
+
+# === CACHE ===
+.cache/
+.parcel-cache/
+
+# === DOCUMENTAÇÃO E RELATÓRIOS ===
+docs/
+*.md
+!README.md
+RELATORIO*.md
+GUIA*.md
+STATUS*.md
+CORRECAO*.md
+IMPLEMENTATION*.md
+DESIGN*.md
+AUDIT*.md
+
+# === BUILD ARTIFACTS ===
+dist/
+build/
+.next/
+out/
+
+# === RUNTIME ===
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# === BACKUP FILES ===
+*.bak
+*.backup
+*_backup.*
+backup_*/
+.git_backup/
+*_backup_*
+
+# === DEBUG/TEST ESPECÍFICOS ===
+debug-*.html
+test-*.html
+teste-*.html
+temp_*.js
+check-*.js
+create-*.js
+validate_*.js
+simple_test.js
+performance_*.js
+*-test.html
+nul
+
+# === DOCKER ===
+Dockerfile
+Dockerfile.*
+docker-compose*.yml
+.dockerignore*
+k8s-*.yaml
+
+# === CI/CD ===
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# === SCRIPTS DE DESENVOLVIMENTO ===
+*.bat
+*.sh
+dev-start.*
+start-server.*
+
+# === ARQUIVOS ESPECÍFICOS DO PROJETO ===
+agents/
+components/
+secrets/
+ssl/
+cost_benefit_analysis.js
+weighted-distribution-solution.js
+schedule-validation-solution.js
+security-*.js
+server-*.js
+add-role-column.js
+
+# === PATCHES E ANÁLISES ===
+*.patch
+gemini.md
+relatorio*.md
+
+# === MISC ===
+.editorconfig
+.nvmrc
+.node-version
+LOGOTIPO.txt
+*.svg
+logo.pdf
+
+# === MANTER APENAS ESSENCIAL PARA PRODUÇÃO ===
+# Estrutura mantida:
+# - server.js
+# - database.js  
+# - package.json
+# - src/
+# - public/
+# - css/
+# - js/
+# - images/ (se existir)

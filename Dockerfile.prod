@@ -1,0 +1,191 @@
+# =========================================
+# EDITALIZA - DOCKERFILE PRODUÇÃO OTIMIZADO
+# DigitalOcean & Better-SQLite3 Compatible
+# =========================================
+
+# Argumentos de build
+ARG NODE_VERSION=20-bullseye
+ARG APP_USER=editaliza
+ARG APP_UID=1001
+ARG APP_GID=1001
+ARG DOCKER_BUILD=false
+
+# =========================================
+# STAGE 1: BASE SYSTEM
+# =========================================
+FROM node:${NODE_VERSION} AS base
+
+# Labels para metadados
+LABEL stage="base"
+LABEL maintainer="Editaliza Team"
+LABEL description="Base system with build tools"
+
+# Instalar dependências do sistema necessárias para better-sqlite3
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    make \
+    g++ \
+    gcc \
+    libc6-dev \
+    sqlite3 \
+    libsqlite3-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# =========================================
+# STAGE 2: DEPENDENCIES
+# =========================================
+FROM base AS deps
+
+# Argumentos no deps
+ARG APP_USER
+ARG APP_UID  
+ARG APP_GID
+
+WORKDIR /app
+
+# Criar usuário não-root
+RUN groupadd -g ${APP_GID} ${APP_USER} && \
+    useradd -r -u ${APP_UID} -g ${APP_USER} ${APP_USER}
+
+# Copiar arquivos de dependências
+COPY package*.json ./
+
+# Configurar variáveis de ambiente para build
+ENV NODE_ENV=production
+ENV DOCKER_BUILD=true
+ENV HUSKY=0
+ENV CI=true
+
+# Instalar dependências de produção com rebuild para better-sqlite3
+RUN npm ci --omit=dev --ignore-scripts && \
+    npm rebuild better-sqlite3 --build-from-source && \
+    npm cache clean --force
+
+# Verificar instalação do better-sqlite3
+RUN node -e "try { require('better-sqlite3'); console.log('✅ better-sqlite3 OK'); } catch(e) { console.error('❌ better-sqlite3 ERROR:', e.message); process.exit(1); }"
+
+# =========================================  
+# STAGE 3: BUILD
+# =========================================
+FROM base AS build
+
+# Argumentos no build
+ARG APP_USER
+ARG APP_UID
+ARG APP_GID
+
+WORKDIR /app
+
+# Criar usuário não-root
+RUN groupadd -g ${APP_GID} ${APP_USER} && \
+    useradd -r -u ${APP_UID} -g ${APP_USER} ${APP_USER}
+
+# Copiar dependências do stage anterior
+COPY --from=deps --chown=${APP_USER}:${APP_USER} /app/node_modules ./node_modules
+COPY --from=deps --chown=${APP_USER}:${APP_USER} /app/package*.json ./
+
+# Copiar código fonte
+COPY --chown=${APP_USER}:${APP_USER} . .
+
+# Configurar variáveis de ambiente
+ENV NODE_ENV=production
+ENV DOCKER_BUILD=true
+
+# Criar diretórios necessários
+RUN mkdir -p uploads logs data && \
+    chown -R ${APP_USER}:${APP_USER} uploads logs data && \
+    chmod 755 uploads logs data
+
+# Executar verificações pós-build
+RUN npm run env:check
+
+# =========================================
+# STAGE 4: RUNNER (FINAL)
+# =========================================
+FROM node:${NODE_VERSION}-slim AS runner
+
+# Labels completos para produção
+LABEL org.opencontainers.image.title="Editaliza"
+LABEL org.opencontainers.image.description="Sistema inteligente de cronograma de estudos - Produção"
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.vendor="Editaliza Team"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.source="https://github.com/editaliza/editaliza"
+
+# Argumentos no runner
+ARG APP_USER
+ARG APP_UID
+ARG APP_GID
+
+# Instalar apenas dependências mínimas de runtime
+RUN apt-get update && apt-get install -y \
+    sqlite3 \
+    dumb-init \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Criar usuário não-root
+RUN groupadd -g ${APP_GID} ${APP_USER} && \
+    useradd -r -u ${APP_UID} -g ${APP_USER} ${APP_USER}
+
+WORKDIR /app
+
+# Copiar aplicação completa do build stage
+COPY --from=build --chown=${APP_USER}:${APP_USER} /app ./
+
+# Criar diretórios de dados se não existirem
+RUN mkdir -p uploads logs data && \
+    chown -R ${APP_USER}:${APP_USER} uploads logs data && \
+    chmod 755 uploads logs data
+
+# Configurar variáveis de ambiente para produção
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOST=0.0.0.0
+ENV DOCKER_BUILD=true
+ENV HUSKY=0
+
+# Expor porta
+EXPOSE ${PORT}
+
+# Volumes para dados persistentes
+VOLUME ["/app/uploads", "/app/logs", "/app/data"]
+
+# Healthcheck otimizado
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:${PORT}/health', (res) => { \
+        process.exit(res.statusCode === 200 ? 0 : 1) \
+    }).on('error', () => process.exit(1))"
+
+# Mudar para usuário não-root
+USER ${APP_USER}
+
+# Verificação final
+RUN node -e "console.log('🚀 Production build ready'); console.log('Node version:', process.version); console.log('Platform:', process.platform); console.log('Arch:', process.arch);"
+
+# Ponto de entrada com dumb-init para signal handling
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
+
+# Comando padrão
+CMD ["npm", "run", "start:prod"]
+
+# =========================================
+# INSTRUÇÕES DE BUILD E DEPLOY
+# =========================================
+# Build para produção:
+# docker build -f Dockerfile.prod -t editaliza:prod .
+#
+# Build com argumentos:
+# docker build -f Dockerfile.prod --build-arg NODE_VERSION=20-bullseye -t editaliza:prod .
+#
+# Run localmente:
+# docker run -d -p 3000:3000 --name editaliza-prod -e NODE_ENV=production editaliza:prod
+#
+# Deploy na DigitalOcean:
+# 1. Build: npm run docker:build:prod
+# 2. Tag: docker tag editaliza:prod registry.digitalocean.com/your-registry/editaliza:latest
+# 3. Push: docker push registry.digitalocean.com/your-registry/editaliza:latest
+# =========================================
