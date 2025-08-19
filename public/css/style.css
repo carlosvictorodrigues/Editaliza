@@ -107,6 +107,38 @@ button {
     cursor: pointer !important;
 }
 
+/* CRITICAL: Force white text on all colored buttons for maximum visibility */
+button[class*="bg-gradient"],
+button[class*="bg-blue"],
+button[class*="bg-red"],
+button[class*="bg-orange"],
+button[class*="bg-green"],
+button[class*="bg-purple"],
+button[class*="bg-indigo"],
+button[class*="bg-yellow"],
+button[class*="from-"],
+.btn-study-start,
+.btn-study-reinforce,
+.btn-study-postpone,
+.btn-replanejar,
+.btn-ver-detalhes {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+}
+
+/* Ensure all session card buttons have white text */
+.study-card button[onclick*="iniciarEstudo"],
+.study-card button[onclick*="reforcar"],
+.study-card button[onclick*="adiar"],
+.study-card button[onclick*="replanejar"],
+.study-card button[onclick*="verDetalhes"],
+.study-card button[onclick*="openStudySession"],
+.study-card button[onclick*="reinforceSession"],
+.study-card button[onclick*="openPostponeModal"] {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+}
+
 /* Primary buttons - White text on blue background */
 button.btn-primary,
 .btn-primary {
@@ -331,18 +363,31 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
-/* Navigation with Theme Support - Usando Design Tokens Padronizados */
+/* Navigation with Theme Support - Fixed contrast issues */
 .nav-link-active {
-    background-color: var(--primary-surface, rgba(37, 99, 235, 0.1)) !important;
-    color: var(--primary) !important;
+    background: linear-gradient(135deg, #0528f2, #3b82f6) !important;
+    color: #FFFFFF !important;
     font-weight: 700 !important;
+    border: none !important;
+    border-radius: 0.5rem !important;
 }
 .nav-link-default {
-    color: var(--text-muted) !important;
+    color: #64748B !important;
+    background: transparent !important;
 }
 .nav-link-default:hover {
-    background-color: var(--surface-2) !important;
-    color: var(--text) !important;
+    background-color: #F1F5F9 !important;
+    color: #1E293B !important;
+    border-radius: 0.5rem !important;
+}
+
+/* Fix dropdown navigation items */
+.dropdown-menu a {
+    color: #374151 !important;
+}
+.dropdown-menu a:hover {
+    background-color: #F3F4F6 !important;
+    color: #0528f2 !important;
 }
 
 
@@ -799,7 +844,11 @@ a:focus {
 }
 
 
-/* Logo SVG - Keep original colors */
+/* Logo SVG - Keep original colors and ensure transparency */
+#logo-header {
+    background: transparent !important;
+    backdrop-filter: none !important;
+}
 #logo-header .cls-1 {
     fill: #0528f2 !important; /* Blue parts */
 }
@@ -808,6 +857,19 @@ a:focus {
 }
 #logo-header .cls-3 {
     fill: #1ad937 !important; /* Green parts */
+}
+
+/* Remove any background from logo containers */
+.footer-logo,
+.editaliza-footer-refatorado .footer-logo,
+body .editaliza-footer-refatorado .footer-logo,
+html body .editaliza-footer-refatorado .footer-logo {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
 }
 
 
@@ -954,16 +1016,33 @@ a:focus {
     margin-left: auto;
 }
 
-/* Correção para TODOS os botões na navegação */
+/* Correção para TODOS os botões na navegação - melhor contraste */
 nav button,
 .navbar button,
 .navigation button,
 header button {
-    background: var(--surface-1) !important;
-    color: var(--text) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: var(--radius) !important;
+    background: #F8FAFC !important;
+    color: #1E293B !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 0.5rem !important;
     transition: all 0.3s ease !important;
+}
+
+/* Fix specific navigation button text colors */
+nav button:not(.btn-primary):not(.nav-link-active),
+.navbar button:not(.btn-primary):not(.nav-link-active),
+.navigation button:not(.btn-primary):not(.nav-link-active),
+header button:not(.btn-primary):not(.nav-link-active) {
+    color: #475569 !important;
+    background: #F8FAFC !important;
+}
+
+/* Selected navigation button contrast fix */
+.nav-link-active {
+    background: linear-gradient(135deg, #0528f2, #3b82f6) !important;
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+    border: none !important;
 }
 
 nav button:hover,
@@ -1018,6 +1097,52 @@ header .btn-primary:hover {
 /* Text readability helpers */
 .text-adaptive {
     color: var(--text-primary);
+}
+
+/* ===============================================
+ * FIX: FORCE WHITE TEXT FOR SPECIFIC BUTTONS
+ * =============================================== */
+
+/* Fix for the three specific buttons that need white text */
+/* "Iniciar Estudo" button (main study button) */
+button[onclick*="openStudySession"] .button-text,
+button[onclick*="openStudySession"] span {
+    color: #FFFFFF !important;
+}
+
+/* "Reforçar" button (with 💪 emoji) */
+button[onclick*="reinforceSession"] span {
+    color: #FFFFFF !important;
+}
+
+/* "Adiar" button (with 📅 emoji) */
+button[onclick*="openPostponeModal"] span {
+    color: #FFFFFF !important;
+}
+
+/* Additional selectors for maximum specificity */
+.study-card button[onclick*="reinforceSession"],
+.study-card button[onclick*="openPostponeModal"] {
+    color: #FFFFFF !important;
+}
+
+.study-card button[onclick*="reinforceSession"] *,
+.study-card button[onclick*="openPostponeModal"] * {
+    color: #FFFFFF !important;
+}
+
+/* Ensure gradient buttons maintain white text */
+.bg-gradient-to-r.from-orange-500 span,
+.bg-gradient-to-r.from-blue-500 span,
+.bg-gradient-to-r.from-blue-600 span {
+    color: #FFFFFF !important;
+}
+
+/* Timer-aware button text fix */
+.timer-aware-button .button-text,
+.timer-aware-button .button-icon,
+.timer-aware-button span {
+    color: #FFFFFF !important;
 }
 
 .text-adaptive-secondary {
@@ -1153,7 +1278,7 @@ a:hover {
     font-weight: 700 !important;
 }
 
-/* BOTÕES DE SESSÃO - TEXTO BRANCO */
+/* BOTÕES DE SESSÃO - TEXTO BRANCO COM MÁXIMA ESPECIFICIDADE */
 .btn-study-start,
 .btn-study-reinforce,
 .btn-study-postpone,
@@ -1163,9 +1288,32 @@ button[onclick*="iniciarEstudo"],
 button[onclick*="reforcar"],
 button[onclick*="adiar"],
 button[onclick*="replanejar"],
-button[onclick*="verDetalhes"] {
+button[onclick*="verDetalhes"],
+button[onclick*="openStudySession"],
+button[onclick*="reinforceSession"],
+button[onclick*="openPostponeModal"] {
     color: #FFFFFF !important;
-    background-color: var(--editaliza-blue) !important;
+    font-weight: 600 !important;
+}
+
+/* Specific overdue session buttons */
+#showReplanDetailsButton,
+#replanButton,
+button[id*="replan"],
+button[id*="details"] {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
+}
+
+/* All gradient buttons need white text */
+button[class*="from-blue"],
+button[class*="from-red"],
+button[class*="from-orange"],
+button[class*="from-yellow"],
+button[class*="from-purple"],
+button[class*="from-green"],
+button[class*="from-indigo"] {
+    color: #FFFFFF !important;
     font-weight: 600 !important;
 }
 
@@ -1192,14 +1340,28 @@ html body .editaliza-footer-refatorado .footer-logo {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
 }
 
-/* RODAPÉ - TÍTULOS BRANCOS */
+/* RODAPÉ - TÍTULOS BRANCOS COM MÁXIMA ESPECIFICIDADE */
 .footer-nav-title,
 .editaliza-footer-refatorado .footer-nav-title,
 body .editaliza-footer-refatorado .footer-nav-title,
-html body .editaliza-footer-refatorado .footer-nav-title {
+html body .editaliza-footer-refatorado .footer-nav-title,
+footer .footer-nav-title,
+footer .editaliza-footer-refatorado .footer-nav-title {
     color: #FFFFFF !important;
     font-weight: 600 !important;
     text-transform: uppercase !important;
+    background: transparent !important;
+}
+
+/* Ensure footer section titles (plataforma, recursos, suporte) are white */
+h3.footer-nav-title,
+.footer-section h3,
+.footer-nav-section h3,
+footer h3 {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    background: transparent !important;
 }
 
 /* RODAPÉ - LINKS MANTIDOS COMO ESTÃO */

@@ -467,7 +467,7 @@ class EditalizaFooterRefatorado {
                             <div class="footer-main-grid">
                             <!-- SEÇÃO DA MARCA -->
                             <div class="footer-brand">
-                                <div class="footer-logo" style="background: rgba(255, 255, 255, 0.95) !important; padding: 16px 20px !important; border-radius: 12px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;">
+                                <div class="footer-logo" style="background: #FFFFFF !important; padding: 16px 20px !important; border-radius: 12px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;">
                                     <svg class="footer-logo-icon" viewBox="0 0 510.24 101.5" xmlns="http://www.w3.org/2000/svg">
                                         <defs>
                                             <style>

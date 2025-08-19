@@ -132,19 +132,19 @@ html body .editaliza-footer-refatorado .footer-brand {
     padding: 0 !important;
 }
 
-/* LOGO - LIGHT THEME */
+/* LOGO - LIGHT THEME WITH TRANSPARENT BACKGROUND */
 body .editaliza-footer-refatorado .footer-logo,
 html body .editaliza-footer-refatorado .footer-logo {
     display: inline-flex !important;
     align-items: center !important;
     padding: 8px 12px !important;
-    background: rgba(255, 255, 255, 0.12) !important;
-    backdrop-filter: blur(16px) !important;
+    background: transparent !important;
+    backdrop-filter: blur(10px) !important;
     border-radius: 8px !important;
     width: fit-content !important;
     margin: 0 0 6px 0 !important;
-    border: none !important;
-    box-shadow: none !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
 }
 
 /* DARK MODE - Logo styling */
@@ -208,7 +208,7 @@ html body .editaliza-footer-refatorado .social-link {
     height: 36px !important;
     background: rgba(255, 255, 255, 0.1) !important;
     border-radius: 6px !important;
-    color: var(--text-muted) !important;
+    color: #FFFFFF !important;
     text-decoration: none !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     backdrop-filter: blur(8px) !important;
@@ -238,6 +238,8 @@ html body .editaliza-footer-refatorado .social-link svg {
     display: block !important;
     margin: 0 !important;
     padding: 0 !important;
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
 }
 
 /* SEÇÕES DE NAVEGAÇÃO - LIGHT THEME */
@@ -253,13 +255,14 @@ body .editaliza-footer-refatorado .footer-nav-title,
 html body .editaliza-footer-refatorado .footer-nav-title {
     font-size: 0.875rem !important;
     font-weight: 600 !important;
-    color: var(--text-muted) !important;
+    color: #FFFFFF !important;
     margin: 0 0 12px 0 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.025em !important;
     position: relative !important;
     display: block !important;
     text-align: left !important;
+    background: transparent !important;
 }
 
 body .editaliza-footer-refatorado .footer-nav-title::after,
@@ -275,11 +278,11 @@ html body .editaliza-footer-refatorado .footer-nav-title::after {
     display: block !important;
 }
 
-/* DARK MODE - Nav title accent - Sutil e discreto */
+/* DARK MODE - Nav title accent - Removed for light mode only */
 [data-theme="dark"] body .editaliza-footer-refatorado .footer-nav-title::after,
 [data-theme="dark"] html body .editaliza-footer-refatorado .footer-nav-title::after {
-    background: #6B7280 !important; /* Cinza neutro discreto */
-    opacity: 0.6 !important;
+    background: #1AD937 !important; /* Keep green accent */
+    opacity: 0.8 !important;
 }
 
 body .editaliza-footer-refatorado .footer-nav-list,
@@ -294,10 +297,10 @@ html body .editaliza-footer-refatorado .footer-nav-list {
 
 body .editaliza-footer-refatorado .footer-nav-link,
 html body .editaliza-footer-refatorado .footer-nav-link {
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: rgba(255, 255, 255, 0.90) !important;
     text-decoration: none !important;
     font-size: 0.813rem !important;
-    font-weight: 400 !important;
+    font-weight: 500 !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     display: inline-block !important;
     margin: 0 !important;
@@ -313,6 +316,8 @@ html body .editaliza-footer-refatorado .footer-nav-link:hover,
 html body .editaliza-footer-refatorado .footer-nav-link:focus {
     color: #1AD937 !important;
     transform: translateX(4px) !important;
+    background: transparent !important;
+    text-shadow: 0 0 8px rgba(26, 217, 55, 0.3) !important;
 }
 
 /* DARK MODE - Nav links hover - Sutil */
