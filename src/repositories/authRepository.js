@@ -7,6 +7,7 @@
 
 const { dbGet, dbAll, dbRun } = require('../utils/database');
 const { securityLog } = require('../utils/security');
+const { getPasswordColumn } = require('../utils/dbCompat');
 
 /**
  * Find user by email
@@ -53,9 +54,10 @@ const findUserByResetToken = async (token) => {
  */
 const createUser = async (userData) => {
     const { email, passwordHash, name, currentDate } = userData;
+    const passwordColumn = getPasswordColumn();
     
     const result = await dbRun(
-        'INSERT INTO users (email, password_hash, name, created_at) VALUES (?,?,?,?)', 
+        `INSERT INTO users (email, ${passwordColumn}, name, created_at) VALUES (?,?,?,?)`, 
         [email, passwordHash, name || null, currentDate]
     );
     
@@ -101,8 +103,9 @@ const linkGoogleAccount = async (userId, googleId, avatar, name) => {
  * Update password
  */
 const updatePassword = async (userId, hashedPassword) => {
+    const passwordColumn = getPasswordColumn();
     await dbRun(
-        'UPDATE users SET password_hash = ? WHERE id = ?',
+        `UPDATE users SET ${passwordColumn} = ? WHERE id = ?`,
         [hashedPassword, userId]
     );
 };

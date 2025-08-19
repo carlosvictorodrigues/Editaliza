@@ -7,6 +7,7 @@
 
 const { dbGet, dbAll, dbRun } = require('../utils/database');
 const { securityLog } = require('../utils/security');
+const { getPasswordColumn } = require('../utils/dbCompat');
 
 /**
  * Get user profile with safe fields only
@@ -26,9 +27,10 @@ const getUserProfile = async (userId) => {
  * Get user with password (for authentication operations)
  */
 const getUserWithPassword = async (userId) => {
+    const passwordColumn = getPasswordColumn();
     return await dbGet(`
         SELECT 
-            id, email, name, password_hash, auth_provider, is_active
+            id, email, name, ${passwordColumn} as password_hash, auth_provider, is_active
         FROM users WHERE id = ?
     `, [userId]);
 };
@@ -64,8 +66,9 @@ const updateUserProfile = async (userId, profileData) => {
  * Update user password
  */
 const updatePassword = async (userId, hashedPassword) => {
+    const passwordColumn = getPasswordColumn();
     await dbRun(
-        'UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?',
+        `UPDATE users SET ${passwordColumn} = ?, updated_at = ? WHERE id = ?`,
         [hashedPassword, new Date().toISOString(), userId]
     );
 };
@@ -366,7 +369,7 @@ const searchUsers = async (query, limit, offset) => {
  */
 const listUsers = async (limit, offset, status = 'active') => {
     let whereClause = '';
-    let params = [limit, offset];
+    const params = [limit, offset];
     
     if (status === 'active') {
         whereClause = 'WHERE is_active = 1';
@@ -391,7 +394,7 @@ const listUsers = async (limit, offset, status = 'active') => {
  */
 const getUserCount = async (status = 'active') => {
     let whereClause = '';
-    let params = [];
+    const params = [];
     
     if (status === 'active') {
         whereClause = 'WHERE is_active = 1';

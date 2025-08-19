@@ -11,6 +11,7 @@ const crypto = require('crypto');
 const authRepository = require('../repositories/authRepository');
 const { sanitizeEmail, sanitizeInput } = require('../utils/sanitizer');
 const { securityLog, createSafeError, checkUserRateLimit } = require('../utils/security');
+const { getPasswordColumn } = require('../utils/dbCompat');
 
 /**
  * Register a new user
@@ -87,14 +88,15 @@ const login = async (credentials, req) => {
     }
     
     // Check if user has a password set
-    if (!user.password_hash) {
+    const passwordColumn = getPasswordColumn();
+    if (!user[passwordColumn]) {
         await authRepository.recordLoginAttempt(sanitizedEmail, false, req.ip, req.headers['user-agent']);
         securityLog('login_attempt_no_password', { email: sanitizedEmail, userId: user.id }, user.id, req);
         throw new Error('Conta não possui senha definida. Use o botão \'Esqueci minha senha\' para criar uma senha.');
     }
 
     // Verify password
-    if (!await bcrypt.compare(password, user.password_hash)) {
+    if (!await bcrypt.compare(password, user[passwordColumn])) {
         await authRepository.recordLoginAttempt(sanitizedEmail, false, req.ip, req.headers['user-agent']);
         securityLog('login_attempt_wrong_password', { email: sanitizedEmail, userId: user.id }, user.id, req);
         throw new Error('E-mail ou senha inválidos.');
