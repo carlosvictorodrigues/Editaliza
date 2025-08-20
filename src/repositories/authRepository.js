@@ -14,7 +14,7 @@ const { getPasswordColumn } = require('../utils/dbCompat');
  */
 const findUserByEmail = async (email) => {
     return await dbGet(
-        'SELECT * FROM users WHERE email = ?', 
+        'SELECT * FROM users WHERE email = $1', 
         [email]
     );
 };
@@ -24,7 +24,7 @@ const findUserByEmail = async (email) => {
  */
 const findUserById = async (userId) => {
     return await dbGet(
-        'SELECT * FROM users WHERE id = ?', 
+        'SELECT * FROM users WHERE id = $1', 
         [userId]
     );
 };
@@ -34,7 +34,7 @@ const findUserById = async (userId) => {
  */
 const findUserByGoogleId = async (googleId) => {
     return await dbGet(
-        'SELECT * FROM users WHERE google_id = ?', 
+        'SELECT * FROM users WHERE google_id = $1', 
         [googleId]
     );
 };
@@ -44,7 +44,7 @@ const findUserByGoogleId = async (googleId) => {
  */
 const findUserByResetToken = async (token) => {
     return await dbGet(
-        'SELECT * FROM users WHERE reset_token = ? AND reset_token_expires > ?', 
+        'SELECT * FROM users WHERE reset_token = $1 AND reset_token_expires > $2', 
         [token, Date.now()]
     );
 };
@@ -57,12 +57,14 @@ const createUser = async (userData) => {
     const passwordColumn = getPasswordColumn();
     
     const result = await dbRun(
-        `INSERT INTO users (email, ${passwordColumn}, name, created_at) VALUES (?,?,?,?)`, 
+        `INSERT INTO users (email, ${passwordColumn}, name, created_at) VALUES ($1,$2,$3,$4) RETURNING id`, 
         [email, passwordHash, name || null, currentDate]
     );
     
-    if (result.lastID) {
-        return await findUserById(result.lastID);
+    // Compatibilidade com diferentes implementações de database
+    const userId = result.lastID || result.lastInsertRowid || result.id;
+    if (userId) {
+        return await findUserById(userId);
     }
     
     throw new Error('Failed to create user');
@@ -76,12 +78,14 @@ const createGoogleUser = async (profileData) => {
     
     const result = await dbRun(
         `INSERT INTO users (email, name, google_id, auth_provider, google_avatar, created_at) 
-         VALUES (?, ?, ?, "google", ?, ?)`,
+         VALUES ($1, $2, $3, 'google', $4, $5) RETURNING id`,
         [email, name, googleId, avatar, currentDate]
     );
     
-    if (result.lastID) {
-        return await findUserById(result.lastID);
+    // Compatibilidade com diferentes implementações de database
+    const userId = result.lastID || result.lastInsertRowid || result.id;
+    if (userId) {
+        return await findUserById(userId);
     }
     
     throw new Error('Failed to create Google user');
@@ -92,7 +96,7 @@ const createGoogleUser = async (profileData) => {
  */
 const linkGoogleAccount = async (userId, googleId, avatar, name) => {
     await dbRun(
-        'UPDATE users SET google_id = ?, auth_provider = "google", google_avatar = ?, name = ? WHERE id = ?',
+        'UPDATE users SET google_id = $1, auth_provider = \'google\', google_avatar = $2, name = $3 WHERE id = $4',
         [googleId, avatar, name, userId]
     );
     
@@ -105,7 +109,7 @@ const linkGoogleAccount = async (userId, googleId, avatar, name) => {
 const updatePassword = async (userId, hashedPassword) => {
     const passwordColumn = getPasswordColumn();
     await dbRun(
-        `UPDATE users SET ${passwordColumn} = ? WHERE id = ?`,
+        `UPDATE users SET ${passwordColumn} = $1 WHERE id = $2`,
         [hashedPassword, userId]
     );
 };
@@ -115,7 +119,7 @@ const updatePassword = async (userId, hashedPassword) => {
  */
 const setResetToken = async (userId, token, expires) => {
     await dbRun(
-        'UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?',
+        'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE id = $3',
         [token, expires, userId]
     );
 };
@@ -125,7 +129,7 @@ const setResetToken = async (userId, token, expires) => {
  */
 const clearResetToken = async (userId) => {
     await dbRun(
-        'UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE id = ?',
+        'UPDATE users SET reset_token = NULL, reset_token_expires = NULL WHERE id = $1',
         [userId]
     );
 };
@@ -140,7 +144,7 @@ const getUserProfile = async (userId) => {
             state, city, birth_date, education, work_status, first_time, concursos_count,
             difficulties, area_interest, level_desired, timeline_goal, study_hours, motivation_text,
             google_id, auth_provider, google_avatar
-        FROM users WHERE id = ?
+        FROM users WHERE id = $1
     `, [userId]);
 };
 
@@ -150,11 +154,13 @@ const getUserProfile = async (userId) => {
 const updateUserProfile = async (userId, profileData) => {
     const fields = [];
     const values = [];
+    let paramCount = 1;
     
     // Build dynamic update query
     Object.entries(profileData).forEach(([key, value]) => {
-        fields.push(`${key} = ?`);
+        fields.push(`${key} = $${paramCount}`);
         values.push(value);
+        paramCount++;
     });
     
     if (fields.length === 0) {
@@ -164,7 +170,7 @@ const updateUserProfile = async (userId, profileData) => {
     values.push(userId);
     
     await dbRun(
-        `UPDATE users SET ${fields.join(', ')} WHERE id = ?`,
+        `UPDATE users SET ${fields.join(', ')} WHERE id = $${paramCount}`,
         values
     );
     
@@ -177,7 +183,7 @@ const updateUserProfile = async (userId, profileData) => {
 const recordLoginAttempt = async (email, success, ipAddress, userAgent) => {
     try {
         await dbRun(
-            'INSERT INTO login_attempts (email, success, ip_address, user_agent, attempt_time) VALUES (?, ?, ?, ?, ?)',
+            'INSERT INTO login_attempts (email, success, ip_address, user_agent, attempt_time) VALUES ($1, $2, $3, $4, $5)',
             [email, success ? 1 : 0, ipAddress, userAgent, new Date().toISOString()]
         );
     } catch (error) {
@@ -194,7 +200,7 @@ const getRecentFailedAttempts = async (email, windowMinutes = 15) => {
         const cutoffTime = new Date(Date.now() - (windowMinutes * 60 * 1000)).toISOString();
         
         const result = await dbGet(
-            'SELECT COUNT(*) as count FROM login_attempts WHERE email = ? AND success = 0 AND attempt_time > ?',
+            'SELECT COUNT(*) as count FROM login_attempts WHERE email = $1 AND success = 0 AND attempt_time > $2',
             [email, cutoffTime]
         );
         
@@ -208,7 +214,7 @@ const getRecentFailedAttempts = async (email, windowMinutes = 15) => {
 
 const findPlansByUserId = async (userId) => {
     return await dbAll(
-        'SELECT * FROM study_plans WHERE user_id = ?',
+        'SELECT * FROM study_plans WHERE user_id = $1',
         [userId]
     );
 };

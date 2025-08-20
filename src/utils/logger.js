@@ -1,209 +1,63 @@
-/**
- * @file src/utils/logger.js
- * @description Sistema de logs estruturados para produção
- * @version 1.0.0
- */
+// src/utils/logger.js
+const { createLogger, format, transports } = require('winston');
 
-const config = require('../config/environment');
-
-/**
- * Níveis de log
- */
-const LOG_LEVELS = {
-    error: 0,
-    warn: 1,
-    info: 2,
-    debug: 3
-};
-
-/**
- * Classe Logger estruturado
- */
-class Logger {
-    constructor() {
-        this.level = LOG_LEVELS[config.DEBUG.LOG_LEVEL] || LOG_LEVELS.info;
-        this.isProduction = config.IS_PRODUCTION;
+function safeStringify(obj, { maxDepth = 8, maxLen = 10000 } = {}) {
+  const seen = new WeakSet();
+  function recur(value, depth = 0) {
+    if (depth > maxDepth) return '[MaxDepth]';
+    if (value && typeof value === 'object') {
+      if (seen.has(value)) return '[Circular]';
+      seen.add(value);
+      if (Array.isArray(value)) return value.map(v => recur(v, depth + 1));
+      const out = {};
+      for (const k of Object.keys(value)) out[k] = recur(value[k], depth + 1);
+      return out;
     }
-
-    /**
-     * Formatar log para stdout/stderr
-     */
-    formatLog(level, message, meta = {}) {
-        const timestamp = new Date().toISOString();
-        
-        if (this.isProduction) {
-            // JSON estruturado para produção
-            return JSON.stringify({
-                timestamp,
-                level,
-                message,
-                ...meta,
-                pid: process.pid,
-                env: config.NODE_ENV
-            });
-        } else {
-            // Formato legível para desenvolvimento
-            const metaStr = Object.keys(meta).length > 0 ? ` | ${JSON.stringify(meta)}` : '';
-            return `[${timestamp}] ${level.toUpperCase()}: ${message}${metaStr}`;
-        }
+    if (typeof value === 'string' && value.length > maxLen) {
+      return value.slice(0, maxLen) + '…[truncated]';
     }
-
-    /**
-     * Verificar se deve logar
-     */
-    shouldLog(level) {
-        return LOG_LEVELS[level] <= this.level;
-    }
-
-    /**
-     * Log de erro
-     */
-    error(message, meta = {}) {
-        if (this.shouldLog('error')) {
-            console.error(this.formatLog('error', message, meta));
-        }
-    }
-
-    /**
-     * Log de warning
-     */
-    warn(message, meta = {}) {
-        if (this.shouldLog('warn')) {
-            console.warn(this.formatLog('warn', message, meta));
-        }
-    }
-
-    /**
-     * Log de info
-     */
-    info(message, meta = {}) {
-        if (this.shouldLog('info')) {
-            console.log(this.formatLog('info', message, meta));
-        }
-    }
-
-    /**
-     * Log de debug
-     */
-    debug(message, meta = {}) {
-        if (this.shouldLog('debug')) {
-            console.log(this.formatLog('debug', message, meta));
-        }
-    }
-
-    /**
-     * Log de requisição HTTP
-     */
-    request(req, res, duration) {
-        const meta = {
-            method: req.method,
-            url: req.url,
-            statusCode: res.statusCode,
-            duration: `${duration}ms`,
-            userAgent: req.get('User-Agent'),
-            ip: req.ip || req.connection.remoteAddress,
-            userId: req.user?.id || null
-        };
-
-        if (res.statusCode >= 400) {
-            this.error(`HTTP ${res.statusCode} - ${req.method} ${req.url}`, meta);
-        } else {
-            this.info(`HTTP ${res.statusCode} - ${req.method} ${req.url}`, meta);
-        }
-    }
-
-    /**
-     * Log de autenticação
-     */
-    auth(action, user, success, meta = {}) {
-        const logMeta = {
-            action,
-            userId: user?.id || null,
-            email: user?.email || null,
-            success,
-            ...meta
-        };
-
-        if (success) {
-            this.info(`Auth ${action} successful`, logMeta);
-        } else {
-            this.warn(`Auth ${action} failed`, logMeta);
-        }
-    }
-
-    /**
-     * Log de banco de dados
-     */
-    database(operation, table, duration, meta = {}) {
-        const logMeta = {
-            operation,
-            table,
-            duration: `${duration}ms`,
-            ...meta
-        };
-
-        if (duration > 1000) {
-            this.warn(`Slow database query`, logMeta);
-        } else {
-            this.debug(`Database ${operation}`, logMeta);
-        }
-    }
-
-    /**
-     * Log de erro de aplicação
-     */
-    appError(error, context = {}) {
-        const meta = {
-            error: {
-                name: error.name,
-                message: error.message,
-                stack: this.isProduction ? undefined : error.stack
-            },
-            context
-        };
-
-        this.error('Application error', meta);
-    }
+    return value;
+  }
+  try { return JSON.stringify(recur(obj)); } catch { return '"[Unserializable]"'; }
 }
 
-// Instância singleton
-const logger = new Logger();
-
-// Middleware para logs de requisição
-const requestLogger = (req, res, next) => {
-    const start = Date.now();
-    
-    // Override do res.end para capturar quando a resposta termina
-    const originalEnd = res.end;
-    res.end = function(...args) {
-        const duration = Date.now() - start;
-        logger.request(req, res, duration);
-        originalEnd.apply(this, args);
-    };
-    
-    next();
-};
-
-// Override do console para capturar logs não estruturados
-if (config.IS_PRODUCTION) {
-    const originalConsoleLog = console.log;
-    const originalConsoleError = console.error;
-    const originalConsoleWarn = console.warn;
-    
-    console.log = (...args) => {
-        logger.info(args.join(' '));
-    };
-    
-    console.error = (...args) => {
-        logger.error(args.join(' '));
-    };
-    
-    console.warn = (...args) => {
-        logger.warn(args.join(' '));
-    };
+function serializeError(err) {
+  if (!err || typeof err !== 'object') return err;
+  return {
+    name: err.name,
+    message: err.message,
+    stack: err.stack,
+    code: err.code,
+    status: err.status || err.statusCode,
+    cause: err.cause && (typeof err.cause === 'object'
+      ? { name: err.cause.name, message: err.cause.message, stack: err.cause.stack }
+      : String(err.cause)),
+    ...('toJSON' in err ? err.toJSON() : {}),
+  };
 }
 
-module.exports = {
-    logger,
-    requestLogger
-};
+// Formato seguro: nunca chama JSON.stringify direto no grafo bruto.
+const safePrintf = format.printf(info => {
+  const { level, message, timestamp, ...meta } = info;
+  const m = typeof message === 'string' ? message : safeStringify(message);
+  const rest = Object.keys(meta).length ? ' ' + safeStringify(meta) : '';
+  return `${timestamp} ${level}: ${m}${rest}`;
+});
+
+const logger = createLogger({
+  level: process.env.LOG_LEVEL || 'info',
+  format: format.combine(
+    format.timestamp(),
+    format.errors({ stack: true }),
+    safePrintf
+  ),
+  transports: [new transports.Console()],
+});
+
+// Helpers expostos
+logger.safeStringify = safeStringify;
+logger.serializeError = serializeError;
+
+// Exporte de forma compatível com require e import
+module.exports = logger;
+module.exports.default = logger;

@@ -30,7 +30,6 @@
     "lint:fix": "eslint . --ext .js --fix",
     "precommit": "npm run lint && npm run security:check",
     "prepare": "node -e \"console.log('Checking environment...'); if (process.env.NODE_ENV === 'production' || process.env.DOCKER_BUILD === 'true') { console.log('Production/Docker environment detected - skipping Husky'); process.exit(0); } else { console.log('Development environment - installing Husky'); require('child_process').spawn('npx', ['husky'], { stdio: 'inherit' }); }\"",
-    "postinstall": "npm run env:check",
     "env:check": "node scripts/env-check.js",
     "build": "echo '✅ Build completed - Node.js application ready'",
     "build:prod": "NODE_ENV=production npm ci --omit=dev --ignore-scripts && npm run env:check",
