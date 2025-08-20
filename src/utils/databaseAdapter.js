@@ -198,9 +198,9 @@ class DatabaseAdapter {
     async _applyPostgreSQLConfig() {
         try {
             // Configurações de sessão
-            await this.run("SET timezone = 'America/Sao_Paulo'");
-            await this.run("SET statement_timeout = '60s'");
-            await this.run("SET lock_timeout = '30s'");
+            await this.run('SET timezone = \'America/Sao_Paulo\'');
+            await this.run('SET statement_timeout = \'60s\'');
+            await this.run('SET lock_timeout = \'30s\'');
             
             console.log('⚡ Configurações PostgreSQL aplicadas');
             
@@ -302,8 +302,13 @@ class DatabaseAdapter {
             
             const result = await client.query(translatedSql, translatedParams);
             
+            // Verificar se result existe antes de acessar rows
+            if (!result) {
+                throw new Error('Query returned undefined result');
+            }
+            
             // Mapear resultados para formato SQLite-compatível
-            return mapResults(result.rows, 'postgresql', 'sqlite');
+            return mapResults(result.rows || [], 'postgresql', 'sqlite');
             
         } finally {
             client.release();
@@ -458,7 +463,7 @@ class DatabaseAdapter {
             }
             
             // Validar definição da coluna (permitir aspas e DEFAULT)
-            if (!/^[a-zA-Z0-9_\s()"'=\-]+$/.test(columnDef)) {
+            if (!/^[a-zA-Z0-9_\s()"'=-]+$/.test(columnDef)) {
                 throw new Error('Definição de coluna contém caracteres inválidos');
             }
             
