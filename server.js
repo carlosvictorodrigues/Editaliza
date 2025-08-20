@@ -10,9 +10,9 @@ const config = require('./src/config/environment');
 function getBrazilianDateString() {
     const now = new Date();
     // Criar objeto Date diretamente no timezone brasileiro
-    const year = parseInt(now.toLocaleString("en-CA", {timeZone: "America/Sao_Paulo", year: "numeric"}));
-    const month = String(parseInt(now.toLocaleString("en-CA", {timeZone: "America/Sao_Paulo", month: "numeric"}))).padStart(2, '0');
-    const day = String(parseInt(now.toLocaleString("en-CA", {timeZone: "America/Sao_Paulo", day: "numeric"}))).padStart(2, '0');
+    const year = parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', year: 'numeric'}));
+    const month = String(parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', month: 'numeric'}))).padStart(2, '0');
+    const day = String(parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', day: 'numeric'}))).padStart(2, '0');
     return `${year}-${month}-${day}`;
 }
 
@@ -78,7 +78,6 @@ const {
     errorHandler,
     asyncHandler,
     handleDatabaseError,
-    setupGlobalErrorHandling
 } = require('./src/utils/error-handler');
 
 // Importar sistema de backup
@@ -181,17 +180,17 @@ app.use((req, res, next) => {
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
-            defaultSrc: ["'self'"],
+            defaultSrc: ['\'self\''],
             // CORREÇÃO: Remover 'unsafe-inline' e usar nonce
-            styleSrc: ["'self'", "https://cdn.tailwindcss.com", "https://fonts.googleapis.com", (req, res) => `'nonce-${res.locals.nonce}'`],
-            scriptSrc: ["'self'", "https://cdn.tailwindcss.com", (req, res) => `'nonce-${res.locals.nonce}'`],
-            fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            imgSrc: ["'self'", "data:", "https:", "https://lh3.googleusercontent.com"], // Google avatars
-            connectSrc: ["'self'", "https://accounts.google.com"],
-            formAction: ["'self'", "https://accounts.google.com"],
-            objectSrc: ["'none'"], // Bloquear Flash/plugins
-            baseUri: ["'self'"], // Prevenir ataques base href
-            frameAncestors: ["'none'"], // Clickjacking protection
+            styleSrc: ['\'self\'', 'https://cdn.tailwindcss.com', 'https://fonts.googleapis.com', (req, res) => `'nonce-${res.locals.nonce}'`],
+            scriptSrc: ['\'self\'', 'https://cdn.tailwindcss.com', (req, res) => `'nonce-${res.locals.nonce}'`],
+            fontSrc: ['\'self\'', 'https://fonts.gstatic.com'],
+            imgSrc: ['\'self\'', 'data:', 'https:', 'https://lh3.googleusercontent.com'], // Google avatars
+            connectSrc: ['\'self\'', 'https://accounts.google.com'],
+            formAction: ['\'self\'', 'https://accounts.google.com'],
+            objectSrc: ['\'none\''], // Bloquear Flash/plugins
+            baseUri: ['\'self\''], // Prevenir ataques base href
+            frameAncestors: ['\'none\''], // Clickjacking protection
             upgradeInsecureRequests: [], // Forçar HTTPS
         },
     },
@@ -674,7 +673,7 @@ const dbAll = (sql, params = []) => new Promise((resolve, reject) => db.all(sql,
 
 // CORREÇÃO DE SEGURANÇA: Disponibilizar dbGet para middleware de admin
 global.dbGet = dbGet;
-const dbRun = (sql, params = []) => new Promise((resolve, reject) => db.run(sql, params, function(err) { err ? reject(err) : resolve(this) }));
+const dbRun = (sql, params = []) => new Promise((resolve, reject) => db.run(sql, params, function(err) { err ? reject(err) : resolve(this); }));
 
 // --- ROTAS DE AUTENTICAÇÃO E USUÁRIO ---
 
@@ -736,18 +735,18 @@ app.post('/login',
         try {
             const user = await dbGet('SELECT * FROM users WHERE email = ?', [email]);
             if (!user) {
-                return res.status(401).json({ "error": "E-mail ou senha inválidos." });
+                return res.status(401).json({ 'error': 'E-mail ou senha inválidos.' });
             }
             
             // Check if user is a Google OAuth user
             if (user.auth_provider === 'google') {
                 return res.status(401).json({ 
-                    "error": "Esta conta foi criada com Google. Use o botão 'Entrar com Google' para fazer login." 
+                    'error': 'Esta conta foi criada com Google. Use o botão \'Entrar com Google\' para fazer login.' 
                 });
             }
             
             if (!await bcrypt.compare(password, user.password_hash)) {
-                return res.status(401).json({ "error": "E-mail ou senha inválidos." });
+                return res.status(401).json({ 'error': 'E-mail ou senha inválidos.' });
             }
             
             const token = jwt.sign(
@@ -759,10 +758,10 @@ app.post('/login',
             req.session.userId = user.id;
             req.session.loginTime = new Date();
             
-            res.json({ "message": "Login bem-sucedido!", "token": token });
+            res.json({ 'message': 'Login bem-sucedido!', 'token': token });
         } catch (error) {
             console.error('Erro no login:', error);
-            res.status(500).json({ "error": "Erro no servidor." });
+            res.status(500).json({ 'error': 'Erro no servidor.' });
         }
     }
 );
@@ -870,7 +869,7 @@ app.post('/request-password-reset',
                 // Check if user is a Google OAuth user
                 if (user.auth_provider === 'google') {
                     return res.status(400).json({ 
-                        error: "Esta conta foi criada com Google. Use o botão 'Entrar com Google' para fazer login." 
+                        error: 'Esta conta foi criada com Google. Use o botão \'Entrar com Google\' para fazer login.' 
                     });
                 }
                 
@@ -904,14 +903,14 @@ app.post('/request-password-reset',
             
             // Always return the same response to prevent user enumeration
             res.json({ 
-                message: "Se um usuário com este e-mail existir, um link de recuperação foi enviado.",
-                info: "Verifique sua caixa de entrada e spam. O link expira em 1 hora."
+                message: 'Se um usuário com este e-mail existir, um link de recuperação foi enviado.',
+                info: 'Verifique sua caixa de entrada e spam. O link expira em 1 hora.'
             });
             
         } catch (error) {
             console.error('Erro na recuperação de senha:', error);
             res.status(500).json({ 
-                error: "Erro no servidor ao processar a solicitação." 
+                error: 'Erro no servidor ao processar a solicitação.' 
             });
         }
     }
@@ -927,14 +926,14 @@ app.post('/reset-password',
         try {
             const user = await dbGet('SELECT * FROM users WHERE reset_token = ? AND reset_token_expires > ?', [token, Date.now()]);
             if (!user) {
-                return res.status(400).json({ error: "Token inválido ou expirado." });
+                return res.status(400).json({ error: 'Token inválido ou expirado.' });
             }
             const hashedPassword = await bcrypt.hash(password, 12);
             await dbRun('UPDATE users SET password_hash = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?', [hashedPassword, user.id]);
-            res.json({ message: "Senha redefinida com sucesso!" });
+            res.json({ message: 'Senha redefinida com sucesso!' });
         } catch (error) {
             console.error('Erro ao redefinir senha:', error);
-            res.status(500).json({ "error": "Erro no servidor ao redefinir a senha." });
+            res.status(500).json({ 'error': 'Erro no servidor ao redefinir a senha.' });
         }
     }
 );
@@ -950,7 +949,7 @@ app.get('/profile', authenticateToken, async (req, res) => {
             google_id, auth_provider, google_avatar
             FROM users WHERE id = ?`, [req.user.id]);
         if (!user) {
-            return res.status(404).json({ error: "Usuário não encontrado." });
+            return res.status(404).json({ error: 'Usuário não encontrado.' });
         }
         
         // Parse difficulties JSON string back to array
@@ -987,7 +986,7 @@ app.get('/profile', authenticateToken, async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao buscar perfil:', error);
-        res.status(500).json({ error: "Erro ao carregar perfil do usuário." });
+        res.status(500).json({ error: 'Erro ao carregar perfil do usuário.' });
     }
 });
 
@@ -1115,7 +1114,7 @@ app.patch('/profile',
             }
             
             if (updates.length === 0) {
-                return res.status(400).json({ error: "Nenhum campo para atualizar." });
+                return res.status(400).json({ error: 'Nenhum campo para atualizar.' });
             }
             
             values.push(req.user.id);
@@ -1141,7 +1140,7 @@ app.patch('/profile',
             }
             
             res.json({
-                message: "Perfil atualizado com sucesso!",
+                message: 'Perfil atualizado com sucesso!',
                 user: {
                     id: updatedUser.id,
                     email: updatedUser.email,
@@ -1167,7 +1166,7 @@ app.patch('/profile',
             });
         } catch (error) {
             console.error('Erro ao atualizar perfil:', error);
-            res.status(500).json({ error: "Erro ao atualizar perfil do usuário." });
+            res.status(500).json({ error: 'Erro ao atualizar perfil do usuário.' });
         }
     }
 );
@@ -1180,7 +1179,7 @@ app.get('/plans', authenticateToken, async (req, res) => {
         res.json(rows.map(plan => ({...plan, study_hours_per_day: JSON.parse(plan.study_hours_per_day || '{}')})));
     } catch (error) {
         console.error('Erro ao buscar planos:', error);
-        res.status(500).json({ "error": "Erro ao buscar planos" });
+        res.status(500).json({ 'error': 'Erro ao buscar planos' });
     }
 });
 
@@ -1199,10 +1198,10 @@ app.post('/plans',
         `;
         try {
             const result = await dbRun(sql, [req.user.id, plan_name, exam_date, defaultHours, 50, 300, 50, 'completo', 0, false]);
-            res.status(201).json({ "message": "Plano criado com sucesso!", "newPlanId": result.lastID });
+            res.status(201).json({ 'message': 'Plano criado com sucesso!', 'newPlanId': result.lastID });
         } catch (error) {
             console.error('Erro ao criar plano:', error);
-            res.status(500).json({ "error": "Erro ao criar plano" });
+            res.status(500).json({ 'error': 'Erro ao criar plano' });
         }
     }
 );
@@ -1213,15 +1212,15 @@ app.get('/plans/:id',
     handleValidationErrors,
     async (req, res) => {
         try {
-            const row = await dbGet("SELECT * FROM study_plans WHERE id = ? AND user_id = ?", [req.params.id, req.user.id]);
-            if (!row) return res.status(404).json({ "error": "Plano não encontrado ou não autorizado." });
+            const row = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+            if (!row) return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
             if (row.study_hours_per_day) {
                 row.study_hours_per_day = JSON.parse(row.study_hours_per_day);
             }
             res.json(row);
         } catch (error) {
             console.error('Erro ao buscar plano:', error);
-            res.status(500).json({ "error": "Erro ao buscar plano" });
+            res.status(500).json({ 'error': 'Erro ao buscar plano' });
         }
     }
 );
@@ -1235,7 +1234,7 @@ app.delete('/plans/:planId',
         const userId = req.user.id;
         try {
             const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
-            if (!plan) return res.status(404).json({ "error": "Plano não encontrado ou você não tem permissão." });
+            if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado ou você não tem permissão.' });
             
             await dbRun('BEGIN TRANSACTION');
             await dbRun('DELETE FROM study_sessions WHERE study_plan_id = ?', [planId]);
@@ -1244,11 +1243,11 @@ app.delete('/plans/:planId',
             await dbRun('DELETE FROM study_plans WHERE id = ?', [planId]);
             await dbRun('COMMIT');
             
-            res.json({ message: "Plano e todos os dados associados foram apagados com sucesso" });
+            res.json({ message: 'Plano e todos os dados associados foram apagados com sucesso' });
         } catch (error) {
             await dbRun('ROLLBACK');
             console.error('Erro ao apagar plano:', error);
-            res.status(500).json({ "error": "Erro ao apagar o plano." });
+            res.status(500).json({ 'error': 'Erro ao apagar o plano.' });
         }
     }
 );
@@ -1269,17 +1268,17 @@ app.patch('/plans/:planId/settings',
         
         const validReviewModes = ['completo', 'focado'];
         if (review_mode && !validReviewModes.includes(review_mode)) {
-            return res.status(400).json({ error: "Modo de revisão inválido" });
+            return res.status(400).json({ error: 'Modo de revisão inválido' });
         }
         
         const sql = 'UPDATE study_plans SET daily_question_goal = ?, weekly_question_goal = ?, review_mode = ?, session_duration_minutes = ?, study_hours_per_day = ?, has_essay = ?, reta_final_mode = ? WHERE id = ? AND user_id = ?';
         try {
             const result = await dbRun(sql, [daily_question_goal, weekly_question_goal, review_mode || 'completo', session_duration_minutes, hoursJson, has_essay, reta_final_mode ? 1 : 0, req.params.planId, req.user.id]);
-            if (result.changes === 0) return res.status(404).json({ error: "Plano não encontrado ou não autorizado." });
-            res.json({ message: "Configurações salvas com sucesso!" });
+            if (result.changes === 0) return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+            res.json({ message: 'Configurações salvas com sucesso!' });
         } catch (error) {
             console.error('Erro ao atualizar configurações:', error);
-            res.status(500).json({ "error": "Erro ao salvar configurações" });
+            res.status(500).json({ 'error': 'Erro ao salvar configurações' });
         }
     }
 );
@@ -1318,7 +1317,7 @@ app.post('/plans/:planId/subjects_with_topics',
         
         try {
             const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
-            if (!plan) return res.status(404).json({ "error": "Plano não encontrado ou não autorizado." });
+            if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
 
             const topics = topics_list.split('\n').map(t => t.trim()).filter(t => t !== '');
             
@@ -1336,11 +1335,11 @@ app.post('/plans/:planId/subjects_with_topics',
             }
             
             await dbRun('COMMIT');
-            res.status(201).json({ message: "Disciplina e tópicos adicionados com sucesso!" });
+            res.status(201).json({ message: 'Disciplina e tópicos adicionados com sucesso!' });
         } catch (error) {
             await dbRun('ROLLBACK');
             console.error('Erro ao criar disciplina:', error);
-            res.status(500).json({ "error": "Erro ao criar a disciplina e tópicos." });
+            res.status(500).json({ 'error': 'Erro ao criar a disciplina e tópicos.' });
         }
     }
 );
@@ -1359,11 +1358,11 @@ app.patch('/subjects/:subjectId',
         `;
         try {
             const result = await dbRun(sql, [subject_name, priority_weight, req.params.subjectId, req.user.id]);
-            if (result.changes === 0) return res.status(404).json({ error: "Disciplina não encontrada ou não autorizada." });
+            if (result.changes === 0) return res.status(404).json({ error: 'Disciplina não encontrada ou não autorizada.' });
             res.json({ message: 'Disciplina atualizada com sucesso!' });
         } catch (error) {
             console.error('Erro ao atualizar disciplina:', error);
-            res.status(500).json({ error: "Erro ao atualizar disciplina" });
+            res.status(500).json({ error: 'Erro ao atualizar disciplina' });
         }
     }
 );
@@ -1379,18 +1378,18 @@ app.delete('/subjects/:subjectId',
                 SELECT s.id FROM subjects s JOIN study_plans sp ON s.study_plan_id = sp.id 
                 WHERE s.id = ? AND sp.user_id = ?
             `, [subjectId, req.user.id]);
-            if (!subject) return res.status(404).json({ error: "Disciplina não encontrada ou não autorizada." });
+            if (!subject) return res.status(404).json({ error: 'Disciplina não encontrada ou não autorizada.' });
 
             await dbRun('BEGIN TRANSACTION');
             await dbRun('DELETE FROM study_sessions WHERE topic_id IN (SELECT id FROM topics WHERE subject_id = ?)', [subjectId]);
             await dbRun('DELETE FROM topics WHERE subject_id = ?', [subjectId]);
             await dbRun('DELETE FROM subjects WHERE id = ?', [subjectId]);
             await dbRun('COMMIT');
-            res.json({ message: "Disciplina e todos os seus dados foram apagados com sucesso" });
+            res.json({ message: 'Disciplina e todos os seus dados foram apagados com sucesso' });
         } catch (error) {
             await dbRun('ROLLBACK');
             console.error('Erro ao apagar disciplina:', error);
-            res.status(500).json({ "error": "Erro ao apagar disciplina" });
+            res.status(500).json({ 'error': 'Erro ao apagar disciplina' });
         }
     }
 );
@@ -1406,10 +1405,10 @@ app.get('/plans/:planId/subjects_with_topics',
         try {
             const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
             if (!plan) {
-                return res.status(404).json({ "error": "Plano não encontrado ou não autorizado." });
+                return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
             }
 
-            const subjects = await dbAll("SELECT * FROM subjects WHERE study_plan_id = ? ORDER BY id DESC", [planId]);
+            const subjects = await dbAll('SELECT * FROM subjects WHERE study_plan_id = ? ORDER BY id DESC', [planId]);
             const subjectIds = subjects.map(s => s.id);
 
             if (subjectIds.length === 0) {
@@ -1439,7 +1438,7 @@ app.get('/plans/:planId/subjects_with_topics',
             res.json(result);
         } catch (error) {
             console.error('Erro ao buscar disciplinas com tópicos:', error);
-            res.status(500).json({ "error": "Erro ao buscar disciplinas e tópicos" });
+            res.status(500).json({ 'error': 'Erro ao buscar disciplinas e tópicos' });
         }
     }
 );
@@ -1454,13 +1453,13 @@ app.get('/subjects/:subjectId/topics',
                 SELECT s.id FROM subjects s JOIN study_plans sp ON s.study_plan_id = sp.id 
                 WHERE s.id = ? AND sp.user_id = ?
             `, [req.params.subjectId, req.user.id]);
-            if (!subject) return res.status(404).json({ error: "Disciplina não encontrada ou não autorizada." });
+            if (!subject) return res.status(404).json({ error: 'Disciplina não encontrada ou não autorizada.' });
 
-            const rows = await dbAll("SELECT id, description, status, completion_date, priority_weight FROM topics WHERE subject_id = ? ORDER BY id ASC", [req.params.subjectId]);
+            const rows = await dbAll('SELECT id, description, status, completion_date, priority_weight FROM topics WHERE subject_id = ? ORDER BY id ASC', [req.params.subjectId]);
             res.json(rows);
         } catch (error) {
             console.error('Erro ao buscar tópicos:', error);
-            res.status(500).json({ "error": "Erro ao buscar tópicos" });
+            res.status(500).json({ 'error': 'Erro ao buscar tópicos' });
         }
     }
 );
@@ -1529,11 +1528,11 @@ app.patch('/topics/batch_update',
             }
             
             await dbRun('COMMIT');
-            res.json({ message: "Progresso dos tópicos atualizado com sucesso!" });
+            res.json({ message: 'Progresso dos tópicos atualizado com sucesso!' });
         } catch (error) {
             await dbRun('ROLLBACK');
             console.error('Erro ao atualizar tópicos:', error);
-            res.status(500).json({ "error": "Erro ao atualizar os tópicos." });
+            res.status(500).json({ 'error': 'Erro ao atualizar os tópicos.' });
         }
     }
 );
@@ -1588,11 +1587,11 @@ app.patch('/topics/batch_update_details',
             }
 
             await dbRun('COMMIT');
-            res.json({ message: "Tópicos atualizados com sucesso!" });
+            res.json({ message: 'Tópicos atualizados com sucesso!' });
         } catch (error) {
             await dbRun('ROLLBACK');
             console.error('Erro ao atualizar tópicos em lote:', error);
-            res.status(500).json({ "error": "Erro ao atualizar os tópicos." });
+            res.status(500).json({ 'error': 'Erro ao atualizar os tópicos.' });
         }
     }
 );
@@ -1631,11 +1630,11 @@ app.patch('/topics/:topicId',
         
         try {
             const result = await dbRun(sql, params);
-            if (result.changes === 0) return res.status(404).json({ error: "Tópico não encontrado ou não autorizado." });
+            if (result.changes === 0) return res.status(404).json({ error: 'Tópico não encontrado ou não autorizado.' });
             res.json({ message: 'Tópico atualizado com sucesso!' });
         } catch (error) {
             console.error('Erro ao atualizar tópico:', error);
-            res.status(500).json({ error: "Erro ao atualizar tópico" });
+            res.status(500).json({ error: 'Erro ao atualizar tópico' });
         }
     }
 );
@@ -1660,18 +1659,18 @@ app.delete('/topics/:topicId',
             
             if (!topic) {
                 console.log(`[DELETE_TOPIC] Tópico ${topicId} não encontrado para usuário ${req.user.id}`);
-                return res.status(404).json({ error: "Tópico não encontrado ou não autorizado." });
+                return res.status(404).json({ error: 'Tópico não encontrado ou não autorizado.' });
             }
 
             await dbRun('BEGIN TRANSACTION');
             await dbRun('DELETE FROM study_sessions WHERE topic_id = ?', [topicId]);
             await dbRun('DELETE FROM topics WHERE id = ?', [topicId]);
             await dbRun('COMMIT');
-            res.json({ message: "Tópico e sessões associadas foram apagados com sucesso" });
+            res.json({ message: 'Tópico e sessões associadas foram apagados com sucesso' });
         } catch (error) {
             await dbRun('ROLLBACK');
             console.error('Erro ao apagar tópico:', error);
-            res.status(500).json({ "error": "Erro ao apagar tópico" });
+            res.status(500).json({ 'error': 'Erro ao apagar tópico' });
         }
     }
 );
@@ -1719,17 +1718,17 @@ app.post('/plans/:planId/generate',
             const plan = await dbGet('SELECT * FROM study_plans WHERE id = ?', [planId]);
             if (!plan) {
                 await dbRun('ROLLBACK');
-                return res.status(404).json({ error: "Plano não encontrado." });
+                return res.status(404).json({ error: 'Plano não encontrado.' });
             }
 
             const totalWeeklyHours = Object.values(study_hours_per_day).reduce((sum, h) => sum + (parseInt(h, 10) || 0), 0);
             if (totalWeeklyHours === 0) {
                 await dbRun('ROLLBACK');
-                return res.status(400).json({ error: "O cronograma não pode ser gerado porque não há horas de estudo definidas." });
+                return res.status(400).json({ error: 'O cronograma não pode ser gerado porque não há horas de estudo definidas.' });
             }
 
             console.log(`[CRONOGRAMA] ✅ Removendo sessões antigas do plano ${planId}`);
-            await dbRun("DELETE FROM study_sessions WHERE study_plan_id = ?", [planId]);
+            await dbRun('DELETE FROM study_sessions WHERE study_plan_id = ?', [planId]);
             console.log(`[CRONOGRAMA] ✅ Sessões antigas removidas`);
 
             const allTopicsQuery = `
@@ -1746,7 +1745,7 @@ app.post('/plans/:planId/generate',
 
             if (allTopics.length === 0) {
                 await dbRun('COMMIT');
-                return res.json({ message: "Nenhum tópico encontrado para gerar o cronograma." });
+                return res.json({ message: 'Nenhum tópico encontrado para gerar o cronograma.' });
             }
             
             const sessionDuration = parseInt(session_duration_minutes, 10) || 50;
@@ -1762,7 +1761,7 @@ app.post('/plans/:planId/generate',
                 }
                 
                 const dates = [];
-                let currentDate = new Date(startDate);
+                const currentDate = new Date(startDate);
                 while (currentDate <= endDate) {
                     const dayOfWeek = currentDate.getDay();
                     const shouldSkip = (weekdayOnly && (dayOfWeek === 0 || dayOfWeek === 6));
@@ -1783,7 +1782,7 @@ app.post('/plans/:planId/generate',
             const agenda = new Map();
             const addSessionToAgenda = (date, session) => {
                 // Usar horário de Brasília corretamente
-                const dateStr = date.toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
+                const dateStr = date.toLocaleDateString('en-CA', {timeZone: 'America/Sao_Paulo'});
                 if (!agenda.has(dateStr)) {
                     agenda.set(dateStr, []);
                 }
@@ -1795,8 +1794,8 @@ app.post('/plans/:planId/generate',
                 for (const dateInfo of sundayDates) {
                     addSessionToAgenda(dateInfo.date, {
                         topicId: null,
-                        subjectName: "Redação",
-                        topicDescription: "Prática de redação dissertativa-argumentativa, focando em estrutura, coesão e argumentação.",
+                        subjectName: 'Redação',
+                        topicDescription: 'Prática de redação dissertativa-argumentativa, focando em estrutura, coesão e argumentação.',
                         sessionType: 'Redação'
                     });
                 }
@@ -1806,7 +1805,7 @@ app.post('/plans/:planId/generate',
                 const availableDates = getAvailableDates(startDate, examDate, isWeekdayOnly);
                 for (const dateInfo of availableDates) {
                     // Usar horário de Brasília corretamente
-                    const dateStr = dateInfo.date.toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
+                    const dateStr = dateInfo.date.toLocaleDateString('en-CA', {timeZone: 'America/Sao_Paulo'});
                     const currentSessions = agenda.get(dateStr)?.length || 0;
                     if (currentSessions < dateInfo.maxSessions) return dateInfo.date;
                 }
@@ -1817,7 +1816,7 @@ app.post('/plans/:planId/generate',
                 const saturdayDates = getAvailableDates(date, examDate).filter(d => d.dayOfWeek === 6);
                 for (const dateInfo of saturdayDates) {
                     // Usar horário de Brasília corretamente
-                    const dateStr = dateInfo.date.toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
+                    const dateStr = dateInfo.date.toLocaleDateString('en-CA', {timeZone: 'America/Sao_Paulo'});
                     if ((agenda.get(dateStr)?.length || 0) < dateInfo.maxSessions) return dateInfo.date;
                 }
                 return null;
@@ -1935,7 +1934,7 @@ app.post('/plans/:planId/generate',
                 console.log('[CRONOGRAMA] Nenhum tópico pendente encontrado');
                 await dbRun('COMMIT');
                 console.timeEnd(`[PERF] Generate schedule for plan ${planId}`);
-                return res.json({ message: "Cronograma gerado com sucesso!" });
+                return res.json({ message: 'Cronograma gerado com sucesso!' });
             }
 
             // ORDENAÇÃO SIMPLES POR PESO: (peso_disciplina × 10) + peso_assunto
@@ -1988,10 +1987,10 @@ app.post('/plans/:planId/generate',
             if (disciplineTopicsArrays.length === 0) {
                 console.error('[CRONOGRAMA] Nenhuma disciplina válida encontrada após agrupamento');
                 await dbRun('ROLLBACK');
-                return res.status(500).json({ error: "Erro na organização dos tópicos por disciplina" });
+                return res.status(500).json({ error: 'Erro na organização dos tópicos por disciplina' });
             }
             
-            let maxTopicsInAnyDiscipline = Math.max(...disciplineTopicsArrays.map(topics => topics.length));
+            const maxTopicsInAnyDiscipline = Math.max(...disciplineTopicsArrays.map(topics => topics.length));
             
             for (let round = 0; round < maxTopicsInAnyDiscipline; round++) {
                 for (const disciplineName of disciplineNames) {
@@ -2018,7 +2017,7 @@ app.post('/plans/:planId/generate',
                 console.log('[CRONOGRAMA] Nenhum tópico válido encontrado para agendamento');
                 await dbRun('COMMIT');
                 console.timeEnd(`[PERF] Generate schedule for plan ${planId}`);
-                return res.json({ message: "Cronograma gerado com sucesso!" });
+                return res.json({ message: 'Cronograma gerado com sucesso!' });
             }
 
             let currentDateForNewTopics = new Date(today);
@@ -2045,7 +2044,7 @@ app.post('/plans/:planId/generate',
                 });
             }
             
-            let maintenanceStartDate = lastNewTopicDate ? new Date(lastNewTopicDate) : new Date(today);
+            const maintenanceStartDate = lastNewTopicDate ? new Date(lastNewTopicDate) : new Date(today);
             maintenanceStartDate.setDate(maintenanceStartDate.getDate() + 1);
             
             const hasPendingNewTopics = pendingTopics.length > 0;
@@ -2062,7 +2061,7 @@ app.post('/plans/:planId/generate',
                     subjectTopicsMap.get(topic.subject_name).push(topic.description);
                 });
                 
-                let currentSimDate = new Date(maintenanceStartDate);
+                const currentSimDate = new Date(maintenanceStartDate);
                 currentSimDate.setDate(currentSimDate.getDate() + 3); 
                 
                 const progressPercentage = (completedTopics.length / allTopics.length);
@@ -2120,14 +2119,14 @@ app.post('/plans/:planId/generate',
                 
                 // Simulados completos só após todo conteúdo ser abordado
                 if (pendingTopics.length === 0 && progressPercentage >= 0.95) {
-                    let basicCompleteSimDate = new Date(maintenanceStartDate);
+                    const basicCompleteSimDate = new Date(maintenanceStartDate);
                     basicCompleteSimDate.setDate(basicCompleteSimDate.getDate() + 7); 
                     const basicCompleteSlot = findNextAvailableSlot(basicCompleteSimDate, false);
                     if (basicCompleteSlot) {
                         addSessionToAgenda(basicCompleteSlot, {
                             topicId: null,
-                            subjectName: "Simulado Completo", 
-                            topicDescription: "Simulado geral abrangendo todas as disciplinas do concurso. Uma excelente oportunidade de testar seus conhecimentos em um formato similar ao da prova real.", 
+                            subjectName: 'Simulado Completo', 
+                            topicDescription: 'Simulado geral abrangendo todas as disciplinas do concurso. Uma excelente oportunidade de testar seus conhecimentos em um formato similar ao da prova real.', 
                             sessionType: 'Simulado Completo' 
                         });
                     }
@@ -2147,11 +2146,11 @@ app.post('/plans/:planId/generate',
                         nextMaintenanceDay = findNextAvailableSlot(nextMaintenanceDay, false);
                         if (!nextMaintenanceDay) break;
                         
-                        const simuladoDescription = "Simulado completo cobrindo todos os tópicos do edital. Foque em tempo, estratégia e resistência. Esta é sua preparação final!";
+                        const simuladoDescription = 'Simulado completo cobrindo todos os tópicos do edital. Foque em tempo, estratégia e resistência. Esta é sua preparação final!';
                         
                         addSessionToAgenda(nextMaintenanceDay, { 
                             topicId: null, 
-                            subjectName: "Simulado Completo", 
+                            subjectName: 'Simulado Completo', 
                             topicDescription: simuladoDescription, 
                             sessionType: 'Simulado Completo' 
                         });
@@ -2268,13 +2267,13 @@ app.post('/plans/:planId/generate',
             try {
                 await dbRun('ROLLBACK');
             } catch (rollbackError) {
-                console.error("[CRONOGRAMA] Erro ao fazer rollback:", rollbackError);
+                console.error('[CRONOGRAMA] Erro ao fazer rollback:', rollbackError);
             }
             
             // LOGS DETALHADOS PARA DEBUGGING
-            console.error("[CRONOGRAMA] ⚠️ ERRO CAPTURADO - Linha exata:", error.stack?.split('\n')[1]?.trim());
-            console.error("[CRONOGRAMA] Erro ao gerar cronograma para plano:", planId);
-            console.error("[CRONOGRAMA] Detalhes do erro:", {
+            console.error('[CRONOGRAMA] ⚠️ ERRO CAPTURADO - Linha exata:', error.stack?.split('\n')[1]?.trim());
+            console.error('[CRONOGRAMA] Erro ao gerar cronograma para plano:', planId);
+            console.error('[CRONOGRAMA] Detalhes do erro:', {
                 message: error.message,
                 stack: error.stack,
                 name: error.name,
@@ -2286,7 +2285,7 @@ app.post('/plans/:planId/generate',
             });
             
             // Log dos parâmetros recebidos para análise
-            console.error("[CRONOGRAMA] Parâmetros recebidos:", {
+            console.error('[CRONOGRAMA] Parâmetros recebidos:', {
                 daily_question_goal,
                 weekly_question_goal,
                 session_duration_minutes,
@@ -2300,14 +2299,14 @@ app.post('/plans/:planId/generate',
             // Retornar erro mais detalhado em desenvolvimento
             if (process.env.NODE_ENV === 'development') {
                 res.status(500).json({ 
-                    error: "Ocorreu um erro interno no servidor ao gerar o cronograma.",
+                    error: 'Ocorreu um erro interno no servidor ao gerar o cronograma.',
                     debug: {
                         message: error.message,
                         stack: error.stack
                     }
                 });
             } else {
-                res.status(500).json({ error: "Ocorreu um erro interno no servidor ao gerar o cronograma." });
+                res.status(500).json({ error: 'Ocorreu um erro interno no servidor ao gerar o cronograma.' });
             }
         }
     }
@@ -2324,15 +2323,15 @@ app.get('/plans/:planId/replan-preview',
         const planId = req.params.planId;
         try {
             const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
-            if (!plan) return res.status(404).json({ error: "Plano não encontrado." });
+            if (!plan) return res.status(404).json({ error: 'Plano não encontrado.' });
 
             const todayStr = getBrazilianDateString();
-            const overdueSessions = await dbAll("SELECT * FROM study_sessions WHERE study_plan_id = ? AND status = 'Pendente' AND session_date < ? ORDER BY session_date, id", [planId, todayStr]);
+            const overdueSessions = await dbAll('SELECT * FROM study_sessions WHERE study_plan_id = ? AND status = \'Pendente\' AND session_date < ? ORDER BY session_date, id', [planId, todayStr]);
             
             if (overdueSessions.length === 0) {
                 return res.json({ 
                     hasOverdue: false,
-                    message: "Nenhuma tarefa atrasada encontrada." 
+                    message: 'Nenhuma tarefa atrasada encontrada.' 
                 });
             }
 
@@ -2376,7 +2375,7 @@ app.get('/plans/:planId/replan-preview',
 
             // Função auxiliar para encontrar slot disponível no preview
             const findAvailableSlotPreview = (startDate, skipDate = null) => {
-                let currentDate = new Date(startDate);
+                const currentDate = new Date(startDate);
                 while (currentDate <= examDate) {
                     const dateStr = currentDate.toISOString().split('T')[0];
                     const dayOfWeek = currentDate.getDay();
@@ -2413,7 +2412,7 @@ app.get('/plans/:planId/replan-preview',
                 
                 for (const session of sessions) {
                     let newDate = null;
-                    let strategy = "";
+                    let strategy = '';
                     
                     // ESTRATÉGIA 1: Tentar inserir antes da próxima sessão da mesma matéria
                     if (futureSessionsOfSubject.length > 0) {
@@ -2424,14 +2423,14 @@ app.get('/plans/:planId/replan-preview',
                         const slot = findAvailableSlotPreview(insertDate > new Date() ? insertDate : new Date());
                         if (slot && slot < nextSessionDate) {
                             newDate = slot;
-                            strategy = "Inserida antes da próxima sessão da matéria";
+                            strategy = 'Inserida antes da próxima sessão da matéria';
                         }
                     }
                     
                     // ESTRATÉGIA 2: Encontrar próximo slot disponível
                     if (!newDate) {
                         newDate = findAvailableSlotPreview(new Date());
-                        strategy = "Próximo slot disponível";
+                        strategy = 'Próximo slot disponível';
                     }
                     
                     if (newDate) {
@@ -2461,8 +2460,8 @@ app.get('/plans/:planId/replan-preview',
             res.json({
                 hasOverdue: true,
                 count: overdueSessions.length,
-                strategy: "Redistribuição Inteligente",
-                description: "As tarefas atrasadas serão reagendadas de forma inteligente: preferencialmente antes das próximas sessões da mesma matéria, preservando a continuidade do aprendizado.",
+                strategy: 'Redistribuição Inteligente',
+                description: 'As tarefas atrasadas serão reagendadas de forma inteligente: preferencialmente antes das próximas sessões da mesma matéria, preservando a continuidade do aprendizado.',
                 replanPreview: replanPreview.slice(0, 5), // Mostrar apenas primeiras 5
                 totalToReplan: replanPreview.length,
                 examDate: plan.exam_date,
@@ -2470,8 +2469,8 @@ app.get('/plans/:planId/replan-preview',
             });
 
         } catch (error) {
-            console.error("Erro ao gerar preview de replanejamento:", error);
-            res.status(500).json({ error: "Erro ao analisar tarefas atrasadas." });
+            console.error('Erro ao gerar preview de replanejamento:', error);
+            res.status(500).json({ error: 'Erro ao analisar tarefas atrasadas.' });
         }
     }
 );
@@ -2485,15 +2484,15 @@ app.post('/plans/:planId/replan',
         const planId = req.params.planId;
         try {
             const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
-            if (!plan) return res.status(404).json({ error: "Plano não encontrado." });
+            if (!plan) return res.status(404).json({ error: 'Plano não encontrado.' });
 
             const todayStr = getBrazilianDateString();
-            const overdueSessions = await dbAll("SELECT * FROM study_sessions WHERE study_plan_id = ? AND status = 'Pendente' AND session_date < ? ORDER BY session_date, id", [planId, todayStr]);
+            const overdueSessions = await dbAll('SELECT * FROM study_sessions WHERE study_plan_id = ? AND status = \'Pendente\' AND session_date < ? ORDER BY session_date, id', [planId, todayStr]);
             
             if (overdueSessions.length === 0) {
                 return res.json({ 
                     success: true, 
-                    message: "Nenhuma tarefa atrasada para replanejar." 
+                    message: 'Nenhuma tarefa atrasada para replanejar.' 
                 });
             }
 
@@ -2503,7 +2502,7 @@ app.post('/plans/:planId/replan',
 
             // Função para encontrar próximo slot disponível com segurança
             const findNextAvailableSlot = async (startDate, skipDate = null, maxDaysSearch = 365) => {
-                let currentDate = new Date(startDate);
+                const currentDate = new Date(startDate);
                 let daysSearched = 0;
                 
                 while (currentDate <= examDate && daysSearched < maxDaysSearch) {
@@ -2590,7 +2589,7 @@ app.post('/plans/:planId/replan',
                 });
 
                 let rescheduledCount = 0;
-                let failedSessions = [];
+                const failedSessions = [];
                 const reschedulingLog = [];
 
                 // Processar cada matéria com segurança
@@ -2626,7 +2625,7 @@ app.post('/plans/:planId/replan',
                                 
                                 // Máximo 2 sessões da mesma matéria por dia para evitar fadiga
                                 if (sameSubjectCount < 2) {
-                                    await dbRun("UPDATE study_sessions SET session_date = ? WHERE id = ?", [newDateStr, session.id]);
+                                    await dbRun('UPDATE study_sessions SET session_date = ? WHERE id = ?', [newDateStr, session.id]);
                                     sessionDateCache.get(newDateStr).push({id: session.id, subject_name: session.subject_name});
                                     rescheduled = true;
                                     strategy = 'inserida antes da próxima sessão';
@@ -2652,7 +2651,7 @@ app.post('/plans/:planId/replan',
                                     
                                     // Preferir dias com menor concentração da mesma matéria
                                     if (sameSubjectCount < 2) {
-                                        await dbRun("UPDATE study_sessions SET session_date = ? WHERE id = ?", [newDateStr, session.id]);
+                                        await dbRun('UPDATE study_sessions SET session_date = ? WHERE id = ?', [newDateStr, session.id]);
                                         sessionDateCache.get(newDateStr).push({id: session.id, subject_name: session.subject_name});
                                         rescheduled = true;
                                         strategy = 'próximo slot balanceado';
@@ -2680,7 +2679,7 @@ app.post('/plans/:planId/replan',
                             const lateSlot = await findNextAvailableSlot(examMinusWeek);
                             if (lateSlot) {
                                 const newDateStr = lateSlot.date.toISOString().split('T')[0];
-                                await dbRun("UPDATE study_sessions SET session_date = ? WHERE id = ?", [newDateStr, session.id]);
+                                await dbRun('UPDATE study_sessions SET session_date = ? WHERE id = ?', [newDateStr, session.id]);
                                 rescheduled = true;
                                 strategy = 'slot de emergência próximo ao exame';
                                 rescheduledCount++;
@@ -2707,7 +2706,7 @@ app.post('/plans/:planId/replan',
             const result = await smartReplan();
             
             // Atualizar contador de replanejamentos
-            await dbRun("UPDATE study_plans SET postponement_count = postponement_count + 1 WHERE id = ?", [planId]);
+            await dbRun('UPDATE study_plans SET postponement_count = postponement_count + 1 WHERE id = ?', [planId]);
             
             await dbRun('COMMIT');
             
@@ -2750,10 +2749,10 @@ app.post('/plans/:planId/replan',
             try {
                 await dbRun('ROLLBACK');
             } catch (rollbackError) {
-                console.error("[REPLAN] Erro ao fazer rollback:", rollbackError);
+                console.error('[REPLAN] Erro ao fazer rollback:', rollbackError);
             }
             
-            console.error("[REPLAN] Erro crítico ao replanejar:", {
+            console.error('[REPLAN] Erro crítico ao replanejar:', {
                 planId,
                 userId: req.user.id,
                 error: error.message,
@@ -2762,7 +2761,7 @@ app.post('/plans/:planId/replan',
             
             res.status(500).json({ 
                 success: false, 
-                error: "Ocorreu um erro interno ao replanejar as tarefas. Nossa equipe foi notificada.",
+                error: 'Ocorreu um erro interno ao replanejar as tarefas. Nossa equipe foi notificada.',
                 message: process.env.NODE_ENV === 'development' ? error.message : 'Erro interno do servidor'
             });
         }
@@ -2781,7 +2780,7 @@ app.get('/plans/:planId/exclusions',
             // Verificar se o plano pertence ao usuário
             const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
             if (!plan) {
-                return res.status(404).json({ error: "Plano não encontrado ou não autorizado." });
+                return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
             }
             
             // Buscar exclusões
@@ -2814,7 +2813,7 @@ app.get('/plans/:planId/exclusions',
             
         } catch (error) {
             console.error('Erro ao buscar exclusões:', error);
-            res.status(500).json({ error: "Erro interno do servidor." });
+            res.status(500).json({ error: 'Erro interno do servidor.' });
         }
     }
 );
@@ -2831,7 +2830,7 @@ app.get('/plans/:planId/excluded-topics',
             // Verificar se o plano pertence ao usuário
             const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
             if (!plan) {
-                return res.status(404).json({ error: "Plano não encontrado ou não autorizado." });
+                return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
             }
             
             // Buscar tópicos excluídos da nova tabela
@@ -2883,7 +2882,7 @@ app.get('/plans/:planId/excluded-topics',
             
         } catch (error) {
             console.error('Erro ao buscar tópicos excluídos:', error);
-            res.status(500).json({ error: "Erro interno do servidor." });
+            res.status(500).json({ error: 'Erro interno do servidor.' });
         }
     }
 );
@@ -3190,7 +3189,7 @@ app.get('/plans/:planId/review_data',
         const planId = req.params.planId;
         try {
             const plan = await dbGet('SELECT review_mode FROM study_plans WHERE id = ?', [planId]);
-            if (!plan) return res.status(404).json({ error: "Plano não encontrado" });
+            if (!plan) return res.status(404).json({ error: 'Plano não encontrado' });
             const reviewDate = new Date(date + 'T00:00:00');
             const daysToLookBack = type === 'mensal' ? 28 : 7;
             const startDate = new Date(reviewDate);
@@ -3206,7 +3205,7 @@ app.get('/plans/:planId/review_data',
                   AND ss.session_type = 'Novo Tópico'
                   AND ss.session_date >= ? AND ss.session_date <= ?
             `;
-            let params = [planId, startDateStr, reviewDateStr];
+            const params = [planId, startDateStr, reviewDateStr];
             if (plan.review_mode === 'focado') {
                 sql += ` AND (SELECT COALESCE(SUM(questions_solved), 0) FROM study_sessions WHERE topic_id = ss.topic_id AND study_plan_id = ?) < 10`;
                 params.push(planId);
@@ -3221,7 +3220,7 @@ app.get('/plans/:planId/review_data',
             res.json(groupedBySubject);
         } catch (error) {
             console.error('Erro ao buscar dados de revisão:', error);
-            res.status(500).json({ error: "Erro ao buscar dados de revisão" });
+            res.status(500).json({ error: 'Erro ao buscar dados de revisão' });
         }
 });
 
@@ -3822,8 +3821,8 @@ app.get('/plans/:planId/share-progress',
         const userId = req.user.id;
 
         try {
-            const plan = await dbGet("SELECT plan_name, exam_date FROM study_plans WHERE id = ? AND user_id = ?", [planId, userId]);
-            if (!plan) return res.status(404).json({ "error": "Plano não encontrado ou não autorizado." });
+            const plan = await dbGet('SELECT plan_name, exam_date FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+            if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
 
             const user = await dbGet('SELECT name FROM users WHERE id = ?', [userId]);
 
@@ -3912,8 +3911,8 @@ app.get('/plans/:planId/share-progress',
             res.json(shareData);
 
         } catch (error) {
-            console.error("Erro ao gerar dados de compartilhamento:", error);
-            res.status(500).json({ "error": "Erro ao gerar dados de compartilhamento." });
+            console.error('Erro ao gerar dados de compartilhamento:', error);
+            res.status(500).json({ 'error': 'Erro ao gerar dados de compartilhamento.' });
         }
     }
 );
@@ -3958,7 +3957,7 @@ app.get('/ready', (req, res) => {
 });
 
 // Configurar error handling global
-setupGlobalErrorHandling();
+// setupGlobalErrorHandling(); // Função não existe, comentada temporariamente
 
 // Middleware de tratamento de erros robusto
 app.use(errorHandler);
