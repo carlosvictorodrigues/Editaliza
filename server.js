@@ -206,17 +206,19 @@ app.use(helmet({
 }));
 
 // Configuração CORS mais restritiva
-const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'];
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || ['http://localhost:3000'];
 app.use(cors({
     origin: function (origin, callback) {
-        // CORREÇÃO: Ser mais restritivo mesmo em desenvolvimento
-        if (!origin && process.env.NODE_ENV === 'development') {
+        // Permitir requisições sem origin header (health checks, server-to-server, etc.)
+        if (!origin) {
             return callback(null, true);
         }
-        if (allowedOrigins.indexOf(origin) !== -1) {
+        
+        // Verificar se o origin está na lista de permitidos
+        if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            console.warn('CORS bloqueou origin:', origin);
+            console.warn('CORS bloqueou origin:', origin, 'Permitidos:', allowedOrigins);
             callback(new Error('Not allowed by CORS'));
         }
     },
