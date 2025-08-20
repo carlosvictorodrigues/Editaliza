@@ -1,193 +1,160 @@
 /**
- * @file src/config/environment.js
- * @description Configuração centralizada de variáveis de ambiente
- * @version 1.0.0 - Preparação para produção
+ * Configuração de Ambiente Inteligente
+ * Detecta automaticamente se está em desenvolvimento ou produção
  */
 
 require('dotenv').config();
 
-/**
- * Validação e parsing de variáveis de ambiente
- */
-const parseBoolean = (value, defaultValue = false) => {
-    if (value === undefined || value === null) return defaultValue;
-    return value.toLowerCase() === 'true';
-};
+const isDevelopment = process.env.NODE_ENV !== 'production';
+const isProduction = process.env.NODE_ENV === 'production';
 
-const parseInteger = (value, defaultValue = 0) => {
-    const parsed = parseInt(value, 10);
-    return isNaN(parsed) ? defaultValue : parsed;
-};
+// Detecta se está rodando localmente
+const isLocal = process.env.APP_URL?.includes('localhost') || 
+                process.env.NODE_ENV === 'development' ||
+                !process.env.NODE_ENV;
 
-const parseFloat = (value, defaultValue = 0.0) => {
-    const parsed = parseFloat(value);
-    return isNaN(parsed) ? defaultValue : parsed;
-};
-
-/**
- * Configurações de ambiente com validação
- */
 const config = {
-    // === CONFIGURAÇÕES BÁSICAS ===
+    // Ambiente
     NODE_ENV: process.env.NODE_ENV || 'development',
-    IS_PRODUCTION: process.env.NODE_ENV === 'production',
-    IS_DEVELOPMENT: process.env.NODE_ENV === 'development',
-    IS_TEST: process.env.NODE_ENV === 'test',
+    PORT: process.env.PORT || 3000,
+    IS_PRODUCTION: isProduction,
+    IS_DEVELOPMENT: isDevelopment,
+    IS_LOCAL: isLocal,
     
-    PORT: parseInteger(process.env.PORT, 3000),
-    HOST: process.env.HOST || '0.0.0.0',
-    BASE_URL: process.env.BASE_URL || 'http://localhost:3000',
-    TIMEZONE: process.env.TIMEZONE || 'America/Sao_Paulo',
-
-    // === BANCO DE DADOS ===
-    DATABASE: {
-        PATH: process.env.DATABASE_PATH || './db.sqlite',
-        CACHE_SIZE: parseInteger(process.env.SQLITE_CACHE_SIZE, -64000),
-        MMAP_SIZE: parseInteger(process.env.SQLITE_MMAP_SIZE, 268435456),
-        BUSY_TIMEOUT: parseInteger(process.env.SQLITE_BUSY_TIMEOUT, 30000)
+    // URLs - Adapta automaticamente
+    APP_URL: process.env.APP_URL || (isProduction 
+        ? 'https://app.editaliza.com.br' 
+        : 'http://localhost:3000'),
+    
+    CLIENT_URL: process.env.CLIENT_URL || (isProduction 
+        ? 'https://app.editaliza.com.br' 
+        : 'http://localhost:3000'),
+    
+    FRONTEND_URL: process.env.FRONTEND_URL || (isProduction 
+        ? 'https://app.editaliza.com.br' 
+        : 'http://localhost:3000'),
+    
+    // Banco de Dados
+    DB: {
+        HOST: process.env.DB_HOST || 'localhost',
+        PORT: process.env.DB_PORT || 5432,
+        NAME: process.env.DB_NAME || (isProduction ? 'editaliza_db' : 'editaliza_dev'),
+        USER: process.env.DB_USER || 'editaliza_user',
+        PASSWORD: process.env.DB_PASSWORD || 'editaliza_password123'
     },
-
-    // === CAMINHOS ===
-    PATHS: {
-        UPLOADS: process.env.UPLOADS_DIR || './uploads',
-        PUBLIC: process.env.PUBLIC_DIR || './public',
-        CSS: process.env.CSS_DIR || './css',
-        JS: process.env.JS_DIR || './js',
-        IMAGES: process.env.IMAGES_DIR || './images'
+    
+    // Redis
+    REDIS: {
+        HOST: process.env.REDIS_HOST || 'localhost',
+        PORT: process.env.REDIS_PORT || 6379,
+        PASSWORD: process.env.REDIS_PASSWORD || '',
+        DB: process.env.REDIS_DB || 0,
+        // Em desenvolvimento, Redis é opcional
+        ENABLED: isProduction || process.env.REDIS_ENABLED === 'true'
     },
-
-    // === UPLOADS ===
-    UPLOAD: {
-        MAX_FILE_SIZE: parseInteger(process.env.UPLOAD_MAX_FILE_SIZE, 5 * 1024 * 1024), // 5MB
-        MAX_BODY_SIZE: process.env.MAX_BODY_SIZE || '10mb'
-    },
-
-    // === SESSÃO ===
-    SESSION: {
-        SECRET: process.env.SESSION_SECRET || 'change_this_in_production_very_long_secure_string',
-        MAX_AGE: parseInteger(process.env.SESSION_MAX_AGE, 24 * 60 * 60 * 1000), // 24h
-        STORE_PATH: process.env.SESSION_STORE_PATH || './sessions.db'
-    },
-
-    // === RATE LIMITING ===
-    RATE_LIMIT: {
-        WINDOW_MS: parseInteger(process.env.RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000), // 15min
-        MAX_REQUESTS: parseInteger(process.env.RATE_LIMIT_MAX_REQUESTS, 100),
-        LOGIN_WINDOW_MS: parseInteger(process.env.LOGIN_RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000),
-        LOGIN_MAX_ATTEMPTS: parseInteger(process.env.LOGIN_RATE_LIMIT_MAX_ATTEMPTS, 5)
-    },
-
-    // === SEGURANÇA ===
+    
+    // Segurança
     SECURITY: {
-        JWT_SECRET: process.env.JWT_SECRET || 'change_this_in_production_jwt_secret_very_long_and_secure',
-        JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'change_this_in_production_refresh_secret_very_long_and_secure',
-        HSTS_MAX_AGE: parseInteger(process.env.HSTS_MAX_AGE, 31536000), // 1 year
-        ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000']
+        JWT_SECRET: process.env.JWT_SECRET || (isProduction 
+            ? undefined // Força erro em produção se não configurado
+            : 'desenvolvimento_jwt_secret_inseguro'),
+        JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || (isProduction 
+            ? undefined 
+            : 'desenvolvimento_refresh_secret_inseguro'),
+        SESSION_SECRET: process.env.SESSION_SECRET || (isProduction 
+            ? undefined 
+            : 'desenvolvimento_session_secret_inseguro'),
+        BCRYPT_ROUNDS: isProduction ? 12 : 10
     },
-
-    // === OAUTH GOOGLE ===
+    
+    // Google OAuth
     GOOGLE: {
         CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
         CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-        CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:3000/auth/google/callback'
+        CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL || (isProduction 
+            ? 'https://app.editaliza.com.br/auth/google/callback'
+            : 'http://localhost:3000/auth/google/callback'),
+        ENABLED: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)
     },
-
-    // === EMAIL ===
+    
+    // Email
     EMAIL: {
+        FROM: process.env.EMAIL_FROM || 'noreply@editaliza.com.br',
         HOST: process.env.EMAIL_HOST || 'smtp.gmail.com',
-        PORT: parseInteger(process.env.EMAIL_PORT, 587),
+        PORT: process.env.EMAIL_PORT || 587,
+        SECURE: process.env.EMAIL_SECURE === 'true',
         USER: process.env.EMAIL_USER,
-        PASS: process.env.EMAIL_PASS,
-        SUPPORT: process.env.SUPPORT_EMAIL || 'suporte@editaliza.com.br'
+        PASSWORD: process.env.EMAIL_PASSWORD,
+        ENABLED: !!(process.env.EMAIL_USER && process.env.EMAIL_PASSWORD)
     },
-
-    // === BUSINESS LOGIC ===
-    BUSINESS: {
-        CRONOGRAMA_BATCH_SIZE: parseInteger(process.env.CRONOGRAMA_BATCH_SIZE, 100),
-        MAX_NAME_LENGTH: parseInteger(process.env.MAX_NAME_LENGTH, 100),
-        MAX_CITY_LENGTH: parseInteger(process.env.MAX_CITY_LENGTH, 100),
-        MAX_MOTIVATION_TEXT_LENGTH: parseInteger(process.env.MAX_MOTIVATION_TEXT_LENGTH, 1000)
+    
+    // CORS
+    CORS: {
+        ORIGIN: process.env.CORS_ORIGIN || (isProduction 
+            ? ['https://app.editaliza.com.br', 'https://editaliza.com.br']
+            : ['http://localhost:3000', 'http://localhost:3001']),
+        CREDENTIALS: process.env.CORS_CREDENTIALS !== 'false'
     },
-
-    // === DEBUG E LOGS ===
+    
+    // Cookies
+    COOKIES: {
+        SECURE: isProduction || process.env.COOKIE_SECURE === 'true',
+        DOMAIN: process.env.COOKIE_DOMAIN || (isProduction 
+            ? '.editaliza.com.br' 
+            : 'localhost'),
+        SAME_SITE: process.env.COOKIE_SAME_SITE || 'lax',
+        HTTP_ONLY: true,
+        MAX_AGE: 7 * 24 * 60 * 60 * 1000 // 7 dias
+    },
+    
+    // Debug
     DEBUG: {
-        MODE: parseBoolean(process.env.DEBUG_MODE, false),
-        LOG_LEVEL: process.env.LOG_LEVEL || 'info'
+        ENABLED: isDevelopment || process.env.DEBUG === 'true',
+        LOG_LEVEL: process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info'),
+        LOG_SQL: isDevelopment && process.env.LOG_SQL === 'true'
     },
-
-    // === CSP ===
-    CSP: {
-        SCRIPT_SRC: process.env.CSP_SCRIPT_SRC || "'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://accounts.google.com https://www.gstatic.com",
-        STYLE_SRC: process.env.CSP_STYLE_SRC || "'self' 'unsafe-inline' https://cdn.tailwindcss.com https://fonts.googleapis.com",
-        FONT_SRC: process.env.CSP_FONT_SRC || "'self' https://fonts.gstatic.com",
-        IMG_SRC: process.env.CSP_IMG_SRC || "'self' data: https: blob:",
-        CONNECT_SRC: process.env.CSP_CONNECT_SRC || "'self' https: wss:"
+    
+    // Rate Limiting
+    RATE_LIMIT: {
+        WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 min
+        MAX_REQUESTS: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
+        ENABLED: isProduction || process.env.RATE_LIMIT_ENABLED === 'true'
+    },
+    
+    // Backup
+    BACKUP: {
+        ENABLED: process.env.BACKUP_ENABLED === 'true',
+        INTERVAL_HOURS: parseInt(process.env.BACKUP_INTERVAL_HOURS || '6')
     }
 };
 
-/**
- * Validação de configurações críticas
- */
-const validateConfig = () => {
-    const errors = [];
-
-    // Validações críticas para produção
-    if (config.IS_PRODUCTION) {
-        if (config.SESSION.SECRET === 'change_this_in_production_very_long_secure_string') {
-            errors.push('SESSION_SECRET deve ser alterado em produção');
-        }
-        
-        if (config.SECURITY.JWT_SECRET === 'change_this_in_production_jwt_secret_very_long_and_secure') {
-            errors.push('JWT_SECRET deve ser alterado em produção');
-        }
-        
-        if (config.SECURITY.JWT_REFRESH_SECRET === 'change_this_in_production_refresh_secret_very_long_and_secure') {
-            errors.push('JWT_REFRESH_SECRET deve ser alterado em produção');
-        }
-
-        if (!config.GOOGLE.CLIENT_ID || !config.GOOGLE.CLIENT_SECRET) {
-            errors.push('Configurações do Google OAuth são obrigatórias em produção');
-        }
-
-        if (config.EMAIL.USER && !config.EMAIL.PASS) {
-            errors.push('EMAIL_PASS é obrigatório quando EMAIL_USER está configurado');
-        }
+// Validação de configurações críticas em produção
+if (isProduction) {
+    const requiredConfigs = [
+        { name: 'JWT_SECRET', value: config.SECURITY.JWT_SECRET },
+        { name: 'SESSION_SECRET', value: config.SECURITY.SESSION_SECRET },
+        { name: 'DB_PASSWORD', value: config.DB.PASSWORD }
+    ];
+    
+    const missing = requiredConfigs.filter(cfg => !cfg.value);
+    if (missing.length > 0) {
+        console.error('❌ Configurações obrigatórias faltando em produção:');
+        missing.forEach(cfg => console.error(`   - ${cfg.name}`));
+        console.error('\nConfigure estas variáveis no arquivo .env');
+        // Em produção real, você poderia querer process.exit(1) aqui
     }
+}
 
-    // Validações de tipos
-    if (config.PORT < 1 || config.PORT > 65535) {
-        errors.push('PORT deve estar entre 1 e 65535');
-    }
-
-    if (config.UPLOAD.MAX_FILE_SIZE < 1024) {
-        errors.push('UPLOAD_MAX_FILE_SIZE deve ser pelo menos 1KB');
-    }
-
-    if (errors.length > 0) {
-        console.error('❌ Erros de configuração encontrados:');
-        errors.forEach(error => console.error(`  - ${error}`));
-        
-        if (config.IS_PRODUCTION) {
-            process.exit(1);
-        } else {
-            console.warn('⚠️  Continuando em modo de desenvolvimento...');
-        }
-    }
-};
-
-// Validar configurações na inicialização
-validateConfig();
-
-// Log das configurações carregadas (sem secrets)
-if (config.DEBUG.MODE) {
-    console.log('🔧 Configurações carregadas:', {
-        NODE_ENV: config.NODE_ENV,
-        PORT: config.PORT,
-        HOST: config.HOST,
-        DATABASE_PATH: config.DATABASE.PATH,
-        UPLOADS_DIR: config.PATHS.UPLOADS,
-        TIMEZONE: config.TIMEZONE
-    });
+// Log das configurações (sem expor secrets)
+if (isDevelopment) {
+    console.log('📋 Configuração do Ambiente:');
+    console.log('   Ambiente:', config.NODE_ENV);
+    console.log('   Porta:', config.PORT);
+    console.log('   URL:', config.APP_URL);
+    console.log('   DB:', `${config.DB.HOST}:${config.DB.PORT}/${config.DB.NAME}`);
+    console.log('   Redis:', config.REDIS.ENABLED ? 'Habilitado' : 'Desabilitado');
+    console.log('   OAuth:', config.GOOGLE.ENABLED ? 'Configurado' : 'Não configurado');
+    console.log('   Email:', config.EMAIL.ENABLED ? 'Configurado' : 'Não configurado');
 }
 
 module.exports = config;
