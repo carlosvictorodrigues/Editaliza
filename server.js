@@ -17,7 +17,7 @@ function getBrazilianDateString() {
 }
 
 const express = require('express');
-const db = require('./database.js');
+const db = require('./database-postgresql.js');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
