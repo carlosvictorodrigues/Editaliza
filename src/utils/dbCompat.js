@@ -7,9 +7,10 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 /**
  * Get the correct password column name based on environment
+ * Both environments now use 'password_hash' as standardized
  */
 const getPasswordColumn = () => {
-    return isProduction ? 'password' : 'password_hash';
+    return 'password_hash';
 };
 
 /**
