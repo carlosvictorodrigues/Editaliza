@@ -534,13 +534,15 @@ app.use((req, res, next) => {
         '/auth/google',
         '/auth/google/callback',
         '/request-password-reset',
-        '/reset-password'
+        '/reset-password',
+        '/csrf-token'  // Endpoint para obter token CSRF
     ];
     
-    // Pular CSRF para APIs autenticadas com JWT
+    // Pular CSRF para APIs autenticadas com JWT (verifica se há Authorization header)
     const isAPIRoute = req.path.startsWith('/schedules') || req.path.startsWith('/plans') || req.path.startsWith('/users') || req.path.startsWith('/topics');
+    const hasJWTAuth = req.headers.authorization && req.headers.authorization.startsWith('Bearer ');
     
-    if (skipCSRF.includes(req.path) || req.method === 'GET' || isAPIRoute) {
+    if (skipCSRF.includes(req.path) || req.method === 'GET' || (isAPIRoute && hasJWTAuth)) {
         return next();
     }
     
@@ -818,6 +820,19 @@ app.get('/auth/session-token', (req, res) => {
     } else {
         res.status(401).json({ error: 'Nenhum token de sessão disponível' });
     }
+});
+
+// Endpoint para obter token CSRF (para testes e desenvolvimento)
+app.get('/csrf-token', (req, res) => {
+    // Gerar token CSRF se não existir na sessão
+    if (!req.session.csrfToken) {
+        req.session.csrfToken = generateCSRFToken();
+    }
+    
+    res.json({ 
+        csrfToken: req.session.csrfToken,
+        info: 'Use este token no header x-csrf-token para requisições POST/PUT/DELETE'
+    });
 });
 
 // Route to check Google OAuth status (for debugging)
