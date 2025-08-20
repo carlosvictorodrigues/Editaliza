@@ -169,7 +169,7 @@ const updateUsersTable = async () => {
             
             // Get all columns
             const columns = await new Promise((resolve, reject) => {
-                const db = require('../../database');
+                const { dbGet, dbAll, dbRun } = require('../utils/database');
                 db.all(`PRAGMA table_info(users)`, (err, columns) => {
                     if (err) reject(err);
                     else resolve(columns);

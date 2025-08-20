@@ -5,6 +5,7 @@ const AuditModel = require('../../subscription/models/audit');
 const SubscriptionModel = require('../../subscription/models/subscription');
 const cacktoConfig = require('../config/cackto.config');
 const CacheService = require('../../subscription/services/cache');
+const { dbGet, dbAll, dbRun } = require('../../utils/database');
 
 class CacktoWebhookProcessor {
     constructor() {
@@ -641,9 +642,9 @@ class CacktoWebhookProcessor {
      * Registra evento de webhook na base de dados
      */
     async recordWebhookEvent(payload, processingId) {
-        const db = require('../../utils/database');
+        const { dbGet, dbAll, dbRun } = require('../../utils/database');
         
-        await db.run(`
+        await dbRun(`
             INSERT INTO webhook_events (
                 webhook_id, event_type, status, processing_id, 
                 raw_payload, created_at, processed_at
@@ -683,9 +684,9 @@ class CacktoWebhookProcessor {
      * Adiciona webhook à dead letter queue para retry
      */
     async addToDeadLetterQueue(payload, error, processingId) {
-        const db = require('../../utils/database');
+        const { dbGet, dbAll, dbRun } = require('../../utils/database');
         
-        await db.run(`
+        await dbRun(`
             INSERT INTO webhook_dead_letter_queue (
                 webhook_id, event_type, error_message, retry_count, 
                 raw_payload, processing_id, failed_at

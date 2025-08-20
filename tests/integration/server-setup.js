@@ -25,7 +25,7 @@ const testDb = new sqlite3.Database(testDbPath);
 const createRealTestServer = () => {
     // We need to create the app the same way as server.js but without starting it
     const express = require('express');
-    const db = require('../../database.js');
+    const db = require('../../database-postgresql.js');
     const bcrypt = require('bcryptjs');
     const jwt = require('jsonwebtoken');
     const cors = require('cors');

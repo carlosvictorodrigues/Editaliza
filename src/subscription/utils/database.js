@@ -1,5 +1,5 @@
 // database.js - Wrapper para compatibilidade Promise com SQLite
-const originalDb = require('../../../database.js');
+const originalDb = require('../../../database-postgresql.js');
 
 class DatabaseWrapper {
     constructor(db) {

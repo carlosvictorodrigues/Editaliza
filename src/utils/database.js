@@ -5,7 +5,7 @@
  * making it easier to work with async/await in services and repositories.
  */
 
-const db = require('../../database');
+const db = require('../../database-postgresql');
 
 /**
  * Get a single row from database

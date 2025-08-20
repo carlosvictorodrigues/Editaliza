@@ -1,5 +1,5 @@
 // cacheService.js - Serviço de cache para otimização da integração CACKTO
-const db = require('../../../database');
+const { dbGet, dbAll, dbRun } = require('../../utils/database');
 const crypto = require('crypto');
 
 class CacheService {
@@ -45,7 +45,7 @@ class CacheService {
             }
 
             // Verificar cache no banco
-            const result = await db.get(
+            const result = await dbGet(
                 `SELECT cache_value, expires_at 
                  FROM cackto_cache 
                  WHERE cache_key = ? AND expires_at > datetime('now')`,
@@ -85,7 +85,7 @@ class CacheService {
             const cacheValue = JSON.stringify(value);
 
             // Armazenar no banco
-            await db.run(
+            await dbRun(
                 `INSERT OR REPLACE INTO cackto_cache (cache_key, cache_value, expires_at, created_at)
                  VALUES (?, ?, ?, datetime('now'))`,
                 [key, cacheValue, expiresAt.toISOString()]
@@ -115,7 +115,7 @@ class CacheService {
             this.memoryCache.delete(key);
 
             // Remover do banco
-            await db.run(
+            await dbRun(
                 'DELETE FROM cackto_cache WHERE cache_key = ?',
                 [key]
             );
@@ -146,7 +146,7 @@ class CacheService {
             }
 
             // Limpar do banco
-            const result = await db.run(
+            const result = await dbRun(
                 'DELETE FROM cackto_cache WHERE cache_key LIKE ?',
                 [sqlPattern]
             );
@@ -168,7 +168,7 @@ class CacheService {
             this.memoryCache.clear();
 
             // Limpar banco
-            await db.run('DELETE FROM cackto_cache');
+            await dbRun('DELETE FROM cackto_cache');
 
             return true;
         } catch (error) {
@@ -194,7 +194,7 @@ class CacheService {
             }
 
             // Limpar do banco
-            const result = await db.run(
+            const result = await dbRun(
                 'DELETE FROM cackto_cache WHERE expires_at <= datetime("now")'
             );
 
@@ -329,7 +329,7 @@ class CacheService {
      */
     async getStats() {
         try {
-            const dbStats = await db.get(`
+            const dbStats = await dbGet(`
                 SELECT 
                     COUNT(*) as total_entries,
                     COUNT(CASE WHEN expires_at > datetime('now') THEN 1 END) as active_entries,

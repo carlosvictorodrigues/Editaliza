@@ -3,7 +3,7 @@
  * Previne problemas N+1 e implementa transações atômicas
  */
 
-const db = require('../../database');
+const { dbGet, dbAll, dbRun } = require('./database');
 
 /**
  * Classe para gerenciar transações atômicas
@@ -33,48 +33,24 @@ class DatabaseTransaction {
      * @returns {Promise} - Resultado da transação
      */
     async execute() {
-        return new Promise((resolve, reject) => {
-            db.serialize(() => {
-                db.run('BEGIN TRANSACTION');
-
-                let completedQueries = 0;
-                let hasError = false;
-
-                const executeNext = () => {
-                    if (completedQueries >= this.queries.length) {
-                        if (hasError) {
-                            db.run('ROLLBACK', (err) => {
-                                if (err) console.error('Erro no rollback:', err);
-                                reject(new Error('Transação falhou e foi revertida'));
-                            });
-                        } else {
-                            db.run('COMMIT', (err) => {
-                                if (err) {
-                                    console.error('Erro no commit:', err);
-                                    reject(err);
-                                } else {
-                                    resolve('Transação executada com sucesso');
-                                }
-                            });
-                        }
-                        return;
-                    }
-
-                    const { query, params } = this.queries[completedQueries];
-                    
-                    db.run(query, params, function(err) {
-                        if (err) {
-                            console.error(`Erro na query ${completedQueries + 1}:`, err);
-                            hasError = true;
-                        }
-                        completedQueries++;
-                        executeNext();
-                    });
-                };
-
-                executeNext();
-            });
-        });
+        try {
+            await dbRun('BEGIN TRANSACTION');
+            
+            for (const { query, params } of this.queries) {
+                await dbRun(query, params);
+            }
+            
+            await dbRun('COMMIT');
+            return 'Transação executada com sucesso';
+        } catch (error) {
+            console.error('Erro na transação:', error);
+            try {
+                await dbRun('ROLLBACK');
+            } catch (rollbackError) {
+                console.error('Erro no rollback:', rollbackError);
+            }
+            throw new Error('Transação falhou e foi revertida');
+        }
     }
 }
 
@@ -95,11 +71,7 @@ function executeOptimizedBatch(baseQuery, conditions, keyField) {
         const placeholders = conditions.map(() => '?').join(',');
         const optimizedQuery = baseQuery.replace('?', `(${placeholders})`);
 
-        db.all(optimizedQuery, conditions, (err, rows) => {
-            if (err) {
-                return reject(err);
-            }
-
+        dbAll(optimizedQuery, conditions).then(rows => {
             // Agrupar resultados por chave
             const groupedResults = {};
             rows.forEach(row => {
@@ -111,6 +83,8 @@ function executeOptimizedBatch(baseQuery, conditions, keyField) {
             });
 
             resolve(groupedResults);
+        }).catch(err => {
+            reject(err);
         });
     });
 }
@@ -163,11 +137,10 @@ async function fetchTopicsWithSubjects(planId) {
             ORDER BY s.priority_weight DESC, t.priority_weight DESC
         `;
 
-        db.all(query, [planId], (err, rows) => {
-            if (err) {
-                return reject(err);
-            }
+        dbAll(query, [planId]).then(rows => {
             resolve(rows);
+        }).catch(err => {
+            reject(err);
         });
     });
 }
@@ -210,11 +183,10 @@ async function fetchSessionsWithRelatedData(planId, dateFilter = null) {
 
         query += ` ORDER BY ss.session_date DESC`;
 
-        db.all(query, params, (err, rows) => {
-            if (err) {
-                return reject(err);
-            }
+        dbAll(query, params).then(rows => {
             resolve(rows);
+        }).catch(err => {
+            reject(err);
         });
     });
 }

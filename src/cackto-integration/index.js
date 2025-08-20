@@ -126,14 +126,14 @@ class CacktoIntegration {
     async syncConfigurations() {
         console.log('🔄 Sincronizando configurações...');
         
-        const db = require('../../database');
+        const { dbGet, dbAll, dbRun } = require('../utils/database');
         
         // Atualizar mapeamentos de produtos
         const productMappings = this.config.products.planMapping;
         
         for (const [planCode, planData] of Object.entries(productMappings)) {
             if (planData.cacktoProductId) {
-                await db.run(`
+                await dbRun(`
                     UPDATE cackto_product_mapping 
                     SET cackto_product_id = ?, price = ?, updated_at = CURRENT_TIMESTAMP
                     WHERE internal_plan_code = ?
@@ -161,10 +161,10 @@ class CacktoIntegration {
      */
     async collectMetrics() {
         try {
-            const db = require('../../database');
+            const { dbGet, dbAll, dbRun } = require('../utils/database');
             
             // Métricas de assinaturas
-            const subscriptionMetrics = await db.get(`
+            const subscriptionMetrics = await dbGet(`
                 SELECT 
                     COUNT(*) as total,
                     COUNT(CASE WHEN status = 'active' THEN 1 END) as active,
@@ -175,12 +175,12 @@ class CacktoIntegration {
             `);
 
             // Salvar métricas
-            await db.run(`
+            await dbRun(`
                 INSERT INTO integration_metrics (metric_name, metric_value, metric_type, processor)
                 VALUES (?, ?, ?, ?)
             `, ['active_subscriptions', subscriptionMetrics.active, 'gauge', 'cackto']);
 
-            await db.run(`
+            await dbRun(`
                 INSERT INTO integration_metrics (metric_name, metric_value, metric_type, processor) 
                 VALUES (?, ?, ?, ?)
             `, ['active_revenue', subscriptionMetrics.active_revenue || 0, 'gauge', 'cackto']);

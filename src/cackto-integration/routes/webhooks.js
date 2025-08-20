@@ -4,6 +4,7 @@ const CacktoWebhookValidator = require('../webhooks/validator');
 const CacktoWebhookProcessor = require('../webhooks/processor');
 const AuditModel = require('../../subscription/models/audit');
 const { asyncHandler } = require('../../utils/error-handler');
+const { dbGet, dbAll, dbRun } = require('../../utils/database');
 
 const router = express.Router();
 const webhookValidator = new CacktoWebhookValidator();
@@ -112,7 +113,7 @@ router.get('/cackto/health', asyncHandler(async (req, res) => {
 router.get('/cackto/stats', asyncHandler(async (req, res) => {
     // TODO: Adicionar middleware de autenticação de admin
     
-    const db = require('../../../database');
+    const { dbGet, dbAll, dbRun } = require('../../utils/database');
     const timeframe = req.query.timeframe || '24h';
     
     let timeCondition;
@@ -302,9 +303,9 @@ router.get('/cackto/events/:eventId', asyncHandler(async (req, res) => {
     // TODO: Adicionar middleware de autenticação de admin
     
     const { eventId } = req.params;
-    const db = require('../../../database');
+    const { dbGet, dbAll, dbRun } = require('../../utils/database');
     
-    const event = await db.get(`
+    const event = await dbGet(`
         SELECT 
             webhook_id,
             event_type,
@@ -352,10 +353,10 @@ router.post('/cackto/retry/:webhookId', asyncHandler(async (req, res) => {
     // TODO: Adicionar middleware de autenticação de admin
     
     const { webhookId } = req.params;
-    const db = require('../../../database');
+    const { dbGet, dbAll, dbRun } = require('../../utils/database');
     
     // Buscar webhook para reprocessamento
-    const webhook = await db.get(`
+    const webhook = await dbGet(`
         SELECT raw_payload, event_type
         FROM webhook_events 
         WHERE webhook_id = ?

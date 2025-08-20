@@ -194,7 +194,7 @@ class WebhookQueue {
      * @param {Error} error - Último erro
      */
     async moveToDeadLetterQueue(task, error) {
-        const db = require('../utils/database');
+        const { dbGet, dbAll, dbRun } = require('../../utils/database');
         
         const query = `
             INSERT INTO webhook_dead_letter_queue (
@@ -204,7 +204,7 @@ class WebhookQueue {
         `;
         
         try {
-            await db.run(query, [
+            await dbRun(query, [
                 crypto.randomUUID(),
                 task.webhook.payload.id,
                 task.webhook.payload.event_type,
@@ -296,10 +296,10 @@ class WebhookQueue {
      * @returns {Promise<boolean>} - Se foi reprocessado com sucesso
      */
     async reprocessFromDLQ(webhookId) {
-        const db = require('../utils/database');
+        const { dbGet, dbAll, dbRun } = require('../../utils/database');
         
         try {
-            const dlqItem = await db.get(
+            const dlqItem = await dbGet(
                 'SELECT * FROM webhook_dead_letter_queue WHERE webhook_id = ?',
                 [webhookId]
             );
@@ -333,7 +333,7 @@ class WebhookQueue {
             });
             
             // Remover da dead letter queue
-            await db.run(
+            await dbRun(
                 'DELETE FROM webhook_dead_letter_queue WHERE webhook_id = ?',
                 [webhookId]
             );
@@ -368,7 +368,7 @@ class WebhookQueue {
      * @returns {Promise<Array>} - Itens da DLQ
      */
     async listDLQ(options = {}) {
-        const db = require('../utils/database');
+        const { dbGet, dbAll, dbRun } = require('../../utils/database');
         const { limit = 50, offset = 0, eventType } = options;
         
         let query = 'SELECT * FROM webhook_dead_letter_queue';
@@ -383,7 +383,7 @@ class WebhookQueue {
         params.push(limit, offset);
         
         try {
-            const items = await db.all(query, params);
+            const items = await dbAll(query, params);
             
             return items.map(item => ({
                 ...item,
@@ -404,12 +404,12 @@ class WebhookQueue {
      * @returns {Promise<number>} - Número de itens removidos
      */
     async cleanupDLQ(daysOld = 30) {
-        const db = require('../utils/database');
+        const { dbGet, dbAll, dbRun } = require('../../utils/database');
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - daysOld);
         
         try {
-            const result = await db.run(
+            const result = await dbRun(
                 'DELETE FROM webhook_dead_letter_queue WHERE failed_at < ?',
                 [cutoffDate.toISOString()]
             );

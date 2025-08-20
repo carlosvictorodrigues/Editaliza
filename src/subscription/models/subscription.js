@@ -1,5 +1,5 @@
 // subscription.js - Modelo de assinatura com segurança robusta
-const db = require('../utils/database');
+const { dbGet, dbAll, dbRun } = require('../../utils/database');
 const crypto = require('crypto');
 const { AppError, ERROR_TYPES } = require('../../utils/error-handler');
 
@@ -39,7 +39,7 @@ class SubscriptionModel {
         const checksum = this.generateChecksum(subscriptionData);
 
         try {
-            await db.run(query, [
+            await dbRun(query, [
                 subscriptionId, userId, kiwifyTransactionId, kiwifyProductId,
                 plan, status, amount, currency, paymentMethod,
                 now, now, expiresAt, encryptedMetadata, checksum
@@ -79,7 +79,7 @@ class SubscriptionModel {
         `;
 
         try {
-            const subscription = await db.get(query, [subscriptionId]);
+            const subscription = await dbGet(query, [subscriptionId]);
             if (!subscription) return null;
 
             return this.decryptSubscription(subscription);
@@ -108,7 +108,7 @@ class SubscriptionModel {
         `;
 
         try {
-            const subscription = await db.get(query, [userId]);
+            const subscription = await dbGet(query, [userId]);
             if (!subscription) return null;
 
             return this.decryptSubscription(subscription);
@@ -163,7 +163,7 @@ class SubscriptionModel {
         `;
 
         try {
-            const result = await db.run(query, [
+            const result = await dbRun(query, [
                 status, now, encryptedMetadata, newVersion,
                 subscriptionId, current.version
             ]);
@@ -212,7 +212,7 @@ class SubscriptionModel {
         `;
 
         try {
-            const subscription = await db.get(query, [kiwifyTransactionId]);
+            const subscription = await dbGet(query, [kiwifyTransactionId]);
             if (!subscription) return null;
 
             return this.decryptSubscription(subscription);
@@ -279,8 +279,8 @@ class SubscriptionModel {
 
         try {
             const [subscriptions, countResult] = await Promise.all([
-                db.all(query, [...params, limit, offset]),
-                db.get(countQuery, params)
+                dbAll(query, [...params, limit, offset]),
+                dbGet(countQuery, params)
             ]);
 
             const decryptedSubscriptions = subscriptions.map(sub => 
@@ -454,7 +454,7 @@ class SubscriptionModel {
         `;
 
         try {
-            await db.run(query, [
+            await dbRun(query, [
                 crypto.randomUUID(),
                 subscriptionId,
                 action,
@@ -487,7 +487,7 @@ class SubscriptionModel {
         `;
 
         try {
-            return await db.all(query, [subscriptionId, limit, offset]);
+            return await dbAll(query, [subscriptionId, limit, offset]);
         } catch (error) {
             throw new AppError(
                 'Erro ao buscar logs de auditoria',

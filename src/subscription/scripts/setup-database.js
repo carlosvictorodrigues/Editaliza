@@ -7,7 +7,7 @@ const crypto = require('crypto');
 
 // Importar configurações
 require('dotenv').config();
-const db = require('../utils/database');
+const { dbGet, dbAll, dbRun } = require('../../utils/database');
 const AuditModel = require('../models/audit');
 
 class DatabaseSetup {

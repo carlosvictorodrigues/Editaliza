@@ -6,7 +6,7 @@
  * and handles callbacks in development (SQLite).
  */
 
-const db = require('../../database');
+const db = require('../../database-postgresql');
 
 // Check if database already returns Promises (PostgreSQL in production)
 const isPromiseBased = process.env.NODE_ENV === 'production';

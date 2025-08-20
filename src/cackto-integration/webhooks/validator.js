@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const { AppError, ERROR_TYPES } = require('../../utils/error-handler');
 const AuditModel = require('../../subscription/models/audit');
 const cacktoConfig = require('../config/cackto.config');
+const { dbGet, dbAll, dbRun } = require('../../utils/database');
 
 class CacktoWebhookValidator {
     constructor() {
@@ -372,10 +373,10 @@ class CacktoWebhookValidator {
      * @param {string} validationId - ID da validação
      */
     async checkIdempotency(webhookId, validationId) {
-        const db = require('../../utils/database');
+        const { dbGet, dbAll, dbRun } = require('../../utils/database');
         
         try {
-            const existingWebhook = await db.get(
+            const existingWebhook = await dbGet(
                 'SELECT id FROM webhook_events WHERE webhook_id = ?',
                 [webhookId]
             );

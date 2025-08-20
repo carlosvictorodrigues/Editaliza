@@ -1,10 +1,11 @@
 // subscription-adapter.js - Adaptador para modelo de assinatura compatível com CACKTO
 const crypto = require('crypto');
 const { AppError, ERROR_TYPES } = require('../../utils/error-handler');
+const { dbGet, dbAll, dbRun } = require('../../utils/database');
 
 class CacktoSubscriptionAdapter {
     constructor() {
-        this.db = require('../../../database');
+        // Constructor vazio - funções db agora são importadas diretamente
     }
 
     /**
@@ -40,7 +41,7 @@ class CacktoSubscriptionAdapter {
         `;
 
         try {
-            await this.db.run(query, [
+            await dbRun(query, [
                 subscriptionId, userId, cacktoTransactionId,
                 plan, status, amount, currency, paymentMethod,
                 now, now, expiresAt, encryptedMetadata, checksum
@@ -123,7 +124,7 @@ class CacktoSubscriptionAdapter {
                 LIMIT 1
             `;
 
-            const subscription = await this.db.get(query, [cacktoTransactionId]);
+            const subscription = await dbGet(query, [cacktoTransactionId]);
 
             if (subscription) {
                 return this.decryptSubscription(subscription);
@@ -155,7 +156,7 @@ class CacktoSubscriptionAdapter {
                 LIMIT 1
             `;
 
-            const subscription = await this.db.get(query, [userId]);
+            const subscription = await dbGet(query, [userId]);
 
             if (subscription) {
                 return this.decryptSubscription(subscription);
@@ -180,7 +181,7 @@ class CacktoSubscriptionAdapter {
     async findById(subscriptionId) {
         try {
             const query = 'SELECT * FROM subscriptions WHERE id = ?';
-            const subscription = await this.db.get(query, [subscriptionId]);
+            const subscription = await dbGet(query, [subscriptionId]);
 
             if (subscription) {
                 return this.decryptSubscription(subscription);
@@ -210,7 +211,7 @@ class CacktoSubscriptionAdapter {
                 ORDER BY created_at DESC
             `;
 
-            const subscriptions = await this.db.all(query, [userId]);
+            const subscriptions = await dbAll(query, [userId]);
 
             return subscriptions.map(sub => this.decryptSubscription(sub));
 
@@ -366,7 +367,7 @@ class CacktoSubscriptionAdapter {
             const whereClause = whereConditions.join(' AND ');
 
             // Métricas básicas
-            const basicMetrics = await this.db.get(`
+            const basicMetrics = await dbGet(`
                 SELECT 
                     COUNT(*) as total,
                     COUNT(CASE WHEN status = 'active' THEN 1 END) as active,
@@ -380,7 +381,7 @@ class CacktoSubscriptionAdapter {
             `, values);
 
             // Métricas por plano
-            const planMetrics = await this.db.all(`
+            const planMetrics = await dbAll(`
                 SELECT 
                     plan,
                     COUNT(*) as count,
@@ -515,7 +516,7 @@ class CacktoSubscriptionAdapter {
             const cutoffDate = new Date();
             cutoffDate.setDate(cutoffDate.getDate() - daysOld);
 
-            const result = await this.db.run(`
+            const result = await dbRun(`
                 DELETE FROM subscriptions 
                 WHERE status IN ('expired', 'cancelled') 
                 AND updated_at < ?

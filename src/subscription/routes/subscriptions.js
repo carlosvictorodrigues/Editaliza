@@ -343,7 +343,7 @@ router.post('/admin/:subscriptionId/cancel',
 router.get('/admin/stats',
     // TODO: Adicionar middleware de autenticação de admin
     asyncHandler(async (req, res) => {
-        const db = require('../utils/database');
+        const { dbGet, dbAll, dbRun } = require('../../utils/database');
         
         const [subscriptionStats, revenueStats, churnStats] = await Promise.all([
             db.get('SELECT * FROM subscription_stats'),

@@ -1,5 +1,5 @@
 // audit.js - Modelo de auditoria imutável para compliance
-const db = require('../../../database');
+const { dbGet, dbAll, dbRun } = require('../../utils/database');
 const crypto = require('crypto');
 const { AppError, ERROR_TYPES } = require('../../utils/error-handler');
 
@@ -45,7 +45,7 @@ class AuditModel {
             // Gerar hash da blockchain para integridade
             const blockchainHash = await this.generateBlockchainHash(eventId);
             
-            await db.run(query, [
+            await dbRun(query, [
                 eventId,
                 entityType,
                 entityId,
@@ -146,8 +146,8 @@ class AuditModel {
 
         try {
             const [events, countResult] = await Promise.all([
-                db.all(query, [...params, limit, offset]),
-                db.get(countQuery, params)
+                dbAll(query, [...params, limit, offset]),
+                dbGet(countQuery, params)
             ]);
 
             // Verificar integridade dos eventos
@@ -198,9 +198,9 @@ class AuditModel {
 
         try {
             const [subscriptions, auditEvents, webhookEvents] = await Promise.all([
-                db.all(queries.subscriptions, [userId]),
-                db.all(queries.auditEvents, [userId]),
-                db.all(queries.webhookEvents, [userId])
+                dbAll(queries.subscriptions, [userId]),
+                dbAll(queries.auditEvents, [userId]),
+                dbAll(queries.webhookEvents, [userId])
             ]);
 
             const exportData = {
@@ -254,13 +254,13 @@ class AuditModel {
         const timestamp = new Date().toISOString();
 
         try {
-            await db.run('BEGIN TRANSACTION');
+            await dbRun('BEGIN TRANSACTION');
 
             // 1. Anonimizar dados em vez de deletar para manter integridade referencial
             const anonymizedEmail = `deleted_${deletionId}@editaliza.deleted`;
             const anonymizedName = `[USUÁRIO DELETADO]`;
 
-            await db.run(`
+            await dbRun(`
                 UPDATE users SET 
                     email = ?, 
                     name = ?,
@@ -274,7 +274,7 @@ class AuditModel {
             `, [anonymizedEmail, anonymizedName, timestamp, reason, userId]);
 
             // 2. Anonimizar metadados de assinatura
-            await db.run(`
+            await dbRun(`
                 UPDATE subscriptions SET 
                     metadata = '{}'
                 WHERE user_id = ?
@@ -282,7 +282,7 @@ class AuditModel {
 
             // 3. Manter logs de auditoria se requerido (obrigatório por lei)
             if (retainAudit) {
-                await db.run(`
+                await dbRun(`
                     UPDATE audit_events SET 
                         ip_address = '[ANONIMIZADO]',
                         user_agent = '[ANONIMIZADO]'
@@ -305,7 +305,7 @@ class AuditModel {
                 severity: 'WARN'
             });
 
-            await db.run('COMMIT');
+            await dbRun('COMMIT');
 
             return {
                 success: true,
@@ -314,7 +314,7 @@ class AuditModel {
                 message: 'Dados do usuário anonimizados com sucesso'
             };
         } catch (error) {
-            await db.run('ROLLBACK');
+            await dbRun('ROLLBACK');
             throw new AppError(
                 'Erro ao processar direito ao esquecimento',
                 ERROR_TYPES.DATABASE_ERROR,
@@ -364,10 +364,10 @@ class AuditModel {
             const params = [startDate, endDate];
             
             const [subscriptions, securityEvents, dataExports, deletionRequests] = await Promise.all([
-                db.all(queries.totalSubscriptions, params),
-                db.all(queries.securityEvents, params),
-                db.get(queries.dataExports, params),
-                db.get(queries.deletionRequests, params)
+                dbAll(queries.totalSubscriptions, params),
+                dbAll(queries.securityEvents, params),
+                dbGet(queries.dataExports, params),
+                dbGet(queries.deletionRequests, params)
             ]);
 
             const report = {
@@ -448,7 +448,7 @@ class AuditModel {
     static async generateBlockchainHash(eventId) {
         try {
             // Buscar o último hash da cadeia
-            const lastEvent = await db.get(`
+            const lastEvent = await dbGet(`
                 SELECT blockchain_hash FROM audit_events 
                 ORDER BY created_at DESC 
                 LIMIT 1
@@ -494,7 +494,7 @@ class AuditModel {
      */
     static async verifyAuditIntegrity() {
         try {
-            const events = await db.all(`
+            const events = await dbAll(`
                 SELECT id, entity_type, entity_id, action, user_id, 
                        created_at, details, hash, blockchain_hash
                 FROM audit_events 

@@ -101,7 +101,7 @@ class SubscriptionSystem {
             }
 
             // Verificar banco de dados
-            const db = require('./utils/database');
+            const { dbGet, dbAll, dbRun } = require('../utils/database');
             await db.get('SELECT 1'); // Teste de conectividade
 
             // Verificar tabelas necessárias
@@ -233,7 +233,7 @@ class SubscriptionSystem {
             };
 
             // Verificar banco de dados
-            const db = require('./utils/database');
+            const { dbGet, dbAll, dbRun } = require('../utils/database');
             const dbStart = Date.now();
             await db.get('SELECT datetime(\'now\') as current_time');
             const dbResponseTime = Date.now() - dbStart;

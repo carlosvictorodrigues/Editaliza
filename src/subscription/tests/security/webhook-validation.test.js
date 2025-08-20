@@ -211,7 +211,7 @@ describe('Webhook Security Validation', () => {
         });
         
         test('should reject duplicate webhook', async () => {
-            const db = require('../../../../database');
+            const { dbGet, dbAll, dbRun } = require('../../../utils/database');
             const validationId = crypto.randomUUID();
             const webhookId = `webhook_duplicate_${Date.now()}`;
             

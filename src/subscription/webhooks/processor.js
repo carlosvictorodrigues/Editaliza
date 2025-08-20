@@ -149,13 +149,13 @@ class WebhookProcessor {
      * @returns {Promise<Object>} - Resultado
      */
     async processOrderPaid(data, processingId) {
-        const db = require('../utils/database');
+        const { dbGet, dbAll, dbRun } = require('../../utils/database');
         
         try {
-            await db.run('BEGIN TRANSACTION');
+            await dbRun('BEGIN TRANSACTION');
             
             // Buscar usuário pelo email
-            const user = await db.get(
+            const user = await dbGet(
                 'SELECT id, email, name FROM users WHERE email = ?',
                 [data.customer.email]
             );
@@ -193,7 +193,7 @@ class WebhookProcessor {
                 }
             });
             
-            await db.run('COMMIT');
+            await dbRun('COMMIT');
             
             // Log de ativação
             await AuditModel.logEvent({
@@ -219,7 +219,7 @@ class WebhookProcessor {
             };
             
         } catch (error) {
-            await db.run('ROLLBACK');
+            await dbRun('ROLLBACK');
             throw error;
         }
     }
@@ -520,7 +520,7 @@ class WebhookProcessor {
      * @param {Object} eventData - Dados do evento
      */
     async logWebhookEvent(eventData) {
-        const db = require('../utils/database');
+        const { dbGet, dbAll, dbRun } = require('../../utils/database');
         
         const query = `
             INSERT INTO webhook_events (
@@ -531,7 +531,7 @@ class WebhookProcessor {
         `;
         
         try {
-            await db.run(query, [
+            await dbRun(query, [
                 crypto.randomUUID(),
                 eventData.webhookId,
                 eventData.eventType,

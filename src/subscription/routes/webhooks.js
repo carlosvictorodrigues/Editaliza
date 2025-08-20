@@ -110,7 +110,7 @@ router.get('/health', asyncHandler(async (req, res) => {
 router.get('/stats', asyncHandler(async (req, res) => {
     // TODO: Adicionar middleware de autenticação de admin
     
-    const db = require('../../../database');
+    const { dbGet, dbAll, dbRun } = require('../../utils/database');
     const timeframe = req.query.timeframe || '24h';
     
     let timeCondition;
