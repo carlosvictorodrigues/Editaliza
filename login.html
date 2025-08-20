@@ -167,11 +167,44 @@
                 return;
             }
             
+            // Check for successful Google OAuth login
+            if (urlParams.get('auth') === 'success') {
+                const token = urlParams.get('token');
+                const refreshToken = urlParams.get('refresh');
+                
+                if (token) {
+                    // Save tokens to localStorage
+                    localStorage.setItem(app.config.tokenKey || 'authToken', decodeURIComponent(token));
+                    if (refreshToken) {
+                        localStorage.setItem('refreshToken', decodeURIComponent(refreshToken));
+                    }
+                    
+                    // Show success message and redirect
+                    const messageContainer = document.getElementById('messageContainer');
+                    if (messageContainer) {
+                        messageContainer.textContent = 'Login com Google realizado com sucesso!';
+                        messageContainer.classList.add('text-green-600');
+                    }
+                    
+                    // Redirect to home after a short delay
+                    setTimeout(() => {
+                        window.location.href = 'home.html';
+                    }, 1000);
+                }
+                return;
+            }
+            
             // Check for OAuth errors
             if (urlParams.get('error')) {
                 const errorType = urlParams.get('error');
                 let errorMessage = 'Erro na autenticação.';
-                if (errorType === 'oauth_failed') {
+                if (errorType === 'auth_failed') {
+                    errorMessage = 'Falha na autenticação com Google. Tente novamente.';
+                } else if (errorType === 'google_auth_denied') {
+                    errorMessage = 'Autenticação cancelada pelo usuário.';
+                } else if (errorType === 'no_code') {
+                    errorMessage = 'Código de autenticação não recebido.';
+                } else if (errorType === 'oauth_failed') {
                     errorMessage = 'Falha na autenticação com Google. Tente novamente.';
                 } else if (errorType === 'oauth_callback_failed') {
                     errorMessage = 'Erro no processo de autenticação. Tente novamente.';

@@ -21,8 +21,9 @@ const {
     sanitizeMiddleware 
 } = require('../../middleware');
 
-// Import controller
+// Import controllers
 const authController = require('../controllers/authController');
+const oauthController = require('../controllers/oauthController');
 
 // Import rate limiting
 const rateLimit = require('express-rate-limit');
@@ -107,41 +108,38 @@ router.post('/login',
 
 /**
  * @route GET /auth/google
- * @desc Initiate Google OAuth
+ * @desc Initiate Google OAuth - NEW DIRECT IMPLEMENTATION
  * @access Public
  */
-router.get('/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+router.get('/google', oauthController.initiateGoogleOAuth);
+
+/**
+ * @route GET /auth/google/direct
+ * @desc Alternative Google OAuth endpoint (same as /google)
+ * @access Public
+ */
+router.get('/google/direct', oauthController.initiateGoogleOAuth);
 
 /**
  * @route GET /auth/google/callback
- * @desc Google OAuth callback
+ * @desc Google OAuth callback - NEW DIRECT IMPLEMENTATION (fixes "Malformed auth code")
  * @access Public
  */
-router.get('/google/callback',
-    passport.authenticate('google', { failureRedirect: '/login.html?error=oauth_failed' }),
-    async (req, res) => {
-        try {
-            // Generate JWT token for the authenticated user
-            const token = jwt.sign(
-                { id: req.user.id, email: req.user.email },
-                process.env.JWT_SECRET,
-                { expiresIn: '24h', issuer: 'editaliza' }
-            );
-            
-            // Set session data
-            req.session.userId = req.user.id;
-            req.session.loginTime = new Date();
-            
-            // Redirect to frontend with token
-            res.redirect(`/home.html?auth_success=1&token=${encodeURIComponent(token)}`);
-        } catch (error) {
-            console.error('Google OAuth callback error:', error);
-            res.redirect('/login.html?error=oauth_callback_failed');
-        }
-    }
-);
+router.get('/google/callback', oauthController.handleGoogleCallback);
+
+/**
+ * @route GET /auth/google/debug
+ * @desc Debug Google OAuth - endpoint para diagnóstico
+ * @access Public (apenas em desenvolvimento)
+ */
+router.get('/google/debug', oauthController.getOAuthStatus);
+
+/**
+ * @route GET /auth/google/test
+ * @desc Test Google connectivity
+ * @access Public (apenas em desenvolvimento)
+ */
+router.get('/google/test', oauthController.testGoogleConnectivity);
 
 /**
  * @route GET /auth/google/status

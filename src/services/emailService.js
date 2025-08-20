@@ -1,7 +1,7 @@
 const { createTransport } = require('nodemailer');
 const path = require('path');
 const EmailProviders = require('./emailProviders');
-const { logger } = require('../utils/logger');
+const { logger } = require('../utils/logger_fixed');
 
 class EmailService {
     constructor() {

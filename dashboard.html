@@ -334,7 +334,13 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', initialize);
+        // Usar o sistema de autenticação do app.js
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Primeiro verificar autenticação via app.init
+            await app.init();
+            // Se chegou aqui, está autenticado - inicializar página
+            initialize();
+        });
     </script>
     
     </div> <!-- End main content wrapper -->

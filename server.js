@@ -125,6 +125,11 @@ try {
 
 const app = express();
 
+// CORREÇÃO OAUTH: Configurar trust proxy para funcionar atrás de Nginx
+// Isso é CRÍTICO para OAuth funcionar corretamente com proxy reverso
+app.set('trust proxy', 1);
+console.log('✅ Trust proxy configurado para funcionar com Nginx');
+
 // Middleware para configurar MIME types corretos
 app.use((req, res, next) => {
     if (req.path.endsWith('.js')) {
@@ -221,21 +226,43 @@ app.use(cors({
     exposedHeaders: ['X-Total-Count'] // Headers seguros para expor
 }));
 
-// Configuração de sessão
-app.use(session({
+// Configuração de sessão (otimizada para OAuth)
+const sessionConfig = {
     store: new SQLiteStore({
         db: 'sessions.db',
         dir: './'
     }),
     secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Importante para OAuth - precisamos inicializar antes do redirect
+    name: 'editaliza.sid',
     cookie: {
         secure: process.env.NODE_ENV === 'production', // HTTPS em produção
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 horas
+        maxAge: 24 * 60 * 60 * 1000, // 24 horas
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' permite cookies cross-site no OAuth
+        domain: process.env.NODE_ENV === 'production' ? '.editaliza.com.br' : undefined // Cookie válido para todos os subdomínios
     }
-}));
+};
+
+// Aplicar configuração de sessão
+app.use(session(sessionConfig));
+
+// Middleware para debug de sessão (temporário)
+if (process.env.NODE_ENV !== 'production') {
+    app.use((req, res, next) => {
+        if (req.path.includes('/auth/google')) {
+            console.log('[SESSION DEBUG]', {
+                path: req.path,
+                sessionID: req.sessionID,
+                hasSession: !!req.session,
+                sessionData: req.session ? Object.keys(req.session) : [],
+                cookies: Object.keys(req.cookies || {})
+            });
+        }
+        next();
+    });
+}
 
 // Configure Passport
 app.use(passport.initialize());

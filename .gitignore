@@ -87,6 +87,16 @@ test-*.html
 teste-*.html
 footer-direto.html
 
+# Documentação com informações sensíveis
+ACESSO_COMPLETO.md
+COMANDOS_RAPIDOS.md
+ESTADO_SISTEMA.md
+DIGITALOCEAN_*.md
+PRODUCTION_*.md
+DEPLOY_*.md
+*_CREDENTIALS.md
+*_PASSWORDS.md
+
 # Migration and audit files
 backup-before-cackto-*/
 backups/
