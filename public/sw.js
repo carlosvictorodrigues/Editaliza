@@ -111,7 +111,7 @@ self.addEventListener('notificationclick', event => {
         event.waitUntil(
             clients.matchAll({ type: 'window', includeUncontrolled: true })
                 .then(clientList => {
-                    for (let client of clientList) {
+                    for (const client of clientList) {
                         if (client.url.includes('editaliza') && 'focus' in client) {
                             return client.focus();
                         }

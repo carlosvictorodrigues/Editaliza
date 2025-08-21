@@ -12,7 +12,6 @@ module.exports = [
             'tests/helpers/**',
             'tests/database-test.js',
             'tests/test-server.js',
-            'js/**',
             'validate_avatars.js'
         ]
     },
@@ -53,7 +52,7 @@ module.exports = [
         }
     },
     {
-        files: ['public/js/**/*.js'],
+        files: ['js/**/*.js', 'public/js/**/*.js'],
         languageOptions: {
             sourceType: 'script',
             globals: {
@@ -75,7 +74,24 @@ module.exports = [
                 setInterval: 'readonly',
                 clearInterval: 'readonly',
                 requestAnimationFrame: 'readonly',
-                cancelAnimationFrame: 'readonly'
+                cancelAnimationFrame: 'readonly',
+                atob: 'readonly',
+                btoa: 'readonly',
+                SpeechSynthesisUtterance: 'readonly',
+                speechSynthesis: 'readonly',
+                confirm: 'readonly',
+                URL: 'readonly'
+            }
+        }
+    },
+    {
+        files: ['public/sw.js'],
+        languageOptions: {
+            globals: {
+                self: 'readonly',
+                caches: 'readonly',
+                clients: 'readonly',
+                fetch: 'readonly'
             }
         }
     },

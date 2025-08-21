@@ -323,7 +323,7 @@ const app = {
     },
     
     async getGamificationData(planId) {
-        if (!planId) throw new Error("ID do plano é necessário para buscar dados de gamificação.");
+        if (!planId) throw new Error('ID do plano é necessário para buscar dados de gamificação.');
         return await this.apiFetch(`/plans/${planId}/gamification`);
     },
 
@@ -670,7 +670,7 @@ async function openStudySession(sessionId) {
 
         let sessionRescheduled = false;
         // Usar horário de Brasília corretamente
-        const todayStr = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
+        const todayStr = new Date().toLocaleDateString('en-CA', {timeZone: 'America/Sao_Paulo'});
         
         // Debug de datas
         console.log('📅 Comparação de datas:', {

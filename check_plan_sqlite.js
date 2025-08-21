@@ -25,7 +25,7 @@ try {
             console.log('Tipo do exam_date:', typeof latestPlan.exam_date);
             
             // Verificar estrutura da tabela
-            const tableInfo = db.prepare("PRAGMA table_info(study_plans)").all();
+            const tableInfo = db.prepare('PRAGMA table_info(study_plans)').all();
             console.log('\nColunas da tabela study_plans:');
             tableInfo.forEach(col => {
                 if (col.name === 'exam_date') {
