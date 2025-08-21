@@ -102,7 +102,7 @@ class SubscriptionSystem {
 
             // Verificar banco de dados
             const { dbGet, dbAll, dbRun } = require('../utils/database');
-            await db.get('SELECT 1'); // Teste de conectividade
+            await dbGet('SELECT 1'); // Teste de conectividade
 
             // Verificar tabelas necessárias
             const requiredTables = [
@@ -114,7 +114,7 @@ class SubscriptionSystem {
 
             for (const table of requiredTables) {
                 try {
-                    await db.get(`SELECT 1 FROM ${table} LIMIT 1`);
+                    await dbGet(`SELECT 1 FROM ${table} LIMIT 1`);
                 } catch (error) {
                     throw new Error(`Tabela ${table} não encontrada. Execute o setup do banco primeiro.`);
                 }
@@ -235,7 +235,7 @@ class SubscriptionSystem {
             // Verificar banco de dados
             const { dbGet, dbAll, dbRun } = require('../utils/database');
             const dbStart = Date.now();
-            await db.get('SELECT datetime(\'now\') as current_time');
+            await dbGet('SELECT datetime(\'now\') as current_time');
             const dbResponseTime = Date.now() - dbStart;
 
             this.healthStatus.services.database = {
