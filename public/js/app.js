@@ -94,16 +94,26 @@ const app = {
     // Aguardar módulos de notificação estarem disponíveis
     async waitForNotificationModules(maxWait = 10000) {
         const startTime = Date.now();
+        let attempts = 0;
+        const maxAttempts = 100; // Máximo 100 tentativas
         
-        while (Date.now() - startTime < maxWait) {
-            if (window.ContextualNotifications && window.NotificationIntegrations) {
-                return true;
+        while (Date.now() - startTime < maxWait && attempts < maxAttempts) {
+            attempts++;
+            
+            try {
+                if (window.ContextualNotifications && window.NotificationIntegrations) {
+                    console.log(`✅ Módulos de notificação carregados após ${attempts} tentativas`);
+                    return true;
+                }
+                await new Promise(resolve => setTimeout(resolve, 100));
+            } catch (error) {
+                console.warn(`⚠️ Erro na tentativa ${attempts}:`, error);
+                break; // Sair do loop em caso de erro
             }
-            await new Promise(resolve => setTimeout(resolve, 100));
         }
         
-        console.warn('⚠️ Módulos de notificação não carregaram, usando fallback');
-        return false; // Retorna false em vez de erro
+        console.warn(`⚠️ Módulos de notificação não carregaram após ${attempts} tentativas (${Date.now() - startTime}ms)`);
+        return false;
     },
 
     // Verificar se o token expirou

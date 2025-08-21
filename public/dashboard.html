@@ -343,10 +343,38 @@
             }, 300);
         }
 
+        // Circuit breaker para evitar retry infinito
+        let fetchPlansAttempts = 0;
+        const maxFetchAttempts = 3;
+        
         async function fetchAndDisplayPlans() {
+            if (fetchPlansAttempts >= maxFetchAttempts) {
+                console.warn('⚠️ Máximo de tentativas de carregamento de planos atingido');
+                document.getElementById('planList').innerHTML = `
+                    <div class="text-center p-6 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex items-center justify-center mb-2">
+                            <span class="text-2xl">❌</span>
+                        </div>
+                        <p class="text-red-800 font-medium">Erro ao carregar planos</p>
+                        <p class="text-red-700 text-sm mt-1">Tente recarregar a página</p>
+                        <button onclick="window.location.reload()" class="mt-3 btn-primary">Recarregar</button>
+                    </div>
+                `;
+                return;
+            }
+            
+            fetchPlansAttempts++;
+            console.log(`🚀 Tentativa ${fetchPlansAttempts} de carregar planos...`);
+            
             app.showSpinner();
             try {
-                const plans = await app.apiFetch("/plans"); 
+                // Timeout para evitar travamento
+                const plansPromise = app.apiFetch("/plans");
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout ao carregar planos')), 10000)
+                );
+                
+                const plans = await Promise.race([plansPromise, timeoutPromise]); 
                 const planList = document.getElementById('planList');
                 planList.innerHTML = '';
 
@@ -387,8 +415,27 @@
                     planList.appendChild(planElement);
                 });
             } catch (error) {
+                console.error(`❌ Erro na tentativa ${fetchPlansAttempts}:`, error);
                 app.showToast(error.message, 'error');
-                document.getElementById('planList').innerHTML = '<p class="text-red-500 text-center py-4">Não foi possível carregar os planos.</p>';
+                
+                if (fetchPlansAttempts < maxFetchAttempts) {
+                    document.getElementById('planList').innerHTML = `
+                        <div class="text-center p-6 bg-orange-50 border border-orange-200 rounded-lg">
+                            <p class="text-orange-800 font-medium">Tentando novamente...</p>
+                            <p class="text-orange-700 text-sm mt-1">Tentativa ${fetchPlansAttempts} de ${maxFetchAttempts}</p>
+                        </div>
+                    `;
+                    // Retry após 2 segundos
+                    setTimeout(() => fetchAndDisplayPlans(), 2000);
+                } else {
+                    document.getElementById('planList').innerHTML = `
+                        <div class="text-center p-6 bg-red-50 border border-red-200 rounded-lg">
+                            <p class="text-red-800 font-medium">Erro persistente ao carregar planos</p>
+                            <p class="text-red-700 text-sm mt-1">${error.message}</p>
+                            <button onclick="window.location.reload()" class="mt-3 btn-primary">Recarregar Página</button>
+                        </div>
+                    `;
+                }
             } finally {
                 app.hideSpinner();
             }
@@ -412,8 +459,31 @@
         }
 
         async function initialize() {
-            await components.renderMainNavigation('dashboard.html');
-            fetchAndDisplayPlans();
+            try {
+                console.log('🚀 Inicializando dashboard...');
+                
+                // Renderizar navegação com timeout
+                const navPromise = components.renderMainNavigation('dashboard.html');
+                const navTimeout = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout na navegação')), 5000)
+                );
+                
+                await Promise.race([navPromise, navTimeout]);
+                console.log('✅ Navegação carregada');
+                
+                // Carregar planos independentemente
+                fetchAndDisplayPlans();
+                console.log('✅ Dashboard inicializado');
+                
+            } catch (error) {
+                console.error('❌ Erro na inicialização do dashboard:', error);
+                app.showToast('Erro ao carregar dashboard. Recarregando...', 'error');
+                
+                // Fallback: recarregar página após 3 segundos
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            }
             
             const examDateInput = document.getElementById('exam_date');
             const timePreview = document.getElementById('timePreview');

@@ -100,26 +100,34 @@ const components = {
         }
 
         try {
-            // Loading avatar from server
-            const userProfile = await app.apiFetch('/users/profile'); // CORREÇÃO 5: Usar endpoint correto
+            // Loading avatar from server com timeout
+            const profilePromise = app.apiFetch('/users/profile');
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout ao carregar perfil')), 5000)
+            );
+            
+            const userProfile = await Promise.race([profilePromise, timeoutPromise]);
             
             // Check if user has Google avatar or local avatar
             let avatar = null;
-            if (userProfile.google_avatar && userProfile.auth_provider === 'google') {
+            if (userProfile && userProfile.google_avatar && userProfile.auth_provider === 'google') {
                 avatar = userProfile.google_avatar;
-                // Google avatar loaded
-            } else if (userProfile.profile_picture) {
+                console.log('🖼️ Avatar do Google carregado');
+            } else if (userProfile && userProfile.profile_picture) {
                 avatar = userProfile.profile_picture;
-                // Local avatar loaded
+                console.log('🖼️ Avatar local carregado');
             } else {
-                // No avatar found
+                console.log('😐 Nenhum avatar encontrado');
             }
             
             this.userAvatarCache = avatar;
             this.userAvatarCacheTime = now;
             return this.userAvatarCache;
         } catch (error) {
-            console.error('❌ Erro ao carregar avatar do usuário:', error);
+            console.warn('⚠️ Erro ao carregar avatar (usando fallback):', error.message);
+            // Cachear erro por 30 segundos para evitar retry contínuo
+            this.userAvatarCache = null;
+            this.userAvatarCacheTime = now;
             return null;
         }
     },
