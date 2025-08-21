@@ -39,7 +39,7 @@ jobs:
       run: npm run test:coverage
     
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage/lcov.info
 
@@ -57,7 +57,7 @@ jobs:
         output: 'trivy-results.sarif'
     
     - name: Upload Trivy scan results
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: 'trivy-results.sarif'
 
