@@ -122,3 +122,4 @@ run-migration*.js
 simple-*.js
 schedule_*.js
 schedule_*.json
+setup-local-db.js

@@ -1398,12 +1398,13 @@ app.post('/plans/:planId/subjects_with_topics',
             const subjectId = result.lastID;
             
             if (topics.length > 0) {
-                const insertTopicsStmt = db.prepare('INSERT INTO topics (subject_id, description, priority_weight) VALUES (?,?,?)');
-                topics.forEach(topic => {
+                // Use dbRun for each topic insert instead of prepared statements
+                // PostgreSQL handles this efficiently with connection pooling
+                for (const topic of topics) {
                     // Tópicos novos recebem peso padrão 3, que pode ser editado depois
-                    insertTopicsStmt.run(subjectId, topic.substring(0, 500), 3);
-                });
-                await new Promise((resolve, reject) => insertTopicsStmt.finalize(err => err ? reject(err) : resolve()));
+                    await dbRun('INSERT INTO topics (subject_id, description, priority_weight) VALUES (?,?,?)', 
+                        [subjectId, topic.substring(0, 500), 3]);
+                }
             }
             
             await dbRun('COMMIT');
@@ -2259,7 +2260,6 @@ app.post('/plans/:planId/generate',
                 }
                 
                 const insertSql = 'INSERT INTO study_sessions (study_plan_id, topic_id, subject_name, topic_description, session_date, session_type, status) VALUES (?, ?, ?, ?, ?, ?, ?)';
-                const stmt = db.prepare(insertSql);
                 
                 const BATCH_SIZE = 100;
                 for (let i = 0; i < sessionsToCreate.length; i += BATCH_SIZE) {
@@ -2276,14 +2276,18 @@ app.post('/plans/:planId/generate',
                         }
                         
                         try {
-                            stmt.run(
-                                planId,
-                                validTopicId,
-                                sessionData.subjectName,
-                                sessionData.topicDescription,
-                                sessionData.session_date,
-                                sessionData.sessionType,
-                                'Pendente'
+                            // Use dbRun instead of prepared statement
+                            await dbRun(
+                                insertSql,
+                                [
+                                    planId,
+                                    validTopicId,
+                                    sessionData.subjectName,
+                                    sessionData.topicDescription,
+                                    sessionData.session_date,
+                                    sessionData.sessionType,
+                                    'Pendente'
+                                ]
                             );
                         } catch (sessionError) {
                             console.error(`[CRONOGRAMA] ❌ ERRO na inserção de sessão:`, {
@@ -2297,10 +2301,6 @@ app.post('/plans/:planId/generate',
                         }
                     }
                 }
-                
-                await new Promise((resolve, reject) => {
-                    stmt.finalize(err => err ? reject(err) : resolve());
-                });
             }
             
             await dbRun('COMMIT');
@@ -3024,7 +3024,7 @@ app.patch('/sessions/batch_update_status',
         try {
             await dbRun('BEGIN TRANSACTION');
             
-            const stmt = db.prepare(`
+            const updateSql = `
                 UPDATE study_sessions 
                 SET status = ? 
                 WHERE id = ? AND EXISTS (
@@ -3032,24 +3032,19 @@ app.patch('/sessions/batch_update_status',
                     WHERE study_plans.id = study_sessions.study_plan_id
                     AND study_plans.user_id = ?
                 )
-            `);
+            `;
 
             for (const session of sessions) {
                 const sessionId = parseInt(session.id, 10);
                 if (isNaN(sessionId)) continue;
 
-                await new Promise((resolve, reject) => {
-                    stmt.run(session.status, sessionId, userId, function(err) {
-                        if (err) return reject(err);
-                        if (this.changes === 0) {
-                            console.warn(`Sessão ${sessionId} não encontrada ou não autorizada para o usuário ${userId}.`);
-                        }
-                        resolve();
-                    });
-                });
+                // Use dbRun instead of prepared statement
+                const result = await dbRun(updateSql, [session.status, sessionId, userId]);
+                if (result.changes === 0) {
+                    console.warn(`Sessão ${sessionId} não encontrada ou não autorizada para o usuário ${userId}.`);
+                }
             }
             
-            await new Promise((resolve, reject) => stmt.finalize(err => err ? reject(err) : resolve()));
             await dbRun('COMMIT');
             
             res.json({ message: "Missão Cumprida! Seu cérebro agradece. 💪" });
