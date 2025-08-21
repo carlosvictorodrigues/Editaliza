@@ -233,12 +233,24 @@ app.use(cors({
     exposedHeaders: ['X-Total-Count'] // Headers seguros para expor
 }));
 
-// Configuração de sessão (APENAS PostgreSQL - sem SQLite)
+// Configuração de sessão - Usa memória se PostgreSQL não estiver disponível
+let sessionStore;
+try {
+    // Tentar usar PostgreSQL
+    sessionStore = new pgSession({
+        conString: process.env.DATABASE_URL || `postgresql://editaliza_user:Editaliza@2025#Secure@localhost:5432/editaliza_db`,
+        tableName: 'sessions',
+        createTableIfMissing: true
+    });
+    console.log('📦 Usando PostgreSQL para sessões');
+} catch (err) {
+    // Fallback para memória se PostgreSQL falhar
+    console.log('⚠️ PostgreSQL não disponível, usando sessões em memória');
+    sessionStore = new session.MemoryStore();
+}
+
 const sessionConfig = {
-    store: new pgSession({
-        conString: process.env.DATABASE_URL,
-        tableName: 'sessions'
-    }),
+    store: sessionStore,
     secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
     resave: false,
     saveUninitialized: false,
