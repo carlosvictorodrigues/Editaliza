@@ -38,11 +38,6 @@ const db = {
             
             const result = await pool.query(pgSql, pgParams);
             
-            if (!result) {
-                console.error('[POSTGRES] Query retornou undefined');
-                return [];
-            }
-            
             if (!result.rows) {
                 console.error('[POSTGRES] Result sem propriedade rows:', result);
                 return [];
@@ -64,11 +59,6 @@ const db = {
             console.log(`[POSTGRES] Params:`, pgParams);
             
             const result = await pool.query(pgSql, pgParams);
-            
-            if (!result) {
-                console.error('[POSTGRES] Query retornou undefined');
-                return null;
-            }
             
             if (!result.rows) {
                 console.error('[POSTGRES] Result sem propriedade rows:', result);
