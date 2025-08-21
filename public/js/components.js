@@ -249,15 +249,10 @@ const components = {
                     <span class="hidden md:inline group-hover:text-editaliza-blue transition-colors duration-200">Perfil</span>
                 </a>`;
         } else {
-            // Fallback para ícone padrão
+            // Apenas texto "Perfil" sem ícone
             profileHtml = `
-                <a href="profile.html" class="hidden sm:flex items-center space-x-2 text-sm font-medium text-editaliza-gray hover:text-editaliza-black transition-all duration-200 group">
-                    <div class="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center text-white group-hover:from-editaliza-blue group-hover:to-indigo-600 transition-all duration-200 shadow-sm">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                        </svg>
-                    </div>
-                    <span class="hidden md:inline group-hover:text-editaliza-blue transition-colors duration-200">Perfil</span>
+                <a href="profile.html" class="hidden sm:flex items-center text-sm font-medium text-editaliza-gray hover:text-editaliza-black transition-all duration-200 group">
+                    <span class="group-hover:text-editaliza-blue transition-colors duration-200">Perfil</span>
                 </a>`;
         }
         
