@@ -112,12 +112,12 @@ const components = {
             let avatar = null;
             if (userProfile && userProfile.google_avatar && userProfile.auth_provider === 'google') {
                 avatar = userProfile.google_avatar;
-                console.log('🖼️ Avatar do Google carregado');
+                // Avatar do Google carregado
             } else if (userProfile && userProfile.profile_picture) {
                 avatar = userProfile.profile_picture;
-                console.log('🖼️ Avatar local carregado');
+                // Avatar local carregado
             } else {
-                console.log('😐 Nenhum avatar encontrado');
+                // Nenhum avatar encontrado
             }
             
             this.userAvatarCache = avatar;
@@ -263,25 +263,44 @@ const components = {
         
         navContainer.innerHTML = `
             <style>
+                /* Hide avatar completely */
+                #nav-user-avatar,
+                .nav-avatar,
+                .navbar-avatar,
+                .user-avatar,
+                .avatar-nav,
+                .nav .avatar,
+                .navbar .avatar,
+                .profile-avatar,
+                .header-avatar {
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                    width: 0 !important;
+                    height: 0 !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                }
+                
                 .nav-link-active {
-                    background: var(--nav-active-bg);
-                    color: var(--nav-active-text);
+                    background: linear-gradient(135deg, #0528f2, #3b82f6);
+                    color: white;
                     border-radius: 0.5rem;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 .nav-link-default {
-                    color: var(--nav-text);
+                    color: #374151;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 .nav-link-default:hover {
-                    background-color: var(--nav-background-hover);
-                    color: var(--nav-text-hover);
+                    background-color: #f3f4f6;
+                    color: #111827;
                     border-radius: 0.5rem;
                 }
                 .btn-secondary {
-                    background: var(--surface-secondary);
-                    color: var(--text-primary);
-                    border: 1px solid var(--border-primary);
+                    background: white;
+                    color: #374151;
+                    border: 1px solid #E5E7EB;
                     border-radius: 0.5rem;
                     padding: 0.5rem 1rem;
                     font-weight: 500;
@@ -289,12 +308,12 @@ const components = {
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 .btn-secondary:hover {
-                    background: var(--surface-elevated);
-                    border-color: var(--border-secondary);
+                    background: #f9fafb;
+                    border-color: #9ca3af;
                     transform: translateY(-1px);
                 }
             </style>
-            <header class="border-b shadow-sm" style="background: var(--nav-background); border-color: var(--nav-border);">
+            <header class="border-b shadow-sm" style="background: white; border-bottom: 1px solid #E5E7EB !important;">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-16">
                         <div class="flex items-center">

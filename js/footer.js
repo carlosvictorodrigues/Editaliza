@@ -3,16 +3,13 @@
  * Sistema modular com design moderno e integração perfeita do logotipo
  */
 
-// LOG DE EMERGÊNCIA - CONFIRMAR QUE O ARQUIVO FOI CARREGADO
-console.log('🚨🚨🚨 FOOTER.JS CARREGADO! 🚨🚨🚨');
-console.log('🚨🚨🚨 Arquivo:', window.location.href);
-console.log('🚨🚨🚨 Timestamp:', new Date().toISOString());
+// Footer.js carregado
 
 class EditalizaFooterRefatorado {
     constructor() {
         this.footerElement = null;
         this.isLoaded = false;
-        this.debugMode = true;
+        this.debugMode = false;
         
         // Tokens de design centralizados
         this.designTokens = {
@@ -51,13 +48,13 @@ class EditalizaFooterRefatorado {
             }
         };
         
-        this.log('🚀 Footer Refatorado inicializado');
+        // Footer inicializado
     }
     
     log(message, data = null) {
         if (!this.debugMode) return;
         const timestamp = new Date().toLocaleTimeString();
-        console.log(`🦶 [FooterRefatorado ${timestamp}] ${message}`, data || '');
+        console.log(`[FooterRefatorado ${timestamp}] ${message}`, data || '');
     }
     
     /**
@@ -83,26 +80,22 @@ class EditalizaFooterRefatorado {
      */
     async init() {
         try {
-            console.log('🚨🚨🚨 FOOTER REFATORADO INICIANDO! 🚨🚨🚨');
-            console.log('🚨🚨🚨 URL:', window.location.href);
-            console.log('🚨🚨🚨 Protocolo:', window.location.protocol);
-            this.log('🚀 Iniciando carregamento do rodapé refatorado...');
-            this.log('📍 URL atual:', window.location.href);
-            this.log('📍 Protocolo:', window.location.protocol);
+            // Footer refatorado iniciando
+            // Iniciando carregamento
             
             // Verificar se deve mostrar footer nesta página
             if (!this.shouldShowFooter()) {
-                this.log('⏭️ Footer não deve aparecer nesta página');
+                // Footer não deve aparecer nesta página
                 return;
             }
             
             // Verificar se já existe
             if (this.checkExistingFooter()) {
-                this.log('✅ Rodapé já existe na página');
+                // Rodapé já existe
                 return;
             }
             
-            this.log('🔧 Iniciando processo de carregamento...');
+            // Processo de carregamento
             
             // Injetar CSS
             this.injectCSS();
@@ -113,24 +106,23 @@ class EditalizaFooterRefatorado {
             this.finalizeFooterLoad();
             
         } catch (error) {
-            this.log('❌ Erro no carregamento:', error);
-            console.error('❌ Erro detalhado:', error);
+            console.error('Erro no carregamento do footer:', error);
         }
     }
     
     checkExistingFooter() {
         // Sempre retorna false para forçar recarregamento
         // Isso garante que o footer seja sempre renderizado corretamente
-        this.log('🔍 Verificando footer existente...');
+        // Verificando footer existente
         
         const existingFooter = document.querySelector('.editaliza-footer, .editaliza-footer-refatorado');
         if (existingFooter) {
-            this.log('🗑️ Footer existente encontrado, será removido e recriado');
+            // Footer existente removido
             existingFooter.remove();
             return false;
         }
         
-        this.log('✅ Nenhum footer existente encontrado');
+        // Nenhum footer existente
         return false;
     }
     
@@ -139,16 +131,16 @@ class EditalizaFooterRefatorado {
      */
     injectCSS() {
         if (document.querySelector('#editaliza-footer-refatorado-css')) {
-            this.log('📄 CSS já existe');
+            // CSS já existe
             return;
         }
         
-        this.log('💉 Injetando CSS refatorado');
+        // Injetando CSS refatorado
         const style = document.createElement('style');
         style.id = 'editaliza-footer-refatorado-css';
         style.textContent = this.getOptimizedCSS();
         document.head.appendChild(style);
-        this.log('✅ CSS injetado');
+        // CSS injetado
     }
     
     /**
@@ -456,7 +448,7 @@ class EditalizaFooterRefatorado {
      * Carrega HTML refatorado
      */
     loadFooterHTML() {
-        this.log('🏗️ Carregando HTML refatorado');
+        // Carregando HTML refatorado
         
         const footerHTML = `
             <footer class="editaliza-footer-refatorado" role="contentinfo" aria-label="Rodapé do site">
@@ -582,52 +574,52 @@ class EditalizaFooterRefatorado {
         `;
         
         this.insertFooter(footerHTML);
-        this.log('✅ HTML refatorado inserido');
+        // HTML refatorado inserido
     }
     
     /**
      * Insere o rodapé na página
      */
     insertFooter(footerHTML) {
-        this.log('🔧 Iniciando inserção do footer...');
+        // Iniciando inserção do footer
         
         // Remove rodapé existente
         const existingFooter = document.querySelector('.editaliza-footer, .editaliza-footer-refatorado');
         if (existingFooter) {
-            this.log('🗑️ Removendo footer existente');
+            // Removendo footer existente
             existingFooter.remove();
         }
         
         // Cria elemento
-        this.log('🏗️ Criando elemento do footer...');
+        // Criando elemento do footer
         const temp = document.createElement('div');
         temp.innerHTML = footerHTML.trim();
         this.footerElement = temp.firstChild;
         
-        this.log('📍 Footer criado, tipo:', this.footerElement.tagName);
-        this.log('📍 Classes do footer:', this.footerElement.className);
+        // 📍 Footer criado, tipo:', this.footerElement.tagName);
+        // 📍 Classes do footer:', this.footerElement.className);
         
         // Insere no body
-        this.log('📌 Inserindo footer no body...');
+        // 📌 Inserindo footer no body...');
         document.body.appendChild(this.footerElement);
         
         // Log para debug
-        this.log('📍 Footer inserido no body, altura:', this.footerElement.offsetHeight);
-        this.log('📍 Posição do footer:', this.footerElement.getBoundingClientRect());
-        this.log('📍 Footer visível:', this.footerElement.offsetHeight > 0 && this.footerElement.offsetWidth > 0);
+        // 📍 Footer inserido no body, altura:', this.footerElement.offsetHeight);
+        // 📍 Posição do footer:', this.footerElement.getBoundingClientRect());
+        // 📍 Footer visível:', this.footerElement.offsetHeight > 0 && this.footerElement.offsetWidth > 0);
         
         // Verificar se foi inserido corretamente
         const insertedFooter = document.querySelector('.editaliza-footer-refatorado');
         if (insertedFooter) {
-            this.log('✅ Footer encontrado no DOM após inserção');
+            // Footer encontrado no DOM
         } else {
-            this.log('❌ Footer NÃO encontrado no DOM após inserção');
+            // Footer NÃO encontrado no DOM
         }
     }
     
     finalizeFooterLoad() {
         this.isLoaded = true;
-        this.log('✅ Rodapé refatorado carregado com sucesso');
+        // Rodapé refatorado carregado com sucesso
         
         // Dispara evento
         const event = new CustomEvent('footerRefatoradoLoaded', {
@@ -645,35 +637,30 @@ window.EditalizaFooterRefatorado = EditalizaFooterRefatorado;
 
 // Função de inicialização
 function initFooterRefatorado() {
-    console.log('🚨🚨🚨 INIT FOOTER REFATORADO CHAMADO! 🚨🚨🚨');
-    console.log('🚨🚨🚨 Timestamp:', new Date().toISOString());
-    console.log('🚀 [FOOTER REFATORADO] Iniciando...');
+    // Iniciando footer refatorado
     
     // Verificar se já existe
     if (document.querySelector('.editaliza-footer-refatorado')) {
-        console.log('✅ [FOOTER REFATORADO] Já existe');
+        // Footer já existe
         return;
     }
     
     try {
-        console.log('🚨🚨🚨 CRIANDO INSTÂNCIA DO FOOTER! 🚨🚨🚨');
+        // Criando instância do footer
         window.footerManagerRefatorado = new EditalizaFooterRefatorado();
-        console.log('🚨🚨🚨 INSTÂNCIA CRIADA, CHAMANDO INIT! 🚨🚨🚨');
         window.footerManagerRefatorado.init();
     } catch (error) {
-        console.error('❌ [FOOTER REFATORADO] Erro:', error);
+        console.error('Erro no footer refatorado:', error);
     }
 }
 
 // Auto-inicialização
-console.log('🚨🚨🚨 AUTO-INICIALIZAÇÃO DO FOOTER! 🚨🚨🚨');
-console.log('🚨🚨🚨 Document readyState:', document.readyState);
 
 if (document.readyState === 'loading') {
-    console.log('🚨🚨🚨 DOM ainda carregando, aguardando DOMContentLoaded...');
+    // DOM ainda carregando, aguardando DOMContentLoaded
     document.addEventListener('DOMContentLoaded', initFooterRefatorado);
 } else {
-    console.log('🚨🚨🚨 DOM já carregado, iniciando imediatamente...');
+    // DOM já carregado, iniciando imediatamente
     initFooterRefatorado();
 }
 

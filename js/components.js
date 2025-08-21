@@ -100,26 +100,34 @@ const components = {
         }
 
         try {
-            // Loading avatar from server
-            const userProfile = await app.apiFetch('/users/profile'); // CORREÇÃO 5: Usar endpoint correto
+            // Loading avatar from server com timeout
+            const profilePromise = app.apiFetch('/users/profile');
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Timeout ao carregar perfil')), 5000)
+            );
+            
+            const userProfile = await Promise.race([profilePromise, timeoutPromise]);
             
             // Check if user has Google avatar or local avatar
             let avatar = null;
-            if (userProfile.google_avatar && userProfile.auth_provider === 'google') {
+            if (userProfile && userProfile.google_avatar && userProfile.auth_provider === 'google') {
                 avatar = userProfile.google_avatar;
-                // Google avatar loaded
-            } else if (userProfile.profile_picture) {
+                console.log('🖼️ Avatar do Google carregado');
+            } else if (userProfile && userProfile.profile_picture) {
                 avatar = userProfile.profile_picture;
-                // Local avatar loaded
+                console.log('🖼️ Avatar local carregado');
             } else {
-                // No avatar found
+                console.log('😐 Nenhum avatar encontrado');
             }
             
             this.userAvatarCache = avatar;
             this.userAvatarCacheTime = now;
             return this.userAvatarCache;
         } catch (error) {
-            console.error('❌ Erro ao carregar avatar do usuário:', error);
+            console.warn('⚠️ Erro ao carregar avatar (usando fallback):', error.message);
+            // Cachear erro por 30 segundos para evitar retry contínuo
+            this.userAvatarCache = null;
+            this.userAvatarCacheTime = now;
             return null;
         }
     },
@@ -255,25 +263,44 @@ const components = {
         
         navContainer.innerHTML = `
             <style>
+                /* Hide avatar completely */
+                #nav-user-avatar,
+                .nav-avatar,
+                .navbar-avatar,
+                .user-avatar,
+                .avatar-nav,
+                .nav .avatar,
+                .navbar .avatar,
+                .profile-avatar,
+                .header-avatar {
+                    display: none !important;
+                    visibility: hidden !important;
+                    opacity: 0 !important;
+                    width: 0 !important;
+                    height: 0 !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                }
+                
                 .nav-link-active {
-                    background: var(--nav-active-bg);
-                    color: var(--nav-active-text);
+                    background: linear-gradient(135deg, #0528f2, #3b82f6);
+                    color: white;
                     border-radius: 0.5rem;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 .nav-link-default {
-                    color: var(--nav-text);
+                    color: #374151;
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 .nav-link-default:hover {
-                    background-color: var(--nav-background-hover);
-                    color: var(--nav-text-hover);
+                    background-color: #f3f4f6;
+                    color: #111827;
                     border-radius: 0.5rem;
                 }
                 .btn-secondary {
-                    background: var(--surface-secondary);
-                    color: var(--text-primary);
-                    border: 1px solid var(--border-primary);
+                    background: white;
+                    color: #374151;
+                    border: 1px solid #E5E7EB;
                     border-radius: 0.5rem;
                     padding: 0.5rem 1rem;
                     font-weight: 500;
@@ -281,12 +308,12 @@ const components = {
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 }
                 .btn-secondary:hover {
-                    background: var(--surface-elevated);
-                    border-color: var(--border-secondary);
+                    background: #f9fafb;
+                    border-color: #9ca3af;
                     transform: translateY(-1px);
                 }
             </style>
-            <header class="border-b shadow-sm" style="background: var(--nav-background); border-color: var(--nav-border);">
+            <header class="border-b shadow-sm" style="background: white; border-bottom: 1px solid #E5E7EB !important;">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-16">
                         <div class="flex items-center">

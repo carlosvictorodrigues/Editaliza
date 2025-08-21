@@ -163,7 +163,7 @@ button.btn-secondary,
 .btn-secondary {
     background-color: #334155 !important;
     color: #FFFFFF !important;
-    border: 1px solid #475569 !important;
+    border: 1px solid #e5e7eb !important;
     font-weight: 500 !important;
     padding: 0.75rem 1.5rem !important;
     border-radius: 0.5rem !important;
@@ -387,22 +387,50 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 0.5rem !important;
 }
 .nav-link-default {
-    color: #64748B !important;
+    color: var(--text-muted) !important;
     background: transparent !important;
+    border: 1px solid transparent !important;
+    border-radius: 0.75rem !important;
 }
 .nav-link-default:hover {
-    background-color: #F1F5F9 !important;
-    color: #1E293B !important;
-    border-radius: 0.5rem !important;
+    background-color: var(--surface-2) !important;
+    color: var(--text) !important;
+    border-color: var(--border) !important;
+    border-radius: 0.75rem !important;
+    transform: translateY(-1px) !important;
 }
 
-/* Fix dropdown navigation items */
-.dropdown-menu a {
-    color: #374151 !important;
+/* Modern dropdown navigation items */
+.dropdown-menu,
+.nav-dropdown,
+.menu-dropdown {
+    background: var(--surface-1) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    padding: 0.5rem !important;
+    margin-top: 0.5rem !important;
 }
-.dropdown-menu a:hover {
-    background-color: #F3F4F6 !important;
-    color: #0528f2 !important;
+
+.dropdown-menu a,
+.nav-dropdown a,
+.menu-dropdown a {
+    color: var(--text-muted) !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.3s ease !important;
+    font-weight: 500 !important;
+    text-decoration: none !important;
+}
+
+.dropdown-menu a:hover,
+.nav-dropdown a:hover,
+.menu-dropdown a:hover {
+    background: var(--surface-2) !important;
+    color: var(--primary) !important;
+    transform: translateX(4px) !important;
 }
 
 
@@ -466,7 +494,7 @@ h1, h2, h3, h4, h5, h6 {
 input, select, textarea {
     background: white !important;
     color: #1e293b !important;
-    border: 1px solid #d1d5db !important;
+    border: 1px solid #e5e7eb !important;
     padding: 0.75rem !important;
     border-radius: 0.5rem !important;
     font-size: 1rem !important;
@@ -486,7 +514,7 @@ input:focus, select:focus, textarea:focus {
     width: 100% !important;
     padding: 0.75rem 1rem !important;
     background-color: white !important;
-    border: 1px solid #d1d5db !important;
+    border: 1px solid #e5e7eb !important;
     border-radius: 0.5rem !important;
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
     color: #1e293b !important;
@@ -1031,25 +1059,120 @@ html body .editaliza-footer-refatorado .footer-logo {
     margin-left: auto;
 }
 
-/* Correção para TODOS os botões na navegação - melhor contraste */
+/* ===============================================
+ * MODERN NAVIGATION BAR STYLING
+ * =============================================== */
+
+/* Main navigation container with soft border - FIXED STYLING */
+.navbar,
+.nav-container,
+header.navigation,
+header.nav-header,
+.main-nav-container header,
+#main-nav-container header {
+    border-bottom: 1px solid #E5E7EB !important;
+    background: #FFFFFF !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* Remove any avatar-related styles */
+.nav-avatar,
+.navbar-avatar,
+.user-avatar,
+.avatar-nav,
+.nav .avatar,
+.navbar .avatar,
+.profile-avatar,
+.header-avatar {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+/* Navigation brand/logo styling */
+.navbar-brand,
+.nav-brand,
+.navigation-logo {
+    color: var(--text) !important;
+    font-weight: 700 !important;
+    font-size: 1.25rem !important;
+    text-decoration: none !important;
+}
+
+.navbar-brand:hover,
+.nav-brand:hover,
+.navigation-logo:hover {
+    color: var(--primary) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Navigation menu items spacing */
+.nav-menu,
+.navbar-nav,
+.navigation-menu {
+    gap: 0.5rem !important;
+    align-items: center !important;
+}
+
+/* Mobile navigation improvements */
+@media (max-width: 768px) {
+    .navbar,
+    .nav-container,
+    header.navigation {
+        padding: 1rem !important;
+        border-bottom: 1px solid var(--border) !important;
+    }
+    
+    .navbar-brand,
+    .nav-brand {
+        font-size: 1.125rem !important;
+    }
+    
+    .nav-menu,
+    .navbar-nav {
+        gap: 0.25rem !important;
+    }
+    
+    nav button,
+    .navbar button {
+        padding: 0.75rem 1rem !important;
+        font-size: 0.875rem !important;
+    }
+}
+
+/* Navegação com bordas suaves - estilo moderno - FIXED */
 nav button,
 .navbar button,
 .navigation button,
 header button {
-    background: #F8FAFC !important;
-    color: #1E293B !important;
-    border: 1px solid #E2E8F0 !important;
-    border-radius: 0.5rem !important;
+    background: #FFFFFF !important;
+    color: #6B7280 !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 0.75rem !important;
     transition: all 0.3s ease !important;
+    font-weight: 500 !important;
 }
 
-/* Fix specific navigation button text colors */
+/* Override Tailwind border classes specifically */
+.border-gray-200 {
+    border-color: #E5E7EB !important;
+}
+
+.border-b {
+    border-bottom-color: #E5E7EB !important;
+}
+
+/* Cores suaves para botões de navegação inativos */
 nav button:not(.btn-primary):not(.nav-link-active),
 .navbar button:not(.btn-primary):not(.nav-link-active),
 .navigation button:not(.btn-primary):not(.nav-link-active),
 header button:not(.btn-primary):not(.nav-link-active) {
-    color: #475569 !important;
-    background: #F8FAFC !important;
+    color: var(--text-muted) !important;
+    background: var(--surface-1) !important;
+    border-color: var(--border) !important;
 }
 
 /* Selected navigation button contrast fix */
@@ -1065,8 +1188,10 @@ nav button:hover,
 .navigation button:hover,
 header button:hover {
     background: var(--surface-2) !important;
-    border-color: var(--primary) !important;
+    border-color: #C7D2FE !important;
     color: var(--primary) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
 }
 
 /* Botões primários na navegação */

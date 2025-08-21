@@ -91,7 +91,7 @@ export const Navigation = {
                                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                         </button>
-                        <div class="absolute left-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div class="absolute left-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50" style="border: 1px solid #E5E7EB !important;">
                             ${dropdownItems}
                         </div>
                     </div>
@@ -112,7 +112,7 @@ export const Navigation = {
         
         navContainer.innerHTML = `
             ${this.getNavigationStyles()}
-            <header class="bg-white border-b border-gray-200 shadow-sm">
+            <header class="bg-white shadow-sm nav-header" style="background: white; border-bottom: 1px solid #E5E7EB !important;">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-16">
                         <div class="flex items-center">
@@ -197,31 +197,55 @@ export const Navigation = {
     getNavigationStyles() {
         return `
             <style>
+                /* NAVIGATION BORDER FIX - Override all Tailwind classes */
+                header.nav-header,
+                .nav-container,
+                .navbar,
+                header.navigation,
+                .main-nav-container header,
+                #main-nav-container header {
+                    border-bottom: 1px solid #E5E7EB !important;
+                    border-color: #E5E7EB !important;
+                }
+                
+                /* Navigation dropdowns */
+                .nav-dropdown,
+                .dropdown-menu {
+                    border: 1px solid #E5E7EB !important;
+                }
+                
+                /* Navigation links */
+                .nav-link,
+                .nav-plan-link {
+                    border: 1px solid #E5E7EB !important;
+                }
+                
                 .nav-link-active {
-                    background: linear-gradient(135deg, #0528f2, #3b82f6);
-                    color: white;
-                    border-radius: 0.5rem;
+                    background: linear-gradient(135deg, #0528f2, #3b82f6) !important;
+                    color: white !important;
+                    border-radius: 0.5rem !important;
+                    border: 1px solid #0528f2 !important;
                 }
                 .nav-link-default {
-                    color: #374151;
+                    color: #374151 !important;
                 }
                 .nav-link-default:hover {
-                    background-color: #f3f4f6;
-                    color: #111827;
+                    background-color: #f3f4f6 !important;
+                    color: #111827 !important;
                 }
                 .btn-secondary {
-                    background: white;
-                    color: #374151;
-                    border: 1px solid #d1d5db;
-                    border-radius: 0.5rem;
-                    padding: 0.5rem 1rem;
-                    font-weight: 500;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
+                    background: white !important;
+                    color: #374151 !important;
+                    border: 1px solid #E5E7EB !important;
+                    border-radius: 0.5rem !important;
+                    padding: 0.5rem 1rem !important;
+                    font-weight: 500 !important;
+                    cursor: pointer !important;
+                    transition: all 0.3s ease !important;
                 }
                 .btn-secondary:hover {
-                    background: #f9fafb;
-                    border-color: #9ca3af;
+                    background: #f9fafb !important;
+                    border-color: #d1d5db !important;
                 }
             </style>
         `;
@@ -281,7 +305,7 @@ export const Navigation = {
             const isActive = activePage === link.href.split('?')[0];
             const activeClass = 'bg-editaliza-blue text-white cursor-default';
             const defaultClass = 'bg-white hover:bg-gray-100 text-gray-700';
-            return `<a id="${link.id}" href="${link.href}" class="px-4 py-2 text-sm font-semibold rounded-lg border border-gray-200 shadow-sm transition-colors ${isActive ? activeClass : defaultClass}">${link.text}</a>`;
+            return `<a id="${link.id}" href="${link.href}" class="px-4 py-2 text-sm font-semibold rounded-lg shadow-sm transition-colors ${isActive ? activeClass : defaultClass}" style="border: 1px solid #E5E7EB !important;">${link.text}</a>`;
         }).join('');
 
         headerContainer.innerHTML = `

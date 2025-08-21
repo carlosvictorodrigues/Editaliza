@@ -74,7 +74,7 @@ html body .editaliza-footer-refatorado .footer-main-section {
     overflow: hidden !important;
     display: block !important;
     margin: 0 !important;
-    padding: 24px 0 !important;
+    padding: 16px 0 !important;
 }
 
 /* DARK MODE - Sophisticated footer gradient */
@@ -90,7 +90,7 @@ html body .editaliza-footer-refatorado .footer-copyright-section {
     width: 100% !important;
     display: block !important;
     margin: 0 !important;
-    padding: 12px 0 !important;
+    padding: 8px 0 !important;
 }
 
 /* DARK MODE - Copyright section */
@@ -342,7 +342,7 @@ html body .editaliza-footer-refatorado .footer-copyright-content {
     align-items: center !important;
     flex-wrap: wrap !important;
     gap: 12px !important;
-    min-height: 44px !important;
+    min-height: 32px !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -417,12 +417,12 @@ html body .editaliza-footer-refatorado .footer-legal-link:focus {
 @media (max-width: 768px) {
     body .editaliza-footer-refatorado .footer-main-section,
     html body .editaliza-footer-refatorado .footer-main-section {
-        padding: 24px 20px !important;
+        padding: 16px 20px !important;
     }
     
     body .editaliza-footer-refatorado .footer-copyright-section,
     html body .editaliza-footer-refatorado .footer-copyright-section {
-        padding: 12px 20px !important;
+        padding: 8px 20px !important;
     }
     
     body .editaliza-footer-refatorado .footer-main-grid,
@@ -469,12 +469,12 @@ html body .editaliza-footer-refatorado .footer-legal-link:focus {
 @media (max-width: 480px) {
     body .editaliza-footer-refatorado .footer-main-section,
     html body .editaliza-footer-refatorado .footer-main-section {
-        padding: 20px 16px !important;
+        padding: 14px 16px !important;
     }
     
     body .editaliza-footer-refatorado .footer-copyright-section,
     html body .editaliza-footer-refatorado .footer-copyright-section {
-        padding: 10px 16px !important;
+        padding: 6px 16px !important;
     }
     
     body .editaliza-footer-refatorado .footer-legal-links,
