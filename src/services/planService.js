@@ -697,7 +697,16 @@ const calculateStudyStreak = (sessions) => {
     if (completedSessions.length === 0) return 0;
     
     // Get unique dates
-    const uniqueDates = [...new Set(completedSessions.map(s => s.session_date.split('T')[0]))];
+    const uniqueDates = [...new Set(completedSessions.map(s => {
+        // Handle Date objects and strings
+        if (s.session_date instanceof Date) {
+            return s.session_date.toISOString().split('T')[0];
+        } else if (typeof s.session_date === 'string') {
+            return s.session_date.split('T')[0];
+        } else {
+            return String(s.session_date).split('T')[0];
+        }
+    }))];
     uniqueDates.sort((a, b) => new Date(b) - new Date(a)); // Most recent first
     
     let streak = 0;
