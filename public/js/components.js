@@ -76,7 +76,7 @@ const components = {
     renderGlobalUI() {
         const uiContainer = document.createElement('div');
         uiContainer.innerHTML = `
-            <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3"></div>
+            <div id="toast-container" class="fixed top-5 right-5 space-y-3" style="z-index: 10000;"></div>
             <div id="spinner-overlay" class="hidden fixed inset-0 bg-editaliza-black bg-opacity-60 z-50 flex items-center justify-center">
                 <div class="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-editaliza-blue"></div>
             </div>
@@ -180,7 +180,7 @@ const components = {
                         ? 'background: linear-gradient(135deg, #0528f2 0%, #3b82f6 100%); color: white;' 
                         : '';
                     const itemClass = isItemActive 
-                        ? 'block px-4 py-2 text-sm font-semibold transition-colors' 
+                        ? 'block px-4 py-2 text-sm font-medium transition-colors' 
                         : 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-editaliza-blue transition-colors';
                     return `<a href="${item.href}" class="${itemClass}" style="${itemStyle}">${item.text}</a>`;
                 }).join('');
@@ -190,14 +190,14 @@ const components = {
                 const dropdownTriggerStyle = hasActiveItem ? 'background: linear-gradient(135deg, #0528f2 0%, #3b82f6 100%); color: white;' : '';
                 
                 return `
-                    <div class="relative dropdown-container">
+                    <div class="relative dropdown-container" style="z-index: 100;">
                         <button class="${dropdownTriggerClass} dropdown-trigger px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center" style="${dropdownTriggerStyle}">
                             ${link.text}
                             <svg class="inline w-4 h-4 ml-1 dropdown-arrow transition-transform" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                             </svg>
                         </button>
-                        <div class="dropdown-menu absolute left-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible transition-all duration-200 z-50">
+                        <div class="dropdown-menu absolute left-0 top-full mt-1 w-56 bg-white rounded-lg shadow-xl border border-gray-200 opacity-0 invisible transition-all duration-200" style="z-index: 9999;">
                             ${dropdownItems}
                         </div>
                     </div>
@@ -308,7 +308,7 @@ const components = {
                     transform: translateY(-1px);
                 }
             </style>
-            <header class="border-b shadow-sm" style="background: white; border-bottom: 1px solid #E5E7EB !important;">
+            <header class="border-b shadow-sm relative" style="background: white; border-bottom: 1px solid #E5E7EB !important; z-index: 999; position: relative;">
                 <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between items-center h-16">
                         <div class="flex items-center">
@@ -467,15 +467,15 @@ const components = {
             const isActive = activePage === link.href.split('?')[0];
             const activeClass = 'cursor-default nav-link-active';
             const defaultClass = 'nav-link-default';
-            return `<a id="${link.id}" href="${link.href}" class="px-4 py-2 text-sm font-semibold rounded-lg border border-gray-200 shadow-sm transition-colors ${isActive ? activeClass : defaultClass}">${link.text}</a>`;
+            return `<a id="${link.id}" href="${link.href}" class="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 shadow-sm transition-colors ${isActive ? activeClass : defaultClass}">${link.text}</a>`;
         }).join('');
 
         headerContainer.innerHTML = `
             <div class="content-card mb-8">
                 <div class="flex flex-col sm:flex-row justify-between sm:items-center">
                     <div class="mb-4 sm:mb-0">
-                        <h1 class="text-2xl font-bold text-editaliza-black">${safePlanName}</h1>
-                        <p id="examDate" class="text-md text-editaliza-gray mt-1"></p>
+                        <h1 class="text-2xl font-semibold text-editaliza-black">${safePlanName}</h1>
+                        <p id="examDate" class="text-md font-normal text-editaliza-gray mt-1"></p>
                     </div>
                     <div class="flex items-center space-x-2">
                         ${linksHtml}
@@ -507,24 +507,24 @@ const components = {
                         <div class="flex-grow">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="flex items-center space-x-3">
-                                    <h3 class="text-2xl font-bold text-red-800">⚠️ Atenção!</h3>
+                                    <h3 class="text-2xl font-semibold text-red-800">⚠️ Atenção!</h3>
                                     <div class="w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
                                 </div>
-                                <span class="bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-bold px-4 py-2 rounded-full flex items-center space-x-2 shadow-lg">
+                                <span class="bg-gradient-to-r from-red-500 to-orange-500 text-white text-sm font-semibold px-4 py-2 rounded-full flex items-center space-x-2 shadow-lg">
                                     <span class="w-3 h-3 bg-white rounded-full animate-pulse"></span>
                                     <span>${count} atrasada${count > 1 ? 's' : ''}</span>
                                     <span class="text-lg">🚨</span>
                                 </span>
                             </div>
-                            <p class="text-gray-800 font-bold text-lg mb-3">Você tem ${count} tarefa${count > 1 ? 's' : ''} atrasada${count > 1 ? 's' : ''}.</p>
-                            <p class="text-gray-700 text-base mb-4 leading-relaxed">Não se preocupe! Podemos reorganizar seu cronograma automaticamente para você voltar aos trilhos. 💪</p>
+                            <p class="text-gray-800 font-medium text-lg mb-3">Você tem ${count} tarefa${count > 1 ? 's' : ''} atrasada${count > 1 ? 's' : ''}.</p>
+                            <p class="text-gray-700 font-normal text-base mb-4 leading-relaxed">Não se preocupe! Podemos reorganizar seu cronograma automaticamente para você voltar aos trilhos. 💪</p>
                             
                             <!-- Detalhes das tarefas atrasadas -->
                             ${this.renderOverdueTasksDetails(tasks)}
                             
                             <!-- Action Section -->
                             <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                                <button id="showReplanDetailsButton" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold px-6 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-3 border-2 border-blue-200">
+                                <button id="showReplanDetailsButton" class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold px-6 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-3 border-2 border-blue-200">
                                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                                     </svg>
@@ -532,7 +532,7 @@ const components = {
                                     <span class="text-xl">📋</span>
                                 </button>
                                 
-                                <button id="replanButton" class="flex-1 bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 hover:from-red-700 hover:via-orange-700 hover:to-amber-700 text-white font-bold px-6 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-3 border-2 border-red-200 animate-pulse">
+                                <button id="replanButton" class="flex-1 bg-gradient-to-r from-red-600 via-orange-600 to-amber-600 hover:from-red-700 hover:via-orange-700 hover:to-amber-700 text-white font-semibold px-6 py-4 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-3 border-2 border-red-200 animate-pulse">
                                     <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
                                     </svg>
@@ -556,7 +556,7 @@ const components = {
                                             <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
                                     </div>
-                                    <h4 class="font-bold text-lg text-blue-800">📋 Estratégia de Replanejamento</h4>
+                                    <h4 class="font-semibold text-lg text-blue-800">📋 Estratégia de Replanejamento</h4>
                                 </div>
                                 <div id="replanDetailsContent" class="text-base text-blue-700">
                                     <div class="animate-pulse flex items-center space-x-2">
@@ -789,7 +789,7 @@ const components = {
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
-                            <span class="text-lg">Tarefa Concluída!</span>
+                            <span class="text-lg text-green-700 font-bold">Tarefa Concluída!</span>
                             <span class="ml-3 text-2xl animate-bounce group-hover/btn:scale-110 transition-transform">🎉</span>
                         </button>
                         <!-- Botões secundários para sessão concluída -->
@@ -804,7 +804,7 @@ const components = {
                             </button>
                         </div>
                     ` : `
-                        <button ${this.generateSmartButton(session.id, 'Iniciar Estudo', session).disabled ? 'disabled' : `onclick='window.openStudySession(${session.id})'`} data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Estudo', session).classes} text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 mb-3">
+                        <button ${this.generateSmartButton(session.id, 'Iniciar Estudo', session).disabled ? 'disabled' : `onclick='window.openStudySession(${session.id})'`} data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Estudo', session).classes} text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-3 mb-3">
                             <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
                                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
@@ -864,7 +864,7 @@ const components = {
             
             if (parts.length > 1) {
                 // Formatar descrição estruturada com disciplinas agrupadas
-                descriptionHtml += `<p class="mb-6 text-xl font-bold text-gray-800">${mainTitle}</p>`;
+                descriptionHtml += `<p class="mb-6 text-xl font-semibold text-gray-800">${mainTitle}</p>`;
                 
                 // Extrair lista de tópicos organizados por disciplinas (melhor parser)
                 const topicsList = parts[1];
@@ -934,20 +934,20 @@ const components = {
                                     
                                     return `
                                         <div class="bg-white/90 p-6 rounded-2xl border-2 ${isDirected ? 'border-purple-200 shadow-purple-100' : 'border-gray-200'} shadow-lg hover:shadow-xl transition-all duration-300 hover:border-${isDirected ? 'purple' : 'gray'}-300">
-                                            <h4 class="font-bold text-gray-800 mb-4 flex items-center justify-between text-lg">
+                                            <h4 class="font-semibold text-gray-800 mb-4 flex items-center justify-between text-lg">
                                                 <div class="flex items-center">
                                                     <span class="text-2xl mr-3">${icon}</span>
                                                     <span>${discipline}</span>
                                                 </div>
-                                                <span class="bg-${isDirected ? 'purple' : 'gray'}-100 text-${isDirected ? 'purple' : 'gray'}-700 px-3 py-1 rounded-full text-xs font-medium">
+                                                <span class="bg-${isDirected ? 'purple' : 'gray'}-100 text-${isDirected ? 'purple' : 'gray'}-700 px-3 py-1 rounded-full text-xs font-normal">
                                                     ${topicCount} ${topicCount === 1 ? 'tópico' : 'tópicos'}
                                                 </span>
                                             </h4>
                                             <ul class="space-y-2">
                                                 ${topics.map(topic => `
                                                     <li class="flex items-start space-x-3 py-2 px-3 bg-white/60 rounded-lg hover:bg-white/80 transition-colors">
-                                                        <span class="${isDirected ? 'text-purple-500' : 'text-gray-500'} font-bold mt-1">•</span>
-                                                        <span class="text-gray-700 leading-relaxed">${topic}</span>
+                                                        <span class="${isDirected ? 'text-purple-500' : 'text-gray-500'} font-medium mt-1">•</span>
+                                                        <span class="text-gray-700 font-normal leading-relaxed">${topic}</span>
                                                     </li>
                                                 `).join('')}
                                             </ul>
@@ -1003,13 +1003,13 @@ const components = {
                             </div>
                             <div class="flex-grow">
                                 <div class="flex items-center space-x-3 mb-2">
-                                    <h3 class="font-bold text-2xl text-gray-800 group-hover:text-gray-900 transition-colors">${safeSubjectName}</h3>
-                                    <span class="${style.badge} px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                                    <h3 class="font-semibold text-2xl text-gray-800 group-hover:text-gray-900 transition-colors">${safeSubjectName}</h3>
+                                    <span class="${style.badge} px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
                                         ${isDirected ? 'DIRECIONADO' : 'COMPLETO'}
                                     </span>
                                 </div>
-                                <p class="text-base font-semibold text-gray-600 mb-1">${style.title}</p>
-                                <p class="text-sm text-gray-500">${style.subtitle}</p>
+                                <p class="text-base font-medium text-gray-600 mb-1">${style.title}</p>
+                                <p class="text-sm font-normal text-gray-500">${style.subtitle}</p>
                             </div>
                         </div>
                         <div class="hidden md:flex items-center space-x-2">
@@ -1026,7 +1026,7 @@ const components = {
                 <!-- Action Section -->
                 <div class="mt-auto pt-6 border-t border-gray-200">
                      ${isCompleted ? `
-                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg mb-3">
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-semibold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg mb-3">
                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover/btn:bg-green-200 transition-colors">
                                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
@@ -1047,7 +1047,7 @@ const components = {
                             </button>
                         </div>
                     ` : `
-                        <button ${this.generateSmartButton(session.id, 'Iniciar Simulado', session).disabled ? 'disabled' : `onclick='window.openStudySession(${session.id})'`} data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Simulado', session).classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Simulado', session).classes : `bg-gradient-to-r ${style.gradient}`} hover:shadow-2xl text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4 mb-3">
+                        <button ${this.generateSmartButton(session.id, 'Iniciar Simulado', session).disabled ? 'disabled' : `onclick='window.openStudySession(${session.id})'`} data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Simulado', session).classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Simulado', session).classes : `bg-gradient-to-r ${style.gradient}`} hover:shadow-2xl text-white font-semibold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4 mb-3">
                             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
@@ -1093,8 +1093,8 @@ const components = {
                                 <span class="text-3xl">✍️</span>
                             </div>
                             <div>
-                                <h3 class="font-bold text-2xl text-gray-800 group-hover:text-gray-900 transition-colors">${safeSubjectName}</h3>
-                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Redação</p>
+                                <h3 class="font-semibold text-2xl text-gray-800 group-hover:text-gray-900 transition-colors">${safeSubjectName}</h3>
+                                <p class="text-sm font-normal text-gray-600 uppercase tracking-wider">Redação</p>
                             </div>
                         </div>
                         <div class="hidden md:flex items-center space-x-2">
@@ -1106,7 +1106,7 @@ const components = {
                     
                     <!-- Content Section -->
                     <div class="bg-white/60 p-6 rounded-2xl border border-rose-100">
-                        <p class="text-lg text-gray-700 leading-relaxed">${safeTopicDescription}</p>
+                        <p class="text-lg font-normal text-gray-700 leading-relaxed">${safeTopicDescription}</p>
                         
                         <!-- Writing Tips -->
                         <div class="mt-4 flex items-center space-x-4 text-sm text-gray-600">
@@ -1129,7 +1129,7 @@ const components = {
                 <!-- Action Section -->
                 <div class="mt-auto pt-6 border-t ${isCompleted ? 'border-green-200' : 'border-rose-200'}">
                     ${isCompleted ? `
-                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg mb-3">
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-semibold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg mb-3">
                             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover/btn:bg-green-200 transition-colors">
                                 <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
@@ -1150,7 +1150,7 @@ const components = {
                             </button>
                         </div>
                     ` : `
-                         <button ${this.generateSmartButton(session.id, 'Iniciar Redação', session).disabled ? 'disabled' : `onclick='window.openStudySession(${session.id})'`} data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Redação', session).classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Redação', session).classes : 'bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700'} hover:shadow-2xl text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4 mb-3">
+                         <button ${this.generateSmartButton(session.id, 'Iniciar Redação', session).disabled ? 'disabled' : `onclick='window.openStudySession(${session.id})'`} data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.generateSmartButton(session.id, 'Iniciar Redação', session).classes.includes('orange') ? this.generateSmartButton(session.id, 'Iniciar Redação', session).classes : 'bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700'} hover:shadow-2xl text-white font-semibold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4 mb-3">
                             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
@@ -1203,8 +1203,8 @@ const components = {
             const icon = disciplineIcons[subjectName] || disciplineIcons.default;
             const topicList = lines.map(line => `
                 <li class="flex items-start space-x-3 py-2 px-3 bg-white/60 rounded-lg hover:bg-white/80 transition-colors">
-                    <span class="text-yellow-600 font-bold mt-1">•</span>
-                    <span class="text-gray-700">${line.replace(/• /g, '').trim()}</span>
+                    <span class="text-yellow-600 font-medium mt-1">•</span>
+                    <span class="text-gray-700 font-normal">${line.replace(/• /g, '').trim()}</span>
                 </li>
             `).join('');
             return `
@@ -1212,7 +1212,7 @@ const components = {
                     <h4 class="font-bold text-gray-800 mb-4 flex items-center text-lg">
                         <span class="text-2xl mr-3">${icon}</span>
                         ${subjectName}
-                        <span class="ml-2 bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">
+                        <span class="ml-2 bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-normal">
                             ${lines.length} ${lines.length === 1 ? 'tópico' : 'tópicos'}
                         </span>
                     </h4>
@@ -1233,15 +1233,15 @@ const components = {
                                 </div>
                                 <div class="flex-1">
                                     <div class="flex items-center space-x-3 mb-2">
-                                        <h3 class="font-bold text-2xl ${isCompleted ? 'text-gray-600' : 'text-gray-800'} group-hover:text-gray-900 transition-colors">
+                                        <h3 class="font-semibold text-2xl ${isCompleted ? 'text-gray-600' : 'text-gray-800'} group-hover:text-gray-900 transition-colors">
                                             ${app.sanitizeHtml(session.subject_name)}
                                         </h3>
-                                        <span class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
+                                        <span class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider shadow-lg">
                                             REVISÃO
                                         </span>
                                     </div>
-                                    <p class="text-base font-semibold text-gray-600">Consolidação de Conhecimento</p>
-                                    <p class="text-sm text-gray-500">Reforço dos tópicos estudados</p>
+                                    <p class="text-base font-medium text-gray-600">Consolidação de Conhecimento</p>
+                                    <p class="text-sm font-normal text-gray-500">Reforço dos tópicos estudados</p>
                                 </div>
                             </div>
                         </div>
@@ -1255,7 +1255,7 @@ const components = {
                     
                     <!-- Conteúdo principal -->
                     <div class="bg-white/80 p-6 rounded-2xl border-2 border-yellow-200 mb-6">
-                        <p class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
+                        <p class="text-lg font-medium text-gray-800 mb-6 flex items-center">
                             <span class="text-2xl mr-3">🎯</span>
                             ${mainTitle}
                         </p>
@@ -1266,7 +1266,7 @@ const components = {
                 <!-- Ação melhorada -->
                 <div class="mt-auto pt-6 border-t-2 ${isCompleted ? 'border-green-200' : 'border-yellow-200'}">
                     ${isCompleted ? `
-                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg mb-3">
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-semibold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg mb-3">
                             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover/btn:bg-green-200 transition-colors">
                                 <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                             </div>
@@ -1285,7 +1285,7 @@ const components = {
                             </button>
                         </div>
                     ` : `
-                        <button onclick='markReviewAsCompleted(${session.id})' class="group/btn w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-4 mb-3">
+                        <button onclick='markReviewAsCompleted(${session.id})' class="group/btn w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white font-semibold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-4 mb-3">
                             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>

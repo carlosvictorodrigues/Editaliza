@@ -22,6 +22,21 @@
     <!-- SCRIPTS CENTRALIZADOS -->
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
+    <script src="js/modules/contextual-notifications.js" type="module"></script>
+    <script src="js/modules/notification-integrations.js" type="module"></script>
+    
+    <!-- Registro do Service Worker para Notificações Push -->
+    <script>
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('✅ Service Worker registrado:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('❌ Erro ao registrar Service Worker:', error);
+                });
+        }
+    </script>
     <!-- Config do Tailwind para reconhecer as cores customizadas -->
     <script>
         tailwind.config = {
@@ -367,7 +382,35 @@
                     const planElement = document.createElement('div');
                     planElement.className = 'plan-item flex justify-between items-center p-4 border rounded-lg hover:bg-slate-50 hover:shadow-sm transition-all duration-200';
                     planElement.style.animationDelay = `${index * 0.1}s`;
-                    const examDate = new Date(plan.exam_date + 'T00:00:00');
+                    // Corrigir parsing de data para evitar Invalid Date
+                    let examDate;
+                    console.log('DEBUG - Processando data do plano:', plan.plan_name, 'exam_date:', plan.exam_date);
+                    
+                    if (plan.exam_date) {
+                        // Verificar diferentes formatos de data
+                        if (plan.exam_date.includes('/')) {
+                            // Formato brasileiro dd/mm/aaaa
+                            const [dia, mes, ano] = plan.exam_date.split('/');
+                            examDate = new Date(ano, mes - 1, dia, 12, 0, 0);
+                        } else if (plan.exam_date.includes('T') || plan.exam_date.includes(' ')) {
+                            // Formato ISO com hora
+                            examDate = new Date(plan.exam_date);
+                        } else if (plan.exam_date.includes('-')) {
+                            // Formato ISO sem hora (YYYY-MM-DD)
+                            examDate = new Date(plan.exam_date + 'T12:00:00');
+                        } else {
+                            // Tentar parsing direto
+                            examDate = new Date(plan.exam_date);
+                        }
+                    }
+                    
+                    // Validar se a data é válida
+                    if (!examDate || isNaN(examDate.getTime())) {
+                        console.warn('Data inválida para plano:', plan.id, plan.exam_date);
+                        examDate = new Date(); // Fallback para hoje
+                    }
+                    
+                    console.log('DEBUG - Data processada:', examDate);
 
                     planElement.innerHTML = `
                         <a href="plan_settings.html?id=${plan.id}" class="flex-grow group flex items-center">

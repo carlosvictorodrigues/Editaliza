@@ -174,7 +174,52 @@ curl https://app.editaliza.com.br/health
 
 ## 🤖 USANDO GEMINI COMO ASSISTENTE
 
-### Para análise e debugging:
+### 🔧 Configuração do MCP Gemini no Claude Code (VS Code)
+
+#### Configuração Atual:
+O MCP Gemini está configurado para funcionar com o Claude Code no VS Code através do arquivo `.claude.json`:
+
+```json
+{
+  "mcpServers": {
+    "gemini-cli": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@google/gemini-cli", "mcp-server"],
+      "env": {
+        "GEMINI_API_KEY": "AIzaSyD3qgG6NREyKUPgTdKuYPZ_vBO80BUBgx8"
+      }
+    }
+  }
+}
+```
+
+#### Para Reconfigurar (se necessário):
+```bash
+# Remover configuração antiga
+claude mcp remove gemini-cli
+
+# Adicionar nova configuração
+claude mcp add gemini-cli npx @google/gemini-cli mcp-server
+
+# Editar manualmente .claude.json para adicionar a API key
+```
+
+#### Verificar Status:
+```bash
+# Listar MCPs configurados
+claude mcp list
+
+# Ver detalhes do MCP
+/mcp
+```
+
+#### Ativar o MCP:
+1. Após configurar, recarregue o VS Code: `Ctrl+Shift+P` → "Developer: Reload Window"
+2. O MCP deve conectar automaticamente
+3. Se não conectar, verifique os logs no VS Code
+
+### Para análise e debugging via Bash:
 ```bash
 # Analisar logs de erro
 ssh editaliza "pm2 logs --lines 100" | gemini -p "Analise estes logs e identifique o problema" -m gemini-2.5-flash
@@ -182,6 +227,12 @@ ssh editaliza "pm2 logs --lines 100" | gemini -p "Analise estes logs e identifiq
 # Revisar código antes de deploy
 cat server.js | gemini -p "Revise este código para problemas de segurança e performance" -m gemini-2.5-flash
 ```
+
+### 📌 Notas Importantes:
+- O MCP funciona diferente no Claude Code (VS Code) vs Claude Desktop
+- A configuração fica em `C:\Users\Gabriel\.claude.json` no escopo do projeto
+- Use `npx` para garantir sempre a versão mais recente do gemini-cli
+- Se houver problemas de conexão, reinstale: `npm install -g @google/gemini-cli@latest`
 
 ## 📝 CONVENÇÕES DE COMMIT
 

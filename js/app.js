@@ -94,16 +94,26 @@ const app = {
     // Aguardar módulos de notificação estarem disponíveis
     async waitForNotificationModules(maxWait = 10000) {
         const startTime = Date.now();
+        let attempts = 0;
+        const maxAttempts = 100; // Máximo 100 tentativas
         
-        while (Date.now() - startTime < maxWait) {
-            if (window.ContextualNotifications && window.NotificationIntegrations) {
-                return true;
+        while (Date.now() - startTime < maxWait && attempts < maxAttempts) {
+            attempts++;
+            
+            try {
+                if (window.ContextualNotifications && window.NotificationIntegrations) {
+                    console.log(`✅ Módulos de notificação carregados após ${attempts} tentativas`);
+                    return true;
+                }
+                await new Promise(resolve => setTimeout(resolve, 100));
+            } catch (error) {
+                console.warn(`⚠️ Erro na tentativa ${attempts}:`, error);
+                break; // Sair do loop em caso de erro
             }
-            await new Promise(resolve => setTimeout(resolve, 100));
         }
         
-        console.warn('⚠️ Módulos de notificação não carregaram, usando fallback');
-        return false; // Retorna false em vez de erro
+        console.warn(`⚠️ Módulos de notificação não carregaram após ${attempts} tentativas (${Date.now() - startTime}ms)`);
+        return false;
     },
 
     // Verificar se o token expirou
@@ -661,7 +671,26 @@ async function openStudySession(sessionId) {
         let sessionRescheduled = false;
         // Usar horário de Brasília corretamente
         const todayStr = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
-        if (session.session_date && session.session_date !== todayStr) {
+        
+        // Debug de datas
+        console.log('📅 Comparação de datas:', {
+            session_date: session.session_date,
+            session_date_type: typeof session.session_date,
+            todayStr: todayStr,
+            comparison: session.session_date !== todayStr
+        });
+        
+        // Converter session_date para string no formato correto se necessário
+        let sessionDateStr = session.session_date;
+        if (session.session_date instanceof Date) {
+            sessionDateStr = session.session_date.toISOString().split('T')[0];
+        } else if (typeof session.session_date === 'object' && session.session_date !== null) {
+            sessionDateStr = new Date(session.session_date).toISOString().split('T')[0];
+        } else if (typeof session.session_date === 'string' && session.session_date.includes('T')) {
+            sessionDateStr = session.session_date.split('T')[0];
+        }
+        
+        if (sessionDateStr && sessionDateStr !== todayStr) {
             const confirmReschedule = confirm('Esta sessão estava marcada para outro dia. Deseja reagendá-la para hoje?');
             if (!confirmReschedule) {
                 return;

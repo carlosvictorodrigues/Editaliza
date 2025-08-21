@@ -157,6 +157,11 @@ const allowedHtmlFiles = [
 
 allowedHtmlFiles.forEach(file => {
     app.get(`/${file}`, (req, res) => {
+        // Adicionar headers para desabilitar o cache durante o debug
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+        
         res.sendFile(path.join(__dirname, file));
     });
 });
@@ -623,9 +628,15 @@ const globalLimiter = rateLimit({
             '/overdue_check',
             '/progress',
             '/goal_progress',
-            '/realitycheck'
+            '/realitycheck',
+            '/settings', // Configurações do plano
+            '/generate', // Geração de cronograma
+            '/batch_update', // Atualização em lote
+            '/batch_update_details' // Atualização de detalhes
         ];
-        return skipPaths.some(path => req.path.endsWith(path));
+        return skipPaths.some(path => req.path.endsWith(path)) || 
+               req.path.includes('/plans/') || // Qualquer rota de planos
+               req.path.includes('/topics/'); // Qualquer rota de tópicos
     }
 });
 app.use(globalLimiter);
@@ -1308,7 +1319,7 @@ app.delete('/plans/:planId',
             const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
             if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado ou você não tem permissão.' });
             
-            await dbRun('BEGIN TRANSACTION');
+            await dbRun('BEGIN');
             await dbRun('DELETE FROM study_sessions WHERE study_plan_id = ?', [planId]);
             await dbRun('DELETE FROM topics WHERE subject_id IN (SELECT id FROM subjects WHERE study_plan_id = ?)', [planId]);
             await dbRun('DELETE FROM subjects WHERE study_plan_id = ?', [planId]);
@@ -1393,7 +1404,7 @@ app.post('/plans/:planId/subjects_with_topics',
 
             const topics = topics_list.split('\n').map(t => t.trim()).filter(t => t !== '');
             
-            await dbRun('BEGIN TRANSACTION');
+            await dbRun('BEGIN');
             const result = await dbRun('INSERT INTO subjects (study_plan_id, subject_name, priority_weight) VALUES (?,?,?)', [planId, subject_name, priority_weight]);
             const subjectId = result.lastID;
             
@@ -1453,7 +1464,7 @@ app.delete('/subjects/:subjectId',
             `, [subjectId, req.user.id]);
             if (!subject) return res.status(404).json({ error: 'Disciplina não encontrada ou não autorizada.' });
 
-            await dbRun('BEGIN TRANSACTION');
+            await dbRun('BEGIN');
             await dbRun('DELETE FROM study_sessions WHERE topic_id IN (SELECT id FROM topics WHERE subject_id = ?)', [subjectId]);
             await dbRun('DELETE FROM topics WHERE subject_id = ?', [subjectId]);
             await dbRun('DELETE FROM subjects WHERE id = ?', [subjectId]);
@@ -1497,6 +1508,8 @@ app.get('/plans/:planId/subjects_with_topics',
 
             const topicsBySubjectId = new Map();
             topics.forEach(topic => {
+                // Normalizar tipo do peso para inteiro
+                topic.priority_weight = parseInt(topic.priority_weight, 10) || 3;
                 if (!topicsBySubjectId.has(topic.subject_id)) {
                     topicsBySubjectId.set(topic.subject_id, []);
                 }
@@ -1508,6 +1521,10 @@ app.get('/plans/:planId/subjects_with_topics',
                 topics: topicsBySubjectId.get(subject.id) || []
             }));
 
+            // Evitar cache para refletir rapidamente alterações
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
             res.json(result);
         } catch (error) {
             console.error('Erro ao buscar disciplinas com tópicos:', error);
@@ -1529,6 +1546,10 @@ app.get('/subjects/:subjectId/topics',
             if (!subject) return res.status(404).json({ error: 'Disciplina não encontrada ou não autorizada.' });
 
             const rows = await dbAll('SELECT id, description, status, completion_date, priority_weight FROM topics WHERE subject_id = ? ORDER BY id ASC', [req.params.subjectId]);
+            rows.forEach(r => r.priority_weight = parseInt(r.priority_weight, 10) || 3);
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
             res.json(rows);
         } catch (error) {
             console.error('Erro ao buscar tópicos:', error);
@@ -1542,19 +1563,35 @@ app.patch('/topics/batch_update',
     body('topics').isArray().withMessage('O corpo deve conter um array de tópicos'),
     body('topics.*.id').isInt().withMessage('ID do tópico inválido'),
     body('topics.*.status').isIn(['Pendente', 'Concluído']).withMessage('Status inválido'),
-    body('topics.*.completion_date').optional({ nullable: true }).isISO8601().withMessage('Data de conclusão inválida'),
-    body('topics.*.description').optional().isString().isLength({ min: 1, max: 500 }),
-    body('topics.*.priority_weight').optional().isInt({ min: 1, max: 5 }),
+    body('topics.*.completion_date').optional({ nullable: true, checkFalsy: true }).isISO8601().withMessage('Data de conclusão inválida'),
+    body('topics.*.description').optional({ checkFalsy: true }).isString().isLength({ min: 1, max: 500 }).withMessage('Descrição do tópico inválida'),
     handleValidationErrors,
     async (req, res) => {
         const { topics } = req.body;
 
         try {
-            await dbRun('BEGIN TRANSACTION');
+            await dbRun('BEGIN');
             
             for (const topic of topics) {
-                const { id, status, completion_date, description, priority_weight } = topic;
+                const { id, status, completion_date, description } = topic;
+                let { priority_weight } = topic;
                 
+                // Log para depurar o valor recebido
+                if (priority_weight !== undefined) {
+                    console.log(`[DEBUG] Recebido priority_weight para tópico ${id}:`, priority_weight, `(Tipo: ${typeof priority_weight})`);
+                }
+
+                // Validação manual e robusta para o peso do tópico
+                if (priority_weight !== undefined) {
+                    const parsedWeight = parseInt(priority_weight, 10);
+                    if (isNaN(parsedWeight) || parsedWeight < 1 || parsedWeight > 5) {
+                        console.error(`[VALIDATION] Peso de prioridade inválido para o tópico ${id}: recebido '${priority_weight}'. A atualização do peso será ignorada.`);
+                        priority_weight = undefined; // Ignorar atualização deste campo
+                    } else {
+                        priority_weight = parsedWeight; // Usar o valor numérico validado
+                    }
+                }
+
                 // Construir consulta dinâmica baseada nos campos presentes
                 const updates = [];
                 const values = [];
@@ -1570,14 +1607,17 @@ app.patch('/topics/batch_update',
                     values.push(completionDate);
                 }
                 
-                if (description !== undefined) {
+                if (description !== undefined && String(description).trim().length > 0) {
                     updates.push('description = ?');
-                    values.push(description);
+                    values.push(String(description).trim());
                 }
                 
                 if (priority_weight !== undefined) {
-                    updates.push('priority_weight = ?');
-                    values.push(priority_weight);
+                    const parsed = parseInt(priority_weight, 10);
+                    if (!isNaN(parsed) && parsed >= 1 && parsed <= 5) {
+                        updates.push('priority_weight = ?');
+                        values.push(parsed);
+                    }
                 }
                 
                 if (updates.length === 0) {
@@ -1597,7 +1637,8 @@ app.patch('/topics/batch_update',
                     )
                 `;
                 
-                await dbRun(sql, values);
+                const result = await dbRun(sql, values);
+                console.log(`[DEBUG] Update tópico ${id}: fields=${updates.join(', ')}, values=${JSON.stringify(values)}; changes=${result.changes}`);
             }
             
             await dbRun('COMMIT');
@@ -1614,15 +1655,15 @@ app.patch('/topics/batch_update_details',
     authenticateToken,
     body('topics').isArray().withMessage('O corpo deve conter um array de tópicos'),
     body('topics.*.id').isInt().withMessage('ID do tópico inválido'),
-    body('topics.*.description').optional().isString().isLength({ min: 1, max: 500 }),
-    body('topics.*.priority_weight').optional().isInt({ min: 1, max: 5 }),
+    body('topics.*.description').optional({ checkFalsy: true }).isString().isLength({ min: 1, max: 500 }).withMessage('Descrição do tópico inválida'),
+    body('topics.*.priority_weight').optional().isInt({ min: 1, max: 5 }).withMessage('Peso do tópico deve estar entre 1 e 5'),
     handleValidationErrors,
     async (req, res) => {
         const { topics } = req.body;
         const userId = req.user.id;
 
         try {
-            await dbRun('BEGIN TRANSACTION');
+            await dbRun('BEGIN');
 
             for (const topic of topics) {
                 const { id, description, priority_weight } = topic;
@@ -1630,9 +1671,9 @@ app.patch('/topics/batch_update_details',
                 const updates = [];
                 const values = [];
 
-                if (description !== undefined) {
+                if (description !== undefined && String(description).trim().length > 0) {
                     updates.push('description = ?');
-                    values.push(description);
+                    values.push(String(description).trim());
                 }
                 if (priority_weight !== undefined) {
                     updates.push('priority_weight = ?');
@@ -1656,7 +1697,8 @@ app.patch('/topics/batch_update_details',
                     )
                 `;
 
-                await dbRun(sql, values);
+                const result = await dbRun(sql, values);
+                console.log(`[DEBUG] Update tópico ${id} (details): fields=${updates.join(', ')}, values=${JSON.stringify(values)}; changes=${result.changes}`);
             }
 
             await dbRun('COMMIT');
@@ -1735,7 +1777,7 @@ app.delete('/topics/:topicId',
                 return res.status(404).json({ error: 'Tópico não encontrado ou não autorizado.' });
             }
 
-            await dbRun('BEGIN TRANSACTION');
+            await dbRun('BEGIN');
             await dbRun('DELETE FROM study_sessions WHERE topic_id = ?', [topicId]);
             await dbRun('DELETE FROM topics WHERE id = ?', [topicId]);
             await dbRun('COMMIT');
@@ -1779,7 +1821,7 @@ app.post('/plans/:planId/generate',
         });
 
         try {
-            await dbRun('BEGIN IMMEDIATE TRANSACTION');
+            await dbRun('BEGIN');
             console.log(`[CRONOGRAMA] ✅ Transação iniciada para plano ${planId}`);
             
             const hoursJson = JSON.stringify(study_hours_per_day);
@@ -1788,7 +1830,9 @@ app.post('/plans/:planId/generate',
                 [daily_question_goal, weekly_question_goal, session_duration_minutes, hoursJson, has_essay, reta_final_mode ? 1 : 0, planId, req.user.id]);
             console.log(`[CRONOGRAMA] ✅ Plano ${planId} atualizado com sucesso`);
             
-            const plan = await dbGet('SELECT * FROM study_plans WHERE id = ?', [planId]);
+            console.log(`[CRONOGRAMA] 🔍 Buscando plano ${planId} para usuário ${req.user.id}`);
+            const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
+            console.log(`[CRONOGRAMA] 📋 Plano encontrado:`, plan ? `ID ${plan.id}, exam_date: ${plan.exam_date}` : 'Não encontrado');
             if (!plan) {
                 await dbRun('ROLLBACK');
                 return res.status(404).json({ error: 'Plano não encontrado.' });
@@ -1815,6 +1859,11 @@ app.post('/plans/:planId/generate',
                 ORDER BY s.priority_weight DESC, COALESCE(t.priority_weight, 3) DESC, t.id ASC
             `;
             const allTopics = await dbAll(allTopicsQuery, [planId]);
+            // Normalizar priority_weight possivelmente string para número seguro
+            allTopics.forEach(t => {
+                t.subject_priority = parseInt(t.subject_priority, 10) || 3;
+                t.topic_priority = parseInt(t.topic_priority, 10) || 3;
+            });
 
             if (allTopics.length === 0) {
                 await dbRun('COMMIT');
@@ -1822,7 +1871,34 @@ app.post('/plans/:planId/generate',
             }
             
             const sessionDuration = parseInt(session_duration_minutes, 10) || 50;
-            const examDate = new Date(plan.exam_date + 'T23:59:59');
+            
+            // Log para debug
+            console.log('🔍 Gerando cronograma - Dados do plano:', {
+                plan_id: planId,
+                exam_date: plan.exam_date,
+                exam_date_type: typeof plan.exam_date,
+                exam_date_value: plan.exam_date
+            });
+            
+            // Validação robusta da data de prova para evitar 500
+            let examDateString = plan.exam_date;
+            
+            // Se exam_date é um objeto Date, converter para string
+            if (plan.exam_date instanceof Date) {
+                examDateString = plan.exam_date.toISOString().split('T')[0];
+            } else if (typeof plan.exam_date === 'object' && plan.exam_date !== null) {
+                // Se for um objeto com toISOString
+                examDateString = new Date(plan.exam_date).toISOString().split('T')[0];
+            }
+            
+            console.log('📅 Data da prova após conversão:', examDateString);
+            
+            if (!examDateString || isNaN(new Date(examDateString + 'T00:00:00').getTime())) {
+                console.error('❌ Data da prova inválida:', examDateString);
+                await dbRun('ROLLBACK');
+                return res.status(400).json({ error: 'Defina a data da prova nas configurações do plano antes de gerar o cronograma.' });
+            }
+            const examDate = new Date(examDateString + 'T23:59:59');
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -1919,7 +1995,7 @@ app.post('/plans/:planId/generate',
             }
             
             const pendingTopics = allTopics.filter(t => t.status !== 'Concluído');
-            const availableSlots = getAvailableDates(today, examDate, true).reduce((sum, d) => sum + d.maxSessions, 0);
+            const availableSlots = getAvailableDates(today, examDate, true).reduce((sum, d) => sum + (parseInt(d.maxSessions, 10) || 0), 0);
             let topicsToSchedule = pendingTopics;
             let excludedTopics = [];
             let prioritizedSubjects = [];
@@ -2282,8 +2358,8 @@ app.post('/plans/:planId/generate',
                                 [
                                     planId,
                                     validTopicId,
-                                    sessionData.subjectName,
-                                    sessionData.topicDescription,
+                                    String(sessionData.subjectName || '').substring(0, 200),
+                                    String(sessionData.topicDescription || '').substring(0, 500),
                                     sessionData.session_date,
                                     sessionData.sessionType,
                                     'Pendente'
@@ -2773,7 +2849,7 @@ app.post('/plans/:planId/replan',
                 return { rescheduledCount, failedSessions, reschedulingLog };
             };
             
-            await dbRun('BEGIN TRANSACTION');
+            await dbRun('BEGIN');
             
             const result = await smartReplan();
             
@@ -3022,7 +3098,7 @@ app.patch('/sessions/batch_update_status',
         const userId = req.user.id;
 
         try {
-            await dbRun('BEGIN TRANSACTION');
+            await dbRun('BEGIN');
             
             const updateSql = `
                 UPDATE study_sessions 
@@ -3744,12 +3820,21 @@ app.get('/plans/:planId/gamification',
             const plan = await dbGet("SELECT id FROM study_plans WHERE id = ? AND user_id = ?", [planId, userId]);
             if (!plan) return res.status(404).json({ "error": "Plano não encontrado ou não autorizado." });
 
+            // CORREÇÃO: Contar tópicos únicos concluídos independente do session_type
             const completedTopicsResult = await dbGet(`
                 SELECT COUNT(DISTINCT topic_id) as count 
                 FROM study_sessions 
-                WHERE study_plan_id = ? AND session_type = 'Novo Tópico' AND status = 'Concluído' AND topic_id IS NOT NULL
+                WHERE study_plan_id = ? 
+                AND status = 'Concluído' 
+                AND topic_id IS NOT NULL
             `, [planId]);
-            const completedTopicsCount = completedTopicsResult.count || 0;
+            const completedTopicsCount = parseInt(completedTopicsResult?.count || 0);
+            
+            // Debug: Log para verificar o que está sendo calculado
+            console.log(`[GAMIFICATION DEBUG] Plan ${planId}:`, {
+                completedTopicsCount,
+                queryResult: completedTopicsResult
+            });
 
             const levels = [
                 { threshold: 0, title: 'Aspirante a Servidor(a) 🌱' },
@@ -3822,21 +3907,158 @@ app.get('/plans/:planId/gamification',
                 FROM study_sessions 
                 WHERE study_plan_id = ? AND status = 'Concluído'
             `, [planId]);
-            const totalCompletedSessions = allCompletedSessionsResult.count || 0;
+            const totalCompletedSessions = parseInt(allCompletedSessionsResult?.count || 0);
+            
+            console.log(`[GAMIFICATION DEBUG] Total sessions:`, {
+                totalCompletedSessions,
+                queryResult: allCompletedSessionsResult
+            });
             
             // XP baseado em: 10 XP por sessão completada + 50 XP por tópico novo completado
             const experiencePoints = (totalCompletedSessions * 10) + (completedTopicsCount * 50);
             
-            // Calcular conquistas baseadas em dados reais
+            // Calcular conquistas baseadas em dados reais (formato compatível com o frontend)
+            // AGORA COM MUITO HUMOR PARA ALIVIAR A PRESSÃO! 😄
             const achievements = [];
-            if (completedTopicsCount >= 1) achievements.push("🌟 Primeiro Tópico");
-            if (completedTopicsCount >= 5) achievements.push("📚 Estudioso");
-            if (completedTopicsCount >= 10) achievements.push("🎯 Focado");
-            if (studyStreak >= 3) achievements.push("🔥 Consistente");
-            if (studyStreak >= 7) achievements.push("💪 Disciplinado");
-            if (studyStreak >= 14) achievements.push("🏆 Dedicado");
-            if (totalCompletedSessions >= 20) achievements.push("📈 Persistente");
-            if (totalCompletedSessions >= 50) achievements.push("⭐ Veterano");
+            const now = new Date().toISOString();
+            
+            // Conquistas por TÓPICOS CONCLUÍDOS (com MUITO humor!)
+            if (completedTopicsCount >= 1) {
+                achievements.push({
+                    title: "🎯 Primeira Lapada no Edital",
+                    description: "O primeiro soco na cara da procrastinação!",
+                    achieved_date: now
+                });
+            }
+            if (completedTopicsCount >= 5) {
+                achievements.push({
+                    title: "📚 Maratonista do PDF",
+                    description: "Sua vista já começou a reclamar.",
+                    achieved_date: now
+                });
+            }
+            if (completedTopicsCount >= 10) {
+                achievements.push({
+                    title: "✨ Destruidor de Questões",
+                    description: "Já discute gabarito com confiança.",
+                    achieved_date: now
+                });
+            }
+            if (completedTopicsCount >= 25) {
+                achievements.push({
+                    title: "👑 Dono do Material",
+                    description: "Sabe até a cor da caneta que o professor usou no slide.",
+                    achieved_date: now
+                });
+            }
+            if (completedTopicsCount >= 50) {
+                achievements.push({
+                    title: "🌟 Meio Monstro",
+                    description: "Você está virando uma lenda local no grupo de estudos.",
+                    achieved_date: now
+                });
+            }
+            if (completedTopicsCount >= 100) {
+                achievements.push({
+                    title: "🏛️ Centurião do Conhecimento",
+                    description: "Bancas já estão te bloqueando no Instagram.",
+                    achieved_date: now
+                });
+            }
+            if (completedTopicsCount >= 200) {
+                achievements.push({
+                    title: "💪 Chuck Norris dos Editais",
+                    description: "Os editais temem você!",
+                    achieved_date: now
+                });
+            }
+            if (completedTopicsCount >= 501) {
+                achievements.push({
+                    title: "🏛️ Vai Escolher Onde Vai Tomar Posse",
+                    description: "Não é se vai passar, é onde.",
+                    achieved_date: now
+                });
+            }
+            
+            // Conquistas por SEQUÊNCIA (STREAK) com humor!
+            if (studyStreak >= 3) {
+                achievements.push({
+                    title: "Resistente ao Netflix 📺",
+                    description: "3 dias seguidos! Resistiu à série nova!",
+                    achieved_date: now
+                });
+            }
+            if (studyStreak >= 7) {
+                achievements.push({
+                    title: "Imune ao Sofá 🛋️",
+                    description: "7 dias! O sofá esqueceu sua forma!",
+                    achieved_date: now
+                });
+            }
+            if (studyStreak >= 14) {
+                achievements.push({
+                    title: "Inimigo do Descanso 😤",
+                    description: "14 dias! Descanso? Não conheço!",
+                    achieved_date: now
+                });
+            }
+            if (studyStreak >= 30) {
+                achievements.push({
+                    title: "Máquina de Aprovar 🤖",
+                    description: "30 dias! Você é um cyborg concurseiro!",
+                    achieved_date: now
+                });
+            }
+            
+            // Conquistas por NÚMERO DE SESSÕES com humor!
+            if (totalCompletedSessions >= 20) {
+                achievements.push({
+                    title: "Viciado(a) em Questões 💊",
+                    description: "20 sessões! Questões são sua droga legal!",
+                    achieved_date: now
+                });
+            }
+            if (totalCompletedSessions >= 50) {
+                achievements.push({
+                    title: "🪑 Lombar Suprema",
+                    description: "Já fez mais fisioterapia que simulados.",
+                    achieved_date: now
+                });
+            }
+            if (totalCompletedSessions >= 100) {
+                achievements.push({
+                    title: "🛏️ Travesseiro Vade Mecum",
+                    description: "Seu travesseiro já está com formato de Vade Mecum.",
+                    achieved_date: now
+                });
+            }
+            if (totalCompletedSessions >= 150) {
+                achievements.push({
+                    title: "📖 Estuda em Fila de Banco",
+                    description: "Estuda até em fila de banco.",
+                    achieved_date: now
+                });
+            }
+            if (totalCompletedSessions >= 200) {
+                achievements.push({
+                    title: "🏖️ O que é Férias?",
+                    description: "Férias? Nunca ouvi falar.",
+                    achieved_date: now
+                });
+            }
+            if (totalCompletedSessions >= 300) {
+                achievements.push({
+                    title: "🎉 Destruidor(a) de Finais de Semana",
+                    description: "Churrasco? Praia? Só depois da posse!",
+                    achieved_date: now
+                });
+            }
+            
+            console.log(`[GAMIFICATION DEBUG] Achievements calculados:`, {
+                count: achievements.length,
+                totalSessions: totalCompletedSessions,
+                streak: studyStreak
+            });
             
             // Calcular total de dias únicos com atividades (não streak, mas total)
             const uniqueStudyDaysResult = await dbGet(`
@@ -3894,12 +4116,21 @@ app.get('/plans/:planId/share-progress',
             const user = await dbGet('SELECT name FROM users WHERE id = ?', [userId]);
 
             // Pegar dados de gamificação
+            // CORREÇÃO: Contar tópicos únicos concluídos independente do session_type
             const completedTopicsResult = await dbGet(`
                 SELECT COUNT(DISTINCT topic_id) as count 
                 FROM study_sessions 
-                WHERE study_plan_id = ? AND session_type = 'Novo Tópico' AND status = 'Concluído' AND topic_id IS NOT NULL
+                WHERE study_plan_id = ? 
+                AND status = 'Concluído' 
+                AND topic_id IS NOT NULL
             `, [planId]);
-            const completedTopicsCount = completedTopicsResult.count || 0;
+            const completedTopicsCount = parseInt(completedTopicsResult?.count || 0);
+            
+            // Debug: Log para verificar o que está sendo calculado
+            console.log(`[GAMIFICATION DEBUG] Plan ${planId}:`, {
+                completedTopicsCount,
+                queryResult: completedTopicsResult
+            });
 
             // Calcular streak
             const completedSessions = await dbAll(`

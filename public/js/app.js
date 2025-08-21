@@ -671,7 +671,26 @@ async function openStudySession(sessionId) {
         let sessionRescheduled = false;
         // Usar horário de Brasília corretamente
         const todayStr = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
-        if (session.session_date && session.session_date !== todayStr) {
+        
+        // Debug de datas
+        console.log('📅 Comparação de datas:', {
+            session_date: session.session_date,
+            session_date_type: typeof session.session_date,
+            todayStr: todayStr,
+            comparison: session.session_date !== todayStr
+        });
+        
+        // Converter session_date para string no formato correto se necessário
+        let sessionDateStr = session.session_date;
+        if (session.session_date instanceof Date) {
+            sessionDateStr = session.session_date.toISOString().split('T')[0];
+        } else if (typeof session.session_date === 'object' && session.session_date !== null) {
+            sessionDateStr = new Date(session.session_date).toISOString().split('T')[0];
+        } else if (typeof session.session_date === 'string' && session.session_date.includes('T')) {
+            sessionDateStr = session.session_date.split('T')[0];
+        }
+        
+        if (sessionDateStr && sessionDateStr !== todayStr) {
             const confirmReschedule = confirm('Esta sessão estava marcada para outro dia. Deseja reagendá-la para hoje?');
             if (!confirmReschedule) {
                 return;

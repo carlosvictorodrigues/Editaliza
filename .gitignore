@@ -58,6 +58,9 @@ desktop.ini
 .idea/
 .claude/
 
+# Claude Code configuration
+.claude.json
+
 # Temporary files and backups
 .tmp.*
 *.tmp

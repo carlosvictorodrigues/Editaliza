@@ -522,6 +522,23 @@
                     </div>
                     <form id="generalSettingsForm" class="space-y-6">
                         <div>
+                            <h3 class="font-semibold text-gray-600 border-b pb-2 mb-3">Informações Básicas</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="exam_date" class="text-sm font-medium text-gray-700 flex items-center">
+                                        📅 Data da Prova
+                                        <span class="tooltip">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-editaliza-blue cursor-pointer ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span class="tooltiptext">Data definida ao criar o plano. Para alterá-la, volte ao dashboard.</span>
+                                        </span>
+                                    </label>
+                                    <input type="date" id="exam_date" name="exam_date" class="form-input bg-gray-100" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
                             <h3 class="font-semibold text-gray-600 border-b pb-2 mb-3">Estrutura de Estudo</h3>
                             <div class="space-y-4">
                                 <div>
@@ -802,6 +819,11 @@
                 document.getElementById('session_duration').value = plan.session_duration_minutes;
                 document.getElementById('has_essay').checked = !!plan.has_essay;
                 
+                // Carregar data da prova
+                if (plan.exam_date) {
+                    document.getElementById('exam_date').value = plan.exam_date.split('T')[0];
+                }
+                
                 // Carregar o valor do Modo Reta Final
                 const retaFinalCheckbox = document.getElementById('retaFinalMode');
                 if (retaFinalCheckbox) {
@@ -1078,27 +1100,49 @@
                 }
             }
             
+            // SINCRONIZAR SELECTS DE PRIORIDADE (desktop e mobile)
+            if (event.target.classList.contains('priority-select')) {
+                const topicItemDiv = event.target.closest('.topic-item');
+                console.log('SYNC - Buscando container:', topicItemDiv);
+                if (topicItemDiv) {
+                    const allPrioritySelects = topicItemDiv.querySelectorAll('.priority-select');
+                    const newValue = event.target.value;
+                    console.log('SYNC - Sincronizando selects de prioridade:');
+                    console.log('  Novo valor:', newValue);
+                    console.log('  Total de selects:', allPrioritySelects.length);
+                    allPrioritySelects.forEach((select, idx) => {
+                        console.log(`  Select ${idx} antes: ${select.value}`);
+                        if (select !== event.target) {
+                            select.value = newValue;
+                        }
+                        console.log(`  Select ${idx} depois: ${select.value}`);
+                    });
+                }
+            }
+            
             // SEGUNDO: Fazer o tracking de mudanças (precisa do topicId)
-            const topicId = event.target.dataset.topicId || event.target.getAttribute('data-topic-id');
-            if (!topicId) {
-                return; // Sem topicId, não conseguimos fazer tracking, mas o toggle de data já funcionou
-            }
-
-            const topicItem = document.querySelector(`[data-topic-id="${topicId}"]`);
+            const topicItem = event.target.closest('.topic-item');
             if (!topicItem) {
-                return;
+                return; // Sem container do tópico, não conseguimos fazer tracking
             }
+            const topicId = parseInt(topicItem.getAttribute('data-topic-id'), 10);
 
             // Obter valores atuais
             const checkbox = topicItem.querySelector('.topic-checkbox');
             const nameInput = topicItem.querySelector('.topic-name-input');
-            const prioritySelect = topicItem.querySelector('.priority-select');
+            // Pegar o select de prioridade que foi modificado ou o primeiro disponível
+            const prioritySelects = topicItem.querySelectorAll('.priority-select');
+            let prioritySelect = null;
+            if (prioritySelects.length > 0) {
+                // Se o evento veio de um select de prioridade, usar esse; senão, usar o primeiro
+                prioritySelect = event.target.classList.contains('priority-select') ? event.target : prioritySelects[0];
+            }
             const dateInput = topicItem.querySelector('.completion-date-input');
 
             const currentValues = {
                 status: checkbox ? (checkbox.checked ? 'Concluído' : 'Pendente') : 'Pendente',
                 description: nameInput ? nameInput.value : '',
-                priority_weight: prioritySelect ? parseInt(prioritySelect.value) : 3,
+                priority_weight: prioritySelect ? parseInt(prioritySelect.value, 10) : 3,
                 completion_date: (checkbox && checkbox.checked && dateInput) ? dateInput.value : null
             };
 
@@ -1139,16 +1183,16 @@
             if (!topicRow) return;
 
             const nameInput = topicRow.querySelector('.topic-name-input');
-            const prioritySelect = topicRow.querySelector('.priority-select');
+            const prioritySelectsAll = topicRow.querySelectorAll('.priority-select');
 
             if (hasChanges) {
                 topicRow.classList.add('modified');
                 nameInput?.classList.add('modified');
-                prioritySelect?.classList.add('modified');
+                prioritySelectsAll.forEach(sel => sel.classList.add('modified'));
             } else {
                 topicRow.classList.remove('modified');
                 nameInput?.classList.remove('modified');
-                prioritySelect?.classList.remove('modified');
+                prioritySelectsAll.forEach(sel => sel.classList.remove('modified'));
             }
         }
 
@@ -1211,7 +1255,7 @@
 
                 app.showSpinner();
                 try {
-                    const response = await app.apiFetch('/topics/batch_update', {
+                    const response = await app.apiFetch('/topics/batch_update_details', {
                         method: 'PATCH',
                         body: JSON.stringify({ topics: topicsToUpdate })
                     });
@@ -1580,11 +1624,22 @@
             const generalSettingsForm = document.getElementById('generalSettingsForm');
             const newContentForm = document.getElementById('newContentForm');
             
-            generateButton.disabled = true;
+            // Habilitar o botão se já houver configurações válidas
+            const checkIfCanGenerate = () => {
+                const hoursPerDay = document.querySelectorAll('.hours-input');
+                const hasHours = Array.from(hoursPerDay).some(input => parseInt(input.value) > 0);
+                return hasHours;
+            };
             
-            const enableGenerateButton = () => { generateButton.disabled = false; };
+            // Verificar se pode gerar logo ao carregar
+            generateButton.disabled = !checkIfCanGenerate();
+            
+            const enableGenerateButton = () => { 
+                generateButton.disabled = !checkIfCanGenerate(); 
+            };
             
             generalSettingsForm.addEventListener('input', enableGenerateButton);
+            generalSettingsForm.addEventListener('change', enableGenerateButton);
             newContentForm.addEventListener('submit', enableGenerateButton);
 
             // Event listener removido - agora integrado no sistema de tracking de mudanças
@@ -1679,7 +1734,9 @@
             });
 
             generateButton.addEventListener('click', async (event) => {
-                const btn = event.target;
+                console.log('🚀 Botão de gerar cronograma clicado!');
+                const btn = event.target.closest('button') || event.target;
+                console.log('Botão encontrado:', btn);
                 btn.disabled = true;
                 btn.textContent = 'Gerando...';
                 app.showSpinner();

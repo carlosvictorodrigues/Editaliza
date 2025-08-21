@@ -107,6 +107,18 @@ const Gamification = {
                 'Primeiro Simulado': '🎯',
                 '10 Tópicos Concluídos': '📚',
                 '50 Tópicos Concluídos': '🏆',
+                // NOVAS conquistas super engraçadas
+                '🎯 Primeira Lapada no Edital': '🎯',
+                '📚 Maratonista do PDF': '📚',
+                '✨ Destruidor de Questões': '✨',
+                '👑 Dono do Material': '👑',
+                '🌟 Meio Monstro': '🌟',
+                '🏛️ Centurião do Conhecimento': '🏛️',
+                '🏛️ Vai Escolher Onde Vai Tomar Posse': '🏛️',
+                '🪑 Lombar Suprema': '🪑',
+                '🛏️ Travesseiro Vade Mecum': '🛏️',
+                '📖 Estuda em Fila de Banco': '📖',
+                '🏖️ O que é Férias?': '🏖️',
                 // Novas conquistas com humor
                 'Primeira Lapada no Edital 📖': '📖',
                 'Maratonista do PDF 🏃': '🏃',

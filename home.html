@@ -41,7 +41,22 @@
     <script src="js/timer.js"></script>
     <script src="js/modules/gamification.js"></script>
     <script src="js/modules/study-goals-notifications.js"></script>
+    <script src="js/modules/contextual-notifications.js" type="module"></script>
+    <script src="js/modules/notification-integrations.js" type="module"></script>
     <!-- <script src="js/ux-improvements.js"></script> -->
+    
+    <!-- Registro do Service Worker para Notificações Push -->
+    <script>
+        if ('serviceWorker' in navigator && 'PushManager' in window) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('✅ Service Worker registrado:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('❌ Erro ao registrar Service Worker:', error);
+                });
+        }
+    </script>
     <!-- Config do Tailwind para cores da marca -->
     <script>
         tailwind.config = {
@@ -1226,7 +1241,21 @@
             window.openPostponeModal = openPostponeModal;
             window.closePostponeModal = closePostponeModal;
             window.setupPlanSelector = setupPlanSelector;
-            window.updateDashboardStats = function() {
+            window.updateDashboardStats = async function() {
+                // Recarregar as sessões de hoje primeiro
+                if (app.state.activePlanId) {
+                    try {
+                        const response = await app.apiFetch(`/schedules/${app.state.activePlanId}/today`);
+                        if (response && response.sessions) {
+                            window.todaySessionsData = response.sessions;
+                            console.log('📊 Sessões de hoje recarregadas:', window.todaySessionsData.length);
+                        }
+                    } catch (error) {
+                        console.error('Erro ao recarregar sessões:', error);
+                    }
+                }
+                
+                // Agora atualizar o progresso
                 updateTodayProgress();
                 if (app.state.activePlanId) {
                     updateStudyStatistics(app.state.activePlanId);
@@ -1372,40 +1401,6 @@
             
             document.head.appendChild(cssLink);
         });
-        
-        // FORCE HIDE ALL AVATARS - Emergency Override - 2025-01-21
-        setTimeout(() => {
-            const avatarElements = document.querySelectorAll(
-                '#userAvatar, #nav-user-avatar, [class*="avatar"], [id*="avatar"], img[alt*="avatar"], img[alt*="Avatar"]'
-            );
-            avatarElements.forEach(el => {
-                if (el) {
-                    el.style.display = 'none';
-                    el.style.visibility = 'hidden';
-                    el.style.opacity = '0';
-                    el.style.width = '0';
-                    el.style.height = '0';
-                    el.remove();
-                }
-            });
-            console.log('🚫 Forcefully removed', avatarElements.length, 'avatar elements');
-        }, 2000);
-        
-        // Also hide on DOM mutations
-        if (typeof MutationObserver !== 'undefined') {
-            const observer = new MutationObserver(() => {
-                const avatarElements = document.querySelectorAll(
-                    '#userAvatar, #nav-user-avatar, [class*="avatar"], [id*="avatar"], img[alt*="avatar"], img[alt*="Avatar"]'
-                );
-                avatarElements.forEach(el => {
-                    if (el) {
-                        el.style.display = 'none';
-                        el.remove();
-                    }
-                });
-            });
-            observer.observe(document.body, { childList: true, subtree: true });
-        }
     </script>
 </body>
 </html>

@@ -89,11 +89,34 @@ const sanitizeMiddleware = (req, res, next) => {
 const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        const error = errors.array()[0];
-        console.error(`[VALIDATION_ERROR] Campo: ${error.param}, Valor: ${error.value}, Erro: ${error.msg}`);
-        console.error(`[VALIDATION_ERROR] URL: ${req.originalUrl}, Método: ${req.method}`);
-        console.error(`[VALIDATION_ERROR] Params:`, req.params);
-        return res.status(400).json({ error: error.msg });
+        // Log detalhado para o servidor
+        console.error('--- ERRO DE VALIDAÇÃO DETECTADO ---');
+        console.error(`[INFO] Rota: ${req.method} ${req.originalUrl}`);
+        console.error(`[INFO] IP: ${req.ip}`);
+        
+        // Log de todos os erros de validação
+        console.error('[ERROS]');
+        errors.array().forEach(error => {
+            console.error(`  - Campo: ${error.param}, Valor Recebido: '${error.value}', Mensagem: ${error.msg}`);
+        });
+
+        // Log do corpo da requisição para depuração completa
+        try {
+            console.error('[PAYLOAD RECEBIDO]', JSON.stringify(req.body, null, 2));
+        } catch (e) {
+            console.error('[PAYLOAD RECEBIDO] (Não pôde ser serializado)');
+        }
+        console.error('--- FIM DO ERRO DE VALIDAÇÃO ---');
+
+        // Retorna uma resposta de erro mais informativa
+        return res.status(400).json({ 
+            error: 'Um ou mais valores enviados são inválidos.',
+            validation_errors: errors.array().map(e => ({
+                field: e.param,
+                message: e.msg,
+                provided_value: e.value
+            }))
+        });
     }
     next();
 };
