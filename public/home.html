@@ -584,7 +584,8 @@
                         }
                     }
 
-                    if (userAvatarElement && profile.profile_picture && profile.profile_picture.trim() !== '') {
+                    // AVATAR FORCE DISABLED - 2025-01-21
+                    if (false && userAvatarElement && profile.profile_picture && profile.profile_picture.trim() !== '') {
                         const cacheBuster = '?t=' + new Date().getTime();
                         let avatarUrl;
 

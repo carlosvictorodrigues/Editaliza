@@ -584,7 +584,8 @@
                         }
                     }
 
-                    if (userAvatarElement && profile.profile_picture && profile.profile_picture.trim() !== '') {
+                    // AVATAR FORCE DISABLED - 2025-01-21
+                    if (false && userAvatarElement && profile.profile_picture && profile.profile_picture.trim() !== '') {
                         const cacheBuster = '?t=' + new Date().getTime();
                         let avatarUrl;
 
@@ -1371,6 +1372,40 @@
             
             document.head.appendChild(cssLink);
         });
+        
+        // FORCE HIDE ALL AVATARS - Emergency Override - 2025-01-21
+        setTimeout(() => {
+            const avatarElements = document.querySelectorAll(
+                '#userAvatar, #nav-user-avatar, [class*="avatar"], [id*="avatar"], img[alt*="avatar"], img[alt*="Avatar"]'
+            );
+            avatarElements.forEach(el => {
+                if (el) {
+                    el.style.display = 'none';
+                    el.style.visibility = 'hidden';
+                    el.style.opacity = '0';
+                    el.style.width = '0';
+                    el.style.height = '0';
+                    el.remove();
+                }
+            });
+            console.log('🚫 Forcefully removed', avatarElements.length, 'avatar elements');
+        }, 2000);
+        
+        // Also hide on DOM mutations
+        if (typeof MutationObserver !== 'undefined') {
+            const observer = new MutationObserver(() => {
+                const avatarElements = document.querySelectorAll(
+                    '#userAvatar, #nav-user-avatar, [class*="avatar"], [id*="avatar"], img[alt*="avatar"], img[alt*="Avatar"]'
+                );
+                avatarElements.forEach(el => {
+                    if (el) {
+                        el.style.display = 'none';
+                        el.remove();
+                    }
+                });
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
     </script>
 </body>
 </html>
