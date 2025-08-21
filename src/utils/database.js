@@ -23,6 +23,14 @@ const pool = new Pool({
 
 console.log('[DATABASE] Usando PostgreSQL direto para resolver timeout');
 
+// Testar conexão na inicialização
+pool.connect().then(client => {
+    console.log('[DATABASE] Conexão PostgreSQL testada com sucesso');
+    client.release();
+}).catch(err => {
+    console.error('[DATABASE] Erro ao conectar PostgreSQL:', err.message);
+});
+
 /**
  * Get a single row from database
  * @param {string} sql - SQL query
