@@ -26,7 +26,8 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { body, query, validationResult } = require('express-validator');
 const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
+// Removido SQLiteStore - usando MemoryStore temporariamente
+// const SQLiteStore = require('connect-sqlite3')(session);
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -227,22 +228,20 @@ app.use(cors({
     exposedHeaders: ['X-Total-Count'] // Headers seguros para expor
 }));
 
-// Configuração de sessão (otimizada para OAuth)
+// Configuração de sessão (APENAS PostgreSQL - sem SQLite)
 const sessionConfig = {
-    store: new SQLiteStore({
-        db: 'sessions.db',
-        dir: './'
-    }),
+    // REMOVIDO SQLiteStore - usando MemoryStore (temporário)
+    // TODO: Implementar RedisStore para produção
     secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
     resave: false,
-    saveUninitialized: true, // Importante para OAuth - precisamos inicializar antes do redirect
+    saveUninitialized: true, // Importante para OAuth
     name: 'editaliza.sid',
     cookie: {
-        secure: process.env.NODE_ENV === 'production', // HTTPS em produção
+        secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000, // 24 horas
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' permite cookies cross-site no OAuth
-        domain: process.env.NODE_ENV === 'production' ? '.editaliza.com.br' : undefined // Cookie válido para todos os subdomínios
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        domain: process.env.NODE_ENV === 'production' ? '.editaliza.com.br' : undefined
     }
 };
 

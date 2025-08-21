@@ -408,36 +408,16 @@ async function getDatabaseStats() {
 }
 
 /**
- * Realizar backup do banco
+ * Backup PostgreSQL
+ * REMOVIDO: Backup SQLite - sistema usa apenas PostgreSQL
  */
 async function backupDatabase() {
     try {
-        const db = await getDbInstance();
+        console.log('ℹ️  Para backup PostgreSQL:');
+        console.log('   pg_dump -h $DB_HOST -U $DB_USER -d $DB_NAME > backup_$(date +%Y%m%d).sql');
+        console.log('   Ou use o comando: npm run db:backup-pg');
         
-        if (db.isSQLite) {
-            // Backup SQLite
-            const fs = require('fs');
-            const path = require('path');
-            
-            const date = new Date().toISOString().split('T')[0];
-            const backupPath = path.join('./backups', `db_backup_${date}.sqlite`);
-            
-            // Criar diretório se não existir
-            const backupDir = path.dirname(backupPath);
-            if (!fs.existsSync(backupDir)) {
-                fs.mkdirSync(backupDir, { recursive: true });
-            }
-            
-            fs.copyFileSync('db.sqlite', backupPath);
-            console.log(`✅ Backup SQLite criado: ${backupPath}`);
-            
-            return backupPath;
-            
-        } else {
-            // Backup PostgreSQL usando pg_dump
-            console.log('ℹ️  Para backup PostgreSQL, use: pg_dump -h host -U user -d database > backup.sql');
-            return null;
-        }
+        return 'backup_instructions_logged';
         
     } catch (error) {
         securityLog('backup_error', { error: error.message });

@@ -103,6 +103,47 @@ const db = {
         }
     },
 
+    // Função de teste de conexão
+    testConnection: async () => {
+        try {
+            const client = await pool.connect();
+            await client.query('SELECT NOW() as current_time');
+            client.release();
+            console.log('[POSTGRES] ✅ Teste de conexão bem-sucedido');
+            return true;
+        } catch (error) {
+            console.error('[POSTGRES] ❌ Erro no teste de conexão:', error.message);
+            throw error;
+        }
+    },
+
+    // Função de health check
+    healthCheck: async () => {
+        try {
+            const client = await pool.connect();
+            const result = await client.query('SELECT NOW() as current_time, version() as version');
+            client.release();
+            
+            return {
+                status: 'healthy',
+                database: 'postgresql',
+                timestamp: result.rows[0].current_time,
+                version: result.rows[0].version,
+                pool: {
+                    total: pool.totalCount,
+                    idle: pool.idleCount,
+                    waiting: pool.waitingCount
+                }
+            };
+        } catch (error) {
+            return {
+                status: 'unhealthy',
+                error: error.message,
+                database: 'postgresql'
+            };
+        }
+    },
+
     // Propriedades de compatibilidade
     dialect: 'postgresql',
     isPostgreSQL: true,
