@@ -92,7 +92,7 @@ const getUserProfile = async (userId) => {
             id, email, name, profile_picture, phone, whatsapp, created_at,
             state, city, birth_date, education, work_status, first_time, concursos_count,
             difficulties, area_interest, level_desired, timeline_goal, study_hours, motivation_text,
-            google_id, auth_provider, google_avatar, is_active
+            google_id, auth_provider, google_avatar
         FROM users WHERE id = $1`
         : `SELECT 
             id, email, name, profile_picture, phone, whatsapp, created_at,
@@ -445,9 +445,8 @@ const recordUserActivity = async (userId, activityData) => {
 const deactivateUser = async (userId, reason) => {
     const db = await getDB();
     const sql = db.isPostgreSQL 
-        ? `UPDATE users 
-        SET is_active = 0, deactivation_reason = $1, deactivated_at = $2
-        WHERE id = $3`
+        ? `-- PostgreSQL: User deactivation not implemented (no is_active column)
+        SELECT 1 WHERE FALSE`
         : `UPDATE users 
         SET is_active = 0, deactivation_reason = ?, deactivated_at = ?
         WHERE id = ?`;
@@ -598,10 +597,9 @@ const searchUsers = async (query, limit, offset) => {
     
     const sql = db.isPostgreSQL 
         ? `SELECT 
-            id, email, name, created_at, is_active, auth_provider,
-            last_login_at
+            id, email, name, created_at, auth_provider
         FROM users 
-        WHERE (name LIKE $1 OR email LIKE $2) AND is_active = 1
+        WHERE (name LIKE $1 OR email LIKE $2)
         ORDER BY created_at DESC
         LIMIT $3 OFFSET $4`
         : `SELECT 
@@ -625,15 +623,11 @@ const listUsers = async (limit, offset, status = 'active') => {
     
     if (db.isPostgreSQL) {
         params = [limit, offset];
-        if (status === 'active') {
-            whereClause = 'WHERE is_active = 1';
-        } else if (status === 'inactive') {
-            whereClause = 'WHERE is_active = 0';
-        }
+        // PostgreSQL: Não há coluna is_active, listar todos os usuários
+        whereClause = '';
         
         const sql = `SELECT 
-            id, email, name, created_at, is_active, auth_provider,
-            last_login_at, deactivated_at, deactivation_reason
+            id, email, name, created_at, auth_provider
         FROM users 
         ${whereClause}
         ORDER BY created_at DESC
@@ -668,10 +662,15 @@ const getUserCount = async (status = 'active') => {
     let whereClause = '';
     const params = [];
     
-    if (status === 'active') {
-        whereClause = 'WHERE is_active = 1';
-    } else if (status === 'inactive') {
-        whereClause = 'WHERE is_active = 0';
+    if (db.isPostgreSQL) {
+        // PostgreSQL: Não há coluna is_active, contar todos
+        whereClause = '';
+    } else {
+        if (status === 'active') {
+            whereClause = 'WHERE is_active = 1';
+        } else if (status === 'inactive') {
+            whereClause = 'WHERE is_active = 0';
+        }
     }
     
     const sql = `SELECT COUNT(*) as count FROM users ${whereClause}`;
@@ -703,11 +702,15 @@ const updateLastLogin = async (userId) => {
 const isUserActive = async (userId) => {
     const db = await getDB();
     const sql = db.isPostgreSQL 
-        ? 'SELECT is_active FROM users WHERE id = $1'
+        ? 'SELECT id FROM users WHERE id = $1'
         : 'SELECT is_active FROM users WHERE id = ?';
     
     const user = await executeQuery('get', sql, [userId], 'isUserActive');
     
+    if (db.isPostgreSQL) {
+        // Para PostgreSQL, assumir que usuário existe = ativo
+        return !!user;
+    }
     return user?.is_active === 1;
 };
 
@@ -731,7 +734,7 @@ const getUserPlanCount = async (userId) => {
 const findUserByEmail = async (email) => {
     const db = await getDB();
     const sql = db.isPostgreSQL 
-        ? 'SELECT id, email, name, created_at, is_active, auth_provider FROM users WHERE email = $1'
+        ? 'SELECT id, email, name, created_at, auth_provider FROM users WHERE email = $1'
         : 'SELECT id, email, name, created_at, is_active, auth_provider FROM users WHERE email = ?';
     
     return await executeQuery('get', sql, [email], 'findUserByEmail');
