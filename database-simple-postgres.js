@@ -1,17 +1,18 @@
 /**
  * IMPLEMENTAÇÃO SIMPLES E DIRETA DO POSTGRESQL
  * Resolve o problema de timeout da API /plans
+ * Versão com suporte a callbacks para compatibilidade
  */
 
 const { Pool } = require('pg');
 
 // Pool de conexões PostgreSQL
 const pool = new Pool({
-    host: 'localhost',
-    port: 5432,
-    database: 'editaliza_db', 
-    user: 'editaliza_user',
-    password: 'editaliza2024',
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    database: process.env.DB_NAME || 'editaliza_db',
+    user: process.env.DB_USER || 'editaliza_user',
+    password: process.env.DB_PASSWORD || 'editaliza2024',
     max: 10,
     min: 2,
     idleTimeoutMillis: 30000,
@@ -29,67 +30,118 @@ function convertQuery(sql, params) {
 
 // Interface compatível com SQLite
 const db = {
-    // Método all - buscar múltiplas linhas
-    all: async (sql, params = []) => {
-        try {
-            const { sql: pgSql, params: pgParams } = convertQuery(sql, params);
-            console.log(`[POSTGRES] Query: ${pgSql}`);
-            console.log(`[POSTGRES] Params:`, pgParams);
-            
-            const result = await pool.query(pgSql, pgParams);
-            
-            if (!result.rows) {
-                console.error('[POSTGRES] Result sem propriedade rows:', result);
-                return [];
+    // Método all - buscar múltiplas linhas (com suporte a callback)
+    all: (sql, params = [], callback) => {
+        // Suportar callback para compatibilidade
+        if (typeof params === 'function') {
+            callback = params;
+            params = [];
+        }
+        
+        const executeQuery = async () => {
+            try {
+                const { sql: pgSql, params: pgParams } = convertQuery(sql, params);
+                console.log(`[POSTGRES] Query: ${pgSql}`);
+                console.log(`[POSTGRES] Params:`, pgParams);
+                
+                const result = await pool.query(pgSql, pgParams);
+                
+                if (!result.rows) {
+                    console.error('[POSTGRES] Result sem propriedade rows:', result);
+                    return [];
+                }
+                
+                console.log(`[POSTGRES] Resultado: ${result.rows.length} linhas`);
+                return result.rows;
+            } catch (error) {
+                console.error('[POSTGRES] Erro em all():', error.message);
+                throw error;
             }
-            
-            console.log(`[POSTGRES] Resultado: ${result.rows.length} linhas`);
-            return result.rows;
-        } catch (error) {
-            console.error('[POSTGRES] Erro em all():', error.message);
-            throw error;
+        };
+        
+        const promise = executeQuery();
+        
+        if (callback) {
+            promise.then(rows => callback(null, rows)).catch(err => callback(err));
+        } else {
+            return promise;
         }
     },
 
-    // Método get - buscar uma linha
-    get: async (sql, params = []) => {
-        try {
-            const { sql: pgSql, params: pgParams } = convertQuery(sql, params);
-            console.log(`[POSTGRES] Query: ${pgSql}`);
-            console.log(`[POSTGRES] Params:`, pgParams);
-            
-            const result = await pool.query(pgSql, pgParams);
-            
-            if (!result.rows) {
-                console.error('[POSTGRES] Result sem propriedade rows:', result);
-                return null;
+    // Método get - buscar uma linha (com suporte a callback)
+    get: (sql, params = [], callback) => {
+        // Suportar callback para compatibilidade
+        if (typeof params === 'function') {
+            callback = params;
+            params = [];
+        }
+        
+        const executeQuery = async () => {
+            try {
+                const { sql: pgSql, params: pgParams } = convertQuery(sql, params);
+                console.log(`[POSTGRES] Query: ${pgSql}`);
+                console.log(`[POSTGRES] Params:`, pgParams);
+                
+                const result = await pool.query(pgSql, pgParams);
+                
+                if (!result.rows) {
+                    console.error('[POSTGRES] Result sem propriedade rows:', result);
+                    return null;
+                }
+                
+                console.log(`[POSTGRES] Resultado: ${result.rows.length > 0 ? 'encontrado' : 'não encontrado'}`);
+                return result.rows[0] || null;
+            } catch (error) {
+                console.error('[POSTGRES] Erro em get():', error.message);
+                throw error;
             }
-            
-            console.log(`[POSTGRES] Resultado: ${result.rows.length > 0 ? 'encontrado' : 'não encontrado'}`);
-            return result.rows[0] || null;
-        } catch (error) {
-            console.error('[POSTGRES] Erro em get():', error.message);
-            throw error;
+        };
+        
+        const promise = executeQuery();
+        
+        if (callback) {
+            promise.then(row => callback(null, row)).catch(err => callback(err));
+        } else {
+            return promise;
         }
     },
 
-    // Método run - executar comandos (INSERT, UPDATE, DELETE)
-    run: async (sql, params = []) => {
-        try {
-            const { sql: pgSql, params: pgParams } = convertQuery(sql, params);
-            console.log(`[POSTGRES] Query: ${pgSql}`);
-            console.log(`[POSTGRES] Params:`, pgParams);
-            
-            const result = await pool.query(pgSql, pgParams);
-            console.log(`[POSTGRES] Linhas afetadas: ${result.rowCount}`);
-            
-            return {
-                lastID: result.insertId || null,
-                changes: result.rowCount || 0
-            };
-        } catch (error) {
-            console.error('[POSTGRES] Erro em run():', error.message);
-            throw error;
+    // Método run - executar comandos (com suporte a callback)
+    run: (sql, params = [], callback) => {
+        // Suportar callback estilo SQLite
+        if (typeof params === 'function') {
+            callback = params;
+            params = [];
+        }
+        
+        const executeQuery = async () => {
+            try {
+                const { sql: pgSql, params: pgParams } = convertQuery(sql, params);
+                console.log(`[POSTGRES] Query: ${pgSql}`);
+                console.log(`[POSTGRES] Params:`, pgParams);
+                
+                const result = await pool.query(pgSql, pgParams);
+                console.log(`[POSTGRES] Linhas afetadas: ${result.rowCount}`);
+                
+                return {
+                    lastID: result.insertId || null,
+                    changes: result.rowCount || 0
+                };
+            } catch (error) {
+                console.error('[POSTGRES] Erro em run():', error.message);
+                throw error;
+            }
+        };
+        
+        const promise = executeQuery();
+        
+        if (callback) {
+            // Callback estilo SQLite com 'this' context
+            promise.then(result => {
+                callback.call(result, null);
+            }).catch(err => callback(err));
+        } else {
+            return promise;
         }
     },
 

@@ -489,7 +489,20 @@ app.use('/reset-password', strictRateLimit);
 })();
 
 // Adicionar informações de assinatura a todas as rotas autenticadas
-app.use(authenticateToken, addSubscriptionInfo());
+// TEMPORÁRIO: Comentando middleware problemático que causa timeout
+// app.use(authenticateToken, addSubscriptionInfo());
+
+// WORKAROUND: Aplicar apenas autenticação sem subscription info
+app.use('*', (req, res, next) => {
+    // Pular autenticação para rotas públicas
+    const publicPaths = ['/health', '/login.html', '/register.html', '/auth', '/api/webhooks'];
+    if (publicPaths.some(path => req.path.includes(path)) || req.method === 'OPTIONS') {
+        return next();
+    }
+    
+    // Aplicar autenticação apenas para outras rotas
+    authenticateToken(req, res, next);
+});
 
 // Rotas de webhook CACKTO (ANTES do rate limiting para APIs)
 app.use('/api/webhooks', CacktoRoutes);
@@ -1210,24 +1223,35 @@ app.get('/test-db', authenticateToken, async (req, res) => {
 // --- ROTAS DE PLANOS (CRUD E CONFIGURAÇÕES) ---
 app.get('/plans', authenticateToken, async (req, res) => {
     try {
-        console.log(`[DEBUG PLANS] Usuário logado ID: ${req.user.id}`);
-        console.log(`[DEBUG PLANS] Executando query: SELECT * FROM study_plans WHERE user_id = ${req.user.id}`);
+        console.log(`[PLANS] Usuário ID: ${req.user.id}`);
         
         const rows = await dbAll('SELECT * FROM study_plans WHERE user_id = ? ORDER BY id DESC', [req.user.id]);
+        console.log(`[PLANS] Encontrados ${rows.length} planos`);
         
-        console.log(`[DEBUG PLANS] Resultado da query:`, rows);
-        console.log(`[DEBUG PLANS] Número de planos encontrados: ${rows.length}`);
-        
-        const processedPlans = rows.map(plan => {
-            console.log(`[DEBUG PLANS] Processando plano ID ${plan.id}: ${plan.plan_name}`);
-            return {...plan, study_hours_per_day: JSON.parse(plan.study_hours_per_day || '{}')};
+        // Processar dados de forma mais robusta
+        const plans = rows.map(plan => {
+            let studyHours = {};
+            if (plan.study_hours_per_day) {
+                try {
+                    studyHours = JSON.parse(plan.study_hours_per_day);
+                } catch (e) {
+                    console.warn(`[PLANS] JSON parse error for plan ${plan.id}:`, e.message);
+                    studyHours = {};
+                }
+            }
+            
+            return {
+                ...plan,
+                study_hours_per_day: studyHours
+            };
         });
         
-        console.log(`[DEBUG PLANS] Planos processados:`, processedPlans);
-        res.json(processedPlans);
+        console.log(`[PLANS] Enviando ${plans.length} planos`);
+        res.json(plans);
+        
     } catch (error) {
-        console.error('[DEBUG PLANS] Erro ao buscar planos:', error);
-        res.status(500).json({ 'error': 'Erro ao buscar planos' });
+        console.error('[PLANS] Erro:', error.message);
+        res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 
