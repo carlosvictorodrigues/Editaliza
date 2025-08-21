@@ -568,6 +568,10 @@ app.use((req, res, next) => {
 });
 
 // Body parsing com sanitização
+// Adicionar middleware de métricas
+const { collectMetrics } = require('./src/middleware/metrics');
+app.use(collectMetrics);
+
 app.use(express.json({ 
     limit: '2mb', // Reduzido para segurança
     verify: (req, res, buf) => {
@@ -4241,6 +4245,17 @@ app.get('/health', (req, res) => {
 // Ready probe endpoint for K8s
 app.get('/ready', (req, res) => {
     res.status(200).json({ status: 'ready', timestamp: Date.now() });
+});
+
+// Metrics endpoint (protegido para evitar exposição de dados)
+app.get('/metrics', authenticateToken, (req, res) => {
+    try {
+        const { getMetricsReport } = require('./src/middleware/metrics');
+        const report = getMetricsReport();
+        res.json(report);
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao coletar métricas' });
+    }
 });
 
 // Configurar error handling global
