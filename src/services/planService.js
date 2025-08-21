@@ -701,13 +701,24 @@ const calculateUniqueStudyDays = (sessions) => {
     sessions.forEach(session => {
         if (session.status === 'Concluído' && session.session_date) {
             // Extract only date (YYYY-MM-DD) from session_date
+            // Skip sessions without date
+            if (!session.session_date) {
+                return;
+            }
+            
             let dateStr;
             if (session.session_date instanceof Date) {
                 dateStr = session.session_date.toISOString().split('T')[0];
             } else if (typeof session.session_date === 'string') {
                 dateStr = session.session_date.split('T')[0];
             } else {
-                dateStr = String(session.session_date).split('T')[0];
+                // Fallback for unexpected types
+                try {
+                    dateStr = String(session.session_date).split('T')[0];
+                } catch (e) {
+                    console.error('Error parsing session_date:', session.session_date, e);
+                    return;
+                }
             }
             uniqueDates.add(dateStr);
         }
@@ -730,16 +741,24 @@ const calculateStudyStreak = (sessions) => {
     if (completedSessions.length === 0) return 0;
     
     // Get unique dates
-    const uniqueDates = [...new Set(completedSessions.map(s => {
-        // Handle Date objects and strings
-        if (s.session_date instanceof Date) {
-            return s.session_date.toISOString().split('T')[0];
-        } else if (typeof s.session_date === 'string') {
-            return s.session_date.split('T')[0];
-        } else {
-            return String(s.session_date).split('T')[0];
-        }
-    }))];
+    const uniqueDates = [...new Set(completedSessions
+        .filter(s => s.session_date) // Filter out sessions without date
+        .map(s => {
+            // Handle Date objects and strings
+            if (s.session_date instanceof Date) {
+                return s.session_date.toISOString().split('T')[0];
+            } else if (typeof s.session_date === 'string') {
+                return s.session_date.split('T')[0];
+            } else {
+                try {
+                    return String(s.session_date).split('T')[0];
+                } catch (e) {
+                    console.error('Error parsing session_date in gamification:', s.session_date, e);
+                    return null;
+                }
+            }
+        })
+        .filter(date => date !== null))];
     uniqueDates.sort((a, b) => new Date(b) - new Date(a)); // Most recent first
     
     let streak = 0;

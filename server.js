@@ -722,10 +722,10 @@ app.post('/register',
             res.status(201).json({ "message": "Usuário criado com sucesso!" });
         } catch (error) {
             if (error.message.includes('UNIQUE constraint failed')) {
-                res.status(400).json({ error: "Este e-mail já está em uso." });
+                return res.status(400).json({ error: "Este e-mail já está em uso." });
             } else {
                 console.error('Erro no registro:', error);
-                res.status(500).json({ error: "Erro ao criar usuário." });
+                return res.status(500).json({ error: "Erro ao criar usuário." });
             }
         }
     }
@@ -789,7 +789,7 @@ app.post('/login',
             res.json({ 'message': 'Login bem-sucedido!', 'token': token });
         } catch (error) {
             console.error('Erro no login:', error);
-            res.status(500).json({ 'error': 'Erro no servidor.' });
+            return res.status(500).json({ 'error': 'Erro no servidor.' });
         }
     }
 );
@@ -974,7 +974,7 @@ app.post('/reset-password',
             res.json({ message: 'Senha redefinida com sucesso!' });
         } catch (error) {
             console.error('Erro ao redefinir senha:', error);
-            res.status(500).json({ 'error': 'Erro no servidor ao redefinir a senha.' });
+            return res.status(500).json({ 'error': 'Erro no servidor ao redefinir a senha.' });
         }
     }
 );
@@ -1027,7 +1027,7 @@ app.get('/profile', authenticateToken, async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao buscar perfil:', error);
-        res.status(500).json({ error: 'Erro ao carregar perfil do usuário.' });
+        return res.status(500).json({ error: 'Erro ao carregar perfil do usuário.' });
     }
 });
 
@@ -1207,7 +1207,7 @@ app.patch('/profile',
             });
         } catch (error) {
             console.error('Erro ao atualizar perfil:', error);
-            res.status(500).json({ error: 'Erro ao atualizar perfil do usuário.' });
+            return res.status(500).json({ error: 'Erro ao atualizar perfil do usuário.' });
         }
     }
 );
@@ -1229,7 +1229,7 @@ app.get('/test-db', authenticateToken, async (req, res) => {
         res.json({ test1, test2, userId: req.user.id });
     } catch (error) {
         console.error('[DEBUG TEST] Erro:', error);
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
     }
 });
 
@@ -1264,7 +1264,7 @@ app.get('/plans', authenticateToken, async (req, res) => {
         
     } catch (error) {
         console.error('[PLANS] Erro:', error.message);
-        res.status(500).json({ error: 'Erro interno do servidor' });
+        return res.status(500).json({ error: 'Erro interno do servidor' });
     }
 });
 
@@ -1286,7 +1286,7 @@ app.post('/plans',
             res.status(201).json({ 'message': 'Plano criado com sucesso!', 'newPlanId': result.lastID });
         } catch (error) {
             console.error('Erro ao criar plano:', error);
-            res.status(500).json({ 'error': 'Erro ao criar plano' });
+            return res.status(500).json({ 'error': 'Erro ao criar plano' });
         }
     }
 );
@@ -1305,7 +1305,7 @@ app.get('/plans/:id',
             res.json(row);
         } catch (error) {
             console.error('Erro ao buscar plano:', error);
-            res.status(500).json({ 'error': 'Erro ao buscar plano' });
+            return res.status(500).json({ 'error': 'Erro ao buscar plano' });
         }
     }
 );
@@ -4097,7 +4097,7 @@ app.get('/plans/:planId/gamification',
 
         } catch (error) {
             console.error("Erro na rota de gamificação:", error);
-            res.status(500).json({ "error": "Erro ao buscar dados de gamificação." });
+            return res.status(500).json({ "error": "Erro ao buscar dados de gamificação." });
         }
 }); 
 END LEGACY ROUTE COMMENT */
