@@ -7,9 +7,9 @@
  * FASE 2: Migrado para usar DatabaseAdapter com suporte PostgreSQL/SQLite
  */
 
-const { getDatabase } = require('../utils/databaseAdapter');
-const { translateQuery, translateParams } = require('../utils/queryMapper');
-const { validateTableName } = require('../utils/security');
+// Usar implementação simples PostgreSQL
+const simpleDb = require('../../database-simple-postgres');
+// Removido translateQuery, translateParams, validateTableName - não necessários com implementação simples
 const { securityLog } = require('../utils/security');
 
 // Cache da instância do banco
@@ -20,7 +20,7 @@ let dbInstance = null;
  */
 async function getDB() {
     if (!dbInstance) {
-        dbInstance = await getDatabase();
+        dbInstance = simpleDb;
     }
     return dbInstance;
 }
