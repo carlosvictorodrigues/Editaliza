@@ -112,12 +112,12 @@ const components = {
             let avatar = null;
             if (userProfile && userProfile.google_avatar && userProfile.auth_provider === 'google') {
                 avatar = userProfile.google_avatar;
-                console.log('🖼️ Avatar do Google carregado');
+                // Avatar do Google carregado
             } else if (userProfile && userProfile.profile_picture) {
                 avatar = userProfile.profile_picture;
-                console.log('🖼️ Avatar local carregado');
+                // Avatar local carregado
             } else {
-                console.log('😐 Nenhum avatar encontrado');
+                // Nenhum avatar encontrado
             }
             
             this.userAvatarCache = avatar;
@@ -211,12 +211,12 @@ const components = {
             }
         }).join('');
         
-        // Carregar avatar do usuário
-        const userAvatar = await this.loadUserAvatar();
+        // Avatar desabilitado - sempre usar link simples
+        // const userAvatar = await this.loadUserAvatar();
         
-        // Criar HTML do perfil com ou sem avatar
+        // Sempre usar perfil sem avatar
         let profileHtml;
-        if (userAvatar) {
+        if (false) { // userAvatar desabilitado
             // Sanitizar o caminho do avatar
             const sanitizedAvatarPath = app.sanitizeHtml(userAvatar);
             

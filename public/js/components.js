@@ -211,12 +211,12 @@ const components = {
             }
         }).join('');
         
-        // Carregar avatar do usuário
-        const userAvatar = await this.loadUserAvatar();
+        // Avatar desabilitado - sempre usar link simples
+        // const userAvatar = await this.loadUserAvatar();
         
-        // Criar HTML do perfil com ou sem avatar
+        // Sempre usar perfil sem avatar
         let profileHtml;
-        if (userAvatar) {
+        if (false) { // userAvatar desabilitado
             // Sanitizar o caminho do avatar
             const sanitizedAvatarPath = app.sanitizeHtml(userAvatar);
             
