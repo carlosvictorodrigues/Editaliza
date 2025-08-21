@@ -36,8 +36,8 @@ jobs:
       uses: trufflesecurity/trufflehog@main
       with:
         path: ./
-        base: main
-        head: HEAD
+        # Para push events, o TruffleHog detecta automaticamente os commits
+        # Não especificar base/head evita o erro quando ambos são iguais
     
     # Análise de segurança do código
     - name: Run CodeQL Analysis
