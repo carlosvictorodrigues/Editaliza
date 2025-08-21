@@ -37,6 +37,17 @@ const db = {
             console.log(`[POSTGRES] Params:`, pgParams);
             
             const result = await pool.query(pgSql, pgParams);
+            
+            if (!result) {
+                console.error('[POSTGRES] Query retornou undefined');
+                return [];
+            }
+            
+            if (!result.rows) {
+                console.error('[POSTGRES] Result sem propriedade rows:', result);
+                return [];
+            }
+            
             console.log(`[POSTGRES] Resultado: ${result.rows.length} linhas`);
             return result.rows;
         } catch (error) {
@@ -53,6 +64,17 @@ const db = {
             console.log(`[POSTGRES] Params:`, pgParams);
             
             const result = await pool.query(pgSql, pgParams);
+            
+            if (!result) {
+                console.error('[POSTGRES] Query retornou undefined');
+                return null;
+            }
+            
+            if (!result.rows) {
+                console.error('[POSTGRES] Result sem propriedade rows:', result);
+                return null;
+            }
+            
             console.log(`[POSTGRES] Resultado: ${result.rows.length > 0 ? 'encontrado' : 'não encontrado'}`);
             return result.rows[0] || null;
         } catch (error) {
