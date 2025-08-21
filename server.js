@@ -1189,6 +1189,26 @@ app.patch('/profile',
 );
 
 
+// --- ROTAS DE TESTE E DEBUG ---
+app.get('/test-db', authenticateToken, async (req, res) => {
+    try {
+        console.log(`[DEBUG TEST] Testando conexão do banco...`);
+        
+        // Teste 1: Query simples sem parâmetros
+        const test1 = await dbAll('SELECT 1 as test');
+        console.log(`[DEBUG TEST] Teste 1 (SELECT 1):`, test1);
+        
+        // Teste 2: Query com parâmetro
+        const test2 = await dbAll('SELECT COUNT(*) as count FROM study_plans WHERE user_id = ?', [req.user.id]);
+        console.log(`[DEBUG TEST] Teste 2 (COUNT):`, test2);
+        
+        res.json({ test1, test2, userId: req.user.id });
+    } catch (error) {
+        console.error('[DEBUG TEST] Erro:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // --- ROTAS DE PLANOS (CRUD E CONFIGURAÇÕES) ---
 app.get('/plans', authenticateToken, async (req, res) => {
     try {
