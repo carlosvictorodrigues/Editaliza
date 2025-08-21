@@ -11,7 +11,7 @@ const pool = new Pool({
     port: 5432,
     database: 'editaliza_db', 
     user: 'editaliza_user',
-    password: 'editaliza_password_123',
+    password: 'editaliza2024',
     max: 10,
     min: 2,
     idleTimeoutMillis: 30000,

@@ -40,7 +40,7 @@ const config = {
         PORT: process.env.DB_PORT || 5432,
         NAME: process.env.DB_NAME || (isProduction ? 'editaliza_db' : 'editaliza_dev'),
         USER: process.env.DB_USER || 'editaliza_user',
-        PASSWORD: process.env.DB_PASSWORD || 'editaliza_password123'
+        PASSWORD: process.env.DB_PASSWORD || 'editaliza2024'
     },
     
     // Redis

@@ -4,7 +4,8 @@
  * 100% compatível com o database.js original
  */
 
-const { getDatabase } = require('./src/utils/databaseAdapter');
+// Usar implementação simples PostgreSQL
+const simpleDb = require('./database-simple-postgres');
 const { securityLog, validateTableName } = require('./src/utils/security');
 const dbConfig = require('./src/config/database');
 
@@ -20,7 +21,23 @@ let dbInstance = null;
 const addColumnIfNotExists = async (tableName, columnName, columnDef) => {
     try {
         const db = await getDbInstance();
-        return await db.addColumnIfNotExists(tableName, columnName, columnDef);
+        
+        // Implementação simples para PostgreSQL
+        const checkQuery = `
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name = $1 AND column_name = $2
+        `;
+        
+        const exists = await db.get(checkQuery, [tableName, columnName]);
+        
+        if (!exists) {
+            const alterQuery = `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDef}`;
+            await db.run(alterQuery);
+            console.log(`✅ Coluna ${columnName} adicionada à tabela ${tableName}`);
+        }
+        
+        return true;
     } catch (error) {
         securityLog('add_column_error', {
             table: tableName,
@@ -37,8 +54,9 @@ const addColumnIfNotExists = async (tableName, columnName, columnDef) => {
 async function getDbInstance() {
     if (!dbInstance) {
         try {
-            dbInstance = await getDatabase();
-            console.log(`✅ Banco de dados ${dbInstance.dialect.toUpperCase()} inicializado`);
+            // Usar implementação simples PostgreSQL
+            dbInstance = simpleDb;
+            console.log(`✅ Banco de dados POSTGRESQL inicializado`);
         } catch (error) {
             console.error('❌ Erro ao inicializar banco:', error.message);
             throw error;
@@ -57,7 +75,7 @@ async function initializeDatabase() {
         const db = await getDbInstance();
         
         // Log da estratégia escolhida
-        console.log(`📊 Usando ${db.dialect.toUpperCase()} como banco de dados`);
+        console.log(`📊 Usando POSTGRESQL como banco de dados`);
         console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
         
         // Aplicar migrações e estrutura
@@ -460,32 +478,10 @@ dbPromise.then(db => {
         run: db.run.bind(db),
         get: db.get.bind(db),
         
-        // Interface estendida
-        query: db.query.bind(db),
-        addColumnIfNotExists: db.addColumnIfNotExists.bind(db),
-        tableExists: db.tableExists.bind(db),
-        columnExists: db.columnExists.bind(db),
-        getTableInfo: db.getTableInfo.bind(db),
-        
-        // Métodos de controle
-        close: db.close.bind(db),
-        isConnected: db.isConnected.bind(db),
-        getStats: db.getStats.bind(db),
-        
         // Propriedades
-        dialect: db.dialect,
-        isPostgreSQL: db.isPostgreSQL,
-        isSQLite: db.isSQLite,
-        
-        // Funções utilitárias
-        getDatabaseStats,
-        backupDatabase,
-        closeDatabase,
-        
-        // Referência interna
-        _adapter: db._adapter,
-        _connection: db._connection,
-        _pool: db._pool
+        dialect: 'postgresql',
+        isPostgreSQL: true,
+        isSQLite: false
     };
 }).catch(error => {
     console.error('💥 Erro na inicialização:', error.message);
