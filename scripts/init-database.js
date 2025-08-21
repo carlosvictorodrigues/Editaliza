@@ -38,7 +38,16 @@ async function initDatabase() {
         await client.query(`
             CREATE INDEX IF NOT EXISTS IDX_session_expire ON sessions (expire)
         `);
-        console.log('✅ Tabela sessions OK');
+        
+        // Garantir permissões corretas
+        await client.query(`
+            GRANT ALL PRIVILEGES ON TABLE sessions TO editaliza_user
+        `);
+        await client.query(`
+            GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO editaliza_user
+        `);
+        
+        console.log('✅ Tabela sessions OK com permissões corretas');
         
         // 2. Verificar tabela de usuários
         console.log('\n📋 Verificando tabela de usuários...');
