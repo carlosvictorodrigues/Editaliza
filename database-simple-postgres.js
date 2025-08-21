@@ -28,6 +28,8 @@ function convertQuery(sql, params) {
     
     // Converter comandos específicos do SQLite para PostgreSQL
     pgSql = pgSql.replace(/BEGIN TRANSACTION/gi, 'BEGIN');
+    pgSql = pgSql.replace(/BEGIN IMMEDIATE TRANSACTION/gi, 'BEGIN');
+    pgSql = pgSql.replace(/BEGIN IMMEDIATE/gi, 'BEGIN');
     
     return { sql: pgSql, params };
 }

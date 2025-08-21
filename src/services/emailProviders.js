@@ -191,7 +191,13 @@ class EmailProviders {
         }
 
         try {
-            await this.transporter.verify();
+            // Add timeout to prevent hanging
+            const verifyPromise = this.transporter.verify();
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Connection timeout')), 5000)
+            );
+            
+            await Promise.race([verifyPromise, timeoutPromise]);
             return true;
         } catch (error) {
             throw new Error(`Connection verification failed: ${error.message}`);
