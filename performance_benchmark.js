@@ -4,7 +4,7 @@ const db = require('./database.js');
 // Utilitários para benchmark
 const dbGet = (sql, params) => new Promise((resolve, reject) => db.get(sql, params, (err, row) => err ? reject(err) : resolve(row)));
 const dbAll = (sql, params) => new Promise((resolve, reject) => db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows)));
-const dbRun = (sql, params) => new Promise((resolve, reject) => db.run(sql, params, function(err) { err ? reject(err) : resolve(this) }));
+const dbRun = (sql, params) => new Promise((resolve, reject) => db.run(sql, params, function(err) { err ? reject(err) : resolve(this); }));
 
 // Função para criar dados de teste
 async function createTestData() {
@@ -80,7 +80,7 @@ async function benchmarkScheduleGeneration(planId, planInfo) {
     try {
         console.log(`\n🔄 Testando: ${planInfo.name} (${planInfo.subjects} disciplinas, ${planInfo.subjects * planInfo.topicsPerSubject} tópicos)`);
         
-        await dbRun('BEGIN IMMEDIATE TRANSACTION');
+        await dbRun('BEGIN');
         
         // Query otimizada (similar à implementada)
         const queryStart = Date.now();
@@ -116,7 +116,7 @@ async function benchmarkScheduleGeneration(planId, planInfo) {
             }
             
             const dates = [];
-            let currentDate = new Date(startDate);
+            const currentDate = new Date(startDate);
             while (currentDate <= endDate && dates.length < 1000) { // Limitar para benchmark
                 const dayOfWeek = currentDate.getDay();
                 const shouldSkip = (dayOfWeek === 0) || (weekdayOnly && dayOfWeek === 6);

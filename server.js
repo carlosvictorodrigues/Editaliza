@@ -26,6 +26,7 @@ const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { body, query, validationResult } = require('express-validator');
 const session = require('express-session');
+const pgSession = require('connect-pg-simple')(session);
 // Removido SQLiteStore - usando MemoryStore temporariamente
 // const SQLiteStore = require('connect-sqlite3')(session);
 const multer = require('multer');
@@ -234,12 +235,13 @@ app.use(cors({
 
 // Configuração de sessão (APENAS PostgreSQL - sem SQLite)
 const sessionConfig = {
-    // REMOVIDO SQLiteStore - usando MemoryStore (temporário)
-    // TODO: Implementar RedisStore para produção
+    store: new pgSession({
+        conString: process.env.DATABASE_URL,
+        tableName: 'sessions'
+    }),
     secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
     resave: false,
-    saveUninitialized: true, // Importante para OAuth
-    name: 'editaliza.sid',
+    saveUninitialized: false,
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,

@@ -34,7 +34,10 @@ class EmailProviders {
                 maxConnections: 5,
                 maxMessages: 100,
                 rateDelta: 1000,
-                rateLimit: 5
+                rateLimit: 5,
+                connectionTimeout: 10000, // 10 seconds
+                greetingTimeout: 10000, // 10 seconds
+                socketTimeout: 10000 // 10 seconds
             },
 
             // SendGrid (recomendado para produção)
