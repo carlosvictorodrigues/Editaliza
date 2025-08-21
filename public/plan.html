@@ -916,8 +916,8 @@
                                 </div>
                                 <div class="bg-gradient-to-br from-editaliza-green/10 to-editaliza-green/20 border border-editaliza-green/30 p-3 rounded-lg">
                                     <h4 class="text-editaliza-green font-semibold text-xs uppercase tracking-wide">Ritmo Necessário</h4>
-                                    <p class="font-bold text-lg text-editaliza-green mt-1">${data.requiredPace || 'Calculando...'}</p>
-                                    <p class="text-xs text-editaliza-green/70">tópicos por dia</p>
+                                    <p class="font-bold text-lg text-editaliza-green mt-1">${data.requiredPace || '0'} tópicos/dia</p>
+                                    <p class="text-xs text-editaliza-green/70">${data.requiredPace && data.requiredPace !== '0' ? 'para concluir 100%' : 'calculando...'}</p>
                                 </div>
                                 <div class="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 p-3 rounded-lg">
                                     <h4 class="text-purple-700 font-semibold text-xs uppercase tracking-wide">Dias Restantes</h4>
@@ -1052,9 +1052,15 @@
                     app.invalidatePlanCache(planId, 'detailed_progress');
                 }
                 
+                console.log('🔍 Buscando detailed_progress para planId:', planId);
                 const data = await app.getActivePlanData(planId, 'detailed_progress', forceRefresh);
+                console.log('📊 Dados recebidos:', data);
                 
-                const totalPercentage = data.totalProgress.toFixed(1);
+                if (!data || typeof data.totalProgress === 'undefined') {
+                    throw new Error('Dados de progresso inválidos ou ausentes');
+                }
+                
+                const totalPercentage = parseFloat(data.totalProgress || 0).toFixed(1);
                 progressDashboard.innerHTML = `
                     <div class="bg-gradient-to-r from-editaliza-green/10 to-editaliza-green/5 p-4 rounded-lg border border-editaliza-green/20 mb-2">
                         <div class="flex justify-between items-center mb-2">
@@ -1073,16 +1079,18 @@
                 }
 
                 accordionContainer.innerHTML = data.subjectDetails.map(subject => {
-                    const subjectPercentage = subject.progress.toFixed(1);
+                    const subjectPercentage = parseFloat(subject.progress || 0).toFixed(1);
                     // Exibir tempo total da disciplina formatado
-                    const subjectTimeDisplay = subject.totalTime > 0
-                        ? formatTime(subject.totalTime).substring(0, 5) + 'h'
+                    const totalTimeNum = parseFloat(subject.totaltime || subject.totalTime || 0);
+                    const subjectTimeDisplay = totalTimeNum > 0
+                        ? formatTime(totalTimeNum).substring(0, 5) + 'h'
                         : '–';
 
                     const topicsHtml = subject.topics.length > 0 ? subject.topics.map(topic => {
                         // Exibir tempo de estudo do tópico
-                        const timeDisplay = formatTime(topic.timeStudied, '–');
-                        const timeClass = topic.timeStudied > 0 ? 'text-gray-500' : 'text-gray-400';
+                        const timeStudiedNum = parseFloat(topic.timestudied || topic.timeStudied || 0);
+                        const timeDisplay = formatTime(timeStudiedNum, '–');
+                        const timeClass = timeStudiedNum > 0 ? 'text-gray-500' : 'text-gray-400';
                         
                         return `
                         <li class="flex justify-between items-center text-sm py-1 px-2 rounded hover:bg-slate-100">
@@ -1122,8 +1130,14 @@
                 });
 
             } catch (error) {
-                progressDashboard.innerHTML = `<p class="text-red-500 text-center">Não foi possível carregar o progresso.</p>`;
-                accordionContainer.innerHTML = `<p class="text-red-500 text-center">Não foi possível carregar a análise detalhada.</p>`;
+                console.error('❌ Erro ao carregar progresso detalhado:', error);
+                console.error('Detalhes do erro:', error.message, error.stack);
+                if (progressDashboard) {
+                    progressDashboard.innerHTML = `<p class="text-red-500 text-center">Não foi possível carregar o progresso. ${error.message}</p>`;
+                }
+                if (accordionContainer) {
+                    accordionContainer.innerHTML = `<p class="text-red-500 text-center">Não foi possível carregar a análise detalhada. ${error.message}</p>`;
+                }
             }
         }
 

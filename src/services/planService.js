@@ -215,7 +215,28 @@ const getRealityCheck = async (planId, userId) => {
 
     const today = new Date(); 
     today.setHours(0, 0, 0, 0);
-    const examDate = new Date(plan.exam_date + 'T23:59:59');
+    
+    // Tratar exam_date que pode vir como Date ou string
+    let examDate;
+    if (plan.exam_date instanceof Date) {
+        examDate = new Date(plan.exam_date);
+    } else if (typeof plan.exam_date === 'string') {
+        // Se já tem timezone, use direto, senão adicione horário
+        if (plan.exam_date.includes('T')) {
+            examDate = new Date(plan.exam_date);
+        } else {
+            examDate = new Date(plan.exam_date + 'T23:59:59');
+        }
+    } else {
+        examDate = new Date(plan.exam_date);
+    }
+    
+    // Validar se a data é válida
+    if (isNaN(examDate.getTime())) {
+        console.error('Data da prova inválida:', plan.exam_date);
+        examDate = new Date(); // Fallback para hoje
+        examDate.setMonth(examDate.getMonth() + 3); // Adiciona 3 meses como padrão
+    }
     
     // Calculate completed topics - CORREÇÃO: filtrar topic_id não nulos
     const newTopicSessions = sessions.filter(s => s.session_type === 'Novo Tópico');
@@ -235,11 +256,21 @@ const getRealityCheck = async (planId, userId) => {
     const firstSessionDateResult = await dbGet('SELECT MIN(session_date) as first_date FROM study_sessions WHERE study_plan_id = ? AND session_type = \'Novo Tópico\' AND status = \'Concluído\'', [planId]);
     const firstSessionDate = firstSessionDateResult.first_date ? new Date(firstSessionDateResult.first_date + 'T00:00:00') : today;
 
-    const daysSinceStart = Math.max(1, Math.ceil((today - firstSessionDate) / (1000 * 60 * 60 * 24)));
-    const daysRemainingForExam = Math.max(1, Math.ceil((examDate - today) / (1000 * 60 * 60 * 24)));
+    // Calcular dias com validação
+    let daysSinceStart = 1;
+    if (firstSessionDate && !isNaN(firstSessionDate.getTime())) {
+        daysSinceStart = Math.max(1, Math.ceil((today - firstSessionDate) / (1000 * 60 * 60 * 24)));
+    }
     
-    const currentPace = topicsCompletedCount / daysSinceStart;
-    const requiredPace = topicsRemaining / daysRemainingForExam;
+    let daysRemainingForExam = 1;
+    if (examDate && !isNaN(examDate.getTime())) {
+        const diffTime = examDate - today;
+        daysRemainingForExam = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    }
+    
+    // Calcular ritmos com validação
+    const currentPace = daysSinceStart > 0 ? (topicsCompletedCount / daysSinceStart) : 0;
+    const requiredPace = daysRemainingForExam > 0 ? (topicsRemaining / daysRemainingForExam) : 0;
 
     let status, primaryMessage, secondaryMessage, motivationalMessage;
 
@@ -274,7 +305,8 @@ const getRealityCheck = async (planId, userId) => {
     }
 
     return {
-        requiredPace: isFinite(requiredPace) ? `${requiredPace.toFixed(1)} tópicos/dia` : 'N/A',
+        requiredPace: isFinite(requiredPace) && requiredPace > 0 ? requiredPace.toFixed(1) : '0',
+        requiredPaceFormatted: isFinite(requiredPace) && requiredPace > 0 ? `${requiredPace.toFixed(1)} tópicos/dia` : 'N/A',
         postponementCount: plan.postponement_count || 0,
         status,
         primaryMessage,
@@ -285,8 +317,9 @@ const getRealityCheck = async (planId, userId) => {
         completedTopics: topicsCompletedCount,
         totalTopics,
         daysRemaining: daysRemainingForExam,
-        currentPace: currentPace.toFixed(1),
-        averageDailyProgress: currentPace
+        daysRemainingForExam: daysRemainingForExam, // Adicionar campo explícito
+        currentPace: isFinite(currentPace) ? currentPace.toFixed(1) : '0',
+        averageDailyProgress: isFinite(currentPace) ? currentPace : 0
     };
 };
 
