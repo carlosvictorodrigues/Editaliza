@@ -43,7 +43,13 @@ function errorHandler(err, req, res, next) {
   logger.error('Unhandled error', payload);
 
   const status = err.status || err.statusCode || 500;
-  res.status(status).json({
+  
+  // Check if headers were already sent
+  if (res.headersSent) {
+    return logger.error('Headers already sent, cannot send error response', payload);
+  }
+  
+  return res.status(status).json({
     error: payload.err.name || 'Error',
     message: payload.err.message || 'Internal Server Error',
   });
