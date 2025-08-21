@@ -33,10 +33,15 @@ const dbGet = (sql, params = []) => {
  */
 const dbAll = (sql, params = []) => {
     return new Promise((resolve, reject) => {
+        console.log(`[DEBUG DB] dbAll executando: ${sql}`);
+        console.log(`[DEBUG DB] dbAll params:`, params);
+        
         db.all(sql, params, (err, rows) => {
             if (err) {
+                console.error(`[DEBUG DB] dbAll erro:`, err);
                 reject(err);
             } else {
+                console.log(`[DEBUG DB] dbAll resultado:`, rows);
                 resolve(rows);
             }
         });
