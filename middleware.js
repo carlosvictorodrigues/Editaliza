@@ -33,7 +33,7 @@ const requireAdmin = async (req, res, next) => {
             }, req.user.id, req);
             
             console.warn(`[SECURITY] Tentativa de acesso admin não autorizada: user_id=${req.user.id}, role=${user?.role}, ip=${req.ip}`);
-            return res.status(403).json({ error: "Acesso negado. Permissões administrativas necessárias." });
+            return res.status(403).json({ error: 'Acesso negado. Permissões administrativas necessárias.' });
         }
         
         // Log de acesso admin autorizado
@@ -89,7 +89,11 @@ const sanitizeMiddleware = (req, res, next) => {
 const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ error: errors.array()[0].msg });
+        const error = errors.array()[0];
+        console.error(`[VALIDATION_ERROR] Campo: ${error.param}, Valor: ${error.value}, Erro: ${error.msg}`);
+        console.error(`[VALIDATION_ERROR] URL: ${req.originalUrl}, Método: ${req.method}`);
+        console.error(`[VALIDATION_ERROR] Params:`, req.params);
+        return res.status(400).json({ error: error.msg });
     }
     next();
 };

@@ -24,7 +24,11 @@ console.log('[POSTGRES] Pool PostgreSQL inicializado');
 // Função para converter placeholders SQLite (?) para PostgreSQL ($1, $2, etc)
 function convertQuery(sql, params) {
     let paramIndex = 1;
-    const pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
+    let pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
+    
+    // Converter comandos específicos do SQLite para PostgreSQL
+    pgSql = pgSql.replace(/BEGIN TRANSACTION/gi, 'BEGIN');
+    
     return { sql: pgSql, params };
 }
 
@@ -51,8 +55,21 @@ const db = {
                     return [];
                 }
                 
-                console.log(`[POSTGRES] Resultado: ${result.rows.length} linhas`);
-                return result.rows;
+                // Converter IDs de string para número se necessário
+                const processedRows = result.rows.map(row => {
+                    // Normalizar todos os campos que podem ser IDs
+                    for (const key in row) {
+                        if (key.endsWith('_id') || key === 'id') {
+                            if (row[key] && typeof row[key] === 'string' && !isNaN(Number(row[key]))) {
+                                row[key] = parseInt(row[key], 10);
+                            }
+                        }
+                    }
+                    return row;
+                });
+                
+                console.log(`[POSTGRES] Resultado: ${processedRows.length} linhas`);
+                return processedRows;
             } catch (error) {
                 console.error('[POSTGRES] Erro em all():', error.message);
                 throw error;
@@ -89,8 +106,21 @@ const db = {
                     return null;
                 }
                 
-                console.log(`[POSTGRES] Resultado: ${result.rows.length > 0 ? 'encontrado' : 'não encontrado'}`);
-                return result.rows[0] || null;
+                // Converter IDs de string para número se necessário
+                const processedRow = result.rows[0] || null;
+                if (processedRow) {
+                    // Normalizar todos os campos que podem ser IDs
+                    for (const key in processedRow) {
+                        if (key.endsWith('_id') || key === 'id') {
+                            if (processedRow[key] && typeof processedRow[key] === 'string' && !isNaN(Number(processedRow[key]))) {
+                                processedRow[key] = parseInt(processedRow[key], 10);
+                            }
+                        }
+                    }
+                }
+                
+                console.log(`[POSTGRES] Resultado: ${processedRow ? 'encontrado' : 'não encontrado'}`);
+                return processedRow;
             } catch (error) {
                 console.error('[POSTGRES] Erro em get():', error.message);
                 throw error;
@@ -120,11 +150,25 @@ const db = {
                 console.log(`[POSTGRES] Query: ${pgSql}`);
                 console.log(`[POSTGRES] Params:`, pgParams);
                 
-                const result = await pool.query(pgSql, pgParams);
+                // Para INSERTs, automaticamente adicionar RETURNING id se não existir
+                let finalSql = pgSql;
+                if (pgSql.trim().toUpperCase().startsWith('INSERT') && !pgSql.toUpperCase().includes('RETURNING')) {
+                    finalSql = pgSql + ' RETURNING id';
+                    console.log(`[POSTGRES] Adicionado RETURNING id: ${finalSql}`);
+                }
+                
+                const result = await pool.query(finalSql, pgParams);
                 console.log(`[POSTGRES] Linhas afetadas: ${result.rowCount}`);
                 
+                // PostgreSQL retorna lastID através de RETURNING id
+                let lastID = null;
+                if (result.rows && result.rows.length > 0 && result.rows[0].id !== undefined) {
+                    lastID = parseInt(result.rows[0].id, 10) || result.rows[0].id;
+                    console.log(`[POSTGRES] lastID: ${lastID} (tipo: ${typeof lastID})`);
+                }
+                
                 return {
-                    lastID: result.insertId || null,
+                    lastID: lastID,
                     changes: result.rowCount || 0
                 };
             } catch (error) {
@@ -184,6 +228,39 @@ const db = {
                 database: 'postgresql'
             };
         }
+    },
+
+    // Método prepare - compatibilidade com SQLite
+    prepare: (sql) => {
+        const { sql: pgSql } = convertQuery(sql, []);
+        console.log(`[POSTGRES] Prepared statement: ${pgSql}`);
+        
+        return {
+            run: async (...params) => {
+                try {
+                    const result = await pool.query(pgSql, params);
+                    console.log(`[POSTGRES] Prepared run - Linhas afetadas: ${result.rowCount}`);
+                    
+                    let lastID = null;
+                    if (result.rows && result.rows.length > 0 && result.rows[0].id !== undefined) {
+                        lastID = parseInt(result.rows[0].id, 10) || result.rows[0].id;
+                    }
+                    
+                    return {
+                        lastID: lastID,
+                        changes: result.rowCount || 0
+                    };
+                } catch (error) {
+                    console.error('[POSTGRES] Erro em prepared run():', error.message);
+                    throw error;
+                }
+            },
+            finalize: (callback) => {
+                // PostgreSQL não precisa finalizar prepared statements
+                if (callback) callback();
+                return Promise.resolve();
+            }
+        };
     },
 
     // Propriedades de compatibilidade
