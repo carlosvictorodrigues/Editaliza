@@ -81,8 +81,7 @@ const {
     handleDatabaseError,
 } = require('./src/utils/error-handler');
 
-// Importar sistema de backup (DESABILITADO DURANTE MIGRAÇÃO POSTGRESQL)
-// const BackupManager = require('./src/utils/backup-manager');
+// Sistema de backup foi removido durante migração para PostgreSQL
 
 // Importar otimizações de banco
 const {
@@ -3998,23 +3997,7 @@ app.get('/ready', (req, res) => {
 // Middleware de tratamento de erros robusto
 app.use(errorHandler);
 
-// Inicializar sistema de backup (DESABILITADO DURANTE MIGRAÇÃO POSTGRESQL)
-/*
-const backupManager = new BackupManager({
-    dbPath: path.join(__dirname, 'db.sqlite'),
-    backupDir: path.join(__dirname, 'backups'),
-    maxBackups: 30,
-    compression: true
-});
-
-// Agendar backup automático a cada 6 horas
-if (process.env.NODE_ENV === 'production') {
-    backupManager.scheduleAutoBackup(6);
-} else {
-    // Em desenvolvimento, backup diário
-    backupManager.scheduleAutoBackup(24);
-}
-*/
+// Sistema de backup foi removido durante migração para PostgreSQL
 
 // --- EMAIL SERVICE ADMINISTRATIVE ROUTES ---
 // Email service status endpoint
