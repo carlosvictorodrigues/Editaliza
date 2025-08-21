@@ -39,11 +39,12 @@ jobs:
         # Para push events, o TruffleHog detecta automaticamente os commits
         # Não especificar base/head evita o erro quando ambos são iguais
     
-    # Análise de segurança do código
-    - name: Run CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
-      with:
-        languages: javascript
+    # Análise de segurança do código (removida - requer configuração especial)
+    # CodeQL precisa de um workflow separado com init/autobuild/analyze
+    # - name: Run CodeQL Analysis
+    #   uses: github/codeql-action/analyze@v3
+    #   with:
+    #     languages: javascript
     
     # Verifica headers de segurança
     - name: Security Headers Check

@@ -50,7 +50,7 @@ class ScheduleWeightAnalyzer {
                     reject(new Error(`Falha ao conectar ao banco: ${err.message}`));
                     return;
                 }
-                console.log('🔌 Conectado ao banco de dados');
+                console.info('🔌 Conectado ao banco de dados');
                 resolve();
             });
         });
@@ -64,7 +64,7 @@ class ScheduleWeightAnalyzer {
                     resolve();
                 });
             });
-            console.log('📴 Conexão com banco fechada');
+            console.info('📴 Conexão com banco fechada');
         }
     }
 
@@ -81,7 +81,7 @@ class ScheduleWeightAnalyzer {
     }
 
     async getSubjectsData() {
-        console.log('📊 Coletando dados das disciplinas...');
+        console.info('📊 Coletando dados das disciplinas...');
         
         const subjects = await this.query(`
             SELECT s.subject_name, s.priority_weight, COUNT(t.id) as topic_count
@@ -96,7 +96,7 @@ class ScheduleWeightAnalyzer {
     }
 
     async getScheduleFrequency() {
-        console.log('📅 Analisando frequência no cronograma (próximas 3 semanas)...');
+        console.info('📅 Analisando frequência no cronograma (próximas 3 semanas)...');
         
         const today = new Date();
         const threeWeeksLater = new Date();

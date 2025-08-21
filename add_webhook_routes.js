@@ -1,10 +1,10 @@
-const fs = require("fs");
+const fs = require('fs');
 
 // Ler o arquivo server_production.js
-let serverContent = fs.readFileSync("server_production.js", "utf8");
+let serverContent = fs.readFileSync('server_production.js', 'utf8');
 
 // Verificar se as rotas já existem
-if (!serverContent.includes("cackto-integration")) {
+if (!serverContent.includes('cackto-integration')) {
     // Adicionar imports no início do arquivo (após outros requires)
     const importText = `
 // Cackto Integration
@@ -80,8 +80,8 @@ app.get("/api/subscription/status/:userId", async (req, res) => {
     );
     
     // Salvar o arquivo
-    fs.writeFileSync("server_production.js", serverContent);
-    console.log("✅ Rotas de webhook adicionadas com sucesso!");
+    fs.writeFileSync('server_production.js', serverContent);
+    console.info('✅ Rotas de webhook adicionadas com sucesso!');
 } else {
-    console.log("ℹ️ Rotas de webhook já existem no servidor");
+    console.info('ℹ️ Rotas de webhook já existem no servidor');
 }
