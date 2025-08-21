@@ -95,6 +95,18 @@ router.get('/:planId/gamification',
 );
 
 /**
+ * @route GET /plans/:planId/performance
+ * @desc Get performance metrics for the plan
+ * @access Private
+ */
+router.get('/:planId/performance',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    planController.getPerformance
+);
+
+/**
  * @route GET /plans/:planId/sessions/completed
  * @desc Get completed sessions for gamification stats
  * @access Private

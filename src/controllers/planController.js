@@ -228,6 +228,26 @@ const getActivitySummary = async (req, res) => {
 };
 
 /**
+ * Get performance metrics
+ * GET /plans/:planId/performance
+ */
+const getPerformance = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        
+        const performanceData = await planService.getPerformance(planId, userId);
+        res.json(performanceData);
+    } catch (error) {
+        console.error('Error getting performance data:', error);
+        res.status(500).json({ 
+            error: 'Erro ao carregar dados de desempenho',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+/**
  * Get plan subjects
  * GET /plans/:planId/subjects
  */
@@ -259,5 +279,6 @@ module.exports = {
     getQuestionRadar,
     getOverdueCheck,
     getActivitySummary,
+    getPerformance,
     getSubjects
 };

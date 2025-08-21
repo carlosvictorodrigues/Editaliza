@@ -599,8 +599,8 @@ const getGamification = async (planId, userId) => {
             LEFT JOIN study_time_logs stl ON stl.session_id = ss.id
             WHERE ss.study_plan_id = ? 
                 AND (ss.status = 'Concluído' OR ss.time_studied_seconds > 0)
-            GROUP BY ss.id
-        )
+            GROUP BY ss.id, ss.time_studied_seconds
+        ) AS session_times
     `, [planId]);
     
     const totalStudyTime = totalTimeResult?.total_time || 0;
@@ -668,8 +668,15 @@ const calculateUniqueStudyDays = (sessions) => {
     sessions.forEach(session => {
         if (session.status === 'Concluído' && session.session_date) {
             // Extract only date (YYYY-MM-DD) from session_date
-            const date = session.session_date.split('T')[0];
-            uniqueDates.add(date);
+            let dateStr;
+            if (session.session_date instanceof Date) {
+                dateStr = session.session_date.toISOString().split('T')[0];
+            } else if (typeof session.session_date === 'string') {
+                dateStr = session.session_date.split('T')[0];
+            } else {
+                dateStr = String(session.session_date).split('T')[0];
+            }
+            uniqueDates.add(dateStr);
         }
     });
     
@@ -811,6 +818,60 @@ const getSubjects = async (planId, userId) => {
     return await planRepository.getSubjects(planId);
 };
 
+/**
+ * Get performance metrics
+ */
+const getPerformance = async (planId, userId) => {
+    const plan = await planRepository.getPlanByIdAndUser(planId, userId);
+    if (!plan) {
+        throw new Error('Plano não encontrado');
+    }
+
+    // Calcular dias restantes para a prova
+    const today = new Date();
+    let examDate;
+    if (plan.exam_date instanceof Date) {
+        examDate = plan.exam_date;
+    } else {
+        examDate = new Date(plan.exam_date + 'T00:00:00');
+    }
+    
+    const daysRemaining = Math.max(0, Math.ceil((examDate - today) / (1000 * 60 * 60 * 24)));
+    
+    // Buscar progresso
+    const progressData = await getProgress(planId, userId);
+    const topicsRemaining = progressData.remaining;
+    
+    // Calcular ritmo necessário
+    const requiredPace = daysRemaining > 0 ? (topicsRemaining / daysRemaining).toFixed(1) : 'N/A';
+    
+    // Buscar estatísticas de estudo
+    const studyStats = await dbGet(`
+        SELECT 
+            COUNT(DISTINCT session_date) as study_days,
+            COUNT(*) as total_sessions,
+            COUNT(CASE WHEN status = 'Concluído' THEN 1 END) as completed_sessions,
+            AVG(CASE WHEN status = 'Concluído' THEN time_studied_seconds END) as avg_study_time
+        FROM study_sessions
+        WHERE study_plan_id = ?
+    `, [planId]);
+    
+    // Calcular velocidade média (tópicos por dia)
+    const avgPace = studyStats.study_days > 0 ? 
+        (progressData.completed / studyStats.study_days).toFixed(1) : 0;
+    
+    return {
+        daysRemaining,
+        topicsRemaining,
+        requiredPace,
+        currentPace: avgPace,
+        totalStudyDays: studyStats.study_days || 0,
+        completedSessions: studyStats.completed_sessions || 0,
+        averageStudyTime: Math.round(studyStats.avg_study_time || 0),
+        onTrack: parseFloat(avgPace) >= parseFloat(requiredPace)
+    };
+};
+
 module.exports = {
     getSchedulePreview,
     getProgress,
@@ -818,6 +879,7 @@ module.exports = {
     getGoalProgress,
     getRealityCheck,
     getGamification,
+    getPerformance,
     getCompletedSessions,
     getUserStats,
     getQuestionRadar,
