@@ -4,6 +4,7 @@
 /**
  * @file js/components.js
  * @description Funções para renderizar componentes de UI reutilizáveis com a nova identidade visual.
+ * @updated 2025-01-21 - AVATAR FORÇADAMENTE DESABILITADO EM TODA NAVEGAÇÃO
  */
 
 const components = {
@@ -263,8 +264,9 @@ const components = {
         
         navContainer.innerHTML = `
             <style>
-                /* Hide avatar completely */
+                /* FORCE HIDE ALL AVATARS - UPDATED 2025-01-21 */
                 #nav-user-avatar,
+                #userAvatar,
                 .nav-avatar,
                 .navbar-avatar,
                 .user-avatar,
@@ -272,7 +274,11 @@ const components = {
                 .nav .avatar,
                 .navbar .avatar,
                 .profile-avatar,
-                .header-avatar {
+                .header-avatar,
+                img[alt*="Avatar"],
+                img[alt*="avatar"],
+                [class*="avatar"],
+                [id*="avatar"] {
                     display: none !important;
                     visibility: hidden !important;
                     opacity: 0 !important;
@@ -280,6 +286,13 @@ const components = {
                     height: 0 !important;
                     margin: 0 !important;
                     padding: 0 !important;
+                    overflow: hidden !important;
+                    max-width: 0 !important;
+                    max-height: 0 !important;
+                    min-width: 0 !important;
+                    min-height: 0 !important;
+                    border: none !important;
+                    background: none !important;
                 }
                 
                 .nav-link-active {
