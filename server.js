@@ -81,8 +81,8 @@ const {
     handleDatabaseError,
 } = require('./src/utils/error-handler');
 
-// Importar sistema de backup
-const BackupManager = require('./src/utils/backup-manager');
+// Importar sistema de backup (DESABILITADO DURANTE MIGRAÇÃO POSTGRESQL)
+// const BackupManager = require('./src/utils/backup-manager');
 
 // Importar otimizações de banco
 const {
@@ -4011,7 +4011,8 @@ app.get('/ready', (req, res) => {
 // Middleware de tratamento de erros robusto
 app.use(errorHandler);
 
-// Inicializar sistema de backup
+// Inicializar sistema de backup (DESABILITADO DURANTE MIGRAÇÃO POSTGRESQL)
+/*
 const backupManager = new BackupManager({
     dbPath: path.join(__dirname, 'db.sqlite'),
     backupDir: path.join(__dirname, 'backups'),
@@ -4026,6 +4027,7 @@ if (process.env.NODE_ENV === 'production') {
     // Em desenvolvimento, backup diário
     backupManager.scheduleAutoBackup(24);
 }
+*/
 
 // --- EMAIL SERVICE ADMINISTRATIVE ROUTES ---
 // Email service status endpoint
