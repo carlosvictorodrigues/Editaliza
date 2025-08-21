@@ -3972,35 +3972,19 @@ app.get('/', (req, res) => {
 });
 
 // Tratamento de erros global
-// Health check endpoint for Docker/K8s
+// Health check endpoint for Docker/K8s (SIMPLIFICADO)
 app.get('/health', (req, res) => {
     const healthCheck = {
         uptime: process.uptime(),
         message: 'OK',
+        database: 'PostgreSQL',
         timestamp: Date.now(),
         environment: process.env.NODE_ENV || 'development',
         version: process.env.npm_package_version || '1.0.0'
     };
     
-    try {
-        // Test database connectivity usando a nova API PostgreSQL
-        dbGet('SELECT 1 as test')
-            .then((result) => {
-                healthCheck.database = 'OK';
-                healthCheck.dbType = 'PostgreSQL';
-                res.status(200).json(healthCheck);
-            })
-            .catch((err) => {
-                healthCheck.message = 'Database connection failed';
-                healthCheck.database = 'ERROR';
-                healthCheck.error = err.message;
-                res.status(503).json(healthCheck);
-            });
-    } catch (error) {
-        healthCheck.message = 'Health check failed';
-        healthCheck.error = error.message;
-        res.status(503).json(healthCheck);
-    }
+    // Resposta simples sem testar banco para evitar deadlocks
+    res.status(200).json(healthCheck);
 });
 
 // Ready probe endpoint for K8s
