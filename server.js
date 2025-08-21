@@ -1192,10 +1192,23 @@ app.patch('/profile',
 // --- ROTAS DE PLANOS (CRUD E CONFIGURAÇÕES) ---
 app.get('/plans', authenticateToken, async (req, res) => {
     try {
+        console.log(`[DEBUG PLANS] Usuário logado ID: ${req.user.id}`);
+        console.log(`[DEBUG PLANS] Executando query: SELECT * FROM study_plans WHERE user_id = ${req.user.id}`);
+        
         const rows = await dbAll('SELECT * FROM study_plans WHERE user_id = ? ORDER BY id DESC', [req.user.id]);
-        res.json(rows.map(plan => ({...plan, study_hours_per_day: JSON.parse(plan.study_hours_per_day || '{}')})));
+        
+        console.log(`[DEBUG PLANS] Resultado da query:`, rows);
+        console.log(`[DEBUG PLANS] Número de planos encontrados: ${rows.length}`);
+        
+        const processedPlans = rows.map(plan => {
+            console.log(`[DEBUG PLANS] Processando plano ID ${plan.id}: ${plan.plan_name}`);
+            return {...plan, study_hours_per_day: JSON.parse(plan.study_hours_per_day || '{}')};
+        });
+        
+        console.log(`[DEBUG PLANS] Planos processados:`, processedPlans);
+        res.json(processedPlans);
     } catch (error) {
-        console.error('Erro ao buscar planos:', error);
+        console.error('[DEBUG PLANS] Erro ao buscar planos:', error);
         res.status(500).json({ 'error': 'Erro ao buscar planos' });
     }
 });
