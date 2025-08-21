@@ -1,5 +1,7 @@
+/* eslint-env jest */
 // tests/setup.js - Configuração global para testes
-const { createTestDatabase, closeTestDatabase, clearTestDatabase } = require('./database-test');
+// Usar PostgreSQL em vez de SQLite para testes
+const { createTestDatabase, closeTestDatabase, clearTestDatabase } = require('./database-test-pg');
 
 // Configurar variáveis de ambiente para testes
 process.env.NODE_ENV = 'test';
