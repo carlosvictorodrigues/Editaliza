@@ -233,20 +233,31 @@ app.use(cors({
     exposedHeaders: ['X-Total-Count'] // Headers seguros para expor
 }));
 
-// Configuração de sessão - Usa memória se PostgreSQL não estiver disponível
+// Configuração de sessão - Usa PostgreSQL ou memória
 let sessionStore;
-try {
-    // Tentar usar PostgreSQL
-    sessionStore = new pgSession({
-        conString: process.env.DATABASE_URL || `postgresql://editaliza_user:Editaliza@2025#Secure@localhost:5432/editaliza_db`,
-        tableName: 'sessions',
-        createTableIfMissing: true
-    });
-    console.log('📦 Usando PostgreSQL para sessões');
-} catch (err) {
-    // Fallback para memória se PostgreSQL falhar
-    console.log('⚠️ PostgreSQL não disponível, usando sessões em memória');
+
+// Construir connection string a partir das variáveis de ambiente
+const pgConnString = process.env.DATABASE_URL || 
+    `postgresql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`;
+
+// Tentar usar PostgreSQL se disponível
+if (process.env.FORCE_MEMORY_SESSIONS === 'true') {
+    console.log('📦 Usando sessões em memória (forçado)');
     sessionStore = new session.MemoryStore();
+} else {
+    try {
+        sessionStore = new pgSession({
+            conString: pgConnString,
+            tableName: 'sessions',
+            createTableIfMissing: true,
+            schemaName: 'public' // Usar schema public
+        });
+        console.log('📦 Usando PostgreSQL para sessões');
+    } catch (err) {
+        // Fallback para memória se PostgreSQL falhar
+        console.log('⚠️ PostgreSQL não disponível, usando sessões em memória');
+        sessionStore = new session.MemoryStore();
+    }
 }
 
 const sessionConfig = {

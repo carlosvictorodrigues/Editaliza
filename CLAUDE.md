@@ -167,10 +167,31 @@ curl https://app.editaliza.com.br/health
 - PM2 App: `editaliza-app`
 - Porta: 3000
 
-### Banco de Dados:
-- PostgreSQL (local no servidor)
-- Nome: `editaliza_db`
+### Banco de Dados PostgreSQL:
+
+#### 🏠 DESENVOLVIMENTO LOCAL:
+- Host: `127.0.0.1`
+- Porta: `5432`
+- Banco: `editaliza_db`
 - Usuário: `editaliza_user`
+- Senha: `1a2b3c4d`
+
+#### 🌐 PRODUÇÃO (DigitalOcean):
+- Host: `localhost`
+- Porta: `5432`
+- Banco: `editaliza_db`
+- Usuário: `editaliza_user`
+- Senha: `Editaliza@2025#Secure`
+
+### ⚠️ Tabelas Necessárias:
+- users (com coluna `password_hash`)
+- sessions
+- schedules
+- plans
+- tasks
+- progress
+- oauth_providers
+- study_plans
 
 ## 🤖 USANDO GEMINI COMO ASSISTENTE
 

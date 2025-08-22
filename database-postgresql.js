@@ -8,11 +8,11 @@ try {
     // Testar conexão
     const { Client } = require('pg');
     const testClient = new Client({
-        database: 'editaliza_db',
-        user: 'editaliza_user',
-        password: 'Editaliza@2025#Secure',
-        host: 'localhost',
-        port: 5432
+        database: process.env.DB_NAME || 'editaliza_db',
+        user: process.env.DB_USER || 'editaliza_user',
+        password: process.env.DB_PASSWORD || '1a2b3c4d',
+        host: process.env.DB_HOST || '127.0.0.1',
+        port: process.env.DB_PORT || 5432
     });
     
     testClient.connect()
