@@ -1261,7 +1261,7 @@ app.get('/test-db', authenticateToken, async (req, res) => {
 });
 
 // --- ROTAS DE PLANOS (CRUD E CONFIGURAÇÕES) ---
-app.get('/plans', authenticateToken, async (req, res) => {
+app.get('/api/plans', authenticateToken, async (req, res) => {
     try {
         console.log(`[PLANS] Usuário ID: ${req.user.id}`);
         
@@ -1295,7 +1295,7 @@ app.get('/plans', authenticateToken, async (req, res) => {
     }
 });
 
-app.post('/plans', 
+app.post('/api/plans', 
     authenticateToken,
     validators.text('plan_name', 1, 200),
     validators.date('exam_date'),
@@ -1318,26 +1318,46 @@ app.post('/plans',
     }
 );
 
-app.get('/plans/:id', 
+app.get('/api/plans/:id', 
     authenticateToken,
     validators.numericId('id'),
     handleValidationErrors,
     async (req, res) => {
         try {
+            console.log('🔍 Buscando plano:', req.params.id, 'para usuário:', req.user.id);
             const row = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
-            if (!row) return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
-            if (row.study_hours_per_day) {
-                row.study_hours_per_day = JSON.parse(row.study_hours_per_day);
+            
+            if (!row) {
+                console.log('❌ Plano não encontrado ou não autorizado');
+                return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
             }
+            
+            console.log('✅ Plano encontrado:', { id: row.id, plan_name: row.plan_name });
+            
+            // CORREÇÃO: study_hours_per_day já é um objeto no PostgreSQL
+            if (row.study_hours_per_day && typeof row.study_hours_per_day === 'string') {
+                try {
+                    row.study_hours_per_day = JSON.parse(row.study_hours_per_day);
+                } catch (parseError) {
+                    console.log('⚠️ Erro ao processar study_hours_per_day:', parseError.message);
+                }
+            }
+            
+            console.log('📤 Enviando resposta do plano');
             res.json(row);
         } catch (error) {
-            console.error('Erro ao buscar plano:', error);
-            return res.status(500).json({ 'error': 'Erro ao buscar plano' });
+            console.error('❌ ERRO DETALHADO ao buscar plano:', {
+                message: error.message,
+                stack: error.stack,
+                planId: req.params.id,
+                userId: req.user?.id
+            });
+            return res.status(500).json({ 'error': 'Erro ao buscar plano: ' + error.message });
         }
     }
 );
 
-app.delete('/plans/:planId', 
+app.delete('/api/plans/:planId', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -1364,7 +1384,7 @@ app.delete('/plans/:planId',
     }
 );
 
-app.patch('/plans/:planId/settings', 
+app.patch('/api/plans/:planId/settings', 
     authenticateToken,
     validators.numericId('planId'),
     validators.integer('daily_question_goal', 0, 500),
@@ -3396,7 +3416,7 @@ END LEGACY ROUTE COMMENT */
 
 // Obter dados de progresso do plano - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/planRoutes.js
-app.get('/plans/:planId/progress', 
+app.get('/api/plans/:planId/progress', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -3437,7 +3457,7 @@ END LEGACY ROUTE COMMENT */
 
 // Obter progresso das metas de questões - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/planRoutes.js
-app.get('/plans/:planId/goal_progress', 
+app.get('/api/plans/:planId/goal_progress', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -3470,7 +3490,7 @@ END LEGACY ROUTE COMMENT */
 
 // Obter radar de questões (pontos fracos) - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/planRoutes.js
-app.get('/plans/:planId/question_radar', 
+app.get('/api/plans/:planId/question_radar', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -3544,9 +3564,8 @@ app.get('/plans/:planId/review_data',
         }
 });
 
-// Obter progresso detalhado - MIGRATED TO MODULAR ARCHITECTURE
-/* LEGACY ROUTE - REPLACED BY src/routes/planRoutes.js
-app.get('/plans/:planId/detailed_progress',
+// Obter progresso detalhado - ATIVA
+app.get('/api/plans/:planId/detailed_progress',
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -3555,7 +3574,7 @@ app.get('/plans/:planId/detailed_progress',
         const userId = req.user.id;
         try {
             const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
-            if (!plan) return res.status(404).json({ "error": "Plano não encontrado ou não autorizado." });
+            if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
 
             // Obter dados básicos de tópicos e disciplinas
             const subjects = await dbAll('SELECT id, subject_name FROM subjects WHERE study_plan_id = ?', [planId]);
@@ -3780,11 +3799,10 @@ app.get('/plans/:planId/detailed_progress',
 
         } catch (error) {
             console.error('Erro ao buscar progresso detalhado:', error);
-            res.status(500).json({ "error": "Erro ao buscar progresso detalhado" });
+            res.status(500).json({ 'error': 'Erro ao buscar progresso detalhado' });
         }
     }
-); 
-END LEGACY ROUTE COMMENT */
+);
 
 // Obter estatísticas resumidas de atividades - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/planRoutes.js
@@ -3855,24 +3873,23 @@ app.get('/plans/:planId/activity_summary',
 ); 
 END LEGACY ROUTE COMMENT */
 
-// Obter diagnóstico de performance (reality check) - MIGRATED TO MODULAR ARCHITECTURE
-/* LEGACY ROUTE - REPLACED BY src/routes/planRoutes.js
-app.get('/plans/:planId/realitycheck', 
+// Obter diagnóstico de performance (reality check) - ATIVA
+app.get('/api/plans/:planId/realitycheck', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
     async (req, res) => {
         const planId = req.params.planId;
         try {
-            const plan = await dbGet("SELECT * FROM study_plans WHERE id = ? AND user_id = ?", [planId, req.user.id]);
-            if (!plan) return res.status(404).json({ "error": "Plano não encontrado" });
+            const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
+            if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado' });
             
-            const sessions = await dbAll("SELECT status, topic_id, session_date, session_type FROM study_sessions WHERE study_plan_id = ?", [planId]);
+            const sessions = await dbAll('SELECT status, topic_id, session_date, session_type FROM study_sessions WHERE study_plan_id = ?', [planId]);
             const totalTopicsResult = await dbGet('SELECT COUNT(t.id) as total FROM topics t JOIN subjects s ON t.subject_id = s.id WHERE s.study_plan_id = ?', [planId]);
             const totalTopics = totalTopicsResult.total;
 
             if (totalTopics === 0) {
-                return res.json({ message: "Adicione tópicos ao seu plano para ver as projeções." });
+                return res.json({ message: 'Adicione tópicos ao seu plano para ver as projeções.' });
             }
 
             const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -3886,7 +3903,7 @@ app.get('/plans/:planId/realitycheck',
             const futureNewTopics = newTopicSessions.filter(s => new Date(s.session_date) >= today && s.status === 'Pendente');
             const isMaintenanceMode = totalTopics > 0 && futureNewTopics.length === 0;
 
-            const firstSessionDateResult = await dbGet("SELECT MIN(session_date) as first_date FROM study_sessions WHERE study_plan_id = ? AND session_type = 'Novo Tópico' AND status = 'Concluído'", [planId]);
+            const firstSessionDateResult = await dbGet('SELECT MIN(session_date) as first_date FROM study_sessions WHERE study_plan_id = ? AND session_type = \'Novo Tópico\' AND status = \'Concluído\'', [planId]);
             const firstSessionDate = firstSessionDateResult.first_date ? new Date(firstSessionDateResult.first_date + 'T00:00:00') : today;
 
             const daysSinceStart = Math.max(1, Math.ceil((today - firstSessionDate) / (1000 * 60 * 60 * 24)));
@@ -3928,7 +3945,7 @@ app.get('/plans/:planId/realitycheck',
             }
 
             res.json({
-                requiredPace: isFinite(requiredPace) ? `${requiredPace.toFixed(1)} tópicos/dia` : "N/A",
+                requiredPace: isFinite(requiredPace) ? `${requiredPace.toFixed(1)} tópicos/dia` : 'N/A',
                 postponementCount: plan.postponement_count,
                 status,
                 primaryMessage,
@@ -3939,7 +3956,7 @@ app.get('/plans/:planId/realitycheck',
 
         } catch (error) {
             console.error('Erro no reality check:', error);
-            res.status(500).json({ "error": "Erro ao calcular diagnóstico" });
+            res.status(500).json({ 'error': 'Erro ao calcular diagnóstico' });
         }
 });
 // Endpoint para registrar tempo de estudo
@@ -3961,7 +3978,7 @@ app.post('/sessions/:sessionId/time',
             `, [sessionId, userId]);
 
             if (!session) {
-                return res.status(404).json({ error: "Sessão não encontrada ou não autorizada." });
+                return res.status(404).json({ error: 'Sessão não encontrada ou não autorizada.' });
             }
 
             await dbRun(`
@@ -3971,21 +3988,19 @@ app.post('/sessions/:sessionId/time',
             `, [seconds, sessionId]);
 
             res.json({ 
-                message: "Tempo registrado com sucesso!", 
+                message: 'Tempo registrado com sucesso!', 
                 totalTime: (session.time_studied_seconds || 0) + seconds 
             });
 
         } catch (error) {
             console.error('Erro ao salvar tempo de estudo:', error);
-            res.status(500).json({ error: "Erro ao registrar tempo de estudo." });
+            res.status(500).json({ error: 'Erro ao registrar tempo de estudo.' });
         }
     }
-); 
-END LEGACY ROUTE COMMENT */
+);
 
-// --- ROTA DE GAMIFICAÇÃO --- - MIGRATED TO MODULAR ARCHITECTURE
-/* LEGACY ROUTE - REPLACED BY src/routes/planRoutes.js
-app.get('/plans/:planId/gamification', 
+// --- ROTA DE GAMIFICAÇÃO --- - ATIVA
+app.get('/api/plans/:planId/gamification', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -3994,8 +4009,8 @@ app.get('/plans/:planId/gamification',
         const userId = req.user.id;
 
         try {
-            const plan = await dbGet("SELECT id FROM study_plans WHERE id = ? AND user_id = ?", [planId, userId]);
-            if (!plan) return res.status(404).json({ "error": "Plano não encontrado ou não autorizado." });
+            const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+            if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
 
             // CORREÇÃO: Contar tópicos únicos concluídos independente do session_type
             const completedTopicsResult = await dbGet(`
@@ -4102,57 +4117,57 @@ app.get('/plans/:planId/gamification',
             // Conquistas por TÓPICOS CONCLUÍDOS (com MUITO humor!)
             if (completedTopicsCount >= 1) {
                 achievements.push({
-                    title: "🎯 Primeira Lapada no Edital",
-                    description: "O primeiro soco na cara da procrastinação!",
+                    title: '🎯 Primeira Lapada no Edital',
+                    description: 'O primeiro soco na cara da procrastinação!',
                     achieved_date: now
                 });
             }
             if (completedTopicsCount >= 5) {
                 achievements.push({
-                    title: "📚 Maratonista do PDF",
-                    description: "Sua vista já começou a reclamar.",
+                    title: '📚 Maratonista do PDF',
+                    description: 'Sua vista já começou a reclamar.',
                     achieved_date: now
                 });
             }
             if (completedTopicsCount >= 10) {
                 achievements.push({
-                    title: "✨ Destruidor de Questões",
-                    description: "Já discute gabarito com confiança.",
+                    title: '✨ Destruidor de Questões',
+                    description: 'Já discute gabarito com confiança.',
                     achieved_date: now
                 });
             }
             if (completedTopicsCount >= 25) {
                 achievements.push({
-                    title: "👑 Dono do Material",
-                    description: "Sabe até a cor da caneta que o professor usou no slide.",
+                    title: '👑 Dono do Material',
+                    description: 'Sabe até a cor da caneta que o professor usou no slide.',
                     achieved_date: now
                 });
             }
             if (completedTopicsCount >= 50) {
                 achievements.push({
-                    title: "🌟 Meio Monstro",
-                    description: "Você está virando uma lenda local no grupo de estudos.",
+                    title: '🌟 Meio Monstro',
+                    description: 'Você está virando uma lenda local no grupo de estudos.',
                     achieved_date: now
                 });
             }
             if (completedTopicsCount >= 100) {
                 achievements.push({
-                    title: "🏛️ Centurião do Conhecimento",
-                    description: "Bancas já estão te bloqueando no Instagram.",
+                    title: '🏛️ Centurião do Conhecimento',
+                    description: 'Bancas já estão te bloqueando no Instagram.',
                     achieved_date: now
                 });
             }
             if (completedTopicsCount >= 200) {
                 achievements.push({
-                    title: "💪 Chuck Norris dos Editais",
-                    description: "Os editais temem você!",
+                    title: '💪 Chuck Norris dos Editais',
+                    description: 'Os editais temem você!',
                     achieved_date: now
                 });
             }
             if (completedTopicsCount >= 501) {
                 achievements.push({
-                    title: "🏛️ Vai Escolher Onde Vai Tomar Posse",
-                    description: "Não é se vai passar, é onde.",
+                    title: '🏛️ Vai Escolher Onde Vai Tomar Posse',
+                    description: 'Não é se vai passar, é onde.',
                     achieved_date: now
                 });
             }
@@ -4160,29 +4175,29 @@ app.get('/plans/:planId/gamification',
             // Conquistas por SEQUÊNCIA (STREAK) com humor!
             if (studyStreak >= 3) {
                 achievements.push({
-                    title: "Resistente ao Netflix 📺",
-                    description: "3 dias seguidos! Resistiu à série nova!",
+                    title: 'Resistente ao Netflix 📺',
+                    description: '3 dias seguidos! Resistiu à série nova!',
                     achieved_date: now
                 });
             }
             if (studyStreak >= 7) {
                 achievements.push({
-                    title: "Imune ao Sofá 🛋️",
-                    description: "7 dias! O sofá esqueceu sua forma!",
+                    title: 'Imune ao Sofá 🛋️',
+                    description: '7 dias! O sofá esqueceu sua forma!',
                     achieved_date: now
                 });
             }
             if (studyStreak >= 14) {
                 achievements.push({
-                    title: "Inimigo do Descanso 😤",
-                    description: "14 dias! Descanso? Não conheço!",
+                    title: 'Inimigo do Descanso 😤',
+                    description: '14 dias! Descanso? Não conheço!',
                     achieved_date: now
                 });
             }
             if (studyStreak >= 30) {
                 achievements.push({
-                    title: "Máquina de Aprovar 🤖",
-                    description: "30 dias! Você é um cyborg concurseiro!",
+                    title: 'Máquina de Aprovar 🤖',
+                    description: '30 dias! Você é um cyborg concurseiro!',
                     achieved_date: now
                 });
             }
@@ -4190,43 +4205,43 @@ app.get('/plans/:planId/gamification',
             // Conquistas por NÚMERO DE SESSÕES com humor!
             if (totalCompletedSessions >= 20) {
                 achievements.push({
-                    title: "Viciado(a) em Questões 💊",
-                    description: "20 sessões! Questões são sua droga legal!",
+                    title: 'Viciado(a) em Questões 💊',
+                    description: '20 sessões! Questões são sua droga legal!',
                     achieved_date: now
                 });
             }
             if (totalCompletedSessions >= 50) {
                 achievements.push({
-                    title: "🪑 Lombar Suprema",
-                    description: "Já fez mais fisioterapia que simulados.",
+                    title: '🪑 Lombar Suprema',
+                    description: 'Já fez mais fisioterapia que simulados.',
                     achieved_date: now
                 });
             }
             if (totalCompletedSessions >= 100) {
                 achievements.push({
-                    title: "🛏️ Travesseiro Vade Mecum",
-                    description: "Seu travesseiro já está com formato de Vade Mecum.",
+                    title: '🛏️ Travesseiro Vade Mecum',
+                    description: 'Seu travesseiro já está com formato de Vade Mecum.',
                     achieved_date: now
                 });
             }
             if (totalCompletedSessions >= 150) {
                 achievements.push({
-                    title: "📖 Estuda em Fila de Banco",
-                    description: "Estuda até em fila de banco.",
+                    title: '📖 Estuda em Fila de Banco',
+                    description: 'Estuda até em fila de banco.',
                     achieved_date: now
                 });
             }
             if (totalCompletedSessions >= 200) {
                 achievements.push({
-                    title: "🏖️ O que é Férias?",
-                    description: "Férias? Nunca ouvi falar.",
+                    title: '🏖️ O que é Férias?',
+                    description: 'Férias? Nunca ouvi falar.',
                     achieved_date: now
                 });
             }
             if (totalCompletedSessions >= 300) {
                 achievements.push({
-                    title: "🎉 Destruidor(a) de Finais de Semana",
-                    description: "Churrasco? Praia? Só depois da posse!",
+                    title: '🎉 Destruidor(a) de Finais de Semana',
+                    description: 'Churrasco? Praia? Só depois da posse!',
                     achieved_date: now
                 });
             }
@@ -4271,11 +4286,10 @@ app.get('/plans/:planId/gamification',
             });
 
         } catch (error) {
-            console.error("Erro na rota de gamificação:", error);
-            return res.status(500).json({ "error": "Erro ao buscar dados de gamificação." });
+            console.error('Erro na rota de gamificação:', error);
+            return res.status(500).json({ 'error': 'Erro ao buscar dados de gamificação.' });
         }
-}); 
-END LEGACY ROUTE COMMENT */
+});
 
 // Endpoint para gerar dados de compartilhamento
 app.get('/plans/:planId/share-progress', 
