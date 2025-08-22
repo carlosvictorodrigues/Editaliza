@@ -193,7 +193,44 @@ curl https://app.editaliza.com.br/health
 - oauth_providers
 - study_plans
 
-## 🤖 USANDO GEMINI COMO ASSISTENTE
+## 🤖 USANDO GEMINI COMO ASSISTENTE INTEGRADO
+
+### 🚀 MCP Gemini CONECTADO E ATIVO!
+
+O Gemini está agora integrado ao Claude através do MCP (Model Context Protocol) e será usado como assistente para:
+- 🔍 **Análise profunda de código** - Aproveitar a janela de contexto longa do Gemini
+- 🐛 **Debugging avançado** - Analisar logs e identificar problemas complexos
+- 📊 **Revisão de arquitetura** - Avaliar design patterns e estrutura do código
+- 🔒 **Análise de segurança** - Identificar vulnerabilidades e sugerir correções
+- 🎯 **Otimização de performance** - Encontrar gargalos e sugerir melhorias
+- 📝 **Geração de documentação** - Criar docs detalhadas aproveitando o contexto amplo
+
+### 🔧 Como o Claude Usa o Gemini:
+
+#### Via MCP (Integrado):
+```python
+# Claude usa automaticamente o Gemini para análises complexas
+mcp__gemini__gemini_ask(
+    prompt="Analise este código e sugira melhorias",
+    system="Você é um expert em Node.js e PostgreSQL"
+)
+```
+
+#### Casos de Uso Práticos:
+1. **Antes de Deploy:**
+   - Revisão completa do código
+   - Análise de impacto das mudanças
+   - Identificação de possíveis regressões
+
+2. **Durante Debugging:**
+   - Análise de stack traces complexas
+   - Correlação de logs dispersos
+   - Identificação de memory leaks
+
+3. **Otimização de Queries:**
+   - Análise de planos de execução
+   - Sugestões de índices
+   - Refatoração de queries lentas
 
 ### 🔧 Configuração do MCP Gemini no Claude Code (VS Code)
 
@@ -203,10 +240,10 @@ O MCP Gemini está configurado para funcionar com o Claude Code no VS Code atrav
 ```json
 {
   "mcpServers": {
-    "gemini-cli": {
+    "gemini": {
       "type": "stdio",
       "command": "npx",
-      "args": ["@google/gemini-cli", "mcp-server"],
+      "args": ["@gmickel/gemini-cli@latest", "mcp"],
       "env": {
         "GEMINI_API_KEY": "AIzaSyD3qgG6NREyKUPgTdKuYPZ_vBO80BUBgx8"
       }
@@ -215,45 +252,50 @@ O MCP Gemini está configurado para funcionar com o Claude Code no VS Code atrav
 }
 ```
 
-#### Para Reconfigurar (se necessário):
+#### Status da Integração:
+✅ **MCP Gemini CONECTADO** - Pronto para análises avançadas
+✅ **Janela de contexto longa disponível** - Ideal para arquivos grandes
+✅ **Integração automática** - Claude usa Gemini proativamente
+
+### 📊 Estratégias de Uso:
+
+#### 1. Análise de Código Complexo:
 ```bash
-# Remover configuração antiga
-claude mcp remove gemini-cli
-
-# Adicionar nova configuração
-claude mcp add gemini-cli npx @google/gemini-cli mcp-server
-
-# Editar manualmente .claude.json para adicionar a API key
+# Claude + Gemini analisam todo o backend
+# Gemini processa arquivos grandes, Claude coordena as mudanças
 ```
 
-#### Verificar Status:
+#### 2. Debug de Problemas Difíceis:
 ```bash
-# Listar MCPs configurados
-claude mcp list
+# Claude identifica o problema
+# Gemini analisa contexto amplo de logs
+# Claude implementa a solução
+```
 
-# Ver detalhes do MCP
+#### 3. Refatoração Massiva:
+```bash
+# Gemini mapeia todas as dependências
+# Claude planeja a refatoração
+# Execução coordenada com validações
+```
+
+### 🎯 Comandos Úteis:
+
+```bash
+# Verificar status do MCP
 /mcp
-```
 
-#### Ativar o MCP:
-1. Após configurar, recarregue o VS Code: `Ctrl+Shift+P` → "Developer: Reload Window"
-2. O MCP deve conectar automaticamente
-3. Se não conectar, verifique os logs no VS Code
+# Ver ferramentas disponíveis
+# Claude tem acesso a: mcp__gemini__gemini_ask
 
-### Para análise e debugging via Bash:
-```bash
-# Analisar logs de erro
-ssh editaliza "pm2 logs --lines 100" | gemini -p "Analise estes logs e identifique o problema" -m gemini-2.5-flash
-
-# Revisar código antes de deploy
-cat server.js | gemini -p "Revise este código para problemas de segurança e performance" -m gemini-2.5-flash
+# Para análises específicas, Claude usará automaticamente
 ```
 
 ### 📌 Notas Importantes:
-- O MCP funciona diferente no Claude Code (VS Code) vs Claude Desktop
-- A configuração fica em `C:\Users\Gabriel\.claude.json` no escopo do projeto
-- Use `npx` para garantir sempre a versão mais recente do gemini-cli
-- Se houver problemas de conexão, reinstale: `npm install -g @google/gemini-cli@latest`
+- O MCP Gemini está **ATIVO e CONECTADO**
+- Claude usará Gemini automaticamente quando apropriado
+- A janela de contexto longa do Gemini é ideal para análises complexas
+- Integração transparente - você não precisa chamar o Gemini diretamente
 
 ## 📧 CREDENCIAIS DE SERVIÇOS
 

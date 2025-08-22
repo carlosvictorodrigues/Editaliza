@@ -437,8 +437,71 @@
                         </div>
                     </div>
                 </div>
-
                 
+            </div>
+            
+            <!-- Segunda linha de métricas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+                <!-- Total de dias -->
+                <div class="metric-card orange-accent">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total de dias</p>
+                            <p id="totalStudyDaysText" class="text-xl font-semibold text-gray-900">0</p>
+                        </div>
+                        <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H6a2 2 0 100 4h2a2 2 0 100 4h2a1 1 0 100 2 2 2 0 01-2 2H6a2 2 0 01-2-2V5z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sequência atual -->
+                <div class="metric-card yellow-accent">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Sequência atual</p>
+                            <p id="currentStreakText" class="text-xl font-semibold text-gray-900">0</p>
+                        </div>
+                        <div class="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Total de horas -->
+                <div class="metric-card blue-accent">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total de horas</p>
+                            <p id="totalHoursText" class="text-xl font-semibold text-gray-900">0h</p>
+                        </div>
+                        <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Média diária -->
+                <div class="metric-card green-accent">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Média diária</p>
+                            <p id="avgHoursText" class="text-xl font-semibold text-gray-900">0h</p>
+                        </div>
+                        <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -805,11 +868,9 @@
 
             async function updateStudyStatistics(planId) {
                 try {
-                    // Use default statistics for now since the API endpoint doesn't exist
-                    const stats = {
-                        totalStudyDays: 0,
-                        currentStreak: 0
-                    };
+                    // Chamar o endpoint correto do backend para obter as estatísticas
+                    const stats = await app.apiFetch(`/plans/${planId}/statistics`);
+                    console.log('📊 Estatísticas recebidas do servidor:', stats);
                     
                     // Update Total de Dias
                     const totalDaysElement = document.getElementById('totalStudyDaysText');
@@ -837,39 +898,51 @@
                         }
                     }
                     
+                    // Update Total de Horas
+                    const totalHoursElement = document.getElementById('totalHoursText');
+                    if (totalHoursElement && stats.totalHours !== undefined) {
+                        const hours = Math.floor(stats.totalHours);
+                        const minutes = Math.round((stats.totalHours - hours) * 60);
+                        if (hours > 0) {
+                            totalHoursElement.textContent = minutes > 0 ? `${hours}h ${minutes}min` : `${hours}h`;
+                        } else {
+                            totalHoursElement.textContent = `${minutes}min`;
+                        }
+                        console.log(`⏱️ Total de horas atualizado: ${stats.totalHours.toFixed(2)}h`);
+                    }
+                    
+                    // Update Média Diária
+                    const avgHoursElement = document.getElementById('avgHoursText');
+                    if (avgHoursElement && stats.averageHoursPerDay !== undefined) {
+                        const avgHours = Math.floor(stats.averageHoursPerDay);
+                        const avgMinutes = Math.round((stats.averageHoursPerDay - avgHours) * 60);
+                        if (avgHours > 0) {
+                            avgHoursElement.textContent = avgMinutes > 0 ? `${avgHours}h ${avgMinutes}min` : `${avgHours}h`;
+                        } else {
+                            avgHoursElement.textContent = `${avgMinutes}min`;
+                        }
+                        console.log(`📊 Média diária atualizada: ${stats.averageHoursPerDay.toFixed(2)}h`);
+                        
+                        // Update color based on average
+                        if (stats.averageHoursPerDay >= 3) {
+                            avgHoursElement.classList.add('text-green-600');
+                            avgHoursElement.classList.remove('text-gray-900', 'text-yellow-600');
+                        } else if (stats.averageHoursPerDay >= 1) {
+                            avgHoursElement.classList.add('text-yellow-600');
+                            avgHoursElement.classList.remove('text-gray-900', 'text-green-600');
+                        } else {
+                            avgHoursElement.classList.add('text-gray-900');
+                            avgHoursElement.classList.remove('text-green-600', 'text-yellow-600');
+                        }
+                    }
+                    
                 } catch (error) {
                     console.error('Erro ao atualizar estatísticas de estudo:', error);
-                    // Set fallback values if API fails
-                    const totalDaysElement = document.getElementById('totalStudyDaysText');
-                    const currentStreakElement = document.getElementById('currentStreakText');
-                    
-                    if (totalDaysElement) {
-                        // Calculate basic total days from today's sessions
-                        const hasCompletedSessions = window.todaySessionsData.some(session =>
-                            session.completed_at || session.status === 'completed' || (session.study_time && session.study_time > 0)
-                        );
-                        // This is a simplified calculation - in production this should come from the API
-                        const storedTotalDays = localStorage.getItem('totalStudyDays') || '0';
-                        let totalDays = parseInt(storedTotalDays);
-                        
-                        // If user has studied today and it's not already counted
-                        const today = new Date().toISOString().split('T')[0];
-                        const lastStudyDate = localStorage.getItem('lastStudyDate');
-                        
-                        if (hasCompletedSessions && lastStudyDate !== today) {
-                            totalDays += 1;
-                            localStorage.setItem('totalStudyDays', totalDays.toString());
-                            localStorage.setItem('lastStudyDate', today);
-                        }
-                        
-                        totalDaysElement.textContent = totalDays.toString();
-                        console.log(`📊 Total de dias (fallback): ${totalDays}`);
-                    }
-                    
-                    if (currentStreakElement) {
-                        // Simplified streak calculation
-                        currentStreakElement.textContent = '0';
-                    }
+                    // Set fallback values if API fails - mostrar valores padrão
+                    document.getElementById('totalStudyDaysText').textContent = '0';
+                    document.getElementById('currentStreakText').textContent = '0';
+                    document.getElementById('totalHoursText').textContent = '0h';
+                    document.getElementById('avgHoursText').textContent = '0h';
                 }
             }
 

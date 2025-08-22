@@ -1879,7 +1879,7 @@ app.post('/plans/:planId/generate',
 
             const allTopicsQuery = `
                 SELECT 
-                    t.id, t.description, t.status, t.completion_date,
+                    t.id, t.topic_name, t.topic_name as description, t.status, t.completion_date,
                     s.subject_name, s.priority_weight as subject_priority,
                     COALESCE(t.priority_weight, 3) as topic_priority
                 FROM subjects s
@@ -2058,8 +2058,8 @@ app.post('/plans/:planId/generate',
             // Se há exclusões, limpar registros antigos e salvar os novos
             if (excludedTopics.length > 0) {
                 // Limpar registros antigos de ambas as tabelas
-                await dbRun('DELETE FROM reta_final_exclusions WHERE study_plan_id = ?', [planId]);
-                await dbRun('DELETE FROM reta_final_excluded_topics WHERE study_plan_id = ?', [planId]);
+                await dbRun('DELETE FROM reta_final_exclusions WHERE plan_id = ?', [planId]);
+                await dbRun('DELETE FROM reta_final_excluded_topics WHERE plan_id = ?', [planId]);
                 
                 for (const excludedTopic of excludedTopics) {
                     const priorityCombined = (excludedTopic.subject_priority * 10) + excludedTopic.topic_priority;
@@ -2076,8 +2076,8 @@ app.post('/plans/:planId/generate',
                             console.log(`[CRONOGRAMA] ✅ Tópico ${excludedTopic.id} encontrado, inserindo em reta_final_exclusions`);
                             // Salvar na tabela legada (para compatibilidade) apenas se o tópico existir
                             await dbRun(
-                                'INSERT INTO reta_final_exclusions (study_plan_id, topic_id, subject_name, topic_description, priority_combined) VALUES (?, ?, ?, ?, ?)',
-                                [planId, excludedTopic.id, excludedTopic.subject_name, excludedTopic.description, priorityCombined]
+                                'INSERT INTO reta_final_exclusions (plan_id, topic_id, reason) VALUES (?, ?, ?)',
+                                [planId, excludedTopic.id, `${excludedTopic.subject_name} - ${excludedTopic.description} (Prioridade: ${priorityCombined.toFixed(2)})`]
                             );
                             console.log(`[CRONOGRAMA] ✅ Inserção em reta_final_exclusions concluída`);
                         } else {
@@ -2087,8 +2087,8 @@ app.post('/plans/:planId/generate',
                         console.log(`[CRONOGRAMA] ✅ Inserindo em reta_final_excluded_topics`);
                         // Salvar na nova tabela com mais detalhes (não depende de FOREIGN KEY para topic_id)
                         await dbRun(
-                            'INSERT INTO reta_final_excluded_topics (study_plan_id, subject_name, topic_name, importance, priority_weight, reason) VALUES (?, ?, ?, ?, ?, ?)',
-                            [planId, excludedTopic.subject_name, excludedTopic.description, excludedTopic.topic_priority, priorityCombined, reason]
+                            'INSERT INTO reta_final_excluded_topics (plan_id, subject_id, topic_id, reason) VALUES (?, ?, ?, ?)',
+                            [planId, excludedTopic.subject_id || null, excludedTopic.id, reason]
                         );
                         console.log(`[CRONOGRAMA] ✅ Inserção em reta_final_excluded_topics concluída`);
                         
@@ -2100,8 +2100,8 @@ app.post('/plans/:planId/generate',
                 }
             } else {
                 // Se não há exclusões, limpar registros antigos de ambas as tabelas
-                await dbRun('DELETE FROM reta_final_exclusions WHERE study_plan_id = ?', [planId]);
-                await dbRun('DELETE FROM reta_final_excluded_topics WHERE study_plan_id = ?', [planId]);
+                await dbRun('DELETE FROM reta_final_exclusions WHERE plan_id = ?', [planId]);
+                await dbRun('DELETE FROM reta_final_excluded_topics WHERE plan_id = ?', [planId]);
             }
 
             // CORREÇÃO CRÍTICA: Algoritmo simplificado e robusto
@@ -2962,7 +2962,7 @@ app.get('/plans/:planId/exclusions',
             
             // Buscar exclusões
             const exclusions = await dbAll(
-                'SELECT * FROM reta_final_exclusions WHERE study_plan_id = ? ORDER BY priority_combined DESC, subject_name, topic_description',
+                'SELECT * FROM reta_final_exclusions WHERE plan_id = ? ORDER BY id',
                 [planId]
             );
             
@@ -3010,11 +3010,20 @@ app.get('/plans/:planId/excluded-topics',
                 return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
             }
             
-            // Buscar tópicos excluídos da nova tabela
-            const excludedTopics = await dbAll(
-                'SELECT * FROM reta_final_excluded_topics WHERE study_plan_id = ? ORDER BY priority_weight DESC, subject_name, topic_name',
-                [planId]
-            );
+            // Buscar tópicos excluídos com informações completas
+            const excludedTopics = await dbAll(`
+                SELECT 
+                    e.*,
+                    t.topic_name,
+                    t.priority_weight,
+                    s.subject_name,
+                    s.priority_weight as subject_priority
+                FROM reta_final_excluded_topics e
+                LEFT JOIN topics t ON t.id = e.topic_id
+                LEFT JOIN subjects s ON s.id = COALESCE(e.subject_id, t.subject_id)
+                WHERE e.plan_id = ?
+                ORDER BY s.priority_weight DESC, t.priority_weight DESC
+            `, [planId]);
             
             // Agrupar por disciplina
             const exclusionsBySubject = excludedTopics.reduce((acc, topic) => {
@@ -3060,6 +3069,145 @@ app.get('/plans/:planId/excluded-topics',
         } catch (error) {
             console.error('Erro ao buscar tópicos excluídos:', error);
             res.status(500).json({ error: 'Erro interno do servidor.' });
+        }
+    }
+);
+
+// Endpoint para estatísticas do plano (Total de dias, Sequência, etc)
+app.get('/plans/:planId/statistics',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    async (req, res) => {
+        try {
+            const planId = req.params.planId;
+            
+            // Verificar se o plano pertence ao usuário
+            const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
+            if (!plan) {
+                return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+            }
+            
+            // 1. Total de dias com estudo
+            const totalDaysResult = await dbGet(`
+                SELECT COUNT(DISTINCT DATE(session_date)) as total_days
+                FROM study_sessions
+                WHERE study_plan_id = ?
+                AND (time_studied_seconds > 0 OR status = 'completed')
+            `, [planId]);
+            
+            const totalStudyDays = totalDaysResult?.total_days || 0;
+            
+            // 2. Calcular sequência atual (streak) - dias consecutivos de estudo
+            const streakQuery = `
+                WITH RECURSIVE study_dates AS (
+                    -- Obter todas as datas com estudo
+                    SELECT DISTINCT DATE(session_date) as study_date
+                    FROM study_sessions
+                    WHERE study_plan_id = ?
+                    AND (time_studied_seconds > 0 OR status = 'completed')
+                ),
+                recent_dates AS (
+                    -- Obter datas recentes ordenadas
+                    SELECT study_date
+                    FROM study_dates
+                    WHERE study_date <= CURRENT_DATE
+                    ORDER BY study_date DESC
+                ),
+                streak_calc AS (
+                    -- Calcular sequência
+                    SELECT 
+                        study_date,
+                        study_date - (ROW_NUMBER() OVER (ORDER BY study_date DESC) - 1) * INTERVAL '1 day' as group_date
+                    FROM recent_dates
+                )
+                SELECT COUNT(*) as current_streak
+                FROM streak_calc
+                WHERE group_date = (
+                    SELECT MAX(group_date) 
+                    FROM streak_calc 
+                    WHERE study_date >= CURRENT_DATE - INTERVAL '1 day'
+                )
+            `;
+            
+            let currentStreak = 0;
+            try {
+                const streakResult = await dbGet(streakQuery, [planId]);
+                currentStreak = streakResult?.current_streak || 0;
+            } catch (streakError) {
+                // Fallback: cálculo simplificado se a query recursiva falhar
+                console.log('Usando cálculo simplificado de streak');
+                const simplifiedStreak = await dbGet(`
+                    SELECT COUNT(DISTINCT DATE(session_date)) as streak
+                    FROM study_sessions
+                    WHERE study_plan_id = ?
+                    AND (time_studied_seconds > 0 OR status = 'completed')
+                    AND session_date >= CURRENT_DATE - INTERVAL '7 days'
+                `, [planId]);
+                currentStreak = Math.min(simplifiedStreak?.streak || 0, 7);
+            }
+            
+            // 3. Total de horas estudadas
+            const totalHoursResult = await dbGet(`
+                SELECT 
+                    COALESCE(SUM(time_studied_seconds) / 3600.0, 0) as total_hours,
+                    COUNT(CASE WHEN time_studied_seconds > 0 OR status = 'completed' THEN 1 END) as completed_sessions,
+                    COUNT(*) as total_sessions
+                FROM study_sessions
+                WHERE study_plan_id = ?
+            `, [planId]);
+            
+            // 4. Média de estudo por dia
+            const avgStudyResult = await dbGet(`
+                SELECT 
+                    AVG(daily_seconds) / 3600.0 as avg_hours_per_day
+                FROM (
+                    SELECT 
+                        DATE(session_date) as study_date,
+                        SUM(time_studied_seconds) as daily_seconds
+                    FROM study_sessions
+                    WHERE study_plan_id = ?
+                    AND time_studied_seconds > 0
+                    GROUP BY DATE(session_date)
+                ) as daily_stats
+            `, [planId]);
+            
+            // 5. Melhor dia da semana para estudo
+            const bestDayResult = await dbGet(`
+                SELECT 
+                    EXTRACT(DOW FROM session_date) as day_of_week,
+                    COUNT(*) as sessions_count
+                FROM study_sessions
+                WHERE study_plan_id = ?
+                AND (time_studied_seconds > 0 OR status = 'completed')
+                GROUP BY EXTRACT(DOW FROM session_date)
+                ORDER BY sessions_count DESC
+                LIMIT 1
+            `, [planId]);
+            
+            const daysOfWeek = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+            const bestDay = bestDayResult ? daysOfWeek[bestDayResult.day_of_week] : null;
+            
+            // 6. Progresso geral
+            const progressPercent = totalHoursResult.total_sessions > 0 
+                ? Math.round((totalHoursResult.completed_sessions / totalHoursResult.total_sessions) * 100)
+                : 0;
+            
+            res.json({
+                totalStudyDays,
+                currentStreak,
+                totalHours: parseFloat(totalHoursResult.total_hours).toFixed(1),
+                completedSessions: totalHoursResult.completed_sessions,
+                totalSessions: totalHoursResult.total_sessions,
+                progressPercent,
+                avgHoursPerDay: parseFloat(avgStudyResult?.avg_hours_per_day || 0).toFixed(1),
+                bestStudyDay: bestDay,
+                lastUpdated: new Date().toISOString()
+            });
+            
+        } catch (error) {
+            console.error('Erro ao buscar estatísticas:', error);
+            res.status(500).json({ error: 'Erro ao calcular estatísticas.' });
         }
     }
 );

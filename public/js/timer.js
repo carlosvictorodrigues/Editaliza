@@ -5,10 +5,6 @@
 
 const TimerSystem = {
     timers: {}, // { sessionId: { startTime, elapsed, isRunning, pomodoros } }
-    _cachedPlanDuration: null, // Cache para duração do plano
-    // CRITICAL FIX: Add notification tracking to prevent infinite loops
-    lastPomodoroNotifications: {},
-    pomodoroNotificationCooldown: 30000, // 30 seconds
     
     // Novos métodos para persistência
     getActiveTimer(sessionId) {
@@ -35,68 +31,18 @@ const TimerSystem = {
     },
     
     // O `createTimerUI` foi movido para checklist.js para um controle centralizado do modal
-    async createTimerUI(sessionId) {
-        // CORREÇÃO: Buscar duração real configurada pelo usuário do plano ativo
-        let sessionDuration = 50; // Duração padrão como fallback
-        
-        try {
-            const activePlanId = localStorage.getItem(app?.config?.planKey);
-            if (activePlanId) {
-                const plan = await app.apiFetch(`/plans/${activePlanId}`);
-                if (plan && plan.session_duration_minutes) {
-                    sessionDuration = plan.session_duration_minutes;
-                    // CORREÇÃO: Armazenar duração em cache para uso posterior
-                    this._cachedPlanDuration = sessionDuration;
-                    console.log(`⏰ Duração do cronômetro configurada: ${sessionDuration} minutos`);
-                } else {
-                    console.log(`⚠️ Usando duração padrão: ${sessionDuration} minutos`);
-                }
-            }
-        } catch (error) {
-            console.warn('⚠️ Erro ao buscar configuração de duração, usando padrão:', error);
-            // Garantir que sessionDuration tenha um valor válido
-            sessionDuration = sessionDuration || 50;
-        }
-        
-        console.log(`🎯 Duração final configurada para sessão ${sessionId}: ${sessionDuration} minutos`);
-        
-        // Verificar se já existe tempo decorrido para esta sessão e se está rodando
-        const hasElapsedTime = this.timers[sessionId] && this.timers[sessionId].elapsed > 100;
-        const isRunning = this.timers[sessionId] && this.timers[sessionId].isRunning;
-        
-        // Determinar texto e ícone do botão baseado no estado
-        let buttonText, buttonIcon, buttonClass;
-        
-        if (isRunning) {
-            // Timer está rodando - mostrar "Pausar"
-            buttonText = 'Pausar';
-            buttonIcon = '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>';
-            buttonClass = 'bg-orange-500 hover:bg-orange-600';
-        } else if (hasElapsedTime) {
-            // Timer pausado mas tem tempo - mostrar "Continuar"
-            buttonText = 'Continuar';
-            buttonIcon = '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>';
-            buttonClass = 'bg-editaliza-blue hover:bg-blue-600';
-        } else {
-            // Timer novo - mostrar "Iniciar"
-            buttonText = 'Iniciar';
-            buttonIcon = '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>';
-            buttonClass = 'bg-editaliza-blue hover:bg-blue-600';
-        }
-        
-        // Obter o tempo já decorrido formatado
-        const currentTime = hasElapsedTime ? this.formatTime(this.timers[sessionId].elapsed) : '00:00:00';
-        
+    createTimerUI(sessionId) {
+        const sessionDuration = 50; // Duração padrão, pode ser aprimorado para buscar do plano
         // Este HTML é gerado dentro do modal pela `checklist.js` agora.
         return `
             <div class="timer-container mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4">
-                        <div class="timer-display text-3xl font-mono font-bold text-editaliza-blue" data-session="${sessionId}">${currentTime}</div>
+                        <div class="timer-display text-3xl font-mono font-bold text-editaliza-blue" data-session="${sessionId}">00:00:00</div>
                     </div>
                     <div class="timer-controls flex items-center space-x-2">
-                        <button onclick="TimerSystem.toggle(${sessionId})" class="btn-timer-toggle px-4 py-2 ${buttonClass} text-white rounded-lg transition-colors shadow-md flex items-center space-x-2" data-session="${sessionId}">
-                           ${buttonIcon}<span>${buttonText}</span>
+                        <button onclick="TimerSystem.toggle(${sessionId})" class="btn-timer-toggle px-4 py-2 bg-editaliza-blue text-white rounded-lg hover:bg-blue-600 transition-colors shadow-md flex items-center space-x-2" data-session="${sessionId}">
+                           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg><span>Iniciar</span>
                         </button>
                     </div>
                 </div>
@@ -156,39 +102,16 @@ const TimerSystem = {
         this.timers[sessionId].elapsed = Date.now() - this.timers[sessionId].startTime;
         this.updateDisplay(sessionId);
         
-        // CORREÇÃO: Disparar evento timerUpdate para sistema de metas
-        try {
-            const timerUpdateEvent = new CustomEvent('timerUpdate', {
-                detail: {
-                    sessionId: sessionId,
-                    elapsed: this.timers[sessionId].elapsed,
-                    timestamp: Date.now()
-                }
-            });
-            document.dispatchEvent(timerUpdateEvent);
-        } catch (error) {
-            // Falha silenciosa para não quebrar o timer
-        }
-        
-        // CORREÇÃO: Melhorar detecção de pomodoros completos com debounce
+        // CORREÇÃO 3: Melhorar detecção de pomodoros completos
         const completedPomodoros = Math.floor((this.timers[sessionId].elapsed / 60000) / 25);
         const lastNotified = this.timers[sessionId].lastPomodoroNotified || 0;
         
         if (completedPomodoros > lastNotified && completedPomodoros > 0) {
-            // CRITICAL FIX: Add cooldown check to prevent infinite notifications
-            const now = Date.now();
-            const lastNotificationTime = this.lastPomodoroNotifications[sessionId] || 0;
-            
-            if (now - lastNotificationTime >= this.pomodoroNotificationCooldown) {
-                console.log(`🍅 Pomodoro ${completedPomodoros} completado para sessão ${sessionId}`);
-                this.timers[sessionId].pomodoros = completedPomodoros;
-                this.timers[sessionId].lastPomodoroNotified = completedPomodoros;
-                this.lastPomodoroNotifications[sessionId] = now;
-                this.notifyPomodoroComplete();
-                this.saveTimersToStorage(); // Salvar progresso
-            } else {
-                console.log(`🛑 Pomodoro notification blocked by cooldown for session ${sessionId}`);
-            }
+            console.log(`🍅 Pomodoro ${completedPomodoros} completado para sessão ${sessionId}`);
+            this.timers[sessionId].pomodoros = completedPomodoros;
+            this.timers[sessionId].lastPomodoroNotified = completedPomodoros;
+            this.notifyPomodoroComplete();
+            this.saveTimersToStorage(); // Salvar progresso
         }
     },
 
@@ -214,21 +137,7 @@ const TimerSystem = {
         
         if (progressBar && statusText) {
             const minutes = Math.floor(timerData.elapsed / 60000);
-            // CORREÇÃO: Buscar duração real do plano se não estiver no dataset
-            let sessionDuration = parseInt(statusText.dataset.duration) || 50;
-            
-            // Se ainda está usando valor padrão, tenta buscar do plano
-            if (sessionDuration === 50) {
-                try {
-                    const activePlanId = localStorage.getItem(app?.config?.planKey);
-                    if (activePlanId && this._cachedPlanDuration) {
-                        sessionDuration = this._cachedPlanDuration;
-                    }
-                } catch (error) {
-                    console.warn('⚠️ Erro ao buscar duração em cache');
-                }
-            }
-            
+            const sessionDuration = parseInt(statusText.dataset.duration) || 50;
             const progress = Math.min((minutes / sessionDuration) * 100, 100);
             progressBar.style.width = `${progress}%`;
             statusText.textContent = `${minutes} / ${sessionDuration} min`;
@@ -331,18 +240,11 @@ const TimerSystem = {
     },
     
     notifyPomodoroComplete() {
-        // CORREÇÃO: Notificação de Pomodoro (NÃO é sessão concluída)
-        console.log('🍅 Executando notificação de Pomodoro completo (PAUSA TIME!)...');
+        // CORREÇÃO 3: Notificação mais robusta
+        console.log('🍅 Executando notificação de Pomodoro completo...');
         
-        // IMPORTANT: Check if we can safely show this notification
-        const now = Date.now();
-        
-        // IMPORTANTE: Pomodoro completo = pausa, NÃO = sessão concluída
-        
-        // Notificação visual para PAUSA (only if app is available)
-        if (window.app && typeof window.app.showToast === 'function') {
-            app.showToast('🍅 Pomodoro completo! Parabéns! Hora de uma pausa de 5 minutos.', 'success');
-        }
+        // Notificação visual
+        app.showToast('🍅 Pomodoro completo! Parabéns! Hora de uma pausa de 5 minutos.', 'success');
         
         // Vibração (se suportada)
         if ('vibrate' in navigator) {
@@ -358,34 +260,15 @@ const TimerSystem = {
         
         // Notificação do sistema (se permitida)
         this.showSystemNotification();
-        
-        // CORREÇÃO: Disparar evento de Pomodoro (NÃO sessionCompleted) - ONCE ONLY
-        try {
-            // CRITICAL FIX: Delay event dispatch to prevent immediate re-triggering
-            setTimeout(() => {
-                const pomodoroEvent = new CustomEvent('pomodoroComplete', {
-                    detail: {
-                        duration: 25,
-                        timestamp: Date.now(),
-                        type: 'break_time', // Indica que é hora da pausa
-                        source: 'timer_system' // Mark the source
-                    }
-                });
-                document.dispatchEvent(pomodoroEvent);
-                console.log('🍅 Evento pomodoroComplete disparado (pausa time!) - delayed to prevent loops');
-            }, 1000); // 1 second delay
-        } catch (error) {
-            console.warn('⚠️ Erro ao disparar evento de Pomodoro:', error);
-        }
     },
     
     showSystemNotification() {
         if ('Notification' in window && Notification.permission === 'granted') {
             try {
-                new Notification('🍅 Hora da Pausa!', {
-                    body: 'Pomodoro completo! 25 minutos de foco conquistados. Faça uma pausa de 5 minutos para recarregar.',
+                new Notification('🍅 Pomodoro Completo!', {
+                    body: 'Parabéns! Você completou 25 minutos de estudo focado. Hora da pausa!',
                     icon: '/favicon.ico',
-                    tag: 'pomodoro-break-time'
+                    tag: 'pomodoro-complete'
                 });
             } catch (e) {
                 console.warn('⚠️ Notificação do sistema falhou:', e.message);
@@ -671,42 +554,23 @@ const TimerSystem = {
         }
     },
 
-    // CORREÇÃO: Método para limpar cache de duração quando plano for alterado
-    clearPlanDurationCache() {
-        this._cachedPlanDuration = null;
-        console.log('🗑️ Cache de duração do plano limpo');
-    },
-
     async saveTimeToDatabase(sessionId, seconds) {
         if(seconds < 10) return; // Não salvar tempos muito curtos
-        
         try {
-            // CORREÇÃO: Tentar nova rota primeiro, depois fallback para legacy
+            // CORREÇÃO: Usar nova rota modular e formato correto
             const now = new Date();
             const startTime = new Date(now.getTime() - seconds * 1000);
             
-            try {
-                // Tentar nova rota modular primeiro
-                await app.apiFetch(`/schedules/sessions/${sessionId}/time`, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        start_time: startTime.toISOString(),
-                        end_time: now.toISOString()
-                    })
-                });
-                console.log(`💾 Tempo salvo no banco (nova rota): ${seconds}s para sessão ${sessionId}`);
-            } catch (newRouteError) {
-                console.warn('⚠️ Nova rota falhou, tentando rota legacy:', newRouteError.message);
-                
-                // Fallback para rota legacy
-                await app.apiFetch(`/sessions/${sessionId}/time`, {
-                    method: 'POST',
-                    body: JSON.stringify({ seconds: seconds })
-                });
-                console.log(`💾 Tempo salvo no banco (rota legacy): ${seconds}s para sessão ${sessionId}`);
-            }
+            await app.apiFetch(`/schedules/sessions/${sessionId}/time`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    start_time: startTime.toISOString(),
+                    end_time: now.toISOString()
+                })
+            });
+            console.log(`💾 Tempo salvo no banco: ${seconds}s para sessão ${sessionId}`);
         } catch (error) { 
-            console.error('❌ Erro ao salvar tempo (ambas as rotas falharam):', error); 
+            console.error('❌ Erro ao salvar tempo:', error); 
         }
     }
 };

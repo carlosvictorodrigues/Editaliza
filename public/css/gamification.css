@@ -1,26 +1,54 @@
-/* ===============================================
- * GAMIFICATION STYLES WITH DARK MODE SUPPORT
- * =============================================== */
+/* Estilos específicos para gamificação integrada da plataforma Editaliza */
 
 /* Gamificação integrada - estilos consistentes com metric-card */
 #gamification-dashboard-content .metric-card {
     transition: all 0.3s ease;
     cursor: default;
+    background: var(--surface-primary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
 }
 
 #gamification-dashboard-content .metric-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--card-shadow-hover);
+    background: var(--surface-elevated);
+}
+
+/* Dark mode specific adjustments for gamification metrics */
+[data-theme="dark"] #gamification-dashboard-content .metric-card {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+[data-theme="dark"] #gamification-dashboard-content .metric-card:hover {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 
+                0 8px 20px rgba(120, 119, 198, 0.1);
 }
 
 /* Animações para conquistas */
 .achievement-card {
     transition: all 0.3s ease;
+    background: var(--surface-primary);
+    border: 1px solid var(--border-primary);
+    color: var(--text-primary);
 }
 
 .achievement-card:hover {
     transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--card-shadow-hover);
+    background: var(--surface-elevated);
+}
+
+/* Dark mode achievement cards */
+[data-theme="dark"] .achievement-card {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+[data-theme="dark"] .achievement-card:hover {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6), 
+                0 8px 20px rgba(120, 119, 198, 0.1);
 }
 
 /* Animação para o ícone de fogo da sequência */
@@ -33,45 +61,48 @@
     50% { transform: scale(1.1); }
 }
 
-/* Estados especiais para métricas - Light Theme */
+/* Estados especiais para métricas */
 .gamification-metric-excellent {
     background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
     border-color: #22c55e;
     box-shadow: 0 4px 16px rgba(34, 197, 94, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .gamification-metric-good {
     background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
     border-color: #f59e0b;
     box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .gamification-metric-needs-improvement {
     background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
     border-color: #ef4444;
     box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Dark Mode - Enhanced metric states */
+/* Dark mode states */
 [data-theme="dark"] .gamification-metric-excellent {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%) !important;
-    border-color: #22c55e;
-    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
-    color: #86efac;
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(34, 197, 94, 0.25) 100%) !important;
+    border-color: #10b981;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+    color: #e2e8f0 !important;
 }
 
 [data-theme="dark"] .gamification-metric-good {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.1) 100%) !important;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(245, 158, 11, 0.25) 100%) !important;
     border-color: #f59e0b;
     box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
-    color: #fcd34d;
+    color: #e2e8f0 !important;
 }
 
 [data-theme="dark"] .gamification-metric-needs-improvement {
-    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%) !important;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.25) 100%) !important;
     border-color: #ef4444;
     box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
-    color: #fca5a5;
+    color: #e2e8f0 !important;
 }
 
 /* Efeitos especiais para conquistas premium */
@@ -80,14 +111,15 @@
     border: 3px solid #f59e0b;
     box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
     position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Dark mode premium achievements */
 [data-theme="dark"] .achievement-premium {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(245, 158, 11, 0.2) 50%, rgba(217, 119, 6, 0.3) 100%) !important;
-    border: 3px solid #f59e0b;
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
-    color: var(--text-primary);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(139, 92, 246, 0.6) 50%, rgba(124, 58, 237, 0.8) 100%) !important;
+    border: 3px solid #8b5cf6;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+    color: #e2e8f0 !important;
 }
 
 .achievement-premium::before {
@@ -113,9 +145,8 @@
 
 /* Dark mode loading states */
 [data-theme="dark"] .gamification-loading {
-    background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--border-primary) 50%, var(--bg-tertiary) 75%);
+    background: linear-gradient(90deg, #252547 25%, #3a3a6b 50%, #252547 75%);
     background-size: 200% 100%;
-    animation: loading-shimmer 1.5s infinite;
 }
 
 @keyframes loading-shimmer {
@@ -136,148 +167,4 @@
     .achievement-card .text-xs {
         font-size: 0.65rem;
     }
-}
-
-/* ===============================================
- * DARK MODE GAMIFICATION ENHANCEMENTS
- * =============================================== */
-
-/* Dark mode card backgrounds */
-[data-theme="dark"] #gamification-dashboard-content .metric-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    color: var(--text-primary);
-}
-
-[data-theme="dark"] #gamification-dashboard-content .metric-card:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-    border-color: var(--border-secondary);
-}
-
-[data-theme="dark"] .achievement-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    color: var(--text-primary);
-}
-
-[data-theme="dark"] .achievement-card:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    border-color: var(--border-secondary);
-}
-
-/* Enhanced streak fire animation for dark mode */
-[data-theme="dark"] .streak-fire {
-    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.4));
-}
-
-/* Dark mode progress indicators */
-[data-theme="dark"] .progress-ring {
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-/* XP and level indicators for dark mode */
-[data-theme="dark"] .xp-bar {
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-primary);
-}
-
-[data-theme="dark"] .xp-fill {
-    background: linear-gradient(90deg, var(--editaliza-blue-dark-mode), var(--editaliza-green-dark-mode));
-    box-shadow: 0 0 10px rgba(79, 148, 255, 0.3);
-}
-
-/* Badge styles for dark mode */
-[data-theme="dark"] .achievement-badge {
-    background: var(--bg-tertiary);
-    border: 2px solid var(--border-secondary);
-    color: var(--text-primary);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-[data-theme="dark"] .achievement-badge.unlocked {
-    background: linear-gradient(135deg, rgba(79, 148, 255, 0.2), rgba(34, 197, 94, 0.2));
-    border-color: var(--editaliza-blue-dark-mode);
-    box-shadow: 0 0 15px rgba(79, 148, 255, 0.3);
-}
-
-/* Leaderboard styles for dark mode */
-[data-theme="dark"] .leaderboard-item {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    color: var(--text-primary);
-}
-
-[data-theme="dark"] .leaderboard-item:hover {
-    background: var(--bg-tertiary);
-    border-color: var(--border-secondary);
-}
-
-[data-theme="dark"] .leaderboard-rank {
-    background: var(--editaliza-blue-dark-mode);
-    color: var(--bg-primary);
-}
-
-/* Challenge cards for dark mode */
-[data-theme="dark"] .challenge-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-primary);
-    color: var(--text-primary);
-}
-
-[data-theme="dark"] .challenge-card.active {
-    border-color: var(--editaliza-blue-dark-mode);
-    box-shadow: 0 0 15px rgba(79, 148, 255, 0.2);
-}
-
-[data-theme="dark"] .challenge-progress {
-    background: var(--bg-tertiary);
-}
-
-[data-theme="dark"] .challenge-progress-fill {
-    background: linear-gradient(90deg, var(--editaliza-blue-dark-mode), var(--editaliza-green-dark-mode));
-}
-
-/* ===============================================
- * GAMIFICATION ACCESSIBILITY FOR DARK MODE
- * =============================================== */
-
-/* High contrast mode support for gamification */
-@media (prefers-contrast: high) {
-    [data-theme="dark"] .achievement-card,
-    [data-theme="dark"] .metric-card {
-        border: 2px solid var(--text-primary);
-    }
-    
-    [data-theme="dark"] .achievement-premium {
-        border: 3px solid var(--editaliza-green-dark-mode);
-    }
-}
-
-/* Reduced motion for gamification animations */
-@media (prefers-reduced-motion: reduce) {
-    .streak-fire,
-    .achievement-card,
-    .gamification-loading {
-        animation: none !important;
-        transition: none !important;
-    }
-}
-
-/* Focus indicators for dark mode gamification */
-[data-theme="dark"] .achievement-card:focus,
-[data-theme="dark"] .challenge-card:focus {
-    outline: 2px solid var(--editaliza-blue-dark-mode);
-    outline-offset: 2px;
-}
-
-/* Tooltip styles for dark mode */
-[data-theme="dark"] .achievement-tooltip {
-    background: var(--bg-primary);
-    border: 1px solid var(--border-secondary);
-    color: var(--text-primary);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-}
-
-[data-theme="dark"] .achievement-tooltip::before {
-    border-bottom-color: var(--bg-primary);
 }

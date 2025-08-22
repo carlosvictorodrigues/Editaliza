@@ -23,6 +23,17 @@ console.log('[POSTGRES] Pool PostgreSQL inicializado');
 
 // Função para converter placeholders SQLite (?) para PostgreSQL ($1, $2, etc)
 function convertQuery(sql, params) {
+    // Se a query já usa placeholders PostgreSQL ($1, $2, etc), não converter
+    if (sql.includes('$1') || sql.includes('$2')) {
+        // Converter comandos específicos do SQLite para PostgreSQL
+        let pgSql = sql.replace(/BEGIN TRANSACTION/gi, 'BEGIN');
+        pgSql = pgSql.replace(/BEGIN IMMEDIATE TRANSACTION/gi, 'BEGIN');
+        pgSql = pgSql.replace(/BEGIN IMMEDIATE/gi, 'BEGIN');
+        
+        return { sql: pgSql, params };
+    }
+    
+    // Converter placeholders ? para $1, $2, etc.
     let paramIndex = 1;
     let pgSql = sql.replace(/\?/g, () => `$${paramIndex++}`);
     

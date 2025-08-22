@@ -6,25 +6,6 @@
 const StudyChecklist = {
     session: null, // Armazena o objeto completo da sessão
     checklistShownSessions: new Set(), // Track sessions that have already shown checklist
-    
-    // Método para verificar dependências e estado do sistema
-    checkSystemReadiness() {
-        console.log('🔧 Verificando prontidão do sistema...');
-        
-        const checks = {
-            modalElementsExist: !!(document.getElementById('studySessionModal') && document.getElementById('studySessionModalContainer')),
-            timerSystemExists: !!window.TimerSystem,
-            appExists: !!window.app,
-            domReady: document.readyState === 'complete' || document.readyState === 'interactive'
-        };
-        
-        console.log('📋 Verificações do sistema:', checks);
-        
-        const allChecksPass = Object.values(checks).every(check => check);
-        console.log(allChecksPass ? '✅ Sistema pronto' : '❌ Sistema não está pronto');
-        
-        return { checks, allReady: allChecksPass };
-    },
 
     items: [
         { id: 'hydration', icon: '💧', text: 'Água por perto?', tip: 'Mantenha-se hidratado!' },
@@ -79,7 +60,7 @@ const StudyChecklist = {
         this.addModalClickListener(); // CORREÇÃO 1: Fechar modal ao clicar fora
     },
 
-    async startStudySession(shouldStartTimer = true) { // CORREÇÃO 2: Controla se deve iniciar o timer
+    startStudySession(shouldStartTimer = true) { // CORREÇÃO 2: Controla se deve iniciar o timer
         // Mark this session as having shown the checklist
         if (this.session && this.session.id) {
             this.checklistShownSessions.add(this.session.id);
@@ -87,8 +68,7 @@ const StudyChecklist = {
         }
         
         const modalContainer = document.getElementById('studySessionModalContainer');
-        // CORREÇÃO: Aguardar HTML do timer com duração correta
-        modalContainer.innerHTML = await this.getTimerHtml();
+        modalContainer.innerHTML = this.getTimerHtml();
         this.addTimerSessionListeners();
         
         // CORREÇÃO: Verificar se já existe timer ativo antes de iniciar
@@ -106,114 +86,6 @@ const StudyChecklist = {
         // Atualizar display imediatamente
         TimerSystem.updateDisplay(this.session.id);
     },
-    
-    // Método para mostrar apenas o modal do cronômetro - COM DEBUGGING ROBUSTO
-    async showTimerModal() {
-        console.log('🔥 showTimerModal() INICIADO');
-        
-        // Verificar prontidão do sistema primeiro
-        const systemCheck = this.checkSystemReadiness();
-        if (!systemCheck.allReady) {
-            console.error('❌ Sistema não está pronto para abrir modal');
-            console.error('Falhas encontradas:', Object.entries(systemCheck.checks).filter(([key, value]) => !value));
-            
-            // Tentar aguardar e tentar novamente
-            setTimeout(() => {
-                console.log('🔄 Tentando novamente após 500ms...');
-                this.showTimerModal();
-            }, 500);
-            return;
-        }
-        
-        console.log('📊 Estado atual:', {
-            sessionExists: !!this.session,
-            sessionId: this.session?.id,
-            sessionSubject: this.session?.subject_name
-        });
-        
-        if (!this.session) {
-            console.error('❌ Nenhuma sessão definida para mostrar o modal do cronômetro');
-            console.error('💡 Dica: Chame StudyChecklist.session = sessionObject antes de showTimerModal()');
-            return;
-        }
-        
-        console.log('✅ Sessão encontrada:', this.session.subject_name);
-        
-        const modal = document.getElementById('studySessionModal');
-        const modalContainer = document.getElementById('studySessionModalContainer');
-        
-        console.log('🔍 Elementos do DOM:', {
-            modalExists: !!modal,
-            modalContainerExists: !!modalContainer,
-            modalClasses: modal?.className,
-            containerClasses: modalContainer?.className
-        });
-        
-        if (!modal || !modalContainer) {
-            console.error('❌ Elementos do modal não encontrados no DOM');
-            console.error('🔍 Elementos procurados:', {
-                studySessionModal: document.getElementById('studySessionModal'),
-                studySessionModalContainer: document.getElementById('studySessionModalContainer')
-            });
-            console.error('📋 Todos os IDs no DOM:', 
-                Array.from(document.querySelectorAll('[id]')).map(el => el.id)
-            );
-            return;
-        }
-        
-        console.log('🎨 Gerando HTML do timer...');
-        try {
-            const timerHtml = await this.getTimerHtml();
-            console.log('✅ HTML gerado com sucesso');
-            modalContainer.innerHTML = timerHtml;
-            console.log('✅ HTML inserido no container');
-        } catch (error) {
-            console.error('❌ Erro ao gerar HTML do timer:', error);
-            return;
-        }
-        
-        console.log('👁️ Removendo classe hidden...');
-        modal.classList.remove('hidden');
-        console.log('✅ Modal não está mais hidden');
-        
-        setTimeout(() => {
-            console.log('🎭 Aplicando animações...');
-            modal.classList.remove('opacity-0');
-            modalContainer.classList.remove('scale-95');
-            console.log('✅ Animações aplicadas');
-        }, 10);
-        
-        console.log('🎧 Adicionando listeners...');
-        try {
-            this.addTimerSessionListeners();
-            console.log('✅ Listeners adicionados');
-        } catch (error) {
-            console.error('❌ Erro ao adicionar listeners:', error);
-        }
-        
-        // Atualizar display do timer
-        if (this.session.id) {
-            console.log('⏰ Atualizando display do timer...');
-            try {
-                TimerSystem.updateDisplay(this.session.id);
-                // O botão já tem o estado correto definido no createTimerUI
-                console.log('✅ Display do timer atualizado');
-            } catch (error) {
-                console.error('❌ Erro ao atualizar display:', error);
-            }
-        }
-        
-        console.log('🎉 showTimerModal() CONCLUÍDO COM SUCESSO!');
-        
-        // Verificação final
-        setTimeout(() => {
-            const isVisible = !modal.classList.contains('hidden') && !modal.classList.contains('opacity-0');
-            console.log('🔍 Verificação final - Modal visível:', isVisible);
-            if (!isVisible) {
-                console.error('⚠️ ALERTA: Modal pode não estar visível após 100ms');
-            }
-        }, 100);
-    },
 
     close() {
         // CORREÇÃO: NÃO parar o timer automaticamente
@@ -225,22 +97,11 @@ const StudyChecklist = {
         const modal = document.getElementById('studySessionModal');
         const modalContainer = document.getElementById('studySessionModalContainer');
         
-        if (modal) {
-            modal.classList.add('opacity-0');
-        }
-        
-        if (modalContainer) {
-            modalContainer.classList.add('scale-95');
-        }
-        
+        modal.classList.add('opacity-0');
+        modalContainer.classList.add('scale-95');
         setTimeout(() => {
-            if (modal) {
-                modal.classList.add('hidden');
-            }
-            // CORREÇÃO: Não limpar o innerHTML imediatamente para permitir reabertura
-            // O innerHTML será substituído quando o modal for aberto novamente
-            // modalContainer.innerHTML = '';
-            
+            modal.classList.add('hidden');
+            modalContainer.innerHTML = '';
             // NÃO limpar this.session para permitir reconexão
             // this.session = null;
         }, 300);
@@ -277,7 +138,7 @@ const StudyChecklist = {
         `;
     },
 
-    async getTimerHtml() {
+    getTimerHtml() {
         // Sanitize data before rendering
         const safeSubjectName = app.sanitizeHtml(this.session.subject_name);
         const safeTopicDescription = app.sanitizeHtml(this.session.topic_description);
@@ -285,10 +146,6 @@ const StudyChecklist = {
         const safeQuestionsSolved = app.sanitizeHtml(this.session.questions_solved || '');
 
         const style = app.getSubjectStyle(this.session.subject_name);
-        
-        // CORREÇÃO: Aguardar criação do timer UI com duração correta
-        const timerHtml = await TimerSystem.createTimerUI(this.session.id);
-        
         return `
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold text-gray-800 flex items-center"><span class="text-3xl mr-3">${style.icon}</span>${safeSubjectName}</h2>
@@ -296,7 +153,7 @@ const StudyChecklist = {
             </div>
             <p class="mb-6 text-gray-600">${safeTopicDescription}</p>
             
-            ${timerHtml}
+            ${TimerSystem.createTimerUI(this.session.id)}
 
             <div class="mt-6 space-y-4">
                  <div>
@@ -306,6 +163,12 @@ const StudyChecklist = {
                 <div>
                     <label for="modal-notes" class="text-sm font-medium text-gray-700">Anotações</label>
                     <textarea id="modal-notes" class="form-input py-2" rows="4" placeholder="Suas anotações...">${safeNotes}</textarea>
+                </div>
+                <div>
+                    <label for="modal-status" class="flex items-center space-x-3 cursor-pointer">
+                        <input type="checkbox" id="modal-status" class="w-5 h-5 text-editaliza-blue rounded focus:ring-editaliza-blue">
+                        <span class="text-sm font-medium text-gray-700">Marcar como concluído</span>
+                    </label>
                 </div>
             </div>
 
@@ -383,84 +246,90 @@ const StudyChecklist = {
             window.addEventListener('beforeunload', () => clearInterval(saveTimer));
         }
 
-        // Adicionar listeners apenas se os elementos existirem
-        const questionsInput = document.getElementById('modal-questions-solved');
-        const notesInput = document.getElementById('modal-notes');
-        const statusCheckbox = document.getElementById('modal-status');
-        
-        if (questionsInput) {
-            questionsInput.addEventListener('input', (e) => updateSessionData('questions_solved', e.target.value));
-        }
-        
-        if (notesInput) {
-            notesInput.addEventListener('input', (e) => updateSessionData('notes', e.target.value));
-        }
-        
-        if (statusCheckbox) {
-            statusCheckbox.addEventListener('change', async (e) => {
-            const newStatus = e.target.checked ? 'Concluído' : 'Pendente';
-            try {
-                // CORREÇÃO 3: Usar endpoint correto
-                const endpoint = `/schedules/sessions/${this.session.id}`;
-                console.log('Atualizando status da sessão:', { sessionId: this.session.id, status: newStatus });
-                
-                await app.apiFetch(endpoint, {
-                    method: 'PATCH',
-                    body: JSON.stringify({ 'status': newStatus })
-                });
-                console.log('Status atualizado com sucesso');
-            } catch (error) {
-                console.error('Erro ao atualizar status:', error);
-                app.showToast('Erro ao salvar status: ' + error.message, 'error');
-                e.target.checked = !e.target.checked; // Reverter checkbox em caso de erro
-                return;
-            }
+        // CORREÇÃO: Verificar se os elementos existem antes de adicionar event listeners
+        const questionsElement = document.getElementById('modal-questions-solved');
+        const notesElement = document.getElementById('modal-notes');
+        const statusElement = document.getElementById('modal-status');
 
-            // ***** CORREÇÃO APLICADA AQUI *****
-            // Invalida o cache do plano para que a tela de Desempenho busque os novos dados.
-            app.invalidatePlanCache(this.session.study_plan_id);
-            
-            // CORREÇÃO: Disparar evento de atualização de métricas
-            app.triggerMetricsUpdate(this.session.study_plan_id, 'session_status_changed');
-            
-            // CORREÇÃO: Atualizar TODAS as métricas quando sessão é concluída
-            if (newStatus === 'Concluído') {
-                console.log('✅ Sessão concluída - atualizando estatísticas...');
-                app.invalidatePlanCache(this.session.study_plan_id, 'gamification');
+        if (questionsElement) {
+            questionsElement.addEventListener('input', (e) => updateSessionData('questions_solved', e.target.value));
+        } else {
+            console.warn('⚠️ Elemento modal-questions-solved não encontrado');
+        }
+
+        if (notesElement) {
+            notesElement.addEventListener('input', (e) => updateSessionData('notes', e.target.value));
+        } else {
+            console.warn('⚠️ Elemento modal-notes não encontrado');
+        }
+
+        if (statusElement) {
+            statusElement.addEventListener('change', async (e) => {
+                const newStatus = e.target.checked ? 'Concluído' : 'Pendente';
+                try {
+                    // CORREÇÃO 3: Usar endpoint correto
+                    const endpoint = `/schedules/sessions/${this.session.id}`;
+                    console.log('Atualizando status da sessão:', { sessionId: this.session.id, status: newStatus });
+                    
+                    await app.apiFetch(endpoint, {
+                        method: 'PATCH',
+                        body: JSON.stringify({ 'status': newStatus })
+                    });
+                    console.log('Status atualizado com sucesso');
+                } catch (error) {
+                    console.error('Erro ao atualizar status:', error);
+                    app.showToast('Erro ao salvar status: ' + error.message, 'error');
+                    e.target.checked = !e.target.checked; // Reverter checkbox em caso de erro
+                    return;
+                }
+
+                // ***** CORREÇÃO APLICADA AQUI *****
+                // Invalida o cache do plano para que a tela de Desempenho busque os novos dados.
+                app.invalidatePlanCache(this.session.study_plan_id);
                 
-                // CORREÇÃO: Atualizar TODAS as métricas se estivermos na tela plan.html
-                if (window.location.pathname.includes('plan.html')) {
-                    try {
-                        if (typeof window.refreshAllMetrics === 'function') {
-                            console.log('🔄 Atualizando todas as métricas após conclusão da sessão...');
-                            setTimeout(() => {
-                                window.refreshAllMetrics();
-                            }, 1000); // Delay para garantir que backend processou
-                        } else if (typeof window.refreshGamificationData === 'function') {
-                            // Fallback para função antiga
-                            setTimeout(() => {
-                                window.refreshGamificationData();
-                            }, 500);
+                // CORREÇÃO: Disparar evento de atualização de métricas
+                app.triggerMetricsUpdate(this.session.study_plan_id, 'session_status_changed');
+                
+                // CORREÇÃO: Atualizar TODAS as métricas quando sessão é concluída
+                if (newStatus === 'Concluído') {
+                    console.log('✅ Sessão concluída - atualizando estatísticas...');
+                    app.invalidatePlanCache(this.session.study_plan_id, 'gamification');
+                    
+                    // CORREÇÃO: Atualizar TODAS as métricas se estivermos na tela plan.html
+                    if (window.location.pathname.includes('plan.html')) {
+                        try {
+                            if (typeof window.refreshAllMetrics === 'function') {
+                                console.log('🔄 Atualizando todas as métricas após conclusão da sessão...');
+                                setTimeout(() => {
+                                    window.refreshAllMetrics();
+                                }, 1000); // Delay para garantir que backend processou
+                            } else if (typeof window.refreshGamificationData === 'function') {
+                                // Fallback para função antiga
+                                setTimeout(() => {
+                                    window.refreshGamificationData();
+                                }, 500);
+                            }
+                        } catch (error) {
+                            console.error('Erro ao atualizar métricas:', error);
                         }
-                    } catch (error) {
-                        console.error('Erro ao atualizar métricas:', error);
                     }
                 }
-            }
 
-            app.showToast(newStatus === 'Concluído' ? 'Sessão concluída! 🎉 As métricas serão atualizadas...' : 'Status da tarefa atualizado!', 'success');
-            
-            // CORREÇÃO: Não atualizar painéis aqui, deixar para a função global fazer isso
-            // O refresh será feito pela função refreshAllMetrics() chamada acima
-            
-            if (e.target.checked) {
-                this.close();
-                // Não precisa mais recarregar a página inteira, já atualizamos os painéis
-                if (!window.location.pathname.includes('plan.html')) {
-                    location.reload(); 
+                app.showToast(newStatus === 'Concluído' ? 'Sessão concluída! 🎉 As métricas serão atualizadas...' : 'Status da tarefa atualizado!', 'success');
+                
+                // CORREÇÃO: Não atualizar painéis aqui, deixar para a função global fazer isso
+                // O refresh será feito pela função refreshAllMetrics() chamada acima
+                
+                if (e.target.checked) {
+                    this.close();
+                    // Não precisa mais recarregar a página inteira, já atualizamos os painéis
+                    if (!window.location.pathname.includes('plan.html')) {
+                        location.reload(); 
+                    }
                 }
-            }
-        });
+            });
+        } else {
+            console.warn('⚠️ Elemento modal-status não encontrado');
         }
     },
 
@@ -575,36 +444,6 @@ const StudyChecklist = {
             
             console.log(`✅ Sessão ${sessionId} finalizada:`, updateData);
             
-            // CORREÇÃO: Disparar evento para sistema de notificações inteligentes
-            try {
-                const durationMinutes = studyTimeSeconds > 0 ? Math.round(studyTimeSeconds / 60) : 25;
-                
-                const sessionCompletedEvent = new CustomEvent('sessionCompleted', {
-                    detail: {
-                        sessionType: this.session.topic_type || 'Estudo',
-                        duration: durationMinutes, // Em minutos
-                        subject: this.session.subject_name || 'Matéria',
-                        difficulty: this.session.difficulty_level || 3,
-                        timestamp: Date.now(),
-                        sessionId: sessionId,
-                        studyTimeSeconds: studyTimeSeconds,
-                        questions_solved: questionsSolved,
-                        notes: notes
-                    }
-                });
-                
-                document.dispatchEvent(sessionCompletedEvent);
-                console.log(`🔔 Evento sessionCompleted disparado: ${durationMinutes} minutos estudados`);
-                
-                // NOVO: Notificar sistema de metas sobre tempo estudado
-                if (window.StudyGoalsNotifications && durationMinutes > 0) {
-                    window.StudyGoalsNotifications.addStudyTime(durationMinutes);
-                }
-                
-            } catch (error) {
-                console.warn('⚠️ Erro ao disparar evento de notificação:', error);
-            }
-            
             // Update dashboard stats if available
             if (window.updateDashboardStats) {
                 window.updateDashboardStats();
@@ -635,6 +474,3 @@ const StudyChecklist = {
         return this.markAsCompleted();
     }
 };
-
-// Expor StudyChecklist globalmente
-window.StudyChecklist = StudyChecklist;
