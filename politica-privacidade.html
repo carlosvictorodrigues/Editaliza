@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Privacidade - Editaliza</title>
+    <meta name="description" content="Política de Privacidade do Editaliza - Como coletamos, usamos e protegemos seus dados pessoais em conformidade com a LGPD">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/footer.css" rel="stylesheet">
+    <!-- SCRIPTS CENTRALIZADOS -->
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        /* Definir variáveis CSS das cores personalizadas */
+        :root {
+            --editaliza-blue: #0528f2;
+            --editaliza-black: #1f2937;
+            --editaliza-gray: #6b7280;
+            --editaliza-green: #10b981;
+        }
+        
+        .text-editaliza-blue { color: var(--editaliza-blue); }
+        .text-editaliza-black { color: var(--editaliza-black); }
+        .text-editaliza-gray { color: var(--editaliza-gray); }
+        .bg-editaliza-blue { background-color: var(--editaliza-blue); }
+        .bg-editaliza-black { background-color: var(--editaliza-black); }
+        .bg-editaliza-green { background-color: var(--editaliza-green); }
+        .hover\:bg-blue-600:hover { background-color: #2563eb; }
+        .hover\:bg-blue-700:hover { background-color: #1d4ed8; }
+        
+        /* Estilos específicos para a página */
+        .privacy-section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .privacy-section h2 {
+            color: var(--editaliza-blue);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .privacy-section h3 {
+            color: var(--editaliza-black);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .privacy-section p, .privacy-section li {
+            color: #4b5563;
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+        
+        .privacy-section ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .privacy-section li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            border: 1px solid #93c5fd;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .contact-box {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 1px solid #86efac;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .last-updated {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 1px solid #fbbf24;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        
+        .privacy-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .privacy-table th {
+            background: var(--editaliza-blue);
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .privacy-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .privacy-table tr:nth-child(even) {
+            background: #f9fafb;
+        }
+        
+        .legal-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-style: italic;
+        }
+        
+        /* Navegação interna */
+        .nav-internal {
+            position: sticky;
+            top: 100px;
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+        
+        .nav-internal a {
+            display: block;
+            padding: 0.5rem 0;
+            color: var(--editaliza-gray);
+            text-decoration: none;
+            transition: color 0.2s ease;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .nav-internal a:hover {
+            color: var(--editaliza-blue);
+        }
+        
+        .nav-internal a:last-child {
+            border-bottom: none;
+        }
+        
+        /* Classes de utilidade */
+        .btn-primary {
+            background: linear-gradient(135deg, #0528f2, #6366f1);
+            color: white;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(5, 40, 242, 0.3);
+        }
+        
+        .motivation-text {
+            background: linear-gradient(45deg, #0528f2, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .privacy-section {
+                padding: 1.5rem;
+            }
+            
+            .nav-internal {
+                position: static;
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800">
+    <!-- NAVEGAÇÃO PRINCIPAL -->
+    <div id="main-nav-container"></div>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-7xl">
+        <!-- Cabeçalho da Página -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold motivation-text mb-4">
+                Política de Privacidade
+            </h1>
+            <p class="text-xl text-editaliza-gray max-w-3xl mx-auto">
+                Transparência total sobre como coletamos, usamos e protegemos seus dados pessoais no Editaliza
+            </p>
+        </div>
+
+        <!-- Aviso de Última Atualização -->
+        <div class="last-updated">
+            <p class="font-semibold text-editaliza-black">
+                <svg class="inline w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path>
+                </svg>
+                Última atualização: 04 de agosto de 2025
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Navegação Interna (Sidebar) -->
+            <div class="lg:col-span-1">
+                <nav class="nav-internal">
+                    <h3 class="font-bold text-editaliza-black mb-4">Índice</h3>
+                    <a href="#introducao">1. Introdução</a>
+                    <a href="#dados-coletados">2. Dados Coletados</a>
+                    <a href="#como-usamos">3. Como Usamos</a>
+                    <a href="#base-legal">4. Base Legal</a>
+                    <a href="#compartilhamento">5. Compartilhamento</a>
+                    <a href="#seguranca">6. Segurança</a>
+                    <a href="#direitos">7. Seus Direitos</a>
+                    <a href="#retencao">8. Retenção de Dados</a>
+                    <a href="#cookies">9. Cookies</a>
+                    <a href="#menores">10. Menores de Idade</a>
+                    <a href="#alteracoes">11. Alterações</a>
+                    <a href="#contato">12. Contato</a>
+                </nav>
+            </div>
+
+            <!-- Conteúdo Principal -->
+            <div class="lg:col-span-3">
+                <!-- 1. Introdução -->
+                <section id="introducao" class="privacy-section">
+                    <h2>1. Introdução</h2>
+                    <p>
+                        Bem-vindo ao <strong>Editaliza</strong>, sua plataforma inteligente de estudos para concursos públicos. 
+                        Esta Política de Privacidade explica como coletamos, usamos, armazenamos e protegemos suas informações 
+                        pessoais quando você utiliza nosso aplicativo e serviços.
+                    </p>
+                    <p>
+                        Estamos comprometidos com a transparência e a proteção da sua privacidade, seguindo rigorosamente as 
+                        diretrizes da <strong>Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)</strong> e demais 
+                        regulamentações aplicáveis.
+                    </p>
+                    
+                    <div class="highlight-box">
+                        <h3 class="text-editaliza-blue font-semibold mb-2">Informações da Empresa</h3>
+                        <p><strong>Razão Social:</strong> Editaliza Tecnologia Educacional Ltda.</p>
+                        <p><strong>CNPJ:</strong> [A ser preenchido]</p>
+                        <p><strong>Endereço:</strong> [Endereço completo da empresa]</p>
+                        <p><strong>E-mail:</strong> privacidade@editaliza.com</p>
+                    </div>
+                </section>
+
+                <!-- 2. Dados Coletados -->
+                <section id="dados-coletados" class="privacy-section">
+                    <h2>2. Quais Dados Coletamos</h2>
+                    <p>
+                        Para fornecer nossos serviços de cronograma de estudos personalizado, coletamos as seguintes 
+                        categorias de dados pessoais:
+                    </p>
+
+                    <h3>2.1 Dados de Identificação</h3>
+                    <ul>
+                        <li><strong>E-mail:</strong> Utilizado para criar sua conta, enviar comunicações importantes e recuperação de senha</li>
+                        <li><strong>Senha:</strong> Armazenada de forma criptografada para proteger o acesso à sua conta</li>
+                        <li><strong>Nome:</strong> Para personalização da experiência e identificação em comunicações</li>
+                    </ul>
+
+                    <h3>2.2 Dados de Uso da Plataforma</h3>
+                    <ul>
+                        <li><strong>Planos de Estudo:</strong> Matérias, cronogramas e metas definidas por você</li>
+                        <li><strong>Progresso de Estudos:</strong> Tarefas concluídas, tempo de estudo, desempenho</li>
+                        <li><strong>Resultados de Simulados:</strong> Pontuações, acertos e erros em exercícios</li>
+                        <li><strong>Redações:</strong> Textos produzidos dentro da plataforma</li>
+                        <li><strong>Preferências:</strong> Configurações de notificações e personalização</li>
+                    </ul>
+
+                    <h3>2.3 Dados Técnicos</h3>
+                    <ul>
+                        <li><strong>Informações do Dispositivo:</strong> Tipo, sistema operacional, versão do navegador</li>
+                        <li><strong>Dados de Conexão:</strong> Endereço IP, data e hora de acesso</li>
+                        <li><strong>Logs de Uso:</strong> Páginas visitadas, tempo de sessão, ações realizadas</li>
+                    </ul>
+
+                    <div class="table-container">
+                        <table class="privacy-table">
+                            <thead>
+                                <tr>
+                                    <th>Tipo de Dado</th>
+                                    <th>Finalidade</th>
+                                    <th>Base Legal (LGPD)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>E-mail e Senha</td>
+                                    <td>Autenticação e segurança da conta</td>
+                                    <td>Execução de contrato</td>
+                                </tr>
+                                <tr>
+                                    <td>Dados de Estudo</td>
+                                    <td>Personalização do cronograma</td>
+                                    <td>Execução de contrato</td>
+                                </tr>
+                                <tr>
+                                    <td>Dados Técnicos</td>
+                                    <td>Segurança e melhoria do serviço</td>
+                                    <td>Interesse legítimo</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 3. Como Usamos os Dados -->
+                <section id="como-usamos" class="privacy-section">
+                    <h2>3. Como Utilizamos Seus Dados</h2>
+                    <p>
+                        Utilizamos suas informações pessoais exclusivamente para os seguintes propósitos:
+                    </p>
+
+                    <h3>3.1 Prestação do Serviço</h3>
+                    <ul>
+                        <li>Criar e manter sua conta de usuário</li>
+                        <li>Gerar cronogramas de estudo personalizados</li>
+                        <li>Acompanhar seu progresso e desempenho</li>
+                        <li>Fornecer simulados e correções</li>
+                        <li>Disponibilizar ferramenta de redação</li>
+                    </ul>
+
+                    <h3>3.2 Comunicação</h3>
+                    <ul>
+                        <li>Enviar lembretes de estudos e notificações importantes</li>
+                        <li>Responder suas dúvidas e solicitações de suporte</li>
+                        <li>Informar sobre atualizações do serviço</li>
+                        <li>Enviar comunicações sobre sua conta (apenas essenciais)</li>
+                    </ul>
+
+                    <h3>3.3 Melhoria e Segurança</h3>
+                    <ul>
+                        <li>Analisar o uso da plataforma para melhorias</li>
+                        <li>Detectar e prevenir fraudes ou usos indevidos</li>
+                        <li>Garantir a segurança e estabilidade do sistema</li>
+                        <li>Realizar análises estatísticas agregadas (dados anonimizados)</li>
+                    </ul>
+
+                    <div class="highlight-box">
+                        <h3 class="text-editaliza-blue font-semibold mb-2">Importante:</h3>
+                        <p>
+                            <strong>NÃO utilizamos seus dados para:</strong> Vendas para terceiros, marketing não solicitado, 
+                            criação de perfis para publicidade direcionada ou qualquer finalidade não relacionada 
+                            aos serviços educacionais oferecidos.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 4. Base Legal -->
+                <section id="base-legal" class="privacy-section">
+                    <h2>4. Base Legal para Tratamento de Dados</h2>
+                    <p>
+                        Conforme exigido pela LGPD, todo tratamento de dados pessoais deve ter uma base legal. 
+                        As bases legais que utilizamos são:
+                    </p>
+
+                    <h3>4.1 Execução de Contrato (Art. 7º, V da LGPD)</h3>
+                    <p>
+                        A maior parte dos seus dados é processada para executar o contrato de prestação de serviços 
+                        educacionais que você estabeleceu conosco ao criar sua conta.
+                    </p>
+
+                    <h3>4.2 Interesse Legítimo (Art. 7º, IX da LGPD)</h3>
+                    <p>
+                        Utilizamos dados técnicos para garantir a segurança da plataforma, prevenir fraudes e 
+                        melhorar nossos serviços, respeitando sempre seus direitos e liberdades fundamentais.
+                    </p>
+
+                    <h3>4.3 Consentimento (Art. 7º, I da LGPD)</h3>
+                    <p>
+                        Para comunicações não essenciais e funcionalidades opcionais, solicitamos seu consentimento 
+                        específico, que pode ser retirado a qualquer momento.
+                    </p>
+                </section>
+
+                <!-- 5. Compartilhamento de Dados -->
+                <section id="compartilhamento" class="privacy-section">
+                    <h2>5. Compartilhamento de Dados</h2>
+                    <p>
+                        Levamos a sério a proteção dos seus dados e <strong>não vendemos, alugamos ou comercializamos</strong> 
+                        suas informações pessoais com terceiros. O compartilhamento ocorre apenas nas seguintes situações:
+                    </p>
+
+                    <h3>5.1 Prestadores de Serviços</h3>
+                    <p>
+                        Compartilhamos dados apenas o necessário com prestadores de serviços que nos auxiliam na 
+                        operação da plataforma:
+                    </p>
+                    <ul>
+                        <li><strong>Hospedagem:</strong> Para manter a plataforma funcionando</li>
+                        <li><strong>E-mail:</strong> Para envio de comunicações autorizadas</li>
+                        <li><strong>Analytics:</strong> Para análises agregadas e anônimas</li>
+                        <li><strong>Suporte:</strong> Para atendimento ao cliente</li>
+                    </ul>
+
+                    <h3>5.2 Obrigações Legais</h3>
+                    <p>
+                        Podemos compartilhar dados quando exigido por lei, ordem judicial ou autoridade competente.
+                    </p>
+
+                    <h3>5.3 Proteção de Direitos</h3>
+                    <p>
+                        Em casos excepcionais, para proteger nossos direitos, propriedade, segurança dos usuários 
+                        ou interesse público.
+                    </p>
+
+                    <div class="highlight-box">
+                        <h3 class="text-editaliza-blue font-semibold mb-2">Garantias de Proteção:</h3>
+                        <p>
+                            Todos os prestadores de serviços assínam acordos de proteção de dados e são obrigados 
+                            a manter o mesmo nível de proteção que aplicamos internamente. Os dados permanecem 
+                            armazenados em servidores localizados no Brasil.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 6. Segurança dos Dados -->
+                <section id="seguranca" class="privacy-section">
+                    <h2>6. Segurança e Proteção dos Dados</h2>
+                    <p>
+                        Implementamos medidas técnicas e organizacionais rigorosas para proteger seus dados pessoais 
+                        contra acesso não autorizado, alteração, divulgação ou destruição:
+                    </p>
+
+                    <h3>6.1 Medidas Técnicas</h3>
+                    <ul>
+                        <li><strong>Criptografia:</strong> Dados sensíveis são criptografados em trânsito e em repouso</li>
+                        <li><strong>Autenticação:</strong> Senhas são armazenadas com hash seguro (bcrypt)</li>
+                        <li><strong>HTTPS:</strong> Toda comunicação utiliza protocolo seguro SSL/TLS</li>
+                        <li><strong>Firewall:</strong> Proteção contra acessos não autorizados</li>
+                        <li><strong>Backups:</strong> Cópias de segurança regulares e criptografadas</li>
+                        <li><strong>Monitoramento:</strong> Detecção de tentativas de acesso suspeitas</li>
+                    </ul>
+
+                    <h3>6.2 Medidas Organizacionais</h3>
+                    <ul>
+                        <li><strong>Acesso Restrito:</strong> Apenas funcionários autorizados têm acesso aos dados</li>
+                        <li><strong>Treinamento:</strong> Equipe capacitada em proteção de dados</li>
+                        <li><strong>Políticas Internas:</strong> Procedimentos rigorosos de segurança</li>
+                        <li><strong>Auditoria:</strong> Revisões regulares dos sistemas de segurança</li>
+                    </ul>
+
+                    <h3>6.3 Resposta a Incidentes</h3>
+                    <p>
+                        Em caso de incidente de segurança que possa afetar seus dados pessoais, notificaremos 
+                        as autoridades competentes e os usuários afetados conforme estabelecido pela LGPD.
+                    </p>
+                </section>
+
+                <!-- 7. Seus Direitos -->
+                <section id="direitos" class="privacy-section">
+                    <h2>7. Seus Direitos Sobre os Dados</h2>
+                    <p>
+                        A LGPD garante diversos direitos sobre seus dados pessoais. Você pode exercer os seguintes direitos:
+                    </p>
+
+                    <h3>7.1 Direito de Acesso</h3>
+                    <p>
+                        Você pode solicitar informações sobre quais dados pessoais tratamos sobre você, para quais 
+                        finalidades e com quem compartilhamos.
+                    </p>
+
+                    <h3>7.2 Direito de Correção</h3>
+                    <p>
+                        Você pode solicitar a correção de dados incompletos, inexatos ou desatualizados.
+                    </p>
+
+                    <h3>7.3 Direito de Exclusão</h3>
+                    <p>
+                        Você pode solicitar a exclusão dos seus dados pessoais, exceto quando a manutenção for 
+                        necessária por obrigação legal.
+                    </p>
+
+                    <h3>7.4 Direito à Portabilidade</h3>
+                    <p>
+                        Você pode solicitar a portabilidade dos seus dados para outro prestador de serviços, 
+                        quando tecnicamente viável.
+                    </p>
+
+                    <h3>7.5 Direito de Oposição</h3>
+                    <p>
+                        Você pode se opor ao tratamento dos seus dados com base no interesse legítimo.
+                    </p>
+
+                    <h3>7.6 Direito de Revogação do Consentimento</h3>
+                    <p>
+                        Você pode retirar o consentimento para tratamentos que dependem dessa base legal.
+                    </p>
+
+                    <div class="contact-box">
+                        <h3 class="text-editaliza-green font-semibold mb-2">Como Exercer Seus Direitos</h3>
+                        <p>
+                            Para exercer qualquer um desses direitos, entre em contato conosco através do e-mail: 
+                            <strong>privacidade@editaliza.com</strong>
+                        </p>
+                        <p>
+                            Responderemos sua solicitação em até <strong>15 dias úteis</strong> e, quando necessário, 
+                            poderemos solicitar documentos para confirmar sua identidade.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 8. Retenção de Dados -->
+                <section id="retencao" class="privacy-section">
+                    <h2>8. Retenção de Dados</h2>
+                    <p>
+                        Mantemos seus dados pessoais apenas pelo período necessário para cumprir as finalidades 
+                        descritas nesta política ou conforme exigido por lei:
+                    </p>
+
+                    <h3>8.1 Dados de Conta Ativa</h3>
+                    <p>
+                        Enquanto sua conta estiver ativa e você utilizar nossos serviços, manteremos seus dados 
+                        para prestação do serviço.
+                    </p>
+
+                    <h3>8.2 Dados Após Cancelamento</h3>
+                    <ul>
+                        <li><strong>Dados pessoais básicos:</strong> Excluídos em até 30 dias após cancelamento</li>
+                        <li><strong>Dados de estudo:</strong> Mantidos por 6 meses para possível reativação</li>
+                        <li><strong>Dados financeiros:</strong> Mantidos por 5 anos (obrigação legal)</li>
+                        <li><strong>Logs de segurança:</strong> Mantidos por 6 meses</li>
+                    </ul>
+
+                    <h3>8.3 Exclusão Automática</h3>
+                    <p>
+                        Implementamos processos automatizados para exclusão de dados após os períodos estabelecidos, 
+                        garantindo que informações desnecessárias não sejam mantidas.
+                    </p>
+                </section>
+
+                <!-- 9. Cookies -->
+                <section id="cookies" class="privacy-section">
+                    <h2>9. Cookies e Tecnologias Similares</h2>
+                    <p>
+                        Utilizamos cookies e tecnologias similares para melhorar sua experiência na plataforma:
+                    </p>
+
+                    <h3>9.1 Tipos de Cookies</h3>
+                    <ul>
+                        <li><strong>Cookies Essenciais:</strong> Necessários para funcionamento básico (login, sessão)</li>
+                        <li><strong>Cookies de Preferências:</strong> Lembram suas configurações e personalizações</li>
+                        <li><strong>Cookies Analíticos:</strong> Ajudam a entender como você usa a plataforma</li>
+                    </ul>
+
+                    <h3>9.2 Gestão de Cookies</h3>
+                    <p>
+                        Você pode gerenciar cookies através das configurações do seu navegador. Note que desabilitar 
+                        cookies essenciais pode afetar o funcionamento da plataforma.
+                    </p>
+                </section>
+
+                <!-- 10. Menores de Idade -->
+                <section id="menores" class="privacy-section">
+                    <h2>10. Proteção de Menores de Idade</h2>
+                    <p>
+                        Nossos serviços são destinados a usuários maiores de 18 anos. Para usuários menores de idade:
+                    </p>
+
+                    <h3>10.1 Menores de 13 anos</h3>
+                    <p>
+                        Não coletamos conscientemente dados de crianças menores de 13 anos. Se tomarmos conhecimento 
+                        da coleta inadvertida, excluiremos os dados imediatamente.
+                    </p>
+
+                    <h3>10.2 Adolescentes (13 a 18 anos)</h3>
+                    <p>
+                        O uso da plataforma por adolescentes deve ter autorização e supervisão dos pais ou responsáveis. 
+                        Implementamos proteções adicionais para esta faixa etária.
+                    </p>
+
+                    <div class="highlight-box">
+                        <h3 class="text-editaliza-blue font-semibold mb-2">Responsabilidade dos Pais</h3>
+                        <p>
+                            Encorajamos pais e responsáveis a monitorar o uso da internet por menores sob sua responsabilidade 
+                            e a nos contactar caso tenham conhecimento do uso indevido por menores de idade.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- 11. Alterações na Política -->
+                <section id="alteracoes" class="privacy-section">
+                    <h2>11. Alterações nesta Política</h2>
+                    <p>
+                        Esta Política de Privacidade pode ser atualizada ocasionalmente para refletir mudanças 
+                        em nossos serviços ou regulamentações aplicáveis.
+                    </p>
+
+                    <h3>11.1 Notificação de Alterações</h3>
+                    <p>
+                        Alterações significativas serão comunicadas através de:
+                    </p>
+                    <ul>
+                        <li>E-mail para todos os usuários registrados</li>
+                        <li>Aviso destacado na plataforma</li>
+                        <li>Atualização da data no topo desta política</li>
+                    </ul>
+
+                    <h3>11.2 Prazo para Manifestação</h3>
+                    <p>
+                        Você terá pelo menos 30 dias para revisar as alterações antes que entrem em vigor. 
+                        O uso continuado da plataforma após esse prazo constitui aceitação das novas condições.
+                    </p>
+                </section>
+
+                <!-- 12. Contato -->
+                <section id="contato" class="privacy-section">
+                    <h2>12. Contato e Encarregado de Dados</h2>
+                    <p>
+                        Para questões relacionadas à proteção de dados, exercício de direitos ou esclarecimentos 
+                        sobre esta política, entre em contato conosco:
+                    </p>
+
+                    <div class="contact-box">
+                        <h3 class="text-editaliza-green font-semibold mb-3">Informações de Contato</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <p><strong>E-mail Principal:</strong></p>
+                                <p>privacidade@editaliza.com</p>
+                                
+                                <p class="mt-3"><strong>Suporte Geral:</strong></p>
+                                <p>suporte@editaliza.com</p>
+                            </div>
+                            <div>
+                                <p><strong>Encarregado de Dados (DPO):</strong></p>
+                                <p>dpo@editaliza.com</p>
+                                
+                                <p class="mt-3"><strong>Telefone:</strong></p>
+                                <p>(11) xxxx-xxxx</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-green-200">
+                            <p><strong>Endereço Postal:</strong></p>
+                            <p>Editaliza Tecnologia Educacional Ltda.</p>
+                            <p>[Endereço completo da empresa]</p>
+                            <p>CEP: [CEP] - [Cidade] - [Estado]</p>
+                        </div>
+                    </div>
+
+                    <h3>Autoridade Nacional de Proteção de Dados (ANPD)</h3>
+                    <p>
+                        Caso não esteja satisfeito com nossas respostas, você pode entrar em contato com a ANPD:
+                    </p>
+                    <ul>
+                        <li><strong>Site:</strong> www.gov.br/anpd</li>
+                        <li><strong>E-mail:</strong> comunicacao@anpd.gov.br</li>
+                    </ul>
+
+                    <div class="highlight-box">
+                        <h3 class="text-editaliza-blue font-semibold mb-2">Compromisso com a Transparência</h3>
+                        <p>
+                            Estamos comprometidos em responder suas dúvidas de forma clara e transparente. 
+                            Nossa equipe de proteção de dados está disponível para ajudar você a entender 
+                            como seus dados são tratados e exercer seus direitos.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Seção Final -->
+                <section class="privacy-section">
+                    <div class="text-center py-8">
+                        <h3 class="text-2xl font-bold motivation-text mb-4">
+                            Sua Privacidade é Nossa Prioridade
+                        </h3>
+                        <p class="text-lg text-editaliza-gray mb-6 max-w-2xl mx-auto">
+                            Continuamos comprometidos em oferecer a melhor experiência de estudos 
+                            respeitando integralmente sua privacidade e direitos.
+                        </p>
+                        <div class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+                            <a href="#" onclick="history.back()" class="btn-primary">
+                                Voltar ao Aplicativo
+                            </a>
+                            <a href="mailto:privacidade@editaliza.com" class="btn-primary">
+                                Fale Conosco
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="legal-text text-center pt-6 border-t border-gray-200">
+                        <p>
+                            Este documento foi elaborado em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018) 
+                            e demais regulamentações aplicáveis à proteção de dados pessoais no Brasil.
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Rodapé carregado automaticamente pelo sistema modular footer.js -->
+    <!-- O sistema modular footer.js irá inserir o rodapé automaticamente -->
+
+    <script>
+        // Inicialização da página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Renderizar componentes globais se necessário
+            try {
+                if (!document.getElementById('toast-container')) {
+                    components.renderGlobalUI();
+                }
+                components.renderMainNavigation('politica-privacidade.html');
+            } catch (error) {
+                console.warn('Erro ao renderizar componentes:', error);
+            }
+            
+            // Smooth scroll para links internos
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Destacar seção ativa na navegação
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        document.querySelectorAll('.nav-internal a').forEach(link => {
+                            link.classList.remove('text-editaliza-blue', 'font-semibold');
+                        });
+                        const activeLink = document.querySelector(`.nav-internal a[href="#${id}"]`);
+                        if (activeLink) {
+                            activeLink.classList.add('text-editaliza-blue', 'font-semibold');
+                        }
+                    }
+                });
+            }, {
+                rootMargin: '-20% 0px -70% 0px'
+            });
+            
+            document.querySelectorAll('section[id]').forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+    
+    <!-- Script do rodapé modular -->
+    <script src="js/footer.js"></script>
+    <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
+</body>
+</html>

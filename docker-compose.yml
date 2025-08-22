@@ -1,0 +1,89 @@
+# =========================================
+# DOCKER COMPOSE - DESENVOLVIMENTO
+# =========================================
+version: '3.8'
+
+services:
+  # === APLICAÇÃO PRINCIPAL ===
+  editaliza-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: editaliza-dev
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - HOST=0.0.0.0
+      - DATABASE_PATH=/app/data/db.sqlite
+      - UPLOADS_DIR=/app/uploads
+      - SESSION_STORE_PATH=/app/data/sessions.db
+    env_file:
+      - .env
+    volumes:
+      # Dados persistentes
+      - editaliza_data:/app/data
+      - editaliza_uploads:/app/uploads
+      - editaliza_logs:/app/logs
+      # Hot reload para desenvolvimento (opcional)
+      - type: bind
+        source: ./src
+        target: /app/src
+        read_only: true
+      - type: bind
+        source: ./js
+        target: /app/js
+        read_only: true
+      - type: bind
+        source: ./css
+        target: /app/css
+        read_only: true
+      - type: bind
+        source: ./public
+        target: /app/public
+        read_only: true
+    networks:
+      - editaliza-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - editaliza-migrate
+
+  # === SERVIÇO DE MIGRAÇÃO ===
+  editaliza-migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    container_name: editaliza-migrate-dev
+    environment:
+      - NODE_ENV=development
+      - DATABASE_PATH=/app/data/db.sqlite
+    env_file:
+      - .env
+    volumes:
+      - editaliza_data:/app/data
+    networks:
+      - editaliza-network
+    command: ["node", "-e", "console.log('Database initialization completed')"]
+
+# === VOLUMES PERSISTENTES ===
+volumes:
+  editaliza_data:
+    driver: local
+  editaliza_uploads:
+    driver: local
+  editaliza_logs:
+    driver: local
+
+# === REDES ===
+networks:
+  editaliza-network:
+    driver: bridge

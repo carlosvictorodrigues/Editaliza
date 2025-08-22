@@ -1,0 +1,155 @@
+# =========================================
+# DOCKER COMPOSE - PRODUÇÃO OTIMIZADA
+# Configuração para DigitalOcean App Platform
+# =========================================
+
+version: '3.8'
+
+services:
+  editaliza-prod:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+      args:
+        NODE_VERSION: 20-bullseye
+        APP_USER: editaliza
+        APP_UID: 1001
+        APP_GID: 1001
+    image: editaliza:prod
+    container_name: editaliza-production
+    restart: unless-stopped
+    
+    # Configurações de ambiente
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3000
+      - DOCKER_BUILD=true
+      - HUSKY=0
+      
+      # Variáveis de produção (carregar de .env.prod)
+      - SESSION_SECRET=${SESSION_SECRET}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      
+      # Google OAuth
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
+      
+      # Email
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - SUPPORT_EMAIL=${SUPPORT_EMAIL}
+      
+      # Database
+      - DATABASE_PATH=${DATABASE_PATH:-./data/db.sqlite}
+      - SESSION_STORE_PATH=${SESSION_STORE_PATH:-./data/sessions.db}
+      
+      # Rate limiting
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-100}
+      - LOGIN_RATE_LIMIT_MAX_ATTEMPTS=${LOGIN_RATE_LIMIT_MAX_ATTEMPTS:-5}
+      
+      # URLs
+      - BASE_URL=${BASE_URL}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+
+    # Portas
+    ports:
+      - "${APP_PORT:-3000}:3000"
+
+    # Volumes para persistência de dados
+    volumes:
+      - editaliza_data:/app/data
+      - editaliza_uploads:/app/uploads
+      - editaliza_logs:/app/logs
+
+    # Configurações de recursos
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.5'
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', (res) => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    # Configurações de segurança
+    security_opt:
+      - no-new-privileges:true
+    
+    # User mapping (não root)
+    user: "1001:1001"
+
+    # Configurações de rede
+    networks:
+      - editaliza-network
+
+    # Logs
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# Volumes nomeados para persistência
+volumes:
+  editaliza_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${DATA_PATH:-./docker-data/data}
+  
+  editaliza_uploads:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${UPLOADS_PATH:-./docker-data/uploads}
+  
+  editaliza_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${LOGS_PATH:-./docker-data/logs}
+
+# Rede isolada
+networks:
+  editaliza-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# =========================================
+# INSTRUÇÕES DE USO:
+# =========================================
+# 
+# 1. Criar arquivo .env.prod com as variáveis necessárias
+# 2. Criar diretórios de dados:
+#    mkdir -p docker-data/{data,uploads,logs}
+# 
+# 3. Executar:
+#    docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
+# 
+# 4. Ver logs:
+#    docker compose -f docker-compose.prod.yml logs -f
+# 
+# 5. Parar:
+#    docker compose -f docker-compose.prod.yml down
+# 
+# 6. Para DigitalOcean App Platform, use apenas o Dockerfile.prod
+#    e configure as variáveis de ambiente na interface web
+# =========================================

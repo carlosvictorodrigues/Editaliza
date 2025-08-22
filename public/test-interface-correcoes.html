@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste das Correções de Interface - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/checklist.js"></script>
+    <script src="js/timer.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .test-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .status-ok { color: #16a34a; font-weight: bold; }
+        .status-error { color: #dc2626; font-weight: bold; }
+        .status-warning { color: #d97706; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-gray-50 p-6">
+    <!-- Modal de Sessão de Estudo (para testes) -->
+    <div id="studySessionModal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4 opacity-0">
+        <div id="studySessionModalContainer" class="modal-container bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl transform scale-95 max-h-[90vh] overflow-y-auto">
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">🔧 Teste das Correções de Interface</h1>
+        <p class="text-gray-600 text-center mb-8">Testando as 5 correções críticas implementadas</p>
+        
+        <!-- TESTE 1: Modal do Checklist -->
+        <div class="test-card">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">✅ CORREÇÃO 1: Modal do Checklist</h2>
+            <p class="text-gray-600 mb-4"><strong>Problema:</strong> Modal não fechava ao clicar fora</p>
+            <p class="text-gray-600 mb-4"><strong>Solução:</strong> Adicionado listener para detectar cliques no overlay</p>
+            
+            <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                <p class="text-sm text-blue-800"><strong>Como testar:</strong></p>
+                <p class="text-sm text-blue-700">1. Clique no botão abaixo para abrir o modal</p>
+                <p class="text-sm text-blue-700">2. Clique fora do modal (no fundo escuro)</p>
+                <p class="text-sm text-blue-700">3. O modal deve fechar automaticamente</p>
+            </div>
+            
+            <button id="testModal1" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium">
+                🧪 Testar Modal do Checklist
+            </button>
+            <div id="status1" class="mt-3 text-sm"></div>
+        </div>
+
+        <!-- TESTE 2: Lógica do Cronômetro -->
+        <div class="test-card">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">⏰ CORREÇÃO 2: Lógica do Cronômetro</h2>
+            <p class="text-gray-600 mb-4"><strong>Problema:</strong> Timer iniciava mesmo clicando "Pular dessa vez"</p>
+            <p class="text-gray-600 mb-4"><strong>Solução:</strong> Parâmetro shouldStartTimer controla se o timer inicia automaticamente</p>
+            
+            <div class="bg-green-50 p-4 rounded-lg mb-4">
+                <p class="text-sm text-green-800"><strong>Como testar:</strong></p>
+                <p class="text-sm text-green-700">1. Clique em "Testar com Checklist" → Complete checklist → Timer inicia</p>
+                <p class="text-sm text-green-700">2. Clique em "Testar Pular" → Clique "Pular dessa vez" → Timer fica pausado</p>
+            </div>
+            
+            <div class="space-x-4">
+                <button id="testTimer1" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium">
+                    🧪 Testar com Checklist
+                </button>
+                <button id="testTimer2" class="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-lg font-medium">
+                    🧪 Testar "Pular"
+                </button>
+            </div>
+            <div id="status2" class="mt-3 text-sm"></div>
+        </div>
+
+        <!-- TESTE 3: Salvamento de Sessão -->
+        <div class="test-card">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">💾 CORREÇÃO 3: Salvamento de Sessão</h2>
+            <p class="text-gray-600 mb-4"><strong>Problema:</strong> "Erro ao salvar dados da sessão" ao marcar como concluído</p>
+            <p class="text-gray-600 mb-4"><strong>Solução:</strong> Endpoints corretos (/schedules/sessions/) e melhor tratamento de erros</p>
+            
+            <div class="bg-purple-50 p-4 rounded-lg mb-4">
+                <p class="text-sm text-purple-800"><strong>Endpoints corrigidos:</strong></p>
+                <p class="text-sm text-purple-700">• Notas e questões: PATCH /schedules/sessions/{id}</p>
+                <p class="text-sm text-purple-700">• Status da sessão: PATCH /schedules/sessions/{id}</p>
+                <p class="text-sm text-purple-700">• Logs detalhados no console</p>
+            </div>
+            
+            <div id="status3" class="status-ok">✅ Implementado - Testar em sessão real</div>
+        </div>
+
+        <!-- TESTE 4: Cálculo de Projeção -->
+        <div class="test-card">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">📊 CORREÇÃO 4: Cálculo de Projeção</h2>
+            <p class="text-gray-600 mb-4"><strong>Problema:</strong> "No ritmo para conclusão" aparecia mesmo com ~0% estudado</p>
+            <p class="text-gray-600 mb-4"><strong>Solução:</strong> Verificação de progresso mínimo antes de mostrar projeções</p>
+            
+            <div class="bg-indigo-50 p-4 rounded-lg mb-4">
+                <p class="text-sm text-indigo-800"><strong>Lógica implementada:</strong></p>
+                <p class="text-sm text-indigo-700">• Se progresso = 0%: Mensagem motivacional "Vamos Começar!"</p>
+                <p class="text-sm text-indigo-700">• Se progresso > 0%: Cálculos de projeção e ritmo</p>
+                <p class="text-sm text-indigo-700">• Tela plan.html atualizada</p>
+            </div>
+            
+            <button id="testProjection" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium">
+                🧪 Ver na Página Plan.html
+            </button>
+            <div id="status4" class="status-ok mt-3">✅ Implementado - Verificar em plan.html</div>
+        </div>
+
+        <!-- TESTE 5: Avatar na Navegação -->
+        <div class="test-card">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">👤 CORREÇÃO 5: Avatar na Navegação</h2>
+            <p class="text-gray-600 mb-4"><strong>Problema:</strong> Avatar não aparecia na barra de título</p>
+            <p class="text-gray-600 mb-4"><strong>Solução:</strong> Endpoint correto, cache otimizado, URLs corrigidas</p>
+            
+            <div class="bg-yellow-50 p-4 rounded-lg mb-4">
+                <p class="text-sm text-yellow-800"><strong>Melhorias implementadas:</strong></p>
+                <p class="text-sm text-yellow-700">• Endpoint correto: GET /users/profile</p>
+                <p class="text-sm text-yellow-700">• Cache reduzido para 2 minutos</p>
+                <p class="text-sm text-yellow-700">• Suporte para avatares Google e locais</p>
+                <p class="text-sm text-yellow-700">• Cache buster para avatares locais</p>
+                <p class="text-sm text-yellow-700">• Logs detalhados de debug</p>
+            </div>
+            
+            <button id="testAvatar" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-3 rounded-lg font-medium">
+                🧪 Testar Carregamento do Avatar
+            </button>
+            <div id="status5" class="mt-3 text-sm"></div>
+        </div>
+
+        <!-- Resumo -->
+        <div class="test-card bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-200">
+            <h2 class="text-xl font-bold text-green-800 mb-4">📋 Resumo das Correções</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-semibold text-green-700 mb-2">✅ Correções Implementadas:</h3>
+                    <ul class="text-sm text-green-600 space-y-1">
+                        <li>• Modal fecha ao clicar fora</li>
+                        <li>• Timer só inicia quando necessário</li>
+                        <li>• Endpoints de salvamento corrigidos</li>
+                        <li>• Projeções baseadas em progresso real</li>
+                        <li>• Avatar na navegação funcionando</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-blue-700 mb-2">🔍 Próximos Passos:</h3>
+                    <ul class="text-sm text-blue-600 space-y-1">
+                        <li>• Testar com conta real (3@3.com)</li>
+                        <li>• Verificar salvamento de sessões</li>
+                        <li>• Confirmar cálculos de projeção</li>
+                        <li>• Validar avatar em todas as páginas</li>
+                        <li>• Testar interação completa</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados de teste para simular uma sessão
+        const mockSession = {
+            id: 999,
+            subject_name: "Direito Constitucional",
+            topic_description: "Princípios fundamentais da Constituição Federal",
+            status: "Pendente",
+            notes: "",
+            questions_solved: 0,
+            study_plan_id: 1
+        };
+
+        document.getElementById('testModal1').addEventListener('click', () => {
+            document.getElementById('status1').innerHTML = '<span class="status-warning">🧪 Testando... Clique fora do modal para verificar se fecha</span>';
+            StudyChecklist.show(mockSession);
+        });
+
+        document.getElementById('testTimer1').addEventListener('click', () => {
+            document.getElementById('status2').innerHTML = '<span class="status-warning">🧪 Testando... Complete o checklist e veja se o timer inicia</span>';
+            StudyChecklist.show(mockSession);
+        });
+
+        document.getElementById('testTimer2').addEventListener('click', () => {
+            document.getElementById('status2').innerHTML = '<span class="status-warning">🧪 Testando... Clique "Pular dessa vez" e veja se o timer fica pausado</span>';
+            StudyChecklist.show(mockSession);
+        });
+
+        document.getElementById('testProjection').addEventListener('click', () => {
+            window.open('plan.html?id=3', '_blank');
+        });
+
+        document.getElementById('testAvatar').addEventListener('click', async () => {
+            const status = document.getElementById('status5');
+            status.innerHTML = '<span class="status-warning">🧪 Testando carregamento do avatar...</span>';
+            
+            try {
+                // Limpar cache
+                components.clearUserAvatarCache();
+                
+                // Tentar carregar avatar
+                const avatar = await components.loadUserAvatar();
+                
+                if (avatar) {
+                    status.innerHTML = `<span class="status-ok">✅ Avatar carregado: ${avatar}</span>`;
+                    
+                    // Atualizar navegação se existir
+                    if (typeof components.updateNavigationAvatar === 'function') {
+                        await components.updateNavigationAvatar();
+                        status.innerHTML += '<br><span class="status-ok">✅ Navegação atualizada!</span>';
+                    }
+                } else {
+                    status.innerHTML = '<span class="status-warning">⚠️ Nenhum avatar encontrado (normal se não estiver logado)</span>';
+                }
+            } catch (error) {
+                console.error('Erro no teste de avatar:', error);
+                status.innerHTML = `<span class="status-error">❌ Erro: ${error.message}</span>`;
+            }
+        });
+
+        // Inicializar componentes globais
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof components !== 'undefined') {
+                components.renderGlobalUI();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Teste - Cores dos Cards Corrigidas - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* PREVIEW DOS CARDS CORRIGIDOS */
+        .test-card {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .before-after {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .before {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: #333;
+        }
+        
+        .after {
+            background: white !important;
+            color: #333;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-4">🧪 Teste: Correção das Cores dos Cards</h1>
+            <p class="text-xl text-gray-600">Comparação ANTES vs DEPOIS das correções aplicadas</p>
+        </div>
+
+        <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-8">
+            <h3 class="font-semibold text-red-800 mb-2">⚠️ PROBLEMA ORIGINAL:</h3>
+            <p class="text-red-700">Cards com fundos transparentes/brancos faziam o texto ficar invisível ou difícil de ler</p>
+        </div>
+
+        <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-8">
+            <h3 class="font-semibold text-green-800 mb-2">✅ SOLUÇÕES APLICADAS:</h3>
+            <ul class="text-green-700 ml-4 space-y-1">
+                <li>• <strong>Inline styles com !important</strong> para máxima prioridade CSS</li>
+                <li>• <strong>Classes CSS fortalecidas</strong> com declarações !important</li>
+                <li>• <strong>Seletores universais</strong> para pegar qualquer card restante</li>
+                <li>• <strong>Prevenção dark mode</strong> em elementos de card</li>
+            </ul>
+        </div>
+
+        <!-- TESTE 1: Cards do Hero Principal -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">🏆 Cards do Hero Principal</h2>
+            
+            <div class="before-after">
+                <div>
+                    <h4 class="font-semibold mb-2 text-gray-600">❌ ANTES (Problema)</h4>
+                    <div class="test-card before">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold">Hoje</div>
+                            <div class="text-sm">05 de agosto</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-2 text-green-600">✅ DEPOIS (Corrigido)</h4>
+                    <div class="test-card" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important; border: 2px solid #3b82f6;">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-900">Hoje</div>
+                            <div class="text-sm text-blue-700">05 de agosto</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+                <!-- Card Dias para Prova -->
+                <div class="test-card" style="background: linear-gradient(135deg, #fecaca, #fca5a5) !important; border: 2px solid #ef4444;">
+                    <div class="text-center">
+                        <div class="text-lg font-bold text-red-900">Dias para Prova</div>
+                        <div class="text-2xl font-bold text-red-800">85</div>
+                    </div>
+                </div>
+                
+                <!-- Card Progresso -->
+                <div class="test-card" style="background: linear-gradient(135deg, #dcfce7, #bbf7d0) !important; border: 2px solid #22c55e;">
+                    <div class="text-center">
+                        <div class="text-lg font-bold text-green-900">Progresso</div>
+                        <div class="text-2xl font-bold text-green-800">67%</div>
+                    </div>
+                </div>
+                
+                <!-- Card Plano Ativo -->
+                <div class="test-card" style="background: linear-gradient(135deg, #e9d5ff, #d8b4fe) !important; border: 2px solid #a855f7;">
+                    <div class="text-center">
+                        <div class="text-lg font-bold text-purple-900">Plano Ativo</div>
+                        <div class="text-sm text-purple-700">Concurso TRT</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TESTE 2: Card de Atividades do Dia -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">📚 Card de Atividades do Dia</h2>
+            
+            <div class="test-card" style="background: white !important; border-left: 4px solid #3b82f6; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center">
+                        <span class="text-2xl">📚</span>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800">Suas Atividades de Hoje</h3>
+                        <p class="text-gray-600">🎯 Foque nestas tarefas para alcançar seus objetivos!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TESTE 3: Card de Progresso do Dia -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">📊 Card de Progresso do Dia</h2>
+            
+            <div class="test-card" style="background: linear-gradient(135deg, #f9fafb, #dbeafe) !important; border: 2px solid #3b82f6;">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800">Progresso do Dia</h3>
+                        <p class="text-sm text-gray-600">3 de 5 tarefas concluídas</p>
+                    </div>
+                    <div class="text-3xl font-bold text-blue-600">60%</div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full" style="width: 60%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TESTE 4: Cards de Estatísticas -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">📈 Cards de Estatísticas</h2>
+            
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="test-card" style="background: white !important; border: 2px solid #f59e0b;">
+                    <div class="text-center">
+                        <div class="text-2xl mb-2">🔥</div>
+                        <div class="text-xl font-bold text-gray-800">12</div>
+                        <div class="text-sm text-gray-600">Sequência</div>
+                    </div>
+                </div>
+                
+                <div class="test-card" style="background: white !important; border: 2px solid #10b981;">
+                    <div class="text-center">
+                        <div class="text-2xl mb-2">✅</div>
+                        <div class="text-xl font-bold text-gray-800">89</div>
+                        <div class="text-sm text-gray-600">Concluídas</div>
+                    </div>
+                </div>
+                
+                <div class="test-card" style="background: white !important; border: 2px solid #6366f1;">
+                    <div class="text-center">
+                        <div class="text-2xl mb-2">📊</div>
+                        <div class="text-xl font-bold text-gray-800">67%</div>
+                        <div class="text-sm text-gray-600">Precisão</div>
+                    </div>
+                </div>
+                
+                <div class="test-card" style="background: white !important; border: 2px solid #ec4899;">
+                    <div class="text-center">
+                        <div class="text-2xl mb-2">⭐</div>
+                        <div class="text-xl font-bold text-gray-800">1,250</div>
+                        <div class="text-sm text-gray-600">XP Total</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INSTRUÇÕES DE TESTE -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <h3 class="text-lg font-semibold text-blue-800 mb-4">🧪 Como Testar na Página Real:</h3>
+            <ol class="text-blue-700 space-y-2 ml-4">
+                <li><strong>1.</strong> Faça login no sistema</li>
+                <li><strong>2.</strong> Acesse a página home.html</li>
+                <li><strong>3.</strong> Verifique se todos os cards têm fundos visíveis</li>
+                <li><strong>4.</strong> Confirme que o texto está legível em todos os cards</li>
+                <li><strong>5.</strong> Teste em modo claro e escuro (se aplicável)</li>
+                <li><strong>6.</strong> Teste em diferentes tamanhos de tela</li>
+            </ol>
+        </div>
+
+        <!-- BOTÕES DE AÇÃO -->
+        <div class="text-center space-x-4">
+            <a href="home.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                Testar na Página Real
+            </a>
+            
+            <a href="login.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                </svg>
+                Fazer Login Primeiro
+            </a>
+        </div>
+
+        <!-- RESUMO TÉCNICO -->
+        <div class="mt-12 p-6 bg-gray-100 rounded-lg">
+            <h4 class="font-semibold text-gray-800 mb-4">📋 Resumo das Correções Aplicadas:</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600">
+                <div>
+                    <h5 class="font-semibold text-gray-800 mb-2">Arquivos Modificados:</h5>
+                    <ul class="space-y-1">
+                        <li>• <code>home.html</code> - Estilos inline adicionados</li>
+                        <li>• <code>css/style.css</code> - Classes CSS fortalecidas</li>
+                        <li>• <code>js/components.js</code> - Cards dinâmicos corrigidos</li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-semibold text-gray-800 mb-2">Técnicas Utilizadas:</h5>
+                    <ul class="space-y-1">
+                        <li>• <code>style="background: ... !important;"</code></li>
+                        <li>• <code>!important</code> declarations in CSS</li>
+                        <li>• Universal card selectors</li>
+                        <li>• Dark mode overrides</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

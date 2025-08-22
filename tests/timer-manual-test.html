@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Manual - Cronômetro Persistente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .test-passed { @apply bg-green-100 border-green-500 text-green-700; }
+        .test-failed { @apply bg-red-100 border-red-500 text-red-700; }
+        .test-running { @apply bg-yellow-100 border-yellow-500 text-yellow-700; }
+        .test-pending { @apply bg-gray-100 border-gray-300 text-gray-600; }
+    </style>
+</head>
+<body class="bg-gray-50 p-6">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-center mb-6">Teste Manual - Cronômetro Persistente</h1>
+        
+        <!-- Área de controle dos testes -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Controles de Teste</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <button onclick="clearAllTests()" 
+                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">
+                    Limpar Todos os Testes
+                </button>
+                <button onclick="runAllTests()" 
+                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                    Executar Todos os Testes
+                </button>
+                <button onclick="generateReport()" 
+                        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">
+                    Gerar Relatório
+                </button>
+            </div>
+            
+            <div class="text-sm text-gray-600">
+                <strong>Instruções:</strong> Execute cada teste individualmente ou use "Executar Todos os Testes" 
+                para automação. Verifique visualmente se os comportamentos esperados ocorrem.
+            </div>
+        </div>
+
+        <!-- Simulação de Cards de Sessão -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">Simulação de Cards de Sessão</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="border rounded-lg p-4">
+                    <h3 class="font-semibold mb-2">Direito Constitucional</h3>
+                    <button onclick="window.openStudySession(1)"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                        🚀 Iniciar Estudo
+                    </button>
+                    <div class="mt-2 text-sm text-gray-600" data-session-time="1"></div>
+                </div>
+                
+                <div class="border rounded-lg p-4">
+                    <h3 class="font-semibold mb-2">Direito Administrativo</h3>
+                    <button onclick="window.openStudySession(2)"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                        🚀 Iniciar Estudo
+                    </button>
+                    <div class="mt-2 text-sm text-gray-600" data-session-time="2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Sessão de Estudo -->
+        <div id="studySessionModal" class="hidden opacity-0 fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                <div id="studySessionModalContainer" class="scale-95">
+                    <!-- Conteúdo será inserido dinamicamente -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Testes -->
+        <div class="space-y-4">
+            <!-- Teste 1: Continuidade quando modal é fechado -->
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 test-pending" id="test-1">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold">Teste 1: Continuidade quando modal é fechado</h3>
+                        <p class="text-gray-600 mt-1">
+                            Verificar se o cronômetro continua rodando em background quando o modal é fechado.
+                        </p>
+                        <div class="mt-2 text-sm">
+                            <strong>Passos:</strong>
+                            <ol class="list-decimal list-inside mt-1 space-y-1">
+                                <li>Clique em "Iniciar Estudo" no card</li>
+                                <li>Inicie o cronômetro no modal</li>
+                                <li>Feche o modal</li>
+                                <li>Observe se o botão do card mostra "Estudando" com animação</li>
+                                <li>Aguarde alguns segundos e observe atualização do tempo</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="ml-4 space-y-2">
+                        <button onclick="runTest(1)" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                            Executar Teste
+                        </button>
+                        <div class="text-xs">
+                            <button onclick="markTestPassed(1)" class="text-green-600 hover:text-green-700">✓ Passou</button>
+                            <span class="mx-1">|</span>
+                            <button onclick="markTestFailed(1)" class="text-red-600 hover:text-red-700">✗ Falhou</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="test-result mt-4 hidden"></div>
+            </div>
+
+            <!-- Teste 2: Botão "Continuar (tempo)" -->
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 test-pending" id="test-2">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold">Teste 2: Botão "Continuar (tempo)" quando há timer ativo</h3>
+                        <p class="text-gray-600 mt-1">
+                            Verificar se o botão do card mostra o tempo acumulado e permite continuar o cronômetro.
+                        </p>
+                        <div class="mt-2 text-sm">
+                            <strong>Passos:</strong>
+                            <ol class="list-decimal list-inside mt-1 space-y-1">
+                                <li>Execute o Teste 1 primeiro</li>
+                                <li>Pause o cronômetro</li>
+                                <li>Feche o modal</li>
+                                <li>Observe se o botão mostra "Continuar (XX:XX)"</li>
+                                <li>Clique no botão e verifique se o tempo continua de onde parou</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="ml-4 space-y-2">
+                        <button onclick="runTest(2)" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                            Executar Teste
+                        </button>
+                        <div class="text-xs">
+                            <button onclick="markTestPassed(2)" class="text-green-600 hover:text-green-700">✓ Passou</button>
+                            <span class="mx-1">|</span>
+                            <button onclick="markTestFailed(2)" class="text-red-600 hover:text-red-700">✗ Falhou</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="test-result mt-4 hidden"></div>
+            </div>
+
+            <!-- Teste 3: Reconexão automática -->
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 test-pending" id="test-3">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold">Teste 3: Reconexão automática ao reabrir modal</h3>
+                        <p class="text-gray-600 mt-1">
+                            Verificar se o modal reconecta automaticamente ao cronômetro ativo.
+                        </p>
+                        <div class="mt-2 text-sm">
+                            <strong>Passos:</strong>
+                            <ol class="list-decimal list-inside mt-1 space-y-1">
+                                <li>Inicie um cronômetro</li>
+                                <li>Feche o modal</li>
+                                <li>Reabra o modal da mesma sessão</li>
+                                <li>Verifique se o cronômetro mostra o tempo correto</li>
+                                <li>Verifique se o botão mostra o estado correto (pausar/continuar)</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="ml-4 space-y-2">
+                        <button onclick="runTest(3)" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                            Executar Teste
+                        </button>
+                        <div class="text-xs">
+                            <button onclick="markTestPassed(3)" class="text-green-600 hover:text-green-700">✓ Passou</button>
+                            <span class="mx-1">|</span>
+                            <button onclick="markTestFailed(3)" class="text-red-600 hover:text-red-700">✗ Falhou</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="test-result mt-4 hidden"></div>
+            </div>
+
+            <!-- Teste 4: Atualização visual dos cards -->
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 test-pending" id="test-4">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold">Teste 4: Atualização visual dos cards com timer ativo</h3>
+                        <p class="text-gray-600 mt-1">
+                            Verificar se os cards refletem visualmente o estado atual dos cronômetros.
+                        </p>
+                        <div class="mt-2 text-sm">
+                            <strong>Passos:</strong>
+                            <ol class="list-decimal list-inside mt-1 space-y-1">
+                                <li>Inicie cronômetros em ambas as sessões</li>
+                                <li>Observe cores e animações nos botões</li>
+                                <li>Pause um cronômetro</li>
+                                <li>Verifique se as cores mudaram apropriadamente</li>
+                                <li>Observe se o tempo é atualizado periodicamente</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="ml-4 space-y-2">
+                        <button onclick="runTest(4)" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                            Executar Teste
+                        </button>
+                        <div class="text-xs">
+                            <button onclick="markTestPassed(4)" class="text-green-600 hover:text-green-700">✓ Passou</button>
+                            <span class="mx-1">|</span>
+                            <button onclick="markTestFailed(4)" class="text-red-600 hover:text-red-700">✗ Falhou</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="test-result mt-4 hidden"></div>
+            </div>
+
+            <!-- Teste 5: Persistência entre recarregamentos -->
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 test-pending" id="test-5">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold">Teste 5: Persistência entre navegações/recarregamento</h3>
+                        <p class="text-gray-600 mt-1">
+                            Verificar se os cronômetros persistem após recarregar a página.
+                        </p>
+                        <div class="mt-2 text-sm">
+                            <strong>Passos:</strong>
+                            <ol class="list-decimal list-inside mt-1 space-y-1">
+                                <li>Inicie um ou mais cronômetros</li>
+                                <li>Recarregue a página (F5 ou Ctrl+R)</li>
+                                <li>Observe se os botões mostram os tempos corretos</li>
+                                <li>Verifique se é possível continuar os cronômetros</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="ml-4 space-y-2">
+                        <button onclick="runTest(5)" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                            Executar Teste
+                        </button>
+                        <div class="text-xs">
+                            <button onclick="markTestPassed(5)" class="text-green-600 hover:text-green-700">✓ Passou</button>
+                            <span class="mx-1">|</span>
+                            <button onclick="markTestFailed(5)" class="text-red-600 hover:text-red-700">✗ Falhou</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="test-result mt-4 hidden"></div>
+            </div>
+
+            <!-- Teste 6: Edge Cases -->
+            <div class="bg-white rounded-lg shadow-md p-6 border-l-4 test-pending" id="test-6">
+                <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold">Teste 6: Edge Cases (longo tempo inativo, múltiplos timers)</h3>
+                        <p class="text-gray-600 mt-1">
+                            Verificar comportamento em situações extremas ou não usuais.
+                        </p>
+                        <div class="mt-2 text-sm">
+                            <strong>Passos:</strong>
+                            <ol class="list-decimal list-inside mt-1 space-y-1">
+                                <li>Inicie múltiplos cronômetros simultaneamente</li>
+                                <li>Deixe a aba inativa por alguns minutos</li>
+                                <li>Retorne e verifique se os tempos estão corretos</li>
+                                <li>Teste limpar localStorage e recarregar</li>
+                                <li>Teste com localStorage cheio (developer tools)</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="ml-4 space-y-2">
+                        <button onclick="runTest(6)" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">
+                            Executar Teste
+                        </button>
+                        <div class="text-xs">
+                            <button onclick="markTestPassed(6)" class="text-green-600 hover:text-green-700">✓ Passou</button>
+                            <span class="mx-1">|</span>
+                            <button onclick="markTestFailed(6)" class="text-red-600 hover:text-red-700">✗ Falhou</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="test-result mt-4 hidden"></div>
+            </div>
+        </div>
+
+        <!-- Relatório de Resultados -->
+        <div id="test-report" class="hidden bg-white rounded-lg shadow-md p-6 mt-6">
+            <h2 class="text-xl font-semibold mb-4">Relatório de Testes</h2>
+            <div id="report-content"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../js/timer.js"></script>
+    <script>
+        // Mock do app global
+        window.app = {
+            apiFetch: async () => ({ success: true }),
+            showToast: (message, type) => {
+                console.log(`Toast ${type}: ${message}`);
+                alert(`${type.toUpperCase()}: ${message}`);
+            }
+        };
+
+        // Mock do StudyChecklist
+        window.StudyChecklist = {
+            session: null,
+            show: function(session) {
+                this.session = session;
+                document.getElementById('studySessionModal').classList.remove('hidden');
+                document.getElementById('studySessionModal').classList.remove('opacity-0');
+                document.getElementById('studySessionModalContainer').classList.remove('scale-95');
+                
+                // Simular interface do cronômetro
+                document.getElementById('studySessionModalContainer').innerHTML = `
+                    <div class="text-center mb-4">
+                        <h2 class="text-xl font-bold">Sessão ${session.id}</h2>
+                        <button onclick="closeModal()" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700">×</button>
+                    </div>
+                    ${TimerSystem.createTimerUI(session.id)}
+                `;
+            },
+            startStudySession: function() {
+                this.show(this.session);
+            },
+            close: function() {
+                document.getElementById('studySessionModal').classList.add('opacity-0');
+                document.getElementById('studySessionModalContainer').classList.add('scale-95');
+                setTimeout(() => {
+                    document.getElementById('studySessionModal').classList.add('hidden');
+                }, 300);
+            }
+        };
+
+        // Função para abrir sessão de estudo
+        window.openStudySession = function(sessionId) {
+            const session = { id: sessionId, title: `Sessão ${sessionId}` };
+            StudyChecklist.show(session);
+        }
+
+        // Função para fechar modal
+        function closeModal() {
+            StudyChecklist.close();
+        }
+
+        // Funções de controle de testes
+        function clearAllTests() {
+            for (let i = 1; i <= 6; i++) {
+                const testEl = document.getElementById(`test-${i}`);
+                testEl.className = testEl.className.replace(/test-(passed|failed|running)/, 'test-pending');
+                const resultEl = testEl.querySelector('.test-result');
+                resultEl.classList.add('hidden');
+            }
+            
+            // Limpar localStorage
+            localStorage.clear();
+            
+            // Parar todos os timers
+            Object.keys(TimerSystem.timers).forEach(id => {
+                TimerSystem.stop(parseInt(id));
+            });
+            
+            console.log('Todos os testes foram resetados');
+        }
+
+        function runTest(testNumber) {
+            const testEl = document.getElementById(`test-${testNumber}`);
+            testEl.className = testEl.className.replace('test-pending', 'test-running');
+            
+            const resultEl = testEl.querySelector('.test-result');
+            resultEl.classList.remove('hidden');
+            
+            switch(testNumber) {
+                case 1:
+                    runTest1();
+                    break;
+                case 2:
+                    runTest2();
+                    break;
+                case 3:
+                    runTest3();
+                    break;
+                case 4:
+                    runTest4();
+                    break;
+                case 5:
+                    runTest5();
+                    break;
+                case 6:
+                    runTest6();
+                    break;
+            }
+        }
+
+        function runTest1() {
+            const resultEl = document.querySelector('#test-1 .test-result');
+            resultEl.innerHTML = `
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded">
+                    <p><strong>Executando Teste 1...</strong></p>
+                    <p>1. Abrindo modal da sessão 1...</p>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                window.openStudySession(1);
+                resultEl.innerHTML += `<p>2. Modal aberto. Clique em "Iniciar" no cronômetro, depois feche o modal.</p>`;
+                
+                setTimeout(() => {
+                    resultEl.innerHTML += `<p>3. Verificando atualização do botão do card...</p>`;
+                    TimerSystem.updateCardVisuals(1);
+                }, 2000);
+            }, 1000);
+        }
+
+        function runTest2() {
+            const resultEl = document.querySelector('#test-2 .test-result');
+            resultEl.innerHTML = `
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded">
+                    <p><strong>Executando Teste 2...</strong></p>
+                    <p>1. Iniciando cronômetro da sessão 1...</p>
+                </div>
+            `;
+            
+            TimerSystem.start(1);
+            
+            setTimeout(() => {
+                TimerSystem.stop(1);
+                TimerSystem.updateCardVisuals(1);
+                resultEl.innerHTML += `<p>2. Cronômetro pausado. Verifique se o botão mostra "Continuar (tempo)"</p>`;
+            }, 3000);
+        }
+
+        function runTest3() {
+            const resultEl = document.querySelector('#test-3 .test-result');
+            resultEl.innerHTML = `
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded">
+                    <p><strong>Executando Teste 3...</strong></p>
+                    <p>1. Simulando reconexão...</p>
+                </div>
+            `;
+            
+            TimerSystem.start(1);
+            setTimeout(() => {
+                closeModal();
+                resultEl.innerHTML += `<p>2. Modal fechado. Reabrindo em 2 segundos...</p>`;
+                
+                setTimeout(() => {
+                    window.openStudySession(1);
+                    resultEl.innerHTML += `<p>3. Modal reaberto. Verifique se o cronômetro mostra o tempo correto.</p>`;
+                }, 2000);
+            }, 2000);
+        }
+
+        function runTest4() {
+            const resultEl = document.querySelector('#test-4 .test-result');
+            resultEl.innerHTML = `
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded">
+                    <p><strong>Executando Teste 4...</strong></p>
+                    <p>1. Iniciando cronômetros em ambas as sessões...</p>
+                </div>
+            `;
+            
+            TimerSystem.start(1);
+            TimerSystem.start(2);
+            
+            setTimeout(() => {
+                resultEl.innerHTML += `<p>2. Pausando cronômetro da sessão 1...</p>`;
+                TimerSystem.stop(1);
+                TimerSystem.updateCardVisuals(1);
+                TimerSystem.updateCardVisuals(2);
+                
+                resultEl.innerHTML += `<p>3. Observe as diferenças visuais entre os cards.</p>`;
+            }, 3000);
+        }
+
+        function runTest5() {
+            const resultEl = document.querySelector('#test-5 .test-result');
+            resultEl.innerHTML = `
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded">
+                    <p><strong>Executando Teste 5...</strong></p>
+                    <p>1. Iniciando cronômetros e salvando no localStorage...</p>
+                </div>
+            `;
+            
+            TimerSystem.start(1);
+            TimerSystem.start(2);
+            
+            setTimeout(() => {
+                TimerSystem.saveTimersToStorage();
+                resultEl.innerHTML += `<p>2. Dados salvos. RECARREGUE A PÁGINA AGORA (F5) para testar persistência.</p>`;
+            }, 2000);
+        }
+
+        function runTest6() {
+            const resultEl = document.querySelector('#test-6 .test-result');
+            resultEl.innerHTML = `
+                <div class="p-3 bg-blue-50 border border-blue-200 rounded">
+                    <p><strong>Executando Teste 6...</strong></p>
+                    <p>1. Iniciando múltiplos cronômetros...</p>
+                </div>
+            `;
+            
+            // Iniciar vários timers
+            for (let i = 1; i <= 2; i++) {
+                TimerSystem.start(i);
+            }
+            
+            // Simular dados antigos no localStorage
+            const oldData = {
+                '99': {
+                    startTime: Date.now() - 3600000,
+                    elapsed: 3600000,
+                    isRunning: false,
+                    savedAt: Date.now() - 300000
+                }
+            };
+            
+            localStorage.setItem('editaliza_timers_test', JSON.stringify(oldData));
+            
+            setTimeout(() => {
+                resultEl.innerHTML += `<p>2. Teste de múltiplos timers concluído. Verifique console para logs.</p>`;
+                resultEl.innerHTML += `<p>3. Dados de teste antigos adicionados ao localStorage.</p>`;
+                console.log('Estado atual dos timers:', TimerSystem.timers);
+                console.log('localStorage test data:', localStorage.getItem('editaliza_timers_test'));
+            }, 2000);
+        }
+
+        function markTestPassed(testNumber) {
+            const testEl = document.getElementById(`test-${testNumber}`);
+            testEl.className = testEl.className.replace(/test-(pending|running|failed)/, 'test-passed');
+            
+            const resultEl = testEl.querySelector('.test-result');
+            if (!resultEl.classList.contains('hidden')) {
+                resultEl.innerHTML += `<div class="mt-2 p-2 bg-green-100 text-green-700 rounded">✅ Teste marcado como PASSOU</div>`;
+            }
+        }
+
+        function markTestFailed(testNumber) {
+            const testEl = document.getElementById(`test-${testNumber}`);
+            testEl.className = testEl.className.replace(/test-(pending|running|passed)/, 'test-failed');
+            
+            const resultEl = testEl.querySelector('.test-result');
+            if (!resultEl.classList.contains('hidden')) {
+                resultEl.innerHTML += `<div class="mt-2 p-2 bg-red-100 text-red-700 rounded">❌ Teste marcado como FALHOU</div>`;
+            }
+        }
+
+        function runAllTests() {
+            console.log('Iniciando execução de todos os testes...');
+            
+            // Executar testes em sequência com delays
+            runTest(1);
+            setTimeout(() => runTest(2), 5000);
+            setTimeout(() => runTest(3), 10000);
+            setTimeout(() => runTest(4), 15000);
+            setTimeout(() => runTest(6), 20000); // Pular teste 5 que requer reload manual
+            
+            setTimeout(() => {
+                alert('Execução automática concluída! O Teste 5 deve ser executado manualmente com F5.');
+            }, 25000);
+        }
+
+        function generateReport() {
+            const reportEl = document.getElementById('test-report');
+            const contentEl = document.getElementById('report-content');
+            
+            let passed = 0, failed = 0, pending = 0;
+            let reportHTML = '<div class="space-y-4">';
+            
+            for (let i = 1; i <= 6; i++) {
+                const testEl = document.getElementById(`test-${i}`);
+                const testTitle = testEl.querySelector('h3').textContent;
+                
+                if (testEl.classList.contains('test-passed')) {
+                    passed++;
+                    reportHTML += `<div class="flex items-center p-3 bg-green-50 border border-green-200 rounded">
+                        <span class="text-green-600 mr-3">✅</span>
+                        <span class="text-green-800">${testTitle}</span>
+                    </div>`;
+                } else if (testEl.classList.contains('test-failed')) {
+                    failed++;
+                    reportHTML += `<div class="flex items-center p-3 bg-red-50 border border-red-200 rounded">
+                        <span class="text-red-600 mr-3">❌</span>
+                        <span class="text-red-800">${testTitle}</span>
+                    </div>`;
+                } else {
+                    pending++;
+                    reportHTML += `<div class="flex items-center p-3 bg-gray-50 border border-gray-200 rounded">
+                        <span class="text-gray-600 mr-3">⏳</span>
+                        <span class="text-gray-800">${testTitle}</span>
+                    </div>`;
+                }
+            }
+            
+            reportHTML += '</div>';
+            
+            const summaryHTML = `
+                <div class="bg-blue-50 border border-blue-200 rounded p-4 mb-4">
+                    <h3 class="font-semibold mb-2">Resumo dos Testes</h3>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div class="bg-green-100 p-2 rounded">
+                            <div class="text-2xl font-bold text-green-600">${passed}</div>
+                            <div class="text-sm text-green-700">Passou</div>
+                        </div>
+                        <div class="bg-red-100 p-2 rounded">
+                            <div class="text-2xl font-bold text-red-600">${failed}</div>
+                            <div class="text-sm text-red-700">Falhou</div>
+                        </div>
+                        <div class="bg-gray-100 p-2 rounded">
+                            <div class="text-2xl font-bold text-gray-600">${pending}</div>
+                            <div class="text-sm text-gray-700">Pendente</div>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <div class="text-lg font-semibold">
+                            Taxa de Sucesso: ${passed > 0 ? Math.round((passed / (passed + failed)) * 100) : 0}%
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            contentEl.innerHTML = summaryHTML + reportHTML;
+            reportEl.classList.remove('hidden');
+            
+            // Scroll para o relatório
+            reportEl.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Inicializar sistema quando a página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Página de testes carregada. TimerSystem disponível:', !!window.TimerSystem);
+            
+            // Carregar timers salvos para demonstrar persistência
+            TimerSystem.loadTimersFromStorage();
+            
+            // Atualizar visuais dos cards a cada 2 segundos
+            setInterval(() => {
+                [1, 2].forEach(sessionId => {
+                    TimerSystem.updateCardVisuals(sessionId);
+                });
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

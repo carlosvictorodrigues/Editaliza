@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Editaliza</title>
+    
+    <!-- Favicon and Web App Icons -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0528f2">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/footer.css" rel="stylesheet">
+    <!-- SCRIPT CENTRALIZADO -->
+    <script src="js/app.js"></script>
+    <!-- Config do Tailwind para reconhecer as cores customizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-black': '#0d0d0d',
+                        'editaliza-gray': '#969696',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <!-- LOGOTIPO SVG ATUALIZADO E CORRIGIDO -->
+            <div class="flex justify-center">
+                <svg id="Camada_2" data-name="Camada 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 510.24 101.5" class="h-16 w-auto">
+                  <defs>
+                    <style>
+                      .cls-1-logo-auth { fill: #0528f2; }
+                      .cls-2-logo-auth { fill: #0d0d0d; }
+                      .cls-3-logo-auth { fill: #1ad937; }
+                    </style>
+                  </defs>
+                  <g id="Camada_1-2" data-name="Camada 1">
+                    <g>
+                      <g>
+                        <path class="cls-2-logo-auth" d="M148.68,17.22l49.51-.04v9.32l-39.51.03v17.97l37.97-.03v9.22l-37.97.03v20.83l39.51-.03v9.22l-49.51.04V17.22Z"/>
+                        <path class="cls-2-logo-auth" d="M210.98,77.75c-4.49-4.5-6.73-10.65-6.73-18.44s2.13-13.7,6.39-18.26c4.26-4.57,10.17-6.85,17.74-6.86,7.5,0,13.55,2.59,18.17,7.78v-24.82h9.23s0,66.56,0,66.56h-9.23s0-5.79,0-5.79c-2.24,2.22-4.82,3.87-7.74,4.95-2.92,1.08-6.04,1.62-9.37,1.62-7.82,0-13.97-2.24-18.46-6.74ZM242.51,72.54c2.76-2.57,4.13-6.39,4.13-11.46v-3.61c0-4.56-1.52-8.19-4.57-10.89-3.04-2.69-7.16-4.04-12.35-4.03-4.74,0-8.57,1.4-11.49,4.19-2.92,2.79-4.37,7.01-4.37,12.65s1.44,9.89,4.33,12.74c2.88,2.85,6.95,4.27,12.21,4.27,5.32,0,9.36-1.29,12.11-3.86Z"/>
+                        <path class="cls-2-logo-auth" d="M264.04,17.13h9.42s0,11.21,0,11.21h-9.42s0-11.21,0-11.21ZM264.14,35.96h9.23s0,47.73,0,47.73h-9.23s0-47.73,0-47.73Z"/>
+                        <path class="cls-2-logo-auth" d="M293.7,80.3c-2.34-2.76-3.61-6.8-3.8-12.12v-23.77h-8.27s0-8.27,0-8.27h8.27v-17.69h9.32s0,17.68,0,17.68h15.86s0,8.26,0,8.26h-15.86v24.55c0,4.69,2.66,7.03,7.98,7.03,2.18,0,4.65-.32,7.4-.96l2.21,7.32c-2.31.76-4.31,1.3-6.01,1.62-1.7.32-3.48.48-5.34.48-5.51,0-9.44-1.37-11.78-4.13Z"/>
+                        <path class="cls-2-logo-auth" d="M326.96,80.36c-3.43-2.57-5.14-6.32-5.14-11.26,0-6.09,2.55-10.19,7.64-12.32,5.1-2.13,12.03-3.26,20.81-3.39l9.04-.2v-1.24c0-3.55-.95-6.05-2.84-7.51-1.89-1.46-5.14-2.18-9.76-2.18-4.1,0-7.21.67-9.32,2-2.12,1.33-3.24,3.58-3.36,6.75h-9.42c.13-5.89,2.05-10.17,5.77-12.84,3.72-2.67,9.16-4.03,16.34-4.1,7.69.06,13.25,1.57,16.68,4.55,3.43,2.98,5.14,7.51,5.14,13.6v31.38h-9.13s0-7.03,0-7.03c-4.55,5.08-10.64,7.62-18.27,7.62-6.02,0-10.75-1.28-14.18-3.84ZM354.7,73.64c3.08-1.97,4.61-4.6,4.61-7.9v-5.8l-8.84.29c-7.05.26-12.03,1.07-14.95,2.44-2.92,1.37-4.37,3.51-4.37,6.42,0,2.41.96,4.26,2.88,5.56,1.92,1.3,4.84,1.95,8.75,1.94,4.87,0,8.84-.99,11.92-2.96Z"/>
+                        <path class="cls-2-logo-auth" d="M377.19,17.04h9.23s0,66.56,0,66.56h-9.23s0-66.56,0-66.56Z"/>
+                        <path class="cls-2-logo-auth" d="M394.68,17.02h9.42s0,11.21,0,11.21h-9.42s0-11.21,0-11.21ZM394.78,35.85h9.23s0,47.73,0,47.73h-9.23s0-47.73,0-47.73Z"/>
+                        <path class="cls-2-logo-auth" d="M412.28,76.83l30.57-33.12-29.9.02v-7.7l42.4-.03v6.56l-30.38,32.93,30.09-.02v8.08l-42.78.03v-6.75Z"/>
+                        <path class="cls-2-logo-auth" d="M468.66,80.25c-3.43-2.57-5.14-6.32-5.14-11.26,0-6.09,2.55-10.19,7.64-12.32,5.1-2.13,12.03-3.26,20.81-3.39l9.04-.2v-1.24c0-3.55-.95-6.05-2.84-7.51-1.89-1.46-5.14-2.18-9.76-2.18-4.1,0-7.21.67-9.32,2-2.12,1.33-3.24,3.58-3.36,6.75h-9.42c.13-5.89,2.05-10.17,5.77-12.84,3.72-2.67,9.16-4.03,16.34-4.1,7.69.06,13.25,1.57,16.68,4.55,3.43,2.98,5.14,7.51,5.14,13.6v31.38h-9.13s0-7.03,0-7.03c-4.55,5.08-10.64,7.62-18.27,7.62-6.02,0-10.75-1.28-14.18-3.84ZM496.39,73.53c3.08-1.97,4.61-4.6,4.61-7.9v-5.8l-8.84.29c-7.05.26-12.03,1.07-14.95,2.44-2.92,1.37-4.37,3.51-4.37,6.42,0,2.41.96,4.26,2.88,5.56,1.92,1.3,4.84,1.95,8.75,1.94,4.87,0,8.84-.99,11.92-2.96Z"/>
+                      </g>
+                      <g>
+                        <path class="cls-1-logo-auth" d="M58.62,101.5s-12.21-26.73-43.18-21.61v-24.04s29.74,1.62,40.51,31.49c1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                        <path class="cls-3-logo-auth" d="M58.62,101.5c-6.75-32.15-28.77-42.36-43.18-45.57-3.53-.79-6.61-1.16-8.89-1.33-2.37-.18-4.2-2.14-4.2-4.52,0-2.73,2.38-4.84,5.09-4.5,11.47,1.44,39.07,8.39,48.52,41.75,1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                        <path class="cls-1-logo-auth" d="M69.48,101.5s12.21-27.94,43.18-22.83v-22.83s-29.74,1.62-40.51,31.49c-1.21,4.27-2.12,8.98-2.67,14.17Z"/>
+                        <path class="cls-3-logo-auth" d="M69.48,101.5c6.75-32.15,28.77-42.36,43.18-45.57,3.53-.79,6.61-1.16,8.89-1.33,2.37-.18,4.2-2.14,4.2-4.52,0-2.73-2.38-4.84-5.09-4.5-11.47,1.44-39.07,8.39-48.52,41.75-1.21,4.27-2.12,8.98-2.67,14.17Z"/>
+                        <path class="cls-1-logo-auth" d="M92.24,7.72C83.54,2.57,73.8,0,64.05,0c-9.75,0-19.49,2.57-28.19,7.72L1.79,27.87c-2.97,1.76-2.07,6.28,1.35,6.75,12,1.65,31.51,6.67,49.09,21.75,1.7,1.46,3.6,2.57,5.6,3.33,3.99,1.52,8.42,1.52,12.41,0,2-.76,3.9-1.87,5.6-3.33,17.59-15.08,37.1-20.1,49.09-21.75,3.42-.47,4.33-4.99,1.35-6.75L92.24,7.72ZM64.05,48.49c-6.16,0-11.16-5-11.16-11.16s5-11.16,11.16-11.16,11.16,5,11.16,11.16-5,11.16-11.16,11.16Z"/>
+                      </g>
+                    </g>
+                  </g>
+                </svg>
+            </div>
+            <h1 class="mt-4 text-3xl font-bold text-editaliza-black">Crie sua conta</h1>
+            <p class="mt-2 text-md text-editaliza-gray">
+                Comece a organizar seus estudos de forma inteligente.
+            </p>
+        </div>
+
+        <div class="bg-white p-8 space-y-6 rounded-2xl shadow-lg">
+            <form id="registerForm" class="space-y-6">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">E-mail</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required class="form-input" placeholder="seu@email.com">
+                </div>
+                
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Senha</label>
+                    <input id="password" name="password" type="password" autocomplete="new-password" required class="form-input" placeholder="Mínimo de 6 caracteres">
+                </div>
+                
+                <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
+                    <input id="confirmPassword" name="confirmPassword" type="password" autocomplete="new-password" required class="form-input" placeholder="Digite a senha novamente">
+                    <div id="passwordMatchMessage" class="mt-2 text-sm"></div>
+                </div>
+            
+                <div id="messageContainer" class="text-sm text-center font-medium"></div>
+
+                <div>
+                    <button type="submit" id="submitButton" class="btn-primary">
+                        Criar Conta Gratuitamente
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Google OAuth Section -->
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">Ou cadastre-se com</span>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <button type="button" id="googleRegisterButton" class="w-full flex justify-center items-center px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-editaliza-blue transition-colors">
+                        <svg class="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Cadastrar com Google
+                    </button>
+                </div>
+            </div>
+
+            <p class="text-center text-sm text-gray-600">
+                Já tem uma conta?
+                <a href="login.html" class="font-medium text-editaliza-blue hover:text-blue-700">
+                    Faça o login
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check for OAuth success and extract token from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('auth_success') === '1' && urlParams.get('token')) {
+                const token = urlParams.get('token');
+                localStorage.setItem(app.config.tokenKey, token);
+                // Clean URL and redirect
+                window.history.replaceState({}, document.title, window.location.pathname);
+                window.location.href = 'home.html';
+                return;
+            }
+            
+            // Check for OAuth errors
+            if (urlParams.get('error')) {
+                const errorType = urlParams.get('error');
+                let errorMessage = 'Erro na autenticação.';
+                if (errorType === 'oauth_failed') {
+                    errorMessage = 'Falha na autenticação com Google. Tente novamente.';
+                } else if (errorType === 'oauth_callback_failed') {
+                    errorMessage = 'Erro no processo de autenticação. Tente novamente.';
+                }
+                
+                const messageContainer = document.getElementById('messageContainer');
+                if (messageContainer) {
+                    messageContainer.textContent = errorMessage;
+                    messageContainer.classList.add('text-red-600');
+                }
+                
+                // Clean URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+            
+            const registerForm = document.getElementById('registerForm');
+            const messageContainer = document.getElementById('messageContainer');
+            const submitButton = document.getElementById('submitButton');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const passwordMatchMessage = document.getElementById('passwordMatchMessage');
+            const googleRegisterButton = document.getElementById('googleRegisterButton');
+
+            // Function to validate password match
+            function validatePasswordMatch() {
+                const password = passwordInput.value;
+                const confirmPassword = confirmPasswordInput.value;
+                
+                if (confirmPassword === '') {
+                    passwordMatchMessage.textContent = '';
+                    passwordMatchMessage.className = 'mt-2 text-sm';
+                    return true; // Allow empty confirm password during typing
+                }
+                
+                if (password === confirmPassword) {
+                    passwordMatchMessage.textContent = '✅ As senhas coincidem';
+                    passwordMatchMessage.className = 'mt-2 text-sm text-green-600';
+                    return true;
+                } else {
+                    passwordMatchMessage.textContent = '❌ As senhas não coincidem';
+                    passwordMatchMessage.className = 'mt-2 text-sm text-red-600';
+                    return false;
+                }
+            }
+
+            // Add real-time password validation
+            confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+            passwordInput.addEventListener('input', () => {
+                if (confirmPasswordInput.value !== '') {
+                    validatePasswordMatch();
+                }
+            });
+
+            registerForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                
+                messageContainer.textContent = '';
+                messageContainer.className = 'text-sm text-center font-medium';
+
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+
+                // Validate password match before submitting
+                if (password !== confirmPassword) {
+                    messageContainer.textContent = 'Erro: As senhas não coincidem';
+                    messageContainer.classList.add('text-red-600');
+                    return;
+                }
+
+                // Validate password strength
+                if (password.length < 6) {
+                    messageContainer.textContent = 'Erro: A senha deve ter pelo menos 6 caracteres';
+                    messageContainer.classList.add('text-red-600');
+                    return;
+                }
+
+                submitButton.disabled = true;
+                submitButton.textContent = 'Criando...';
+
+                try {
+                    // ATUALIZADO: Usa a função segura app.apiFetch
+                    const data = await app.apiFetch('/auth/register', {
+                        method: 'POST',
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    messageContainer.textContent = 'Cadastro realizado com sucesso! Redirecionando para o login...';
+                    messageContainer.classList.add('text-green-600');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+
+                } catch (error) {
+                    messageContainer.textContent = `Erro: ${error.message}`;
+                    messageContainer.classList.add('text-red-600');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Criar Conta Gratuitamente';
+                }
+            });
+            
+            // Google OAuth register handler
+            googleRegisterButton.addEventListener('click', () => {
+                // Redirect to Google OAuth endpoint (same as login)
+                window.location.href = '/auth/google';
+            });
+        });
+    </script>
+    
+    <!-- Script do rodapé modular -->
+    <script src="js/footer.js"></script>
+    <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
+</body>
+</html>

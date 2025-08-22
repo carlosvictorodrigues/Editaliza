@@ -1,0 +1,525 @@
+/* ========================================
+   FOOTER EDITALIZA - CSS WITH DARK MODE SUPPORT
+   ======================================== */
+
+/* RESET E BASE - ALTA ESPECIFICIDADE */
+body .editaliza-footer,
+body .editaliza-footer-refatorado,
+html body .editaliza-footer,
+html body .editaliza-footer-refatorado {
+    /* Reset completo */
+    all: unset;
+    box-sizing: border-box;
+    
+    /* Posicionamento */
+    position: relative !important;
+    z-index: 9999 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    
+    /* Display */
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    
+    /* Layout */
+    clear: both !important;
+    float: none !important;
+    
+    /* Texto */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    text-align: left !important;
+    
+    /* Cores base */
+    color: var(--text-muted) !important;
+    background: transparent !important;
+    
+    /* Bordas */
+    border: none !important;
+    outline: none !important;
+    
+    /* Sombras */
+    box-shadow: none !important;
+    text-shadow: none !important;
+    
+    /* Transições */
+    transition: none !important;
+    animation: none !important;
+    
+    /* Transformações */
+    transform: none !important;
+    
+    /* Overflow */
+    overflow: visible !important;
+    
+    /* Cursor */
+    cursor: default !important;
+    
+    /* Seleção */
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+}
+
+/* ESTRUTURA PRINCIPAL - LIGHT THEME */
+body .editaliza-footer-refatorado .footer-main-section,
+html body .editaliza-footer-refatorado .footer-main-section {
+    background: linear-gradient(135deg, #0528f2 0%, #0d0d0d 100%) !important;
+    width: 100% !important;
+    position: relative !important;
+    overflow: hidden !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 16px 0 !important;
+}
+
+/* DARK MODE - Sophisticated footer gradient */
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-main-section,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-main-section {
+    background: linear-gradient(135deg, #1a1b23 0%, #242530 50%, #2d2e3f 100%) !important;
+}
+
+body .editaliza-footer-refatorado .footer-copyright-section,
+html body .editaliza-footer-refatorado .footer-copyright-section {
+    background: linear-gradient(90deg, #0528f2 0%, #041d8a 100%) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    width: 100% !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 8px 0 !important;
+}
+
+/* DARK MODE - Copyright section */
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-copyright-section,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-copyright-section {
+    background: linear-gradient(90deg, #1a1b23 0%, #242530 100%) !important;
+    border-top: 1px solid #3a3b4a !important;
+}
+
+/* CONTAINER - ALTA ESPECIFICIDADE */
+body .editaliza-footer-refatorado .footer-container,
+html body .editaliza-footer-refatorado .footer-container {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 16px !important;
+    position: relative !important;
+    z-index: 1 !important;
+    display: block !important;
+}
+
+/* GRID - ALTA ESPECIFICIDADE */
+body .editaliza-footer-refatorado .footer-main-grid,
+html body .editaliza-footer-refatorado .footer-main-grid {
+    display: grid !important;
+    grid-template-columns: 2fr 1fr 1fr 1fr !important;
+    gap: 24px !important;
+    align-items: start !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* SEÇÃO DA MARCA - ALTA ESPECIFICIDADE */
+body .editaliza-footer-refatorado .footer-brand,
+html body .editaliza-footer-refatorado .footer-brand {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* LOGO - LIGHT THEME WITH TRANSPARENT BACKGROUND */
+body .editaliza-footer-refatorado .footer-logo,
+html body .editaliza-footer-refatorado .footer-logo {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 8px 12px !important;
+    background: transparent !important;
+    backdrop-filter: blur(10px) !important;
+    border-radius: 8px !important;
+    width: fit-content !important;
+    margin: 0 0 6px 0 !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+/* DARK MODE - Logo styling */
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-logo,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-logo {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid #3a3b4a !important;
+}
+
+body .editaliza-footer-refatorado .footer-logo-icon,
+html body .editaliza-footer-refatorado .footer-logo-icon {
+    height: 28px !important;
+    width: auto !important;
+    filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.4)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15)) !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* DESCRIÇÃO - LIGHT THEME */
+body .editaliza-footer-refatorado .footer-description,
+html body .editaliza-footer-refatorado .footer-description {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-size: 0.813rem !important;
+    line-height: 1.3 !important;
+    margin: 0 !important;
+    max-width: 280px !important;
+    display: block !important;
+    font-weight: 400 !important;
+    text-align: left !important;
+}
+
+/* DARK MODE - Description text */
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-description,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-description {
+    color: #b8b4ad !important;
+}
+
+/* REDES SOCIAIS - ALTA ESPECIFICIDADE */
+body .editaliza-footer-refatorado .footer-social,
+html body .editaliza-footer-refatorado .footer-social {
+    margin-top: 12px !important;
+    display: block !important;
+}
+
+body .editaliza-footer-refatorado .social-links,
+html body .editaliza-footer-refatorado .social-links {
+    display: flex !important;
+    gap: 6px !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body .editaliza-footer-refatorado .social-link,
+html body .editaliza-footer-refatorado .social-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 6px !important;
+    color: #FFFFFF !important;
+    text-decoration: none !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    backdrop-filter: blur(8px) !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body .editaliza-footer-refatorado .social-link:hover,
+html body .editaliza-footer-refatorado .social-link:hover {
+    background: #1AD937 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(26, 217, 55, 0.3) !important;
+}
+
+/* DARK MODE - Social links hover */
+[data-theme="dark"] body .editaliza-footer-refatorado .social-link:hover,
+[data-theme="dark"] html body .editaliza-footer-refatorado .social-link:hover {
+    background: #6ba644 !important;
+    box-shadow: 0 4px 12px rgba(107, 166, 68, 0.3) !important;
+}
+
+body .editaliza-footer-refatorado .social-link svg,
+html body .editaliza-footer-refatorado .social-link svg {
+    width: 18px !important;
+    height: 18px !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+}
+
+/* SEÇÕES DE NAVEGAÇÃO - LIGHT THEME */
+body .editaliza-footer-refatorado .footer-nav-section,
+html body .editaliza-footer-refatorado .footer-nav-section {
+    display: flex !important;
+    flex-direction: column !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body .editaliza-footer-refatorado .footer-nav-title,
+html body .editaliza-footer-refatorado .footer-nav-title {
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: #FFFFFF !important;
+    margin: 0 0 12px 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.025em !important;
+    position: relative !important;
+    display: block !important;
+    text-align: left !important;
+    background: transparent !important;
+}
+
+body .editaliza-footer-refatorado .footer-nav-title::after,
+html body .editaliza-footer-refatorado .footer-nav-title::after {
+    content: '' !important;
+    position: absolute !important;
+    bottom: -4px !important;
+    left: 0 !important;
+    width: 24px !important;
+    height: 2px !important;
+    background: #1AD937 !important;
+    border-radius: 1px !important;
+    display: block !important;
+}
+
+/* DARK MODE - Nav title accent - Removed for light mode only */
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-nav-title::after,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-nav-title::after {
+    background: #1AD937 !important; /* Keep green accent */
+    opacity: 0.8 !important;
+}
+
+body .editaliza-footer-refatorado .footer-nav-list,
+html body .editaliza-footer-refatorado .footer-nav-list {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+}
+
+body .editaliza-footer-refatorado .footer-nav-link,
+html body .editaliza-footer-refatorado .footer-nav-link {
+    color: rgba(255, 255, 255, 0.90) !important;
+    text-decoration: none !important;
+    font-size: 0.813rem !important;
+    font-weight: 500 !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+body .editaliza-footer-refatorado .footer-nav-link:hover,
+body .editaliza-footer-refatorado .footer-nav-link:focus,
+html body .editaliza-footer-refatorado .footer-nav-link:hover,
+html body .editaliza-footer-refatorado .footer-nav-link:focus {
+    color: #1AD937 !important;
+    transform: translateX(4px) !important;
+    background: transparent !important;
+    text-shadow: 0 0 8px rgba(26, 217, 55, 0.3) !important;
+}
+
+/* DARK MODE - Nav links hover - Sutil */
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-nav-link,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-nav-link {
+    color: #D1D5DB !important; /* Cinza claro no dark mode */
+    background: transparent !important;
+}
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-nav-link:hover,
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-nav-link:focus,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-nav-link:hover,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-nav-link:focus {
+    color: #F3F4F6 !important; /* Branco suave ao hover */
+    background: transparent !important;
+}
+
+/* COPYRIGHT - ALTA ESPECIFICIDADE */
+body .editaliza-footer-refatorado .footer-copyright-content,
+html body .editaliza-footer-refatorado .footer-copyright-content {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    min-height: 32px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body .editaliza-footer-refatorado .footer-copyright-text,
+html body .editaliza-footer-refatorado .footer-copyright-text {
+    color: rgba(255, 255, 255, 0.65) !important;
+    font-size: 0.75rem !important;
+    font-weight: 400 !important;
+    margin: 0 !important;
+    display: block !important;
+}
+
+body .editaliza-footer-refatorado .footer-legal-links,
+html body .editaliza-footer-refatorado .footer-legal-links {
+    display: flex !important;
+    gap: 12px !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body .editaliza-footer-refatorado .footer-legal-link,
+html body .editaliza-footer-refatorado .footer-legal-link {
+    color: rgba(255, 255, 255, 0.65) !important;
+    text-decoration: none !important;
+    font-size: 0.75rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    display: inline-block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body .editaliza-footer-refatorado .footer-legal-link:hover,
+body .editaliza-footer-refatorado .footer-legal-link:focus,
+html body .editaliza-footer-refatorado .footer-legal-link:hover,
+html body .editaliza-footer-refatorado .footer-legal-link:focus {
+    color: #1AD937 !important;
+}
+
+/* DARK MODE - Legal links hover - Consistente */
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-legal-link,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-legal-link {
+    color: #9CA3AF !important; /* Cinza médio */
+    background: transparent !important;
+}
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-legal-link:hover,
+[data-theme="dark"] body .editaliza-footer-refatorado .footer-legal-link:focus,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-legal-link:hover,
+[data-theme="dark"] html body .editaliza-footer-refatorado .footer-legal-link:focus {
+    color: #D1D5DB !important; /* Cinza claro ao hover */
+    background: transparent !important;
+}
+
+/* RESPONSIVIDADE - ALTA ESPECIFICIDADE */
+@media (max-width: 1024px) {
+    body .editaliza-footer-refatorado .footer-main-grid,
+    html body .editaliza-footer-refatorado .footer-main-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 28px !important;
+    }
+    
+    body .editaliza-footer-refatorado .footer-brand,
+    html body .editaliza-footer-refatorado .footer-brand {
+        grid-column: 1 / -1 !important;
+        margin-bottom: 16px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    body .editaliza-footer-refatorado .footer-main-section,
+    html body .editaliza-footer-refatorado .footer-main-section {
+        padding: 16px 20px !important;
+    }
+    
+    body .editaliza-footer-refatorado .footer-copyright-section,
+    html body .editaliza-footer-refatorado .footer-copyright-section {
+        padding: 8px 20px !important;
+    }
+    
+    body .editaliza-footer-refatorado .footer-main-grid,
+    html body .editaliza-footer-refatorado .footer-main-grid {
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+    }
+    
+    body .editaliza-footer-refatorado .footer-brand,
+    html body .editaliza-footer-refatorado .footer-brand {
+        grid-column: 1 !important;
+        margin-bottom: 16px !important;
+    }
+    
+    body .editaliza-footer-refatorado .footer-logo,
+    html body .editaliza-footer-refatorado .footer-logo {
+        padding: 10px 14px !important;
+    }
+    
+    body .editaliza-footer-refatorado .footer-logo-icon,
+    html body .editaliza-footer-refatorado .footer-logo-icon {
+        height: 28px !important;
+    }
+    
+    body .editaliza-footer-refatorado .footer-description,
+    html body .editaliza-footer-refatorado .footer-description {
+        font-size: 0.8rem !important;
+        max-width: none !important;
+    }
+    
+    body .editaliza-footer-refatorado .footer-copyright-content,
+    html body .editaliza-footer-refatorado .footer-copyright-content {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 12px !important;
+    }
+    
+    body .editaliza-footer-refatorado .footer-legal-links,
+    html body .editaliza-footer-refatorado .footer-legal-links {
+        justify-content: center !important;
+    }
+}
+
+@media (max-width: 480px) {
+    body .editaliza-footer-refatorado .footer-main-section,
+    html body .editaliza-footer-refatorado .footer-main-section {
+        padding: 14px 16px !important;
+    }
+    
+    body .editaliza-footer-refatorado .footer-copyright-section,
+    html body .editaliza-footer-refatorado .footer-copyright-section {
+        padding: 6px 16px !important;
+    }
+    
+    body .editaliza-footer-refatorado .footer-legal-links,
+    html body .editaliza-footer-refatorado .footer-legal-links {
+        flex-direction: column !important;
+        gap: 6px !important;
+    }
+}
+
+/* ========================================
+   OVERRIDE FINAL - PRIORIDADE MÁXIMA
+   ======================================== */
+
+/* Força visibilidade em qualquer contexto */
+.editaliza-footer-refatorado,
+.editaliza-footer-refatorado *,
+.editaliza-footer,
+.editaliza-footer * {
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: block !important;
+}
+
+/* Remove qualquer display: none */
+.editaliza-footer-refatorado[style*="display: none"],
+.editaliza-footer[style*="display: none"] {
+    display: block !important;
+}
+
+/* Remove qualquer visibility: hidden */
+.editaliza-footer-refatorado[style*="visibility: hidden"],
+.editaliza-footer[style*="visibility: hidden"] {
+    visibility: visible !important;
+}
+
+/* Remove qualquer opacity: 0 */
+.editaliza-footer-refatorado[style*="opacity: 0"],
+.editaliza-footer[style*="opacity: 0"] {
+    opacity: 1 !important;
+}
+
+/* Garante que o footer esteja sempre visível */
+.editaliza-footer-refatorado:not([style*="display: none"]):not([style*="visibility: hidden"]):not([style*="opacity: 0"]),
+.editaliza-footer:not([style*="display: none"]):not([style*="visibility: hidden"]):not([style*="opacity: 0"]) {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}

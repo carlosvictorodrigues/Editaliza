@@ -1,0 +1,190 @@
+{
+  "timestamp": "2025-08-07T13:00:08.442Z",
+  "fortress": {
+    "name": "Editaliza Testing Fortress",
+    "version": "1.0.0"
+  },
+  "validation": {
+    "overall": {
+      "passed": false,
+      "percentage": 79
+    },
+    "categories": {
+      "authentication": {
+        "name": "Testes de Autenticação",
+        "priority": "critical",
+        "modules": [
+          "login",
+          "register",
+          "tokens",
+          "sessions",
+          "oauth"
+        ],
+        "coverage": {
+          "percentage": 0,
+          "tests": 0,
+          "lines": 0
+        },
+        "passed": false
+      },
+      "timer": {
+        "name": "Testes de Cronômetro/Timer",
+        "priority": "high",
+        "modules": [
+          "start",
+          "pause",
+          "stop",
+          "persistence",
+          "sync",
+          "pomodoro"
+        ],
+        "coverage": {
+          "percentage": 90,
+          "tests": 26,
+          "describes": 7,
+          "lines": 605
+        },
+        "passed": true
+      },
+      "sessions": {
+        "name": "Testes de Sessões de Estudo",
+        "priority": "high",
+        "modules": [
+          "checklist",
+          "continuation",
+          "completion",
+          "data-saving"
+        ],
+        "coverage": {
+          "percentage": 90,
+          "tests": 27,
+          "describes": 9,
+          "lines": 595
+        },
+        "passed": true
+      },
+      "metrics": {
+        "name": "Testes de Métricas",
+        "priority": "medium",
+        "modules": [
+          "progress",
+          "sync",
+          "cache",
+          "gamification"
+        ],
+        "coverage": {
+          "percentage": 90,
+          "tests": 31,
+          "describes": 10,
+          "lines": 695
+        },
+        "passed": true
+      },
+      "navigation": {
+        "name": "Testes de Navegação",
+        "priority": "medium",
+        "modules": [
+          "links",
+          "menu",
+          "loading",
+          "responsive",
+          "breadcrumbs"
+        ],
+        "coverage": {
+          "percentage": 90,
+          "tests": 40,
+          "describes": 12,
+          "lines": 699
+        },
+        "passed": true
+      },
+      "api": {
+        "name": "Testes de API",
+        "priority": "critical",
+        "modules": [
+          "endpoints",
+          "errors",
+          "timeouts",
+          "rate-limit",
+          "validation"
+        ],
+        "coverage": {
+          "percentage": 90,
+          "tests": 36,
+          "describes": 12,
+          "lines": 677
+        },
+        "passed": true
+      },
+      "interface": {
+        "name": "Testes de Interface",
+        "priority": "medium",
+        "modules": [
+          "components",
+          "errors",
+          "modals",
+          "forms",
+          "feedback"
+        ],
+        "coverage": {
+          "percentage": 90,
+          "tests": 36,
+          "describes": 10,
+          "lines": 1033
+        },
+        "passed": true
+      },
+      "annotations": {
+        "name": "Testes de Sistema de Anotações",
+        "priority": "medium",
+        "modules": [
+          "crud",
+          "organization",
+          "search",
+          "persistence",
+          "sync"
+        ],
+        "coverage": {
+          "percentage": 90,
+          "tests": 35,
+          "describes": 7,
+          "lines": 1062
+        },
+        "passed": true
+      },
+      "e2e_integration": {
+        "name": "Testes de Integração E2E",
+        "priority": "high",
+        "modules": [
+          "complete_flows",
+          "user_scenarios",
+          "cross_browser",
+          "performance"
+        ],
+        "coverage": {
+          "percentage": 85,
+          "tests": 19,
+          "describes": 9,
+          "lines": 919
+        },
+        "passed": true
+      }
+    },
+    "issues": [
+      "Testes de Autenticação abaixo do threshold (0% < 80%)",
+      "Qualidade: Padrões de nomenclatura - 43% dos arquivos seguem convenções"
+    ],
+    "recommendations": [
+      "🎯 Priorizar aumento da cobertura geral para 80%+",
+      "🔧 Melhorar cobertura em: Testes de Autenticação",
+      "🚨 URGENTE: Corrigir categorias críticas com baixa cobertura",
+      "🛠️  Resolver 2 problemas identificados"
+    ]
+  },
+  "summary": {
+    "totalCategories": 9,
+    "passedCategories": 8,
+    "totalIssues": 2,
+    "averageCoverage": 79
+  }
+}

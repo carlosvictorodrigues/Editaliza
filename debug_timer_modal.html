@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Timer Modal - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Debug - Timer Modal Issue</h1>
+        
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+            <h2 class="text-xl font-semibold mb-4">Teste de Fluxo</h2>
+            <button onclick="testTimerModalFlow()" class="btn-primary px-6 py-3 rounded-lg">
+                Testar Fluxo do Modal do Timer
+            </button>
+            
+            <div id="debug-log" class="mt-6 p-4 bg-gray-800 text-green-400 rounded-lg font-mono text-sm max-h-96 overflow-y-auto">
+                <!-- Logs aparecerão aqui -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Sessão de Estudo -->
+    <div id="studySessionModal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4 opacity-0">
+        <div id="studySessionModalContainer" class="modal-container bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl transform scale-95 max-h-[90vh] overflow-y-auto">
+            <!-- O conteúdo do modal será injetado aqui pelo JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Mock data para teste
+        window.app = {
+            showToast: (message, type) => {
+                debugLog(`Toast: ${message} (${type})`, 'info');
+            },
+            sanitizeHtml: (str) => str,
+            getSubjectStyle: () => ({ icon: '📚', color: 'border-blue-500' })
+        };
+
+        // Mock TimerSystem
+        window.TimerSystem = {
+            hasActiveTimer: (sessionId) => false,
+            getTimerElapsed: (sessionId) => 5000, // 5 segundos para simular tempo estudado
+            timers: {
+                123: { elapsed: 5000 }
+            },
+            continueTimer: (sessionId) => {
+                debugLog(`TimerSystem.continueTimer(${sessionId}) chamado`, 'success');
+                return true;
+            },
+            formatTime: (ms) => {
+                const s = Math.floor(ms / 1000);
+                return `00:00:${s.toString().padStart(2, '0')}`;
+            },
+            createTimerUI: (sessionId) => `<div class="text-center"><h3>Timer UI para sessão ${sessionId}</h3></div>`,
+            updateDisplay: (sessionId) => debugLog(`TimerSystem.updateDisplay(${sessionId}) chamado`, 'info')
+        };
+
+        // Mock StudyChecklist
+        window.StudyChecklist = {
+            session: null,
+            showTimerModal: function() {
+                debugLog('StudyChecklist.showTimerModal() CHAMADO!', 'success');
+                
+                if (!this.session) {
+                    debugLog('❌ Nenhuma sessão definida para mostrar o modal do cronômetro', 'error');
+                    return;
+                }
+                
+                const modal = document.getElementById('studySessionModal');
+                const modalContainer = document.getElementById('studySessionModalContainer');
+                
+                if (!modal || !modalContainer) {
+                    debugLog('❌ Elementos do modal não encontrados no DOM', 'error');
+                    return;
+                }
+                
+                debugLog('✅ Elementos do modal encontrados no DOM', 'success');
+                
+                modalContainer.innerHTML = `
+                    <div class="text-center">
+                        <h2 class="text-2xl font-bold mb-4">Timer Modal - Sessão ${this.session.id}</h2>
+                        <p class="text-gray-600 mb-6">${this.session.subject_name}</p>
+                        <div class="text-lg font-mono">05:00</div>
+                        <button onclick="StudyChecklist.close()" class="mt-4 btn-secondary px-4 py-2 rounded">Fechar</button>
+                    </div>
+                `;
+                
+                modal.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modalContainer.classList.remove('scale-95');
+                }, 10);
+                
+                debugLog('✅ Modal do timer aberto com sucesso!', 'success');
+            },
+            close: function() {
+                debugLog('StudyChecklist.close() chamado', 'info');
+                const modal = document.getElementById('studySessionModal');
+                const modalContainer = document.getElementById('studySessionModalContainer');
+                
+                modal.classList.add('opacity-0');
+                modalContainer.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modalContainer.innerHTML = '';
+                }, 300);
+            }
+        };
+
+        function debugLog(message, type = 'log') {
+            const logElement = document.getElementById('debug-log');
+            const timestamp = new Date().toLocaleTimeString();
+            const colorClass = {
+                'success': 'text-green-400',
+                'error': 'text-red-400',
+                'warning': 'text-yellow-400',
+                'info': 'text-blue-400',
+                'log': 'text-green-400'
+            }[type] || 'text-green-400';
+            
+            logElement.innerHTML += `<div class="${colorClass}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Função mockada para simular fetchSessionData
+        async function fetchSessionData(sessionId) {
+            debugLog(`fetchSessionData(${sessionId}) chamado`, 'info');
+            return {
+                id: sessionId,
+                subject_name: 'Direito Constitucional',
+                topic_description: 'Princípios Fundamentais',
+                status: 'Pendente'
+            };
+        }
+
+        // Reproduzir o fluxo exato do app.js
+        async function testTimerModalFlow() {
+            debugLog('🎯 INICIANDO TESTE DO FLUXO COMPLETO', 'success');
+            debugLog('═'.repeat(50), 'log');
+            
+            const sessionId = 123;
+            
+            // Simular que shouldContinue = true
+            debugLog('1. Usuário escolheu "Continuar" no modal de confirmação', 'info');
+            
+            // Buscar dados da sessão
+            debugLog('2. Buscando dados da sessão...', 'info');
+            const session = await fetchSessionData(sessionId);
+            
+            if (session) {
+                debugLog('3. ✅ Sessão carregada com sucesso', 'success');
+                debugLog(`   - ID: ${session.id}`, 'log');
+                debugLog(`   - Matéria: ${session.subject_name}`, 'log');
+                
+                // CORREÇÃO: Definir sessão ANTES de chamar qualquer método
+                debugLog('4. Definindo StudyChecklist.session...', 'info');
+                StudyChecklist.session = session;
+                debugLog('   ✅ StudyChecklist.session definido', 'success');
+                
+                // Continuar o timer
+                debugLog('5. Continuando timer...', 'info');
+                TimerSystem.continueTimer(sessionId);
+                
+                // Abrir o modal do cronômetro
+                debugLog('6. Verificando condições para abrir modal...', 'info');
+                debugLog(`   - window.StudyChecklist existe: ${!!window.StudyChecklist}`, 'log');
+                debugLog(`   - StudyChecklist.showTimerModal existe: ${!!StudyChecklist.showTimerModal}`, 'log');
+                debugLog(`   - StudyChecklist.session existe: ${!!StudyChecklist.session}`, 'log');
+                
+                if (window.StudyChecklist && StudyChecklist.showTimerModal) {
+                    debugLog('7. ✅ Condições atendidas - chamando showTimerModal()', 'success');
+                    StudyChecklist.showTimerModal();
+                } else {
+                    debugLog('7. ❌ CONDIÇÕES NÃO ATENDIDAS!', 'error');
+                    if (!window.StudyChecklist) {
+                        debugLog('   - window.StudyChecklist não existe', 'error');
+                    }
+                    if (!StudyChecklist.showTimerModal) {
+                        debugLog('   - StudyChecklist.showTimerModal não existe', 'error');
+                    }
+                }
+                
+                // Mostrar toast
+                app.showToast('⏱️ Continuando estudos! Timer retomado.', 'success');
+                
+            } else {
+                debugLog('3. ❌ Erro ao carregar sessão', 'error');
+            }
+            
+            debugLog('═'.repeat(50), 'log');
+            debugLog('🏁 TESTE CONCLUÍDO', 'success');
+        }
+
+        // Adicionar CSS personalizado
+        const style = document.createElement('style');
+        style.textContent = `
+            .btn-primary {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+            .btn-primary:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            }
+            .btn-secondary {
+                background: #6b7280;
+                color: white;
+            }
+            .btn-secondary:hover {
+                background: #4b5563;
+            }
+        `;
+        document.head.appendChild(style);
+
+        debugLog('🚀 Sistema de debug inicializado', 'success');
+        debugLog('Clique no botão para testar o fluxo completo', 'info');
+    </script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+# =========================================
+# DOCKER IGNORE - EDITALIZA
+# =========================================
+
+# === DEPENDENCIES ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# === ENVIRONMENT FILES ===
+.env
+.env.*
+!.env.example
+
+# === GIT ===
+.git/
+.gitignore
+.gitattributes
+
+# === LOGS ===
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# === TEMPORARY FILES ===
+tmp/
+temp/
+.tmp/
+.temp/
+
+# === OS GENERATED FILES ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# === IDE / EDITOR ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === COVERAGE ===
+coverage/
+.nyc_output/
+
+# === RUNTIME ===
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# === BUILD ARTIFACTS ===
+dist/
+build/
+.next/
+out/
+
+# === DATABASE FILES (for development) ===
+*.sqlite
+*.sqlite3
+*.db
+db_backup_*
+sessions.db
+
+# === UPLOAD FILES ===
+uploads/*
+!uploads/.gitkeep
+
+# === CACHE ===
+.cache/
+.parcel-cache/
+
+# === DOCUMENTATION ===
+docs/
+*.md
+!README.md
+RELATORIO*.md
+GUIA*.md
+STATUS*.md
+CORRECAO*.md
+IMPLEMENTATION*.md
+DESIGN*.md
+AUDIT*.md
+
+# === TEST FILES ===
+test/
+tests/
+*.test.js
+*.spec.js
+__tests__/
+jest.config.js
+jest-setup.js
+
+# === DEVELOPMENT TOOLS ===
+.eslintrc*
+.prettierrc*
+babel.config.js
+tailwind.config.js
+nodemon.json
+eslint.config.js
+
+# === BACKUP FILES ===
+*.bak
+*.backup
+*_backup.*
+backup_*/
+.git_backup/
+*_backup_*
+
+# === DEBUG/TEST FILES ESPECÍFICOS DO PROJETO ===
+debug-*.html
+test-*.html
+teste-*.html
+temp_*.js
+check-*.js
+create-*.js
+validate_*.js
+simple_test.js
+performance_*.js
+*-test.html
+nul
+
+# === DOCKER ===
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+k8s-*.yaml
+deploy*.sh
+maintenance.*
+nginx.conf
+
+# === CI/CD ===
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# === SCRIPTS DE DESENVOLVIMENTO ===
+*.bat
+baixar_avatares.sh
+deploy.sh
+dev-start.*
+start-server.*
+setup-deploy.sh
+
+# === ARQUIVOS ESPECÍFICOS DO PROJETO ===
+agents/
+components/
+secrets/
+ssl/
+cost_benefit_analysis.js
+weighted-distribution-solution.js
+schedule-validation-solution.js
+security-*.js
+server-*.js
+add-role-column.js
+
+# === PATCHES E ANÁLISES ===
+*.patch
+gemini.md
+relatorio*.md
+
+# === MISC ===
+.editorconfig
+.nvmrc
+.node-version
+LOGOTIPO.txt
+*.svg
+logo.pdf

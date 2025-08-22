@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Anotações - Editaliza</title>
+    <!-- Favicon and Web App Icons - Enhanced for better browser compatibility -->
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=4">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=4">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png?v=4">
+    <link rel="shortcut icon" href="favicon.ico?v=4">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=4">
+    <meta name="theme-color" content="#0528f2">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/design-tokens.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/footer.css" rel="stylesheet">
+    <!-- Theme system removed - light mode only -->
+    <!-- SCRIPTS CENTRALIZADOS -->
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <!-- Config do Tailwind para reconhecer as cores customizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-black': '#0d0d0d',
+                        'editaliza-gray': '#969696',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-container { transition: all 0.3s ease; }
+        
+        /* Estilos para as anotações */
+        .note-card {
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(248,250,252,0.95));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        .note-content {
+            line-height: 1.6;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        
+        .search-input:focus {
+            border-color: #0528f2;
+            box-shadow: 0 0 0 3px rgba(5, 40, 242, 0.1);
+        }
+        
+        .filter-btn.active {
+            background: linear-gradient(135deg, #0528f2, #3b82f6);
+            color: white;
+            border-color: #0528f2;
+        }
+        
+        /* Animação suave para mostrar/ocultar anotações */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+    <!-- Container de Toast para Notificações -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3"></div>
+
+    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
+    <div id="main-nav-container"></div>
+
+    <!-- Modal para Criar/Editar Anotação -->
+    <div id="noteModal" class="modal-overlay hidden fixed inset-0 bg-editaliza-black bg-opacity-70 z-30 flex items-center justify-center p-4 opacity-0">
+        <div class="modal-container bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden transform scale-95">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h2 id="modalTitle" class="text-2xl font-bold text-editaliza-black">Nova Anotação</h2>
+                <button id="closeModalButton" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="noteForm" class="p-6 space-y-4 overflow-y-auto max-h-[calc(90vh-200px)]">
+                <div>
+                    <label for="noteTitle" class="block text-sm font-semibold text-gray-700 mb-2">Título da Anotação</label>
+                    <input type="text" id="noteTitle" name="title" required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-editaliza-blue focus:border-editaliza-blue transition-colors"
+                           placeholder="Digite um título descritivo...">
+                </div>
+                
+                <div>
+                    <label for="noteSubject" class="block text-sm font-semibold text-gray-700 mb-2">Disciplina/Matéria</label>
+                    <select id="noteSubject" name="subject" required 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-editaliza-blue focus:border-editaliza-blue transition-colors">
+                        <option value="">Selecione uma disciplina...</option>
+                        <!-- CORREÇÃO: Disciplinas serão carregadas dinamicamente do plano selecionado -->
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="noteContent" class="block text-sm font-semibold text-gray-700 mb-2">Conteúdo da Anotação</label>
+                    <textarea id="noteContent" name="content" required rows="8"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-editaliza-blue focus:border-editaliza-blue transition-colors resize-vertical"
+                              placeholder="Digite aqui suas anotações, resumos, dicas, fórmulas, conceitos importantes..."></textarea>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                    <button type="submit" class="btn-primary flex-1">
+                        <span id="submitButtonText">Salvar Anotação</span>
+                    </button>
+                    <button type="button" id="cancelButton" class="btn-secondary flex-1">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+        <!-- Cabeçalho da Página -->
+        <div class="content-card mb-8">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
+                <div class="mb-4 lg:mb-0">
+                    <h1 class="text-3xl font-bold text-editaliza-black mb-2 flex items-center">
+                        <span class="text-3xl mr-3">📝</span>Minhas Anotações
+                    </h1>
+                    <p class="text-gray-600">Organize suas anotações e resumos por disciplina</p>
+                </div>
+                
+                <!-- CORREÇÃO: Seletor de plano de estudos -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <div class="flex items-center space-x-3">
+                        <label for="planSelector" class="text-sm font-medium text-gray-700 whitespace-nowrap">
+                            Plano de Estudos:
+                        </label>
+                        <select id="planSelector" 
+                                class="block w-auto min-w-[200px] rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-editaliza-blue focus:ring-editaliza-blue">
+                            <option value="">Carregando planos...</option>
+                        </select>
+                    </div>
+                    
+                    <button id="createNoteButton" class="btn-primary flex items-center px-4 py-2 text-sm font-medium w-auto">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        Nova Anotação
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controles de Busca e Filtro -->
+        <div class="content-card mb-8">
+            <div class="flex flex-col lg:flex-row gap-4 items-center">
+                <!-- Campo de Busca -->
+                <div class="flex-1 w-full">
+                    <div class="relative">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" id="searchInput" placeholder="Buscar anotações por título ou conteúdo..." 
+                               class="search-input w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none transition-all duration-300">
+                    </div>
+                </div>
+                
+                <!-- Filtros por Disciplina -->
+                <div class="flex flex-wrap gap-2">
+                    <button data-filter="all" class="filter-btn active px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 transition-all duration-200">
+                        Todas
+                    </button>
+                    <div id="subjectFilters" class="flex flex-wrap gap-2">
+                        <!-- Filtros por disciplina serão inseridos aqui dinamicamente -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container das Anotações -->
+        <div id="notesContainer" class="space-y-6">
+            <div class="content-card text-center">
+                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p class="text-lg font-medium mb-2 text-gray-500">Carregando suas anotações...</p>
+                <p class="text-sm text-gray-400">Aguarde enquanto organizamos seu conteúdo</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentNotes = [];
+        let currentFilter = 'all';
+        let currentSearch = '';
+        let editingNoteId = null;
+        let availablePlans = [];
+        let selectedPlanId = null;
+        let planSubjects = [];
+
+        // Inicializar a página
+        async function initialize() {
+            await components.renderMainNavigation('notes.html');
+            await loadPlans();
+            await loadNotes();
+            setupEventListeners();
+        }
+
+        // CORREÇÃO: Carregar planos de estudo disponíveis
+        async function loadPlans() {
+            try {
+                availablePlans = await app.getPlans();
+                
+                if (!availablePlans || availablePlans.length === 0) {
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+
+                // Carregar plano selecionado do localStorage ou usar o primeiro
+                const savedPlanId = localStorage.getItem(app.config.planKey);
+                const planExists = availablePlans.some(p => p.id == savedPlanId);
+                
+                selectedPlanId = (savedPlanId && planExists) ? savedPlanId : availablePlans[0].id;
+                localStorage.setItem(app.config.planKey, selectedPlanId);
+
+                // Populár seletor de planos
+                const planSelector = document.getElementById('planSelector');
+                planSelector.innerHTML = availablePlans.map(p => 
+                    `<option value="${p.id}" ${p.id == selectedPlanId ? 'selected' : ''}>${app.sanitizeHtml(p.plan_name)}</option>`
+                ).join('');
+
+                await loadPlanSubjects(selectedPlanId);
+                
+            } catch (error) {
+                console.error("Erro ao carregar planos:", error);
+                app.showToast('Erro ao carregar planos de estudo', 'error');
+            }
+        }
+
+        // CORREÇÃO: Carregar disciplinas do plano selecionado
+        async function loadPlanSubjects(planId) {
+            try {
+                if (!planId) {
+                    planSubjects = [];
+                    return;
+                }
+
+                const subjects = await app.apiFetch(`/plans/${planId}/subjects`);
+                planSubjects = subjects.map(s => s.subject_name).sort();
+                
+                console.log(`📚 Carregadas ${planSubjects.length} disciplinas do plano ${planId}:`, planSubjects);
+                
+                updateSubjectOptions();
+                
+            } catch (error) {
+                console.error("Erro ao carregar disciplinas do plano:", error);
+                // Fallback para disciplinas padrão
+                planSubjects = [
+                    'Direito Constitucional', 'Direito Administrativo', 'Direito Civil', 'Direito Penal',
+                    'Matemática', 'Português', 'Informática', 'Conhecimentos Gerais', 'Outros'
+                ];
+                updateSubjectOptions();
+            }
+        }
+
+        // CORREÇÃO: Atualizar opções de disciplinas no modal
+        function updateSubjectOptions() {
+            const subjectSelect = document.getElementById('noteSubject');
+            subjectSelect.innerHTML = '<option value="">Selecione uma disciplina...</option>' +
+                planSubjects.map(subject => `<option value="${app.sanitizeHtml(subject)}">${app.sanitizeHtml(subject)}</option>`).join('');
+        }
+
+        // Configurar event listeners
+        function setupEventListeners() {
+            // CORREÇÃO: Seletor de plano de estudos
+            document.getElementById('planSelector').addEventListener('change', async (e) => {
+                const newPlanId = e.target.value;
+                if (newPlanId !== selectedPlanId) {
+                    selectedPlanId = newPlanId;
+                    localStorage.setItem(app.config.planKey, selectedPlanId);
+                    await loadPlanSubjects(selectedPlanId);
+                    filterAndDisplayNotes(); // Re-filtrar notas após mudança de plano
+                    app.showToast('Plano alterado! Disciplinas atualizadas.', 'success');
+                }
+            });
+
+            // Botão criar nova anotação
+            document.getElementById('createNoteButton').addEventListener('click', () => {
+                openNoteModal();
+            });
+
+            // Fechar modal
+            document.getElementById('closeModalButton').addEventListener('click', closeNoteModal);
+            document.getElementById('cancelButton').addEventListener('click', closeNoteModal);
+
+            // Formulário de anotação
+            document.getElementById('noteForm').addEventListener('submit', handleNoteSubmit);
+
+            // Busca em tempo real
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                currentSearch = e.target.value.toLowerCase();
+                filterAndDisplayNotes();
+            });
+
+            // Filtros por disciplina
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('filter-btn')) {
+                    // Remover active de todos os filtros
+                    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                    // Adicionar active ao filtro clicado
+                    e.target.classList.add('active');
+                    currentFilter = e.target.dataset.filter;
+                    filterAndDisplayNotes();
+                }
+            });
+
+            // Fechar modal clicando fora
+            document.getElementById('noteModal').addEventListener('click', (e) => {
+                if (e.target === document.getElementById('noteModal')) {
+                    closeNoteModal();
+                }
+            });
+        }
+
+        // CORREÇÃO: Carregar anotações do localStorage filtradas por plano
+        async function loadNotes() {
+            try {
+                const savedNotes = localStorage.getItem('editaliza_notes');
+                const allNotes = savedNotes ? JSON.parse(savedNotes) : [];
+                
+                // CORREÇÃO: Filtrar notas do plano selecionado
+                currentNotes = selectedPlanId ? allNotes.filter(note => note.planId === selectedPlanId) : allNotes;
+                
+                // Se não há anotações para este plano, criar uma de exemplo
+                if (currentNotes.length === 0 && selectedPlanId) {
+                    const planName = availablePlans.find(p => p.id == selectedPlanId)?.plan_name || 'Este Plano';
+                    const firstSubject = planSubjects.length > 0 ? planSubjects[0] : 'Conhecimentos Gerais';
+                    
+                    const exampleNote = {
+                        id: Date.now(),
+                        planId: selectedPlanId,
+                        title: `Bem-vindo ao Sistema de Anotações - ${planName}!`,
+                        subject: firstSubject,
+                        content: "Esta é uma anotação de exemplo para demonstrar como o sistema funciona.\n\nVocê pode:\n- Criar novas anotações por disciplina do seu plano de estudos\n- Buscar por título ou conteúdo\n- Filtrar por matéria\n- Editar e excluir suas anotações\n- Alternar entre diferentes planos de estudo\n\nDica: Use este espaço para resumos, fórmulas, conceitos importantes e qualquer conteúdo que você queira revisar rapidamente!",
+                        createdAt: new Date().toISOString(),
+                        updatedAt: null
+                    };
+                    currentNotes = [exampleNote];
+                    saveNoteToStorage(exampleNote);
+                }
+                
+                // Garantir que cada nota tenha um ID único e planId
+                currentNotes.forEach((note, index) => {
+                    if (!note.id) {
+                        note.id = Date.now() + index;
+                    }
+                    if (!note.planId && selectedPlanId) {
+                        note.planId = selectedPlanId;
+                    }
+                });
+                
+                updateSubjectFilters();
+                filterAndDisplayNotes();
+            } catch (error) {
+                console.error('Erro ao carregar anotações:', error);
+                app.showToast('Erro ao carregar anotações', 'error');
+            }
+        }
+
+        // CORREÇÃO: Salvar uma anotação específica no localStorage global
+        function saveNoteToStorage(note) {
+            try {
+                const savedNotes = localStorage.getItem('editaliza_notes');
+                const allNotes = savedNotes ? JSON.parse(savedNotes) : [];
+                
+                const existingIndex = allNotes.findIndex(n => n.id === note.id);
+                if (existingIndex >= 0) {
+                    allNotes[existingIndex] = note;
+                } else {
+                    allNotes.unshift(note);
+                }
+                
+                localStorage.setItem('editaliza_notes', JSON.stringify(allNotes));
+                console.log(`💾 Nota salva: "${note.title}" (Plano: ${note.planId})`);
+            } catch (error) {
+                console.error('Erro ao salvar nota:', error);
+                app.showToast('Erro ao salvar anotação', 'error');
+            }
+        }
+
+        // CORREÇÃO: Salvar todas as anotações do plano atual
+        function saveNotes() {
+            try {
+                currentNotes.forEach(note => saveNoteToStorage(note));
+            } catch (error) {
+                console.error('Erro ao salvar anotações:', error);
+                app.showToast('Erro ao salvar anotações', 'error');
+            }
+        }
+
+        // CORREÇÃO: Deletar nota do localStorage global
+        function deleteNoteFromStorage(noteId) {
+            try {
+                const savedNotes = localStorage.getItem('editaliza_notes');
+                const allNotes = savedNotes ? JSON.parse(savedNotes) : [];
+                const filteredNotes = allNotes.filter(n => n.id !== noteId);
+                localStorage.setItem('editaliza_notes', JSON.stringify(filteredNotes));
+                console.log(`🗑️ Nota deletada: ID ${noteId}`);
+            } catch (error) {
+                console.error('Erro ao deletar nota:', error);
+                app.showToast('Erro ao deletar anotação', 'error');
+            }
+        }
+
+        // CORREÇÃO: Atualizar filtros por disciplina (apenas disciplinas com anotações do plano atual)
+        function updateSubjectFilters() {
+            const subjects = [...new Set(currentNotes.map(note => note.subject))].sort();
+            const filtersContainer = document.getElementById('subjectFilters');
+            
+            if (subjects.length === 0) {
+                filtersContainer.innerHTML = '<p class="text-sm text-gray-500 py-2">Nenhuma disciplina com anotações</p>';
+                return;
+            }
+            
+            filtersContainer.innerHTML = subjects.map(subject => `
+                <button data-filter="${app.sanitizeHtml(subject)}" class="filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 transition-all duration-200">
+                    ${app.sanitizeHtml(subject)}
+                </button>
+            `).join('');
+        }
+
+        // Filtrar e exibir anotações
+        function filterAndDisplayNotes() {
+            let filteredNotes = currentNotes;
+
+            // Filtrar por disciplina
+            if (currentFilter !== 'all') {
+                filteredNotes = filteredNotes.filter(note => note.subject === currentFilter);
+            }
+
+            // Filtrar por busca
+            if (currentSearch) {
+                filteredNotes = filteredNotes.filter(note => 
+                    note.title.toLowerCase().includes(currentSearch) ||
+                    note.content.toLowerCase().includes(currentSearch)
+                );
+            }
+
+            displayNotes(filteredNotes);
+        }
+
+        // Exibir anotações na tela
+        function displayNotes(notes) {
+            const container = document.getElementById('notesContainer');
+            
+            if (notes.length === 0) {
+                const emptyMessage = currentSearch || currentFilter !== 'all' 
+                    ? 'Nenhuma anotação encontrada com os filtros aplicados.'
+                    : 'Você ainda não criou nenhuma anotação.';
+                    
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-12">
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">${emptyMessage}</h3>
+                        <div class="mt-4">
+                            ${currentSearch || currentFilter !== 'all' 
+                                ? '<button onclick="clearFilters()" class="btn-secondary" style="width: auto; padding: 0.5rem 1.5rem;">Limpar filtros</button>'
+                                : '<button onclick="openNoteModal()" class="btn-primary" style="width: auto; padding: 0.75rem 2rem;">Criar sua primeira anotação</button>'
+                            }
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Agrupar por disciplina
+            const groupedNotes = notes.reduce((groups, note) => {
+                const subject = note.subject;
+                if (!groups[subject]) groups[subject] = [];
+                groups[subject].push(note);
+                return groups;
+            }, {});
+
+            let html = '';
+            Object.entries(groupedNotes).forEach(([subject, subjectNotes]) => {
+                // Ícone para cada disciplina
+                const subjectIcons = {
+                    'Direito Constitucional': '⚖️',
+                    'Direito Administrativo': '🏛️',
+                    'Direito Civil': '📋',
+                    'Direito Penal': '⚡',
+                    'Direito Processual Civil': '🔍',
+                    'Direito Processual Penal': '🚔',
+                    'Matemática': '🧮',
+                    'Português': '📚',
+                    'Informática': '💻',
+                    'Conhecimentos Gerais': '🌐',
+                    'Raciocínio Lógico': '🧠',
+                    'Estatística': '📊',
+                    'Geografia': '🌍',
+                    'História': '📜',
+                    'Atualidades': '📰',
+                    'default': '📖'
+                };
+
+                const icon = subjectIcons[subject] || subjectIcons.default;
+                
+                html += `
+                    <div class="mb-8">
+                        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <span class="text-2xl mr-3">${icon}</span>
+                            ${app.sanitizeHtml(subject)}
+                            <span class="ml-3 bg-editaliza-blue text-white px-3 py-1 rounded-full text-xs font-medium">
+                                ${subjectNotes.length} ${subjectNotes.length === 1 ? 'anotação' : 'anotações'}
+                            </span>
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${subjectNotes.map(note => createNoteCard(note)).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Criar card de anotação
+        function createNoteCard(note) {
+            const createdDate = new Date(note.createdAt).toLocaleDateString('pt-BR');
+            const updatedDate = note.updatedAt ? new Date(note.updatedAt).toLocaleDateString('pt-BR') : null;
+            
+            // Truncar conteúdo se muito longo
+            const truncatedContent = note.content.length > 200 
+                ? note.content.substring(0, 200) + '...' 
+                : note.content;
+
+            return `
+                <div class="note-card bg-white p-6 rounded-xl shadow-lg border-l-4 border-editaliza-blue hover:shadow-xl fade-in">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-lg font-semibold text-gray-800 line-clamp-2">${app.sanitizeHtml(note.title)}</h3>
+                        <div class="flex space-x-1 ml-2">
+                            <button onclick="editNote(${note.id})" class="text-gray-400 hover:text-editaliza-blue transition-colors p-1" title="Editar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </button>
+                            <button onclick="deleteNote(${note.id})" class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Excluir">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="note-content text-gray-600 text-sm mb-4 leading-relaxed">
+                        ${app.sanitizeHtml(truncatedContent).replace(/\n/g, '<br>')}
+                    </div>
+                    
+                    <div class="flex justify-between items-center text-xs text-gray-400">
+                        <span>Criado: ${createdDate}</span>
+                        ${updatedDate ? `<span>Editado: ${updatedDate}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Abrir modal para nova anotação ou edição
+        function openNoteModal(note = null) {
+            const modal = document.getElementById('noteModal');
+            const title = document.getElementById('modalTitle');
+            const form = document.getElementById('noteForm');
+            const submitButtonText = document.getElementById('submitButtonText');
+            
+            if (note) {
+                // Modo edição
+                title.textContent = 'Editar Anotação';
+                submitButtonText.textContent = 'Salvar Alterações';
+                document.getElementById('noteTitle').value = note.title;
+                document.getElementById('noteSubject').value = note.subject;
+                document.getElementById('noteContent').value = note.content;
+                editingNoteId = note.id;
+            } else {
+                // Modo criação
+                title.textContent = 'Nova Anotação';
+                submitButtonText.textContent = 'Salvar Anotação';
+                form.reset();
+                editingNoteId = null;
+            }
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.querySelector('.modal-container').classList.remove('scale-95');
+            }, 10);
+            
+            // Focar no primeiro campo
+            document.getElementById('noteTitle').focus();
+        }
+
+        // Fechar modal
+        function closeNoteModal() {
+            const modal = document.getElementById('noteModal');
+            modal.classList.add('opacity-0');
+            modal.querySelector('.modal-container').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                editingNoteId = null;
+            }, 300);
+        }
+
+        // Manipular envio do formulário
+        async function handleNoteSubmit(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const noteData = {
+                title: formData.get('title').trim(),
+                subject: formData.get('subject'),
+                content: formData.get('content').trim(),
+            };
+
+            if (!noteData.title || !noteData.subject || !noteData.content) {
+                app.showToast('Por favor, preencha todos os campos', 'error');
+                return;
+            }
+
+            try {
+                if (editingNoteId) {
+                    // Editar anotação existente
+                    const noteIndex = currentNotes.findIndex(note => note.id === editingNoteId);
+                    if (noteIndex !== -1) {
+                        const updatedNote = {
+                            ...currentNotes[noteIndex],
+                            ...noteData,
+                            updatedAt: new Date().toISOString()
+                        };
+                        currentNotes[noteIndex] = updatedNote;
+                        saveNoteToStorage(updatedNote);
+                        app.showToast('Anotação atualizada com sucesso!', 'success');
+                    }
+                } else {
+                    // CORREÇÃO: Criar nova anotação com planId
+                    const newNote = {
+                        id: Date.now(),
+                        planId: selectedPlanId,
+                        ...noteData,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: null
+                    };
+                    currentNotes.unshift(newNote); // Adicionar no início
+                    saveNoteToStorage(newNote);
+                    app.showToast('Anotação criada com sucesso!', 'success');
+                }
+                updateSubjectFilters();
+                filterAndDisplayNotes();
+                closeNoteModal();
+            } catch (error) {
+                console.error('Erro ao salvar anotação:', error);
+                app.showToast('Erro ao salvar anotação', 'error');
+            }
+        }
+
+        // Editar anotação
+        function editNote(noteId) {
+            const note = currentNotes.find(n => n.id === noteId);
+            if (note) {
+                openNoteModal(note);
+            }
+        }
+
+        // CORREÇÃO: Deletar anotação do plano atual
+        function deleteNote(noteId) {
+            const note = currentNotes.find(n => n.id === noteId);
+            if (!note) return;
+
+            if (confirm(`Tem certeza que deseja excluir a anotação "${note.title}"?`)) {
+                // Remover da lista atual
+                currentNotes = currentNotes.filter(n => n.id !== noteId);
+                // Remover do localStorage global
+                deleteNoteFromStorage(noteId);
+                updateSubjectFilters();
+                filterAndDisplayNotes();
+                app.showToast('Anotação excluída com sucesso!', 'success');
+            }
+        }
+
+        // Limpar filtros
+        function clearFilters() {
+            currentFilter = 'all';
+            currentSearch = '';
+            document.getElementById('searchInput').value = '';
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector('[data-filter="all"]').classList.add('active');
+            filterAndDisplayNotes();
+        }
+
+        // Tornar funções globais acessíveis
+        window.editNote = editNote;
+        window.deleteNote = deleteNote;
+        window.clearFilters = clearFilters;
+
+        // Inicializar quando DOM estiver carregado
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+    
+    <!-- Script do rodapé modular -->
+    <script src="js/footer.js"></script>
+    <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
+</body>
+</html>

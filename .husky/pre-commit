@@ -1,0 +1,23 @@
+#\!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔒 Executando verificações de segurança..."
+
+# Verifica se há secrets no código
+echo "Verificando secrets..."
+if git diff --cached --name-only | xargs grep -E "(password|secret|key|token|apikey|api_key)" --ignore-case 2>/dev/null; then
+  echo "⚠️ ATENÇÃO: Possíveis secrets detectados no código\!"
+  echo "Verifique os arquivos acima antes de commitar."
+fi
+
+# Verifica se .env está sendo commitado
+if git diff --cached --name-only | grep -E "^\.env$"; then
+  echo "❌ ERRO CRÍTICO: Tentativa de commitar arquivo .env\!"
+  echo "Remova o .env do commit: git rm --cached .env"
+  exit 1
+fi
+
+# Roda lint-staged
+npx lint-staged
+
+echo "✅ Verificações de segurança concluídas\!"

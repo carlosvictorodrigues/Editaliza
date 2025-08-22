@@ -1,0 +1,29 @@
+{
+  "agentDirectory": "./agents",
+  "mcpServers": {
+    "gemini-cli": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["@google/gemini-cli", "mcp-server"],
+      "env": {
+        "GEMINI_API_KEY": "AIzaSyD3qgG6NREyKUPgTdKuYPZ_vBO80BUBgx8"
+      }
+    }
+  },
+  "agents": {
+    "enabled": true,
+    "proactiveAgents": [
+      "studio-coach",
+      "test-writer-fixer", 
+      "whimsy-injector",
+      "experiment-tracker"
+    ],
+    "contextualAgents": {
+      "editaliza-frontend": ["frontend-developer", "ui-designer", "ux-researcher"],
+      "editaliza-backend": ["backend-architect", "devops-automator", "api-tester"],
+      "editaliza-features": ["rapid-prototyper", "ai-engineer", "performance-benchmarker"],
+      "editaliza-business": ["feedback-synthesizer", "analytics-reporter", "growth-hacker"],
+      "editaliza-launch": ["app-store-optimizer", "content-creator", "project-shipper"]
+    }
+  }
+}

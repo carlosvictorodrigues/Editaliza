@@ -1,0 +1,153 @@
+/* ================================================
+   EDITALIZA - FORÇAR LIGHT MODE APENAS (FORÇA BRUTA)
+   ================================================ */
+
+/* REMOVER COMPLETAMENTE QUALQUER DATA-THEME */
+html,
+body,
+html[data-theme],
+body[data-theme],
+html[data-theme="dark"],
+body[data-theme="dark"],
+html[data-theme="light"],
+body[data-theme="light"],
+[data-theme],
+[data-theme="dark"],
+[data-theme="light"] {
+    background: #F7FAFC !important;
+    color: #111827 !important;
+}
+
+/* REMOVER TODOS OS TOGGLES DE TEMA */
+.theme-toggle,
+.theme-toggle-nav,
+.theme-switch,
+.fab-theme,
+.floating-theme,
+button[onclick*="toggleTheme"],
+button[onclick*="theme"],
+[data-theme-toggle],
+.btn-theme,
+.theme-btn,
+.sun-icon,
+.moon-icon,
+.theme-icon {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* SESSÕES DE ESTUDO - TÍTULOS SEMPRE PRETOS */
+.study-session-title,
+.session-title,
+.study-card h3,
+.study-card .text-xl,
+.session-card h3,
+.session-card .text-xl,
+.study-card .font-bold,
+.session-card .font-bold,
+.text-gray-800 {
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+/* BOTÕES DE SESSÃO - TEXTO SEMPRE BRANCO */
+.btn-study-start,
+.btn-study-reinforce,
+.btn-study-postpone,
+.btn-replanejar,
+.btn-ver-detalhes,
+button[onclick*="iniciarEstudo"],
+button[onclick*="reforcar"],
+button[onclick*="adiar"],
+button[onclick*="replanejar"],
+button[onclick*="verDetalhes"],
+.btn-primary {
+    color: #FFFFFF !important;
+    background-color: #0528f2 !important;
+    font-weight: 600 !important;
+}
+
+/* BOTÕES DE SESSÃO ATRASADA - TEXTO BRANCO */
+.btn-replanejar-agora,
+.btn-ver-detalhes-atraso,
+.btn-danger {
+    color: #FFFFFF !important;
+    background-color: #EF4444 !important;
+    font-weight: 600 !important;
+}
+
+/* BOTÕES SECUNDÁRIOS - TEXTO BRANCO */
+.btn-secondary {
+    color: #FFFFFF !important;
+    background-color: #334155 !important;
+    font-weight: 600 !important;
+}
+
+/* RODAPÉ - FUNDO BRANCO DO CARD DO LOGO */
+.footer-logo,
+.editaliza-footer-refatorado .footer-logo,
+body .editaliza-footer-refatorado .footer-logo,
+html body .editaliza-footer-refatorado .footer-logo {
+    background: #FFFFFF !important;
+    backdrop-filter: none !important;
+    border: 1px solid #E5E7EB !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+/* RODAPÉ - TÍTULOS BRANCOS */
+.footer-nav-title,
+.editaliza-footer-refatorado .footer-nav-title,
+body .editaliza-footer-refatorado .footer-nav-title,
+html body .editaliza-footer-refatorado .footer-nav-title {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+}
+
+/* RODAPÉ - LINKS MANTIDOS COMO ESTÃO */
+.footer-nav-link,
+.editaliza-footer-refatorado .footer-nav-link,
+body .editaliza-footer-refatorado .footer-nav-link,
+html body .editaliza-footer-refatorado .footer-nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    background: transparent !important;
+    border: none !important;
+    text-decoration: none !important;
+}
+
+/* GARANTIR CORES PADRÃO */
+.text-white {
+    color: #FFFFFF !important;
+}
+
+.text-black {
+    color: #000000 !important;
+}
+
+.bg-white {
+    background-color: #FFFFFF !important;
+}
+
+.bg-black {
+    background-color: #000000 !important;
+}
+
+/* FORÇAR LIGHT MODE EM ELEMENTOS ESPECÍFICOS */
+.modal,
+.card,
+.panel,
+.box,
+.navbar,
+.nav,
+header,
+main,
+section,
+article,
+aside {
+    background: var(--surface-1, #FFFFFF) !important;
+    color: var(--text, #111827) !important;
+}

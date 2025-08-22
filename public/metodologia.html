@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nossa Metodologia - Editaliza</title>
+    <meta name="description" content="Descubra a metodologia científica por trás do Editaliza: algoritmos inteligentes, revisões espaçadas e personalização que transformam seu estudo em aprovação.">
+    
+    <!-- Favicon and Web App Icons - Enhanced for better browser compatibility -->
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=4">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=4">
+    <link rel="icon" type="image/png" sizes="48x48" href="favicon-48x48.png?v=4">
+    <link rel="shortcut icon" href="favicon.ico?v=4">
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=4">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg?v=4">
+    <meta name="theme-color" content="#0528f2">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="css/design-tokens.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/footer.css" rel="stylesheet">
+    <!-- Theme system removed - light mode only -->
+    
+    <!-- SCRIPTS CENTRALIZADOS -->
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    
+    <!-- Config do Tailwind para reconhecer as cores customizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-black': '#0d0d0d',
+                        'editaliza-gray': '#969696',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'fade-in-up': 'fadeInUp 0.6s ease-out',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero-gradient {
+            background: linear-gradient(135deg, #0528f2 0%, #1e40af 30%, #3b82f6 60%, #60a5fa 100%);
+        }
+        
+        .methodology-icon {
+            background: linear-gradient(135deg, #0528f2, #1ad937);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .feature-glow {
+            box-shadow: 0 0 50px rgba(5, 40, 242, 0.1);
+        }
+        
+        .scroll-indicator {
+            animation: bounce 2s infinite;
+        }
+        
+        /* Timeline enhancements */
+        .timeline {
+            position: relative;
+        }
+        
+        .timeline .absolute.left-8 {
+            background: linear-gradient(to bottom, #0528f2, #1ad937);
+        }
+        
+        /* Enhanced logo container */
+        .logo-container {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Dot animation for algorithm section */
+        .algorithm-dot {
+            display: inline-block;
+            animation: pulse 2s infinite;
+            animation-delay: calc(var(--delay, 0) * 0.2s);
+        }
+        
+        /* Ensure content cards are visible */
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            opacity: 1 !important;
+            transform: none !important;
+            border-radius: 1rem;
+            border: 1px solid rgba(229, 231, 235, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Ensure all sections are visible */
+        section {
+            opacity: 1 !important;
+            transform: none !important;
+        }
+        
+        /* Timeline items visibility */
+        .relative.flex.items-start {
+            opacity: 1 !important;
+            transform: none !important;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-gray-800 overflow-x-hidden">
+    <!-- Container de Toast para Notificações -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3"></div>
+
+    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
+    <div id="main-nav-container"></div>
+
+    <!-- HERO SECTION -->
+    <section class="hero-gradient relative min-h-screen flex items-center justify-center text-white overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-20 left-10 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-pulse-slow"></div>
+            <div class="absolute bottom-32 right-16 w-96 h-96 bg-editaliza-green/10 rounded-full blur-3xl animate-pulse-slow"></div>
+            <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-white/3 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div class="container mx-auto px-6 text-center relative z-10 max-w-6xl">
+            <!-- Logo Integration -->
+            <div class="mb-8 flex justify-center">
+                <div class="bg-white/20 backdrop-blur-md rounded-2xl p-6 border border-white/20 shadow-2xl feature-glow">
+                    <svg class="h-16 w-auto" viewBox="0 0 510.24 101.5" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <style>
+                                .cls-1 { fill: #ffffff; }
+                                .cls-2 { fill: #ffffff; }
+                                .cls-3 { fill: #1ad937; }
+                            </style>
+                        </defs>
+                        <g>
+                            <g>
+                                <path class="cls-2" d="M148.68,17.22l49.51-.04v9.32l-39.51.03v17.97l37.97-.03v9.22l-37.97.03v20.83l39.51-.03v9.22l-49.51.04V17.22Z"/>
+                                <path class="cls-2" d="M210.98,77.75c-4.49-4.5-6.73-10.65-6.73-18.44s2.13-13.7,6.39-18.26c4.26-4.57,10.17-6.85,17.74-6.86,7.5,0,13.55,2.59,18.17,7.78v-24.82h9.23s0,66.56,0,66.56h-9.23s0-5.79,0-5.79c-2.24,2.22-4.82,3.87-7.74,4.95-2.92,1.08-6.04,1.62-9.37,1.62-7.82,0-13.97-2.24-18.46-6.74ZM242.51,72.54c2.76-2.57,4.13-6.39,4.13-11.46v-3.61c0-4.56-1.52-8.19-4.57-10.89-3.04-2.69-7.16-4.04-12.35-4.03-4.74,0-8.57,1.4-11.49,4.19-2.92,2.79-4.37,7.01-4.37,12.65s1.44,9.89,4.33,12.74c2.88,2.85,6.95,4.27,12.21,4.27,5.32,0,9.36-1.29,12.11-3.86Z"/>
+                                <path class="cls-2" d="M264.04,17.13h9.42s0,11.21,0,11.21h-9.42s0-11.21,0-11.21ZM264.14,35.96h9.23s0,47.73,0,47.73h-9.23s0-47.73,0-47.73Z"/>
+                                <path class="cls-2" d="M293.7,80.3c-2.34-2.76-3.61-6.8-3.8-12.12v-23.77h-8.27s0-8.27,0-8.27h8.27v-17.69h9.32s0,17.68,0,17.68h15.86s0,8.26,0,8.26h-15.86v24.55c0,4.69,2.66,7.03,7.98,7.03,2.18,0,4.65-.32,7.4-.96l2.21,7.32c-2.31.76-4.31,1.3-6.01,1.62-1.7.32-3.48.48-5.34.48-5.51,0-9.44-1.37-11.78-4.13Z"/>
+                                <path class="cls-2" d="M326.96,80.36c-3.43-2.57-5.14-6.32-5.14-11.26,0-6.09,2.55-10.19,7.64-12.32,5.1-2.13,12.03-3.26,20.81-3.39l9.04-.2v-1.24c0-3.55-.95-6.05-2.84-7.51-1.89-1.46-5.14-2.18-9.76-2.18-4.1,0-7.21.67-9.32,2-2.12,1.33-3.24,3.58-3.36,6.75h-9.42c.13-5.89,2.05-10.17,5.77-12.84,3.72-2.67,9.16-4.03,16.34-4.1,7.69.06,13.25,1.57,16.68,4.55,3.43,2.98,5.14,7.51,5.14,13.6v31.38h-9.13s0-7.03,0-7.03c-4.55,5.08-10.64,7.62-18.27,7.62-6.02,0-10.75-1.28-14.18-3.84ZM354.7,73.64c3.08-1.97,4.61-4.6,4.61-7.9v-5.8l-8.84.29c-7.05.26-12.03,1.07-14.95,2.44-2.92,1.37-4.37,3.51-4.37,6.42,0,2.41.96,4.26,2.88,5.56,1.92,1.3,4.84,1.95,8.75,1.94,4.87,0,8.84-.99,11.92-2.96Z"/>
+                                <path class="cls-2" d="M377.19,17.04h9.23s0,66.56,0,66.56h-9.23s0-66.56,0-66.56Z"/>
+                                <path class="cls-2" d="M394.68,17.02h9.42s0,11.21,0,11.21h-9.42s0-11.21,0-11.21ZM394.78,35.85h9.23s0,47.73,0,47.73h-9.23s0-47.73,0-47.73Z"/>
+                                <path class="cls-2" d="M412.28,76.83l30.57-33.12-29.9.02v-7.7l42.4-.03v6.56l-30.38,32.93,30.09-.02v8.08l-42.78.03v-6.75Z"/>
+                                <path class="cls-2" d="M468.66,80.25c-3.43-2.57-5.14-6.32-5.14-11.26,0-6.09,2.55-10.19,7.64-12.32,5.1-2.13,12.03-3.26,20.81-3.39l9.04-.2v-1.24c0-3.55-.95-6.05-2.84-7.51-1.89-1.46-5.14-2.18-9.76-2.18-4.1,0-7.21.67-9.32,2-2.12,1.33-3.24,3.58-3.36,6.75h-9.42c.13-5.89,2.05-10.17,5.77-12.84,3.72-2.67,9.16-4.03,16.34-4.1,7.69.06,13.25,1.57,16.68,4.55,3.43,2.98,5.14,7.51,5.14,13.6v31.38h-9.13s0-7.03,0-7.03c-4.55,5.08-10.64,7.62-18.27,7.62-6.02,0-10.75-1.28-14.18-3.84ZM496.39,73.53c3.08-1.97,4.61-4.6,4.61-7.9v-5.8l-8.84.29c-7.05.26-12.03,1.07-14.95,2.44-2.92,1.37-4.37,3.51-4.37,6.42,0,2.41.96,4.26,2.88,5.56,1.92,1.3,4.84,1.95,8.75,1.94,4.87,0,8.84-.99,11.92-2.96Z"/>
+                            </g>
+                            <g>
+                                <path class="cls-1" d="M58.62,101.5s-12.21-26.73-43.18-21.61v-24.04s29.74,1.62,40.51,31.49c1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                                <path class="cls-3" d="M58.62,101.5c-6.75-32.15-28.77-42.36-43.18-45.57-3.53-.79-6.61-1.16-8.89-1.33-2.37-.18-4.2-2.14-4.2-4.52,0-2.73,2.38-4.84,5.09-4.5,11.47,1.44,39.07,8.39,48.52,41.75,1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                                <path class="cls-1" d="M69.48,101.5s12.21-27.94,43.18-22.83v-22.83s-29.74,1.62-40.51,31.49c-1.21,4.27-2.12,8.98-2.67,14.17Z"/>
+                                <path class="cls-3" d="M69.48,101.5c6.75-32.15,28.77-42.36,43.18-45.57,3.53-.79,6.61-1.16,8.89-1.33,2.37-.18,4.2-2.14,4.2-4.52,0-2.73-2.38-4.84-5.09-4.5-11.47,1.44-39.07,8.39-48.52,41.75-1.21,4.27-2.12,8.98-2.67,14.17Z"/>
+                                <path class="cls-1" d="M92.24,7.72C83.54,2.57,73.8,0,64.05,0c-9.75,0-19.49,2.57-28.19,7.72L1.79,27.87c-2.97,1.76-2.07,6.28,1.35,6.75,12,1.65,31.51,6.67,49.09,21.75,1.7,1.46,3.6,2.57,5.6,3.33,3.99,1.52,8.42,1.52,12.41,0,2-.76,3.9-1.87,5.6-3.33,17.59-15.08,37.1-20.1,49.09-21.75,3.42-.47,4.33-4.99,1.35-6.75L92.24,7.72ZM64.05,48.49c-6.16,0-11.16-5-11.16-11.16s5-11.16,11.16-11.16,11.16,5,11.16,11.16-5,11.16-11.16,11.16Z"/>
+                            </g>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 leading-tight">
+                A <span class="text-white drop-shadow-lg">Metodologia</span><br>
+                que <span class="text-green-300 drop-shadow-lg font-extrabold">Aprova</span>
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-white/95 mb-12 max-w-4xl mx-auto leading-relaxed drop-shadow-md">
+                Descubra a ciência por trás do seu sucesso. Algoritmos inteligentes, revisões espaçadas e personalização total que transformam seu estudo em <strong class="text-white font-bold">aprovação garantida</strong>.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+                <a href="#fundamentos" class="bg-white text-editaliza-blue hover:bg-gray-100 hover:text-editaliza-blue px-8 py-4 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl border-2 border-white">
+                    Descobrir a Metodologia
+                </a>
+                <a href="register.html" class="border-2 border-white text-white hover:bg-white hover:text-editaliza-blue px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105">
+                    Começar Agora
+                </a>
+            </div>
+            
+            <!-- Scroll Indicator -->
+            <div class="scroll-indicator">
+                <svg class="w-6 h-6 mx-auto text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- INTRODUCTION SECTION -->
+    <section id="fundamentos" class="py-20 bg-gradient-to-b from-slate-50 to-white">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Por Que Nossa Metodologia É Única?</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    Não somos apenas mais uma plataforma de estudos. Somos o resultado da convergência entre neurociência, inteligência artificial e anos de pesquisa em otimização de aprendizado.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8 mb-16">
+                <div class="content-card text-center p-8 feature-glow">
+                    <div class="w-16 h-16 bg-gradient-to-br from-editaliza-blue to-editaliza-green rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Inteligência Artificial</h3>
+                    <p class="text-gray-600 leading-relaxed">Algoritmos adaptativos que aprendem com seu desempenho e personalizam completamente sua jornada de estudos.</p>
+                </div>
+                
+                <div class="content-card text-center p-8 feature-glow">
+                    <div class="w-16 h-16 bg-gradient-to-br from-editaliza-blue to-editaliza-green rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Base Científica</h3>
+                    <p class="text-gray-600 leading-relaxed">Fundamentado em neurociência e psicologia cognitiva, com técnicas comprovadas de memorização e aprendizado.</p>
+                </div>
+                
+                <div class="content-card text-center p-8 feature-glow">
+                    <div class="w-16 h-16 bg-gradient-to-br from-editaliza-blue to-editaliza-green rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Resultados Reais</h3>
+                    <p class="text-gray-600 leading-relaxed">Milhares de aprovados que confiam em nossa metodologia para transformar esforço em conquista concreta.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SCIENCE FOUNDATIONS SECTION -->
+    <section class="py-20 bg-gradient-to-b from-white to-slate-50">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Os Fundamentos Científicos</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Nossa metodologia não é baseada em achismos. É construída sobre décadas de pesquisa científica em aprendizagem e memória.
+                </p>
+            </div>
+            
+            <div class="space-y-16">
+                <!-- Spaced Repetition -->
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <div class="inline-flex items-center bg-gradient-to-r from-editaliza-blue to-editaliza-green text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                            🧠 NEUROCIÊNCIA
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900 mb-6">Revisões Espaçadas Inteligentes</h3>
+                        <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                            Hermann Ebbinghaus descobriu em 1885 que esquecemos 80% do que aprendemos em 24 horas. Nossa solução? 
+                            <strong class="text-editaliza-blue">Revisões automaticamente agendadas</strong> em intervalos científicamente calculados.
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-editaliza-green rounded-full mr-4"></div>
+                                <span class="text-gray-700"><strong>7 dias:</strong> Primeira revisão para fixação inicial</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-editaliza-blue rounded-full mr-4"></div>
+                                <span class="text-gray-700"><strong>14 dias:</strong> Consolidação na memória de médio prazo</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-editaliza-green rounded-full mr-4"></div>
+                                <span class="text-gray-700"><strong>28 dias:</strong> Transferência para memória de longo prazo</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="relative">
+                        <div class="bg-gradient-to-br from-editaliza-blue/10 to-editaliza-green/10 rounded-3xl p-8 backdrop-blur-sm">
+                            <div class="space-y-6">
+                                <div class="bg-white rounded-xl p-6 shadow-lg">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <span class="text-sm font-semibold text-gray-600">Retenção de Memória</span>
+                                        <span class="text-2xl font-bold text-editaliza-blue">95%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-gradient-to-r from-editaliza-blue to-editaliza-green h-3 rounded-full" style="width: 95%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-2">Com revisões espaçadas</p>
+                                </div>
+                                <div class="bg-white rounded-xl p-6 shadow-lg">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <span class="text-sm font-semibold text-gray-600">Sem Revisões</span>
+                                        <span class="text-2xl font-bold text-red-500">20%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-red-500 h-3 rounded-full" style="width: 20%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-2">Método tradicional</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Intelligent Algorithm -->
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div class="order-2 lg:order-1 relative">
+                        <div class="bg-gradient-to-br from-editaliza-blue/10 to-editaliza-green/10 rounded-3xl p-8">
+                            <div class="text-center">
+                                <div class="inline-block bg-white rounded-2xl p-6 mb-6 shadow-lg">
+                                    <div class="text-4xl font-bold text-editaliza-blue mb-2">ALGORITMO</div>
+                                    <div class="text-sm text-gray-600">Inteligente de Distribuição</div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="bg-white rounded-xl p-4 shadow-md flex items-center justify-between">
+                                        <span class="font-semibold text-gray-700">Direito Constitucional</span>
+                                        <div class="flex" id="constitutional-dots">
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white rounded-xl p-4 shadow-md flex items-center justify-between">
+                                        <span class="font-semibold text-gray-700">Direito Administrativo</span>
+                                        <div class="flex" id="administrative-dots">
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
+                                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                    <div class="bg-white rounded-xl p-4 shadow-md flex items-center justify-between">
+                                        <span class="font-semibold text-gray-700">Informática</span>
+                                        <div class="flex" id="informatics-dots">
+                                            <div class="w-3 h-3 bg-gray-400 rounded-full mr-1"></div>
+                                            <div class="w-3 h-3 bg-gray-400 rounded-full"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="order-1 lg:order-2">
+                        <div class="inline-flex items-center bg-gradient-to-r from-editaliza-blue to-editaliza-green text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
+                            🤖 INTELIGÊNCIA ARTIFICIAL
+                        </div>
+                        <h3 class="text-3xl font-bold text-gray-900 mb-6">Distribuição Inteligente Ponderada</h3>
+                        <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                            Chega de cronogramas rígidos que quebram na primeira dificuldade. Nosso <strong class="text-editaliza-blue">algoritmo adaptatório</strong> 
+                            distribui automaticamente suas matérias baseado em prioridades e desempenho.
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <div class="w-6 h-6 bg-editaliza-blue rounded-full flex items-center justify-center mr-4 mt-1 flex-shrink-0">
+                                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <strong class="text-gray-900">Priorização Automática:</strong>
+                                    <p class="text-gray-600">Matérias mais importantes aparecem proporcionalmente mais vezes sem nunca esquecer as secundárias.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-6 h-6 bg-editaliza-green rounded-full flex items-center justify-center mr-4 mt-1 flex-shrink-0">
+                                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <strong class="text-gray-900">Flexibilidade Total:</strong>
+                                    <p class="text-gray-600">Perdeu um dia? O sistema automaticamente redistribui suas tarefas mantendo o equilíbrio perfeito.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <div class="w-6 h-6 bg-editaliza-blue rounded-full flex items-center justify-center mr-4 mt-1 flex-shrink-0">
+                                    <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <strong class="text-gray-900">Personalização Única:</strong>
+                                    <p class="text-gray-600">Cada plano é único, adaptado ao seu perfil, disponibilidade e objetivo específico.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS SECTION -->
+    <section class="py-20 bg-gradient-to-b from-slate-50 to-white">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Como Nossa Metodologia Funciona</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Uma experiência cuidadosamente projetada que transforma complexidade em simplicidade, caos em organização.
+                </p>
+            </div>
+            
+            <div class="relative">
+                <!-- Timeline Line -->
+                <div class="absolute left-8 top-0 bottom-0 w-0.5 bg-gradient-to-b from-editaliza-blue to-editaliza-green hidden md:block"></div>
+                
+                <div class="space-y-12 md:space-y-16">
+                    <!-- Step 1 -->
+                    <div class="relative flex items-start">
+                        <div class="hidden md:block absolute left-6 w-5 h-5 bg-editaliza-blue rounded-full border-4 border-white shadow-lg"></div>
+                        <div class="md:ml-16 content-card p-8 w-full feature-glow">
+                            <div class="flex items-center mb-6">
+                                <div class="w-12 h-12 bg-gradient-to-br from-editaliza-blue to-editaliza-green rounded-xl flex items-center justify-center text-white font-bold text-lg mr-4 md:hidden">1</div>
+                                <h3 class="text-2xl font-bold text-gray-900">Análise Completa do Seu Perfil</h3>
+                            </div>
+                            <p class="text-gray-600 leading-relaxed mb-6">
+                                Começamos mapeando completamente seu contexto: edital específico, tempo disponível, pontos fortes e fracos, 
+                                experiência prévia e data da prova. <strong class="text-editaliza-blue">Cada detalhe importa</strong> para criar seu plano perfeito.
+                            </p>
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div class="bg-gradient-to-r from-editaliza-blue/10 to-transparent p-4 rounded-lg">
+                                    <strong class="text-editaliza-blue">🎯 Personalização Total</strong><br>
+                                    <span class="text-gray-600 text-sm">Seu plano é único no mundo</span>
+                                </div>
+                                <div class="bg-gradient-to-r from-editaliza-green/10 to-transparent p-4 rounded-lg">
+                                    <strong class="text-editaliza-green">⚡ Configuração Rápida</strong><br>
+                                    <span class="text-gray-600 text-sm">Pronto para estudar em minutos</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2 -->
+                    <div class="relative flex items-start">
+                        <div class="hidden md:block absolute left-6 w-5 h-5 bg-editaliza-green rounded-full border-4 border-white shadow-lg"></div>
+                        <div class="md:ml-16 content-card p-8 w-full feature-glow">
+                            <div class="flex items-center mb-6">
+                                <div class="w-12 h-12 bg-gradient-to-br from-editaliza-green to-editaliza-blue rounded-xl flex items-center justify-center text-white font-bold text-lg mr-4 md:hidden">2</div>
+                                <h3 class="text-2xl font-bold text-gray-900">Processamento Inteligente</h3>
+                            </div>
+                            <p class="text-gray-600 leading-relaxed mb-6">
+                                Nossa IA processa milhões de combinações para encontrar a <strong class="text-editaliza-blue">distribuição perfeita</strong> 
+                                entre suas matérias, considerando prioridades, curva de esquecimento e tempo até a prova.
+                            </p>
+                            <div class="bg-gradient-to-r from-gray-50 to-white p-6 rounded-2xl border-l-4 border-editaliza-blue">
+                                <div class="text-sm text-gray-500 mb-2">ALGORITMO EM AÇÃO:</div>
+                                <div class="font-mono text-sm text-gray-700">
+                                    Priorização × Tempo Disponível × Curva de Esquecimento = <strong class="text-editaliza-blue">Cronograma Perfeito</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 3 -->
+                    <div class="relative flex items-start">
+                        <div class="hidden md:block absolute left-6 w-5 h-5 bg-editaliza-blue rounded-full border-4 border-white shadow-lg"></div>
+                        <div class="md:ml-16 content-card p-8 w-full feature-glow">
+                            <div class="flex items-center mb-6">
+                                <div class="w-12 h-12 bg-gradient-to-br from-editaliza-blue to-editaliza-green rounded-xl flex items-center justify-center text-white font-bold text-lg mr-4 md:hidden">3</div>
+                                <h3 class="text-2xl font-bold text-gray-900">Execução Inteligente</h3>
+                            </div>
+                            <p class="text-gray-600 leading-relaxed mb-6">
+                                Todos os dias você recebe seu <strong class="text-editaliza-blue">plano de estudos otimizado</strong>, 
+                                com tarefas balanceadas que maximizam retenção e minimizam sobrecarga cognitiva.
+                            </p>
+                            <div class="grid sm:grid-cols-3 gap-4">
+                                <div class="text-center p-4 bg-gradient-to-b from-editaliza-blue/5 to-transparent rounded-lg">
+                                    <div class="w-8 h-8 bg-editaliza-blue rounded-full mx-auto mb-3 flex items-center justify-center">
+                                        <span class="text-white text-sm font-bold">📚</span>
+                                    </div>
+                                    <div class="font-semibold text-gray-800">Conteúdo Novo</div>
+                                    <div class="text-xs text-gray-600">Aprendizado progressivo</div>
+                                </div>
+                                <div class="text-center p-4 bg-gradient-to-b from-editaliza-green/5 to-transparent rounded-lg">
+                                    <div class="w-8 h-8 bg-editaliza-green rounded-full mx-auto mb-3 flex items-center justify-center">
+                                        <span class="text-white text-sm font-bold">🔄</span>
+                                    </div>
+                                    <div class="font-semibold text-gray-800">Revisões</div>
+                                    <div class="text-xs text-gray-600">Fixação inteligente</div>
+                                </div>
+                                <div class="text-center p-4 bg-gradient-to-b from-gray-500/5 to-transparent rounded-lg">
+                                    <div class="w-8 h-8 bg-gray-500 rounded-full mx-auto mb-3 flex items-center justify-center">
+                                        <span class="text-white text-sm font-bold">📝</span>
+                                    </div>
+                                    <div class="font-semibold text-gray-800">Questões</div>
+                                    <div class="text-xs text-gray-600">Prática direcionada</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 4 -->
+                    <div class="relative flex items-start">
+                        <div class="hidden md:block absolute left-6 w-5 h-5 bg-editaliza-green rounded-full border-4 border-white shadow-lg"></div>
+                        <div class="md:ml-16 content-card p-8 w-full feature-glow">
+                            <div class="flex items-center mb-6">
+                                <div class="w-12 h-12 bg-gradient-to-br from-editaliza-green to-editaliza-blue rounded-xl flex items-center justify-center text-white font-bold text-lg mr-4 md:hidden">4</div>
+                                <h3 class="text-2xl font-bold text-gray-900">Adaptação Contínua</h3>
+                            </div>
+                            <p class="text-gray-600 leading-relaxed mb-6">
+                                O sistema aprende continuamente com seu desempenho, <strong class="text-editaliza-blue">ajustando automaticamente</strong> 
+                                prioridades, identificando pontos fracos e otimizando sua jornada rumo à aprovação.
+                            </p>
+                            <div class="bg-gradient-to-r from-editaliza-green/10 via-transparent to-editaliza-blue/10 p-6 rounded-2xl">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="font-semibold text-gray-800">Inteligência Adaptativa</span>
+                                    <div class="flex space-x-2">
+                                        <div class="w-3 h-3 bg-editaliza-green rounded-full animate-pulse"></div>
+                                        <div class="w-3 h-3 bg-editaliza-blue rounded-full animate-pulse"></div>
+                                    </div>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    Aprendizado de máquina aplicado ao seu sucesso em tempo real
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DIFFERENTIALS SECTION -->
+    <section class="py-20 bg-gradient-to-b from-white to-slate-50">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Nossos Diferenciais Únicos</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Recursos exclusivos que você não encontra em lugar nenhum, desenvolvidos especificamente para concurseiros.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Modo Reta Final -->
+                <div class="content-card p-8 text-center feature-glow group hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:animate-bounce-slow">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Modo Reta Final</h3>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Automaticamente detecta quando você está próximo da prova e <strong class="text-red-500">prioriza apenas o essencial</strong>, 
+                        maximizando pontos com foco laser nas matérias de maior peso.
+                    </p>
+                    <div class="inline-block bg-red-50 text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
+                        🚨 Ultra Focado
+                    </div>
+                </div>
+                
+                <!-- Gamificação Inteligente -->
+                <div class="content-card p-8 text-center feature-glow group hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:animate-bounce-slow">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Gamificação Avançada</h3>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Sistema de <strong class="text-purple-500">conquistas e rankings</strong> baseado em League of Legends, 
+                        transformando estudos em uma jornada épica de evolução pessoal.
+                    </p>
+                    <div class="inline-block bg-purple-50 text-purple-600 px-3 py-1 rounded-full text-sm font-semibold">
+                        🏆 Motivação Máxima
+                    </div>
+                </div>
+                
+                <!-- Análise de Performance -->
+                <div class="content-card p-8 text-center feature-glow group hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:animate-bounce-slow">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Analytics Avançado</h3>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Dashboard completo com <strong class="text-blue-500">métricas detalhadas</strong> do seu progresso, 
+                        identificação de pontos fracos e projeções de performance na prova.
+                    </p>
+                    <div class="inline-block bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm font-semibold">
+                        📊 Data-Driven
+                    </div>
+                </div>
+                
+                <!-- Backup Automático -->
+                <div class="content-card p-8 text-center feature-glow group hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:animate-bounce-slow">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Backup Inteligente</h3>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Todos os seus dados são <strong class="text-green-500">automaticamente protegidos</strong> 
+                        com backups diários. Estude com tranquilidade total, nunca perca seu progresso.
+                    </p>
+                    <div class="inline-block bg-green-50 text-green-600 px-3 py-1 rounded-full text-sm font-semibold">
+                        🔒 Segurança Total
+                    </div>
+                </div>
+                
+                <!-- Suporte Especializado -->
+                <div class="content-card p-8 text-center feature-glow group hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:animate-bounce-slow">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Suporte Premium</h3>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Nossa equipe de especialistas em concursos está sempre disponível para <strong class="text-orange-500">otimizar sua estratégia</strong> 
+                        e resolver qualquer dúvida sobre metodologia.
+                    </p>
+                    <div class="inline-block bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-sm font-semibold">
+                        🎯 Especializada
+                    </div>
+                </div>
+                
+                <!-- Cross-Platform -->
+                <div class="content-card p-8 text-center feature-glow group hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:animate-bounce-slow">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Multi-Plataforma</h3>
+                    <p class="text-gray-600 leading-relaxed mb-4">
+                        Acesse de qualquer lugar: <strong class="text-indigo-500">smartphone, tablet ou desktop</strong>. 
+                        Sincronização automática mantém tudo sempre atualizado e acessível.
+                    </p>
+                    <div class="inline-block bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-sm font-semibold">
+                        📱 Sempre Disponível
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- RESULTS SECTION -->
+    <section class="py-20 bg-gradient-to-b from-slate-50 to-white">
+        <div class="container mx-auto px-6 max-w-6xl">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Resultados Que Falam Por Si</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Não são apenas números. São <strong class="text-editaliza-blue">vidas transformadas</strong>, sonhos realizados e famílias que conquistaram estabilidade.
+                </p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+                <div class="text-center">
+                    <div class="relative">
+                        <div class="w-24 h-24 bg-gradient-to-br from-editaliza-blue to-editaliza-green rounded-full mx-auto mb-6 flex items-center justify-center feature-glow">
+                            <span class="text-3xl font-bold text-white">95%</span>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Taxa de Aprovação</h3>
+                    <p class="text-gray-600">Usuários ativos que seguem nossa metodologia</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-gradient-to-br from-editaliza-green to-editaliza-blue rounded-full mx-auto mb-6 flex items-center justify-center feature-glow">
+                        <span class="text-3xl font-bold text-white">60%</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Menos Tempo</h3>
+                    <p class="text-gray-600">Redução no tempo médio até aprovação</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-gradient-to-br from-editaliza-blue to-editaliza-green rounded-full mx-auto mb-6 flex items-center justify-center feature-glow">
+                        <span class="text-3xl font-bold text-white">3x</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Mais Retenção</h3>
+                    <p class="text-gray-600">Comparado a métodos tradicionais</p>
+                </div>
+                
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-gradient-to-br from-editaliza-green to-editaliza-blue rounded-full mx-auto mb-6 flex items-center justify-center feature-glow">
+                        <span class="text-3xl font-bold text-white">24/7</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Disponibilidade</h3>
+                    <p class="text-gray-600">Acesso total à plataforma</p>
+                </div>
+            </div>
+            
+            <!-- Benefits Grid -->
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <h3 class="text-3xl font-bold text-gray-900 mb-8">Por Que Nossa Metodologia Funciona?</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-editaliza-blue rounded-full flex items-center justify-center mr-4 mt-1 flex-shrink-0">
+                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <strong class="text-gray-900">Fundamentação Científica:</strong>
+                                <p class="text-gray-600">Baseada em décadas de pesquisa em neurociência e psicologia cognitiva.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-editaliza-green rounded-full flex items-center justify-center mr-4 mt-1 flex-shrink-0">
+                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <strong class="text-gray-900">Personalização Total:</strong>
+                                <p class="text-gray-600">Cada usuário tem um plano único, otimizado para seu perfil específico.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-editaliza-blue rounded-full flex items-center justify-center mr-4 mt-1 flex-shrink-0">
+                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <strong class="text-gray-900">Adaptação Inteligente:</strong>
+                                <p class="text-gray-600">Sistema aprende com seu desempenho e ajusta automaticamente.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="w-6 h-6 bg-editaliza-green rounded-full flex items-center justify-center mr-4 mt-1 flex-shrink-0">
+                                <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <strong class="text-gray-900">Suporte Contínuo:</strong>
+                                <p class="text-gray-600">Equipe especializada disponível para otimizar sua jornada.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content-card p-8 feature-glow">
+                    <div class="text-center mb-6">
+                        <div class="inline-block bg-gradient-to-r from-editaliza-blue to-editaliza-green text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                            🎯 GARANTIA EDITALIZA
+                        </div>
+                        <h4 class="text-2xl font-bold text-gray-900 mb-4">Metodologia Comprovada</h4>
+                    </div>
+                    
+                    <blockquote class="text-lg text-gray-600 italic text-center leading-relaxed mb-6">
+                        "Em 8 meses usando o Editaliza, consegui minha aprovação no TRT. A metodologia personalizada me deu exatamente o que eu precisava: foco, organização e confiança."
+                    </blockquote>
+                    
+                    <div class="text-center">
+                        <div class="font-semibold text-gray-900">Ana Carolina Silva</div>
+                        <div class="text-sm text-gray-500">Analista Judiciário - TRT 15ª Região</div>
+                        <div class="flex justify-center mt-3" id="rating-stars">
+                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                            <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section class="py-20 hero-gradient text-white relative overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-10 right-10 w-64 h-64 bg-white/5 rounded-full blur-3xl animate-pulse-slow"></div>
+            <div class="absolute bottom-16 left-16 w-96 h-96 bg-editaliza-green/10 rounded-full blur-3xl animate-pulse-slow"></div>
+        </div>
+        
+        <div class="container mx-auto px-6 text-center relative z-10 max-w-4xl">
+            <h2 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                Sua Aprovação Começa <span class="text-editaliza-green">Agora</span>
+            </h2>
+            
+            <p class="text-xl md:text-2xl text-white/90 mb-12 leading-relaxed">
+                Pare de estudar por tentativa e erro. Tenha acesso à metodologia que já aprovou milhares de concurseiros. 
+                <strong class="text-editaliza-green">Sua vaga está esperando</strong>.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-6 justify-center mb-12">
+                <a href="register.html" class="bg-white text-editaliza-blue hover:bg-gray-100 px-10 py-5 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl">
+                    Começar Minha Jornada
+                </a>
+                <a href="faq.html" class="border-2 border-white text-white hover:bg-white hover:text-editaliza-blue px-10 py-5 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105">
+                    Saiba Mais
+                </a>
+            </div>
+            
+            <div class="flex items-center justify-center space-x-8 text-white/80">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-editaliza-green" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Sem compromisso</span>
+                </div>
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-editaliza-green" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Setup em minutos</span>
+                </div>
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-editaliza-green" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span>Suporte especializado</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize navigation first
+            if (typeof components !== 'undefined' && components.renderMainNavigation) {
+                components.renderMainNavigation('metodologia.html');
+            }
+            
+            // Generate algorithm distribution dots
+            function generateDots(containerId, count, colorClass = 'bg-blue-500') {
+                console.log(`Generating dots for ${containerId} with count ${count}`);
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.innerHTML = ''; // Clear existing content
+                    for (let i = 0; i < count; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = `w-3 h-3 ${colorClass} rounded-full mr-1 inline-block`;
+                        container.appendChild(dot);
+                    }
+                    console.log(`✅ Generated ${count} dots for ${containerId}`);
+                } else {
+                    console.error(`❌ Container ${containerId} not found`);
+                }
+            }
+            
+            // Generate rating stars
+            function generateStars(containerId, count = 5) {
+                console.log(`Generating stars for ${containerId}`);
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.innerHTML = '';
+                    for (let i = 0; i < count; i++) {
+                        const star = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        star.setAttribute('class', 'w-5 h-5 text-yellow-400 inline-block');
+                        star.setAttribute('fill', 'currentColor');
+                        star.setAttribute('viewBox', '0 0 20 20');
+                        
+                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path.setAttribute('d', 'M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z');
+                        
+                        star.appendChild(path);
+                        container.appendChild(star);
+                    }
+                    console.log(`✅ Generated ${count} stars for ${containerId}`);
+                } else {
+                    console.error(`❌ Container ${containerId} not found`);
+                }
+            }
+            
+            // Wait a bit for the DOM to be fully ready, then initialize dynamic elements
+            setTimeout(() => {
+                console.log('🎯 Initializing dynamic content...');
+                
+                // Initialize dynamic elements with fallback
+                try {
+                    generateDots('constitutional-dots', 5, 'bg-blue-500');
+                    generateDots('administrative-dots', 4, 'bg-blue-500');  
+                    generateDots('informatics-dots', 2, 'bg-gray-400');
+                    generateStars('rating-stars', 5);
+                    
+                    console.log('✅ All dynamic elements initialized successfully');
+                } catch (error) {
+                    console.error('❌ Error initializing dynamic elements:', error);
+                }
+                
+                // Ensure all content cards are visible
+                const contentCards = document.querySelectorAll('.content-card');
+                console.log(`Found ${contentCards.length} content cards`);
+                
+                contentCards.forEach((card, index) => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'none';
+                    console.log(`✅ Made card ${index + 1} visible`);
+                });
+                
+                // Make sure timeline content is visible
+                const timelineItems = document.querySelectorAll('.relative.flex.items-start');
+                console.log(`Found ${timelineItems.length} timeline items`);
+                
+                timelineItems.forEach((item, index) => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'none';
+                    console.log(`✅ Made timeline item ${index + 1} visible`);
+                });
+                
+            }, 500); // Wait 500ms to ensure everything is loaded
+            
+            // Smooth scroll for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+            
+            // Simplified visibility observer
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                        entry.target.style.transition = 'all 0.6s ease-out';
+                    }
+                });
+            }, observerOptions);
+            
+            // Observe all content sections
+            setTimeout(() => {
+                document.querySelectorAll('.content-card, section').forEach(element => {
+                    observer.observe(element);
+                });
+            }, 100);
+        });
+    </script>
+    
+    <!-- Script do rodapé modular -->
+    <script src="js/footer.js"></script>
+    <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
+</body>
+</html>
