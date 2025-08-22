@@ -62,8 +62,13 @@ const db = {
                     // Normalizar todos os campos que podem ser IDs
                     for (const key in row) {
                         if (key.endsWith('_id') || key === 'id') {
-                            if (row[key] && typeof row[key] === 'string' && !isNaN(Number(row[key]))) {
+                            // Converter string numérica para número
+                            if (row[key] && typeof row[key] === 'string' && /^\d+$/.test(row[key])) {
                                 row[key] = parseInt(row[key], 10);
+                            }
+                            // Converter bigint para número
+                            else if (row[key] && typeof row[key] === 'bigint') {
+                                row[key] = Number(row[key]);
                             }
                         }
                     }
@@ -114,8 +119,13 @@ const db = {
                     // Normalizar todos os campos que podem ser IDs
                     for (const key in processedRow) {
                         if (key.endsWith('_id') || key === 'id') {
-                            if (processedRow[key] && typeof processedRow[key] === 'string' && !isNaN(Number(processedRow[key]))) {
+                            // Converter string numérica para número
+                            if (processedRow[key] && typeof processedRow[key] === 'string' && /^\d+$/.test(processedRow[key])) {
                                 processedRow[key] = parseInt(processedRow[key], 10);
+                            }
+                            // Converter bigint para número
+                            else if (processedRow[key] && typeof processedRow[key] === 'bigint') {
+                                processedRow[key] = Number(processedRow[key]);
                             }
                         }
                     }
