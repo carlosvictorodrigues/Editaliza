@@ -140,6 +140,11 @@ const ContextualNotifications = {
         // Verificar consistência de horários
         this.analyzeStudyTiming();
         
+        // Mostrar mensagem aleatória ocasionalmente (10% de chance)
+        if (Math.random() < 0.1) {
+            setTimeout(() => this.showRandomMotivationalMessage(), 5000);
+        }
+        
         // Salvar padrões periodicamente
         setInterval(() => this.savePatterns(), 60000); // 1 minuto
     },
@@ -320,14 +325,14 @@ const ContextualNotifications = {
         // Determinar período do dia para saudação
         let greeting, timeEmoji;
         if (currentHour < 12) {
-            greeting = "Bom dia";
-            timeEmoji = "☀️";
+            greeting = 'Bom dia';
+            timeEmoji = '☀️';
         } else if (currentHour < 18) {
-            greeting = "Boa tarde";
-            timeEmoji = "🌤️";
+            greeting = 'Boa tarde';
+            timeEmoji = '🌤️';
         } else {
-            greeting = "Boa noite";
-            timeEmoji = "🌙";
+            greeting = 'Boa noite';
+            timeEmoji = '🌙';
         }
 
         // Mensagens humoradas baseadas na sequência
@@ -335,21 +340,25 @@ const ContextualNotifications = {
         
         if (streak === 0) {
             const funnyMessages = [
-                "Olha quem voltou! Como um ex que aparece depois de meses... mas dessa vez é bem-vindo! 😂",
-                "Sentimos sua falta! Os livros estavam perguntando onde você estava! 📚😢",
-                "Eita! Alguém lembrou que tem concurso para passar! Bem-vindo de volta, campeão! 🎯",
-                "Como um Phoenix renascendo das cinzas... só que das cinzas da procrastinação! 🔥",
-                "Voltou! Agora é hora de transformar o Netflix em 'Studyflix'! 🍿➡️📖"
+                'Olha quem voltou! Como um ex que aparece depois de meses... mas dessa vez é bem-vindo! 😂',
+                'Sentimos sua falta! Os livros estavam perguntando onde você estava! 📚😢',
+                'Eita! Alguém lembrou que tem concurso para passar! Bem-vindo de volta, campeão! 🎯',
+                'Como um Phoenix renascendo das cinzas... só que das cinzas da procrastinação! 🔥',
+                'Voltou! Agora é hora de transformar o Netflix em \'Studyflix\'! 🍿➡️📖',
+                'Quem é vivo sempre aparece… menos quem passou no concurso ainda. Bora mudar isso! 👀',
+                'Você sumiu tanto que já pensei em abrir um B.O. Bem-vindo de volta, desaparecido(a)! 🕵️‍♂️',
+                'Faz tanto tempo que a lei mudou desde sua última sessão… cuidado! ⚖️😂',
+                'Se o edital fosse namoro, já teria terminado por abandono afetivo. Bora reatar! 💔➡️❤️'
             ];
             title = `${timeEmoji} ${greeting}, Ressuscitado(a)!`;
             welcomeMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
         } else if (streak === 1) {
             const funnyMessages = [
-                "1 dia de sequência! É o começo de algo lindo... como uma plantinha que acabou de brotar! 🌱",
-                "Primeiro dia da nova vida! Hoje você é estudante, amanhã será aprovado(a)! ⭐",
-                "Um dia! É pouco? Não! Todo império começou com uma única pedra! 🏰",
-                "1 dia de estudos! Você está 1% mais próximo da aprovação! (matemática motivacional) 📊",
-                "Dia 1 da operação 'Bye bye vida social, hello aprovação!' 🎯"
+                '1 dia de sequência! É o começo de algo lindo... como uma plantinha que acabou de brotar! 🌱',
+                'Primeiro dia da nova vida! Hoje você é estudante, amanhã será aprovado(a)! ⭐',
+                'Um dia! É pouco? Não! Todo império começou com uma única pedra! 🏰',
+                '1 dia de estudos! Você está 1% mais próximo da aprovação! (matemática motivacional) 📊',
+                'Dia 1 da operação \'Bye bye vida social, hello aprovação!\' 🎯'
             ];
             title = `${timeEmoji} ${greeting}, Iniciante Determinado(a)!`;
             welcomeMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
@@ -359,7 +368,10 @@ const ContextualNotifications = {
                 `${streak} dias seguidos! Parabéns, você está viciado(a)... em coisa boa! 🎮➡️📚`,
                 `${streak} dias! Já pode se considerar um(a) 'Estudante em Série'! 📺➡️📖`,
                 `${streak} dias de sequência! Tá mais regular que remédio pra pressão! 💊`,
-                `${streak} dias! Você está no modo 'Tartaruga Ninja dos Estudos'! 🐢🥷`
+                `${streak} dias! Você está no modo 'Tartaruga Ninja dos Estudos'! 🐢🥷`,
+                `${streak} dias firmes! Até sua cadeira já fez vínculo empregatício. 🪑`,
+                `${streak} dias! A procrastinação entrou com pedido de falência. 📉`,
+                `${streak} dias seguidos! Sua lombar virou patrimônio histórico do sofrimento. 🪑🕍`
             ];
             title = `${timeEmoji} ${greeting}, Viciado(a) em Sucesso!`;
             welcomeMessage = funnyMessages[Math.floor(Math.random() * funnyMessages.length)];
@@ -414,6 +426,45 @@ const ContextualNotifications = {
         });
     },
 
+    // Mensagens aleatórias motivacionais (independente de streak ou conquista)
+    showRandomMotivationalMessage() {
+        const randomMessages = [
+            {
+                message: 'Esse login rendeu +10 XP e -2 pontos de coluna. 🎮🪑',
+                title: '📊 Status Atualizado'
+            },
+            {
+                message: 'Se procrastinação fosse disciplina, você já tava aprovado com nota 10. 🏆',
+                title: '💭 Verdade Inconveniente'
+            },
+            {
+                message: 'O café já desistiu de te dar energia. Agora é só placebo. ☕',
+                title: '☕ Alerta Cafeína'
+            },
+            {
+                message: 'Você tá mais tempo na frente desse PDF do que na frente do crush. ❤️📑',
+                title: '📱 Análise de Tela'
+            },
+            {
+                message: 'Parabéns! Você desbloqueou a conquista secreta: Cadeira com formato do seu corpo. 🪑',
+                title: '🏆 Conquista Secreta'
+            },
+            {
+                message: 'Login confirmado: a procrastinação está chorando no canto agora. 😢',
+                title: '✅ Sistema Operacional'
+            }
+        ];
+
+        const selectedMessage = randomMessages[Math.floor(Math.random() * randomMessages.length)];
+
+        this.showContextualToast({
+            type: 'info',
+            title: selectedMessage.title,
+            message: selectedMessage.message,
+            duration: 6000
+        });
+    },
+
     // === DETECÇÃO DE PADRÕES ===
 
     detectProcrastination() {
@@ -432,10 +483,10 @@ const ContextualNotifications = {
 
     showProcrastinationNudge() {
         const nudges = [
-            "Que tal começar com apenas 15 minutos de estudo hoje? Pequenos passos fazem grandes diferenças! 🌱",
-            "Sentindo resistência para estudar? É normal! Que tal escolher o tópico mais fácil para quebrar o gelo? ❄️",
-            "Lembra da sua meta? Cada sessão, mesmo curta, te aproxima da aprovação! 🎯",
-            "Que tal definir um horário fixo de estudo? A consistência é mais importante que a duração! ⏰"
+            'Que tal começar com apenas 15 minutos de estudo hoje? Pequenos passos fazem grandes diferenças! 🌱',
+            'Sentindo resistência para estudar? É normal! Que tal escolher o tópico mais fácil para quebrar o gelo? ❄️',
+            'Lembra da sua meta? Cada sessão, mesmo curta, te aproxima da aprovação! 🎯',
+            'Que tal definir um horário fixo de estudo? A consistência é mais importante que a duração! ⏰'
         ];
 
         this.showContextualToast({
@@ -457,11 +508,11 @@ const ContextualNotifications = {
         let timingMessage = null;
 
         if (hour >= 6 && hour <= 9) {
-            timingMessage = "Manhã é um ótimo horário para estudar! Seu cérebro está 23% mais focado agora! 🧠";
+            timingMessage = 'Manhã é um ótimo horário para estudar! Seu cérebro está 23% mais focado agora! 🧠';
         } else if (hour >= 14 && hour <= 16) {
-            timingMessage = "Tarde perfeita para revisões! É quando a retenção de memória está no pico! 🔄";
+            timingMessage = 'Tarde perfeita para revisões! É quando a retenção de memória está no pico! 🔄';
         } else if (hour >= 19 && hour <= 21) {
-            timingMessage = "Noite ideal para simulados! Teste seus conhecimentos do dia! 📝";
+            timingMessage = 'Noite ideal para simulados! Teste seus conhecimentos do dia! 📝';
         }
 
         if (timingMessage && Math.random() < 0.3) { // 30% chance
@@ -481,11 +532,11 @@ const ContextualNotifications = {
         
         if (this.config.streakMilestones.includes(streak)) {
             const milestoneMessages = {
-                3: "3 dias consecutivos! Você está construindo um hábito poderoso! 🔥",
-                7: "Uma semana inteira! Sua disciplina está impressionante! 💪",
-                14: "2 semanas de consistência! Você é imparável! ⭐",
-                21: "3 semanas! Cientificamente, você já tem um hábito consolidado! 🧠",
-                30: "1 mês de estudos! Você é oficialmente um concurseiro dedicado! 🏆"
+                3: '3 dias consecutivos! Você está construindo um hábito poderoso! 🔥',
+                7: 'Uma semana inteira! Sua disciplina está impressionante! 💪',
+                14: '2 semanas de consistência! Você é imparável! ⭐',
+                21: '3 semanas! Cientificamente, você já tem um hábito consolidado! 🧠',
+                30: '1 mês de estudos! Você é oficialmente um concurseiro dedicado! 🏆'
             };
 
             this.showContextualToast({
@@ -698,9 +749,9 @@ const ContextualNotifications = {
         if (!this.isEnabled()) return;
 
         const inactivityMessages = [
-            "Que tal uma pausa ativa? Levante, estique o corpo e volte com tudo! 🧘",
-            "15 minutos de pausa! Hidrate-se e prepare-se para a próxima sessão! 💧",
-            "Momento para respirar! Seu cérebro agradece pelas pausas estratégicas! 🫁"
+            'Que tal uma pausa ativa? Levante, estique o corpo e volte com tudo! 🧘',
+            '15 minutos de pausa! Hidrate-se e prepare-se para a próxima sessão! 💧',
+            'Momento para respirar! Seu cérebro agradece pelas pausas estratégicas! 🫁'
         ];
 
         this.showContextualToast({
