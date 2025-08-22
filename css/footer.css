@@ -13,7 +13,7 @@ html body .editaliza-footer-refatorado {
     
     /* Posicionamento */
     position: relative !important;
-    z-index: 9999 !important;
+    z-index: 10 !important;
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;

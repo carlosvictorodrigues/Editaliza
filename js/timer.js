@@ -47,12 +47,12 @@ const TimerSystem = {
                     </div>
                 </div>
                  <div class="mt-3">
-                    <div class="flex justify-between text-xs text-gray-500 mb-1">
+                    <div class="flex justify-between text-sm font-medium text-gray-600 mb-1">
                         <span>Progresso da Sessão</span><span class="pomodoro-status" data-session="${sessionId}" data-duration="${sessionDuration}">0 / ${sessionDuration} min</span>
                     </div>
                     <div class="w-full bg-gray-200 rounded-full h-2"><div class="pomodoro-progress bg-editaliza-green h-2 rounded-full transition-all" data-session="${sessionId}" style="width: 0%"></div></div>
                 </div>
-                 <div class="mt-2 flex items-center space-x-1"><span class="text-xs text-gray-600">Pomodoros:</span><div class="pomodoro-dots flex space-x-1" data-session="${sessionId}"></div></div>
+                 <div class="mt-2 flex items-center space-x-1"><span class="text-sm text-gray-600">Pomodoros:</span><div class="pomodoro-dots flex space-x-1" data-session="${sessionId}"></div></div>
             </div>`;
     },
 

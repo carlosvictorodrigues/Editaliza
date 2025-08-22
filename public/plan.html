@@ -399,7 +399,7 @@
             if (window.initializingPlan) return;
             window.initializingPlan = true;
             try {
-                const plan = await app.apiFetch(`/plans/${planId}`);
+                const plan = await app.apiFetch(`/api/plans/${planId}`);
                 components.renderPlanHeader(planId, plan.plan_name, 'plan.html');
                 const examDate = new Date(plan.exam_date + 'T00:00:00');
                 document.getElementById('examDate').textContent = `Data da Prova: ${examDate.toLocaleDateString('pt-BR')}`;

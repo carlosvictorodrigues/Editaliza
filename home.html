@@ -729,7 +729,7 @@
             async function loadMetrics(planId) {
                 try {
                     const [plan, progress] = await Promise.all([
-                        app.apiFetch(`/plans/${planId}`),
+                        app.apiFetch(`/api/plans/${planId}`),
                         app.getActivePlanData(planId, 'progress')
                     ]);
 
@@ -1346,6 +1346,20 @@
                     updateStudyStatistics(app.state.activePlanId);
                 }
             };
+            
+            // Listener para sessão concluída - atualizar estatísticas
+            document.addEventListener('sessionCompleted', function(event) {
+                console.log('📊 Sessão concluída detectada, atualizando estatísticas...');
+                if (app.state.activePlanId) {
+                    // Atualizar todas as métricas
+                    setTimeout(() => {
+                        updateStudyStatistics(app.state.activePlanId);
+                        loadMetrics(app.state.activePlanId);
+                        updateTodayProgress();
+                        loadTodaySchedule(app.state.activePlanId);
+                    }, 1000); // Pequeno delay para garantir que o backend processou
+                }
+            });
 
         </script>
 
