@@ -548,6 +548,17 @@
             document.addEventListener('DOMContentLoaded', async () => {
                 console.log('🚀 Inicializando página home.html');
                 
+                // Exibir data de hoje imediatamente
+                const today = new Date();
+                const todayElement = document.getElementById('todayDateHero');
+                if (todayElement) {
+                    todayElement.textContent = today.toLocaleDateString('pt-BR', { 
+                        day: 'numeric', 
+                        month: 'long',
+                        year: 'numeric'
+                    });
+                }
+                
                 // Footer agora está inline no HTML - não precisa de verificação
                 
                 app.showSpinner();
@@ -591,6 +602,7 @@
                     loadUserProfile();
                     loadMetrics(planId);
                     loadTodaySchedule(planId);
+                    updateStudyStatistics(planId); // Carregar estatísticas imediatamente
                     checkOverdueTasks();
                     loadTransparencyData();
                     
@@ -1376,7 +1388,7 @@
                     console.error('❌ PROBLEMA: Seletor existe mas não tem opções válidas');
                     console.log('   - Tentando forçar carregamento emergencial...');
                     // Última tentativa emergencial
-                    fetch('/plans', {
+                    fetch('/api/plans', {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('editaliza_token')}`
                         }

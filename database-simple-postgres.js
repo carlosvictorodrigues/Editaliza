@@ -16,7 +16,9 @@ const pool = new Pool({
     max: 10,
     min: 2,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000
+    connectionTimeoutMillis: 5000,
+    // CORREÇÃO CRÍTICA: Configurar search_path para usar schema 'app' como padrão
+    options: '-c search_path=app,public'
 });
 
 console.log('[POSTGRES] Pool PostgreSQL inicializado');
@@ -292,10 +294,19 @@ const db = {
     isSQLite: false
 };
 
-// Testar conexão na inicialização
+// Testar conexão na inicialização e configurar schema
 pool.connect()
-    .then(client => {
+    .then(async client => {
         console.log('[POSTGRES] ✅ Conexão PostgreSQL testada com sucesso');
+        
+        // CORREÇÃO CRÍTICA: Configurar search_path para usar schema 'app' primeiro
+        await client.query('SET search_path TO app, public');
+        console.log('[POSTGRES] 🔧 Search path configurado para "app, public"');
+        
+        // Verificar schema atual
+        const currentSchema = await client.query('SELECT current_schema()');
+        console.log(`[POSTGRES] 📍 Schema atual: ${currentSchema.rows[0].current_schema}`);
+        
         client.release();
     })
     .catch(err => {

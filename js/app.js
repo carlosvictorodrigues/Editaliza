@@ -265,7 +265,7 @@ const app = {
         if (this.state.plans.length > 0 && !forceRefresh) {
             return this.state.plans;
         }
-        const plans = await this.apiFetch('/plans');
+        const plans = await this.apiFetch('/api/plans');
         this.state.plans = plans;
         return plans;
     },

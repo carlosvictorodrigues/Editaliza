@@ -361,7 +361,7 @@
         async function fetchAndDisplayPlans() {
             app.showSpinner();
             try {
-                const plans = await app.apiFetch("/plans"); 
+                const plans = await app.apiFetch("/api/plans"); 
                 const planList = document.getElementById('planList');
                 planList.innerHTML = '';
 
@@ -444,7 +444,7 @@
             closeDeleteModal();
 
             try {
-                const data = await app.apiFetch(`/plans/${planIdToDelete}`, { method: 'DELETE' });
+                const data = await app.apiFetch(`/api/plans/${planIdToDelete}`, { method: 'DELETE' });
                 app.showToast(data.message, 'success');
                 await fetchAndDisplayPlans();
             } catch (error) {
@@ -531,7 +531,7 @@
                 app.showSpinner();
 
                 try {
-                    const data = await app.apiFetch('/plans', {
+                    const data = await app.apiFetch('/api/plans', {
                         method: 'POST',
                         body: JSON.stringify({ plan_name, exam_date })
                     });
