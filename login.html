@@ -254,8 +254,17 @@
                     window.location.href = data.redirectUrl || 'home.html'; 
                     
                 } catch (error) {
-                    messageContainer.textContent = `Erro: ${error.message}`;
+                    // Usar sistema de notificações melhorado
+                    notifications.error(error.message || 'Erro ao fazer login. Tente novamente.');
+                    
+                    // Também mostrar no container da página para compatibilidade
+                    messageContainer.textContent = error.message || 'Erro ao fazer login';
                     messageContainer.classList.add('text-red-600');
+                    messageContainer.style.padding = '10px';
+                    messageContainer.style.backgroundColor = '#fee2e2';
+                    messageContainer.style.borderRadius = '4px';
+                    messageContainer.style.marginTop = '10px';
+                    
                     submitButton.disabled = false;
                     submitButton.textContent = 'Entrar';
                 }
@@ -269,6 +278,8 @@
         });
     </script>
     
+    <!-- Sistema de notificações -->
+    <script src="js/notifications.js"></script>
     <!-- Script do rodapé modular -->
     <script src="js/footer.js"></script>
     <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->

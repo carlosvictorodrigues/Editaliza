@@ -244,15 +244,31 @@
                         body: JSON.stringify({ email, password })
                     });
 
+                    // Usar sistema de notificações melhorado
+                    notifications.success('Cadastro realizado com sucesso! Redirecionando para o login...');
+                    
                     messageContainer.textContent = 'Cadastro realizado com sucesso! Redirecionando para o login...';
                     messageContainer.classList.add('text-green-600');
+                    messageContainer.style.padding = '10px';
+                    messageContainer.style.backgroundColor = '#dcfce7';
+                    messageContainer.style.borderRadius = '4px';
+                    messageContainer.style.marginTop = '10px';
                     setTimeout(() => {
                         window.location.href = 'login.html';
                     }, 2000);
 
                 } catch (error) {
-                    messageContainer.textContent = `Erro: ${error.message}`;
+                    // Usar sistema de notificações melhorado
+                    notifications.error(error.message || 'Erro ao criar conta. Tente novamente.');
+                    
+                    // Também mostrar no container da página para compatibilidade
+                    messageContainer.textContent = error.message || 'Erro ao criar conta';
                     messageContainer.classList.add('text-red-600');
+                    messageContainer.style.padding = '10px';
+                    messageContainer.style.backgroundColor = '#fee2e2';
+                    messageContainer.style.borderRadius = '4px';
+                    messageContainer.style.marginTop = '10px';
+                    
                     submitButton.disabled = false;
                     submitButton.textContent = 'Criar Conta Gratuitamente';
                 }
@@ -266,6 +282,8 @@
         });
     </script>
     
+    <!-- Sistema de notificações -->
+    <script src="js/notifications.js"></script>
     <!-- Script do rodapé modular -->
     <script src="js/footer.js"></script>
     <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->

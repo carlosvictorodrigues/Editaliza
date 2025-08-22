@@ -1,0 +1,399 @@
+{
+  "timestamp": "2025-08-22T03:12:49.103Z",
+  "code_quality": {
+    "total_files": 19,
+    "total_size_kb": 438,
+    "total_lines": 9039,
+    "avg_file_size_kb": 23,
+    "files_with_issues": 17,
+    "issues": [
+      {
+        "file": "app.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\app.js",
+        "size": 36,
+        "lines": 917,
+        "issues": [
+          {
+            "type": "EXCESSIVE_CONSOLE_LOGS",
+            "severity": "MEDIUM",
+            "count": 42,
+            "description": "Muitos console.log podem impactar performance"
+          },
+          {
+            "type": "LARGE_FUNCTIONS",
+            "severity": "MEDIUM",
+            "avgSize": 229,
+            "description": "Funções muito grandes podem impactar maintainability"
+          },
+          {
+            "type": "POTENTIAL_MEMORY_LEAK",
+            "severity": "HIGH",
+            "description": "setInterval sem clearInterval pode causar memory leak"
+          }
+        ]
+      },
+      {
+        "file": "checklist.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\checklist.js",
+        "size": 23,
+        "lines": 476,
+        "issues": [
+          {
+            "type": "EXCESSIVE_CONSOLE_LOGS",
+            "severity": "MEDIUM",
+            "count": 22,
+            "description": "Muitos console.log podem impactar performance"
+          },
+          {
+            "type": "INLINE_EVENT_HANDLERS",
+            "severity": "MEDIUM",
+            "count": 3,
+            "description": "Event handlers inline podem causar memory leaks"
+          },
+          {
+            "type": "EXCESSIVE_DOM_QUERIES",
+            "severity": "MEDIUM",
+            "description": "Muitas consultas DOM podem impactar performance"
+          }
+        ]
+      },
+      {
+        "file": "components - Copia.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\components - Copia.js",
+        "size": 18,
+        "lines": 298,
+        "issues": [
+          {
+            "type": "INLINE_EVENT_HANDLERS",
+            "severity": "MEDIUM",
+            "count": 4,
+            "description": "Event handlers inline podem causar memory leaks"
+          }
+        ]
+      },
+      {
+        "file": "components-new.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\components-new.js",
+        "size": 16,
+        "lines": 416,
+        "issues": [
+          {
+            "type": "EXCESSIVE_CONSOLE_LOGS",
+            "severity": "MEDIUM",
+            "count": 12,
+            "description": "Muitos console.log podem impactar performance"
+          },
+          {
+            "type": "POTENTIAL_MEMORY_LEAK",
+            "severity": "HIGH",
+            "description": "setInterval sem clearInterval pode causar memory leak"
+          }
+        ]
+      },
+      {
+        "file": "components.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\components.js",
+        "size": 94,
+        "lines": 1418,
+        "issues": [
+          {
+            "type": "INLINE_EVENT_HANDLERS",
+            "severity": "MEDIUM",
+            "count": 31,
+            "description": "Event handlers inline podem causar memory leaks"
+          },
+          {
+            "type": "POTENTIAL_MEMORY_LEAK",
+            "severity": "HIGH",
+            "description": "setInterval sem clearInterval pode causar memory leak"
+          }
+        ]
+      },
+      {
+        "file": "footer.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\footer.js",
+        "size": 32,
+        "lines": 673,
+        "issues": [
+          {
+            "type": "LARGE_FUNCTIONS",
+            "severity": "MEDIUM",
+            "avgSize": 673,
+            "description": "Funções muito grandes podem impactar maintainability"
+          }
+        ]
+      },
+      {
+        "file": "force-light-mode.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\force-light-mode.js",
+        "size": 6,
+        "lines": 174,
+        "issues": [
+          {
+            "type": "INLINE_EVENT_HANDLERS",
+            "severity": "MEDIUM",
+            "count": 5,
+            "description": "Event handlers inline podem causar memory leaks"
+          },
+          {
+            "type": "POTENTIAL_MEMORY_LEAK",
+            "severity": "HIGH",
+            "description": "setInterval sem clearInterval pode causar memory leak"
+          }
+        ]
+      },
+      {
+        "file": "cards.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\modules\\cards.js",
+        "size": 36,
+        "lines": 567,
+        "issues": [
+          {
+            "type": "INLINE_EVENT_HANDLERS",
+            "severity": "MEDIUM",
+            "count": 8,
+            "description": "Event handlers inline podem causar memory leaks"
+          }
+        ]
+      },
+      {
+        "file": "components-core.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\modules\\components-core.js",
+        "size": 12,
+        "lines": 356,
+        "issues": [
+          {
+            "type": "EXCESSIVE_CONSOLE_LOGS",
+            "severity": "MEDIUM",
+            "count": 14,
+            "description": "Muitos console.log podem impactar performance"
+          },
+          {
+            "type": "POTENTIAL_MEMORY_LEAK",
+            "severity": "HIGH",
+            "description": "setInterval sem clearInterval pode causar memory leak"
+          }
+        ]
+      },
+      {
+        "file": "contextual-notifications.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\modules\\contextual-notifications.js",
+        "size": 21,
+        "lines": 576,
+        "issues": [
+          {
+            "type": "POTENTIAL_MEMORY_LEAK",
+            "severity": "HIGH",
+            "description": "setInterval sem clearInterval pode causar memory leak"
+          }
+        ]
+      },
+      {
+        "file": "gamification.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\modules\\gamification.js",
+        "size": 23,
+        "lines": 416,
+        "issues": [
+          {
+            "type": "INLINE_EVENT_HANDLERS",
+            "severity": "MEDIUM",
+            "count": 2,
+            "description": "Event handlers inline podem causar memory leaks"
+          }
+        ]
+      },
+      {
+        "file": "navigation.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\modules\\navigation.js",
+        "size": 21,
+        "lines": 360,
+        "issues": [
+          {
+            "type": "EXCESSIVE_CONSOLE_LOGS",
+            "severity": "MEDIUM",
+            "count": 7,
+            "description": "Muitos console.log podem impactar performance"
+          },
+          {
+            "type": "INLINE_EVENT_HANDLERS",
+            "severity": "MEDIUM",
+            "count": 1,
+            "description": "Event handlers inline podem causar memory leaks"
+          }
+        ]
+      },
+      {
+        "file": "notification-integrations.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\modules\\notification-integrations.js",
+        "size": 21,
+        "lines": 645,
+        "issues": [
+          {
+            "type": "EXCESSIVE_CONSOLE_LOGS",
+            "severity": "MEDIUM",
+            "count": 9,
+            "description": "Muitos console.log podem impactar performance"
+          }
+        ]
+      },
+      {
+        "file": "smart-buttons.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\modules\\smart-buttons.js",
+        "size": 10,
+        "lines": 227,
+        "issues": [
+          {
+            "type": "LARGE_FUNCTIONS",
+            "severity": "MEDIUM",
+            "avgSize": 114,
+            "description": "Funções muito grandes podem impactar maintainability"
+          }
+        ]
+      },
+      {
+        "file": "ui-core.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\modules\\ui-core.js",
+        "size": 6,
+        "lines": 169,
+        "issues": [
+          {
+            "type": "INLINE_EVENT_HANDLERS",
+            "severity": "MEDIUM",
+            "count": 1,
+            "description": "Event handlers inline podem causar memory leaks"
+          }
+        ]
+      },
+      {
+        "file": "timer.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\timer.js",
+        "size": 26,
+        "lines": 605,
+        "issues": [
+          {
+            "type": "EXCESSIVE_CONSOLE_LOGS",
+            "severity": "MEDIUM",
+            "count": 34,
+            "description": "Muitos console.log podem impactar performance"
+          },
+          {
+            "type": "LARGE_FUNCTIONS",
+            "severity": "MEDIUM",
+            "avgSize": 605,
+            "description": "Funções muito grandes podem impactar maintainability"
+          },
+          {
+            "type": "INLINE_EVENT_HANDLERS",
+            "severity": "MEDIUM",
+            "count": 2,
+            "description": "Event handlers inline podem causar memory leaks"
+          }
+        ]
+      },
+      {
+        "file": "ux-improvements.js",
+        "path": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\js\\ux-improvements.js",
+        "size": 34,
+        "lines": 701,
+        "issues": [
+          {
+            "type": "EXCESSIVE_CONSOLE_LOGS",
+            "severity": "MEDIUM",
+            "count": 7,
+            "description": "Muitos console.log podem impactar performance"
+          },
+          {
+            "type": "INLINE_EVENT_HANDLERS",
+            "severity": "MEDIUM",
+            "count": 1,
+            "description": "Event handlers inline podem causar memory leaks"
+          }
+        ]
+      }
+    ]
+  },
+  "performance_issues": [
+    {
+      "type": "DUPLICATE_FILES",
+      "severity": "MEDIUM",
+      "files": [
+        {
+          "name": "components - Copia.js",
+          "path": "js\\components - Copia.js",
+          "size_kb": 18
+        },
+        {
+          "name": "components-legacy-backup.js",
+          "path": "js\\components-legacy-backup.js",
+          "size_kb": 1
+        }
+      ],
+      "impact": "Bundle size desnecessariamente grande"
+    },
+    {
+      "type": "EXTERNAL_DEPENDENCIES",
+      "severity": "LOW",
+      "dependencies": [
+        {
+          "file": "cronograma.html",
+          "url": "https://cdn.tailwindcss.com",
+          "type": "Other"
+        },
+        {
+          "file": "cronograma.html",
+          "url": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+          "type": "Font"
+        }
+      ],
+      "impact": "Dependência de recursos externos"
+    }
+  ],
+  "recommendations": [
+    {
+      "category": "BUNDLE_OPTIMIZATION",
+      "priority": "HIGH",
+      "title": "Remover Arquivos Duplicados",
+      "description": "2 arquivos duplicados encontrados",
+      "actions": [
+        "Remover components - Copia.js (18KB)",
+        "Remover components-legacy-backup.js (1KB)"
+      ],
+      "impact": "Redução de 19KB no bundle"
+    },
+    {
+      "category": "CODE_QUALITY",
+      "priority": "MEDIUM",
+      "title": "Melhorar Qualidade do Código",
+      "description": "17 arquivos com problemas de código",
+      "actions": [
+        "Reduzir uso de console.log em produção",
+        "Quebrar funções grandes em menores",
+        "Implementar error handling em async functions",
+        "Evitar variáveis globais desnecessárias"
+      ],
+      "impact": "Melhora maintainability e reduz bugs"
+    },
+    {
+      "category": "DEPENDENCY_OPTIMIZATION",
+      "priority": "LOW",
+      "title": "Otimizar Dependências Externas",
+      "description": "2 dependências externas",
+      "actions": [
+        "Considerar self-hosting de recursos críticos",
+        "Implementar fallbacks para CDNs",
+        "Usar resource hints (preload, prefetch)"
+      ],
+      "impact": "Melhora confiabilidade e performance"
+    }
+  ],
+  "metrics": {
+    "total_files_analyzed": 19,
+    "total_bundle_size_kb": 438,
+    "total_issues": 19,
+    "critical_issues": 6,
+    "medium_issues": 24,
+    "low_issues": 1,
+    "performance_score": 0,
+    "recommendations_count": 3
+  }
+}

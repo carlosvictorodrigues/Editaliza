@@ -1442,7 +1442,7 @@ app.post('/plans/:planId/subjects_with_topics',
                 // PostgreSQL handles this efficiently with connection pooling
                 for (const topic of topics) {
                     // Tópicos novos recebem peso padrão 3, que pode ser editado depois
-                    await dbRun('INSERT INTO topics (subject_id, description, priority_weight) VALUES (?,?,?)', 
+                    await dbRun('INSERT INTO topics (subject_id, topic_name, priority_weight) VALUES (?,?,?)', 
                         [subjectId, topic.substring(0, 500), 3]);
                 }
             }
@@ -1529,7 +1529,7 @@ app.get('/plans/:planId/subjects_with_topics',
             }
 
             const topics = await dbAll(`
-                SELECT id, subject_id, description, status, completion_date, priority_weight 
+                SELECT id, subject_id, topic_name, topic_name as description, status, completion_date, priority_weight 
                 FROM topics 
                 WHERE subject_id IN (${subjectIds.map(() => '?').join(',')}) 
                 ORDER BY id ASC
@@ -1574,7 +1574,7 @@ app.get('/subjects/:subjectId/topics',
             `, [req.params.subjectId, req.user.id]);
             if (!subject) return res.status(404).json({ error: 'Disciplina não encontrada ou não autorizada.' });
 
-            const rows = await dbAll('SELECT id, description, status, completion_date, priority_weight FROM topics WHERE subject_id = ? ORDER BY id ASC', [req.params.subjectId]);
+            const rows = await dbAll('SELECT id, topic_name, topic_name as description, status, completion_date, priority_weight FROM topics WHERE subject_id = ? ORDER BY id ASC', [req.params.subjectId]);
             rows.forEach(r => r.priority_weight = parseInt(r.priority_weight, 10) || 3);
             res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
             res.setHeader('Pragma', 'no-cache');

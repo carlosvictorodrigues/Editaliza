@@ -77,7 +77,7 @@ const login = async (credentials, req) => {
     if (!user) {
         await authRepository.recordLoginAttempt(sanitizedEmail, false, req.ip, req.headers['user-agent']);
         securityLog('login_attempt_user_not_found', { email: sanitizedEmail }, null, req);
-        throw new Error('E-mail ou senha inválidos.');
+        throw new Error('Conta não encontrada. Verifique o e-mail ou crie uma nova conta.');
     }
     
     // Check if user is a Google OAuth user
@@ -99,7 +99,7 @@ const login = async (credentials, req) => {
     if (!await bcrypt.compare(password, user[passwordColumn])) {
         await authRepository.recordLoginAttempt(sanitizedEmail, false, req.ip, req.headers['user-agent']);
         securityLog('login_attempt_wrong_password', { email: sanitizedEmail, userId: user.id }, user.id, req);
-        throw new Error('E-mail ou senha inválidos.');
+        throw new Error('Senha incorreta. Tente novamente ou use "Esqueci minha senha".');
     }
     
     // Success - record attempt and generate token

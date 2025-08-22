@@ -255,6 +255,13 @@ cat server.js | gemini -p "Revise este código para problemas de segurança e pe
 - Use `npx` para garantir sempre a versão mais recente do gemini-cli
 - Se houver problemas de conexão, reinstale: `npm install -g @google/gemini-cli@latest`
 
+## 📧 CREDENCIAIS DE SERVIÇOS
+
+### StayCloud (Email Service):
+- **Email:** editalizaconcursos@gmail.com
+- **Senha:** @Editaliza2025
+- **Uso:** Serviço de email para notificações do sistema
+
 ## 📝 CONVENÇÕES DE COMMIT
 
 Use Conventional Commits:

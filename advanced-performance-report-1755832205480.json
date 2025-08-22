@@ -1,0 +1,752 @@
+{
+  "timestamp": "2025-08-22T03:09:02.366Z",
+  "memory_analysis": {
+    "baseline": {
+      "heapUsed": 5,
+      "heapTotal": 6,
+      "rss": 47
+    },
+    "snapshots": [
+      {
+        "iteration": 0,
+        "heapUsed": 5,
+        "heapTotal": 7,
+        "external": 1836447,
+        "rss": 51
+      },
+      {
+        "iteration": 10,
+        "heapUsed": 5,
+        "heapTotal": 8,
+        "external": 1906261,
+        "rss": 52
+      },
+      {
+        "iteration": 20,
+        "heapUsed": 6,
+        "heapTotal": 8,
+        "external": 2155032,
+        "rss": 52
+      },
+      {
+        "iteration": 30,
+        "heapUsed": 6,
+        "heapTotal": 8,
+        "external": 2013878,
+        "rss": 52
+      },
+      {
+        "iteration": 40,
+        "heapUsed": 5,
+        "heapTotal": 8,
+        "external": 1906261,
+        "rss": 52
+      },
+      {
+        "iteration": 50,
+        "heapUsed": 6,
+        "heapTotal": 8,
+        "external": 2155032,
+        "rss": 52
+      },
+      {
+        "iteration": 60,
+        "heapUsed": 5,
+        "heapTotal": 8,
+        "external": 1979119,
+        "rss": 52
+      },
+      {
+        "iteration": 70,
+        "heapUsed": 5,
+        "heapTotal": 8,
+        "external": 1869980,
+        "rss": 52
+      },
+      {
+        "iteration": 80,
+        "heapUsed": 6,
+        "heapTotal": 8,
+        "external": 2118751,
+        "rss": 52
+      },
+      {
+        "iteration": 90,
+        "heapUsed": 5,
+        "heapTotal": 8,
+        "external": 1942542,
+        "rss": 52
+      }
+    ],
+    "analysis": {
+      "heap_growth_mb": 1,
+      "rss_growth_mb": 2,
+      "heap_trend_per_iteration": 31480,
+      "rss_trend_per_iteration": 126703,
+      "leak_suspected": false,
+      "severity": "LOW"
+    }
+  },
+  "database_performance": {
+    "sqlite_databases": [
+      {
+        "file": "database.sqlite",
+        "size_mb": 0.1,
+        "modified": "2025-08-15T15:07:20.265Z"
+      },
+      {
+        "file": "study_planner.db",
+        "size_mb": 0,
+        "modified": "2025-08-15T19:24:45.495Z"
+      }
+    ],
+    "postgresql_status": {
+      "status": "DISCONNECTED",
+      "error": "autentica��o do tipo senha falhou para o usu�rio \"editaliza_user\""
+    },
+    "query_performance": [
+      {
+        "type": "SELECT_USER",
+        "query": "SELECT * FROM users WHERE id = ?",
+        "estimated_time_ms": 5,
+        "frequency": "VERY_HIGH",
+        "optimization_potential": "LOW"
+      },
+      {
+        "type": "SELECT_CRONOGRAMA",
+        "query": "SELECT * FROM cronograma WHERE user_id = ? ORDER BY date",
+        "estimated_time_ms": 25,
+        "frequency": "HIGH",
+        "optimization_potential": "MEDIUM"
+      },
+      {
+        "type": "JOIN_SESSIONS_SUBJECTS",
+        "query": "SELECT s.*, sub.name FROM sessions s JOIN subjects sub ON s.subject_id = sub.id WHERE s.user_id = ?",
+        "estimated_time_ms": 50,
+        "frequency": "MEDIUM",
+        "optimization_potential": "HIGH"
+      },
+      {
+        "type": "COMPLEX_STATISTICS",
+        "query": "SELECT COUNT(*), AVG(duration), DATE(created_at) FROM sessions WHERE user_id = ? GROUP BY DATE(created_at)",
+        "estimated_time_ms": 100,
+        "frequency": "LOW",
+        "optimization_potential": "HIGH"
+      }
+    ],
+    "recommendations": [
+      {
+        "priority": "HIGH",
+        "issue": "Sistema usando SQLite em desenvolvimento",
+        "solution": "Configurar PostgreSQL para melhor performance e recursos",
+        "impact": "Melhor concorrência, integridade de dados e performance"
+      }
+    ]
+  },
+  "api_performance": {
+    "endpoints": {
+      "/health": {
+        "method": "GET",
+        "auth_required": false,
+        "measurements": [
+          {
+            "response_time": 3,
+            "ttfb": 3,
+            "download_time": 0,
+            "status_code": 200,
+            "content_length": 134,
+            "headers_count": 21,
+            "timestamp": "2025-08-22T03:09:02.698Z"
+          },
+          {
+            "response_time": 9,
+            "ttfb": 8,
+            "download_time": 1,
+            "status_code": 200,
+            "content_length": 133,
+            "headers_count": 21,
+            "timestamp": "2025-08-22T03:09:02.810Z"
+          },
+          {
+            "response_time": 8,
+            "ttfb": 8,
+            "download_time": 1,
+            "status_code": 200,
+            "content_length": 134,
+            "headers_count": 21,
+            "timestamp": "2025-08-22T03:09:02.932Z"
+          },
+          {
+            "response_time": 4,
+            "ttfb": 4,
+            "download_time": 0,
+            "status_code": 200,
+            "content_length": 134,
+            "headers_count": 21,
+            "timestamp": "2025-08-22T03:09:03.038Z"
+          },
+          {
+            "response_time": 5,
+            "ttfb": 5,
+            "download_time": 0,
+            "status_code": 200,
+            "content_length": 133,
+            "headers_count": 21,
+            "timestamp": "2025-08-22T03:09:03.148Z"
+          }
+        ],
+        "statistics": {
+          "response_time": {
+            "min": 3,
+            "max": 9,
+            "avg": 6,
+            "p95": 9
+          },
+          "ttfb": {
+            "min": 3,
+            "max": 8,
+            "avg": 6,
+            "p95": 8
+          },
+          "success_rate": 100
+        }
+      },
+      "/login.html": {
+        "method": "GET",
+        "auth_required": false,
+        "measurements": [
+          {
+            "response_time": 4,
+            "ttfb": 4,
+            "download_time": 0,
+            "status_code": 200,
+            "content_length": 17321,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:03.257Z"
+          },
+          {
+            "response_time": 4,
+            "ttfb": 4,
+            "download_time": 1,
+            "status_code": 200,
+            "content_length": 17321,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:03.363Z"
+          },
+          {
+            "response_time": 2,
+            "ttfb": 2,
+            "download_time": 0,
+            "status_code": 200,
+            "content_length": 17321,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:03.468Z"
+          },
+          {
+            "response_time": 5,
+            "ttfb": 4,
+            "download_time": 1,
+            "status_code": 200,
+            "content_length": 17321,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:03.578Z"
+          },
+          {
+            "response_time": 5,
+            "ttfb": 4,
+            "download_time": 1,
+            "status_code": 200,
+            "content_length": 17321,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:03.690Z"
+          }
+        ],
+        "statistics": {
+          "response_time": {
+            "min": 2,
+            "max": 5,
+            "avg": 4,
+            "p95": 5
+          },
+          "ttfb": {
+            "min": 2,
+            "max": 4,
+            "avg": 4,
+            "p95": 4
+          },
+          "success_rate": 100
+        }
+      },
+      "/register.html": {
+        "method": "GET",
+        "auth_required": false,
+        "measurements": [
+          {
+            "response_time": 5,
+            "ttfb": 4,
+            "download_time": 0,
+            "status_code": 200,
+            "content_length": 17199,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:03.798Z"
+          },
+          {
+            "response_time": 5,
+            "ttfb": 4,
+            "download_time": 0,
+            "status_code": 200,
+            "content_length": 17199,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:03.905Z"
+          },
+          {
+            "response_time": 6,
+            "ttfb": 6,
+            "download_time": 0,
+            "status_code": 200,
+            "content_length": 17199,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:04.015Z"
+          },
+          {
+            "response_time": 5,
+            "ttfb": 4,
+            "download_time": 0,
+            "status_code": 200,
+            "content_length": 17199,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:04.121Z"
+          },
+          {
+            "response_time": 5,
+            "ttfb": 4,
+            "download_time": 1,
+            "status_code": 200,
+            "content_length": 17199,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:04.230Z"
+          }
+        ],
+        "statistics": {
+          "response_time": {
+            "min": 5,
+            "max": 6,
+            "avg": 5,
+            "p95": 6
+          },
+          "ttfb": {
+            "min": 4,
+            "max": 6,
+            "avg": 4,
+            "p95": 6
+          },
+          "success_rate": 100
+        }
+      },
+      "/cronograma.html": {
+        "method": "GET",
+        "auth_required": false,
+        "measurements": [
+          {
+            "response_time": 7,
+            "ttfb": 6,
+            "download_time": 1,
+            "status_code": 200,
+            "content_length": 59741,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:04.342Z"
+          },
+          {
+            "response_time": 7,
+            "ttfb": 6,
+            "download_time": 1,
+            "status_code": 200,
+            "content_length": 59741,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:04.452Z"
+          },
+          {
+            "response_time": 7,
+            "ttfb": 6,
+            "download_time": 1,
+            "status_code": 200,
+            "content_length": 59741,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:04.574Z"
+          },
+          {
+            "response_time": 7,
+            "ttfb": 6,
+            "download_time": 1,
+            "status_code": 200,
+            "content_length": 59741,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:04.686Z"
+          },
+          {
+            "response_time": 6,
+            "ttfb": 4,
+            "download_time": 2,
+            "status_code": 200,
+            "content_length": 59741,
+            "headers_count": 10,
+            "timestamp": "2025-08-22T03:09:04.793Z"
+          }
+        ],
+        "statistics": {
+          "response_time": {
+            "min": 6,
+            "max": 7,
+            "avg": 7,
+            "p95": 7
+          },
+          "ttfb": {
+            "min": 4,
+            "max": 6,
+            "avg": 6,
+            "p95": 6
+          },
+          "success_rate": 100
+        }
+      },
+      "/api/auth/login": {
+        "method": "POST",
+        "auth_required": false,
+        "measurements": [
+          {
+            "response_time": 3,
+            "ttfb": 2,
+            "download_time": 0,
+            "status_code": 403,
+            "content_length": 59,
+            "headers_count": 25,
+            "timestamp": "2025-08-22T03:09:04.899Z"
+          },
+          {
+            "response_time": 1,
+            "ttfb": 1,
+            "download_time": 0,
+            "status_code": 403,
+            "content_length": 59,
+            "headers_count": 25,
+            "timestamp": "2025-08-22T03:09:05.008Z"
+          },
+          {
+            "response_time": 2,
+            "ttfb": 2,
+            "download_time": 0,
+            "status_code": 403,
+            "content_length": 59,
+            "headers_count": 25,
+            "timestamp": "2025-08-22T03:09:05.119Z"
+          },
+          {
+            "response_time": 5,
+            "ttfb": 5,
+            "download_time": 0,
+            "status_code": 403,
+            "content_length": 59,
+            "headers_count": 25,
+            "timestamp": "2025-08-22T03:09:05.232Z"
+          },
+          {
+            "response_time": 5,
+            "ttfb": 5,
+            "download_time": 0,
+            "status_code": 403,
+            "content_length": 59,
+            "headers_count": 25,
+            "timestamp": "2025-08-22T03:09:05.342Z"
+          }
+        ],
+        "statistics": {
+          "response_time": {
+            "min": 1,
+            "max": 5,
+            "avg": 3,
+            "p95": 5
+          },
+          "ttfb": {
+            "min": 1,
+            "max": 5,
+            "avg": 3,
+            "p95": 5
+          },
+          "success_rate": 0
+        }
+      },
+      "/api/cronograma/generate": {
+        "method": "POST",
+        "auth_required": true,
+        "measurements": [
+          {
+            "response_time": 5,
+            "ttfb": 5,
+            "download_time": 0,
+            "status_code": 403,
+            "content_length": 59,
+            "headers_count": 25,
+            "timestamp": "2025-08-22T03:09:05.453Z"
+          },
+          {
+            "response_time": 6,
+            "ttfb": 5,
+            "download_time": 0,
+            "status_code": 403,
+            "content_length": 59,
+            "headers_count": 25,
+            "timestamp": "2025-08-22T03:09:05.560Z"
+          },
+          {
+            "response_time": 4,
+            "ttfb": 4,
+            "download_time": 0,
+            "status_code": 403,
+            "content_length": 59,
+            "headers_count": 25,
+            "timestamp": "2025-08-22T03:09:05.668Z"
+          },
+          {
+            "response_time": 4,
+            "ttfb": 4,
+            "download_time": 0,
+            "status_code": 403,
+            "content_length": 59,
+            "headers_count": 25,
+            "timestamp": "2025-08-22T03:09:05.775Z"
+          },
+          {
+            "response_time": 2,
+            "ttfb": 2,
+            "download_time": 0,
+            "status_code": 403,
+            "content_length": 59,
+            "headers_count": 25,
+            "timestamp": "2025-08-22T03:09:05.882Z"
+          }
+        ],
+        "statistics": {
+          "response_time": {
+            "min": 2,
+            "max": 6,
+            "avg": 4,
+            "p95": 6
+          },
+          "ttfb": {
+            "min": 2,
+            "max": 5,
+            "avg": 4,
+            "p95": 5
+          },
+          "success_rate": 0
+        }
+      },
+      "/api/sessions": {
+        "method": "GET",
+        "auth_required": true,
+        "measurements": [
+          {
+            "response_time": 2,
+            "ttfb": 2,
+            "download_time": 0,
+            "status_code": 404,
+            "content_length": 151,
+            "headers_count": 24,
+            "timestamp": "2025-08-22T03:09:05.991Z"
+          },
+          {
+            "response_time": 4,
+            "ttfb": 3,
+            "download_time": 0,
+            "status_code": 404,
+            "content_length": 151,
+            "headers_count": 24,
+            "timestamp": "2025-08-22T03:09:06.102Z"
+          },
+          {
+            "response_time": 3,
+            "ttfb": 3,
+            "download_time": 0,
+            "status_code": 404,
+            "content_length": 151,
+            "headers_count": 24,
+            "timestamp": "2025-08-22T03:09:06.209Z"
+          },
+          {
+            "response_time": 6,
+            "ttfb": 5,
+            "download_time": 0,
+            "status_code": 404,
+            "content_length": 151,
+            "headers_count": 24,
+            "timestamp": "2025-08-22T03:09:06.321Z"
+          },
+          {
+            "response_time": 2,
+            "ttfb": 2,
+            "download_time": 0,
+            "status_code": 404,
+            "content_length": 151,
+            "headers_count": 24,
+            "timestamp": "2025-08-22T03:09:06.426Z"
+          }
+        ],
+        "statistics": {
+          "response_time": {
+            "min": 2,
+            "max": 6,
+            "avg": 3,
+            "p95": 6
+          },
+          "ttfb": {
+            "min": 2,
+            "max": 5,
+            "avg": 3,
+            "p95": 5
+          },
+          "success_rate": 0
+        }
+      },
+      "/api/profile": {
+        "method": "GET",
+        "auth_required": true,
+        "measurements": [
+          {
+            "response_time": 4,
+            "ttfb": 4,
+            "download_time": 0,
+            "status_code": 404,
+            "content_length": 150,
+            "headers_count": 24,
+            "timestamp": "2025-08-22T03:09:06.537Z"
+          },
+          {
+            "response_time": 3,
+            "ttfb": 3,
+            "download_time": 0,
+            "status_code": 404,
+            "content_length": 150,
+            "headers_count": 24,
+            "timestamp": "2025-08-22T03:09:06.643Z"
+          },
+          {
+            "response_time": 3,
+            "ttfb": 3,
+            "download_time": 0,
+            "status_code": 404,
+            "content_length": 150,
+            "headers_count": 24,
+            "timestamp": "2025-08-22T03:09:06.752Z"
+          },
+          {
+            "response_time": 2,
+            "ttfb": 2,
+            "download_time": 0,
+            "status_code": 404,
+            "content_length": 150,
+            "headers_count": 24,
+            "timestamp": "2025-08-22T03:09:06.859Z"
+          },
+          {
+            "response_time": 3,
+            "ttfb": 3,
+            "download_time": 0,
+            "status_code": 404,
+            "content_length": 150,
+            "headers_count": 24,
+            "timestamp": "2025-08-22T03:09:06.969Z"
+          }
+        ],
+        "statistics": {
+          "response_time": {
+            "min": 2,
+            "max": 4,
+            "avg": 3,
+            "p95": 4
+          },
+          "ttfb": {
+            "min": 2,
+            "max": 4,
+            "avg": 3,
+            "p95": 4
+          },
+          "success_rate": 0
+        }
+      }
+    },
+    "summary": {
+      "total_endpoints_tested": 8,
+      "successful_tests": 8,
+      "overall_avg_response_time": 4,
+      "fast_endpoints": 8,
+      "slow_endpoints": 0,
+      "performance_grade": "A+"
+    }
+  },
+  "stress_testing": {
+    "scenarios": {
+      "Light Load": {
+        "scenario": "Light Load",
+        "total_requests": 857,
+        "successful_requests": 857,
+        "failed_requests": 0,
+        "success_rate": 100,
+        "avg_response_time": 3,
+        "min_response_time": 1,
+        "max_response_time": 9,
+        "p95_response_time": 6,
+        "throughput_rps": 86,
+        "status": "PASSED"
+      },
+      "Medium Load": {
+        "scenario": "Medium Load",
+        "total_requests": 3957,
+        "successful_requests": 3957,
+        "failed_requests": 0,
+        "success_rate": 100,
+        "avg_response_time": 2,
+        "min_response_time": 1,
+        "max_response_time": 18,
+        "p95_response_time": 5,
+        "throughput_rps": 264,
+        "status": "PASSED"
+      },
+      "Heavy Load": {
+        "scenario": "Heavy Load",
+        "total_requests": 10712,
+        "successful_requests": 10712,
+        "failed_requests": 0,
+        "success_rate": 100,
+        "avg_response_time": 3,
+        "min_response_time": 1,
+        "max_response_time": 20,
+        "p95_response_time": 5,
+        "throughput_rps": 536,
+        "status": "PASSED"
+      },
+      "Spike Test": {
+        "scenario": "Spike Test",
+        "total_requests": 4242,
+        "successful_requests": 4242,
+        "failed_requests": 0,
+        "success_rate": 100,
+        "avg_response_time": 7,
+        "min_response_time": 1,
+        "max_response_time": 94,
+        "p95_response_time": 31,
+        "throughput_rps": 848,
+        "status": "PASSED"
+      }
+    },
+    "summary": {
+      "scenarios_passed": 4,
+      "scenarios_degraded": 0,
+      "scenarios_failed": 0,
+      "max_concurrent_supported": 50,
+      "overall_status": "EXCELLENT"
+    }
+  },
+  "security_headers": {},
+  "bottlenecks": [],
+  "recommendations": []
+}

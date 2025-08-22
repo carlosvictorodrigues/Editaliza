@@ -1,0 +1,485 @@
+{
+  "metadata": {
+    "timestamp": "2025-08-22T03:07:12.855Z",
+    "auditor": "Editaliza Performance Auditor v1.0",
+    "environment": "Local Development"
+  },
+  "executive_summary": {
+    "overall_score": 90,
+    "critical_issues": 0,
+    "warnings": 1,
+    "top_recommendations": [
+      {
+        "priority": "HIGH",
+        "category": "Database",
+        "issue": "Usando banco em memória",
+        "solution": "Migrar para PostgreSQL em produção",
+        "impact": "Persistência de dados e melhor performance"
+      }
+    ]
+  },
+  "detailed_analysis": {
+    "timestamp": "2025-08-22T03:07:12.855Z",
+    "backend": {
+      "endpoints": {
+        "/": {
+          "responseTime": 24,
+          "ttfb": 23,
+          "statusCode": 302,
+          "contentLength": 33,
+          "headers": {
+            "content-security-policy": "default-src 'self';style-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com 'nonce-b/kKarYThQHopkOeXMbzhQ==';script-src 'self' https://cdn.tailwindcss.com 'nonce-b/kKarYThQHopkOeXMbzhQ==';font-src 'self' https://fonts.gstatic.com;img-src 'self' data: https: https://lh3.googleusercontent.com;connect-src 'self' https://accounts.google.com;form-action 'self' https://accounts.google.com;object-src 'none';base-uri 'self';frame-ancestors 'none';upgrade-insecure-requests;script-src-attr 'none'",
+            "cross-origin-opener-policy": "same-origin",
+            "cross-origin-resource-policy": "same-origin",
+            "origin-agent-cluster": "?1",
+            "referrer-policy": "strict-origin-when-cross-origin",
+            "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+            "x-content-type-options": "nosniff",
+            "x-dns-prefetch-control": "off",
+            "x-download-options": "noopen",
+            "x-frame-options": "DENY",
+            "x-permitted-cross-domain-policies": "none",
+            "x-xss-protection": "0",
+            "vary": "Origin, Accept",
+            "access-control-allow-credentials": "true",
+            "access-control-expose-headers": "X-Total-Count",
+            "ratelimit-policy": "100;w=900",
+            "ratelimit-limit": "100",
+            "ratelimit-remaining": "98",
+            "ratelimit-reset": "796",
+            "location": "/login.html",
+            "content-type": "text/plain; charset=utf-8",
+            "content-length": "33",
+            "date": "Fri, 22 Aug 2025 03:07:12 GMT",
+            "connection": "keep-alive",
+            "keep-alive": "timeout=5"
+          }
+        },
+        "/health": {
+          "responseTime": 4,
+          "ttfb": 3,
+          "statusCode": 200,
+          "contentLength": 134,
+          "headers": {
+            "content-security-policy": "default-src 'self';style-src 'self' https://cdn.tailwindcss.com https://fonts.googleapis.com 'nonce-YJ+ldSQpjaRy9OXC2Jxqtg==';script-src 'self' https://cdn.tailwindcss.com 'nonce-YJ+ldSQpjaRy9OXC2Jxqtg==';font-src 'self' https://fonts.gstatic.com;img-src 'self' data: https: https://lh3.googleusercontent.com;connect-src 'self' https://accounts.google.com;form-action 'self' https://accounts.google.com;object-src 'none';base-uri 'self';frame-ancestors 'none';upgrade-insecure-requests;script-src-attr 'none'",
+            "cross-origin-opener-policy": "same-origin",
+            "cross-origin-resource-policy": "same-origin",
+            "origin-agent-cluster": "?1",
+            "referrer-policy": "strict-origin-when-cross-origin",
+            "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+            "x-content-type-options": "nosniff",
+            "x-dns-prefetch-control": "off",
+            "x-download-options": "noopen",
+            "x-frame-options": "DENY",
+            "x-permitted-cross-domain-policies": "none",
+            "x-xss-protection": "0",
+            "vary": "Origin",
+            "access-control-allow-credentials": "true",
+            "access-control-expose-headers": "X-Total-Count",
+            "content-type": "application/json; charset=utf-8",
+            "content-length": "134",
+            "etag": "W/\"86-mp4K5OaqYTw190bTIP74r0rVbLo\"",
+            "date": "Fri, 22 Aug 2025 03:07:12 GMT",
+            "connection": "keep-alive",
+            "keep-alive": "timeout=5"
+          }
+        },
+        "/api/cronograma/1": {
+          "responseTime": 3,
+          "ttfb": 3,
+          "statusCode": 404,
+          "contentLength": 155,
+          "headers": {
+            "content-security-policy": "default-src 'none'",
+            "cross-origin-opener-policy": "same-origin",
+            "cross-origin-resource-policy": "same-origin",
+            "origin-agent-cluster": "?1",
+            "referrer-policy": "strict-origin-when-cross-origin",
+            "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+            "x-content-type-options": "nosniff",
+            "x-dns-prefetch-control": "off",
+            "x-download-options": "noopen",
+            "x-frame-options": "DENY",
+            "x-permitted-cross-domain-policies": "none",
+            "x-xss-protection": "0",
+            "vary": "Origin",
+            "access-control-allow-credentials": "true",
+            "access-control-expose-headers": "X-Total-Count",
+            "ratelimit-policy": "100;w=900",
+            "ratelimit-limit": "100",
+            "ratelimit-remaining": "97",
+            "ratelimit-reset": "796",
+            "content-type": "text/html; charset=utf-8",
+            "content-length": "155",
+            "date": "Fri, 22 Aug 2025 03:07:12 GMT",
+            "connection": "keep-alive",
+            "keep-alive": "timeout=5"
+          }
+        },
+        "/api/profile": {
+          "responseTime": 2,
+          "ttfb": 2,
+          "statusCode": 404,
+          "contentLength": 150,
+          "headers": {
+            "content-security-policy": "default-src 'none'",
+            "cross-origin-opener-policy": "same-origin",
+            "cross-origin-resource-policy": "same-origin",
+            "origin-agent-cluster": "?1",
+            "referrer-policy": "strict-origin-when-cross-origin",
+            "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+            "x-content-type-options": "nosniff",
+            "x-dns-prefetch-control": "off",
+            "x-download-options": "noopen",
+            "x-frame-options": "DENY",
+            "x-permitted-cross-domain-policies": "none",
+            "x-xss-protection": "0",
+            "vary": "Origin",
+            "access-control-allow-credentials": "true",
+            "access-control-expose-headers": "X-Total-Count",
+            "ratelimit-policy": "100;w=900",
+            "ratelimit-limit": "100",
+            "ratelimit-remaining": "96",
+            "ratelimit-reset": "796",
+            "content-type": "text/html; charset=utf-8",
+            "content-length": "150",
+            "date": "Fri, 22 Aug 2025 03:07:12 GMT",
+            "connection": "keep-alive",
+            "keep-alive": "timeout=5"
+          }
+        },
+        "/api/sessions": {
+          "responseTime": 2,
+          "ttfb": 2,
+          "statusCode": 404,
+          "contentLength": 151,
+          "headers": {
+            "content-security-policy": "default-src 'none'",
+            "cross-origin-opener-policy": "same-origin",
+            "cross-origin-resource-policy": "same-origin",
+            "origin-agent-cluster": "?1",
+            "referrer-policy": "strict-origin-when-cross-origin",
+            "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+            "x-content-type-options": "nosniff",
+            "x-dns-prefetch-control": "off",
+            "x-download-options": "noopen",
+            "x-frame-options": "DENY",
+            "x-permitted-cross-domain-policies": "none",
+            "x-xss-protection": "0",
+            "vary": "Origin",
+            "access-control-allow-credentials": "true",
+            "access-control-expose-headers": "X-Total-Count",
+            "ratelimit-policy": "100;w=900",
+            "ratelimit-limit": "100",
+            "ratelimit-remaining": "95",
+            "ratelimit-reset": "796",
+            "content-type": "text/html; charset=utf-8",
+            "content-length": "151",
+            "date": "Fri, 22 Aug 2025 03:07:12 GMT",
+            "connection": "keep-alive",
+            "keep-alive": "timeout=5"
+          }
+        },
+        "/api/subjects": {
+          "responseTime": 2,
+          "ttfb": 2,
+          "statusCode": 404,
+          "contentLength": 151,
+          "headers": {
+            "content-security-policy": "default-src 'none'",
+            "cross-origin-opener-policy": "same-origin",
+            "cross-origin-resource-policy": "same-origin",
+            "origin-agent-cluster": "?1",
+            "referrer-policy": "strict-origin-when-cross-origin",
+            "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+            "x-content-type-options": "nosniff",
+            "x-dns-prefetch-control": "off",
+            "x-download-options": "noopen",
+            "x-frame-options": "DENY",
+            "x-permitted-cross-domain-policies": "none",
+            "x-xss-protection": "0",
+            "vary": "Origin",
+            "access-control-allow-credentials": "true",
+            "access-control-expose-headers": "X-Total-Count",
+            "ratelimit-policy": "100;w=900",
+            "ratelimit-limit": "100",
+            "ratelimit-remaining": "94",
+            "ratelimit-reset": "796",
+            "content-type": "text/html; charset=utf-8",
+            "content-length": "151",
+            "date": "Fri, 22 Aug 2025 03:07:12 GMT",
+            "connection": "keep-alive",
+            "keep-alive": "timeout=5"
+          }
+        },
+        "/api/statistics": {
+          "responseTime": 1,
+          "ttfb": 1,
+          "statusCode": 404,
+          "contentLength": 153,
+          "headers": {
+            "content-security-policy": "default-src 'none'",
+            "cross-origin-opener-policy": "same-origin",
+            "cross-origin-resource-policy": "same-origin",
+            "origin-agent-cluster": "?1",
+            "referrer-policy": "strict-origin-when-cross-origin",
+            "strict-transport-security": "max-age=31536000; includeSubDomains; preload",
+            "x-content-type-options": "nosniff",
+            "x-dns-prefetch-control": "off",
+            "x-download-options": "noopen",
+            "x-frame-options": "DENY",
+            "x-permitted-cross-domain-policies": "none",
+            "x-xss-protection": "0",
+            "vary": "Origin",
+            "access-control-allow-credentials": "true",
+            "access-control-expose-headers": "X-Total-Count",
+            "ratelimit-policy": "100;w=900",
+            "ratelimit-limit": "100",
+            "ratelimit-remaining": "93",
+            "ratelimit-reset": "796",
+            "content-type": "text/html; charset=utf-8",
+            "content-length": "153",
+            "date": "Fri, 22 Aug 2025 03:07:12 GMT",
+            "connection": "keep-alive",
+            "keep-alive": "timeout=5"
+          }
+        }
+      },
+      "connectionPooling": {
+        "concurrentRequests": 10,
+        "totalTime": 17,
+        "averageResponseTime": 11,
+        "allSuccessful": false,
+        "bottleneck": "NONE"
+      },
+      "memoryLeak": {
+        "initialHeapUsed": 6,
+        "finalHeapUsed": 7,
+        "heapGrowth": 0,
+        "rss": 53,
+        "external": 2
+      }
+    },
+    "frontend": {
+      "bundleSizes": {
+        "totalJS": 287,
+        "totalCSS": 68,
+        "total": 355,
+        "files": [
+          {
+            "name": "components.js",
+            "size": 94,
+            "type": "JS"
+          },
+          {
+            "name": "style.css",
+            "size": 41,
+            "type": "CSS"
+          },
+          {
+            "name": "app.js",
+            "size": 36,
+            "type": "JS"
+          },
+          {
+            "name": "ux-improvements.js",
+            "size": 34,
+            "type": "JS"
+          },
+          {
+            "name": "footer.js",
+            "size": 32,
+            "type": "JS"
+          },
+          {
+            "name": "timer.js",
+            "size": 26,
+            "type": "JS"
+          },
+          {
+            "name": "checklist.js",
+            "size": 23,
+            "type": "JS"
+          },
+          {
+            "name": "components - Copia.js",
+            "size": 18,
+            "type": "JS"
+          },
+          {
+            "name": "footer.css",
+            "size": 18,
+            "type": "CSS"
+          },
+          {
+            "name": "components-new.js",
+            "size": 16,
+            "type": "JS"
+          },
+          {
+            "name": "force-light-mode.js",
+            "size": 6,
+            "type": "JS"
+          },
+          {
+            "name": "gamification.css",
+            "size": 5,
+            "type": "CSS"
+          },
+          {
+            "name": "light-mode-only.css",
+            "size": 4,
+            "type": "CSS"
+          },
+          {
+            "name": "components-legacy-backup.js",
+            "size": 1,
+            "type": "JS"
+          },
+          {
+            "name": "components-modular.js",
+            "size": 1,
+            "type": "JS"
+          },
+          {
+            "name": "desktop.ini",
+            "size": 0,
+            "type": "JS"
+          },
+          {
+            "name": "modules",
+            "size": 0,
+            "type": "JS"
+          },
+          {
+            "name": "desktop.ini",
+            "size": 0,
+            "type": "CSS"
+          }
+        ]
+      },
+      "assets": {
+        "totalImageSize": 230,
+        "unoptimizedCount": 0,
+        "unoptimizedImages": []
+      },
+      "webVitals": {
+        "LCP": {
+          "value": 524,
+          "status": "GOOD",
+          "target": "< 2.5s"
+        },
+        "FID": {
+          "value": 45,
+          "status": "GOOD",
+          "target": "< 100ms"
+        },
+        "CLS": {
+          "value": 0.1,
+          "status": "NEEDS_IMPROVEMENT",
+          "target": "< 0.1"
+        }
+      }
+    },
+    "database": {
+      "type": "memory",
+      "connectionPooling": "LIMITED",
+      "queries": [
+        {
+          "query": "SELECT * FROM cronograma WHERE user_id = ?",
+          "estimatedTime": 50,
+          "frequency": "HIGH"
+        },
+        {
+          "query": "SELECT * FROM sessions WHERE user_id = ? ORDER BY created_at DESC",
+          "estimatedTime": 30,
+          "frequency": "MEDIUM"
+        },
+        {
+          "query": "SELECT COUNT(*) FROM subjects WHERE plan_id = ?",
+          "estimatedTime": 20,
+          "frequency": "LOW"
+        }
+      ]
+    },
+    "memory": {},
+    "stress": {
+      "1_users": {
+        "concurrent": 1,
+        "totalTime": 2,
+        "averageResponseTime": 2,
+        "successRate": 0,
+        "throughput": 593,
+        "status": "FAILED"
+      },
+      "maxCapacity": 0
+    },
+    "bottlenecks": [
+      {
+        "type": "MEMORY_DATABASE",
+        "description": "Usando banco em memória - dados não persistem",
+        "severity": "WARNING"
+      }
+    ],
+    "recommendations": [
+      {
+        "priority": "HIGH",
+        "category": "Database",
+        "issue": "Usando banco em memória",
+        "solution": "Migrar para PostgreSQL em produção",
+        "impact": "Persistência de dados e melhor performance"
+      }
+    ]
+  },
+  "metrics_summary": {
+    "backend": {
+      "avg_response_time": 5,
+      "slowest_endpoint": "/ (24ms)",
+      "memory_usage": {
+        "initialHeapUsed": 6,
+        "finalHeapUsed": 7,
+        "heapGrowth": 0,
+        "rss": 53,
+        "external": 2
+      }
+    },
+    "frontend": {
+      "bundle_size": 355,
+      "web_vitals": {
+        "LCP": {
+          "value": 524,
+          "status": "GOOD",
+          "target": "< 2.5s"
+        },
+        "FID": {
+          "value": 45,
+          "status": "GOOD",
+          "target": "< 100ms"
+        },
+        "CLS": {
+          "value": 0.1,
+          "status": "NEEDS_IMPROVEMENT",
+          "target": "< 0.1"
+        }
+      }
+    },
+    "stress": {
+      "max_concurrent_users": "Not determined",
+      "bottleneck_threshold": "1 concurrent users"
+    }
+  },
+  "action_plan": {
+    "immediate": [],
+    "short_term": [
+      {
+        "priority": "HIGH",
+        "category": "Database",
+        "issue": "Usando banco em memória",
+        "solution": "Migrar para PostgreSQL em produção",
+        "impact": "Persistência de dados e melhor performance"
+      }
+    ],
+    "medium_term": [],
+    "long_term": []
+  }
+}
