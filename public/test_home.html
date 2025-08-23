@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Home</title>
+</head>
+<body>
+    <div id="welcomeMessage"></div>
+
+    <script>
+        // Mock app object
+        const app = {
+            config: {
+                tokenKey: 'editaliza_token'
+            },
+            sanitizeHtml: (str) => str // Simple mock
+        };
+
+        // Mock localStorage
+        localStorage.setItem(app.config.tokenKey, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiVmljdG9yIn0.signature');
+
+        // Copied and adapted loadUserProfile function
+        async function loadUserProfile() {
+            const welcomeElement = document.getElementById("welcomeMessage");
+            try {
+                // Simulate failed API call
+                throw new Error("API call failed");
+            } catch (error) {
+                console.error('Erro ao carregar perfil:', error);
+                if (welcomeElement) {
+                    const token = localStorage.getItem(app.config.tokenKey);
+                    if (token) {
+                        try {
+                            const payload = JSON.parse(atob(token.split('.')[1]));
+                            if (payload.name) {
+                                welcomeElement.textContent = "Olá, " + app.sanitizeHtml(payload.name) + "! (offline)";
+                            } else {
+                                welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
+                            }
+                        } catch (e) {
+                            welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
+                        }
+                    } else {
+                        welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
+                    }
+                }
+            }
+        }
+
+        // Run test
+        loadUserProfile();
+    </script>
+</body>
+</html>

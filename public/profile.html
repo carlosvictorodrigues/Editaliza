@@ -1,0 +1,1377 @@
+    <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Perfil - Editaliza</title>
+    
+    <!-- Favicon and Web App Icons -->
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0528f2">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/design-tokens.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/footer.css" rel="stylesheet">
+    <!-- Theme system removed - light mode only -->
+    <!-- SCRIPTS CENTRALIZADOS -->
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <style>
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .avatar-gallery-tab.active {
+            border-color: #0528f2;
+            background-color: #e0e7ff;
+            color: #0528f2;
+        }
+        .avatar-item {
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease-in-out;
+        }
+        .avatar-item:hover {
+            transform: scale(1.05);
+            border-color: #6366f1;
+        }
+        .avatar-item.selected {
+            border-color: #0528f2;
+            box-shadow: 0 0 0 3px rgba(5, 40, 242, 0.3);
+        }
+        
+        #avatar-gallery {
+            min-height: 120px;
+        }
+        
+        .avatar-loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .avatar-error {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .avatar-success {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            background: white;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #0528f2;
+            box-shadow: 0 0 0 3px rgba(5, 40, 242, 0.1);
+        }
+        
+        .form-input:disabled, .form-input[readonly] {
+            background-color: #f8fafc;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #6b7280;
+            border: 2px solid #e5e7eb;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-secondary:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+            color: #374151;
+        }
+        
+        .section-collapsed {
+            opacity: 0.7;
+        }
+        
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            max-width: 200px;
+            white-space: normal;
+            text-align: center;
+        }
+        
+        .tooltip:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(1px);
+            border: 5px solid transparent;
+            border-top-color: #1f2937;
+            z-index: 1000;
+        }
+        
+        .profile-completion-indicator {
+            background: linear-gradient(90deg, #10b981 var(--progress), #e5e7eb var(--progress));
+            height: 4px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .section-header {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 10;
+            margin: -8px -8px 24px -8px;
+            padding: 8px;
+            border-radius: 16px;
+        }
+        
+        @media (max-width: 640px) {
+            .grid.grid-cols-1.sm\:grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .tooltip:hover::after {
+                left: 20px;
+                transform: none;
+                max-width: calc(100vw - 40px);
+            }
+            
+            .tooltip:hover::before {
+                left: 30px;
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800 relative overflow-x-hidden">
+    <!-- NAVEGAÇÃO PRINCIPAL -->
+    <div id="main-nav-container"></div>
+
+    <main class="relative z-10 container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        
+        <div class="glass-card p-8 rounded-3xl mb-8">
+            <div class="text-center">
+                <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-float">
+                    <img id="profilePhoto" src="" alt="Foto do perfil" class="w-full h-full object-cover rounded-full hidden">
+                    <svg id="defaultAvatar" class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold motivation-text mb-3">Meu Perfil</h1>
+                <p class="text-gray-600 text-lg mb-2">Complete seu perfil para uma experiência personalizada de estudos</p>
+                <p class="text-sm text-blue-600 bg-blue-50 rounded-lg p-3 max-w-2xl mx-auto">
+                    💡 <strong>Por que essas informações são importantes?</strong><br>
+                    Cada dado que você compartilha nos ajuda a criar um plano de estudos único para você, sugerir conteúdos relevantes e acompanhar seu progresso rumo à aprovação!
+                </p>
+                <div class="mt-4">
+                    <div class="mb-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-sm text-gray-600">Progresso do Perfil</span>
+                            <span id="progressText" class="text-sm font-medium text-blue-600">0%</span>
+                        </div>
+                        <div class="profile-completion-indicator" id="progressBar" style="--progress: 0%"></div>
+                    </div>
+                    <div class="flex flex-wrap gap-2 justify-center">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">Dados Pessoais</span>
+                        <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Experiência</span>
+                        <span class="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium">Objetivos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div class="lg:col-span-2">
+                <div class="space-y-6">
+                    <!-- Seção 1: Dados Pessoais -->
+                    <div class="content-card">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-2xl font-bold text-gray-800">Dados Pessoais</h2>
+                            <button type="button" id="personalToggle" class="text-blue-600 hover:text-blue-800 font-medium">
+                                <svg class="w-5 h-5 inline transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-green-800">Como seus dados pessoais te ajudam</h3>
+                                    <div class="mt-2 text-sm text-green-700">
+                                        <p>📍 <strong>Localização:</strong> Sugerimos concursos na sua região e oportunidades próximas</p>
+                                        <p>🎓 <strong>Escolaridade:</strong> Filtramos apenas concursos compatíveis com seu nível</p>
+                                        <p>💼 <strong>Situação profissional:</strong> Criamos cronogramas realistas baseados no seu tempo disponível</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="personalSection" class="space-y-6">
+                            <form id="profileForm" class="space-y-6">
+                                <div>
+                                    <label for="name" class="block text-sm font-semibold text-gray-700 mb-1">Nome Completo</label>
+                                    <p class="text-xs text-gray-500 mb-2">💫 Seu nome aparecerá nas suas conquistas e certificados personalizados</p>
+                                    <input type="text" id="name" name="name" class="form-input" placeholder="Digite seu nome completo">
+                                </div>
+
+                                <div>
+                                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-1">E-mail</label>
+                                    <p class="text-xs text-gray-500 mb-2">📧 Usado para notificações importantes e atualizações sobre concursos</p>
+                                    <input type="email" id="email" name="email" class="form-input bg-gray-50" readonly>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="state" class="block text-sm font-semibold text-gray-700 mb-1">Estado</label>
+                                        <p class="text-xs text-gray-500 mb-2">🌎 Priorizamos concursos e oportunidades na sua região</p>
+                                        <select id="state" name="state" class="form-input">
+                                            <option value="">Selecione seu estado</option>
+                                            <option value="AC">Acre (AC)</option>
+                                            <option value="AL">Alagoas (AL)</option>
+                                            <option value="AP">Amapá (AP)</option>
+                                            <option value="AM">Amazonas (AM)</option>
+                                            <option value="BA">Bahia (BA)</option>
+                                            <option value="CE">Ceará (CE)</option>
+                                            <option value="DF">Distrito Federal (DF)</option>
+                                            <option value="ES">Espírito Santo (ES)</option>
+                                            <option value="GO">Goiás (GO)</option>
+                                            <option value="MA">Maranhão (MA)</option>
+                                            <option value="MT">Mato Grosso (MT)</option>
+                                            <option value="MS">Mato Grosso do Sul (MS)</option>
+                                            <option value="MG">Minas Gerais (MG)</option>
+                                            <option value="PA">Pará (PA)</option>
+                                            <option value="PB">Paraíba (PB)</option>
+                                            <option value="PR">Paraná (PR)</option>
+                                            <option value="PE">Pernambuco (PE)</option>
+                                            <option value="PI">Piauí (PI)</option>
+                                            <option value="RJ">Rio de Janeiro (RJ)</option>
+                                            <option value="RN">Rio Grande do Norte (RN)</option>
+                                            <option value="RS">Rio Grande do Sul (RS)</option>
+                                            <option value="RO">Rondônia (RO)</option>
+                                            <option value="RR">Roraima (RR)</option>
+                                            <option value="SC">Santa Catarina (SC)</option>
+                                            <option value="SP">São Paulo (SP)</option>
+                                            <option value="SE">Sergipe (SE)</option>
+                                            <option value="TO">Tocantins (TO)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="city" class="block text-sm font-semibold text-gray-700 mb-1">Cidade</label>
+                                        <p class="text-xs text-gray-500 mb-2">🏙️ Para sugerir locais de prova e vagas específicas da sua cidade</p>
+                                        <input type="text" id="city" name="city" class="form-input" placeholder="Digite sua cidade">
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="birthDate" class="block text-sm font-semibold text-gray-700 mb-1">Data de Nascimento</label>
+                                        <p class="text-xs text-gray-500 mb-2">📅 Alguns concursos têm limite de idade - garantimos que você veja apenas oportunidades adequadas</p>
+                                        <input type="date" id="birthDate" name="birthDate" class="form-input">
+                                    </div>
+                                    <div>
+                                        <label for="education" class="block text-sm font-semibold text-gray-700 mb-1">Nível de Escolaridade</label>
+                                        <p class="text-xs text-gray-500 mb-2">🎓 Filtramos concursos compatíveis com sua formação e sugerimos áreas promissoras</p>
+                                        <select id="education" name="education" class="form-input">
+                                            <option value="">Selecione sua escolaridade</option>
+                                            <option value="fundamental">Ensino Fundamental</option>
+                                            <option value="medio">Ensino Médio</option>
+                                            <option value="tecnico">Técnico</option>
+                                            <option value="superior-incompleto">Superior Incompleto</option>
+                                            <option value="superior-completo">Superior Completo</option>
+                                            <option value="pos-graduacao">Pós-graduação</option>
+                                            <option value="mestrado">Mestrado</option>
+                                            <option value="doutorado">Doutorado</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="workStatus" class="block text-sm font-semibold text-gray-700 mb-1">Situação Profissional</label>
+                                    <p class="text-xs text-gray-500 mb-2">💼 Adaptamos seus cronogramas baseado no tempo disponível para estudos</p>
+                                    <select id="workStatus" name="workStatus" class="form-input">
+                                        <option value="">Selecione sua situação</option>
+                                        <option value="desempregado">Desempregado(a)</option>
+                                        <option value="empregado-privado">Empregado(a) - Setor Privado</option>
+                                        <option value="empregado-publico">Empregado(a) - Setor Público</option>
+                                        <option value="autonomo">Autônomo(a)</option>
+                                        <option value="empresario">Empresário(a)</option>
+                                        <option value="estudante">Estudante</option>
+                                        <option value="aposentado">Aposentado(a)</option>
+                                    </select>
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="phone" class="block text-sm font-semibold text-gray-700 mb-1">Telefone</label>
+                                        <p class="text-xs text-gray-500 mb-2">📞 Para contato em emergências e informações urgentes sobre editais</p>
+                                        <input type="tel" id="phone" name="phone" class="form-input" placeholder="(11) 99999-9999">
+                                    </div>
+                                    <div>
+                                        <label for="whatsapp" class="block text-sm font-semibold text-gray-700 mb-1">WhatsApp</label>
+                                        <p class="text-xs text-gray-500 mb-2">📱 Para receber lembretes importantes e dicas de estudo (opcional)</p>
+                                        <input type="tel" id="whatsapp" name="whatsapp" class="form-input" placeholder="(11) 99999-9999">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Seção 2: Experiência em Concursos -->
+                    <div class="content-card">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-2xl font-bold text-gray-800">Experiência em Concursos</h2>
+                            <button type="button" id="experienceToggle" class="text-blue-600 hover:text-blue-800 font-medium">
+                                <svg class="w-5 h-5 inline transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="bg-purple-50 border-l-4 border-purple-400 p-4 mb-6">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-purple-800">Como sua experiência nos orienta</h3>
+                                    <div class="mt-2 text-sm text-purple-700">
+                                        <p>🚀 <strong>Primeira vez:</strong> Oferecemos guias especiais para iniciantes e dicas fundamentais</p>
+                                        <p>📈 <strong>Já tentou antes:</strong> Focamos em estratégias avançadas e superação de obstáculos específicos</p>
+                                        <p>🎯 <strong>Suas dificuldades:</strong> Personalizamos o conteúdo para fortalecer seus pontos fracos</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="experienceSection" class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1">É sua primeira vez estudando para concursos?</label>
+                                <p class="text-xs text-gray-500 mb-3">✨ Definimos o nível de orientação e suporte que você precisa</p>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="firstTime" value="sim" class="mr-3 text-blue-600">
+                                        <span>Sim, é minha primeira vez</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="firstTime" value="nao" class="mr-3 text-blue-600">
+                                        <span>Não, já estudei antes</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="concursosCount" class="block text-sm font-semibold text-gray-700 mb-1">Quantos concursos já prestou?</label>
+                                <p class="text-xs text-gray-500 mb-2">📊 Ajustamos as estratégias baseadas na sua experiência prática</p>
+                                <select id="concursosCount" name="concursosCount" class="form-input">
+                                    <option value="">Selecione</option>
+                                    <option value="0">Nenhum ainda</option>
+                                    <option value="1-3">1 a 3 concursos</option>
+                                    <option value="4-10">4 a 10 concursos</option>
+                                    <option value="11-20">11 a 20 concursos</option>
+                                    <option value="20+">Mais de 20 concursos</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="difficulties" class="block text-sm font-semibold text-gray-700 mb-1">Principais dificuldades (opcional)</label>
+                                <p class="text-xs text-gray-500 mb-3">🎯 Identificamos seus desafios para oferecer soluções e conteúdo específico</p>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="difficulties" value="organizacao" class="mr-3 text-blue-600">
+                                        <span>Organização dos estudos</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="difficulties" value="motivacao" class="mr-3 text-blue-600">
+                                        <span>Manter a motivação</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="difficulties" value="tempo" class="mr-3 text-blue-600">
+                                        <span>Falta de tempo</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="difficulties" value="disciplina" class="mr-3 text-blue-600">
+                                        <span>Disciplina nos estudos</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="difficulties" value="materias" class="mr-3 text-blue-600">
+                                        <span>Dificuldade em matérias específicas</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" name="difficulties" value="ansiedade" class="mr-3 text-blue-600">
+                                        <span>Ansiedade na prova</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 3: Metas e Objetivos -->
+                    <div class="content-card">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-2xl font-bold text-gray-800">Metas e Objetivos</h2>
+                            <button type="button" id="goalsToggle" class="text-blue-600 hover:text-blue-800 font-medium">
+                                <svg class="w-5 h-5 inline transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-blue-800">Seus objetivos direcionam tudo</h3>
+                                    <div class="mt-2 text-sm text-blue-700">
+                                        <p>🎯 <strong>Área de interesse:</strong> Sugerimos concursos específicos e conteúdo direcionado</p>
+                                        <p>⏰ <strong>Cronograma:</strong> Criamos planos de estudo realistas baseados no seu prazo</p>
+                                        <p>💪 <strong>Motivação:</strong> Personalizamos mensagens inspiradoras com base nos seus sonhos</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="goalsSection" class="space-y-6">
+                            <div>
+                                <label for="areaInterest" class="block text-sm font-semibold text-gray-700 mb-1">Área de Interesse Principal</label>
+                                <p class="text-xs text-gray-500 mb-2">🎯 Direcionamos todo conteúdo e sugestões para sua área de interesse</p>
+                                <select id="areaInterest" name="areaInterest" class="form-input">
+                                    <option value="">Selecione uma área</option>
+                                    <option value="administrativo">Área Administrativa</option>
+                                    <option value="fiscal">Área Fiscal</option>
+                                    <option value="policial">Área Policial</option>
+                                    <option value="juridica">Área Jurídica</option>
+                                    <option value="saude">Área da Saúde</option>
+                                    <option value="educacao">Área da Educação</option>
+                                    <option value="engenharia">Engenharia</option>
+                                    <option value="ti">Tecnologia da Informação</option>
+                                    <option value="bancaria">Área Bancária</option>
+                                    <option value="legislativo">Poder Legislativo</option>
+                                    <option value="judiciario">Poder Judiciário</option>
+                                    <option value="outros">Outras áreas</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="levelDesired" class="block text-sm font-semibold text-gray-700 mb-1">Nível Desejado</label>
+                                <p class="text-xs text-gray-500 mb-2">📈 Filtramos oportunidades com salários e responsabilidades adequadas ao nível desejado</p>
+                                <select id="levelDesired" name="levelDesired" class="form-input">
+                                    <option value="">Selecione o nível</option>
+                                    <option value="fundamental">Nível Fundamental</option>
+                                    <option value="medio">Nível Médio</option>
+                                    <option value="tecnico">Nível Técnico</option>
+                                    <option value="superior">Nível Superior</option>
+                                    <option value="qualquer">Qualquer nível</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="timelineGoal" class="block text-sm font-semibold text-gray-700 mb-1">Prazo para Aprovação</label>
+                                <p class="text-xs text-gray-500 mb-2">⏳ Criamos cronogramas realistas e intensidade de estudos adequada ao seu objetivo</p>
+                                <select id="timelineGoal" name="timelineGoal" class="form-input">
+                                    <option value="">Selecione um prazo</option>
+                                    <option value="6-meses">Até 6 meses</option>
+                                    <option value="1-ano">Até 1 ano</option>
+                                    <option value="2-anos">Até 2 anos</option>
+                                    <option value="3-anos">Até 3 anos</option>
+                                    <option value="sem-pressa">Sem pressa definida</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="studyHours" class="block text-sm font-semibold text-gray-700 mb-1">Quantas horas por dia você consegue estudar?</label>
+                                <p class="text-xs text-gray-500 mb-2">📚 Distribuímos o conteúdo de forma equilibrada respeitando seu tempo disponível</p>
+                                <select id="studyHours" name="studyHours" class="form-input">
+                                    <option value="">Selecione</option>
+                                    <option value="1-2">1 a 2 horas</option>
+                                    <option value="3-4">3 a 4 horas</option>
+                                    <option value="5-6">5 a 6 horas</option>
+                                    <option value="7-8">7 a 8 horas</option>
+                                    <option value="8+">Mais de 8 horas</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="motivationText" class="block text-sm font-semibold text-gray-700 mb-1">O que te motiva a ser servidor público? (opcional)</label>
+                                <p class="text-xs text-gray-500 mb-2">💫 Personalizamos mensagens inspiradoras conectadas aos seus sonhos e objetivos pessoais</p>
+                                <textarea id="motivationText" name="motivationText" rows="3" class="form-input" placeholder="Ex: Busco estabilidade para minha família, quero servir à sociedade, desejo fazer a diferença na educação pública..."></textarea>
+                                <p class="text-xs text-blue-600 mt-1">💡 Dica: Quanto mais específico, mais personalizadas serão suas mensagens motivacionais diárias!</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botão Salvar -->
+                    <div class="content-card">
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                            <div class="flex items-center">
+                                <svg class="h-5 w-5 text-green-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                <p class="text-sm text-green-700">
+                                    <strong>Pronto para começar?</strong> Salve suas informações e transforme seus dados em um plano de estudos personalizado!
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <button type="submit" id="saveBtn" form="profileForm" class="btn-primary flex items-center justify-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Salvar e Personalizar Minha Experiência
+                            </button>
+                            <button type="button" id="resetBtn" class="btn-secondary">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Restaurar Dados Originais
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="content-card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">
+                        <svg class="w-5 h-5 inline mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        Escolha seu Avatar
+                    </h3>
+                    <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mb-4">
+                        <p class="text-sm text-indigo-700">
+                            🎨 <strong>Sua identidade visual:</strong> Seu avatar aparece em conquistas, rankings e interações na plataforma, tornando sua jornada mais pessoal e motivadora!
+                        </p>
+                    </div>
+                    <div id="avatar-selection-ui"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let originalData = {};
+        let selectedAvatarPath = null;
+
+        const defaultAvatarCatalog = {
+            adventurer: [
+                'avatar1.svg',
+                'avatar2.svg',
+                'avatar3.svg',
+                'avatar4.svg',
+                'avatar5.svg',
+                'avatar6.svg'
+            ],
+            'pixel-art': [
+                'pixel1.svg',
+                'pixel2.svg',
+                'pixel3.svg',
+                'pixel4.svg',
+                'pixel5.svg',
+                'pixel6.svg'
+            ],
+            bots: [
+                'bot1.svg',
+                'bot2.svg',
+                'bot3.svg',
+                'bot4.svg',
+                'bot5.svg',
+                'bot6.svg'
+            ],
+            miniavs: [
+                'miniav1.svg',
+                'miniav2.svg',
+                'miniav3.svg',
+                'miniav4.svg',
+                'miniav5.svg',
+                'miniav6.svg'
+            ],
+            classic: [
+                '1.svg',
+                '2.svg',
+                '3.svg',
+                '4.svg',
+                '5.svg',
+                '6.svg',
+                '7.svg',
+                '8.svg',
+                '9.svg',
+                '10.svg',
+                '11.svg',
+                'avatar-svgrepo-com.svg',
+                'avatar-svgrepo-com (1).svg',
+                'avatar-svgrepo-com (2).svg',
+                'avatar-svgrepo-com (3).svg',
+                'avatar-svgrepo-com (4).svg',
+                'avatar-svgrepo-com (5).svg'
+            ],
+            christmas: [
+                'avatar-winter-custome-5-svgrepo-com.svg',
+                'avatar-winter-custome-14-svgrepo-com.svg',
+                'avatar-winter-custome-24-svgrepo-com.svg',
+                'avatar-winter-custome-35-svgrepo-com.svg',
+                'avatar-winter-custome-37-svgrepo-com.svg',
+                'avatar-winter-custome-47-svgrepo-com.svg'
+            ]
+        };
+
+        const labelMap = {
+            adventurer: 'Aventureiros',
+            'pixel-art': 'Pixel Art',
+            bots: 'Bots',
+            miniavs: 'Minimalista',
+            classic: 'Clássico',
+            christmas: 'Natalino'
+        };
+
+        const avatarCatalog = window.avatarCatalog || defaultAvatarCatalog;
+        const avatarCategories = Object.fromEntries(
+            Object.entries(avatarCatalog).map(([key, files]) => [key, {
+                label: labelMap[key] || key,
+                files
+            }])
+        );
+
+        async function initialize() {
+            try {
+                await components.renderMainNavigation('profile.html');
+                await loadProfileData();
+                renderAvatarUI();
+                setupFormEvents();
+                setupTooltips();
+                updateProgressBar();
+                showProfileCompletionTips();
+                console.log('✅ Página de perfil inicializada com sucesso!');
+                console.log('🎯 Estado inicial do avatar:', selectedAvatarPath);
+            } catch (error) {
+                console.error("❌ Erro na inicialização da página de perfil:", error);
+                app.showToast('Erro fatal ao carregar a página. Tente novamente.', 'error');
+            }
+        }
+
+        async function loadProfileData() {
+            try {
+                console.log('📥 Carregando dados do perfil...');
+                app.showSpinner();
+                const profile = await app.apiFetch('/users/profile');
+                console.log('📋 Dados do perfil recebidos:', profile);
+                
+                // Dados pessoais básicos
+                document.getElementById('name').value = profile.name || '';
+                document.getElementById('email').value = profile.email || '';
+                document.getElementById('phone').value = profile.phone || '';
+                document.getElementById('whatsapp').value = profile.whatsapp || '';
+                
+                // Novos dados pessoais
+                document.getElementById('state').value = profile.state || '';
+                document.getElementById('city').value = profile.city || '';
+                document.getElementById('birthDate').value = profile.birth_date || '';
+                document.getElementById('education').value = profile.education || '';
+                document.getElementById('workStatus').value = profile.work_status || '';
+                
+                // Experiência em concursos
+                if (profile.first_time) {
+                    const radio = document.querySelector(`input[name="firstTime"][value="${profile.first_time}"]`);
+                    if (radio) radio.checked = true;
+                }
+                document.getElementById('concursosCount').value = profile.concursos_count || '';
+                
+                // Dificuldades (array)
+                if (profile.difficulties && Array.isArray(profile.difficulties)) {
+                    profile.difficulties.forEach(difficulty => {
+                        const checkbox = document.querySelector(`input[name="difficulties"][value="${difficulty}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                }
+                
+                // Metas e objetivos
+                document.getElementById('areaInterest').value = profile.area_interest || '';
+                document.getElementById('levelDesired').value = profile.level_desired || '';
+                document.getElementById('timelineGoal').value = profile.timeline_goal || '';
+                document.getElementById('studyHours').value = profile.study_hours || '';
+                document.getElementById('motivationText').value = profile.motivation_text || '';
+                
+                // Check if user has Google avatar or local avatar
+                console.log('🖼️ Carregando avatar do perfil:');
+                console.log('  - profile.google_avatar:', profile.google_avatar);
+                console.log('  - profile.auth_provider:', profile.auth_provider);
+                console.log('  - profile.profile_picture:', profile.profile_picture);
+                
+                if (profile.google_avatar && profile.auth_provider === 'google') {
+                    selectedAvatarPath = profile.google_avatar;
+                    console.log('🌐 Usando avatar do Google:', selectedAvatarPath);
+                } else {
+                    selectedAvatarPath = profile.profile_picture;
+                    console.log('💾 Usando avatar local:', selectedAvatarPath);
+                }
+                
+                console.log('🎯 Avatar final selecionado:', selectedAvatarPath);
+                updateProfilePhoto(selectedAvatarPath);
+                
+                // Atualizar dados originais para comparação
+                originalData = {
+                    name: profile.name || '',
+                    phone: profile.phone || '',
+                    whatsapp: profile.whatsapp || '',
+                    state: profile.state || '',
+                    city: profile.city || '',
+                    birth_date: profile.birth_date || '',
+                    education: profile.education || '',
+                    work_status: profile.work_status || '',
+                    first_time: profile.first_time || '',
+                    concursos_count: profile.concursos_count || '',
+                    difficulties: profile.difficulties || [],
+                    area_interest: profile.area_interest || '',
+                    level_desired: profile.level_desired || '',
+                    timeline_goal: profile.timeline_goal || '',
+                    study_hours: profile.study_hours || '',
+                    motivation_text: profile.motivation_text || '',
+                    profile_picture: profile.profile_picture || null
+                };
+                
+                console.log('📝 Dados originais configurados:', originalData);
+                
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados do perfil:', error);
+                app.showToast('Erro ao carregar dados do perfil.', 'error');
+            } finally {
+                console.log('🏁 Finalizando carregamento dos dados do perfil...');
+                app.hideSpinner();
+            }
+        }
+
+        function updateProfilePhoto(path) {
+            const profilePhoto = document.getElementById('profilePhoto');
+            const defaultAvatar = document.getElementById('defaultAvatar');
+            
+            if (!profilePhoto || !defaultAvatar) {
+                console.error('❌ Elementos de foto do perfil não encontrados');
+                return;
+            }
+            
+            if (path) {
+                console.log('📁 Caminho do avatar:', path);
+                console.log('🔍 Tipo de avatar:', path.startsWith('https://') ? 'Google' : 'Local');
+                
+                // Check if it's a Google avatar (starts with https://)
+                if (path.startsWith('https://')) {
+                    // Google avatar - use directly without cache buster
+                    console.log('🌐 Usando avatar do Google:', path);
+                    profilePhoto.src = path;
+                } else {
+                    // Local avatar - add cache buster to avoid caching issues
+                    const cacheBuster = '?t=' + new Date().getTime();
+                    const finalPath = path.startsWith('./') ? path + cacheBuster : './' + path + cacheBuster;
+                    console.log('💾 Usando avatar local com cache buster:', finalPath);
+                    profilePhoto.src = finalPath;
+                }
+                
+                // Handle load success
+                profilePhoto.addEventListener('load', () => {
+                    profilePhoto.classList.remove('hidden');
+                    defaultAvatar.classList.add('hidden');
+                }, { once: true });
+                
+                // Handle load error
+                profilePhoto.addEventListener('error', () => {
+                    console.error('❌ Erro ao carregar foto do perfil:', path);
+                    profilePhoto.classList.add('hidden');
+                    defaultAvatar.classList.remove('hidden');
+                }, { once: true });
+            } else {
+                console.log('🚫 Nenhum avatar definido, mostrando avatar padrão');
+                profilePhoto.classList.add('hidden');
+                defaultAvatar.classList.remove('hidden');
+            }
+        }
+
+        function renderAvatarUI() {
+            console.log('🎨 Renderizando interface de seleção de avatar...');
+            console.log('🎯 Avatar atualmente selecionado:', selectedAvatarPath);
+            
+            const container = document.getElementById('avatar-selection-ui');
+            const tabs = Object.entries(avatarCategories).map(([key, data]) =>
+                `<button class="avatar-gallery-tab px-4 py-2 text-sm font-semibold rounded-lg border transition-colors" data-category="${key}">${data.label}</button>`
+            ).join('');
+
+            // Check if user is Google user
+            const isGoogleUser = selectedAvatarPath && selectedAvatarPath.startsWith('https://');
+            console.log('🌐 Usuário do Google:', isGoogleUser);
+            
+            const googleNotice = isGoogleUser ? 
+                `<div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                    <p class="text-sm text-blue-700">
+                        🔗 <strong>Avatar do Google:</strong> Você está usando sua foto do Google. Para usar um avatar personalizado, selecione uma opção abaixo.
+                    </p>
+                </div>` : '';
+            
+            container.innerHTML = `
+                ${googleNotice}
+                <div class="flex flex-wrap gap-2 mb-4">${tabs}</div>
+                <div id="avatar-gallery" class="grid grid-cols-4 gap-4"></div>
+            `;
+
+            const tabButtons = container.querySelectorAll('.avatar-gallery-tab');
+            console.log('🔘 Abas de avatar encontradas:', tabButtons.length);
+            
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    console.log('🔘 Aba clicada:', btn.dataset.category);
+                    tabButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    renderAvatarGallery(btn.dataset.category);
+                });
+            });
+
+            // Load first category by default
+            if (tabButtons.length > 0) {
+                console.log('🔄 Carregando primeira categoria por padrão...');
+                tabButtons[0].click();
+            } else {
+                console.warn('⚠️ Nenhuma aba de avatar encontrada');
+            }
+        }
+
+        function renderAvatarGallery(category) {
+            const gallery = document.getElementById('avatar-gallery');
+            if (!gallery) {
+                console.error('❌ Elemento avatar-gallery não encontrado');
+                return;
+            }
+            gallery.innerHTML = '';
+
+            const files = avatarCategories[category]?.files || [];
+            files.forEach(file => {
+                const avatarPath = `images/avatars/${category}/${file}`;
+
+                const avatarContainer = document.createElement('div');
+                avatarContainer.className = 'relative';
+
+                const img = document.createElement('img');
+                img.src = avatarPath;
+                img.className = `avatar-item rounded-full p-1 bg-gray-100 w-16 h-16 object-cover`;
+                img.alt = `Avatar ${file}`;
+
+                // Loading placeholder
+                const loadingDiv = document.createElement('div');
+                loadingDiv.className = 'w-16 h-16 rounded-full bg-gray-200 animate-pulse flex items-center justify-center';
+                loadingDiv.innerHTML = '<span class="text-xs text-gray-400">...</span>';
+
+                // Error placeholder
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'w-16 h-16 rounded-full bg-red-100 border-2 border-red-300 hidden flex items-center justify-center';
+                errorDiv.innerHTML = '<span class="text-xs text-red-500">❌</span>';
+
+                if (avatarPath === selectedAvatarPath) {
+                    img.classList.add('selected');
+                }
+
+                img.addEventListener('load', () => {
+                    loadingDiv.style.display = 'none';
+                    img.style.display = 'block';
+                    
+                    // Verificar se este avatar está selecionado
+                    if (avatarPath === selectedAvatarPath) {
+                        console.log(`🎯 Avatar já selecionado: ${avatarPath}`);
+                        img.classList.add('selected');
+                    }
+                });
+
+                img.addEventListener('error', () => {
+                    loadingDiv.style.display = 'none';
+                    img.style.display = 'none';
+                    errorDiv.classList.remove('hidden');
+                    errorDiv.classList.add('flex');
+                    errorDiv.title = `Erro: ${file} não encontrado`;
+                });
+
+                // Initially hide image and show loading
+                img.style.display = 'none';
+
+                img.addEventListener('click', () => {
+                    if (img.style.display !== 'none') {
+                        console.log('🖱️ Avatar clicado:', avatarPath);
+                        console.log('  - Avatar anterior:', selectedAvatarPath);
+                        
+                        document.querySelectorAll('.avatar-item.selected').forEach(el => el.classList.remove('selected'));
+                        img.classList.add('selected');
+                        selectedAvatarPath = avatarPath;
+                        
+                        console.log('  - Novo avatar selecionado:', selectedAvatarPath);
+                        console.log('  - Botão de salvar será habilitado');
+                        
+                        document.getElementById('saveBtn').disabled = false;
+                        console.log('🎯 Avatar selecionado:', avatarPath);
+                        
+                        // Verificar mudanças para habilitar o botão de salvar
+                        if (typeof checkForChanges === 'function') {
+                            console.log('🔍 Chamando checkForChanges...');
+                            checkForChanges();
+                        } else {
+                            console.warn('⚠️ Função checkForChanges não encontrada');
+                        }
+                    }
+                });
+
+                avatarContainer.appendChild(loadingDiv);
+                avatarContainer.appendChild(img);
+                avatarContainer.appendChild(errorDiv);
+                gallery.appendChild(avatarContainer);
+            });
+        }
+
+        function setupFormEvents() {
+            const form = document.getElementById('profileForm');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            
+            // Todos os campos do formulário
+            const formFields = [
+                'name', 'phone', 'whatsapp', 'state', 'city', 'birthDate', 
+                'education', 'workStatus', 'concursosCount', 'areaInterest', 
+                'levelDesired', 'timelineGoal', 'studyHours', 'motivationText'
+            ];
+            
+            function checkForChanges() {
+                console.log('🔍 Verificando mudanças no formulário...');
+                let hasChanges = false;
+                
+                // Verificar campos de input e select
+                formFields.forEach(fieldName => {
+                    const element = document.getElementById(fieldName);
+                    if (element) {
+                        const currentValue = element.value.trim();
+                        const originalValue = originalData[fieldName === 'birthDate' ? 'birth_date' : 
+                                                      fieldName === 'workStatus' ? 'work_status' :
+                                                      fieldName === 'concursosCount' ? 'concursos_count' :
+                                                      fieldName === 'areaInterest' ? 'area_interest' :
+                                                      fieldName === 'levelDesired' ? 'level_desired' :
+                                                      fieldName === 'timelineGoal' ? 'timeline_goal' :
+                                                      fieldName === 'studyHours' ? 'study_hours' :
+                                                      fieldName === 'motivationText' ? 'motivation_text' :
+                                                      fieldName] || '';
+                        if (currentValue !== originalValue) {
+                            hasChanges = true;
+                        }
+                    }
+                });
+                
+                // Verificar radio buttons
+                const firstTimeRadio = document.querySelector('input[name="firstTime"]:checked');
+                const firstTimeValue = firstTimeRadio ? firstTimeRadio.value : '';
+                if (firstTimeValue !== (originalData.first_time || '')) {
+                    hasChanges = true;
+                }
+                
+                // Verificar checkboxes
+                const selectedDifficulties = Array.from(document.querySelectorAll('input[name="difficulties"]:checked')).map(cb => cb.value);
+                const originalDifficulties = originalData.difficulties || [];
+                if (JSON.stringify(selectedDifficulties.sort()) !== JSON.stringify(originalDifficulties.sort())) {
+                    hasChanges = true;
+                }
+                
+                // Verificar avatar
+                console.log('🔍 Verificando mudanças no avatar:');
+                console.log('  - selectedAvatarPath:', selectedAvatarPath);
+                console.log('  - originalData.profile_picture:', originalData.profile_picture);
+                console.log('  - São diferentes?', selectedAvatarPath !== originalData.profile_picture);
+                
+                if (selectedAvatarPath !== originalData.profile_picture) {
+                    hasChanges = true;
+                    console.log('✅ Mudança detectada no avatar');
+                }
+                
+                console.log('📊 Resumo das mudanças:');
+                console.log('  - hasChanges:', hasChanges);
+                console.log('  - Botão de salvar será:', hasChanges ? 'habilitado' : 'desabilitado');
+                
+                saveBtn.disabled = !hasChanges;
+                updateProgressBar();
+            }
+            
+            // Adicionar event listeners
+            formFields.forEach(fieldName => {
+                const element = document.getElementById(fieldName);
+                if (element) {
+                    element.addEventListener('input', checkForChanges);
+                    element.addEventListener('change', checkForChanges);
+                }
+            });
+            
+            // Radio buttons e checkboxes
+            document.querySelectorAll('input[name="firstTime"]').forEach(radio => {
+                radio.addEventListener('change', checkForChanges);
+            });
+            
+            document.querySelectorAll('input[name="difficulties"]').forEach(checkbox => {
+                checkbox.addEventListener('change', checkForChanges);
+            });
+            
+            // Form submit
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveProfile();
+            });
+            
+            // Reset button
+            resetBtn.addEventListener('click', () => {
+                if (confirm('Tem certeza que deseja restaurar todos os dados para os valores originais?')) {
+                    loadProfileData();
+                }
+            });
+            
+            // Setup section toggles
+            setupSectionToggles();
+        }
+        
+        async function saveProfile() {
+            console.log('💾 Iniciando salvamento do perfil...');
+            console.log('🎯 Avatar selecionado antes de salvar:', selectedAvatarPath);
+            
+            const saveBtn = document.getElementById('saveBtn');
+            
+            // Coletar dados do formulário
+            const selectedDifficulties = Array.from(document.querySelectorAll('input[name="difficulties"]:checked')).map(cb => cb.value);
+            const firstTimeRadio = document.querySelector('input[name="firstTime"]:checked');
+            
+            // Função helper para limpar strings vazias
+            const cleanValue = (value) => {
+                if (typeof value === 'string') {
+                    const cleaned = value.trim();
+                    return cleaned === '' ? null : cleaned;
+                }
+                return value || null;
+            };
+            
+            const updateData = {
+                // Dados pessoais básicos
+                name: cleanValue(document.getElementById('name').value),
+                phone: cleanValue(document.getElementById('phone').value),
+                whatsapp: cleanValue(document.getElementById('whatsapp').value),
+                
+                // Novos dados pessoais
+                state: cleanValue(document.getElementById('state').value),
+                city: cleanValue(document.getElementById('city').value),
+                birth_date: cleanValue(document.getElementById('birthDate').value),
+                education: cleanValue(document.getElementById('education').value),
+                work_status: cleanValue(document.getElementById('workStatus').value),
+                
+                // Experiência em concursos
+                first_time: firstTimeRadio ? firstTimeRadio.value : null,
+                concursos_count: cleanValue(document.getElementById('concursosCount').value),
+                difficulties: selectedDifficulties, // Sempre envia um array, mesmo que vazio
+                
+                // Metas e objetivos
+                area_interest: cleanValue(document.getElementById('areaInterest').value),
+                level_desired: cleanValue(document.getElementById('levelDesired').value),
+                timeline_goal: cleanValue(document.getElementById('timelineGoal').value),
+                study_hours: cleanValue(document.getElementById('studyHours').value),
+                motivation_text: cleanValue(document.getElementById('motivationText').value),
+                
+                // Avatar
+                profile_picture: selectedAvatarPath || null
+            };
+            
+            console.log('🎯 Avatar selecionado para salvar:', selectedAvatarPath);
+            console.log('📸 Campo profile_picture no updateData:', updateData.profile_picture);
+            
+            // Remover campos nulos/vazios para não enviar dados desnecessários
+            Object.keys(updateData).forEach(key => {
+                if (updateData[key] === null || updateData[key] === undefined) {
+                    delete updateData[key];
+                }
+            });
+
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = `
+                <svg class="w-5 h-5 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                Salvando...
+            `;
+            app.showSpinner();
+
+            try {
+                console.log('💾 Enviando dados do perfil:', updateData);
+                console.log('📤 Dados sendo enviados para o servidor:', JSON.stringify(updateData, null, 2));
+                
+                const response = await app.apiFetch('/users/profile', {
+                    method: 'PATCH',
+                    body: JSON.stringify(updateData)
+                });
+                
+                console.log('✅ Perfil salvo com sucesso:', response);
+                console.log('📥 Resposta do servidor:', JSON.stringify(response, null, 2));
+                
+                // Atualizar dados originais
+                console.log('📝 Atualizando dados originais após salvar:');
+                console.log('  - originalData anterior:', originalData);
+                console.log('  - updateData:', updateData);
+                
+                originalData = { ...originalData, ...updateData };
+                console.log('  - originalData atualizado:', originalData);
+                
+                console.log('🖼️ Atualizando foto do perfil após salvar:', selectedAvatarPath);
+                updateProfilePhoto(selectedAvatarPath);
+                
+                // Atualizar avatar na navegação
+                if (typeof app.onUserAvatarUpdated === 'function') {
+                    await app.onUserAvatarUpdated();
+                }
+                
+                app.showToast('Perfil atualizado com sucesso! Suas informações ajudarão a personalizar sua experiência.', 'success');
+                saveBtn.disabled = true;
+                
+                // Atualizar barra de progresso após salvar
+                updateProgressBar();
+                
+            } catch (error) {
+                console.error('❌ Erro ao salvar perfil:', error);
+                console.error('📋 Detalhes do erro:', {
+                    message: error.message,
+                    stack: error.stack,
+                    details: error.details
+                });
+                const errorMessage = error.message || 'Erro ao salvar perfil. Tente novamente.';
+                app.showToast(errorMessage, 'error');
+                saveBtn.disabled = false;
+                
+                // Se houver erros de validação, mostrar detalhes
+                if (error.details && Array.isArray(error.details)) {
+                    console.warn('Erros de validação:', error.details);
+                    error.details.forEach(detail => {
+                        console.warn('- ' + detail.msg + ' (campo: ' + detail.msg + ')');
+                    });
+                }
+                
+                // Log adicional para debug
+                console.log('🔍 Estado atual após erro:');
+                console.log('  - selectedAvatarPath:', selectedAvatarPath);
+                console.log('  - originalData.profile_picture:', originalData.profile_picture);
+            } finally {
+                console.log('🏁 Finalizando salvamento do perfil...');
+                console.log('🎯 Estado final do avatar:', selectedAvatarPath);
+                
+                app.hideSpinner();
+                saveBtn.innerHTML = `
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Salvar Todas as Informações
+                `;
+            }
+        }
+        
+        function setupSectionToggles() {
+            const toggles = [
+                { button: 'personalToggle', section: 'personalSection' },
+                { button: 'experienceToggle', section: 'experienceSection' },
+                { button: 'goalsToggle', section: 'goalsSection' }
+            ];
+            
+            toggles.forEach(({ button, section }) => {
+                const toggleBtn = document.getElementById(button);
+                const sectionEl = document.getElementById(section);
+                const icon = toggleBtn.querySelector('svg');
+                
+                toggleBtn.addEventListener('click', () => {
+                    const isHidden = sectionEl.style.display === 'none';
+                    
+                    if (isHidden) {
+                        sectionEl.style.display = 'block';
+                        icon.style.transform = 'rotate(0deg)';
+                        // Smooth reveal animation
+                        sectionEl.style.opacity = '0';
+                        sectionEl.style.maxHeight = '0';
+                        sectionEl.style.overflow = 'hidden';
+                        sectionEl.style.transition = 'all 0.3s ease-out';
+                        
+                        setTimeout(() => {
+                            sectionEl.style.opacity = '1';
+                            sectionEl.style.maxHeight = '1000px';
+                        }, 10);
+                        
+                        setTimeout(() => {
+                            sectionEl.style.maxHeight = '';
+                            sectionEl.style.overflow = '';
+                            sectionEl.style.transition = '';
+                        }, 300);
+                    } else {
+                        sectionEl.style.transition = 'all 0.3s ease-out';
+                        sectionEl.style.opacity = '0';
+                        sectionEl.style.maxHeight = '0';
+                        sectionEl.style.overflow = 'hidden';
+                        icon.style.transform = 'rotate(-90deg)';
+                        
+                        setTimeout(() => {
+                            sectionEl.style.display = 'none';
+                            sectionEl.style.transition = '';
+                        }, 300);
+                    }
+                });
+            });
+        }
+        
+        function setupTooltips() {
+            const tooltips = {
+                'education': 'Seu nível de escolaridade nos ajuda a sugerir concursos adequados',
+                'workStatus': 'Sua situação profissional influencia no tempo disponível para estudos',
+                'concursosCount': 'Essa informação nos ajuda a adaptar o conteúdo para seu nível de experiência',
+                'studyHours': 'Usado para criar cronogramas realistas e personalizar suas metas',
+                'timelineGoal': 'Definir um prazo nos ajuda a criar um plano de estudos eficiente'
+            };
+            
+            Object.keys(tooltips).forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    const label = field.previousElementSibling;
+                    if (label && label.tagName === 'LABEL') {
+                        label.setAttribute('data-tooltip', tooltips[fieldId]);
+                        label.classList.add('tooltip');
+                        label.style.cursor = 'help';
+                    }
+                }
+            });
+        }
+        
+        function showProfileCompletionTips() {
+            // Mostrar dica sobre a importância de completar o perfil
+            setTimeout(() => {
+                const incompleteFields = checkProfileCompleteness();
+                if (incompleteFields.length > 0) {
+                    app.showToast(
+                        `Complete seu perfil para uma experiência personalizada! ${incompleteFields.length} campos restantes.`,
+                        'info',
+                        5000
+                    );
+                }
+            }, 2000);
+        }
+        
+        function checkProfileCompleteness() {
+            const requiredFields = [
+                { id: 'name', name: 'Nome' },
+                { id: 'state', name: 'Estado' },
+                { id: 'education', name: 'Escolaridade' },
+                { id: 'areaInterest', name: 'Área de Interesse' },
+                { id: 'levelDesired', name: 'Nível Desejado' },
+                { id: 'studyHours', name: 'Horas de Estudo' }
+            ];
+            
+            return requiredFields.filter(field => {
+                const element = document.getElementById(field.id);
+                return !element || !element.value.trim();
+            });
+        }
+        
+        function updateProgressBar() {
+            const allFields = [
+                'name', 'state', 'city', 'birthDate', 'education', 'workStatus',
+                'concursosCount', 'areaInterest', 'levelDesired', 'timelineGoal', 'studyHours'
+            ];
+            
+            let completedFields = 0;
+            
+            // Contar campos preenchidos
+            allFields.forEach(fieldId => {
+                const element = document.getElementById(fieldId);
+                if (element && element.value.trim()) {
+                    completedFields++;
+                }
+            });
+            
+            // Verificar radio buttons
+            const firstTimeRadio = document.querySelector('input[name="firstTime"]:checked');
+            if (firstTimeRadio) completedFields++;
+            
+            // Verificar se tem avatar
+            if (selectedAvatarPath) completedFields++;
+            
+            const totalFields = allFields.length + 2; // +2 para firstTime e avatar
+            const percentage = Math.round((completedFields / totalFields) * 100);
+            
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            
+            if (progressBar && progressText) {
+                progressBar.style.setProperty('--progress', percentage + '%');
+                progressText.textContent = percentage + '%';
+                
+                // Mudar cor baseada no progresso
+                const successColor = getComputedStyle(document.documentElement).getPropertyValue('--success').trim();
+                const warningColor = getComputedStyle(document.documentElement).getPropertyValue('--warning').trim();
+                const errorColor = getComputedStyle(document.documentElement).getPropertyValue('--error').trim();
+                const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+                
+                if (percentage >= 80) {
+                    progressBar.style.background = `linear-gradient(90deg, ${successColor} ${percentage}%, ${borderColor} ${percentage}%)`;
+                } else if (percentage >= 50) {
+                    progressBar.style.background = `linear-gradient(90deg, ${warningColor} ${percentage}%, ${borderColor} ${percentage}%)`;
+                } else {
+                    progressBar.style.background = `linear-gradient(90deg, ${errorColor} ${percentage}%, ${borderColor} ${percentage}%)`;
+                }
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', initialize);
+    </script>
+    
+    <!-- Script do rodapé modular -->
+    <script src="js/footer.js"></script>
+    <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
+</body>
+</html>

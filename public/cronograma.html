@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Cronograma - Editaliza</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/footer.css" rel="stylesheet">
+    <link href="css/light-mode-only.css" rel="stylesheet">
+    <!-- Theme system completely removed - light mode only -->
+    <!-- SCRIPTS CENTRALIZADOS -->
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/ux-improvements.js"></script>
+    <!-- Config do Tailwind para reconhecer as cores customizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-black': '#0d0d0d',
+                        'editaliza-gray': '#969696',
+                    }
+                }
+            }
+        }
+    </script>
+    <style> 
+        body { font-family: 'Inter', sans-serif; } 
+        .filter-btn.active {
+            background-color: #0528f2; /* editaliza-blue */
+            color: white;
+            border-color: #0528f2;
+        }
+        .modal-overlay { transition: opacity 0.3s ease; }
+        .modal-container { transition: all 0.3s ease; }
+        /* Estilos para o conteúdo gerado dinamicamente (descrições de simulado) */
+        .prose { max-width: none; }
+        .prose-sm { font-size: 0.875rem; line-height: 1.5; }
+        
+        /* Animações personalizadas para transparência */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .transparency-card {
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .reta-final-badge {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Hover effects para cards de exclusão */
+        .exclusion-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .exclusion-card {
+            transition: all 0.2s ease;
+        }
+        
+        /* Gradientes personalizados */
+        .bg-gradient-reta-final {
+            background: linear-gradient(135deg, #fef2f2 0%, #fff7ed 100%);
+        }
+        
+        /* Loading shimmer effect */
+        .shimmer {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-gray-800">
+    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
+    <div id="main-nav-container"></div>
+
+    <!-- Modal para Adiar Tarefa -->
+    <div id="postponeModal" class="modal-overlay hidden fixed inset-0 bg-editaliza-black bg-opacity-70 z-30 flex items-center justify-center p-4 opacity-0">
+        <div class="modal-container bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm transform scale-95">
+            <h2 class="text-2xl font-bold text-editaliza-black">Adiar Tarefa</h2>
+            <p class="mt-2 text-gray-600">Para quando você gostaria de mover esta tarefa?</p>
+            <div class="mt-6 space-y-3">
+                <button data-days="next" class="postpone-option-btn btn-primary py-2">Próximo dia de estudo</button>
+                <button data-days="7" class="postpone-option-btn w-full bg-blue-100 text-editaliza-blue font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:bg-blue-200">Adiar em 7 dias</button>
+            </div>
+            <div class="mt-6 text-center">
+                <button id="cancelPostponeButton" class="text-sm text-gray-500 hover:text-gray-700 font-medium">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Exportar para Calendário -->
+    <div id="calendarModal" class="modal-overlay hidden fixed inset-0 bg-editaliza-black bg-opacity-70 z-30 flex items-center justify-center p-4 opacity-0">
+        <div class="modal-container bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform scale-95">
+            <h2 class="text-2xl font-bold text-editaliza-black">Exportar para Agenda</h2>
+            <p class="mt-2 text-gray-600">Escolha uma opção de exportação para os próximos 7 dias.</p>
+            <div class="mt-6 space-y-4">
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-500 mb-2">ADICIONAR AO GOOGLE CALENDAR (DIA A DIA)</h3>
+                    <div id="calendarLinksContainer" class="space-y-2">
+                        <!-- Links serão inseridos aqui dinamicamente -->
+                    </div>
+                </div>
+                <div class="relative flex py-3 items-center">
+                    <div class="flex-grow border-t border-gray-200"></div>
+                    <span class="flex-shrink mx-4 text-xs text-gray-400 font-semibold">OU</span>
+                    <div class="flex-grow border-t border-gray-200"></div>
+                </div>
+                <div>
+                     <h3 class="text-sm font-semibold text-gray-500 mb-2">BAIXAR ARQUIVO PARA OUTROS CALENDÁRIOS</h3>
+                    <button id="downloadIcsButton" class="w-full text-center btn-secondary py-2">Baixar arquivo .ics da semana</button>
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <button id="closeCalendarModalButton" class="text-sm text-gray-500 hover:text-gray-700 font-medium">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
+        
+        <!-- CABEÇALHO DO PLANO (GERADO PELO JS) -->
+        <div id="plan-header-container"></div>
+
+        <!-- ALERTA DE TAREFAS ATRASADAS (GERADO PELO JS) -->
+        <div id="overdue-alert-container"></div>
+        
+        <!-- ALERTA DE MODO RETA FINAL -->
+        <div id="reta-final-alert-container"></div>
+
+        <!-- Controles de Filtro e Exportação -->
+        <div class="bg-white p-4 rounded-xl shadow-md mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center">
+                <div id="filterControls" class="flex items-center space-x-2 mb-4 sm:mb-0">
+                    <button data-filter="week" class="filter-btn active px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 transition-colors">Esta Semana</button>
+                    <button data-filter="month" class="filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 transition-colors">Este Mês</button>
+                    <button data-filter="all" class="filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 transition-colors">Tudo</button>
+                </div>
+                <button id="exportButton" class="btn-secondary w-full sm:w-auto">
+                    Exportar Semana para Agenda
+                </button>
+            </div>
+        </div>
+
+        <div id="scheduleContainer" class="space-y-10">
+            <!-- Conteúdo do cronograma será inserido aqui -->
+        </div>
+        
+        <!-- Seção de Transparência do Modo Reta Final -->
+        <div id="transparencySection" class="mt-8 transparency-card" style="display: none;">
+            <div class="bg-gradient-reta-final border border-red-200 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                            <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xl font-bold text-red-800 flex items-center">
+                                <span class="mr-2">🎯</span>
+                                Transparência - Modo Reta Final
+                            </h3>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                                <span class="text-xs font-medium text-red-700">ATIVO</span>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-4 rounded-lg border border-red-100 mb-4">
+                            <p class="text-sm text-red-700 mb-3 leading-relaxed">
+                                <strong>Otimização Inteligente:</strong> Com base no tempo disponível e na prioridade das disciplinas, 
+                                nosso algoritmo selecionou os tópicos mais estratégicos para maximizar suas chances de aprovação.
+                            </p>
+                            
+                            <!-- Estatísticas Melhoradas -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                                <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200 text-center hover:scale-105 transition-transform duration-200">
+                                    <div class="text-2xl font-bold text-green-700" id="includedTopicsCount"><div class="w-8 h-6 bg-gray-200 rounded shimmer mx-auto"></div></div>
+                                    <div class="text-xs text-green-600 font-medium mt-1">Tópicos Priorizados</div>
+                                    <div class="w-8 h-1 bg-green-400 rounded mx-auto mt-2"></div>
+                                </div>
+                                <div class="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg border border-red-200 text-center hover:scale-105 transition-transform duration-200">
+                                    <div class="text-2xl font-bold text-red-700" id="excludedTopicsCount"><div class="w-8 h-6 bg-gray-200 rounded shimmer mx-auto"></div></div>
+                                    <div class="text-xs text-red-600 font-medium mt-1">Tópicos Excluídos</div>
+                                    <div class="w-8 h-1 bg-red-400 rounded mx-auto mt-2"></div>
+                                </div>
+                                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200 text-center hover:scale-105 transition-transform duration-200">
+                                    <div class="text-2xl font-bold text-blue-700" id="efficiencyRate"><div class="w-8 h-6 bg-gray-200 rounded shimmer mx-auto"></div></div>
+                                    <div class="text-xs text-blue-600 font-medium mt-1">Taxa de Eficiência</div>
+                                    <div class="w-8 h-1 bg-blue-400 rounded mx-auto mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Lista de Tópicos Excluídos -->
+                        <div id="excludedTopicsList" class="mb-4">
+                            <!-- Será preenchido dinamicamente -->
+                        </div>
+                        
+                        <!-- Ações Melhoradas -->
+                        <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-red-200">
+                            <button id="viewFullReportBtn" class="flex items-center justify-center btn-secondary text-sm px-4 py-2 hover:scale-105 transition-transform">
+                                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Relatório Detalhado
+                            </button>
+                            <button id="exportExclusionsBtn" class="flex items-center justify-center bg-white text-red-700 border border-red-300 hover:bg-red-50 text-sm px-4 py-2 rounded-lg transition-all hover:scale-105">
+                                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Exportar Lista CSV
+                            </button>
+                            <button id="toggleTransparencyBtn" class="flex items-center justify-center bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200 text-sm px-4 py-2 rounded-lg transition-all hover:scale-105">
+                                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464a1.414 1.414 0 00-2 2l1.414 1.414zm4.242 4.242L12.708 15.5a1.414 1.414 0 002 2l1.414-1.414z" />
+                                </svg>
+                                Minimizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        // CORREÇÃO: Sistema inteligente de detecção de planId
+        function getPlanId() {
+            console.log('🔍 Iniciando detecção de planId...');
+            
+            // Primeiro: tentar da URL
+            const urlPlanId = urlParams.get('id');
+            if (urlPlanId) {
+                console.log('✅ PlanId obtido da URL:', urlPlanId);
+                return urlPlanId;
+            }
+            
+            // Segundo: tentar do localStorage
+            const storedPlanId = localStorage.getItem('selectedPlanId');
+            console.log('🔍 Valor no localStorage:', storedPlanId);
+            console.log('🔍 Todos os itens do localStorage:', {...localStorage});
+            
+            if (storedPlanId) {
+                console.log('✅ PlanId obtido do localStorage:', storedPlanId);
+                // Atualizar URL para manter consistência
+                window.history.replaceState({}, '', `cronograma.html?id=${storedPlanId}`);
+                return storedPlanId;
+            }
+            
+            // Nenhum planId encontrado
+            console.log('❌ Nenhum planId encontrado. Redirecionando para home.html...');
+            console.log('🔍 Debug - URL atual:', window.location.href);
+            return null;
+        }
+        
+        let planId = getPlanId();
+        
+        // Se não encontrou planId, redirecionar para home
+        if (!planId) {
+            window.location.href = 'home.html';
+        }
+        
+        let activeFilter = 'week';
+        let fullSchedule = {};
+        let sessionIdToPostpone = null;
+        const postponeModal = document.getElementById('postponeModal');
+
+        function openPostponeModal(sessionId) {
+            sessionIdToPostpone = sessionId;
+            postponeModal.classList.remove('hidden');
+            setTimeout(() => {
+                postponeModal.classList.remove('opacity-0');
+                postponeModal.querySelector('.modal-container').classList.remove('scale-95');
+            }, 10);
+        }
+
+        function closePostponeModal() {
+            postponeModal.classList.add('opacity-0');
+            postponeModal.querySelector('.modal-container').classList.add('scale-95');
+            setTimeout(() => {
+                postponeModal.classList.add('hidden');
+                sessionIdToPostpone = null;
+            }, 300);
+        }
+
+        async function initialize() {
+            await components.renderMainNavigation('cronograma.html');
+            if (!planId) { window.location.href = 'dashboard.html'; return; }
+            
+            addSessionUpdateListeners();
+
+            app.showSpinner();
+            try {
+                const plan = await app.apiFetch(`/plans/${planId}`);
+                components.renderPlanHeader(planId, plan.plan_name, 'cronograma.html');
+                const examDate = new Date(plan.exam_date + 'T00:00:00');
+                document.getElementById('examDate').textContent = `Data da Prova: ${examDate.toLocaleDateString('pt-BR')}`;
+                
+                // Verificar e mostrar alerta de Reta Final
+                console.log('🔍 Verificando modo Reta Final:', plan.reta_final_mode);
+                console.log('📋 Dados completos do plano:', plan);
+                
+                // Verificação mais robusta para reta_final_mode (pode ser 1, true, "1", etc.)
+                const isRetaFinalMode = plan.reta_final_mode === 1 || plan.reta_final_mode === true || plan.reta_final_mode === '1';
+                
+                if (isRetaFinalMode) {
+                    console.log('🚨 Modo Reta Final ativo - renderizando alerta');
+                    components.renderRetaFinalAlert();
+                } else {
+                    console.log('✅ Modo Reta Final inativo - valor:', plan.reta_final_mode);
+                }
+                
+                const overdueData = await app.apiFetch(`/plans/${planId}/overdue_check`);
+                components.renderOverdueAlert(overdueData);
+                if (overdueData.count > 0) addReplanListener();
+
+                await fetchAndRenderSchedule(activeFilter);
+                
+                // Carregar dados de transparência do Modo Reta Final
+                await loadTransparencyData();
+            } catch (error) {
+                app.showToast('Erro ao carregar dados: ' + error.message, 'error');
+            } finally {
+                app.hideSpinner();
+            }
+        }
+
+        async function fetchAndRenderSchedule(filter) {
+            const container = document.getElementById('scheduleContainer');
+            container.innerHTML = '<div class="text-center text-gray-500 py-8">Carregando cronograma...</div>';
+            app.showSpinner();
+            try {
+                fullSchedule = await app.apiFetch(`/schedules/${planId}`);
+                await renderScheduleDOM(filter);
+            } catch (error) {
+                app.showToast('Erro ao renderizar cronograma: ' + error.message, 'error');
+                container.innerHTML = `<div class="text-center p-6 bg-red-50 text-red-700 rounded-lg">Falha ao carregar cronograma.</div>`;
+            } finally {
+                app.hideSpinner();
+            }
+        }
+
+        async function renderScheduleDOM(filter) {
+            const container = document.getElementById('scheduleContainer');
+            container.innerHTML = '';
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+
+            let startDate = new Date(today);
+            let endDate;
+
+            if (filter === 'week') {
+                const dayOfWeek = today.getDay() === 0 ? 6 : today.getDay() - 1;
+                startDate.setDate(today.getDate() - dayOfWeek);
+                endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 6);
+            } else if (filter === 'month') {
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            } else {
+                const firstDateKey = Object.keys(fullSchedule).sort()[0];
+                startDate = firstDateKey ? new Date(firstDateKey + 'T00:00:00') : today;
+                endDate = new Date(8640000000000000);
+            }
+
+            const dates = Object.keys(fullSchedule)
+                .sort((a, b) => new Date(a) - new Date(b))
+                .filter(dateStr => {
+                    const date = new Date(dateStr + 'T00:00:00');
+                    if (filter === 'all') return true;
+                    return date >= startDate && date <= endDate;
+                });
+
+            if (dates.length === 0) {
+                container.innerHTML = `<div class="content-card text-center"><h3 class="text-xl font-semibold text-gray-700">Nenhuma tarefa</h3><p class="text-gray-500 mt-2">Não há tarefas agendadas para este período.</p></div>`;
+                return;
+            }
+
+            let allDaysHtml = '';
+            for (const dateStr of dates) {
+                const date = new Date(dateStr + 'T00:00:00');
+                const isToday = date.getTime() === today.getTime();
+                const dateClass = isToday ? 'text-editaliza-blue' : 'text-editaliza-black';
+                const formattedDate = date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+                const daySessions = fullSchedule[dateStr] || [];
+                const sessionsHtml = daySessions.map(session => renderIndividualCard(session)).join('');
+                                // Adicionar badge do Modo Reta Final no cabeçalho da primeira data se ativo
+                const transparencySection = document.getElementById('transparencySection');
+                const headerBadge = (dates.indexOf(dateStr) === 0 && transparencySection && transparencySection.style.display !== 'none') ? createRetaFinalBadge() : '';
+                allDaysHtml += `<div class="mb-10"><h3 class="text-2xl font-bold ${dateClass} flex items-center">${formattedDate}${headerBadge}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-4">${sessionsHtml}</div></div>`;
+            }
+            
+            container.innerHTML = allDaysHtml;
+        }
+        
+        function renderIndividualCard(session) {
+            // Delega a renderização para o components.js
+            switch (session.session_type) {
+                case 'Novo Tópico':
+                case 'Reforço Extra':
+                    return components.createSessionCard(session);
+                case 'Revisão Consolidada':
+                    return components.createReviewCard(session);
+                case 'Simulado Direcionado':
+                case 'Simulado Completo':
+                    return components.createSimuladCard(session);
+                case 'Redação':
+                    return components.createEssayCard(session);
+                default:
+                    console.warn(`Tipo de sessão desconhecido: ${session.session_type}. Usando card padrão.`);
+                    return components.createSessionCard(session);
+            }
+        }
+
+        async function markReviewAsCompleted(sessionId) {
+            app.showSpinner();
+            try {
+                await app.apiFetch(`/schedules/sessions/${sessionId}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ status: 'Concluído' })
+                });
+                app.showToast('Revisão marcada como concluída!', 'success');
+                await fetchAndRenderSchedule(activeFilter);
+            } catch (error) {
+                app.showToast(error.message, 'error');
+            } finally {
+                app.hideSpinner();
+            }
+        }
+
+        function addSessionUpdateListeners() {
+            const container = document.getElementById('scheduleContainer');
+            if (!container) return;
+
+            // Debounce para inputs de texto e número
+            container.addEventListener('input', app.debounce((event) => {
+                const target = event.target;
+                const sessionId = target.dataset.sessionId;
+                if (sessionId && target.dataset.field) { 
+                    const data = { [target.dataset.field]: target.value };
+                    app.apiFetch(`/schedules/sessions/${sessionId}`, {
+                        method: 'PATCH',
+                        body: JSON.stringify(data)
+                    }).catch(err => app.showToast('Erro ao salvar alteração.', 'error'));
+                }
+            }, 800));
+
+            // Listener para o checkbox de conclusão
+            container.addEventListener('change', async (event) => {
+                const target = event.target;
+                const sessionId = target.dataset.sessionId;
+                if (sessionId && target.type === 'checkbox') {
+                    const data = { status: target.checked ? 'Concluído' : 'Pendente' };
+                    try {
+                        await app.apiFetch(`/schedules/sessions/${sessionId}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify(data)
+                        });
+                        const card = target.closest('.flex.flex-col');
+                        if (card) {
+                            card.classList.toggle('bg-slate-100', target.checked);
+                        }
+                        // ***** CORREÇÃO APLICADA AQUI *****
+                        // Invalida o cache do plano para forçar a atualização dos gráficos de progresso.
+                        app.invalidatePlanCache(planId);
+                        
+                        // Atualizar painéis na tela plan.html se ela estiver aberta em outra aba/janela
+                        // ou se o usuário navegar para ela depois
+                        app.showToast('Progresso atualizado!', 'success');
+
+                    } catch(err) {
+                        app.showToast('Erro ao salvar alteração.', 'error');
+                        target.checked = !target.checked;
+                    };
+                }
+            });
+        }
+        
+        async function reinforceSession(sessionId) {
+            app.showSpinner();
+            try {
+                const result = await app.apiFetch(`/schedules/sessions/${sessionId}/reinforce`, { method: 'POST' });
+                app.showToast(result.message, 'success');
+                await fetchAndRenderSchedule(activeFilter);
+            } catch (error) {
+                app.showToast(error.message, 'error');
+            } finally {
+                app.hideSpinner();
+            }
+        }
+
+        async function handlePostpone(days) {
+            if (!sessionIdToPostpone) return;
+            closePostponeModal();
+            app.showSpinner();
+            try {
+                const result = await app.apiFetch(`/schedules/sessions/${sessionIdToPostpone}/postpone`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ days })
+                });
+                app.showToast(result.message, 'success');
+                await fetchAndRenderSchedule(activeFilter);
+            } catch (error) {
+                app.showToast(error.message, 'error');
+            } finally {
+                app.hideSpinner();
+            }
+        }
+
+        function addReplanListener() {
+            const replanButton = document.getElementById('replanButton');
+            if(replanButton) {
+                replanButton.addEventListener('click', async () => {
+                    app.showSpinner();
+                    try {
+                        const data = await app.apiFetch(`/plans/${planId}/replan`, { method: 'POST' });
+                        app.showToast(data.message, 'success');
+                        await fetchAndRenderSchedule(activeFilter);
+                        document.getElementById('overdue-alert-container').innerHTML = '';
+                    } catch (error) {
+                        app.showToast(error.message, 'error');
+                    } finally {
+                        app.hideSpinner();
+                    }
+                });
+            }
+        }
+
+        function handleExport() {
+            const calendarModal = document.getElementById('calendarModal');
+            const linksContainer = document.getElementById('calendarLinksContainer');
+            linksContainer.innerHTML = '';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const weekDates = Array.from({ length: 7 }, (_, i) => {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                return date;
+            }).filter(date => fullSchedule[date.toISOString().split('T')[0]]);
+            
+            if (weekDates.length === 0) {
+                app.showToast("Nenhuma tarefa para exportar nos próximos 7 dias.", "info");
+                return;
+            }
+
+            weekDates.forEach(date => {
+                const dateStr = date.toISOString().split('T')[0];
+                const sessions = fullSchedule[dateStr];
+                const text = encodeURIComponent('Editaliza: Estudos do Dia');
+                const details = encodeURIComponent(sessions.map(s => `• ${s.subject_name}: ${s.topic_description}`).join('\n'));
+                const startDate = dateStr.replace(/-/g, '');
+                const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${startDate}/${startDate}&details=${details}`;
+                
+                const link = document.createElement('a');
+                link.href = calendarUrl;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.className = 'block w-full text-center bg-blue-50 text-editaliza-blue font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:bg-blue-100';
+                link.textContent = `Adicionar dia ${date.toLocaleDateString('pt-BR')}`;
+                linksContainer.appendChild(link);
+            });
+
+            document.getElementById('downloadIcsButton').onclick = () => {
+                let icsContent = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Editaliza//App v1.0//PT'];
+                weekDates.forEach(date => {
+                    const dateStr = date.toISOString().split('T')[0];
+                    fullSchedule[dateStr].forEach(session => {
+                        const startDate = dateStr.replace(/-/g, '');
+                        icsContent.push('BEGIN:VEVENT', `UID:${session.id}@editaliza.com`, `DTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '')}Z`, `DTSTART;VALUE=DATE:${startDate}`, `SUMMARY:Estudar: ${session.subject_name || session.session_type}`, `DESCRIPTION:${session.topic_description || 'Revisão geral.'}`, 'END:VEVENT');
+                    });
+                });
+                icsContent.push('END:VCALENDAR');
+                const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `cronograma_editaliza.ics`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            calendarModal.classList.remove('hidden');
+            setTimeout(() => { calendarModal.classList.remove('opacity-0'); calendarModal.querySelector('.modal-container').classList.remove('scale-95'); }, 10);
+        }
+
+        // Funções para Transparência do Modo Reta Final
+        async function loadTransparencyData() {
+            if (!planId) {
+                console.log('⚠️ Transparência: planId não encontrado');
+                return;
+            }
+            
+            try {
+                console.log('🔍 Carregando dados de transparência para plano:', planId);
+                const response = await app.apiFetch(`/plans/${planId}/exclusions`);
+                console.log('📄 Resposta da transparência:', response);
+                
+                // Verificação mais robusta para o modo Reta Final
+                const isRetaFinalActive = response && (response.isRetaFinalActive === 1 || response.isRetaFinalActive === true || response.isRetaFinalActive === '1');
+                
+                if (isRetaFinalActive) {
+                    if (response.totalExclusions > 0) {
+                        console.log('✅ Mostrando seção de transparência -', response.totalExclusions, 'exclusões encontradas');
+                        showTransparencySection(response);
+                        addExclusionIndicators(response);
+                        addTransparencyQuickAccess();
+                    } else {
+                        console.log('ℹ️ Modo Reta Final ativo, mas nenhum tópico foi excluído');
+                    }
+                } else {
+                    console.log('ℹ️ Modo Reta Final não está ativo para este plano');
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar dados de transparência:', error);
+            }
+        }
+        
+        function showTransparencySection(data) {
+            const section = document.getElementById('transparencySection');
+            const includedCount = document.getElementById('includedTopicsCount');
+            const excludedCount = document.getElementById('excludedTopicsCount');
+            const excludedList = document.getElementById('excludedTopicsList');
+            
+            // Verificar se os dados são válidos
+            if (!data || !data.exclusionsBySubject) {
+                console.error('❌ Dados de exclusão inválidos:', data);
+                return;
+            }
+            
+            // Calcular tópicos incluídos do cronograma atual
+            const includedTopicsCount = calculateIncludedTopics();
+            
+            // Atualizar contadores com animação
+            setTimeout(() => {
+                includedCount.textContent = includedTopicsCount;
+                excludedCount.textContent = data.totalExclusions;
+            }, 200);
+            
+            // Gerar resumo visual das exclusões
+            let listHTML = generateExclusionsSummary(data);
+            
+            excludedList.innerHTML = listHTML;
+            
+            // Exibir seção
+            section.style.display = 'block';
+            
+            // Calcular e exibir taxa de eficiência com animação
+            const efficiencyRate = Math.round((includedTopicsCount / (includedTopicsCount + data.totalExclusions)) * 100);
+            setTimeout(() => {
+                document.getElementById('efficiencyRate').textContent = efficiencyRate + '%';
+            }, 400);
+            
+            // Configurar botões
+            document.getElementById('viewFullReportBtn').onclick = () => showFullTransparencyReport(data);
+            document.getElementById('exportExclusionsBtn').onclick = () => exportExclusionsList(data);
+            document.getElementById('toggleTransparencyBtn').onclick = () => toggleTransparencySection();
+        }
+        
+        function calculateIncludedTopics() {
+            let count = 0;
+            Object.values(fullSchedule).forEach(daySessions => {
+                daySessions.forEach(session => {
+                    if (session.session_type === 'Novo Tópico') {
+                        count++;
+                    }
+                });
+            });
+            return count;
+        }
+        
+        function generateExclusionsSummary(data) {
+            if (!data || !data.exclusionsBySubject) {
+                return '<div class="text-center text-gray-500 py-4">Nenhum dado de exclusão disponível</div>';
+            }
+            
+            const subjects = Object.keys(data.exclusionsBySubject);
+            const maxSubjectsToShow = 3;
+            
+            if (subjects.length === 0) {
+                return '<div class="text-center text-gray-500 py-4">Nenhuma disciplina com exclusões</div>';
+            }
+            
+            let html = `
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+            `;
+            
+            // Mostrar resumo das primeiras disciplinas
+            subjects.slice(0, maxSubjectsToShow).forEach(subject => {
+                const topics = data.exclusionsBySubject[subject];
+                html += `
+                    <div class="bg-white p-3 rounded-lg border border-red-200 hover:border-red-300 transition-all duration-200 exclusion-card">
+                        <div class="flex items-center justify-between mb-2">
+                            <h5 class="font-semibold text-red-800 text-sm truncate" title="${subject}">${subject}</h5>
+                            <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-bold animate-pulse">${topics.length}</span>
+                        </div>
+                        <div class="text-xs text-gray-600">
+                            <div class="truncate mb-1 text-gray-700" title="${topics[0].description}">• ${topics[0].description}</div>
+                            ${topics.length > 1 ? `<div class="text-red-600 font-medium">+ ${topics.length - 1} outros tópicos</div>` : ''}
+                        </div>
+                        <div class="mt-2 w-full bg-red-100 rounded-full h-1">
+                            <div class="bg-red-500 h-1 rounded-full" style="width: ${Math.min((topics.length / 10) * 100, 100)}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div>`;
+            
+            // Se houver mais disciplinas, mostrar indicador
+            if (subjects.length > maxSubjectsToShow) {
+                html += `
+                    <div class="bg-gray-100 p-3 rounded-lg text-center text-sm text-gray-600">
+                        <span class="font-semibold">+ ${subjects.length - maxSubjectsToShow} disciplinas adicionais</span> com tópicos excluídos
+                    </div>
+                `;
+            }
+            
+            return html;
+        }
+        
+        function showFullTransparencyReport(data) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4';
+            
+            const includedTopicsCount = calculateIncludedTopics();
+            const totalSubjectsAffected = Object.keys(data.exclusionsBySubject).length;
+            const lastUpdateDate = data.lastUpdated ? new Date(data.lastUpdated).toLocaleDateString('pt-BR') : 'Não disponível';
+            
+            let reportHTML = `
+                <div class="bg-white rounded-xl p-6 max-w-4xl w-full max-h-[85vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-red-700">Relatório Completo de Transparência</h2>
+                                <p class="text-sm text-gray-600">Modo Reta Final - Última atualização: ${lastUpdateDate}</p>
+                            </div>
+                        </div>
+                        <button class="text-gray-500 hover:text-gray-700 text-2xl transition-colors">&times;</button>
+                    </div>
+                    
+                    <!-- Resumo Executivo -->
+                    <div class="mb-6">
+                        <div class="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-xl border border-red-200">
+                            <h3 class="font-bold text-red-800 mb-3 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                                Resumo da Otimização Inteligente
+                            </h3>
+                            <p class="text-sm text-red-700 mb-4">O algoritmo analisou todos os tópicos disponíveis e fez uma seleção estratégica baseada na prioridade das disciplinas e no tempo disponível.</p>
+                            
+                            <!-- Estatísticas em Cards -->
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                <div class="bg-white p-4 rounded-lg border border-red-200 text-center">
+                                    <div class="text-2xl font-bold text-green-600">${includedTopicsCount}</div>
+                                    <div class="text-xs text-gray-600 mt-1">Tópicos Priorizados</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-red-200 text-center">
+                                    <div class="text-2xl font-bold text-red-600">${data.totalExclusions}</div>
+                                    <div class="text-xs text-gray-600 mt-1">Tópicos Excluídos</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-red-200 text-center">
+                                    <div class="text-2xl font-bold text-orange-600">${totalSubjectsAffected}</div>
+                                    <div class="text-xs text-gray-600 mt-1">Disciplinas Afetadas</div>
+                                </div>
+                                <div class="bg-white p-4 rounded-lg border border-red-200 text-center">
+                                    <div class="text-2xl font-bold text-blue-600">${Math.round((includedTopicsCount / (includedTopicsCount + data.totalExclusions)) * 100)}%</div>
+                                    <div class="text-xs text-gray-600 mt-1">Taxa de Inclusão</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Detalhes por Disciplina -->
+                    <div class="mb-6">
+                        <h3 class="font-bold text-gray-800 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            Detalhamento por Disciplina
+                        </h3>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            `;
+            
+            // Adicionar cards detalhados por disciplina
+            for (const [subject, topics] of Object.entries(data.exclusionsBySubject)) {
+                reportHTML += `
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="font-semibold text-gray-800">${subject}</h4>
+                            <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-bold">${topics.length} excluídos</span>
+                        </div>
+                        <div class="space-y-2 max-h-48 overflow-y-auto">
+                `;
+                
+                topics.forEach((topic, index) => {
+                    const priorityColor = topic.priority_combined > 7 ? 'red' : topic.priority_combined > 4 ? 'orange' : 'yellow';
+                    reportHTML += `
+                        <div class="bg-white p-3 rounded border border-gray-200 hover:border-${priorityColor}-300 transition-colors">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-1">
+                                    <div class="text-sm text-gray-700 font-medium">${topic.description}</div>
+                                    <div class="flex items-center mt-1 space-x-2">
+                                        <span class="bg-${priorityColor}-100 text-${priorityColor}-800 px-2 py-1 rounded text-xs font-semibold">
+                                            Prioridade ${topic.priority_combined}
+                                        </span>
+                                        <span class="text-xs text-gray-500">
+                                            ${new Date(topic.exclusion_date).toLocaleDateString('pt-BR')}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                reportHTML += `
+                        </div>
+                    </div>
+                `;
+            }
+            
+            reportHTML += `
+                        </div>
+                    </div>
+                    
+                    <!-- Estratégias e Recomendações -->
+                    <div class="bg-blue-50 p-6 rounded-xl border border-blue-200 mb-6">
+                        <h3 class="font-bold text-blue-800 mb-3 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                            </svg>
+                            Estratégias Recomendadas
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <h4 class="font-semibold text-blue-800 mb-2">Foco Principal</h4>
+                                <ul class="text-sm text-blue-700 space-y-1">
+                                    <li>• Dedique-se aos ${includedTopicsCount} tópicos priorizados</li>
+                                    <li>• Siga rigorosamente o cronograma estabelecido</li>
+                                    <li>• Priorize qualidade sobre quantidade</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-blue-800 mb-2">Se Sobrar Tempo</h4>
+                                <ul class="text-sm text-blue-700 space-y-1">
+                                    <li>• Revise tópicos excluídos por ordem de prioridade</li>
+                                    <li>• Foque nos conceitos principais</li>
+                                    <li>• Use técnicas de revisão rápida</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ações -->
+                    <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button onclick="this.closest('.fixed').remove()" class="btn-primary px-6 py-2">
+                            Entendi, continuar
+                        </button>
+                        <button onclick="exportFullReport()" class="bg-white text-red-700 border border-red-300 hover:bg-red-50 px-6 py-2 rounded-lg transition-colors">
+                            Exportar Relatório Completo
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            modal.innerHTML = reportHTML;
+            document.body.appendChild(modal);
+            
+            // Event listeners
+            const closeBtn = modal.querySelector('button:first-of-type');
+            closeBtn.onclick = () => document.body.removeChild(modal);
+            modal.onclick = (e) => {
+                if (e.target === modal) document.body.removeChild(modal);
+            };
+        }
+        
+        function exportExclusionsList(data) {
+            let csvContent = 'Disciplina,Tópico,Prioridade,Data de Exclusão,Motivo\n';
+            
+            for (const [subject, topics] of Object.entries(data.exclusionsBySubject)) {
+                topics.forEach(topic => {
+                    const reason = 'Modo Reta Final - Priorização por tempo limitado';
+                    csvContent += `"${subject}","${topic.description}","${topic.priority_combined}","${new Date(topic.exclusion_date).toLocaleDateString('pt-BR')}","${reason}"\n`;
+                });
+            }
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `topicos_excluidos_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            app.showToast('Lista de exclusões exportada com sucesso!', 'success');
+        }
+        
+        function exportFullReport() {
+            // Função para exportar relatório completo em PDF ou TXT
+            app.showToast('Funcionalidade de exportação completa em desenvolvimento', 'info');
+        }
+        
+        // Adicionar indicadores visuais no cronograma
+        function addExclusionIndicators(data) {
+            // A funcionalidade foi integrada diretamente no renderScheduleDOM
+            // para garantir que o badge apareça corretamente
+            console.log('Indicadores de exclusão adicionados ao cronograma');
+        }
+
+        // Tornar funções globais acessíveis
+        window.markReviewAsCompleted = markReviewAsCompleted;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initialize();
+            
+            document.getElementById('filterControls').addEventListener('click', (event) => {
+                if (event.target.classList.contains('filter-btn')) {
+                    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                    event.target.classList.add('active');
+                    activeFilter = event.target.dataset.filter;
+                    renderScheduleDOM(activeFilter);
+                }
+            });
+
+            document.getElementById('exportButton').addEventListener('click', handleExport);
+            document.getElementById('cancelPostponeButton').addEventListener('click', closePostponeModal);
+            document.querySelectorAll('.postpone-option-btn').forEach(btn => {
+                btn.addEventListener('click', (event) => handlePostpone(event.target.dataset.days));
+            });
+            postponeModal.addEventListener('click', (event) => {
+                if (event.target === postponeModal) closePostponeModal();
+            });
+            
+            // CORREÇÃO 1: Adicionar listener para fechar modal de estudo ao clicar fora
+            const studyModal = document.getElementById('studySessionModal');
+            if (studyModal) {
+                studyModal.addEventListener('click', (event) => {
+                    if (event.target === studyModal && typeof StudyChecklist !== 'undefined') {
+                        StudyChecklist.close();
+                    }
+                });
+            }
+
+            // CORREÇÃO 2: Adicionar listener para fechar modal de calendário ao clicar fora
+            const calendarModal = document.getElementById('calendarModal');
+            document.getElementById('closeCalendarModalButton').addEventListener('click', () => {
+                calendarModal.classList.add('opacity-0');
+                calendarModal.querySelector('.modal-container').classList.add('scale-95');
+                setTimeout(() => calendarModal.classList.add('hidden'), 300);
+            });
+            calendarModal.addEventListener('click', (event) => {
+                if (event.target === calendarModal) {
+                    calendarModal.classList.add('opacity-0');
+                    calendarModal.querySelector('.modal-container').classList.add('scale-95');
+                    setTimeout(() => calendarModal.classList.add('hidden'), 300);
+                }
+            });
+        });
+
+        // Função para minimizar/expandir seção de transparência
+        function toggleTransparencySection() {
+            const section = document.getElementById('transparencySection');
+            const content = section.querySelector('.ml-4');
+            const button = document.getElementById('toggleTransparencyBtn');
+            const isMinimized = content.style.display === 'none';
+            
+            if (isMinimized) {
+                content.style.display = 'block';
+                button.innerHTML = `
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L8.464 8.464a1.414 1.414 0 00-2 2l1.414 1.414zm4.242 4.242L12.708 15.5a1.414 1.414 0 002 2l1.414-1.414z" />
+                    </svg>
+                    Minimizar
+                `;
+                section.style.marginBottom = '2rem';
+            } else {
+                content.style.display = 'none';
+                button.innerHTML = `
+                    <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Ver Transparência
+                `;
+                section.style.marginBottom = '0.5rem';
+            }
+        }
+        
+        // Função para criar um ícone de badge no cronograma
+        function createRetaFinalBadge() {
+            return `
+                <div class="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800 ml-2 reta-final-badge cursor-pointer" 
+                     title="Alguns tópicos foram excluídos devido ao Modo Reta Final - Clique para ver detalhes"
+                     onclick="document.getElementById('transparencySection').scrollIntoView({behavior: 'smooth', block: 'center'})">
+                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    Reta Final
+                </div>
+            `;
+        }
+        
+        // Adicionar botão de acesso rápido à transparência no cabeçalho
+        function addTransparencyQuickAccess() {
+            const planHeader = document.getElementById('plan-header-container');
+            if (planHeader && !planHeader.querySelector('.transparency-quick-access')) {
+                const quickAccessBtn = document.createElement('div');
+                quickAccessBtn.className = 'transparency-quick-access mt-2';
+                quickAccessBtn.innerHTML = `
+                    <button onclick="document.getElementById('transparencySection').scrollIntoView({behavior: 'smooth', block: 'center'})" 
+                            class="inline-flex items-center px-3 py-2 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg text-sm text-red-700 font-medium transition-all duration-200 hover:scale-105">
+                        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        Ver Transparência do Plano
+                        <span class="ml-2 bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-bold animate-pulse">Modo RF</span>
+                    </button>
+                `;
+                planHeader.appendChild(quickAccessBtn);
+            }
+        }
+
+        window.postponeSession = openPostponeModal;
+        window.reinforceSession = reinforceSession;
+    </script>
+    
+    <!-- Script do rodapé modular -->
+    <script src="js/footer.js"></script>
+    <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
+</body>
+</html>
