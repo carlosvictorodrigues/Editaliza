@@ -1,5 +1,22 @@
 # 🤖 INSTRUÇÕES PARA CLAUDE - FLUXO DE DESENVOLVIMENTO PROFISSIONAL
 
+## ⚠️ FILOSOFIA DE TRABALHO - CRÍTICO!
+
+### 🎯 PRINCÍPIO FUNDAMENTAL: MENOR INTERVENÇÃO POSSÍVEL
+**SEMPRE aplique a menor mudança necessária para resolver o problema específico.**
+- ❌ NÃO crie novos problemas ao resolver um existente
+- ❌ NÃO faça mudanças bruscas que afetam outras partes
+- ❌ NÃO adicione complexidade desnecessária
+- ✅ Se uma mudança não resolveu, DESFAÇA-A imediatamente
+- ✅ Atenda SOMENTE ao problema informado
+- ✅ Teste SEMPRE o impacto da mudança em outras funcionalidades
+
+### 📝 CHECKLIST ANTES DE QUALQUER MUDANÇA:
+1. Esta é a menor mudança possível?
+2. Isso pode quebrar algo que já funciona?
+3. Testei o impacto em outras partes?
+4. Se não funcionar, é fácil reverter?
+
 ## 🔄 FLUXO DE DESENVOLVIMENTO (GitFlow Simplificado)
 
 ### 📌 REGRA DE OURO: 

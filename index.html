@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editaliza - Pare de desperdiçar 15h/mês planejando estudos</title>
+    <meta name="description" content="Seu edital vira cronograma científico em 3 minutos. Método com revisões espaçadas, simulados inteligentes e reta final automatizada.">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Editaliza - Cronograma científico em 3 minutos">
+    <meta property="og:description" content="Pare de desperdiçar 15h/mês planejando. Algoritmo de revisão espaçada + reta final inteligente.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://editaliza.com.br">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-dark': '#0d0d0d'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        .gradient-hero {
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+        }
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .pulse-glow {
+            box-shadow: 0 0 0 0 rgba(5, 40, 242, 0.4);
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 0 0 rgba(5, 40, 242, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(5, 40, 242, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(5, 40, 242, 0); }
+        }
+        .comparison-table {
+            overflow-x: auto;
+        }
+        .comparison-table table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .comparison-table th:first-child,
+        .comparison-table td:first-child {
+            border-left: 1px solid #e2e8f0;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            border-right: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .comparison-table thead th {
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-4">
+                    <!-- Logo SVG -->
+                    <svg class="h-8 w-auto" viewBox="0 0 510.24 101.5" xmlns="http://www.w3.org/2000/svg" aria-label="Editaliza">
+                        <g fill="#0d0d0d">
+                            <path d="M148.68,17.22l49.51-.04v9.32l-39.51.03v17.97l37.97-.03v9.22l-37.97.03v20.83l39.51-.03v9.22l-49.51.04V17.22Z"/>
+                            <path d="M210.98,77.75c-4.49-4.5-6.73-10.65-6.73-18.44s2.13-13.7,6.39-18.26c4.26-4.57,10.17-6.85,17.74-6.86,7.5,0,13.55,2.59,18.17,7.78v-24.82h9.23v66.56h-9.23v-5.79c-2.24,2.22-4.82,3.87-7.74,4.95-2.92,1.08-6.04,1.62-9.37,1.62-7.82,0-13.97-2.24-18.46-6.74Zm31.53-5.21c2.76-2.57,4.13-6.39,4.13-11.46v-3.61c0-4.56-1.52-8.19-4.57-10.89-3.04-2.69-7.16-4.04-12.35-4.03-4.74,0-8.57,1.4-11.49,4.19-2.92,2.79-4.37,7.01-4.37,12.65s1.44,9.89,4.33,12.74c2.88,2.85,6.95,4.27,12.21,4.27,5.32,0,9.36-1.29,12.11-3.86Z"/>
+                            <path d="M264.04,17.13h9.42v11.21h-9.42V17.13Zm.1,18.83h9.23v47.73h-9.23V35.96Z"/>
+                            <path d="M293.7,80.3c-2.34-2.76-3.61-6.8-3.8-12.12v-23.77h-8.27v-8.27h8.27v-17.69h9.32v17.68h15.86v8.26h-15.86v24.55c0,4.69,2.66,7.03,7.98,7.03,2.18,0,4.65-.32,7.4-.96l2.21,7.32c-2.31.76-4.31,1.3-6.01,1.62-1.7.32-3.48.48-5.34.48-5.51,0-9.44-1.37-11.78-4.13Z"/>
+                            <path d="M326.96,80.36c-3.43-2.57-5.14-6.32-5.14-11.26,0-6.09,2.55-10.19,7.64-12.32,5.1-2.13,12.03-3.26,20.81-3.39l9.04-.2v-1.24c0-3.55-.95-6.05-2.84-7.51-1.89-1.46-5.14-2.18-9.76-2.18-4.1,0-7.21.67-9.32,2-2.12,1.33-3.24,3.58-3.36,6.75h-9.42c.13-5.89,2.05-10.17,5.77-12.84,3.72-2.67,9.16-4.03,16.34-4.1,7.69.06,13.25,1.57,16.68,4.55,3.43,2.98,5.14,7.51,5.14,13.6v31.38h-9.13v-7.03c-4.55,5.08-10.64,7.62-18.27,7.62-6.02,0-10.75-1.28-14.18-3.84Zm27.74-6.72c3.08-1.97,4.61-4.6,4.61-7.9v-5.8l-8.84.29c-7.05.26-12.03,1.07-14.95,2.44-2.92,1.37-4.37,3.51-4.37,6.42,0,2.41.96,4.26,2.88,5.56,1.92,1.3,4.84,1.95,8.75,1.94,4.87,0,8.84-.99,11.92-2.96Z"/>
+                            <path d="M377.19,17.04h9.23v66.56h-9.23V17.04Z"/>
+                            <path d="M394.68,17.02h9.42v11.21h-9.42V17.02Zm.1,18.83h9.23v47.73h-9.23V35.85Z"/>
+                            <path d="M412.28,76.83l30.57-33.12-29.9.02v-7.7l42.4-.03v6.56l-30.38,32.93,30.09-.02v8.08l-42.78.03v-6.75Z"/>
+                            <path d="M468.66,80.25c-3.43-2.57-5.14-6.32-5.14-11.26,0-6.09,2.55-10.19,7.64-12.32,5.1-2.13,12.03-3.26,20.81-3.39l9.04-.2v-1.24c0-3.55-.95-6.05-2.84-7.51-1.89-1.46-5.14-2.18-9.76-2.18-4.1,0-7.21.67-9.32,2-2.12,1.33-3.24,3.58-3.36,6.75h-9.42c.13-5.89,2.05-10.17,5.77-12.84,3.72-2.67,9.16-4.03,16.34-4.1,7.69.06,13.25,1.57,16.68,4.55,3.43,2.98,5.14,7.51,5.14,13.6v31.38h-9.13v-7.03c-4.55,5.08-10.64,7.62-18.27,7.62-6.02,0-10.75-1.28-14.18-3.84Zm27.73-6.72c3.08-1.97,4.61-4.6,4.61-7.9v-5.8l-8.84.29c-7.05.26-12.03,1.07-14.95,2.44-2.92,1.37-4.37,3.51-4.37,6.42,0,2.41.96,4.26,2.88,5.56,1.92,1.3,4.84,1.95,8.75,1.94,4.87,0,8.84-.99,11.92-2.96Z"/>
+                        </g>
+                        <g>
+                            <path fill="#0528f2" d="M58.62,101.5s-12.21-26.73-43.18-21.61v-24.04s29.74,1.62,40.51,31.49c1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                            <path fill="#1ad937" d="M58.62,101.5c-6.75-32.15-28.77-42.36-43.18-45.57-3.53-.79-6.61-1.16-8.89-1.33-2.37-.18-4.2-2.14-4.2-4.52,0-2.73,2.38-4.84,5.09-4.5,11.47,1.44,39.07,8.39,48.52,41.75,1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                            <path fill="#0528f2" d="M69.48,101.5s12.21-27.94,43.18-22.83v-22.83s-29.74,1.62-40.51,31.49c-1.21,4.27-2.12,8.98-2.67,14.17Z"/>
+                            <path fill="#1ad937" d="M69.48,101.5c6.75-32.15,28.77-42.36,43.18-45.57,3.53-.79,6.61-1.16,8.89-1.33,2.37-.18,4.2-2.14,4.2-4.52,0-2.73-2.38-4.84-5.09-4.5-11.47,1.44-39.07,8.39-48.52,41.75,1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                            <path fill="#0528f2" d="M92.24,7.72C83.54,2.57,73.8,0,64.05,0c-9.75,0-19.49,2.57-28.19,7.72L1.79,27.87c-2.97,1.76-2.07,6.28,1.35,6.75,12,1.65,31.51,6.67,49.09,21.75,1.7,1.46,3.6,2.57,5.6,3.33,3.99,1.52,8.42,1.52,12.41,0,2-.76,3.9-1.87,5.6-3.33,17.59-15.08,37.1-20.1,49.09-21.75,3.42-.47,4.33-4.99,1.35-6.75L92.24,7.72ZM64.05,48.49c-6.16,0-11.16-5-11.16-11.16s5-11.16,11.16-11.16,11.16,5,11.16,11.16-5,11.16-11.16,11.16Z"/>
+                        </g>
+                    </svg>
+                    <span class="hidden sm:inline-flex px-3 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">Estratégia automatizada</span>
+                </div>
+                
+                <nav class="hidden md:flex items-center space-x-8 text-sm font-medium">
+                    <a href="#comparativo" class="text-gray-600 hover:text-editaliza-blue transition-colors">Vantagens</a>
+                    <a href="#como-funciona" class="text-gray-600 hover:text-editaliza-blue transition-colors">Como funciona</a>
+                    <a href="#metodologia" class="text-gray-600 hover:text-editaliza-blue transition-colors">Metodologia</a>
+                    <a href="#precos" class="text-gray-600 hover:text-editaliza-blue transition-colors">Planos</a>
+                </nav>
+                
+                <a href="https://app.editaliza.com.br/login.html" class="bg-editaliza-blue text-white px-6 py-2 rounded-xl font-medium hover:bg-blue-700 transition-colors">
+                    Entrar
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="gradient-hero pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div data-aos="fade-up" data-aos-duration="800">
+                    <div class="inline-flex items-center px-4 py-2 bg-editaliza-blue/10 text-editaliza-blue rounded-full text-sm font-medium mb-6">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                        Pare de desperdiçar tempo planejando
+                    </div>
+                    
+                    <h1 class="text-4xl lg:text-6xl font-extrabold text-editaliza-dark leading-tight mb-4">
+                        Pare de desperdiçar <span class="text-editaliza-blue">15h/mês</span> planejando estudos
+                    </h1>
+                    
+                    <h2 class="text-xl lg:text-2xl text-gray-600 font-medium mb-6">
+                        Seu edital vira cronograma científico em 3 minutos.
+                    </h2>
+                    
+                    <p class="text-lg text-gray-700 mb-8 leading-relaxed">
+                        Enquanto você atualiza planilhas, outros concurseiros já estudaram 3 capítulos com nosso algoritmo de revisão espaçada.
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 mb-8">
+                        <a href="#precos" class="pulse-glow bg-editaliza-blue text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-all duration-300 text-center">
+                            Começar agora - R$ 19,90/mês
+                        </a>
+                        <button class="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-xl font-semibold hover:border-editaliza-blue hover:text-editaliza-blue transition-colors text-center">
+                            Ver demonstração
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center space-x-6 text-sm text-gray-600">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-editaliza-green mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            2.847 aprovados em 2024
+                        </div>
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 text-editaliza-green mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            89% de retenção
+                        </div>
+                    </div>
+                </div>
+                
+                <div data-aos="fade-up" data-aos-delay="200" class="floating-animation">
+                    <div class="bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <p class="text-sm text-gray-500 uppercase tracking-wide">Economia real</p>
+                                <p class="text-3xl font-bold text-editaliza-dark">R$ 9.600/ano</p>
+                                <p class="text-sm text-gray-600">vs mentoria tradicional</p>
+                            </div>
+                            <div class="bg-editaliza-green/10 text-editaliza-green px-3 py-1 rounded-full text-sm font-medium">
+                                90% menos
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <span class="text-sm font-medium">Setup inicial</span>
+                                <span class="text-editaliza-green font-bold">3 minutos</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <span class="text-sm font-medium">Revisões automáticas</span>
+                                <span class="text-editaliza-green font-bold">7/14/28 dias</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <span class="text-sm font-medium">Retenção de conteúdo</span>
+                                <span class="text-editaliza-green font-bold">90%</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <span class="text-sm font-medium">Reta final inteligente</span>
+                                <span class="text-editaliza-green font-bold">Automática</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefícios Principais -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl lg:text-5xl font-extrabold text-editaliza-dark mb-4">
+                    3 benefícios que mudam o jogo
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Baseado em ciência, não achismo. Resultados comprovados por 2.847 aprovados.
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-12 h-12 bg-editaliza-blue text-white rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-editaliza-dark mb-4">Economia brutal de tempo</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        15h/mês que você gastaria planejando, agora você estuda. Setup em 3 minutos, não 3 horas.
+                    </p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-12 h-12 bg-editaliza-green text-white rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-editaliza-dark mb-4">Método científico, não achismo</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Curva de Ebbinghaus + revisões 7/14/28 dias = você lembra de 90% do conteúdo (vs 20% sem método).
+                    </p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-12 h-12 bg-purple-600 text-white rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-editaliza-dark mb-4">Reta final inteligente</h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Algoritmo detecta últimas 4 semanas e foca nos tópicos de maior peso. Sem pânico, só estratégia.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparativo -->
+    <section id="comparativo" class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl lg:text-5xl font-extrabold text-editaliza-dark mb-4">
+                    Compare e decida
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Veja por que 2.847 concurseiros escolheram a Editaliza em 2024
+                </p>
+            </div>
+            
+            <div class="comparison-table bg-white rounded-2xl shadow-xl overflow-hidden" data-aos="fade-up" data-aos-delay="200">
+                <table class="w-full">
+                    <thead class="bg-editaliza-blue text-white">
+                        <tr>
+                            <th class="px-6 py-4 text-left font-semibold">Critério</th>
+                            <th class="px-6 py-4 text-center font-semibold bg-editaliza-green">Editaliza</th>
+                            <th class="px-6 py-4 text-center font-semibold">Mentoria</th>
+                            <th class="px-6 py-4 text-center font-semibold">Planilha</th>
+                            <th class="px-6 py-4 text-center font-semibold">Sem método</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-6 py-4 font-medium text-gray-900">Preço</td>
+                            <td class="px-6 py-4 text-center bg-green-50 font-semibold text-editaliza-green">R$ 29,90/mês</td>
+                            <td class="px-6 py-4 text-center text-red-600">R$ 800-2000/mês</td>
+                            <td class="px-6 py-4 text-center text-gray-600">R$ 0 (mas 15h/mês perdidas)</td>
+                            <td class="px-6 py-4 text-center text-red-600">Caos mental</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="px-6 py-4 font-medium text-gray-900">Setup inicial</td>
+                            <td class="px-6 py-4 text-center bg-green-50 font-semibold text-editaliza-green">3 min</td>
+                            <td class="px-6 py-4 text-center text-gray-600">Horários fixos</td>
+                            <td class="px-6 py-4 text-center text-red-600">3h+</td>
+                            <td class="px-6 py-4 text-center text-red-600">Reestuda tudo</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 font-medium text-gray-900">Revisões</td>
+                            <td class="px-6 py-4 text-center bg-green-50 font-semibold text-editaliza-green">Automáticas</td>
+                            <td class="px-6 py-4 text-center text-gray-600">Você anota</td>
+                            <td class="px-6 py-4 text-center text-red-600">Manual</td>
+                            <td class="px-6 py-4 text-center text-red-600">Esquece 80%</td>
+                        </tr>
+                        <tr class="bg-gray-50">
+                            <td class="px-6 py-4 font-medium text-gray-900">Adaptação</td>
+                            <td class="px-6 py-4 text-center bg-green-50 font-semibold text-editaliza-green">Adapta ao ritmo</td>
+                            <td class="px-6 py-4 text-center text-gray-600">Genérico</td>
+                            <td class="px-6 py-4 text-center text-red-600">Quebra sempre</td>
+                            <td class="px-6 py-4 text-center text-red-600">Reprova</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 font-medium text-gray-900">Simulados</td>
+                            <td class="px-6 py-4 text-center bg-green-50 font-semibold text-editaliza-green">Inclusos</td>
+                            <td class="px-6 py-4 text-center text-red-600">Cobrados à parte</td>
+                            <td class="px-6 py-4 text-center text-red-600">Sem simulados</td>
+                            <td class="px-6 py-4 text-center text-red-600">Desespero</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Como Funciona -->
+    <section id="como-funciona" class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl lg:text-5xl font-extrabold text-editaliza-dark mb-4">
+                    Como funciona em 3 passos
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    De caos a cronograma científico em menos de 5 minutos
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-3 gap-12">
+                <div class="text-center" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-20 h-20 bg-editaliza-blue text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">
+                        1
+                    </div>
+                    <h3 class="text-2xl font-bold text-editaliza-dark mb-4">Cole seu edital</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        PDF, Word, ou digite manualmente. Nossa IA extrai automaticamente todas as disciplinas e tópicos.
+                    </p>
+                </div>
+                
+                <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-20 h-20 bg-editaliza-green text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">
+                        2
+                    </div>
+                    <h3 class="text-2xl font-bold text-editaliza-dark mb-4">Defina pesos 1-5</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Português peso 5, Atualidades peso 2. O algoritmo balanceia automaticamente seu tempo de estudo.
+                    </p>
+                </div>
+                
+                <div class="text-center" data-aos="fade-up" data-aos-delay="300">
+                    <div class="w-20 h-20 bg-purple-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">
+                        3
+                    </div>
+                    <h3 class="text-2xl font-bold text-editaliza-dark mb-4">Estude e aprove</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Cronograma diário, revisões automáticas, simulados direcionados. Só seguir o plano científico.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-16 text-center" data-aos="fade-up" data-aos-delay="400">
+                <a href="#precos" class="bg-editaliza-blue text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors inline-flex items-center">
+                    Criar meu cronograma agora
+                    <svg class="w-5 h-5 ml-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Metodologia -->
+    <section id="metodologia" class="py-20 px-4 sm:px-6 lg:px-8 bg-editaliza-dark text-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl lg:text-5xl font-extrabold mb-4">
+                    Baseado na Curva de Ebbinghaus
+                </h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Ciência comprovada: sem revisões, você esquece 80% em 1 semana
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div data-aos="fade-right">
+                    <div class="bg-white/10 backdrop-blur rounded-2xl p-8">
+                        <h3 class="text-2xl font-bold mb-6">Revisão espaçada inteligente</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center space-x-4">
+                                <div class="w-8 h-8 bg-editaliza-green rounded-full flex items-center justify-center text-sm font-bold">
+                                    7
+                                </div>
+                                <span>Primeira revisão após 7 dias</span>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="w-8 h-8 bg-editaliza-blue rounded-full flex items-center justify-center text-sm font-bold">
+                                    14
+                                </div>
+                                <span>Segunda revisão após 14 dias</span>
+                            </div>
+                            <div class="flex items-center space-x-4">
+                                <div class="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-sm font-bold">
+                                    28
+                                </div>
+                                <span>Terceira revisão após 28 dias</span>
+                            </div>
+                        </div>
+                        <div class="mt-8 p-4 bg-editaliza-green/20 rounded-lg">
+                            <p class="text-editaliza-green font-semibold">Resultado: 90% de retenção vs 20% sem método</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div data-aos="fade-left">
+                    <div class="space-y-6">
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-6">
+                            <h4 class="font-semibold text-lg mb-2">Reta final automática</h4>
+                            <p class="text-gray-300">Últimas 4 semanas focam 80% do tempo nos tópicos de maior peso</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-6">
+                            <h4 class="font-semibold text-lg mb-2">Simulados direcionados</h4>
+                            <p class="text-gray-300">Questões focadas nas suas deficiências identificadas pelo algoritmo</p>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur rounded-xl p-6">
+                            <h4 class="font-semibold text-lg mb-2">Adaptação contínua</h4>
+                            <p class="text-gray-300">Perdeu um dia? O sistema replaneja automaticamente preservando as revisões</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Depoimentos -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl lg:text-5xl font-extrabold text-editaliza-dark mb-4">
+                    2.847 aprovados não mentem
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Prova social de quem saiu do desespero para a aprovação
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-lg" data-aos="fade-up" data-aos-delay="100">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                        </div>
+                        <span class="ml-2 text-sm text-gray-600">5/5</span>
+                    </div>
+                    <p class="text-gray-700 mb-4">
+                        "Gastava 3h todo domingo refazendo planilha. Com a Editaliza, uso essas 3h para estudar. Fui aprovado no TRT em 4 meses."
+                    </p>
+                    <div class="font-semibold text-editaliza-dark">Carlos M.</div>
+                    <div class="text-sm text-gray-600">Analista TRT-SP, aprovado em 2024</div>
+                </div>
+                
+                <div class="bg-white p-8 rounded-2xl shadow-lg" data-aos="fade-up" data-aos-delay="200">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                        </div>
+                        <span class="ml-2 text-sm text-gray-600">5/5</span>
+                    </div>
+                    <p class="text-gray-700 mb-4">
+                        "As revisões automáticas salvaram minha vida. Lembrava de 90% do conteúdo na prova, coisa que nunca consegui antes."
+                    </p>
+                    <div class="font-semibold text-editaliza-dark">Marina L.</div>
+                    <div class="text-sm text-gray-600">Fiscal SEFAZ-RJ, aprovada em 2024</div>
+                </div>
+                
+                <div class="bg-white p-8 rounded-2xl shadow-lg" data-aos="fade-up" data-aos-delay="300">
+                    <div class="flex items-center mb-4">
+                        <div class="flex text-yellow-400">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L .489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/></svg>
+                        </div>
+                        <span class="ml-2 text-sm text-gray-600">5/5</span>
+                    </div>
+                    <p class="text-gray-700 mb-4">
+                        "Economizei R$ 12.000 que gastaria em mentoria. O resultado foi o mesmo: aprovação no primeiro colocado."
+                    </p>
+                    <div class="font-semibold text-editaliza-dark">Roberto S.</div>
+                    <div class="text-sm text-gray-600">Auditor TCEMG, 1º lugar em 2024</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Preços -->
+    <section id="precos" class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl lg:text-5xl font-extrabold text-editaliza-dark mb-4">
+                    Planos simples, preço honesto
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Todos os recursos inclusos. Sem pegadinhas, sem limitações.
+                </p>
+            </div>
+            
+            <div class="grid lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Mensal -->
+                <div class="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-editaliza-blue transition-colors" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-editaliza-dark mb-2">Mensal</h3>
+                        <div class="mb-4">
+                            <span class="text-4xl font-extrabold text-editaliza-dark">R$ 29,90</span>
+                            <span class="text-gray-600">/mês</span>
+                        </div>
+                        <p class="text-gray-600 mb-6">Flexibilidade total</p>
+                        
+                        <ul class="space-y-3 text-left mb-8">
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 text-editaliza-green mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                                Todos os recursos inclusos
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 text-editaliza-green mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                                Cancele quando quiser
+                            </li>
+                        </ul>
+                        
+                        <a href="https://pay.cakto.com.br/gn77vf5_522579" class="w-full bg-editaliza-blue text-white py-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors block text-center">
+                            Assinar mensal
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Semestral -->
+                <div class="bg-white border-2 border-gray-200 rounded-2xl p-8 hover:border-editaliza-blue transition-colors" data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold text-editaliza-dark mb-2">Semestral</h3>
+                        <div class="mb-4">
+                            <span class="text-4xl font-extrabold text-editaliza-dark">R$ 24,90</span>
+                            <span class="text-gray-600">/mês</span>
+                        </div>
+                        <p class="text-gray-600 mb-6">Economia real</p>
+                        
+                        <ul class="space-y-3 text-left mb-8">
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 text-editaliza-green mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                                Todos os recursos inclusos
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 text-editaliza-green mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                                Fatura a cada 6 meses
+                            </li>
+                        </ul>
+                        
+                        <a href="https://pay.cakto.com.br/38n3co4_538306" class="w-full bg-editaliza-blue text-white py-4 rounded-xl font-semibold hover:bg-blue-700 transition-colors block text-center">
+                            Assinar semestral
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Anual (Destacado) -->
+                <div class="bg-gradient-to-br from-editaliza-blue to-blue-700 text-white border-2 border-editaliza-blue rounded-2xl p-8 relative transform lg:scale-105" data-aos="fade-up" data-aos-delay="300">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-editaliza-green text-white px-4 py-1 rounded-full text-sm font-medium">
+                            Melhor oferta
+                        </span>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold mb-2">Anual</h3>
+                        <div class="mb-4">
+                            <span class="text-4xl font-extrabold">R$ 19,90</span>
+                            <span className="text-blue-100">/mês</span>
+                        </div>
+                        <p class="text-blue-100 mb-6">Melhor oferta (2 meses grátis)</p>
+                        
+                        <ul class="space-y-3 text-left mb-8">
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 text-editaliza-green mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                                Todos os recursos inclusos
+                            </li>
+                            <li class="flex items-center">
+                                <svg class="w-5 h-5 text-editaliza-green mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                </svg>
+                                Fatura anual
+                            </li>
+                        </ul>
+                        
+                        <a href="https://pay.cakto.com.br/sig5am8_538314" class="w-full bg-white text-editaliza-blue py-4 rounded-xl font-semibold hover:bg-gray-100 transition-colors block text-center">
+                            Assinar anual
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12" data-aos="fade-up" data-aos-delay="400">
+                <p class="text-gray-600">
+                    <span class="font-semibold">Garantia:</span> Todos os planos incluem os mesmos recursos. Escolha só o tempo de compromisso.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16" data-aos="fade-up">
+                <h2 class="text-3xl lg:text-5xl font-extrabold text-editaliza-dark mb-4">
+                    Perguntas frequentes
+                </h2>
+                <p class="text-xl text-gray-600">
+                    Decida sem enrolação. Aqui estão as dúvidas reais dos concurseiros.
+                </p>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="bg-white rounded-2xl p-8" data-aos="fade-up" data-aos-delay="100">
+                    <h3 class="text-xl font-bold text-editaliza-dark mb-4 flex items-center">
+                        <svg class="w-6 h-6 text-editaliza-blue mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                        </svg>
+                        É só mais um app de questões?
+                    </h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Não. É um motor de planejamento que transforma seu edital em cronograma científico com revisões automáticas. Questões são só uma das ferramentas.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-8" data-aos="fade-up" data-aos-delay="200">
+                    <h3 class="text-xl font-bold text-editaliza-dark mb-4 flex items-center">
+                        <svg class="w-6 h-6 text-editaliza-blue mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                        </svg>
+                        Funciona para concursos estaduais/municipais?
+                    </h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Sim. Cole qualquer edital PDF e defina pesos 1-5. O algoritmo faz o resto. Já aprovamos gente em TJPE, SEFAZ-RJ, TRT-SP e centenas de outros.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-8" data-aos="fade-up" data-aos-delay="300">
+                    <h3 class="text-xl font-bold text-editaliza-dark mb-4 flex items-center">
+                        <svg class="w-6 h-6 text-editaliza-blue mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                        </svg>
+                        E se eu perder dias de estudo?
+                    </h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Botão "Replanejar" redistribui tudo preservando suas revisões críticas. O sistema é feito para a vida real, não para a perfeição.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-2xl p-8" data-aos="fade-up" data-aos-delay="400">
+                    <h3 class="text-xl font-bold text-editaliza-dark mb-4 flex items-center">
+                        <svg class="w-6 h-6 text-editaliza-blue mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 8a3.001 3.001 0 01-2 2.83V11a1 1 0 11-2 0v-1a1 1 0 011-1 1 1 0 100-2zm0 8a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                        </svg>
+                        Posso pausar nas férias?
+                    </h3>
+                    <p class="text-gray-700 leading-relaxed">
+                        Sim. Pausa, retoma, replaneja. Sem perder progresso. Concurso é uma maratona, não um sprint.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Final -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-editaliza-blue to-blue-700 text-white">
+        <div class="max-w-4xl mx-auto text-center" data-aos="fade-up">
+            <h2 class="text-3xl lg:text-5xl font-extrabold mb-6">
+                Pare de desperdiçar tempo. Comece a aprovar.
+            </h2>
+            <p class="text-xl text-blue-100 mb-8 leading-relaxed">
+                2.847 aprovados em 2024 não podem estar errados. Seu cronograma científico está a 3 minutos de distância.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+                <a href="#precos" class="pulse-glow bg-editaliza-green text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-green-600 transition-all duration-300">
+                    Criar cronograma agora
+                </a>
+                <a href="https://app.editaliza.com.br/login.html" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-editaliza-blue transition-colors">
+                    Já tenho conta
+                </a>
+            </div>
+            
+            <div class="flex items-center justify-center space-x-6 text-sm text-blue-200">
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                    Setup em 3 minutos
+                </div>
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                    Cancele quando quiser
+                </div>
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                    4.8/5 estrelas
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-editaliza-dark text-white py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-4 gap-8 mb-8">
+                <div class="lg:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <svg class="h-8 w-auto" viewBox="0 0 510.24 101.5" xmlns="http://www.w3.org/2000/svg" aria-label="Editaliza">
+                            <g fill="white">
+                                <path d="M148.68,17.22l49.51-.04v9.32l-39.51.03v17.97l37.97-.03v9.22l-37.97.03v20.83l39.51-.03v9.22l-49.51.04V17.22Z"/>
+                                <path d="M210.98,77.75c-4.49-4.5-6.73-10.65-6.73-18.44s2.13-13.7,6.39-18.26c4.26-4.57,10.17-6.85,17.74-6.86,7.5,0,13.55,2.59,18.17,7.78v-24.82h9.23v66.56h-9.23v-5.79c-2.24,2.22-4.82,3.87-7.74,4.95-2.92,1.08-6.04,1.62-9.37,1.62-7.82,0-13.97-2.24-18.46-6.74Zm31.53-5.21c2.76-2.57,4.13-6.39,4.13-11.46v-3.61c0-4.56-1.52-8.19-4.57-10.89-3.04-2.69-7.16-4.04-12.35-4.03-4.74,0-8.57,1.4-11.49,4.19-2.92,2.79-4.37,7.01-4.37,12.65s1.44,9.89,4.33,12.74c2.88,2.85,6.95,4.27,12.21,4.27,5.32,0,9.36-1.29,12.11-3.86Z"/>
+                                <path d="M264.04,17.13h9.42v11.21h-9.42V17.13Zm.1,18.83h9.23v47.73h-9.23V35.96Z"/>
+                                <path d="M293.7,80.3c-2.34-2.76-3.61-6.8-3.8-12.12v-23.77h-8.27v-8.27h8.27v-17.69h9.32v17.68h15.86v8.26h-15.86v24.55c0,4.69,2.66,7.03,7.98,7.03,2.18,0,4.65-.32,7.4-.96l2.21,7.32c-2.31.76-4.31,1.3-6.01,1.62-1.7.32-3.48.48-5.34.48-5.51,0-9.44-1.37-11.78-4.13Z"/>
+                                <path d="M326.96,80.36c-3.43-2.57-5.14-6.32-5.14-11.26,0-6.09,2.55-10.19,7.64-12.32,5.1-2.13,12.03-3.26,20.81-3.39l9.04-.2v-1.24c0-3.55-.95-6.05-2.84-7.51-1.89-1.46-5.14-2.18-9.76-2.18-4.1,0-7.21.67-9.32,2-2.12,1.33-3.24,3.58-3.36,6.75h-9.42c.13-5.89,2.05-10.17,5.77-12.84,3.72-2.67,9.16-4.03,16.34-4.1,7.69.06,13.25,1.57,16.68,4.55,3.43,2.98,5.14,7.51,5.14,13.6v31.38h-9.13v-7.03c-4.55,5.08-10.64,7.62-18.27,7.62-6.02,0-10.75-1.28-14.18-3.84Zm27.74-6.72c3.08-1.97,4.61-4.6,4.61-7.9v-5.8l-8.84.29c-7.05.26-12.03,1.07-14.95,2.44-2.92,1.37-4.37,3.51-4.37,6.42,0,2.41.96,4.26,2.88,5.56,1.92,1.3,4.84,1.95,8.75,1.94,4.87,0,8.84-.99,11.92-2.96Z"/>
+                                <path d="M377.19,17.04h9.23v66.56h-9.23V17.04Z"/>
+                                <path d="M394.68,17.02h9.42v11.21h-9.42V17.02Zm.1,18.83h9.23v47.73h-9.23V35.85Z"/>
+                                <path d="M412.28,76.83l30.57-33.12-29.9.02v-7.7l42.4-.03v6.56l-30.38,32.93,30.09-.02v8.08l-42.78.03v-6.75Z"/>
+                                <path d="M468.66,80.25c-3.43-2.57-5.14-6.32-5.14-11.26,0-6.09,2.55-10.19,7.64-12.32,5.1-2.13,12.03-3.26,20.81-3.39l9.04-.2v-1.24c0-3.55-.95-6.05-2.84-7.51-1.89-1.46-5.14-2.18-9.76-2.18-4.1,0-7.21.67-9.32,2-2.12,1.33-3.24,3.58-3.36,6.75h-9.42c.13-5.89,2.05-10.17,5.77-12.84,3.72-2.67,9.16-4.03,16.34-4.1,7.69.06,13.25,1.57,16.68,4.55,3.43,2.98,5.14,7.51,5.14,13.6v31.38h-9.13v-7.03c-4.55,5.08-10.64,7.62-18.27,7.62-6.02,0-10.75-1.28-14.18-3.84Zm27.73-6.72c3.08-1.97,4.61-4.6,4.61-7.9v-5.8l-8.84.29c-7.05.26-12.03,1.07-14.95,2.44-2.92,1.37-4.37,3.51-4.37,6.42,0,2.41.96,4.26,2.88,5.56,1.92,1.3,4.84,1.95,8.75,1.94,4.87,0,8.84-.99,11.92-2.96Z"/>
+                            </g>
+                            <g>
+                                <path fill="#0528f2" d="M58.62,101.5s-12.21-26.73-43.18-21.61v-24.04s29.74,1.62,40.51,31.49c1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                                <path fill="#1ad937" d="M58.62,101.5c-6.75-32.15-28.77-42.36-43.18-45.57-3.53-.79-6.61-1.16-8.89-1.33-2.37-.18-4.2-2.14-4.2-4.52,0-2.73,2.38-4.84,5.09-4.5,11.47,1.44,39.07,8.39,48.52,41.75,1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                                <path fill="#0528f2" d="M69.48,101.5s12.21-27.94,43.18-22.83v-22.83s-29.74,1.62-40.51,31.49c-1.21,4.27-2.12,8.98-2.67,14.17Z"/>
+                                <path fill="#1ad937" d="M69.48,101.5c6.75-32.15,28.77-42.36,43.18-45.57,3.53-.79,6.61-1.16,8.89-1.33,2.37-.18,4.2-2.14,4.2-4.52,0-2.73-2.38-4.84-5.09-4.5-11.47,1.44-39.07,8.39-48.52,41.75,1.21,4.27,2.12,8.98,2.67,14.17Z"/>
+                                <path fill="#0528f2" d="M92.24,7.72C83.54,2.57,73.8,0,64.05,0c-9.75,0-19.49,2.57-28.19,7.72L1.79,27.87c-2.97,1.76-2.07,6.28,1.35,6.75,12,1.65,31.51,6.67,49.09,21.75,1.7,1.46,3.6,2.57,5.6,3.33,3.99,1.52,8.42,1.52,12.41,0,2-.76,3.9-1.87,5.6-3.33,17.59-15.08,37.1-20.1,49.09-21.75,3.42-.47,4.33-4.99,1.35-6.75L92.24,7.72ZM64.05,48.49c-6.16,0-11.16-5-11.16-11.16s5-11.16,11.16-11.16,11.16,5,11.16,11.16-5,11.16-11.16,11.16Z"/>
+                            </g>
+                        </svg>
+                        <span class="text-xl font-bold">Editaliza</span>
+                    </div>
+                    <p class="text-gray-300 mb-4 max-w-md">
+                        Transformamos editais em cronogramas científicos. 2.847 aprovados em 2024 comprovam: método funciona.
+                    </p>
+                    <div class="text-sm text-gray-400">
+                        <p>CNPJ: 00.000.000/0001-00</p>
+                        <p>© 2025 Editaliza. Todos os direitos reservados.</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Produto</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="#como-funciona" class="hover:text-white transition-colors">Como funciona</a></li>
+                        <li><a href="#metodologia" class="hover:text-white transition-colors">Metodologia</a></li>
+                        <li><a href="#precos" class="hover:text-white transition-colors">Preços</a></li>
+                        <li><a href="https://app.editaliza.com.br/login.html" class="hover:text-white transition-colors">Login</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-semibold mb-4">Suporte</h4>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><a href="mailto:suporte@editaliza.com.br" class="hover:text-white transition-colors">suporte@editaliza.com.br</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Termos de Uso</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Política de Privacidade</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 pt-8 text-center text-gray-400">
+                <p>Feito com dedicação para concurseiros que querem mais que sonhar: querem aprovar.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Initialize AOS
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Mobile menu toggle (if needed)
+        // Add any additional interactive functionality here
+    </script>
+</body>
+</html>
