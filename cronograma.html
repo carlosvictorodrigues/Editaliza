@@ -112,7 +112,7 @@
     <!-- Modal para Exportar para Calendário -->
     <div id="calendarModal" class="modal-overlay hidden fixed inset-0 bg-editaliza-black bg-opacity-70 z-30 flex items-center justify-center p-4 opacity-0">
         <div class="modal-container bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform scale-95">
-            <h2 class="text-2xl font-bold text-editaliza-black">Exportar para Agenda</h2>
+            <h2 class="text-2xl font-bold text-editaliza-black">Exportar para Calendário</h2>
             <p class="mt-2 text-gray-600">Escolha uma opção de exportação para os próximos 7 dias.</p>
             <div class="mt-6 space-y-4">
                 <div>
@@ -157,7 +157,7 @@
                     <button data-filter="all" class="filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 transition-colors">Tudo</button>
                 </div>
                 <button id="exportButton" class="btn-secondary w-full sm:w-auto">
-                    Exportar Semana para Agenda
+                    Exportar para Calendário
                 </button>
             </div>
         </div>
@@ -583,55 +583,96 @@
         function handleExport() {
             const calendarModal = document.getElementById('calendarModal');
             const linksContainer = document.getElementById('calendarLinksContainer');
-            linksContainer.innerHTML = '';
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const weekDates = Array.from({ length: 7 }, (_, i) => {
-                const date = new Date(today);
-                date.setDate(today.getDate() + i);
-                return date;
-            }).filter(date => fullSchedule[date.toISOString().split('T')[0]]);
             
-            if (weekDates.length === 0) {
-                app.showToast("Nenhuma tarefa para exportar nos próximos 7 dias.", "info");
-                return;
-            }
-
-            weekDates.forEach(date => {
-                const dateStr = date.toISOString().split('T')[0];
-                const sessions = fullSchedule[dateStr];
-                const text = encodeURIComponent('Editaliza: Estudos do Dia');
-                const details = encodeURIComponent(sessions.map(s => `• ${s.subject_name}: ${s.topic_description}`).join('\n'));
-                const startDate = dateStr.replace(/-/g, '');
-                const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${startDate}/${startDate}&details=${details}`;
+            // Adicionar seletor de período
+            linksContainer.innerHTML = `
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Selecione o período:</label>
+                    <select id="exportPeriod" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-editaliza-blue">
+                        <option value="7">Próximos 7 dias</option>
+                        <option value="15">Próximos 15 dias</option>
+                        <option value="30">Próximos 30 dias</option>
+                    </select>
+                </div>
+                <div id="exportLinks" class="space-y-2"></div>
+            `;
+            
+            const exportLinks = document.getElementById('exportLinks');
+            const periodSelect = document.getElementById('exportPeriod');
+            
+            function generateExportLinks(days) {
+                exportLinks.innerHTML = '';
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const dates = Array.from({ length: days }, (_, i) => {
+                    const date = new Date(today);
+                    date.setDate(today.getDate() + i);
+                    return date;
+                }).filter(date => fullSchedule[date.toISOString().split('T')[0]]);
                 
-                const link = document.createElement('a');
-                link.href = calendarUrl;
-                link.target = '_blank';
-                link.rel = 'noopener noreferrer';
-                link.className = 'block w-full text-center bg-blue-50 text-editaliza-blue font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:bg-blue-100';
-                link.textContent = `Adicionar dia ${date.toLocaleDateString('pt-BR')}`;
-                linksContainer.appendChild(link);
-            });
-
-            document.getElementById('downloadIcsButton').onclick = () => {
-                let icsContent = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Editaliza//App v1.0//PT'];
-                weekDates.forEach(date => {
+                if (dates.length === 0) {
+                    exportLinks.innerHTML = `<p class="text-center text-gray-500">Nenhuma tarefa para exportar nos próximos ${days} dias.</p>`;
+                    return dates;
+                }
+                
+                // Mostrar apenas primeiros 7 dias nos links individuais
+                const displayDates = dates.slice(0, 7);
+                displayDates.forEach(date => {
                     const dateStr = date.toISOString().split('T')[0];
-                    fullSchedule[dateStr].forEach(session => {
-                        const startDate = dateStr.replace(/-/g, '');
-                        icsContent.push('BEGIN:VEVENT', `UID:${session.id}@editaliza.com`, `DTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '')}Z`, `DTSTART;VALUE=DATE:${startDate}`, `SUMMARY:Estudar: ${session.subject_name || session.session_type}`, `DESCRIPTION:${session.topic_description || 'Revisão geral.'}`, 'END:VEVENT');
-                    });
+                    const sessions = fullSchedule[dateStr];
+                    const text = encodeURIComponent('Editaliza: Estudos do Dia');
+                    const details = encodeURIComponent(sessions.map(s => `• ${s.subject_name}: ${s.topic_description}`).join('\n'));
+                    const startDate = dateStr.replace(/-/g, '');
+                    const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${startDate}/${startDate}&details=${details}`;
+                    
+                    const link = document.createElement('a');
+                    link.href = calendarUrl;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    link.className = 'block w-full text-center bg-blue-50 text-editaliza-blue font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:bg-blue-100';
+                    link.textContent = `Adicionar dia ${date.toLocaleDateString('pt-BR')}`;
+                    exportLinks.appendChild(link);
                 });
-                icsContent.push('END:VCALENDAR');
-                const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `cronograma_editaliza.ics`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
+                
+                if (dates.length > 7) {
+                    const moreInfo = document.createElement('p');
+                    moreInfo.className = 'text-center text-sm text-gray-500 mt-2';
+                    moreInfo.textContent = `... e mais ${dates.length - 7} dias disponíveis no arquivo .ics`;
+                    exportLinks.appendChild(moreInfo);
+                }
+                
+                return dates;
+            }
+            
+            // Gerar links iniciais para 7 dias
+            let exportDates = generateExportLinks(7);
+            
+            // Atualizar ao mudar período
+            periodSelect.addEventListener('change', (e) => {
+                exportDates = generateExportLinks(parseInt(e.target.value));
+                updateDownloadButton();
+            });
+            
+            function updateDownloadButton() {
+                document.getElementById('downloadIcsButton').onclick = () => {
+                    let icsContent = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Editaliza//App v1.0//PT'];
+                    exportDates.forEach(date => {
+                        const dateStr = date.toISOString().split('T')[0];
+                        fullSchedule[dateStr].forEach(session => {
+                            const startDate = dateStr.replace(/-/g, '');
+                            icsContent.push('BEGIN:VEVENT', `UID:${session.id}@editaliza.com`, `DTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '')}Z`, `DTSTART;VALUE=DATE:${startDate}`, `SUMMARY:Estudar: ${session.subject_name || session.session_type}`, `DESCRIPTION:${session.topic_description || 'Revisão geral.'}`, 'END:VEVENT');
+                        });
+                    });
+                    icsContent.push('END:VCALENDAR');
+                    const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `editaliza_cronograma_${periodSelect.value}dias.ics`;
+                    link.click();
+                };
+            }
+            
+            updateDownloadButton();
 
             calendarModal.classList.remove('hidden');
             setTimeout(() => { calendarModal.classList.remove('opacity-0'); calendarModal.querySelector('.modal-container').classList.remove('scale-95'); }, 10);

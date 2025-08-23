@@ -707,7 +707,7 @@
             try {
                 console.log('📥 Carregando dados do perfil...');
                 app.showSpinner();
-                const profile = await app.apiFetch('/api/profile');
+                const profile = await app.apiFetch('/api/users/profile');
                 console.log('📋 Dados do perfil recebidos:', profile);
                 
                 // Dados pessoais básicos
@@ -1149,7 +1149,7 @@
                 console.log('💾 Enviando dados do perfil:', updateData);
                 console.log('📤 Dados sendo enviados para o servidor:', JSON.stringify(updateData, null, 2));
                 
-                const response = await app.apiFetch('/api/profile', {
+                const response = await app.apiFetch('/api/users/profile', {
                     method: 'PATCH',
                     body: JSON.stringify(updateData)
                 });

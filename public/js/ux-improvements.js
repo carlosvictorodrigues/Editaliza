@@ -21,7 +21,7 @@ const UXImprovements = {
         
         try {
             // Buscar preview do replanejamento
-            const preview = await app.apiFetch(`/api/plans/${planId}/replan-preview`);
+            const preview = await app.apiFetch(`/api/plans/${planId}/replan_preview`);
             
             modal.innerHTML = `
                 <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">

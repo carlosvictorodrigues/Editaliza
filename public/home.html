@@ -35,10 +35,10 @@
     <link href="css/footer.css" rel="stylesheet">
     <!-- Theme system removed - light mode only -->
     <!-- SCRIPTS CENTRALIZADOS -->
-    <script src="js/app.js"></script>
     <script src="js/components.js"></script>
-    <script src="js/checklist.js"></script>
     <script src="js/timer.js"></script>
+    <script src="js/checklist.js"></script>
+    <script src="js/app.js"></script>
     <script src="js/modules/gamification.js"></script>
     <script src="js/modules/study-goals-notifications.js"></script>
     <script src="js/modules/contextual-notifications.js" type="module"></script>
@@ -277,7 +277,6 @@
             background: #94a3b8;
         }
     </style>
-    <link rel="stylesheet" href="/css/theme-utilities.css">
     <!-- Theme toggle removed - light mode only -->
 </head>
 <body class="bg-slate-50 text-gray-800">
@@ -749,6 +748,8 @@
                         const diffTime = examDate - today;
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                         document.getElementById('daysToExamHero').textContent = diffDays > 0 ? `${diffDays}` : 'Hoje!';
+                    } else {
+                        document.getElementById('daysToExamHero').textContent = '--';
                     }
 
                     document.getElementById('generalProgressHero').textContent = `${progress.percentage || 0}%`;
@@ -889,7 +890,7 @@
             async function updateStudyStatistics(planId) {
                 try {
                     // Chamar o endpoint correto do backend para obter as estatísticas
-                    const stats = await app.apiFetch(`/plans/${planId}/statistics`);
+                    const stats = await app.apiFetch(`/api/plans/${planId}/statistics`);
                     console.log('📊 Estatísticas recebidas do servidor:', stats);
                     
                     // Update Total de Dias
@@ -989,7 +990,7 @@
                         console.warn('❌ activePlanId não definido para verificar tarefas atrasadas');
                         return;
                     }
-                    const overdueData = await app.apiFetch(`/plans/${app.state.activePlanId}/overdue_check`);
+                    const overdueData = await app.apiFetch(`/api/plans/${app.state.activePlanId}/overdue_check`);
                     if (overdueData.count > 0) {
                         components.renderOverdueAlert(overdueData);
                         addReplanListener();
@@ -1009,7 +1010,7 @@
                     if (!app.state.activePlanId) return;
                     
                     // Obter dados do plano para verificar se está no modo Reta Final
-                    const plan = await app.apiFetch(`/plans/${app.state.activePlanId}`);
+                    const plan = await app.apiFetch(`/api/plans/${app.state.activePlanId}`);
                     
                     if (plan.reta_final_mode) {
                         // Mostrar indicador do Modo Reta Final
@@ -1017,7 +1018,7 @@
                         indicator.classList.remove('hidden');
                         
                         // Carregar exclusões
-                        const exclusionsData = await app.apiFetch(`/plans/${app.state.activePlanId}/exclusions`);
+                        const exclusionsData = await app.apiFetch(`/api/plans/${app.state.activePlanId}/exclusions`);
                         
                         if (exclusionsData.totalExclusions > 0) {
                             // Mostrar contador de exclusões
@@ -1052,7 +1053,7 @@
                         `;
                         
                         try {
-                            const response = await app.apiFetch(`/plans/${app.state.activePlanId}/replan`, {
+                            const response = await app.apiFetch(`/api/plans/${app.state.activePlanId}/replan`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' }
                             });
@@ -1098,7 +1099,7 @@
                             `;
                             
                             try {
-                                const planData = await app.apiFetch(`/plans/${app.state.activePlanId}/overdue_details`);
+                                const planData = await app.apiFetch(`/api/plans/${app.state.activePlanId}/overdue_details`);
                                 if (planData && planData.replanStrategy) {
                                     detailsContent.innerHTML = `
                                         <div class="space-y-4">
@@ -1301,7 +1302,7 @@
                             localStorage.setItem(app.config.planKey, newPlanId);
                             
                             // Atualizar indicador de Reta Final dinamicamente
-                            const newPlan = await app.apiFetch(`/plans/${newPlanId}`);
+                            const newPlan = await app.apiFetch(`/api/plans/${newPlanId}`);
                             const isRetaFinalMode = newPlan.reta_final_mode === 1 || newPlan.reta_final_mode === true || newPlan.reta_final_mode === '1';
                             components.renderRetaFinalIndicator(isRetaFinalMode);
                             

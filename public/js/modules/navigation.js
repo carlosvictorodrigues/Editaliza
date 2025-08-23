@@ -4,7 +4,7 @@
  * @version 2.0 - Modularized for performance
  */
 
-const Navigation = {
+export const Navigation = {
     // Cache do avatar do usuário para evitar múltiplas requisições
     userAvatarCache: null,
     userAvatarCacheTime: null,
@@ -22,7 +22,7 @@ const Navigation = {
 
         try {
             console.log('🔄 Carregando avatar do servidor...');
-            const userProfile = await window.app.apiFetch('/users/profile');
+            const userProfile = await window.app.apiFetch('/api/users/profile');
             
             // Check if user has Google avatar or local avatar
             let avatar = null;
@@ -76,7 +76,7 @@ const Navigation = {
             { href: 'faq.html', text: 'FAQ' }
         ];
 
-        const linksHtml = links.map(link => {
+        let linksHtml = links.map(link => {
             if (link.dropdown) {
                 // Dropdown menu
                 const dropdownItems = link.dropdown.map(item => 
@@ -301,7 +301,7 @@ const Navigation = {
             { id: 'navSettings', href: `plan_settings.html?id=${planId}`, text: 'Configurar Plano' }
         ];
 
-        const linksHtml = links.map(link => {
+        let linksHtml = links.map(link => {
             const isActive = activePage === link.href.split('?')[0];
             const activeClass = 'bg-editaliza-blue text-white cursor-default';
             const defaultClass = 'bg-white hover:bg-gray-100 text-gray-700';

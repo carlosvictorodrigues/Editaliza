@@ -172,16 +172,8 @@ const StudyChecklist = {
                 </div>
             </div>
 
-            <div class="mt-6 pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="flex space-x-3">
-                    <button onclick="StudyChecklist.markAsCompleted()" class="btn-primary py-3 px-6 text-sm font-medium flex items-center space-x-2">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span>Marcar como Concluído</span>
-                    </button>
-                    <button onclick="StudyChecklist.close()" class="btn-secondary py-3 px-6 text-sm font-medium">Fechar</button>
-                </div>
+            <div class="mt-6 pt-6 border-t flex items-center justify-end">
+                <button onclick="StudyChecklist.close()" class="btn-secondary py-3 px-6 text-sm font-medium">Fechar</button>
             </div>
         `;
     },
@@ -211,7 +203,7 @@ const StudyChecklist = {
         const updateSessionData = app.debounce(async (field, value) => {
             try {
                 // CORREÇÃO 3: Usar endpoint correto e validar dados
-                const endpoint = `/schedules/sessions/${this.session.id}`;
+                const endpoint = `/api/sessions/${this.session.id}`;
                 const payload = { [field]: value };
                 console.log('Salvando dados da sessão:', { sessionId: this.session.id, field, value });
                 
@@ -265,20 +257,24 @@ const StudyChecklist = {
 
         if (statusElement) {
             statusElement.addEventListener('change', async (e) => {
-                const newStatus = e.target.checked ? 'Concluído' : 'Pendente';
-                try {
-                    // CORREÇÃO 3: Usar endpoint correto
-                    const endpoint = `/schedules/sessions/${this.session.id}`;
-                    console.log('Atualizando status da sessão:', { sessionId: this.session.id, status: newStatus });
-                    
-                    await app.apiFetch(endpoint, {
-                        method: 'PATCH',
-                        body: JSON.stringify({ 'status': newStatus })
-                    });
-                    console.log('Status atualizado com sucesso');
-                } catch (error) {
-                    console.error('Erro ao atualizar status:', error);
-                    app.showToast('Erro ao salvar status: ' + error.message, 'error');
+                if (e.target.checked) {
+                    // Chamar markAsCompleted quando checkbox for marcado
+                    await this.markAsCompleted();
+                } else {
+                    // Se desmarcar, apenas atualizar status para Pendente
+                    try {
+                        const endpoint = `/api/sessions/${this.session.id}`;
+                        console.log('Atualizando status da sessão para Pendente:', this.session.id);
+                        
+                        await app.apiFetch(endpoint, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ 'status': 'Pendente' })
+                        });
+                        console.log('Status atualizado para Pendente');
+                        app.showToast('Sessão marcada como pendente', 'info');
+                    } catch (error) {
+                        console.error('Erro ao atualizar status:', error);
+                        app.showToast('Erro ao salvar status: ' + error.message, 'error');
                     e.target.checked = !e.target.checked; // Reverter checkbox em caso de erro
                     return;
                 }
@@ -432,7 +428,7 @@ const StudyChecklist = {
             }
             
             // Save to database
-            const endpoint = `/schedules/sessions/${sessionId}`;
+            const endpoint = `/api/sessions/${sessionId}`;
             await app.apiFetch(endpoint, {
                 method: 'PATCH',
                 body: JSON.stringify(updateData)

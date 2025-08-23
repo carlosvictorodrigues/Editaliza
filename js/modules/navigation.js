@@ -22,7 +22,7 @@ export const Navigation = {
 
         try {
             console.log('🔄 Carregando avatar do servidor...');
-            const userProfile = await window.app.apiFetch('/users/profile');
+            const userProfile = await window.app.apiFetch('/api/users/profile');
             
             // Check if user has Google avatar or local avatar
             let avatar = null;
