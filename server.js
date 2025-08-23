@@ -423,7 +423,7 @@ passport.deserializeUser(async (id, done) => {
 // ============================================================================
 const { validateFilePath, createSafeError, securityLog } = require('./src/utils/security');
 
-app.post('/profile/upload-photo', authenticateToken, (req, res) => {
+app.post('/api/profile/upload-photo', authenticateToken, (req, res) => {
     upload.single('photo')(req, res, async (err) => {
         if (err) {
             securityLog('upload_error', { error: err.message }, req.user.id, req);
@@ -735,7 +735,7 @@ const dbRun = (sql, params = []) => new Promise((resolve, reject) => db.run(sql,
 // Rota para registrar um novo usuário
 // LEGACY AUTH ROUTES - COMMENTED OUT (Now using modular /auth routes)
 /*
-app.post('/register', 
+app.post('/api/register', 
     validators.email,
     validators.password,
     body('name').optional().isString().isLength({ max: 100 }).withMessage('Nome muito longo'),
@@ -770,17 +770,17 @@ const userRoutes = require('./src/routes/userRoutes');
 const scheduleRoutes = require('./src/routes/scheduleRoutes');
 
 // Use modular routes
-app.use('/plans', planRoutes);
-app.use('/auth', authRoutes);
-app.use('/users', userRoutes);
-app.use('/schedules', scheduleRoutes);
+app.use('/api/plans', planRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/schedules', scheduleRoutes);
 
 // ============================================================================
 // LEGACY ROUTES - TO BE REFACTORED
 // ============================================================================
 
 // Rota para login de usuário
-app.post('/login', 
+app.post('/api/login', 
     loginLimiter,
     validators.email,
     validators.password,
@@ -874,7 +874,7 @@ app.get('/auth/session-token', (req, res) => {
 });
 
 // Endpoint para obter token CSRF (para testes e desenvolvimento)
-app.get('/csrf-token', (req, res) => {
+app.get('/api/csrf-token', (req, res) => {
     // Gerar token CSRF se não existir na sessão
     if (!req.session.csrfToken) {
         req.session.csrfToken = generateCSRFToken();
@@ -900,7 +900,7 @@ app.get('/auth/google/status', authenticateToken, (req, res) => {
 });
 
 // Rota para logout
-app.post('/logout', authenticateToken, (req, res) => {
+app.post('/api/logout', authenticateToken, (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             return res.status(500).json({ error: 'Erro ao fazer logout' });
@@ -910,7 +910,7 @@ app.post('/logout', authenticateToken, (req, res) => {
 });
 
 // Rota para solicitar redefinição de senha
-app.post('/request-password-reset',
+app.post('/api/request-password-reset',
     createPasswordRecoveryRateLimit(), // Add rate limiting middleware
     validators.email,
     handleValidationErrors,
@@ -985,7 +985,7 @@ app.post('/request-password-reset',
 );
 
 // Rota para redefinir a senha com um token
-app.post('/reset-password',
+app.post('/api/reset-password',
     body('token').isLength({ min: 32, max: 64 }).withMessage('Token inválido'),
     validators.password,
     handleValidationErrors,
@@ -1008,7 +1008,7 @@ app.post('/reset-password',
 
 // --- ROTAS DE PERFIL DO USUÁRIO ---
 // Rota para obter dados do perfil do usuário logado
-app.get('/profile', authenticateToken, async (req, res) => {
+app.get('/api/profile', authenticateToken, async (req, res) => {
     try {
         const user = await dbGet(`SELECT 
             id, email, name, profile_picture, phone, whatsapp, created_at,
@@ -1059,7 +1059,7 @@ app.get('/profile', authenticateToken, async (req, res) => {
 });
 
 // Rota para atualizar dados do perfil (completo com todos os campos)
-app.patch('/profile', 
+app.patch('/api/profile', 
     authenticateToken,
     // Basic profile validations
     body('name').optional().isString().isLength({ min: 1, max: 100 }).withMessage('Nome deve ter entre 1 e 100 caracteres'),
@@ -1241,7 +1241,7 @@ app.patch('/profile',
 
 
 // --- ROTAS DE TESTE E DEBUG ---
-app.get('/test-db', authenticateToken, async (req, res) => {
+app.get('/api/test-db', authenticateToken, async (req, res) => {
     try {
         console.log(`[DEBUG TEST] Testando conexão do banco...`);
         
@@ -1318,14 +1318,14 @@ app.post('/api/plans',
     }
 );
 
-app.get('/api/plans/:id', 
+app.get('/api/plans/:planId', 
     authenticateToken,
-    validators.numericId('id'),
+    validators.numericId('planId'),
     handleValidationErrors,
     async (req, res) => {
         try {
-            console.log('🔍 Buscando plano:', req.params.id, 'para usuário:', req.user.id);
-            const row = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [req.params.id, req.user.id]);
+            console.log('🔍 Buscando plano:', req.params.planId, 'para usuário:', req.user.id);
+            const row = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [req.params.planId, req.user.id]);
             
             if (!row) {
                 console.log('❌ Plano não encontrado ou não autorizado');
@@ -1349,7 +1349,7 @@ app.get('/api/plans/:id',
             console.error('❌ ERRO DETALHADO ao buscar plano:', {
                 message: error.message,
                 stack: error.stack,
-                planId: req.params.id,
+                planId: req.params.planId,
                 userId: req.user?.id
             });
             return res.status(500).json({ 'error': 'Erro ao buscar plano: ' + error.message });
@@ -1417,7 +1417,7 @@ app.patch('/api/plans/:planId/settings',
 
 // --- ROTAS DE DISCIPLINAS E TÓPICOS --- - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/planRoutes.js
-app.get('/plans/:planId/subjects', 
+app.get('/api/plans/:planId/subjects', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -1436,7 +1436,7 @@ app.get('/plans/:planId/subjects',
 ); 
 END LEGACY ROUTE COMMENT */
 
-app.post('/plans/:planId/subjects_with_topics', 
+app.post('/api/plans/:planId/subjects_with_topics', 
     authenticateToken,
     validators.numericId('planId'),
     validators.text('subject_name', 1, 200),
@@ -1477,7 +1477,7 @@ app.post('/plans/:planId/subjects_with_topics',
     }
 );
 
-app.patch('/subjects/:subjectId', 
+app.patch('/api/subjects/:subjectId', 
     authenticateToken,
     validators.numericId('subjectId'),
     validators.text('subject_name', 1, 200),
@@ -1500,11 +1500,12 @@ app.patch('/subjects/:subjectId',
     }
 );
 
-app.delete('/subjects/:subjectId', 
+app.delete('/api/subjects/:subjectId', 
     authenticateToken,
     validators.numericId('subjectId'),
     handleValidationErrors,
     async (req, res) => {
+        console.log(`[DELETE /api/subjects/:subjectId] Deleting subject with id: ${req.params.subjectId}`);
         const subjectId = req.params.subjectId;
         try {
             const subject = await dbGet(`
@@ -1527,7 +1528,7 @@ app.delete('/subjects/:subjectId',
     }
 );
 
-app.get('/plans/:planId/subjects_with_topics', 
+app.get('/api/plans/:planId/subjects_with_topics', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -1582,7 +1583,7 @@ app.get('/plans/:planId/subjects_with_topics',
     }
 );
 
-app.get('/subjects/:subjectId/topics', 
+app.get('/api/subjects/:subjectId/topics', 
     authenticateToken,
     validators.numericId('subjectId'),
     handleValidationErrors,
@@ -1607,7 +1608,7 @@ app.get('/subjects/:subjectId/topics',
     }
 );
 
-app.patch('/topics/batch_update', 
+app.patch('/api/topics/batch_update', 
     authenticateToken,
     body('topics').isArray().withMessage('O corpo deve conter um array de tópicos'),
     body('topics.*.id').isInt().withMessage('ID do tópico inválido'),
@@ -1700,7 +1701,7 @@ app.patch('/topics/batch_update',
     }
 );
 
-app.patch('/topics/batch_update_details',
+app.patch('/api/topics/batch_update_details',
     authenticateToken,
     body('topics').isArray().withMessage('O corpo deve conter um array de tópicos'),
     body('topics.*.id').isInt().withMessage('ID do tópico inválido'),
@@ -1760,7 +1761,7 @@ app.patch('/topics/batch_update_details',
     }
 );
 
-app.patch('/topics/:topicId', 
+app.patch('/api/topics/:topicId', 
     authenticateToken,
     validators.numericId('topicId'),
     validators.text('description', 1, 500),
@@ -1803,7 +1804,7 @@ app.patch('/topics/:topicId',
     }
 );
 
-app.delete('/topics/:topicId', 
+app.delete('/api/topics/:topicId', 
     authenticateToken,
     validators.numericId('topicId'),
     handleValidationErrors,
@@ -1840,7 +1841,7 @@ app.delete('/topics/:topicId',
 );
 
 // --- ROTA DE GERAÇÃO DE CRONOGRAMA OTIMIZADA ---
-app.post('/plans/:planId/generate', 
+app.post('/api/plans/:planId/generate', 
     authenticateToken,
     validators.numericId('planId'),
     validators.integer('daily_question_goal', 0, 500),
@@ -2545,7 +2546,7 @@ app.post('/plans/:planId/generate',
 // --- ROTAS DE SESSÕES E DADOS ---
 
 // Obter detalhes do replanejamento de tarefas atrasadas
-app.get('/plans/:planId/replan-preview', 
+app.get('/api/plans/:planId/replan-preview', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -2706,7 +2707,7 @@ app.get('/plans/:planId/replan-preview',
 );
 
 // Replanejar tarefas atrasadas com estratégia inteligente
-app.post('/plans/:planId/replan', 
+app.post('/api/plans/:planId/replan', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -2999,7 +3000,7 @@ app.post('/plans/:planId/replan',
 );
 
 // Obter tópicos excluídos no modo Reta Final (endpoint legado - mantido para compatibilidade)
-app.get('/plans/:planId/exclusions',
+app.get('/api/plans/:planId/exclusions',
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -3049,7 +3050,7 @@ app.get('/plans/:planId/exclusions',
 );
 
 // Novo endpoint para consultar tópicos excluídos no modo Reta Final
-app.get('/plans/:planId/excluded-topics',
+app.get('/api/plans/:planId/excluded-topics',
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -3127,7 +3128,7 @@ app.get('/plans/:planId/excluded-topics',
 );
 
 // Endpoint para estatísticas do plano (Total de dias, Sequência, etc)
-app.get('/plans/:planId/statistics',
+app.get('/api/plans/:planId/statistics',
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -3267,7 +3268,7 @@ app.get('/plans/:planId/statistics',
 
 // Verificar tarefas atrasadas - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/planRoutes.js
-app.get('/plans/:planId/overdue_check', 
+app.get('/api/plans/:planId/overdue_check', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -3288,7 +3289,7 @@ END LEGACY ROUTE COMMENT */
 
 // Obter o cronograma de um plano - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/scheduleRoutes.js
-app.get('/plans/:planId/schedule', 
+app.get('/api/plans/:planId/schedule', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -3317,7 +3318,7 @@ END LEGACY ROUTE COMMENT */
 
 // Atualizar status de múltiplas sessões - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/scheduleRoutes.js
-app.patch('/sessions/batch_update_status', 
+app.patch('/api/sessions/batch_update_status', 
     authenticateToken,
     body('sessions').isArray().withMessage('O corpo deve conter um array de sessões'),
     body('sessions.*.id').isInt().withMessage('ID da sessão inválido'),
@@ -3365,7 +3366,7 @@ END LEGACY ROUTE COMMENT */
 
 // Agendar uma sessão de reforço - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/scheduleRoutes.js
-app.post('/sessions/:sessionId/reinforce', 
+app.post('/api/sessions/:sessionId/reinforce', 
     authenticateToken,
     validators.numericId('sessionId'),
     handleValidationErrors,
@@ -3391,8 +3392,40 @@ app.post('/sessions/:sessionId/reinforce',
 END LEGACY ROUTE COMMENT */
 
 // Adiar uma sessão de estudo - MIGRATED TO MODULAR ARCHITECTURE
+// Rota genérica para atualizar status de sessão
+app.patch('/api/sessions/:sessionId', 
+    authenticateToken,
+    validators.numericId('sessionId'),
+    handleValidationErrors,
+    async (req, res) => {
+        const sessionId = req.params.sessionId;
+        const { status } = req.body;
+
+        try {
+            // Verificar se a sessão existe e pertence ao usuário
+            const session = await dbGet(`
+                SELECT ss.* FROM study_sessions ss
+                JOIN study_plans sp ON ss.study_plan_id = sp.id
+                WHERE ss.id = ? AND sp.user_id = ?
+            `, [sessionId, req.user.id]);
+
+            if (!session) {
+                return res.status(404).json({ error: "Sessão não encontrada ou não autorizada." });
+            }
+
+            // Atualizar status da sessão
+            await dbRun('UPDATE study_sessions SET status = ? WHERE id = ?', [status, sessionId]);
+
+            res.json({ message: "Sessão atualizada com sucesso!", status });
+        } catch (error) {
+            console.error('Erro ao atualizar sessão:', error);
+            res.status(500).json({ error: "Erro ao atualizar a sessão." });
+        }
+    }
+);
+
 /* LEGACY ROUTE - REPLACED BY src/routes/scheduleRoutes.js
-app.patch('/sessions/:sessionId/postpone', 
+app.patch('/api/sessions/:sessionId/postpone', 
     authenticateToken,
     validators.numericId('sessionId'),
     body('days').custom((value) => {
@@ -3551,7 +3584,7 @@ app.get('/api/plans/:planId/question_radar',
 END LEGACY ROUTE COMMENT */
 
 // Obter dados para revisão
-app.get('/plans/:planId/review_data', 
+app.get('/api/plans/:planId/review_data', 
     authenticateToken,
     validators.numericId('planId'),
     query('date').isISO8601().withMessage('Data inválida'),
@@ -3839,7 +3872,7 @@ app.get('/api/plans/:planId/detailed_progress',
 
 // Obter estatísticas resumidas de atividades - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/planRoutes.js
-app.get('/plans/:planId/activity_summary',
+app.get('/api/plans/:planId/activity_summary',
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
@@ -3993,7 +4026,7 @@ app.get('/api/plans/:planId/realitycheck',
         }
 });
 // Endpoint para registrar tempo de estudo
-app.post('/sessions/:sessionId/time',
+app.post('/api/sessions/:sessionId/time',
     authenticateToken,
     validators.numericId('sessionId'),
     body('seconds').isInt({ min: 0, max: 86400 }).withMessage('Tempo inválido'),
@@ -4325,7 +4358,7 @@ app.get('/api/plans/:planId/gamification',
 });
 
 // Endpoint para gerar dados de compartilhamento
-app.get('/plans/:planId/share-progress', 
+app.get('/api/plans/:planId/share-progress', 
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,

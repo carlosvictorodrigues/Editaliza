@@ -316,7 +316,7 @@
 
             app.showSpinner();
             try {
-                const plan = await app.apiFetch(`/plans/${planId}`);
+                const plan = await app.apiFetch(`/api/plans/${planId}`);
                 components.renderPlanHeader(planId, plan.plan_name, 'cronograma.html');
                 const examDate = new Date(plan.exam_date + 'T00:00:00');
                 document.getElementById('examDate').textContent = `Data da Prova: ${examDate.toLocaleDateString('pt-BR')}`;
@@ -335,7 +335,7 @@
                     console.log('✅ Modo Reta Final inativo - valor:', plan.reta_final_mode);
                 }
                 
-                const overdueData = await app.apiFetch(`/plans/${planId}/overdue_check`);
+                const overdueData = await app.apiFetch(`/api/plans/${planId}/overdue_check`);
                 components.renderOverdueAlert(overdueData);
                 if (overdueData.count > 0) addReplanListener();
 
@@ -344,7 +344,37 @@
                 // Carregar dados de transparência do Modo Reta Final
                 await loadTransparencyData();
             } catch (error) {
-                app.showToast('Erro ao carregar dados: ' + error.message, 'error');
+                console.error('Erro ao carregar plano:', error);
+                
+                // Se o plano não existe (404), limpar localStorage e redirecionar
+                if (error.message && error.message.includes('não encontrado')) {
+                    console.log('🔄 Plano não encontrado. Limpando localStorage...');
+                    localStorage.removeItem('selectedPlanId');
+                    
+                    // Tentar buscar o primeiro plano disponível
+                    try {
+                        const plans = await app.apiFetch('/api/plans');
+                        if (plans && plans.length > 0) {
+                            console.log('✅ Encontrado plano alternativo:', plans[0].id);
+                            localStorage.setItem('selectedPlanId', plans[0].id);
+                            window.location.href = `cronograma.html?id=${plans[0].id}`;
+                        } else {
+                            console.log('❌ Nenhum plano disponível. Redirecionando para home...');
+                            app.showToast('Nenhum plano encontrado. Redirecionando...', 'warning');
+                            setTimeout(() => {
+                                window.location.href = 'home.html';
+                            }, 2000);
+                        }
+                    } catch (listError) {
+                        console.error('Erro ao buscar planos:', listError);
+                        app.showToast('Erro ao carregar dados. Redirecionando...', 'error');
+                        setTimeout(() => {
+                            window.location.href = 'home.html';
+                        }, 2000);
+                    }
+                } else {
+                    app.showToast('Erro ao carregar dados: ' + error.message, 'error');
+                }
             } finally {
                 app.hideSpinner();
             }
@@ -355,7 +385,7 @@
             container.innerHTML = '<div class="text-center text-gray-500 py-8">Carregando cronograma...</div>';
             app.showSpinner();
             try {
-                fullSchedule = await app.apiFetch(`/schedules/${planId}`);
+                fullSchedule = await app.apiFetch(`/api/plans/${planId}/schedule`);
                 await renderScheduleDOM(filter);
             } catch (error) {
                 app.showToast('Erro ao renderizar cronograma: ' + error.message, 'error');
@@ -439,7 +469,7 @@
         async function markReviewAsCompleted(sessionId) {
             app.showSpinner();
             try {
-                await app.apiFetch(`/schedules/sessions/${sessionId}`, {
+                await app.apiFetch(`/api/sessions/${sessionId}`, {
                     method: 'PATCH',
                     body: JSON.stringify({ status: 'Concluído' })
                 });
@@ -462,7 +492,7 @@
                 const sessionId = target.dataset.sessionId;
                 if (sessionId && target.dataset.field) { 
                     const data = { [target.dataset.field]: target.value };
-                    app.apiFetch(`/schedules/sessions/${sessionId}`, {
+                    app.apiFetch(`/api/sessions/${sessionId}`, {
                         method: 'PATCH',
                         body: JSON.stringify(data)
                     }).catch(err => app.showToast('Erro ao salvar alteração.', 'error'));
@@ -476,7 +506,7 @@
                 if (sessionId && target.type === 'checkbox') {
                     const data = { status: target.checked ? 'Concluído' : 'Pendente' };
                     try {
-                        await app.apiFetch(`/schedules/sessions/${sessionId}`, {
+                        await app.apiFetch(`/api/sessions/${sessionId}`, {
                             method: 'PATCH',
                             body: JSON.stringify(data)
                         });
@@ -503,7 +533,7 @@
         async function reinforceSession(sessionId) {
             app.showSpinner();
             try {
-                const result = await app.apiFetch(`/schedules/sessions/${sessionId}/reinforce`, { method: 'POST' });
+                const result = await app.apiFetch(`/api/sessions/${sessionId}/reinforce`, { method: 'POST' });
                 app.showToast(result.message, 'success');
                 await fetchAndRenderSchedule(activeFilter);
             } catch (error) {
@@ -518,7 +548,7 @@
             closePostponeModal();
             app.showSpinner();
             try {
-                const result = await app.apiFetch(`/schedules/sessions/${sessionIdToPostpone}/postpone`, {
+                const result = await app.apiFetch(`/api/sessions/${sessionIdToPostpone}/postpone`, {
                     method: 'PATCH',
                     body: JSON.stringify({ days })
                 });
@@ -537,7 +567,7 @@
                 replanButton.addEventListener('click', async () => {
                     app.showSpinner();
                     try {
-                        const data = await app.apiFetch(`/plans/${planId}/replan`, { method: 'POST' });
+                        const data = await app.apiFetch(`/api/plans/${planId}/replan`, { method: 'POST' });
                         app.showToast(data.message, 'success');
                         await fetchAndRenderSchedule(activeFilter);
                         document.getElementById('overdue-alert-container').innerHTML = '';
@@ -616,7 +646,7 @@
             
             try {
                 console.log('🔍 Carregando dados de transparência para plano:', planId);
-                const response = await app.apiFetch(`/plans/${planId}/exclusions`);
+                const response = await app.apiFetch(`/api/plans/${planId}/exclusions`);
                 console.log('📄 Resposta da transparência:', response);
                 
                 // Verificação mais robusta para o modo Reta Final

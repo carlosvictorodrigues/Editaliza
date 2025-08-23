@@ -811,7 +811,7 @@
             renderHoursInputs();
             app.showSpinner();
             try {
-                const plan = await app.apiFetch(`/plans/${planId}`);
+                                const plan = await app.apiFetch(`/api/plans/${planId}`);
                 components.renderPlanHeader(planId, plan.plan_name, 'plan_settings.html');
                 
                 document.getElementById('daily_goal').value = plan.daily_question_goal;
@@ -870,7 +870,7 @@
             
             loadingSubjects = true;
             try {
-                const subjects = await app.apiFetch(`/plans/${planId}/subjects`);
+                                const subjects = await app.apiFetch(`/api/plans/${planId}/subjects`);
                 const container = document.getElementById('subjectsContainer');
                 container.innerHTML = '';
 
@@ -967,7 +967,7 @@
             const header = document.getElementById(`topics-header-${subjectId}`);
             
             try {
-                const topics = await app.apiFetch(`/subjects/${subjectId}/topics`);
+                                const topics = await app.apiFetch(`/api/subjects/${subjectId}/topics`);
                 const todayStr = new Date().toISOString().split('T')[0];
 
                 // Salvar dados originais para comparação
@@ -1255,7 +1255,7 @@
 
                 app.showSpinner();
                 try {
-                    const response = await app.apiFetch('/topics/batch_update_details', {
+                                        const response = await app.apiFetch('/api/topics/batch_update_details', {
                         method: 'PATCH',
                         body: JSON.stringify({ topics: topicsToUpdate })
                     });
@@ -1339,7 +1339,7 @@
         async function deleteTopic(topicId) {
             app.showSpinner();
             try {
-                await app.apiFetch(`/topics/${topicId}`, { method: 'DELETE' });
+                                await app.apiFetch(`/api/topics/${topicId}`, { method: 'DELETE' });
                 app.showToast('Tópico excluído com sucesso!', 'success');
                 
                 // Recarregar a disciplina que contém este tópico
@@ -1599,10 +1599,10 @@
             event.preventDefault();
             const id = event.target.dataset.id;
             const body = { subject_name: document.getElementById('edit_subject_name').value, priority_weight: document.getElementById('edit_priority_weight').value };
-            await submitApiRequestWrapper(`/subjects/${id}`, 'PATCH', body, 'Disciplina atualizada!');
+                        await submitApiRequestWrapper(`/api/subjects/${id}`, 'PATCH', body, 'Disciplina atualizada!');
         }
         async function submitDeleteSubject(event) {
-            await submitApiRequestWrapper(`/subjects/${event.target.dataset.id}`, 'DELETE', null, 'Disciplina apagada!');
+                        await submitApiRequestWrapper(`/api/subjects/${event.target.dataset.id}`, 'DELETE', null, 'Disciplina apagada!');
         }
         async function submitEditTopic(event) {
             event.preventDefault();
@@ -1611,10 +1611,10 @@
                 description: document.getElementById('edit_topic_description').value,
                 priority_weight: parseInt(document.getElementById('edit_topic_priority').value)
             };
-            await submitApiRequestWrapper(`/topics/${id}`, 'PATCH', body, 'Tópico atualizado!');
+                        await submitApiRequestWrapper(`/api/topics/${id}`, 'PATCH', body, 'Tópico atualizado!');
         }
         async function submitDeleteTopic(event) {
-            await submitApiRequestWrapper(`/plans/topics/${event.target.dataset.id}`, 'DELETE', null, 'Tópico apagado!');
+                        await submitApiRequestWrapper(`/api/topics/${event.target.dataset.id}`, 'DELETE', null, 'Tópico apagado!');
         }
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -1658,7 +1658,7 @@
                 const body = { subject_name: document.getElementById('subject_name').value, priority_weight: document.getElementById('priority_weight').value, topics_list: document.getElementById('topics_list').value };
                 app.showSpinner();
                 try {
-                    const data = await app.apiFetch(`/plans/${planId}/subjects_with_topics`, { method: 'POST', body: JSON.stringify(body) });
+                                        const data = await app.apiFetch(`/api/plans/${planId}/subjects_with_topics`, { method: 'POST', body: JSON.stringify(body) });
                     app.showToast(data.message, 'success');
                     form.reset();
                     await loadSubjects();
@@ -1721,7 +1721,7 @@
                 app.showSpinner();
                 try {
                     const settings = getSettingsFromForm();
-                    await app.apiFetch(`/plans/${planId}/settings`, {
+                                        await app.apiFetch(`/api/plans/${planId}/settings`, {
                         method: 'PATCH',
                         body: JSON.stringify(settings)
                     });
@@ -1743,7 +1743,7 @@
                 
                 try {
                     const settings = getSettingsFromForm();
-                    const result = await app.apiFetch(`/plans/${planId}/generate`, {
+                                        const result = await app.apiFetch(`/api/plans/${planId}/generate`, {
                         method: 'POST',
                         body: JSON.stringify(settings)
                     });

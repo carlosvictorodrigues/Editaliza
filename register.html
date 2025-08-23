@@ -239,7 +239,7 @@
 
                 try {
                     // ATUALIZADO: Usa a função segura app.apiFetch
-                    const data = await app.apiFetch('/auth/register', {
+                    const data = await app.apiFetch('/api/register', {
                         method: 'POST',
                         body: JSON.stringify({ email, password })
                     });

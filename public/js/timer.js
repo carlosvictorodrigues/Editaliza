@@ -561,7 +561,7 @@ const TimerSystem = {
             const now = new Date();
             const startTime = new Date(now.getTime() - seconds * 1000);
             
-            await app.apiFetch(`/schedules/sessions/${sessionId}/time`, {
+            await app.apiFetch(`/api/sessions/${sessionId}/time`, {
                 method: 'POST',
                 body: JSON.stringify({
                     start_time: startTime.toISOString(),

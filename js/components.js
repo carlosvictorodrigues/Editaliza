@@ -101,7 +101,7 @@ const components = {
 
         try {
             // Loading avatar from server com timeout
-            const profilePromise = app.apiFetch('/users/profile');
+            const profilePromise = app.apiFetch('/api/profile');
             const timeoutPromise = new Promise((_, reject) => 
                 setTimeout(() => reject(new Error('Timeout ao carregar perfil')), 5000)
             );

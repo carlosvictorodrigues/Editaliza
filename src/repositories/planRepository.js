@@ -539,7 +539,7 @@ const getSubjects = async (planId) => {
         FROM subjects s
         LEFT JOIN topics t ON s.id = t.subject_id
         WHERE s.study_plan_id = $1
-        GROUP BY s.id
+        GROUP BY s.id, s.subject_name, s.priority_weight, s.study_plan_id, s.created_at, s.updated_at
         ORDER BY s.subject_name`
         : `SELECT 
             s.*,

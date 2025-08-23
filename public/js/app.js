@@ -248,7 +248,7 @@ const app = {
         
         // Fazer logout no servidor (se possível)
         if (this.state.token) {
-            fetch(`${this.config.apiUrl}/logout`, {
+            fetch(`${this.config.apiUrl}/api/logout`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.state.token}`
@@ -313,7 +313,7 @@ const app = {
         }
         
         console.log(`🌍 Buscando dados frescos da API: ${dataType}`);
-        const data = await this.apiFetch(`/plans/${planId}/${dataType}`);
+        const data = await this.apiFetch(`/api/plans/${planId}/${dataType}`);
         
         // Salvar no cache
         this.state.activePlanData[planId][dataType] = data;
@@ -324,7 +324,7 @@ const app = {
     
     async getGamificationData(planId) {
         if (!planId) throw new Error('ID do plano é necessário para buscar dados de gamificação.');
-        return await this.apiFetch(`/plans/${planId}/gamification`);
+        return await this.apiFetch(`/api/plans/${planId}/gamification`);
     },
 
     // CORREÇÃO: Melhorar sistema de invalidação de cache com logs
@@ -698,7 +698,7 @@ async function openStudySession(sessionId) {
 
             const oldDate = session.session_date;
             try {
-                await app.apiFetch(`/schedules/sessions/${sessionId}`, {
+                await app.apiFetch(`/api/sessions/${sessionId}`, {
                     method: 'PATCH',
                     body: JSON.stringify({ session_date: todayStr })
                 });
@@ -831,7 +831,7 @@ async function fetchSessionData(sessionId) {
 
         // Se não encontrou localmente, buscar no servidor
         console.log('🌐 Buscando sessão no servidor...');
-        const response = await app.apiFetch(`/schedules/sessions/${sessionId}`);
+        const response = await app.apiFetch(`/api/sessions/${sessionId}`);
         return response;
         
     } catch (error) {

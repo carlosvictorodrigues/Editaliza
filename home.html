@@ -649,7 +649,7 @@
             async function loadUserProfile() {
                 try {
                     console.log('👤 Carregando perfil do usuário...');
-                    const profile = await app.apiFetch("/profile");
+                    const profile = await app.apiFetch("/api/profile");
                     const welcomeElement = document.getElementById("welcomeMessage");
                     const userAvatarElement = document.getElementById("userAvatar");
 
@@ -767,7 +767,7 @@
                     const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
                     console.log('📅 Data de hoje (Brasília):', today);
                     
-                    const scheduleData = await app.apiFetch(`/schedules/${planId}/range?startDate=${today}&endDate=${today}`);
+                    const scheduleData = await app.apiFetch(`/api/plans/${planId}/schedule?startDate=${today}&endDate=${today}`);
                     console.log('📅 Dados do cronograma recebidos:', scheduleData);
                     
                     window.todaySessionsData = scheduleData || [];
@@ -834,7 +834,7 @@
                     const startDate = pastDate.toISOString().split('T')[0];
                     const endDate = futureDate.toISOString().split('T')[0];
                     
-                    const allScheduleData = await app.apiFetch(`/schedules/${planId}/range?startDate=${startDate}&endDate=${endDate}`);
+                    const allScheduleData = await app.apiFetch(`/api/plans/${planId}/schedule?startDate=${startDate}&endDate=${endDate}`);
                     window.allSessionsData = allScheduleData || [];
 
                     console.log(`📅 Carregadas ${window.allSessionsData.length} sessões (${startDate} a ${endDate})`);
@@ -881,7 +881,7 @@
             async function updateStudyStatistics(planId) {
                 try {
                     // Chamar o endpoint correto do backend para obter as estatísticas
-                    const stats = await app.apiFetch(`/plans/${planId}/statistics`);
+                    const stats = await app.apiFetch(`/api/plans/${planId}/statistics`);
                     console.log('📊 Estatísticas recebidas do servidor:', stats);
                     
                     // Update Total de Dias
@@ -981,7 +981,7 @@
                         console.warn('❌ activePlanId não definido para verificar tarefas atrasadas');
                         return;
                     }
-                    const overdueData = await app.apiFetch(`/plans/${app.state.activePlanId}/overdue_check`);
+                    const overdueData = await app.apiFetch(`/api/plans/${app.state.activePlanId}/overdue_check`);
                     if (overdueData.count > 0) {
                         components.renderOverdueAlert(overdueData);
                         addReplanListener();
@@ -1001,7 +1001,7 @@
                     if (!app.state.activePlanId) return;
                     
                     // Obter dados do plano para verificar se está no modo Reta Final
-                    const plan = await app.apiFetch(`/plans/${app.state.activePlanId}`);
+                    const plan = await app.apiFetch(`/api/plans/${app.state.activePlanId}`);
                     
                     if (plan.reta_final_mode) {
                         // Mostrar indicador do Modo Reta Final
@@ -1009,7 +1009,7 @@
                         indicator.classList.remove('hidden');
                         
                         // Carregar exclusões
-                        const exclusionsData = await app.apiFetch(`/plans/${app.state.activePlanId}/exclusions`);
+                        const exclusionsData = await app.apiFetch(`/api/plans/${app.state.activePlanId}/exclusions`);
                         
                         if (exclusionsData.totalExclusions > 0) {
                             // Mostrar contador de exclusões
@@ -1044,7 +1044,7 @@
                         `;
                         
                         try {
-                            const response = await app.apiFetch(`/plans/${app.state.activePlanId}/replan`, {
+                            const response = await app.apiFetch(`/api/plans/${app.state.activePlanId}/replan`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' }
                             });
@@ -1090,7 +1090,7 @@
                             `;
                             
                             try {
-                                const planData = await app.apiFetch(`/plans/${app.state.activePlanId}/overdue_details`);
+                                const planData = await app.apiFetch(`/api/plans/${app.state.activePlanId}/overdue_details`);
                                 if (planData && planData.replanStrategy) {
                                     detailsContent.innerHTML = `
                                         <div class="space-y-4">
@@ -1147,7 +1147,7 @@
             // Função para reforçar uma sessão (agenda para 3 dias depois)
             async function reinforceSession(sessionId) {
                 try {
-                    const result = await app.apiFetch(`/sessions/${sessionId}/reinforce`, { method: 'POST' });
+                    const result = await app.apiFetch(`/api/sessions/${sessionId}/reinforce`, { method: 'POST' });
                     if (result.message) {
                         app.showToast('💪 ' + result.message, 'success');
                         // Recarregar as atividades após o reforço
@@ -1191,7 +1191,7 @@
                 closePostponeModal();
 
                 try {
-                    const result = await app.apiFetch(`/sessions/${sessionIdToPostpone}/postpone`, {
+                    const result = await app.apiFetch(`/api/sessions/${sessionIdToPostpone}/postpone`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ days: days })
@@ -1293,7 +1293,7 @@
                             localStorage.setItem(app.config.planKey, newPlanId);
                             
                             // Atualizar indicador de Reta Final dinamicamente
-                            const newPlan = await app.apiFetch(`/plans/${newPlanId}`);
+                            const newPlan = await app.apiFetch(`/api/plans/${newPlanId}`);
                             const isRetaFinalMode = newPlan.reta_final_mode === 1 || newPlan.reta_final_mode === true || newPlan.reta_final_mode === '1';
                             components.renderRetaFinalIndicator(isRetaFinalMode);
                             
@@ -1330,7 +1330,7 @@
                 // Recarregar as sessões de hoje primeiro
                 if (app.state.activePlanId) {
                     try {
-                        const response = await app.apiFetch(`/schedules/${app.state.activePlanId}/today`);
+                        const response = await app.apiFetch(`/api/plans/${app.state.activePlanId}/schedule`);
                         if (response && response.sessions) {
                             window.todaySessionsData = response.sessions;
                             console.log('📊 Sessões de hoje recarregadas:', window.todaySessionsData.length);
