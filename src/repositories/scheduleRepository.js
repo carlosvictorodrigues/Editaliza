@@ -99,9 +99,24 @@ const getScheduleGroupedByDate = async (planId, userId) => {
     const sessions = await getScheduleByPlan(planId, userId);
     
     const groupedByDate = sessions.reduce((acc, session) => {
-        const date = session.session_date;
-        if (!acc[date]) acc[date] = [];
-        acc[date].push(session);
+        // Converter data para string YYYY-MM-DD
+        let dateStr;
+        if (session.session_date instanceof Date) {
+            // Se for objeto Date, formatar como string
+            const year = session.session_date.getFullYear();
+            const month = String(session.session_date.getMonth() + 1).padStart(2, '0');
+            const day = String(session.session_date.getDate()).padStart(2, '0');
+            dateStr = `${year}-${month}-${day}`;
+        } else if (typeof session.session_date === 'string') {
+            // Se já for string, usar apenas a parte da data
+            dateStr = session.session_date.split('T')[0];
+        } else {
+            // Fallback
+            dateStr = String(session.session_date).split('T')[0];
+        }
+        
+        if (!acc[dateStr]) acc[dateStr] = [];
+        acc[dateStr].push(session);
         return acc;
     }, {});
 
