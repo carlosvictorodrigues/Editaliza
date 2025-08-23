@@ -324,10 +324,13 @@ const ContextualNotifications = {
         
         // Determinar período do dia para saudação
         let greeting, timeEmoji;
-        if (currentHour < 12) {
+        if (currentHour >= 0 && currentHour < 5) {
+            greeting = 'Boa madrugada';
+            timeEmoji = '🌃';
+        } else if (currentHour >= 5 && currentHour < 12) {
             greeting = 'Bom dia';
             timeEmoji = '☀️';
-        } else if (currentHour < 18) {
+        } else if (currentHour >= 12 && currentHour < 18) {
             greeting = 'Boa tarde';
             timeEmoji = '🌤️';
         } else {
