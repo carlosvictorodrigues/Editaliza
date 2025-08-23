@@ -767,7 +767,7 @@
                     const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
                     console.log('📅 Data de hoje (Brasília):', today);
                     
-                    const allScheduleData = await app.apiFetch(`/api/plans/${planId}/schedule`);
+                    const allScheduleData = await app.apiFetch(`/api/schedules/${planId}`);
                     console.log('📅 Dados do cronograma recebidos:', allScheduleData);
                     
                     // Filtrar apenas as sessões de hoje
@@ -836,7 +836,7 @@
                     const startDate = pastDate.toISOString().split('T')[0];
                     const endDate = futureDate.toISOString().split('T')[0];
                     
-                    const fullScheduleData = await app.apiFetch(`/api/plans/${planId}/schedule`);
+                    const fullScheduleData = await app.apiFetch(`/api/schedules/${planId}`);
                     // Converter objeto agrupado por data em array flat de sessões
                     window.allSessionsData = [];
                     for (const date in fullScheduleData) {
@@ -1338,7 +1338,7 @@
                 // Recarregar as sessões de hoje primeiro
                 if (app.state.activePlanId) {
                     try {
-                        const response = await app.apiFetch(`/api/plans/${app.state.activePlanId}/schedule`);
+                        const response = await app.apiFetch(`/api/schedules/${app.state.activePlanId}`);
                         const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
                         const todaySchedule = response[today] || [];
                         if (todaySchedule) {
