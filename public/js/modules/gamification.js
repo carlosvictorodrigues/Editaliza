@@ -43,13 +43,12 @@ const Gamification = {
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <!-- Nível Atual -->
-                    <div class="bg-slate-50 border border-gray-200 p-6 rounded-xl shadow-inner text-center hover:shadow-lg transition-all duration-300">
-                        <div class="w-16 h-16 bg-gradient-to-br from-orange-100 to-yellow-100 rounded-xl flex items-center justify-center mx-auto mb-4 animate-pulse">
-                            <span class="text-3xl">${levelIcon}</span>
+                    <div class="bg-slate-50 border border-gray-200 p-6 rounded-xl shadow-inner text-center">
+                        <div class="w-16 h-16 bg-orange-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl">${levelIcon}</span>
                         </div>
                         <p class="text-lg font-semibold text-orange-800 uppercase tracking-wider mb-1">Nível Atual</p>
-                        <p class="text-xl font-bold text-orange-600">${levelTitle}</p>
-                        ${safeData.topicsToNextLevel > 0 ? `<p class="text-xs text-orange-500 mt-2">Faltam ${safeData.topicsToNextLevel} tópicos para o próximo nível!</p>` : ''}
+                        <p class="text-2xl font-bold text-orange-600">${levelTitle}</p>
                     </div>
                     
                     <!-- Total de Dias de Estudo -->
@@ -100,44 +99,13 @@ const Gamification = {
     renderAchievements(achievements) {
         const achievementCards = achievements.slice(0, 6).map(achievement => {
             const achievementIcons = {
-                // Conquistas antigas (compatibilidade)
                 'Primeiro Estudo': '🌟',
                 'Sequência de 3 dias': '🔥',
                 'Sequência de 7 dias': '💪',
                 'Primeiro Simulado': '🎯',
                 '10 Tópicos Concluídos': '📚',
                 '50 Tópicos Concluídos': '🏆',
-                // NOVAS conquistas super engraçadas
-                '🎯 Primeira Lapada no Edital': '🎯',
-                '📚 Maratonista do PDF': '📚',
-                '✨ Destruidor de Questões': '✨',
-                '👑 Dono do Material': '👑',
-                '🌟 Meio Monstro': '🌟',
-                '🏛️ Centurião do Conhecimento': '🏛️',
-                '🏛️ Vai Escolher Onde Vai Tomar Posse': '🏛️',
-                '🪑 Lombar Suprema': '🪑',
-                '🛏️ Travesseiro Vade Mecum': '🛏️',
-                '📖 Estuda em Fila de Banco': '📖',
-                '🏖️ O que é Férias?': '🏖️',
-                // Novas conquistas com humor
-                'Primeira Lapada no Edital 📖': '📖',
-                'Maratonista do PDF 🏃': '🏃',
-                'Concurseiro(a) Raiz 🌳': '🌳',
-                'Doutor(a) Google de Legislação 🔎': '🔎',
-                'Guru dos Grifos 🖍️': '🖍️',
-                'Mestre Jedi dos Concursos ⚔️': '⚔️',
-                'Chuck Norris dos Editais 💪': '💪',
-                'Resistente ao Netflix 📺': '📺',
-                'Imune ao Sofá 🛋️': '🛋️',
-                'Inimigo do Descanso 😤': '😤',
-                'Máquina de Aprovar 🤖': '🤖',
-                'Cyborg Concurseiro 🦾': '🦾',
-                'Viciado(a) em Questões 💊': '💊',
-                'Bibliotecário(a) Honorário(a) 📚': '📚',
-                'Rei/Rainha do Resumo 👑': '👑',
-                'PhD em Perseverança 🎓': '🎓',
-                'Madrugador(a) Insano(a) 🌅': '🌅',
-                'Destruidor(a) de Finais de Semana 🎉': '🎉',
+                'Nível Avançado': '⭐',
                 'default': '🏅'
             };
 
@@ -336,32 +304,12 @@ const Gamification = {
         notification.className = 'fixed top-20 right-5 z-50 bg-gradient-to-r from-yellow-400 to-orange-500 text-white p-6 rounded-2xl shadow-2xl transform translate-x-full opacity-0 transition-all duration-500';
         
         const achievementIcons = {
-            // Conquistas antigas (compatibilidade)
             'Primeiro Estudo': '🌟',
             'Sequência de 3 dias': '🔥',
             'Sequência de 7 dias': '💪',
             'Primeiro Simulado': '🎯',
             '10 Tópicos Concluídos': '📚',
             '50 Tópicos Concluídos': '🏆',
-            // Novas conquistas com humor
-            'Primeira Lapada no Edital 📖': '📖',
-            'Maratonista do PDF 🏃': '🏃',
-            'Concurseiro(a) Raiz 🌳': '🌳',
-            'Doutor(a) Google de Legislação 🔎': '🔎',
-            'Guru dos Grifos 🖍️': '🖍️',
-            'Mestre Jedi dos Concursos ⚔️': '⚔️',
-            'Chuck Norris dos Editais 💪': '💪',
-            'Resistente ao Netflix 📺': '📺',
-            'Imune ao Sofá 🛋️': '🛋️',
-            'Inimigo do Descanso 😤': '😤',
-            'Máquina de Aprovar 🤖': '🤖',
-            'Cyborg Concurseiro 🦾': '🦾',
-            'Viciado(a) em Questões 💊': '💊',
-            'Bibliotecário(a) Honorário(a) 📚': '📚',
-            'Rei/Rainha do Resumo 👑': '👑',
-            'PhD em Perseverança 🎓': '🎓',
-            'Madrugador(a) Insano(a) 🌅': '🌅',
-            'Destruidor(a) de Finais de Semana 🎉': '🎉',
             'default': '🏅'
         };
 

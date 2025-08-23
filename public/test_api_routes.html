@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Teste de Rotas API</title>
+</head>
+<body>
+    <h1>Teste de Rotas API</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function testRoutes() {
+            const results = document.getElementById('results');
+            
+            // Primeiro, fazer login
+            results.innerHTML = '<p>1. Fazendo login...</p>';
+            
+            const loginResponse = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: 'teste@editaliza.com',
+                    password: 'senha123'
+                })
+            });
+            
+            if (!loginResponse.ok) {
+                // Tentar registrar primeiro
+                results.innerHTML += '<p>Criando conta de teste...</p>';
+                await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'Teste',
+                        email: 'teste@editaliza.com',
+                        password: 'senha123'
+                    })
+                });
+                
+                // Tentar login novamente
+                const retry = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'teste@editaliza.com',
+                        password: 'senha123'
+                    })
+                });
+                
+                if (!retry.ok) {
+                    results.innerHTML += '<p style="color:red">Erro no login!</p>';
+                    return;
+                }
+                
+                const data = await retry.json();
+                localStorage.setItem('editaliza_token', data.token);
+                results.innerHTML += '<p style="color:green">Login OK! Token: ' + data.token.substring(0,20) + '...</p>';
+            } else {
+                const data = await loginResponse.json();
+                localStorage.setItem('editaliza_token', data.token);
+                results.innerHTML += '<p style="color:green">Login OK! Token: ' + data.token.substring(0,20) + '...</p>';
+            }
+            
+            const token = localStorage.getItem('editaliza_token');
+            
+            // Testar criação de plano
+            results.innerHTML += '<p>2. Criando plano...</p>';
+            
+            const createResponse = await fetch('/api/plans', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    plan_name: 'Teste ' + Date.now(),
+                    exam_date: '2025-12-01',
+                    study_hours_per_day: {
+                        monday: 2,
+                        tuesday: 2,
+                        wednesday: 2,
+                        thursday: 2,
+                        friday: 2,
+                        saturday: 3,
+                        sunday: 3
+                    }
+                })
+            });
+            
+            if (!createResponse.ok) {
+                results.innerHTML += '<p style="color:red">Erro ao criar plano: ' + createResponse.status + '</p>';
+                return;
+            }
+            
+            const planData = await createResponse.json();
+            const planId = planData.newPlanId;
+            results.innerHTML += '<p style="color:green">Plano criado! ID: ' + planId + '</p>';
+            
+            // Testar busca do plano
+            results.innerHTML += '<p>3. Buscando plano ID ' + planId + '...</p>';
+            
+            // Testar rota SEM /api (deve dar 404)
+            const wrongResponse = await fetch('/plans/' + planId, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            results.innerHTML += '<p>Rota /plans/' + planId + ': ' + wrongResponse.status + ' ' + wrongResponse.statusText + '</p>';
+            
+            // Testar rota COM /api (deve funcionar)
+            const correctResponse = await fetch('/api/plans/' + planId, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            if (!correctResponse.ok) {
+                results.innerHTML += '<p style="color:red">Erro na rota /api/plans/' + planId + ': ' + correctResponse.status + ' ' + correctResponse.statusText + '</p>';
+                const errorText = await correctResponse.text();
+                results.innerHTML += '<p>Resposta: ' + errorText + '</p>';
+            } else {
+                const plan = await correctResponse.json();
+                results.innerHTML += '<p style="color:green">Rota /api/plans/' + planId + ' OK! Nome: ' + plan.plan_name + '</p>';
+            }
+            
+            // Verificar o que app.apiFetch faria
+            results.innerHTML += '<h3>4. Testando via app.apiFetch simulado:</h3>';
+            
+            const apiUrl = window.location.hostname === 'localhost' ? 'http://localhost:3000' : window.location.origin;
+            const url = '/api/plans/' + planId;
+            const fullUrl = apiUrl + url;
+            
+            results.innerHTML += '<p>URL construída: ' + fullUrl + '</p>';
+            
+            const appResponse = await fetch(fullUrl, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            
+            results.innerHTML += '<p>Resposta: ' + appResponse.status + ' ' + appResponse.statusText + '</p>';
+        }
+        
+        // Executar teste ao carregar
+        testRoutes();
+    </script>
+</body>
+</html>

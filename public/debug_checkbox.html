@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Checkbox Functionality</title>
+    <style>
+        .historic-date-input { 
+            display: none; 
+            background: yellow;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .topic-item.show-date .historic-date-input { 
+            display: block; 
+        }
+        .topic-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug Checkbox Functionality</h1>
+    
+    <div class="topic-item" data-topic-id="123">
+        <div>
+            <input type="checkbox" 
+                   class="topic-checkbox" 
+                   data-topic-id="123">
+            <label>Tópico de Teste</label>
+        </div>
+        
+        <div class="historic-date-input">
+            <label>Data de conclusão:</label>
+            <input type="date" class="completion-date-input" data-topic-id="123">
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM carregado');
+            
+            // Testar se o CSS está funcionando
+            const checkbox = document.querySelector('.topic-checkbox');
+            const topicItem = document.querySelector('.topic-item');
+            
+            console.log('Checkbox encontrado:', checkbox);
+            console.log('Topic item encontrado:', topicItem);
+            
+            if (checkbox) {
+                checkbox.addEventListener('change', function(e) {
+                    console.log('Checkbox mudou:', e.target.checked);
+                    
+                    const topicItemDiv = e.target.closest('.topic-item');
+                    console.log('Topic item div:', topicItemDiv);
+                    
+                    if (topicItemDiv) {
+                        topicItemDiv.classList.toggle('show-date', e.target.checked);
+                        console.log('Classes após toggle:', topicItemDiv.className);
+                        
+                        const dateInput = topicItemDiv.querySelector('.historic-date-input');
+                        console.log('Date input display:', getComputedStyle(dateInput).display);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

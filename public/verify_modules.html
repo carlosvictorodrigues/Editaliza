@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação de Módulos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-6">🔍 Verificação de Módulos do Sistema</h1>
+        
+        <div id="results" class="space-y-4">
+            <div class="text-gray-500">Verificando módulos...</div>
+        </div>
+    </div>
+    
+    <script>
+        const modules = [
+            { name: 'app.js', path: 'js/app.js', check: () => typeof app !== 'undefined' },
+            { name: 'components.js', path: 'js/components.js', check: () => typeof components !== 'undefined' },
+            { name: 'gamification.js', path: 'js/modules/gamification.js', check: () => typeof Gamification !== 'undefined' },
+            { name: 'time-visualization.js', path: 'js/modules/time-visualization.js', check: () => typeof TimeVisualization !== 'undefined' },
+            { name: 'contextual-notifications.js', path: 'js/modules/contextual-notifications.js', check: () => typeof ContextualNotifications !== 'undefined' },
+            { name: 'notification-integrations.js', path: 'js/modules/notification-integrations.js', check: () => typeof NotificationIntegrations !== 'undefined' }
+        ];
+        
+        const results = document.getElementById('results');
+        results.innerHTML = '';
+        
+        let loadedCount = 0;
+        let totalCount = modules.length;
+        
+        modules.forEach((module, index) => {
+            const script = document.createElement('script');
+            script.src = module.path;
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'border rounded-lg p-4';
+            resultDiv.id = `module-${index}`;
+            resultDiv.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="font-semibold">${module.name}</h3>
+                        <p class="text-sm text-gray-600">${module.path}</p>
+                    </div>
+                    <div id="status-${index}" class="text-yellow-500">
+                        ⏳ Carregando...
+                    </div>
+                </div>
+            `;
+            results.appendChild(resultDiv);
+            
+            script.onload = () => {
+                setTimeout(() => {
+                    const statusDiv = document.getElementById(`status-${index}`);
+                    const moduleDiv = document.getElementById(`module-${index}`);
+                    
+                    try {
+                        if (module.check()) {
+                            loadedCount++;
+                            statusDiv.innerHTML = '<span class="text-green-500">✅ Carregado</span>';
+                            moduleDiv.classList.add('bg-green-50', 'border-green-200');
+                        } else {
+                            statusDiv.innerHTML = '<span class="text-red-500">❌ Não encontrado</span>';
+                            moduleDiv.classList.add('bg-red-50', 'border-red-200');
+                        }
+                    } catch (error) {
+                        statusDiv.innerHTML = '<span class="text-red-500">❌ Erro: ' + error.message + '</span>';
+                        moduleDiv.classList.add('bg-red-50', 'border-red-200');
+                    }
+                    
+                    // Se for o último módulo, mostrar resumo
+                    if (index === totalCount - 1) {
+                        showSummary();
+                    }
+                }, 100);
+            };
+            
+            script.onerror = () => {
+                const statusDiv = document.getElementById(`status-${index}`);
+                const moduleDiv = document.getElementById(`module-${index}`);
+                statusDiv.innerHTML = '<span class="text-red-500">❌ Falha ao carregar</span>';
+                moduleDiv.classList.add('bg-red-50', 'border-red-200');
+                
+                if (index === totalCount - 1) {
+                    showSummary();
+                }
+            };
+            
+            document.head.appendChild(script);
+        });
+        
+        function showSummary() {
+            setTimeout(() => {
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'mt-6 p-4 rounded-lg ' + 
+                    (loadedCount === totalCount ? 'bg-green-100 border-green-300' : 'bg-yellow-100 border-yellow-300') + 
+                    ' border';
+                
+                summaryDiv.innerHTML = `
+                    <h2 class="text-lg font-semibold mb-2">📊 Resumo da Verificação</h2>
+                    <p class="text-lg">
+                        <span class="font-bold">${loadedCount}/${totalCount}</span> módulos carregados com sucesso
+                    </p>
+                    ${loadedCount === totalCount ? 
+                        '<p class="text-green-700 mt-2">✅ Todos os módulos estão funcionando corretamente!</p>' :
+                        '<p class="text-yellow-700 mt-2">⚠️ Alguns módulos não foram carregados. Verifique os erros acima.</p>'
+                    }
+                `;
+                
+                results.appendChild(summaryDiv);
+                
+                // Testar funcionalidades específicas
+                testSpecificFeatures();
+            }, 500);
+        }
+        
+        function testSpecificFeatures() {
+            const testsDiv = document.createElement('div');
+            testsDiv.className = 'mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg';
+            testsDiv.innerHTML = '<h2 class="text-lg font-semibold mb-4">🧪 Testes de Funcionalidades</h2>';
+            
+            const tests = [];
+            
+            // Teste 1: TimeVisualization
+            if (typeof TimeVisualization !== 'undefined') {
+                tests.push({
+                    name: 'TimeVisualization.createVisualizationContainer',
+                    test: () => typeof TimeVisualization.createVisualizationContainer === 'function',
+                    success: '✅ Função de criação de container disponível',
+                    error: '❌ Função de criação de container não encontrada'
+                });
+                
+                tests.push({
+                    name: 'TimeVisualization.toggleView',
+                    test: () => typeof TimeVisualization.toggleView === 'function',
+                    success: '✅ Função de toggle disponível',
+                    error: '❌ Função de toggle não encontrada'
+                });
+            }
+            
+            // Teste 2: Gamification
+            if (typeof Gamification !== 'undefined') {
+                tests.push({
+                    name: 'Gamification.renderGamificationDashboard',
+                    test: () => typeof Gamification.renderGamificationDashboard === 'function',
+                    success: '✅ Função de dashboard de gamificação disponível',
+                    error: '❌ Função de dashboard não encontrada'
+                });
+            }
+            
+            // Executar testes
+            tests.forEach(test => {
+                const testResult = document.createElement('div');
+                testResult.className = 'py-2';
+                try {
+                    if (test.test()) {
+                        testResult.innerHTML = `<span class="text-green-600">${test.success}</span>`;
+                    } else {
+                        testResult.innerHTML = `<span class="text-red-600">${test.error}</span>`;
+                    }
+                } catch (e) {
+                    testResult.innerHTML = `<span class="text-red-600">❌ Erro ao testar ${test.name}: ${e.message}</span>`;
+                }
+                testsDiv.appendChild(testResult);
+            });
+            
+            if (tests.length === 0) {
+                testsDiv.innerHTML += '<p class="text-gray-600">Nenhum teste específico disponível (módulos não carregados)</p>';
+            }
+            
+            results.appendChild(testsDiv);
+        }
+    </script>
+</body>
+</html>

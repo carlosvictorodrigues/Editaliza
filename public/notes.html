@@ -264,7 +264,7 @@
                     return;
                 }
 
-                const subjects = await app.apiFetch(`/api/plans/${planId}/subjects`);
+                const subjects = await app.apiFetch(`/plans/${planId}/subjects`);
                 planSubjects = subjects.map(s => s.subject_name).sort();
                 
                 console.log(`📚 Carregadas ${planSubjects.length} disciplinas do plano ${planId}:`, planSubjects);

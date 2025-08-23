@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Modal Timer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-8">
+        <h1 class="text-2xl font-bold mb-4">Teste do Modal do Timer</h1>
+        
+        <!-- Botões de teste -->
+        <div class="space-y-4">
+            <button onclick="testShowModal()" class="bg-blue-500 text-white px-4 py-2 rounded">
+                Testar Abertura do Modal
+            </button>
+            
+            <button onclick="testContinueSession()" class="bg-green-500 text-white px-4 py-2 rounded">
+                Simular Continuar Sessão
+            </button>
+        </div>
+        
+        <!-- Log de eventos -->
+        <div id="log" class="mt-8 p-4 bg-white rounded shadow">
+            <h2 class="font-bold mb-2">Log de Eventos:</h2>
+            <div id="logContent" class="text-sm font-mono"></div>
+        </div>
+    </div>
+
+    <!-- Modal de teste -->
+    <div id="studySessionModal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4 opacity-0">
+        <div id="studySessionModalContainer" class="modal-container bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl transform scale-95 max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold mb-4">Modal de Teste</h2>
+            <p>Se você está vendo isso, o modal está funcionando!</p>
+            <button onclick="closeModal()" class="mt-4 bg-red-500 text-white px-4 py-2 rounded">
+                Fechar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logContent = document.getElementById('logContent');
+            const time = new Date().toLocaleTimeString();
+            logContent.innerHTML += `<div>[${time}] ${message}</div>`;
+        }
+
+        function testShowModal() {
+            log('Tentando abrir modal...');
+            
+            const modal = document.getElementById('studySessionModal');
+            const modalContainer = document.getElementById('studySessionModalContainer');
+            
+            if (!modal) {
+                log('❌ Modal não encontrado!');
+                return;
+            }
+            
+            if (!modalContainer) {
+                log('❌ Container do modal não encontrado!');
+                return;
+            }
+            
+            log('✅ Elementos encontrados, abrindo modal...');
+            
+            modal.classList.remove('hidden');
+            
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContainer.classList.remove('scale-95');
+                log('✅ Modal aberto com sucesso!');
+            }, 10);
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('studySessionModal');
+            const modalContainer = document.getElementById('studySessionModalContainer');
+            
+            modal.classList.add('opacity-0');
+            modalContainer.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                log('Modal fechado');
+            }, 300);
+        }
+        
+        async function testContinueSession() {
+            log('Simulando continuação de sessão...');
+            
+            // Simular dados de sessão
+            const mockSession = {
+                id: 'test123',
+                subject_name: 'Matemática',
+                topic_description: 'Álgebra Linear',
+                notes: 'Teste de notas'
+            };
+            
+            // Verificar se StudyChecklist existe
+            if (typeof StudyChecklist === 'undefined') {
+                log('⚠️ StudyChecklist não está carregado. Carregando scripts...');
+                
+                // Carregar scripts necessários
+                await loadScript('/js/app.js');
+                await loadScript('/js/checklist.js');
+                await loadScript('/js/timer.js');
+            }
+            
+            if (typeof StudyChecklist !== 'undefined') {
+                log('✅ StudyChecklist carregado');
+                
+                // Definir sessão
+                StudyChecklist.session = mockSession;
+                log('Sessão definida: ' + JSON.stringify(mockSession));
+                
+                // Tentar mostrar modal
+                if (StudyChecklist.showTimerModal) {
+                    log('Chamando showTimerModal()...');
+                    try {
+                        StudyChecklist.showTimerModal();
+                        log('✅ showTimerModal() executado');
+                    } catch (error) {
+                        log('❌ Erro ao executar showTimerModal: ' + error.message);
+                    }
+                } else {
+                    log('❌ Método showTimerModal não encontrado');
+                }
+            } else {
+                log('❌ StudyChecklist não pôde ser carregado');
+            }
+        }
+        
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Log inicial
+        log('Página de teste carregada');
+    </script>
+</body>
+</html>

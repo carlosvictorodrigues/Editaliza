@@ -10,13 +10,6 @@ const NotificationIntegrations = {
     observers: [],
     listeners: [],
     intervals: [],
-    // FIX: Add debounce tracking to prevent infinite loops
-    lastEventTimes: {},
-    eventCooldowns: {
-        pomodoroComplete: 30000, // 30 seconds
-        sessionCompleted: 15000, // 15 seconds
-        toastCreated: 5000 // 5 seconds
-    },
 
     // Inicialização segura
     async init() {
@@ -70,8 +63,8 @@ const NotificationIntegrations = {
         // Observer para início de sessões
         this.observeSessionStarts();
 
-        // Monitor de tempo de estudo - Desabilitado temporariamente
-        // this.monitorStudyTime(); // TODO: Implementar função de monitoramento
+        // Monitor de tempo de estudo
+        this.monitorStudyTime();
     },
 
     observeSessionCompletions() {
@@ -107,25 +100,12 @@ const NotificationIntegrations = {
 
     checkForSessionCompletion(element) {
         // Verificar se é uma notificação de sessão concluída
-        // CORREÇÃO: Ignorar notificações de Pomodoro para evitar falsos positivos
-        const text = element.textContent || '';
-        
-        // Se for notificação de Pomodoro, não processar como sessão concluída
-        if (text.includes('Pomodoro completo') || 
-            text.includes('🍅') ||
-            text.includes('pausa de 5 minutos')) {
-            console.log('🔍 Ignorando notificação de Pomodoro:', text);
-            return;
-        }
-        
-        if (element.classList?.contains('toast-success') && 
-            (text.includes('Sessão concluída') ||
-             text.includes('marcada como concluída') ||
-             text.includes('Parabéns'))) {
+        if (element.classList?.contains('toast-success') || 
+            element.textContent?.includes('Sessão concluída') ||
+            element.textContent?.includes('Parabéns')) {
             
             // Extrair dados da sessão se possível
             const sessionData = this.extractSessionData(element);
-            console.log('✅ Sessão realmente concluída detectada:', sessionData);
             this.triggerSessionCompleted(sessionData);
         }
     },
@@ -257,43 +237,29 @@ const NotificationIntegrations = {
     },
 
     monitorPomodoroCompletions() {
-        // CRITICAL FIX: Add debounce mechanism to prevent infinite loop
+        // Observer para detectar conclusão de pomodoros
         const pomodoroObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 const target = mutation.target;
-                const text = target.textContent || '';
                 
-                // FIX: Check debounce first to prevent infinite loops
-                if (!this.canTriggerEvent('pomodoroComplete')) {
-                    return;
-                }
-                
-                // CORREÇÃO: Detectar apenas Pomodoros realmente completos
-                if (text.includes('Pomodoro completo') ||
-                    text.includes('🍅') ||
-                    text.includes('pausa de 5 minutos')) {
+                // Verificar se pomodoro foi concluído
+                if (target.textContent?.includes('Pomodoro concluído') ||
+                    target.textContent?.includes('Tempo esgotado') ||
+                    target.classList?.contains('timer-finished')) {
                     
-                    console.log('🍅 Pomodoro completo detectado (com debounce):', text);
                     this.triggerPomodoroComplete();
-                    // NÃO disparar sessão concluída aqui!
                 }
             });
         });
 
-        // FIX: Only observe specific timer areas, not toast containers to prevent loops
-        const elementsToObserve = [
-            ...document.querySelectorAll('.timer, .pomodoro, .countdown')
-            // REMOVED: toast containers to prevent recursive notifications
-        ];
-        
-        elementsToObserve.forEach(element => {
-            if (element) {
-                pomodoroObserver.observe(element, {
-                    childList: true,
-                    subtree: true,
-                    characterData: true
-                });
-            }
+        // Observar elementos de timer
+        const timerElements = document.querySelectorAll('.timer, .pomodoro, .countdown');
+        timerElements.forEach(element => {
+            pomodoroObserver.observe(element, {
+                childList: true,
+                subtree: true,
+                characterData: true
+            });
         });
 
         this.observers.push(pomodoroObserver);
@@ -340,15 +306,32 @@ const NotificationIntegrations = {
     },
 
     interceptToasts() {
-        // CRITICAL FIX: Disable toast interception to prevent infinite loops
-        // The issue was that notification system was observing its own toast creations
-        console.log('📝 Toast interception disabled to prevent infinite notification loops');
-        
-        // REMOVED: Toast observer that was causing the infinite loop
-        // The notifications from ContextualNotifications were being detected
-        // by this observer, which then triggered more notifications
-        
-        return; // Skip toast interception entirely
+        // Observar container de toasts
+        const toastObserver = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach(node => {
+                        if (node.nodeType === Node.ELEMENT_NODE && 
+                            (node.classList?.contains('toast') || 
+                             node.classList?.contains('alert'))) {
+                            
+                            this.enhanceToast(node);
+                        }
+                    });
+                }
+            });
+        });
+
+        // Observar áreas onde toasts aparecem
+        const toastContainers = document.querySelectorAll('.toast-container, .alerts, .notifications');
+        toastContainers.forEach(container => {
+            toastObserver.observe(container, {
+                childList: true,
+                subtree: true
+            });
+        });
+
+        this.observers.push(toastObserver);
     },
 
     monitorPageNavigation() {
@@ -386,29 +369,14 @@ const NotificationIntegrations = {
     },
 
     triggerPomodoroComplete() {
-        // CRITICAL FIX: Add debounce check to prevent infinite triggering
-        if (!this.canTriggerEvent('pomodoroComplete')) {
-            console.log('🛑 Pomodoro event blocked by debounce (preventing infinite loop)');
-            return;
-        }
-        
-        console.log('🍅 Disparando evento pomodoroComplete (NÃO sessionCompleted)');
-        
-        // MARK: Record this event to prevent immediate re-triggering
-        this.markEventTriggered('pomodoroComplete');
-        
         const event = new CustomEvent('pomodoroComplete', {
             detail: {
                 duration: 25,
-                timestamp: Date.now(),
-                type: 'pomodoro' // Marcar explicitamente como pomodoro
+                timestamp: Date.now()
             }
         });
 
         document.dispatchEvent(event);
-        
-        // IMPORTANTE: NÃO disparar sessionCompleted aqui!
-        // Pomodoro ≠ Sessão Concluída
     },
 
     triggerStreakMilestone(streak) {
@@ -599,29 +567,13 @@ const NotificationIntegrations = {
         }
     },
 
-    // CRITICAL FIX: Add debounce utility methods
-    canTriggerEvent(eventType) {
-        const now = Date.now();
-        const lastTime = this.lastEventTimes[eventType] || 0;
-        const cooldown = this.eventCooldowns[eventType] || 5000;
-        
-        const canTrigger = (now - lastTime) >= cooldown;
-        
-        if (!canTrigger) {
-            console.log(`🛑 Event ${eventType} blocked by debounce. Last: ${lastTime}, Now: ${now}, Cooldown: ${cooldown}ms`);
-        }
-        
-        return canTrigger;
-    },
-    
-    markEventTriggered(eventType) {
-        this.lastEventTimes[eventType] = Date.now();
-        console.log(`⏰ Event ${eventType} marked as triggered at ${this.lastEventTimes[eventType]}`);
-    },
-    
     enhanceToast(toastElement) {
-        // DISABLED: This was part of the infinite loop problem
-        return;
+        // Adicionar classes ou funcionalidades ao toast se necessário
+        const text = toastElement.textContent;
+        
+        if (text.includes('concluído') || text.includes('Parabéns')) {
+            toastElement.classList.add('enhanced-success');
+        }
     },
 
     // === CONTROLES ===

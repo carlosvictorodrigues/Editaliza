@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Validação - Plataforma Editaliza</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        <h1 class="text-3xl font-bold text-gray-800 mb-8">🧪 Teste de Validação - Plan Settings</h1>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">📋 Campos do Formulário</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Meta Diária de Questões</label>
+                    <input type="number" id="daily_goal" class="w-full px-3 py-2 border border-gray-300 rounded-md" value="50" min="0">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Meta Semanal de Questões</label>
+                    <input type="number" id="weekly_goal" class="w-full px-3 py-2 border border-gray-300 rounded-md" value="300" min="0" readonly>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Duração da Sessão (minutos)</label>
+                    <input type="number" id="session_duration" class="w-full px-3 py-2 border border-gray-300 rounded-md" value="50" min="10">
+                </div>
+                
+                <div class="flex items-center">
+                    <input id="has_essay" name="has_essay" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                    <label for="has_essay" class="ml-2 text-sm font-medium text-gray-700">Incluir Redação</label>
+                </div>
+                
+                <div class="flex items-center">
+                    <input id="retaFinalMode" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-red-600 focus:ring-red-500">
+                    <label for="retaFinalMode" class="ml-2 text-sm font-medium text-gray-700">Modo Reta Final</label>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Horas de Estudo por Dia</label>
+                <div id="hours-grid" class="grid grid-cols-7 gap-2">
+                    <!-- Será preenchido via JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">🔍 Teste de Validação</h2>
+            
+            <button id="testButton" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Testar Função getSettingsFromForm()
+            </button>
+            
+            <div id="testResults" class="mt-4 p-4 bg-gray-50 rounded-md hidden">
+                <h3 class="font-semibold mb-2">Resultados:</h3>
+                <pre id="resultsOutput" class="text-sm bg-white p-3 rounded border"></pre>
+            </div>
+        </div>
+        
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">📊 Logs de Debug</h2>
+            <div id="debugLog" class="bg-gray-900 text-green-400 p-4 rounded-md font-mono text-sm h-64 overflow-y-auto">
+                <div>🚀 Página carregada. Clique em "Testar" para ver os resultados.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const debugLog = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            debugLog.scrollTop = debugLog.scrollHeight;
+        }
+
+        function renderHoursInputs() {
+            const grid = document.getElementById('hours-grid');
+            const days = [
+                {d:1,l:'Seg'}, {d:2,l:'Ter'}, {d:3,l:'Qua'}, 
+                {d:4,l:'Qui'}, {d:5,l:'Sex'}, {d:6,l:'Sáb'}, {d:0,l:'Dom'}
+            ];
+            
+            grid.innerHTML = days.map(day => `
+                <div class="text-center">
+                    <label class="block text-xs font-medium text-gray-500 mb-1">${day.l}</label>
+                    <input type="number" class="w-full px-2 py-1 text-center border border-gray-300 rounded hours-input" 
+                           data-day="${day.d}" 
+                           value="${(day.d >= 1 && day.d <= 5) ? 4 : (day.d === 6 ? 2 : 0)}" 
+                           min="0" max="24">
+                </div>
+            `).join('');
+        }
+
+        function getSettingsFromForm() {
+            log('🔍 Executando getSettingsFromForm()...');
+            
+            const settings = {
+                daily_question_goal: document.getElementById('daily_goal').value,
+                weekly_question_goal: document.getElementById('weekly_goal').value,
+                session_duration_minutes: document.getElementById('session_duration').value,
+                has_essay: document.getElementById('has_essay').checked,
+                reta_final_mode: document.getElementById('retaFinalMode').checked,
+                study_hours_per_day: {}
+            };
+            
+            log('📋 Campos básicos coletados');
+            
+            document.querySelectorAll('.hours-input').forEach(input => {
+                const day = input.dataset.day;
+                const value = parseInt(input.value, 10) || 0;
+                settings.study_hours_per_day[day] = value;
+                log(`  - Dia ${day}: ${value} horas`);
+            });
+            
+            log('✅ Função executada com sucesso');
+            return settings;
+        }
+
+        function validateSettings(settings) {
+            log('🔍 Validando configurações...');
+            
+            const errors = [];
+            
+            // Validar campos obrigatórios
+            if (!settings.daily_question_goal || settings.daily_question_goal < 0) {
+                errors.push('Meta diária deve ser um número positivo');
+            }
+            
+            if (!settings.weekly_question_goal || settings.weekly_question_goal < 0) {
+                errors.push('Meta semanal deve ser um número positivo');
+            }
+            
+            if (!settings.session_duration_minutes || settings.session_duration_minutes < 10) {
+                errors.push('Duração da sessão deve ser pelo menos 10 minutos');
+            }
+            
+            // Validar horas de estudo
+            const totalHours = Object.values(settings.study_hours_per_day).reduce((sum, h) => sum + (parseInt(h, 10) || 0), 0);
+            if (totalHours === 0) {
+                errors.push('Deve haver pelo menos uma hora de estudo por semana');
+            }
+            
+            log(`📊 Total de horas por semana: ${totalHours}`);
+            
+            if (errors.length === 0) {
+                log('✅ Validação passou com sucesso');
+            } else {
+                log(`❌ Validação falhou: ${errors.length} erro(s)`);
+                errors.forEach(error => log(`  - ${error}`));
+            }
+            
+            return { isValid: errors.length === 0, errors, totalHours };
+        }
+
+        // Event listeners
+        document.getElementById('testButton').addEventListener('click', () => {
+            log('🚀 Iniciando teste...');
+            
+            try {
+                const settings = getSettingsFromForm();
+                const validation = validateSettings(settings);
+                
+                // Mostrar resultados
+                const resultsDiv = document.getElementById('testResults');
+                const output = document.getElementById('resultsOutput');
+                
+                output.textContent = JSON.stringify({
+                    settings,
+                    validation,
+                    timestamp: new Date().toISOString()
+                }, null, 2);
+                
+                resultsDiv.classList.remove('hidden');
+                
+                log('✅ Teste concluído com sucesso');
+                
+            } catch (error) {
+                log(`❌ Erro durante o teste: ${error.message}`);
+                console.error('Erro completo:', error);
+            }
+        });
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            log('🚀 Página carregada, inicializando...');
+            renderHoursInputs();
+            log('✅ Campos de horas renderizados');
+            log('✅ Página pronta para testes');
+        });
+    </script>
+</body>
+</html>
