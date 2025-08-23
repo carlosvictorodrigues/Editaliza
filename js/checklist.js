@@ -470,3 +470,6 @@ const StudyChecklist = {
         return this.markAsCompleted();
     }
 };
+
+// Expor globalmente
+window.StudyChecklist = StudyChecklist;
