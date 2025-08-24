@@ -3,36 +3,55 @@ const path = require('path');
 const EmailProviders = require('./emailProviders');
 const { logger } = require('../utils/logger_fixed');
 
+// Import SendGrid service for production email delivery
+let SendGridService = null;
+try {
+    SendGridService = require('./sendGridService');
+} catch (error) {
+    console.warn('⚠️ SendGrid service not found, will use SMTP fallback only');
+}
+
 class EmailService {
     constructor() {
         this.provider = new EmailProviders();
         this.transporter = null;
+        this.sendGridService = SendGridService;
         this.isConfigured = false;
         this.initializeTransporter();
     }
 
     /**
-     * Initialize nodemailer transporter with Gmail SMTP
+     * Initialize email services (SendGrid + SMTP fallback)
      */
     async initializeTransporter() {
         try {
+            // Initialize SendGrid service (primary)
+            if (this.sendGridService) {
+                const sendGridStatus = this.sendGridService.getStatus();
+                console.log('📧 SendGrid status:', sendGridStatus);
+            }
+            
+            // Initialize SMTP fallback
             this.transporter = await this.provider.initializeTransporter();
-            this.isConfigured = !!this.transporter;
+            const smtpConfigured = !!this.transporter;
+            
+            // Email service is configured if either SendGrid or SMTP works
+            this.isConfigured = (this.sendGridService?.isConfigured || smtpConfigured);
             
             if (this.isConfigured) {
-                const status = await this.provider.getStatus();
-                logger.info('Email service initialized', {
-                    provider: status.provider,
-                    limits: status.limits
-                });
+                console.log('✅ Email service initialized with multiple providers:');
+                if (this.sendGridService?.isConfigured) {
+                    console.log('  - SendGrid API (primary): Ready');
+                }
+                if (smtpConfigured) {
+                    const status = await this.provider.getStatus();
+                    console.log(`  - SMTP fallback (${status.provider}): Ready`);
+                }
             } else {
-                logger.warn('Email service not configured - emails will be simulated');
+                console.warn('⚠️ No email providers configured - emails will be simulated');
             }
         } catch (error) {
-            logger.error('Failed to initialize email service', null, {
-                error: error.message,
-                provider: process.env.EMAIL_PROVIDER || 'gmail'
-            });
+            console.error('❌ Failed to initialize email service:', error.message);
             this.isConfigured = false;
         }
     }
@@ -382,36 +401,39 @@ Equipe Editaliza
      */
     async sendPasswordRecoveryEmail(email, userName, resetToken, baseUrl = null) {
         try {
-            // Use configured APP_URL or default to localhost
+            // 1. Try SendGrid first (preferred for production)
+            if (this.sendGridService?.isConfigured) {
+                console.log('🚀 Attempting to send via SendGrid API...');
+                const result = await this.sendGridService.sendPasswordRecoveryEmail(email, userName, resetToken, baseUrl);
+                if (result.success && !result.simulated) {
+                    console.log('✅ Email sent successfully via SendGrid!');
+                    return result;
+                }
+                console.log('⚠️ SendGrid not available, trying SMTP fallback...');
+            }
+
+            // 2. Fallback to SMTP if SendGrid fails or not configured
             const appUrl = baseUrl || process.env.APP_URL || 'http://localhost:3000';
             const resetLink = `${appUrl}/reset-password.html?token=${resetToken}`;
             const expirationTime = '1 hora';
 
-            // If email service is not configured, simulate sending
-            if (!this.isConfigured || !this.transporter) {
-                console.log('\n📧 SIMULAÇÃO DE E-MAIL - RECUPERAÇÃO DE SENHA');
-                console.log('═'.repeat(50));
-                console.log(`Para: ${email}`);
-                console.log(`Nome: ${userName || 'Usuário'}`);
-                console.log(`Link de recuperação: ${resetLink}`);
-                console.log(`Expira em: ${expirationTime}`);
-                console.log('═'.repeat(50));
-                console.log('ℹ️  Para enviar e-mails reais, configure as variáveis EMAIL_USER e EMAIL_PASS no .env');
-                return { success: true, simulated: true };
+            if (!this.transporter) {
+                console.log('⚠️ SMTP not configured, using simulation...');
+                return await this.simulatePasswordRecoveryEmail(email, userName, resetLink, expirationTime);
             }
 
-            // Verify connection before sending
+            // Verify SMTP connection
             const isConnected = await this.verifyConnection();
             if (!isConnected) {
-                throw new Error('Failed to verify email connection');
+                console.log('⚠️ SMTP connection failed, using simulation...');
+                return await this.simulatePasswordRecoveryEmail(email, userName, resetLink, expirationTime);
             }
 
+            // Send via SMTP
+            console.log('📧 Sending via SMTP fallback...');
             const htmlContent = this.generatePasswordResetHTML(userName, resetLink, expirationTime);
             const textContent = this.generatePasswordResetText(userName, resetLink, expirationTime);
 
-            // Update HTML to use CID for logo
-            const htmlWithCid = htmlContent.replace('${logoUrl}', 'cid:logo');
-            
             const mailOptions = {
                 from: {
                     name: 'Editaliza',
@@ -420,53 +442,62 @@ Equipe Editaliza
                 to: email,
                 subject: '🔐 Recuperação de Senha - Editaliza',
                 text: textContent,
-                html: htmlWithCid,
+                html: htmlContent,
                 priority: 'high',
                 headers: {
                     'X-Mailer': 'Editaliza Password Recovery System',
                     'X-Priority': '1'
-                },
-                attachments: [{
-                    filename: 'logo.png',
-                    path: path.join(__dirname, '../../public/logotipo.png'),
-                    cid: 'logo' // Same CID as referenced in HTML
-                }]
+                }
             };
 
             const result = await this.transporter.sendMail(mailOptions);
             
-            console.log('✅ Email de recuperação enviado com sucesso');
+            console.log('✅ Email de recuperação enviado via SMTP');
             console.log(`📧 Para: ${email}`);
             console.log(`📝 Message ID: ${result.messageId}`);
 
             return { 
                 success: true, 
                 simulated: false,
-                messageId: result.messageId 
+                messageId: result.messageId,
+                provider: 'smtp'
             };
 
         } catch (error) {
             console.error('❌ Erro ao enviar email de recuperação:', error.message);
             
-            // Log detailed error for debugging but don't expose to client
-            if (process.env.NODE_ENV === 'development') {
-                console.error('Email error details:', error);
-            }
-
-            // Fallback to simulation if email fails
+            // Final fallback to simulation
+            const appUrl = baseUrl || process.env.APP_URL || 'http://localhost:3000';
             const resetLink = `${appUrl}/reset-password.html?token=${resetToken}`;
-            console.log('\n📧 FALLBACK - SIMULAÇÃO DE E-MAIL');
-            console.log('═'.repeat(50));
-            console.log(`Para: ${email}`);
-            console.log(`Link de recuperação: ${resetLink}`);
-            console.log('═'.repeat(50));
-
-            return { 
-                success: true, 
-                simulated: true, 
-                error: error.message 
-            };
+            return await this.simulatePasswordRecoveryEmail(email, userName, resetLink, '1 hora', error.message);
         }
+    }
+
+    /**
+     * Simulate password recovery email (when no providers work)
+     */
+    async simulatePasswordRecoveryEmail(email, userName, resetLink, expirationTime, error = null) {
+        console.log('\n📧 SIMULAÇÃO DE E-MAIL - RECUPERAÇÃO DE SENHA');
+        console.log('═'.repeat(60));
+        console.log(`📧 DESTINATÁRIO: ${email}`);
+        console.log(`👤 NOME: ${userName || 'Usuário'}`);
+        console.log(`🔗 LINK DE RECUPERAÇÃO:`);
+        console.log(`   ${resetLink}`);
+        console.log(`⏰ EXPIRA EM: ${expirationTime}`);
+        if (error) {
+            console.log(`❌ ERRO: ${error}`);
+        }
+        console.log('═'.repeat(60));
+        console.log('✅ INSTRUÇÃO: Envie este link manualmente para o usuário');
+        console.log('🔧 Para automatizar: Configure SendGrid ou SMTP no .env');
+        console.log('═'.repeat(60));
+        
+        return { 
+            success: true, 
+            simulated: true,
+            resetLink,
+            error 
+        };
     }
 
     /**
@@ -934,30 +965,34 @@ Equipe Editaliza
      */
     async sendWelcomeEmail(email, userName) {
         try {
-            // If email service is not configured, simulate sending
-            if (!this.isConfigured || !this.transporter) {
-                console.log('\n📧 SIMULAÇÃO DE E-MAIL - BEM-VINDO');
-                console.log('═'.repeat(50));
-                console.log(`Para: ${email}`);
-                console.log(`Nome: ${userName || 'Usuário'}`);
-                console.log('Tipo: E-mail de boas-vindas');
-                console.log('═'.repeat(50));
-                console.log('ℹ️  Para enviar e-mails reais, configure as variáveis EMAIL_USER e EMAIL_PASS no .env');
-                return { success: true, simulated: true };
+            // 1. Try SendGrid first (preferred for production)
+            if (this.sendGridService?.isConfigured) {
+                console.log('🚀 Attempting to send welcome email via SendGrid API...');
+                const result = await this.sendGridService.sendWelcomeEmail(email, userName);
+                if (result.success && !result.simulated) {
+                    console.log('✅ Welcome email sent successfully via SendGrid!');
+                    return result;
+                }
+                console.log('⚠️ SendGrid not available, trying SMTP fallback...');
             }
 
-            // Verify connection before sending
+            // 2. Fallback to SMTP if SendGrid fails or not configured
+            if (!this.transporter) {
+                console.log('⚠️ SMTP not configured, using simulation...');
+                return await this.simulateWelcomeEmail(email, userName);
+            }
+
+            // Verify SMTP connection
             const isConnected = await this.verifyConnection();
             if (!isConnected) {
-                throw new Error('Failed to verify email connection');
+                console.log('⚠️ SMTP connection failed, using simulation...');
+                return await this.simulateWelcomeEmail(email, userName);
             }
 
-            const appUrl = process.env.APP_URL || 'http://localhost:3000';
+            // Send via SMTP
+            console.log('📧 Sending welcome email via SMTP fallback...');
             const htmlContent = this.generateWelcomeHTML(userName, email);
             const textContent = this.generateWelcomeText(userName, email);
-            
-            // Update HTML to use CID for logo
-            const htmlWithCid = htmlContent.replace('${logoUrl}', 'cid:logo');
 
             const mailOptions = {
                 from: {
@@ -967,52 +1002,57 @@ Equipe Editaliza
                 to: email,
                 subject: '🎉 Bem-vindo ao Editaliza - Sua jornada começa agora!',
                 text: textContent,
-                html: htmlWithCid,
+                html: htmlContent,
                 priority: 'normal',
                 headers: {
                     'X-Mailer': 'Editaliza Welcome System',
                     'List-Unsubscribe': '<mailto:unsubscribe@editaliza.com>'
-                },
-                attachments: [{
-                    filename: 'logo.png',
-                    path: path.join(__dirname, '../../public/logotipo.png'),
-                    cid: 'logo' // Same CID as referenced in HTML
-                }]
+                }
             };
 
             const result = await this.transporter.sendMail(mailOptions);
             
-            console.log('✅ Email de boas-vindas enviado com sucesso');
+            console.log('✅ Email de boas-vindas enviado via SMTP');
             console.log(`📧 Para: ${email}`);
             console.log(`📝 Message ID: ${result.messageId}`);
 
             return { 
                 success: true, 
                 simulated: false,
-                messageId: result.messageId 
+                messageId: result.messageId,
+                provider: 'smtp'
             };
 
         } catch (error) {
             console.error('❌ Erro ao enviar email de boas-vindas:', error.message);
             
-            // Log detailed error for debugging but don't expose to client
-            if (process.env.NODE_ENV === 'development') {
-                console.error('Welcome email error details:', error);
-            }
-
-            // Fallback to simulation if email fails
-            console.log('\n📧 FALLBACK - SIMULAÇÃO DE E-MAIL');
-            console.log('═'.repeat(50));
-            console.log(`Para: ${email}`);
-            console.log('Tipo: E-mail de boas-vindas');
-            console.log('═'.repeat(50));
-
-            return { 
-                success: true, 
-                simulated: true, 
-                error: error.message 
-            };
+            // Final fallback to simulation
+            return await this.simulateWelcomeEmail(email, userName, error.message);
         }
+    }
+
+    /**
+     * Simulate welcome email (when no providers work)
+     */
+    async simulateWelcomeEmail(email, userName, error = null) {
+        console.log('\n🎉 SIMULAÇÃO DE E-MAIL - BEM-VINDO');
+        console.log('═'.repeat(50));
+        console.log(`📧 DESTINATÁRIO: ${email}`);
+        console.log(`👤 NOME: ${userName || 'Usuário'}`);
+        console.log('📋 TIPO: E-mail de boas-vindas');
+        if (error) {
+            console.log(`❌ ERRO: ${error}`);
+        }
+        console.log('═'.repeat(50));
+        console.log('✅ USUÁRIO: Cadastrado com sucesso!');
+        console.log('🔧 Para envio automático: Configure SendGrid ou SMTP no .env');
+        console.log('═'.repeat(50));
+        
+        return { 
+            success: true, 
+            simulated: true,
+            error 
+        };
     }
 
     /**
