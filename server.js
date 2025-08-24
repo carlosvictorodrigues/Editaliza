@@ -771,7 +771,7 @@ const scheduleRoutes = require('./src/routes/scheduleRoutes');
 
 // Use modular routes
 app.use('/api/plans', planRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/schedules', scheduleRoutes);
 
