@@ -56,7 +56,7 @@ class SendGridService {
             const msg = {
                 to: email,
                 from: {
-                    email: 'suporte@editaliza.com.br',
+                    email: 'contato@editaliza.com.br',
                     name: 'Editaliza'
                 },
                 subject: '🔐 Recuperação de Senha - Editaliza',
@@ -164,7 +164,7 @@ class SendGridService {
             const msg = {
                 to: email,
                 from: {
-                    email: 'suporte@editaliza.com.br',
+                    email: 'contato@editaliza.com.br',
                     name: 'Editaliza'
                 },
                 subject: '✅ Teste SendGrid - Editaliza',
@@ -251,7 +251,7 @@ class SendGridService {
         
         <div class="footer">
             <p>Esta é uma mensagem automática do sistema Editaliza.</p>
-            <p>Para dúvidas: <a href="mailto:suporte@editaliza.com.br">suporte@editaliza.com.br</a></p>
+            <p>Para dúvidas: <a href="mailto:contato@editaliza.com.br">contato@editaliza.com.br</a></p>
         </div>
     </div>
 </body>
@@ -279,7 +279,7 @@ IMPORTANTE:
 
 ---
 Esta é uma mensagem automática do sistema Editaliza.
-Para suporte: suporte@editaliza.com.br
+Para suporte: contato@editaliza.com.br
         `.trim();
     }
 
@@ -391,7 +391,7 @@ PRONTO PARA COMEÇAR?
 Acesse: https://app.editaliza.com.br
 
 ---
-Para suporte: suporte@editaliza.com.br
+Para suporte: contato@editaliza.com.br
 Equipe Editaliza
         `.trim();
     }
