@@ -248,11 +248,8 @@ const app = {
         
         // Fazer logout no servidor (se possível)
         if (this.state.token) {
-            fetch(`${this.config.apiUrl}/api/logout`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.state.token}`
-                }
+            this.apiFetch('/api/logout', {
+                method: 'POST'
             }).catch(() => {
                 // Ignorar erros de logout
             });

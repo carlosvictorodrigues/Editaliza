@@ -1413,11 +1413,7 @@
                     console.error('❌ PROBLEMA: Seletor existe mas não tem opções válidas');
                     console.log('   - Tentando forçar carregamento emergencial...');
                     // Última tentativa emergencial
-                    fetch('/api/plans', {
-                        headers: {
-                            'Authorization': `Bearer ${localStorage.getItem('editaliza_token')}`
-                        }
-                    }).then(r => r.json()).then(plans => {
+                    app.apiFetch('/api/plans').then(plans => {
                         if (plans && plans.length > 0) {
                             finalPlanSelector.innerHTML = plans.map(p => `<option value="${p.id}">${p.plan_name}</option>`).join('');
                             finalPlanSelector.disabled = false;

@@ -148,7 +148,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('auth_success') === '1') {
                 // Buscar token da sessão segura ao invés da URL
-                fetch('/api/auth/session-token')
+                app.apiFetch('/api/auth/session-token')
                     .then(response => response.json())
                     .then(data => {
                         if (data.success && data.token) {

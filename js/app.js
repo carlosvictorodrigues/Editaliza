@@ -162,12 +162,37 @@ const app = {
     },
 
     async apiFetch(url, options = {}) {
+        // Obter token CSRF antes de fazer requisições POST/PUT/DELETE
+        let csrfToken = null;
+        const method = (options.method || 'GET').toUpperCase();
+        
+        if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+            try {
+                const csrfResponse = await fetch(`${this.config.apiUrl}/api/csrf-token`, {
+                    credentials: 'include'
+                });
+                if (csrfResponse.ok) {
+                    const csrfData = await csrfResponse.json();
+                    csrfToken = csrfData.csrfToken;
+                }
+            } catch (err) {
+                console.warn('Não foi possível obter token CSRF:', err);
+            }
+        }
+        
         const defaultOptions = {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${this.state.token}`
-            }
+            },
+            credentials: 'include' // Importante para cookies de sessão
         };
+        
+        // Adicionar token CSRF se disponível
+        if (csrfToken) {
+            defaultOptions.headers['x-csrf-token'] = csrfToken;
+        }
+        
         const config = { ...defaultOptions, ...options, headers: { ...defaultOptions.headers, ...options.headers } };
 
         try {
@@ -248,11 +273,8 @@ const app = {
         
         // Fazer logout no servidor (se possível)
         if (this.state.token) {
-            fetch(`${this.config.apiUrl}/api/logout`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.state.token}`
-                }
+            this.apiFetch('/api/logout', {
+                method: 'POST'
             }).catch(() => {
                 // Ignorar erros de logout
             });
