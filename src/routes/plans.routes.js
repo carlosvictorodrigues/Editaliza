@@ -10,7 +10,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { body, query } = require('express-validator');
+const { body } = require('express-validator');
 
 // Import middleware
 const { 
@@ -266,11 +266,11 @@ router.get('/:planId/schedule',
             );
             
             if (!plan.rows || plan.rows.length === 0) {
-                return res.status(404).json({ error: "Plano não encontrado ou não autorizado." });
+                return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
             }
 
             const result = await db.query(
-                "SELECT * FROM study_sessions WHERE study_plan_id = $1 ORDER BY session_date ASC, id ASC", 
+                'SELECT * FROM study_sessions WHERE study_plan_id = $1 ORDER BY session_date ASC, id ASC', 
                 [req.params.planId]
             );
             
@@ -284,37 +284,46 @@ router.get('/:planId/schedule',
             res.json(groupedByDate);
         } catch(err) {
             console.error('Erro ao buscar cronograma:', err);
-            res.status(500).json({ error: "Erro ao buscar cronograma" });
+            res.status(500).json({ error: 'Erro ao buscar cronograma' });
         }
     }
 );
 
 /**
- * 🚧 ROTAS COMPLEXAS AINDA NÃO MIGRADAS
+ * 📝 ROTAS COMPLEXAS EM MIGRAÇÃO - FASE 5 WAVE 3
  * 
- * As seguintes rotas são EXTREMAMENTE complexas e serão migradas em etapas futuras:
- * - POST /plans/:planId/generate (Algoritmo de geração de cronograma - 500+ linhas)
- * - GET /plans/:planId/replan-preview (Preview de replanejamento inteligente)
- * - POST /plans/:planId/replan (Replanejamento com estratégia otimizada)
- * - GET /plans/:planId/review_data (Dados para revisão com CTEs complexas)
- * - GET /plans/:planId/detailed_progress (Progresso detalhado com múltiplas queries)
- * - GET /plans/:planId/realitycheck (Diagnóstico de performance com análises complexas)
+ * ✅ MIGRADAS E APRIMORADAS:
+ * - GET /plans/:planId/progress (Progresso avançado com PlanService)
+ * - GET /plans/:planId/goal_progress (Metas com timezone brasileiro correto)
+ * - GET /plans/:planId/realitycheck (Diagnóstico preditivo avançado)
+ * - GET /plans/:planId/schedule-preview (Preview com análises detalhadas)
+ * - GET /plans/:planId/performance (Métricas de performance completas)
+ * - POST /plans/:planId/replan-preview (Preview de replanejamento inteligente)
  * 
- * Estas rotas permanecem no server.js até serem migradas individualmente
- * devido à sua extrema complexidade e criticidade para o sistema.
+ * 🔄 AINDA NO SERVER.JS (próximas waves):
+ * - POST /plans/:planId/generate (Algoritmo de geração - 500+ linhas)
+ * - POST /plans/:planId/replan (Replanejamento executivo)
+ * - GET /plans/:planId/review_data (Dados de revisão complexos)
+ * - GET /plans/:planId/detailed_progress (Progresso ultra-detalhado)
+ * - GET /plans/:planId/activity_summary (Resumo de atividades)
  */
 
 /**
- * 📝 ROTAS JÁ MIGRADAS EM OUTRAS FASES
+ * 📝 ROTAS MIGRADAS - FASE 5 WAVE 3 STATUS
  * 
- * As seguintes rotas JÁ foram migradas para outros controllers:
- * ✅ GET /plans/:planId/subjects -> planRoutes.js (existente)
- * ✅ GET /plans/:planId/progress -> planRoutes.js (existente) 
- * ✅ GET /plans/:planId/goal_progress -> planRoutes.js (existente)
- * ✅ GET /plans/:planId/question_radar -> planRoutes.js (existente)
- * ✅ GET /plans/:planId/overdue_check -> planRoutes.js (✅ IMPLEMENTADO)
- * ✅ GET /plans/:planId/activity_summary -> planRoutes.js (existente)
- * ✅ GET /plans/:planId/schedule -> scheduleRoutes.js
+ * ✅ MIGRADAS E APRIMORADAS COM PLANSERVICE:
+ * - GET /plans/:planId/overdue_check (Enhanced com algoritmos avançados)
+ * - GET /plans/:planId/gamification (Enhanced com sistema de ranks humorístico)
+ * - GET /plans/:planId/progress (Enhanced com cálculos precisos)
+ * - GET /plans/:planId/goal_progress (Enhanced com timezone brasileiro)
+ * - GET /plans/:planId/realitycheck (Enhanced com projeções preditivas)
+ * - GET /plans/:planId/schedule-preview (Enhanced com análises de cobertura)
+ * - GET /plans/:planId/performance (Enhanced com métricas avançadas)
+ * - POST /plans/:planId/replan-preview (Enhanced com algoritmos de replanejamento)
+ * 
+ * 🔄 MANTIDAS EM OUTROS CONTROLLERS:
+ * - GET /plans/:planId/schedule -> Tem implementação inline neste arquivo
+ * - POST /plans/:planId/generate -> Migrada anteriormente para este controller
  */
 
 module.exports = router;

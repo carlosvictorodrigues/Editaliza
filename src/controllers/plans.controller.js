@@ -21,14 +21,16 @@ function getBrazilianDateString() {
     return `${year}-${month}-${day}`;
 }
 
-// FASE 4.1 - REPOSITORY INTEGRATION
+// FASE 5 WAVE 3 - PLANSERVICE INTEGRATION
 const db = require('../../database-postgresql.js');
 const { createRepositories } = require('../repositories');
 const DatabaseAdapter = require('../adapters/database.adapter');
+const PlanService = require('../services/PlanService');
 
-// Inicializar repositories e adapter
+// Inicializar repositories, adapter e services
 const repos = createRepositories(db);
 const dbAdapter = new DatabaseAdapter(repos, db);
+const planService = new PlanService(repos, db);
 
 // Métodos de transição - gradualmente substituir por repositories diretos
 const dbGet = dbAdapter.dbGet;
@@ -546,7 +548,7 @@ const getExcludedTopics = async (req, res) => {
 
 /**
  * GET /api/plans/:planId/overdue_check - Verificar tarefas atrasadas
- * FASE 4.1 - MIGRADO PARA USAR REPOSITORY
+ * FASE 5 WAVE 3 - ENHANCED WITH PLANSERVICE
  */
 const getOverdueCheck = async (req, res) => {
     try {
@@ -555,23 +557,20 @@ const getOverdueCheck = async (req, res) => {
         
         logger.info(`[OVERDUE_CHECK] Verificando tarefas atrasadas - Plano: ${planId}, Usuário: ${userId}`);
         
-        // NOVA ABORDAGEM: Verificar autorização com repository
-        const plan = await repos.plan.findByIdAndUserId(planId, userId);
-        if (!plan) {
-            logger.warn(`[OVERDUE_CHECK] Plano não encontrado: ${planId}`);
-            return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
-        }
+        // ENHANCED: Usar PlanService para lógica de negócio avançada
+        const overdueData = await planService.checkOverdue(planId, userId);
         
-        // Usar Brazilian timezone para cálculo preciso de atraso
-        const todayStr = getBrazilianDateString();
-        logger.info(`[OVERDUE_CHECK] Data brasileira atual: ${todayStr}`);
+        logger.info(`[OVERDUE_CHECK] Resultado do service:`, {
+            count: overdueData.count,
+            needsReplanning: overdueData.needsReplanning
+        });
         
-        // NOVA ABORDAGEM: Usar repository para buscar sessões atrasadas
-        const overdueCount = await repos.session.countOverdueSessions(planId, todayStr);
-        
-        logger.info(`[OVERDUE_CHECK] Sessões atrasadas encontradas: ${overdueCount}`);
-        
-        res.json({ count: overdueCount });
+        // ENHANCED: Resposta mais rica com dados do service
+        res.json({
+            count: overdueData.count,
+            needsReplanning: overdueData.needsReplanning,
+            sessions: overdueData.sessions.slice(0, 5) // Primeiras 5 para não sobrecarregar
+        });
         
     } catch (error) {
         logger.error('[OVERDUE_CHECK] Erro ao verificar tarefas atrasadas:', {
@@ -580,7 +579,19 @@ const getOverdueCheck = async (req, res) => {
             planId: req.params.planId,
             userId: req.user?.id
         });
-        res.status(500).json({ error: 'Erro ao verificar tarefas atrasadas' });
+        
+        // FALLBACK: Se service falhar, usar abordagem original
+        try {
+            const plan = await repos.plan.findByIdAndUserId(req.params.planId, req.user.id);
+            if (!plan) {
+                return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+            }
+            
+            const overdueCount = await repos.session.countOverdueSessions(req.params.planId, getBrazilianDateString());
+            res.json({ count: overdueCount });
+        } catch (fallbackError) {
+            res.status(500).json({ error: 'Erro ao verificar tarefas atrasadas' });
+        }
     }
 };
 
@@ -590,233 +601,38 @@ const getOverdueCheck = async (req, res) => {
 
 /**
  * GET /api/plans/:planId/gamification - Dados de gamificação
+ * FASE 5 WAVE 3 - ENHANCED WITH PLANSERVICE
  */
 const getGamification = async (req, res) => {
     const planId = req.params.planId;
     const userId = req.user.id;
 
     try {
-        // Verificar se o plano pertence ao usuário
-        const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
-        if (!plan) {
-            return res.status(404).json({ error: 'Plano não encontrado.' });
-        }
-
-        // Buscar tópicos concluídos únicos para XP base
-        const completedTopicsResult = await dbGet(`
-            SELECT COUNT(DISTINCT ss.topic_id) as completed_topics
-            FROM study_sessions ss
-            WHERE ss.study_plan_id = ?
-            AND ss.status = 'Concluído'
-            AND ss.session_type = 'Novo Tópico'
-            AND ss.topic_id IS NOT NULL
-        `, [planId]);
-
-        const completedTopics = completedTopicsResult?.completed_topics || 0;
-
-        // Buscar sessões concluídas para bônus de sequência
-        const completedSessions = await dbAll(`
-            SELECT 
-                session_date,
-                session_type,
-                questions_solved,
-                time_spent_minutes
-            FROM study_sessions
-            WHERE study_plan_id = ? 
-            AND status = 'Concluído'
-            ORDER BY session_date DESC, id DESC
-        `, [planId]);
-
-        // Calcular XP base (100 por tópico único concluído)
-        const baseXP = completedTopics * 100;
-
-        // Calcular bônus de questões (1 XP por questão)
-        const totalQuestions = completedSessions.reduce((sum, session) => {
-            return sum + (parseInt(session.questions_solved) || 0);
-        }, 0);
-
-        // Buscar estatísticas de hoje para missões diárias
-        const todayStr = getBrazilianDateString();
-        const todayTasksResult = await dbGet(`
-            SELECT 
-                COUNT(*) as total_tasks,
-                SUM(CASE WHEN status = 'Concluído' THEN 1 ELSE 0 END) as completed_tasks
-            FROM study_sessions
-            WHERE study_plan_id = ? AND session_date = ?
-        `, [planId, todayStr]);
-
-        // Estatísticas gerais para achievements
-        const allCompletedSessionsResult = await dbGet(`
-            SELECT 
-                COUNT(*) as total_sessions,
-                COUNT(DISTINCT session_date) as unique_days,
-                SUM(COALESCE(questions_solved, 0)) as total_questions_solved,
-                SUM(COALESCE(time_spent_minutes, 0)) as total_time_minutes
-            FROM study_sessions
-            WHERE study_plan_id = ? AND status = 'Concluído'
-        `, [planId]);
-
-        const stats = allCompletedSessionsResult || {
-            total_sessions: 0,
-            unique_days: 0,
-            total_questions_solved: 0,
-            total_time_minutes: 0
-        };
-
-        // Sistema de achievements baseado em marcos
-        const achievements = [];
-
-        // Achievement: Primeiros Passos
-        if (stats.total_sessions >= 1) {
-            achievements.push({
-                id: 'first_session',
-                name: 'Primeiros Passos',
-                description: 'Complete sua primeira sessão de estudos',
-                icon: '🎯',
-                unlocked: true,
-                xpBonus: 50
-            });
-        }
-
-        // Achievement: Dedicação
-        if (stats.total_sessions >= 10) {
-            achievements.push({
-                id: 'dedication',
-                name: 'Dedicação',
-                description: 'Complete 10 sessões de estudo',
-                icon: '💪',
-                unlocked: true,
-                xpBonus: 100
-            });
-        }
-
-        // Achievement: Mestre das Questões
-        if (stats.total_questions_solved >= 100) {
-            achievements.push({
-                id: 'question_master',
-                name: 'Mestre das Questões',
-                description: 'Resolva 100 questões',
-                icon: '🧠',
-                unlocked: true,
-                xpBonus: 200
-            });
-        }
-
-        // Achievement: Maratona
-        if (stats.total_time_minutes >= 600) { // 10 horas
-            achievements.push({
-                id: 'marathon',
-                name: 'Maratonista',
-                description: 'Estude por mais de 10 horas',
-                icon: '🏃‍♂️',
-                unlocked: true,
-                xpBonus: 150
-            });
-        }
-
-        // Achievement: Consistência
-        if (stats.unique_days >= 7) {
-            achievements.push({
-                id: 'consistency',
-                name: 'Consistência',
-                description: 'Estude em 7 dias diferentes',
-                icon: '📅',
-                unlocked: true,
-                xpBonus: 100
-            });
-        }
-
-        // Calcular XP de achievements
-        const achievementXP = achievements.reduce((sum, ach) => sum + (ach.xpBonus || 0), 0);
-
-        // Calcular sequência de dias únicos
-        const uniqueStudyDaysResult = await dbGet(`
-            SELECT COUNT(DISTINCT session_date) as unique_days
-            FROM study_sessions 
-            WHERE study_plan_id = ? AND status = 'Concluído'
-            AND session_date >= CURRENT_DATE - INTERVAL '30 days'
-        `, [planId]);
-
-        const currentStreak = uniqueStudyDaysResult?.unique_days || 0;
-
-        // Calcular tempo total de estudo em horas
-        const totalStudyTimeResult = await dbGet(`
-            SELECT SUM(COALESCE(time_spent_minutes, 0)) as total_minutes
-            FROM study_sessions
-            WHERE study_plan_id = ? AND status = 'Concluído'
-        `, [planId]);
-
-        const totalStudyHours = Math.floor((totalStudyTimeResult?.total_minutes || 0) / 60);
-
-        // XP total
-        const totalXP = baseXP + totalQuestions + achievementXP;
-
-        // Calcular nível baseado no XP (cada nível requer 1000 XP a mais que o anterior)
-        let level = 1;
-        let xpForNextLevel = 1000;
-        let tempXP = totalXP;
-
-        while (tempXP >= xpForNextLevel) {
-            tempXP -= xpForNextLevel;
-            level++;
-            xpForNextLevel += 500; // Cada nível fica progressivamente mais difícil
-        }
-
-        const currentLevelXP = totalXP - tempXP;
-        const nextLevelXP = xpForNextLevel;
-
-        // Missões diárias
-        const dailyMissions = [
-            {
-                id: 'daily_study',
-                name: 'Sessão Diária',
-                description: 'Complete pelo menos 1 sessão de estudo hoje',
-                progress: todayTasksResult?.completed_tasks || 0,
-                target: 1,
-                completed: (todayTasksResult?.completed_tasks || 0) >= 1,
-                xpReward: 50
-            },
-            {
-                id: 'daily_questions',
-                name: 'Questões do Dia',
-                description: 'Resolva pelo menos 10 questões hoje',
-                progress: Math.min(10, totalQuestions), // Simplificação para demo
-                target: 10,
-                completed: totalQuestions >= 10,
-                xpReward: 75
-            }
-        ];
-
-        const response = {
-            level: level,
-            totalXP: totalXP,
-            currentLevelXP: currentLevelXP,
-            nextLevelXP: nextLevelXP,
-            xpProgress: Math.round((currentLevelXP / nextLevelXP) * 100),
-            
-            stats: {
-                completedTopics: completedTopics,
-                totalSessions: stats.total_sessions || 0,
-                totalQuestions: stats.total_questions_solved || 0,
-                totalStudyHours: totalStudyHours,
-                currentStreak: currentStreak
-            },
-            
-            achievements: achievements,
-            dailyMissions: dailyMissions,
-            
-            breakdown: {
-                baseXP: baseXP,
-                questionXP: totalQuestions,
-                achievementXP: achievementXP
-            }
-        };
-
-        return res.json(response);
-
+        // ENHANCED: Usar PlanService para dados de gamificação completos
+        const gamificationData = await planService.getGamificationData(planId, userId);
+        
+        // ENHANCED: Log de performance da gamificação
+        logger.info(`[GAMIFICATION] Dados carregados para plano ${planId}:`, {
+            level: gamificationData.concurseiroLevel,
+            streak: gamificationData.studyStreak,
+            completedTopics: gamificationData.completedTopicsCount,
+            achievements: gamificationData.achievementsCount
+        });
+        
+        return res.json(gamificationData);
+        
     } catch (error) {
-        console.error('Erro ao buscar dados de gamificação:', error);
-        return res.status(500).json({ 'error': 'Erro ao buscar dados de gamificação.' });
+        logger.error('[GAMIFICATION] Erro ao carregar dados:', error.message);
+        return res.status(500).json({ 
+            error: 'Erro ao buscar dados de gamificação',
+            fallback: {
+                level: 1,
+                totalXP: 0,
+                stats: { completedTopics: 0, totalSessions: 0 },
+                achievements: [],
+                dailyMissions: []
+            }
+        });
     }
 };
 
@@ -883,6 +699,198 @@ const getShareProgress = async (req, res) => {
     } catch (error) {
         console.error('Erro ao gerar dados de compartilhamento:', error);
         res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+};
+
+/**
+ * 🔄 ENHANCED ENDPOINTS - POWERED BY PLANSERVICE
+ * FASE 5 WAVE 3 - Novos endpoints com lógica avançada do service
+ */
+
+/**
+ * GET /api/plans/:planId/progress - Progresso do plano com métricas avançadas
+ * ENHANCED: Usa PlanService para cálculos precisos e métricas detalhadas
+ */
+const getPlanProgress = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        
+        logger.info(`[PLAN_PROGRESS] Buscando progresso para plano ${planId}`);
+        
+        // ENHANCED: Usar PlanService para progresso detalhado
+        const progressData = await planService.calculateProgress(planId, userId);
+        
+        res.json(progressData);
+        
+    } catch (error) {
+        logger.error('[PLAN_PROGRESS] Erro ao buscar progresso:', {
+            error: error.message,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        
+        if (error.message.includes('não encontrado')) {
+            return res.status(404).json({ error: error.message });
+        }
+        
+        res.status(500).json({ error: 'Erro ao buscar progresso do plano' });
+    }
+};
+
+/**
+ * GET /api/plans/:planId/goal_progress - Progresso de metas diárias/semanais
+ * ENHANCED: Usa PlanService para cálculos de timezone brasileiro corretos
+ */
+const getGoalProgress = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        
+        logger.info(`[GOAL_PROGRESS] Buscando metas para plano ${planId}`);
+        
+        // ENHANCED: Usar PlanService para cálculos de meta precisos
+        const goalData = await planService.getGoalProgress(planId, userId);
+        
+        res.json(goalData);
+        
+    } catch (error) {
+        logger.error('[GOAL_PROGRESS] Erro ao buscar metas:', {
+            error: error.message,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        
+        if (error.message.includes('não encontrado')) {
+            return res.status(404).json({ error: error.message });
+        }
+        
+        res.status(500).json({ error: 'Erro ao buscar progresso de metas' });
+    }
+};
+
+/**
+ * GET /api/plans/:planId/realitycheck - Diagnóstico de performance avançado
+ * ENHANCED: Usa PlanService para análise preditiva e projeções realistas
+ */
+const getRealityCheck = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        
+        logger.info(`[REALITY_CHECK] Executando diagnóstico para plano ${planId}`);
+        
+        // ENHANCED: Usar PlanService para análise avançada de realidade
+        const realityData = await planService.getRealityCheck(planId, userId);
+        
+        res.json(realityData);
+        
+    } catch (error) {
+        logger.error('[REALITY_CHECK] Erro no diagnóstico:', {
+            error: error.message,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        
+        if (error.message.includes('não encontrado')) {
+            return res.status(404).json({ error: error.message });
+        }
+        
+        res.status(500).json({ error: 'Erro no diagnóstico de performance' });
+    }
+};
+
+/**
+ * GET /api/plans/:planId/schedule-preview - Preview do cronograma com análises
+ * ENHANCED: Usa PlanService para análise detalhada de cobertura e fases
+ */
+const getSchedulePreview = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        
+        logger.info(`[SCHEDULE_PREVIEW] Gerando preview para plano ${planId}`);
+        
+        // ENHANCED: Usar PlanService para preview detalhado
+        const previewData = await planService.getSchedulePreview(planId, userId);
+        
+        res.json(previewData);
+        
+    } catch (error) {
+        logger.error('[SCHEDULE_PREVIEW] Erro no preview:', {
+            error: error.message,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        
+        if (error.message.includes('não encontrado')) {
+            return res.status(404).json({ error: error.message });
+        }
+        
+        res.status(500).json({ error: 'Erro ao gerar preview do cronograma' });
+    }
+};
+
+/**
+ * GET /api/plans/:planId/performance - Métricas de performance detalhadas
+ * ENHANCED: Usa PlanService para cálculos avançados de ritmo e projeções
+ */
+const getPerformance = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        
+        logger.info(`[PERFORMANCE] Calculando métricas para plano ${planId}`);
+        
+        // ENHANCED: Usar PlanService para métricas de performance
+        const performanceData = await planService.getPerformance(planId, userId);
+        
+        res.json(performanceData);
+        
+    } catch (error) {
+        logger.error('[PERFORMANCE] Erro nas métricas:', {
+            error: error.message,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        
+        if (error.message.includes('não encontrado')) {
+            return res.status(404).json({ error: error.message });
+        }
+        
+        res.status(500).json({ error: 'Erro ao calcular métricas de performance' });
+    }
+};
+
+/**
+ * POST /api/plans/:planId/replan-preview - Preview de replanejamento inteligente
+ * ENHANCED: Usa PlanService para algoritmos de replanejamento avançados
+ */
+const getReplanPreview = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        const options = req.body || {};
+        
+        logger.info(`[REPLAN_PREVIEW] Gerando preview de replanejamento para plano ${planId}`);
+        
+        // ENHANCED: Usar PlanService para preview de replanejamento
+        const replanData = await planService.replanSchedule(planId, userId, { ...options, preview: true });
+        
+        res.json(replanData);
+        
+    } catch (error) {
+        logger.error('[REPLAN_PREVIEW] Erro no preview de replanejamento:', {
+            error: error.message,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        
+        if (error.message.includes('não encontrado')) {
+            return res.status(404).json({ error: error.message });
+        }
+        
+        res.status(500).json({ error: 'Erro no preview de replanejamento' });
     }
 };
 
@@ -1069,11 +1077,19 @@ module.exports = {
     
     // Replanejamento e Controle de Atrasos
     getOverdueCheck,
+    getReplanPreview,
     
     // Estatísticas e Análises
     getPlanStatistics,
     getPlanExclusions,
     getExcludedTopics,
+    
+    // ENHANCED ENDPOINTS - FASE 5 WAVE 3
+    getPlanProgress,
+    getGoalProgress,
+    getRealityCheck,
+    getSchedulePreview,
+    getPerformance,
     
     // Gamificação e Compartilhamento
     getGamification,
