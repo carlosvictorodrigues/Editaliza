@@ -231,6 +231,49 @@ router.get('/:planId/share-progress',
 );
 
 /**
+ * @route GET /plans/:planId/schedule
+ * @desc Get study schedule grouped by date
+ * @access Private
+ * @note Route was missing from modular implementation - added for compatibility
+ */
+router.get('/:planId/schedule',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    async (req, res) => {
+        try {
+            const db = req.app.locals.db;
+            // PostgreSQL query com parâmetros $1, $2
+            const plan = await db.query(
+                'SELECT id FROM study_plans WHERE id = $1 AND user_id = $2', 
+                [req.params.planId, req.user.id]
+            );
+            
+            if (!plan.rows || plan.rows.length === 0) {
+                return res.status(404).json({ error: "Plano não encontrado ou não autorizado." });
+            }
+
+            const result = await db.query(
+                "SELECT * FROM study_sessions WHERE study_plan_id = $1 ORDER BY session_date ASC, id ASC", 
+                [req.params.planId]
+            );
+            
+            const groupedByDate = result.rows.reduce((acc, session) => {
+                const date = session.session_date;
+                if (!acc[date]) acc[date] = [];
+                acc[date].push(session);
+                return acc;
+            }, {});
+            
+            res.json(groupedByDate);
+        } catch(err) {
+            console.error('Erro ao buscar cronograma:', err);
+            res.status(500).json({ error: "Erro ao buscar cronograma" });
+        }
+    }
+);
+
+/**
  * 🚧 ROTAS COMPLEXAS AINDA NÃO MIGRADAS
  * 
  * As seguintes rotas são EXTREMAMENTE complexas e serão migradas em etapas futuras:

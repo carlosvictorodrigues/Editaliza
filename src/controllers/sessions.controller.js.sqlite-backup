@@ -453,7 +453,7 @@ class SessionsController {
                     )
                     SELECT COUNT(*) as streak
                     FROM recent_dates
-                    WHERE CURRENT_DATE - INTERVAL '1 days' <= study_date
+                    WHERE DATE('now', '-1 day') <= study_date
                     AND (prev_date IS NULL OR DATE(prev_date, '+1 day') = study_date)
                 `;
                 

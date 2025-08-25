@@ -369,7 +369,7 @@ class ManualReschedulingTester {
         FROM users u
         JOIN study_plans sp ON u.id = sp.user_id
         JOIN study_sessions ss ON sp.id = ss.study_plan_id
-        WHERE ss.status = 'Pendente' AND ss.session_date < CURRENT_DATE
+        WHERE ss.status = 'Pendente' AND ss.session_date < date('now')
         GROUP BY u.id, u.email, u.name
         ORDER BY overdue_count DESC
       `);
@@ -402,7 +402,7 @@ class ManualReschedulingTester {
         this.query('SELECT COUNT(*) as count FROM study_sessions'),
         this.query(`
           SELECT COUNT(*) as count FROM study_sessions 
-          WHERE status = 'Pendente' AND session_date < CURRENT_DATE
+          WHERE status = 'Pendente' AND session_date < date('now')
         `)
       ]);
 
@@ -423,8 +423,8 @@ class ManualReschedulingTester {
           sp.exam_date,
           u.email,
           COUNT(ss.id) as total_sessions,
-          COUNT(CASE WHEN ss.status = 'Pendente' AND ss.session_date < CURRENT_DATE THEN 1 END) as overdue,
-          COUNT(CASE WHEN ss.status = 'Pendente' AND ss.session_date >= CURRENT_DATE THEN 1 END) as future,
+          COUNT(CASE WHEN ss.status = 'Pendente' AND ss.session_date < date('now') THEN 1 END) as overdue,
+          COUNT(CASE WHEN ss.status = 'Pendente' AND ss.session_date >= date('now') THEN 1 END) as future,
           COUNT(CASE WHEN ss.status = 'Concluída' THEN 1 END) as completed
         FROM study_plans sp
         JOIN users u ON sp.user_id = u.id

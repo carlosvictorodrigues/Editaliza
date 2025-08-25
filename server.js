@@ -18,6 +18,15 @@ function getBrazilianDateString() {
 
 const express = require('express');
 const db = require('./database-postgresql.js');
+
+// ============================================================================
+// INTEGRAÇÃO DOS REPOSITORIES - FASE 4
+// ============================================================================
+const { createRepositories } = require('./src/repositories');
+const repos = createRepositories(db);
+// Disponibilizar repositories globalmente para migração gradual
+global.repos = repos;
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
@@ -778,14 +787,14 @@ const adminRoutes = require('./src/routes/admin.routes'); // FASE 8 - ADMINISTRA
 const scheduleGenerationRoutes = require('./src/routes/schedule.routes'); // FASE 9 - GERAÇÃO DE CRONOGRAMA
 
 // Use modular routes
-app.use('/api/plans', planRoutes); // Rotas existentes (analytics, etc)
-app.use('/api/plans', plansRoutes); // NOVAS ROTAS CONSOLIDADAS (CRUD, etc)
-app.use('/', subjectsRoutes); // FASE 4 - DISCIPLINAS (rotas já incluem /api)
-app.use('/', topicsRoutes); // FASE 4 - TÓPICOS (rotas já incluem /api)
+// app.use('/api/plans', planRoutes); // REMOVIDO - arquivo órfão deletado
+app.use('/api/plans', plansRoutes); // Rotas modulares ativas // NOVAS ROTAS CONSOLIDADAS (CRUD, etc)
+app.use('/api', subjectsRoutes); // FASE 4 - DISCIPLINAS
+app.use('/api', topicsRoutes); // FASE 4 - TÓPICOS
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 // app.use('/api/schedules', scheduleRoutes); // COMENTADO - Conflito com schedule.routes.js
-app.use('/', sessionsRoutes); // FASE 5 - SESSÕES (rotas já incluem /api)
+app.use('/api', sessionsRoutes); // FASE 5 - SESSÕES
 app.use('/api', statisticsRoutes); // FASE 6 - ESTATÍSTICAS E MÉTRICAS
 app.use('/api', gamificationRoutes); // FASE 7 - GAMIFICAÇÃO (XP, níveis, achievements)
 app.use('/api/admin', adminRoutes); // FASE 8 - ADMINISTRAÇÃO (email, system, users, config, audit)
@@ -3320,167 +3329,167 @@ END LEGACY ROUTE COMMENT */
 
 // Atualizar status de múltiplas sessões - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/scheduleRoutes.js
-app.patch('/api/sessions/batch_update_status', 
-    authenticateToken,
-    body('sessions').isArray().withMessage('O corpo deve conter um array de sessões'),
-    body('sessions.*.id').isInt().withMessage('ID da sessão inválido'),
-    body('sessions.*.status').isIn(['Pendente', 'Concluído']).withMessage('Status inválido'),
-    handleValidationErrors,
-    async (req, res) => {
-        const { sessions } = req.body;
-        const userId = req.user.id;
 
-        try {
-            await dbRun('BEGIN');
-            
-            const updateSql = `
-                UPDATE study_sessions 
-                SET status = ? 
-                WHERE id = ? AND EXISTS (
-                    SELECT 1 FROM study_plans
-                    WHERE study_plans.id = study_sessions.study_plan_id
-                    AND study_plans.user_id = ?
-                )
-            `;
 
-            for (const session of sessions) {
-                const sessionId = parseInt(session.id, 10);
-                if (isNaN(sessionId)) continue;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 // Use dbRun instead of prepared statement
-                const result = await dbRun(updateSql, [session.status, sessionId, userId]);
-                if (result.changes === 0) {
-                    console.warn(`Sessão ${sessionId} não encontrada ou não autorizada para o usuário ${userId}.`);
-                }
-            }
-            
-            await dbRun('COMMIT');
-            
-            res.json({ message: "Missão Cumprida! Seu cérebro agradece. 💪" });
 
-        } catch (error) {
-            await dbRun('ROLLBACK');
-            console.error("ERRO no /sessions/batch_update_status:", error);
-            res.status(500).json({ "error": "Ocorreu um erro no servidor ao atualizar as sessões." });
-        }
-});
-END LEGACY ROUTE COMMENT */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Agendar uma sessão de reforço - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/scheduleRoutes.js
-app.post('/api/sessions/:sessionId/reinforce', 
-    authenticateToken,
-    validators.numericId('sessionId'),
-    handleValidationErrors,
-    async (req, res) => {
-        const sessionId = req.params.sessionId;
-        try {
-            const session = await dbGet('SELECT ss.* FROM study_sessions ss JOIN study_plans sp ON ss.study_plan_id = sp.id WHERE ss.id = ? AND sp.user_id = ?', [sessionId, req.user.id]);
-            if (!session || !session.topic_id) return res.status(404).json({ error: "Sessão original não encontrada ou não é um tópico estudável." });
-            
-            const reinforceDate = new Date();
-            reinforceDate.setDate(reinforceDate.getDate() + 3);
-            const reinforceDateStr = reinforceDate.toISOString().split('T')[0];
-            
-            const sql = 'INSERT INTO study_sessions (study_plan_id, topic_id, subject_name, topic_description, session_date, session_type, status) VALUES (?, ?, ?, ?, ?, ?, ?)';
-            await dbRun(sql, [session.study_plan_id, session.topic_id, session.subject_name, session.topic_description, reinforceDateStr, 'Reforço Extra', 'Pendente']);
-            
-            res.status(201).json({ message: `Sessão de reforço agendada para ${reinforceDate.toLocaleDateString('pt-BR')}!` });
-        } catch (error) {
-            console.error('Erro ao agendar reforço:', error);
-            res.status(500).json({ error: "Erro ao agendar a sessão de reforço." });
-        }
-});
-END LEGACY ROUTE COMMENT */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Adiar uma sessão de estudo - MIGRATED TO MODULAR ARCHITECTURE
 // Rota genérica para atualizar status de sessão
-app.patch('/api/sessions/:sessionId', 
-    authenticateToken,
-    validators.numericId('sessionId'),
-    handleValidationErrors,
-    async (req, res) => {
-        const sessionId = req.params.sessionId;
-        const { status } = req.body;
 
-        try {
+
+
+
+
+
+
+
+
             // Verificar se a sessão existe e pertence ao usuário
-            const session = await dbGet(`
-                SELECT ss.* FROM study_sessions ss
-                JOIN study_plans sp ON ss.study_plan_id = sp.id
-                WHERE ss.id = ? AND sp.user_id = ?
-            `, [sessionId, req.user.id]);
 
-            if (!session) {
-                return res.status(404).json({ error: "Sessão não encontrada ou não autorizada." });
-            }
+
+
+
+
+
+
+
+
 
             // Atualizar status da sessão
-            await dbRun('UPDATE study_sessions SET status = ? WHERE id = ?', [status, sessionId]);
 
-            res.json({ message: "Sessão atualizada com sucesso!", status });
-        } catch (error) {
-            console.error('Erro ao atualizar sessão:', error);
-            res.status(500).json({ error: "Erro ao atualizar a sessão." });
-        }
-    }
-);
+
+
+
+
+
+
+
+
 
 /* LEGACY ROUTE - REPLACED BY src/routes/scheduleRoutes.js
-app.patch('/api/sessions/:sessionId/postpone', 
-    authenticateToken,
-    validators.numericId('sessionId'),
-    body('days').custom((value) => {
-        return value === 'next' || (Number.isInteger(Number(value)) && Number(value) > 0 && Number(value) <= 30);
-    }).withMessage('Número de dias inválido'),
-    handleValidationErrors,
-    async (req, res) => {
-        const { days } = req.body;
-        const sessionId = req.params.sessionId;
 
-        try {
-            const session = await dbGet('SELECT * FROM study_sessions WHERE id = ?', [sessionId]);
-            if (!session) return res.status(404).json({ error: "Sessão não encontrada." });
 
-            const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [session.study_plan_id, req.user.id]);
-            if (!plan) return res.status(403).json({ error: "Não autorizado." });
 
-            const studyHoursPerDay = JSON.parse(plan.study_hours_per_day);
-            const examDate = new Date(plan.exam_date + 'T23:59:59');
 
-            const findNextStudyDay = (date) => {
-                let nextDay = new Date(date);
-                while (nextDay <= examDate) {
-                    if (nextDay.getDay() !== 0 && (studyHoursPerDay[nextDay.getDay()] || 0) > 0) return nextDay;
-                    nextDay.setDate(nextDay.getDate() + 1);
-                }
-                return null;
-            };
 
-            let targetDate = new Date(session.session_date + 'T00:00:00');
-            if (days === 'next') {
-                targetDate.setDate(targetDate.getDate() + 1);
-            } else {
-                targetDate.setDate(targetDate.getDate() + parseInt(days, 10));
-            }
 
-            const newDate = findNextStudyDay(targetDate);
 
-            if (!newDate) {
-                return res.status(400).json({ error: "Não há dias de estudo disponíveis para adiar a tarefa." });
-            }
 
-            const newDateStr = newDate.toISOString().split('T')[0];
-            await dbRun("UPDATE study_sessions SET session_date = ? WHERE id = ?", [newDateStr, sessionId]);
 
-            res.json({ message: `Tarefa adiada para ${newDate.toLocaleDateString('pt-BR')}!` });
 
-        } catch (error) {
-            console.error("Erro ao adiar tarefa:", error);
-            res.status(500).json({ error: "Erro interno ao adiar a tarefa." });
-        }
-});
-END LEGACY ROUTE COMMENT */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Obter dados de progresso do plano - MIGRATED TO MODULAR ARCHITECTURE
 /* LEGACY ROUTE - REPLACED BY src/routes/planRoutes.js
@@ -4028,44 +4037,44 @@ app.get('/api/plans/:planId/realitycheck',
         }
 });
 // Endpoint para registrar tempo de estudo
-app.post('/api/sessions/:sessionId/time',
-    authenticateToken,
-    validators.numericId('sessionId'),
-    body('seconds').isInt({ min: 0, max: 86400 }).withMessage('Tempo inválido'),
-    handleValidationErrors,
-    async (req, res) => {
-        const { seconds } = req.body;
-        const sessionId = req.params.sessionId;
-        const userId = req.user.id;
 
-        try {
-            const session = await dbGet(`
-                SELECT ss.* FROM study_sessions ss 
-                JOIN study_plans sp ON ss.study_plan_id = sp.id 
-                WHERE ss.id = ? AND sp.user_id = ?
-            `, [sessionId, userId]);
 
-            if (!session) {
-                return res.status(404).json({ error: 'Sessão não encontrada ou não autorizada.' });
-            }
 
-            await dbRun(`
-                UPDATE study_sessions 
-                SET time_studied_seconds = COALESCE(time_studied_seconds, 0) + ?
-                WHERE id = ?
-            `, [seconds, sessionId]);
 
-            res.json({ 
-                message: 'Tempo registrado com sucesso!', 
-                totalTime: (session.time_studied_seconds || 0) + seconds 
-            });
 
-        } catch (error) {
-            console.error('Erro ao salvar tempo de estudo:', error);
-            res.status(500).json({ error: 'Erro ao registrar tempo de estudo.' });
-        }
-    }
-);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // === ROTA DE GAMIFICAÇÃO MIGRADA PARA MÓDULO ===
 // A rota /api/plans/:planId/gamification foi migrada para:
@@ -4074,119 +4083,86 @@ app.post('/api/sessions/:sessionId/time',
 // FASE 7 COMPLETA ✅
 
 // Endpoint para gerar dados de compartilhamento
-app.get('/api/plans/:planId/share-progress', 
-    authenticateToken,
-    validators.numericId('planId'),
-    handleValidationErrors,
-    async (req, res) => {
-        const planId = req.params.planId;
-        const userId = req.user.id;
 
-        try {
-            const plan = await dbGet('SELECT plan_name, exam_date FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
-            if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
 
-            const user = await dbGet('SELECT name FROM users WHERE id = ?', [userId]);
+
+
+
+
+
+
+
+
+
+
+
 
             // Pegar dados de gamificação
             // CORREÇÃO: Contar tópicos únicos concluídos independente do session_type
-            const completedTopicsResult = await dbGet(`
-                SELECT COUNT(DISTINCT topic_id) as count 
-                FROM study_sessions 
-                WHERE study_plan_id = ? 
-                AND status = 'Concluído' 
-                AND topic_id IS NOT NULL
-            `, [planId]);
-            const completedTopicsCount = parseInt(completedTopicsResult?.count || 0);
-            
+
+
+
+
+
+
+
+
+
             // Debug: Log para verificar o que está sendo calculado
-            console.log(`[GAMIFICATION DEBUG] Plan ${planId}:`, {
-                completedTopicsCount,
-                queryResult: completedTopicsResult
-            });
+
+
+
+
 
             // Calcular streak
-            const completedSessions = await dbAll(`
-                SELECT DISTINCT session_date FROM study_sessions 
-                WHERE study_plan_id = ? AND status = 'Concluído' ORDER BY session_date DESC
-            `, [planId]);
-            
-            let studyStreak = 0;
-            if (completedSessions.length > 0) {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const yesterday = new Date(today);
-                yesterday.setDate(today.getDate() - 1);
 
-                const lastStudyDate = new Date(completedSessions[0].session_date + 'T00:00:00');
-                
-                if (lastStudyDate.getTime() === today.getTime() || lastStudyDate.getTime() === yesterday.getTime()) {
-                    studyStreak = 1;
-                    let currentDate = new Date(lastStudyDate);
-                    for (let i = 1; i < completedSessions.length; i++) {
-                        const previousDay = new Date(currentDate);
-                        previousDay.setDate(currentDate.getDate() - 1);
-                        const nextStudyDate = new Date(completedSessions[i].session_date + 'T00:00:00');
-                        if (nextStudyDate.getTime() === previousDay.getTime()) {
-                            studyStreak++;
-                            currentDate = nextStudyDate;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             // Calcular dias até prova
-            const examDate = new Date(plan.exam_date + 'T00:00:00');
-            const today = new Date();
-            const timeDiff = examDate.getTime() - today.getTime();
-            const daysToExam = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+
+
+
 
             // Determinar nível atual
-            const levels = [
-                { threshold: 0, title: 'Aspirante a Servidor(a) 🌱' },
-                { threshold: 11, title: 'Pagador(a) de Inscrição 💸' },
-                { threshold: 31, title: 'Acima da Nota de Corte (nos simulados) 😉' },
-                { threshold: 51, title: 'Mestre dos Grupos de WhatsApp de Concurso 📲' },
-                { threshold: 101, title: 'Gabaritador(a) da prova de Português da FGV 🎯' },
-                { threshold: 201, title: 'Terror do Cespe/Cebraspe 👹' },
-                { threshold: 351, title: 'Veterano(a) de 7 Bancas Diferentes 😎' },
-                { threshold: 501, title: '✨ Lenda Viva: Assinante Vitalício do Diário Oficial ✨' }
-            ];
 
-            let currentLevel = levels[0];
-            for (let i = levels.length - 1; i >= 0; i--) {
-                if (completedTopicsCount >= levels[i].threshold) {
-                    currentLevel = levels[i];
-                    break;
-                }
-            }
 
-            const shareData = {
-                userName: user?.name || 'Concurseiro(a)',
-                planName: plan.plan_name,
-                completedTopics: completedTopicsCount,
-                studyStreak: studyStreak,
-                daysToExam: daysToExam > 0 ? daysToExam : 0,
-                level: currentLevel.title,
-                shareText: `🎯 MEU PROGRESSO NO ${plan.plan_name.toUpperCase()}!\n\n` +
-                          `📚 ${completedTopicsCount} tópicos já dominados ✅\n` +
-                          `🔥 ${studyStreak} dias consecutivos de foco total!\n` +
-                          `⏰ Faltam ${daysToExam > 0 ? daysToExam : 0} dias para a prova\n` +
-                          `🏆 Status atual: ${currentLevel.title}\n\n` +
-                          `💪 A aprovação está cada vez mais próxima!\n\n` +
-                          `#Concursos #Estudos #Editaliza #FocoNaAprovacao #VemAprovacao`
-            };
 
-            res.json(shareData);
 
-        } catch (error) {
-            console.error('Erro ao gerar dados de compartilhamento:', error);
-            res.status(500).json({ 'error': 'Erro ao gerar dados de compartilhamento.' });
-        }
-    }
-);
+
+
+
+
+
+// FASE2_REMOVED: Share progress endpoint moved to plans.routes.js
 
 // Rota padrão - redireciona para login
 app.get('/', (req, res) => {

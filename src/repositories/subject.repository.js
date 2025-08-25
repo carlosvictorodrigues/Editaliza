@@ -169,7 +169,7 @@ class SubjectRepository extends BaseRepository {
                 s.study_percentage,
                 s.difficulty_level,
                 COUNT(t.id) as topics_count,
-                COUNT(CASE WHEN t.completed = 1 THEN 1 END) as completed_topics
+                COUNT(CASE WHEN t.status = 'completed' THEN 1 END) as completed_topics
             FROM subjects s
             LEFT JOIN topics t ON s.id = t.subject_id
             WHERE s.study_plan_id = $1
@@ -188,9 +188,9 @@ class SubjectRepository extends BaseRepository {
             SELECT 
                 s.*,
                 COUNT(t.id) as total_topics,
-                COUNT(CASE WHEN t.completed = 1 THEN 1 END) as completed_topics,
+                COUNT(CASE WHEN t.status = 'completed' THEN 1 END) as completed_topics,
                 ROUND(
-                    COUNT(CASE WHEN t.completed = 1 THEN 1 END) * 100.0 / 
+                    COUNT(CASE WHEN t.status = 'completed' THEN 1 END) * 100.0 / 
                     NULLIF(COUNT(t.id), 0), 2
                 ) as progress_percentage,
                 SUM(t.total_questions) as total_questions,
@@ -246,7 +246,7 @@ class SubjectRepository extends BaseRepository {
             SELECT 
                 COUNT(DISTINCT s.id) as total_subjects,
                 COUNT(DISTINCT t.id) as total_topics,
-                COUNT(DISTINCT CASE WHEN t.completed = 1 THEN t.id END) as completed_topics,
+                COUNT(DISTINCT CASE WHEN t.status = 'completed' THEN t.id END) as completed_topics,
                 AVG(s.priority_weight) as avg_priority,
                 SUM(s.study_percentage) as total_percentage,
                 MAX(s.priority_weight) as max_priority,
@@ -267,7 +267,7 @@ class SubjectRepository extends BaseRepository {
                 s.subject_name,
                 s.priority_weight,
                 COUNT(t.id) as topics_count,
-                COUNT(CASE WHEN t.completed = 1 THEN 1 END) as completed_count,
+                COUNT(CASE WHEN t.status = 'completed' THEN 1 END) as completed_count,
                 ROUND(
                     COUNT(t.id) * 100.0 / 
                     SUM(COUNT(t.id)) OVER (), 2
@@ -311,16 +311,16 @@ class SubjectRepository extends BaseRepository {
             SELECT 
                 s.*,
                 COUNT(t.id) as total_topics,
-                COUNT(CASE WHEN t.completed = 1 THEN 1 END) as completed_topics,
+                COUNT(CASE WHEN t.status = 'completed' THEN 1 END) as completed_topics,
                 ROUND(
-                    COUNT(CASE WHEN t.completed = 1 THEN 1 END) * 100.0 / 
+                    COUNT(CASE WHEN t.status = 'completed' THEN 1 END) * 100.0 / 
                     NULLIF(COUNT(t.id), 0), 2
                 ) as progress_percentage
             FROM subjects s
             LEFT JOIN topics t ON s.id = t.subject_id
             WHERE s.study_plan_id = $1
             GROUP BY s.id
-            HAVING COUNT(CASE WHEN t.completed = 1 THEN 1 END) * 100.0 / 
+            HAVING COUNT(CASE WHEN t.status = 'completed' THEN 1 END) * 100.0 / 
                    NULLIF(COUNT(t.id), 0) < $2
             ORDER BY s.priority_weight DESC
         `;

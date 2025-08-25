@@ -352,7 +352,7 @@ const getPlanStatistics = async (req, res) => {
                     SELECT COUNT(DISTINCT session_date) as current_streak
                     FROM study_sessions 
                     WHERE study_plan_id = ? AND status = 'Concluído'
-                    AND session_date >= CURRENT_DATE - INTERVAL '7 days'
+                    AND session_date >= date('now', '-7 days')
                 `, [planId]);
                 
                 currentStreak = simplifiedStreak ? (simplifiedStreak.current_streak || 0) : 0;
@@ -396,7 +396,7 @@ const getPlanStatistics = async (req, res) => {
         // Melhor dia da semana (simplificado)
         const bestDayResult = await dbGet(`
             SELECT 
-                CASE EXTRACT(DOW FROM session_date)
+                CASE strftime('%w', session_date)
                     WHEN '0' THEN 'Domingo'
                     WHEN '1' THEN 'Segunda'
                     WHEN '2' THEN 'Terça'
@@ -408,7 +408,7 @@ const getPlanStatistics = async (req, res) => {
                 COUNT(*) as session_count
             FROM study_sessions 
             WHERE study_plan_id = ? AND status = 'Concluído'
-            GROUP BY EXTRACT(DOW FROM session_date)
+            GROUP BY strftime('%w', session_date)
             ORDER BY session_count DESC
             LIMIT 1
         `, [planId]);
@@ -690,7 +690,7 @@ const getGamification = async (req, res) => {
             SELECT COUNT(DISTINCT session_date) as unique_days
             FROM study_sessions 
             WHERE study_plan_id = ? AND status = 'Concluído'
-            AND session_date >= CURRENT_DATE - INTERVAL '30 days'
+            AND session_date >= date('now', '-30 days')
         `, [planId]);
 
         const currentStreak = uniqueStudyDaysResult?.unique_days || 0;
@@ -813,7 +813,7 @@ const getShareProgress = async (req, res) => {
             FROM study_sessions
             WHERE study_plan_id = ? 
             AND status = 'Concluído'
-            AND session_date >= CURRENT_DATE - INTERVAL '7 days'
+            AND session_date >= date('now', '-7 days')
             GROUP BY session_date, subject_name
             ORDER BY session_date DESC, subject_name
             LIMIT 10

@@ -525,7 +525,7 @@ describe('Spaced Repetition Preservation Tests', () => {
         const recentSessions = await testDB.all(`
           SELECT session_date, status FROM study_sessions 
           WHERE study_plan_id = ? AND subject_name = ? 
-            AND session_date >= CURRENT_DATE - INTERVAL '21 days'
+            AND session_date >= date('now', '-21 days')
           ORDER BY session_date DESC
         `, [testPlan.id, subjectConfig.name]);
 

@@ -357,7 +357,7 @@ const getUserStatistics = async (userId) => {
         FROM study_plans WHERE user_id = $1`
         : `SELECT 
             COUNT(*) as plans_created,
-            SUM(CASE WHEN exam_date < CURRENT_DATE THEN 1 ELSE 0 END) as plans_completed
+            SUM(CASE WHEN exam_date < date('now') THEN 1 ELSE 0 END) as plans_completed
         FROM study_plans WHERE user_id = ?`;
     
     const planStats = await executeQuery('get', planStatsSQL, [userId], 'getUserStatistics_plans');
@@ -387,7 +387,7 @@ const getUserStatistics = async (userId) => {
         WHERE user_id = $1 AND created_at >= CURRENT_DATE - INTERVAL '30 days'`
         : `SELECT COUNT(DISTINCT DATE(created_at)) as streak_days 
         FROM user_activities 
-        WHERE user_id = ? AND created_at >= CURRENT_DATE - INTERVAL '30 days'`;
+        WHERE user_id = ? AND created_at >= DATE('now', '-30 days')`;
     
     const streakData = await executeQuery('get', streakSQL, [userId], 'getUserStatistics_streak');
     

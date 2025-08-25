@@ -227,10 +227,10 @@ class PlanRepository extends BaseRepository {
                 sp.*,
                 u.email,
                 u.name as user_name,
-                DATE_PART('day', sp.exam_date - CURRENT_DATE) as days_until_exam
+                JULIANDAY(sp.exam_date) - JULIANDAY(date('now')) as days_until_exam
             FROM study_plans sp
             JOIN users u ON sp.user_id = u.id
-            WHERE sp.exam_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '1 day' * ${daysAhead}
+            WHERE sp.exam_date BETWEEN date('now') AND date('now', '+${daysAhead} days')
             ORDER BY sp.exam_date ASC
         `;
         return this.findAll(query);

@@ -215,7 +215,7 @@ class TopicRepository extends BaseRepository {
             FROM topics t
             JOIN subjects s ON t.subject_id = s.id
             WHERE s.study_plan_id = $1 
-                AND t.completed = 0
+                AND t.status != 'completed'
             ORDER BY s.priority_weight DESC, t.priority_weight DESC
         `;
         return this.findAll(query, [planId]);
@@ -232,7 +232,7 @@ class TopicRepository extends BaseRepository {
             FROM topics t
             JOIN subjects s ON t.subject_id = s.id
             WHERE s.study_plan_id = $1 
-                AND t.completed = 1
+                AND t.status = 'completed'
             ORDER BY t.completion_date DESC
         `;
         return this.findAll(query, [planId]);
@@ -250,7 +250,7 @@ class TopicRepository extends BaseRepository {
             FROM topics t
             JOIN subjects s ON t.subject_id = s.id
             WHERE s.study_plan_id = $1 
-                AND t.completed = 0
+                AND t.status != 'completed'
             ORDER BY combined_priority DESC
             LIMIT $2
         `;
@@ -295,10 +295,10 @@ class TopicRepository extends BaseRepository {
         const query = `
             SELECT 
                 COUNT(*) as total_topics,
-                COUNT(CASE WHEN completed = 1 THEN 1 END) as completed_topics,
+                COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_topics,
                 COUNT(CASE WHEN completed = 0 THEN 1 END) as pending_topics,
                 ROUND(
-                    COUNT(CASE WHEN completed = 1 THEN 1 END) * 100.0 / 
+                    COUNT(CASE WHEN status = 'completed' THEN 1 END) * 100.0 / 
                     NULLIF(COUNT(*), 0), 2
                 ) as completion_percentage,
                 SUM(total_questions) as total_questions,
@@ -323,9 +323,9 @@ class TopicRepository extends BaseRepository {
                 s.id as subject_id,
                 s.subject_name,
                 COUNT(t.id) as total_topics,
-                COUNT(CASE WHEN t.completed = 1 THEN 1 END) as completed_topics,
+                COUNT(CASE WHEN t.status = 'completed' THEN 1 END) as completed_topics,
                 ROUND(
-                    COUNT(CASE WHEN t.completed = 1 THEN 1 END) * 100.0 / 
+                    COUNT(CASE WHEN t.status = 'completed' THEN 1 END) * 100.0 / 
                     NULLIF(COUNT(t.id), 0), 2
                 ) as progress_percentage
             FROM subjects s
@@ -478,7 +478,7 @@ class TopicRepository extends BaseRepository {
             SELECT COUNT(t.id) as count
             FROM topics t
             JOIN subjects s ON t.subject_id = s.id
-            WHERE s.study_plan_id = $1 AND t.completed = 0
+            WHERE s.study_plan_id = $1 AND t.status != 'completed'
         `;
         const result = await this.findOne(query, [planId]);
         return result.count;

@@ -248,7 +248,7 @@ app.get('/plans/:planId/replan_preview', authenticateToken, async (req, res) => 
         const overdueCount = await db.prepare(`
             SELECT COUNT(*) as count 
             FROM study_sessions 
-            WHERE study_plan_id = ? AND session_date < CURRENT_DATE AND status != 'Concluído'
+            WHERE study_plan_id = ? AND session_date < date('now') AND status != 'Concluído'
         `).get(planId);
         
         // Calcular slots disponíveis nos próximos 30 dias

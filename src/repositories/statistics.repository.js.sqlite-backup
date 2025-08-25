@@ -25,7 +25,7 @@ class StatisticsRepository extends BaseRepository {
                     sp.exam_date,
                     sp.daily_study_hours,
                     sp.days_per_week,
-                    DATE_PART('day', sp.exam_date - CURRENT_DATE) as days_until_exam
+                    JULIANDAY(sp.exam_date) - JULIANDAY(DATE('now')) as days_until_exam
                 FROM study_plans sp
                 WHERE sp.id = $1 AND sp.user_id = $2
             ),
@@ -104,7 +104,7 @@ class StatisticsRepository extends BaseRepository {
                 WHERE streak_group = (
                     SELECT streak_group 
                     FROM streak_calc 
-                    WHERE study_date = CURRENT_DATE
+                    WHERE study_date = DATE('now')
                     LIMIT 1
                 )
             ),
@@ -123,7 +123,7 @@ class StatisticsRepository extends BaseRepository {
                 cs.streak_end,
                 ls.max_streak as longest_streak,
                 CASE 
-                    WHEN cs.streak_end = CURRENT_DATE THEN 1
+                    WHEN cs.streak_end = DATE('now') THEN 1
                     ELSE 0
                 END as is_active
             FROM current_streak cs
@@ -201,19 +201,19 @@ class StatisticsRepository extends BaseRepository {
         const query = `
             WITH week_data AS (
                 SELECT 
-                    DATE_TRUNC('week', session_date) as week_start,
+                    DATE('now', 'weekday 0', '-' || ((CAST(strftime('%w', session_date) AS INTEGER) + 6) % 7) || ' days') as week_start,
                     COUNT(*) as sessions_count,
                     COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_count,
                     SUM(time_studied_seconds) as week_time,
                     SUM(questions_solved) as week_questions
                 FROM study_sessions
                 WHERE study_plan_id = $1
-                    AND session_date >= CURRENT_DATE - INTERVAL '1 week' * $2
+                    AND session_date >= DATE('now', '-' || $2 || ' weeks')
                 GROUP BY week_start
             )
             SELECT 
                 week_start,
-                EXTRACT(WEEK FROM week_start) as week_number,
+                strftime('%W', week_start) as week_number,
                 sessions_count,
                 completed_count,
                 ROUND(completed_count * 100.0 / NULLIF(sessions_count, 0), 2) as completion_rate,
@@ -316,7 +316,7 @@ class StatisticsRepository extends BaseRepository {
                     COALESCE(SUM(time_studied_seconds), 0) as today_seconds
                 FROM study_sessions
                 WHERE study_plan_id = $1 
-                    AND DATE(session_date) = CURRENT_DATE
+                    AND DATE(session_date) = DATE('now')
             ),
             week_progress AS (
                 SELECT 
@@ -325,8 +325,8 @@ class StatisticsRepository extends BaseRepository {
                     COUNT(DISTINCT DATE(session_date)) as study_days_this_week
                 FROM study_sessions
                 WHERE study_plan_id = $1 
-                    AND session_date >= DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'
-                    AND session_date <= CURRENT_DATE
+                    AND session_date >= DATE('now', 'weekday 0', '-6 days')
+                    AND session_date <= DATE('now')
             )
             SELECT 
                 pg.daily_question_goal,
@@ -358,9 +358,9 @@ class StatisticsRepository extends BaseRepository {
             WITH time_slots AS (
                 SELECT 
                     CASE 
-                        WHEN CAST(EXTRACT(HOUR FROM session_date) AS INTEGER) < 6 THEN 'madrugada'
-                        WHEN CAST(EXTRACT(HOUR FROM session_date) AS INTEGER) < 12 THEN 'manhã'
-                        WHEN CAST(EXTRACT(HOUR FROM session_date) AS INTEGER) < 18 THEN 'tarde'
+                        WHEN CAST(strftime('%H', session_date) AS INTEGER) < 6 THEN 'madrugada'
+                        WHEN CAST(strftime('%H', session_date) AS INTEGER) < 12 THEN 'manhã'
+                        WHEN CAST(strftime('%H', session_date) AS INTEGER) < 18 THEN 'tarde'
                         ELSE 'noite'
                     END as period,
                     COUNT(*) as session_count,
@@ -373,7 +373,7 @@ class StatisticsRepository extends BaseRepository {
             ),
             weekday_distribution AS (
                 SELECT 
-                    CASE CAST(EXTRACT(DOW FROM session_date) AS INTEGER)
+                    CASE CAST(strftime('%w', session_date) AS INTEGER)
                         WHEN 0 THEN 'Domingo'
                         WHEN 1 THEN 'Segunda'
                         WHEN 2 THEN 'Terça'
@@ -382,7 +382,7 @@ class StatisticsRepository extends BaseRepository {
                         WHEN 5 THEN 'Sexta'
                         WHEN 6 THEN 'Sábado'
                     END as weekday,
-                    CAST(EXTRACT(DOW FROM session_date) AS INTEGER) as weekday_num,
+                    CAST(strftime('%w', session_date) AS INTEGER) as weekday_num,
                     COUNT(*) as session_count,
                     SUM(time_studied_seconds) as total_seconds
                 FROM study_sessions
@@ -488,7 +488,7 @@ class StatisticsRepository extends BaseRepository {
                     COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed
                 FROM study_sessions
                 WHERE study_plan_id = $1
-                    AND session_date > CURRENT_DATE - INTERVAL '1 day' * $2
+                    AND session_date > DATE('now', '-' || $2 || ' days')
             ),
             previous_period AS (
                 SELECT 
@@ -498,8 +498,8 @@ class StatisticsRepository extends BaseRepository {
                     COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed
                 FROM study_sessions
                 WHERE study_plan_id = $1
-                    AND session_date > CURRENT_DATE - INTERVAL '1 day' * ($2 * 2)
-                    AND session_date <= CURRENT_DATE - INTERVAL '1 day' * $2
+                    AND session_date > DATE('now', '-' || ($2 * 2) || ' days')
+                    AND session_date <= DATE('now', '-' || $2 || ' days')
             )
             SELECT 
                 cp.sessions as current_sessions,
@@ -551,7 +551,7 @@ class StatisticsRepository extends BaseRepository {
                 (SELECT COUNT(*) 
                  FROM study_sessions 
                  WHERE study_plan_id = $1 
-                   AND DATE(session_date) = CURRENT_DATE) as sessions_today,
+                   AND DATE(session_date) = DATE('now')) as sessions_today,
                 
                 -- Próxima Sessão
                 (SELECT MIN(session_date) 
@@ -561,7 +561,7 @@ class StatisticsRepository extends BaseRepository {
                    AND session_date >= CURRENT_TIMESTAMP) as next_session,
                 
                 -- Dias até o exame
-                (SELECT DATE_PART('day', exam_date - CURRENT_DATE) 
+                (SELECT JULIANDAY(exam_date) - JULIANDAY(DATE('now')) 
                  FROM study_plans 
                  WHERE id = $1 AND user_id = $2) as days_until_exam,
                 
@@ -571,7 +571,7 @@ class StatisticsRepository extends BaseRepository {
                     NULLIF(COUNT(*), 0), 2)
                  FROM study_sessions 
                  WHERE study_plan_id = $1 
-                   AND session_date >= CURRENT_DATE - INTERVAL '7 days') as weekly_completion_rate
+                   AND session_date >= DATE('now', '-7 days')) as weekly_completion_rate
         `;
         
         return this.findOne(query, [planId, userId]);

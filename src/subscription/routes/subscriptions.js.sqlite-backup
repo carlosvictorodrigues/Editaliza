@@ -353,7 +353,7 @@ router.get('/admin/stats',
                     COUNT(*) as new_subscriptions,
                     SUM(amount) as revenue
                 FROM subscriptions 
-                WHERE created_at > CURRENT_DATE - INTERVAL '30 days'
+                WHERE created_at > date('now', '-30 days')
                 AND status = 'active'
                 GROUP BY DATE(created_at)
                 ORDER BY date DESC
@@ -363,7 +363,7 @@ router.get('/admin/stats',
                     DATE(updated_at) as date,
                     COUNT(*) as cancellations
                 FROM subscriptions 
-                WHERE updated_at > CURRENT_DATE - INTERVAL '30 days'
+                WHERE updated_at > date('now', '-30 days')
                 AND status = 'cancelled'
                 GROUP BY DATE(updated_at)
                 ORDER BY date DESC

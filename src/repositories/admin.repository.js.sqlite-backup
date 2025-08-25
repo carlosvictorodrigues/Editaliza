@@ -48,10 +48,10 @@ class AdminRepository extends BaseRepository {
         const query = `
             SELECT 
                 (SELECT COUNT(*) FROM users) as total_users,
-                (SELECT COUNT(*) FROM users WHERE created_at > CURRENT_DATE - INTERVAL '30 days') as new_users_30d,
+                (SELECT COUNT(*) FROM users WHERE created_at > DATE('now', '-30 days')) as new_users_30d,
                 (SELECT COUNT(*) FROM users WHERE auth_provider = 'google') as google_users,
                 (SELECT COUNT(*) FROM study_plans) as total_plans,
-                (SELECT COUNT(*) FROM study_plans WHERE created_at > CURRENT_DATE - INTERVAL '7 days') as new_plans_7d,
+                (SELECT COUNT(*) FROM study_plans WHERE created_at > DATE('now', '-7 days')) as new_plans_7d,
                 (SELECT COUNT(*) FROM study_sessions) as total_sessions,
                 (SELECT COUNT(*) FROM study_sessions WHERE status = 'completed') as completed_sessions,
                 (SELECT COALESCE(SUM(time_studied_seconds), 0) FROM study_sessions) as total_study_seconds,
@@ -169,7 +169,7 @@ class AdminRepository extends BaseRepository {
                 sp.*,
                 u.name as user_name,
                 u.email as user_email,
-                DATE_PART('day', sp.exam_date - CURRENT_DATE) as days_until_exam,
+                JULIANDAY(sp.exam_date) - JULIANDAY(DATE('now')) as days_until_exam,
                 COUNT(DISTINCT t.id) as total_topics,
                 COUNT(DISTINCT CASE WHEN t.status = 'completed' THEN t.id END) as completed_topics,
                 ROUND(
@@ -180,7 +180,7 @@ class AdminRepository extends BaseRepository {
             JOIN users u ON sp.user_id = u.id
             LEFT JOIN subjects s ON sp.id = s.study_plan_id
             LEFT JOIN topics t ON s.id = t.subject_id
-            WHERE sp.exam_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '1 day' * $1
+            WHERE sp.exam_date BETWEEN DATE('now') AND DATE('now', '+' || $1 || ' days')
             GROUP BY sp.id, u.name, u.email
             ORDER BY sp.exam_date ASC
         `;
@@ -204,7 +204,7 @@ class AdminRepository extends BaseRepository {
                     u.created_at as activity_date,
                     'Novo usuário cadastrado' as description
                 FROM users u
-                WHERE u.created_at > CURRENT_DATE - INTERVAL '7 days'
+                WHERE u.created_at > DATE('now', '-7 days')
                 
                 UNION ALL
                 
@@ -216,7 +216,7 @@ class AdminRepository extends BaseRepository {
                     sp.created_at as activity_date,
                     'Novo plano criado' as description
                 FROM study_plans sp
-                WHERE sp.created_at > CURRENT_DATE - INTERVAL '7 days'
+                WHERE sp.created_at > DATE('now', '-7 days')
                 
                 UNION ALL
                 
@@ -228,7 +228,7 @@ class AdminRepository extends BaseRepository {
                     ss.completed_at as activity_date,
                     'Sessão de estudo completada' as description
                 FROM study_sessions ss
-                WHERE ss.completed_at > CURRENT_DATE - INTERVAL '7 days'
+                WHERE ss.completed_at > DATE('now', '-7 days')
                     AND ss.status = 'completed'
             )
             SELECT * FROM activities
@@ -286,14 +286,14 @@ class AdminRepository extends BaseRepository {
             const sessionsDeleted = await repo.delete(
                 `DELETE FROM study_sessions 
                  WHERE status = 'completed' 
-                   AND completed_at < CURRENT_DATE - INTERVAL '1 day' * $1`,
+                   AND completed_at < DATE('now', '-' || $1 || ' days')`,
                 [daysToKeep]
             );
             
             // Limpar logs antigos (se houver tabela de logs)
             const logsDeleted = await repo.delete(
                 `DELETE FROM system_logs 
-                 WHERE created_at < CURRENT_DATE - INTERVAL '1 day' * $1`,
+                 WHERE created_at < DATE('now', '-' || $1 || ' days')`,
                 [daysToKeep]
             );
             
@@ -354,8 +354,8 @@ class AdminRepository extends BaseRepository {
         const query = `
             WITH month_series AS (
                 SELECT 
-                    DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month' * (n-1) as month_start,
-                    DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month' * (n-2) - INTERVAL '1 day' as month_end
+                    DATE('now', 'start of month', '-' || (n-1) || ' months') as month_start,
+                    DATE('now', 'start of month', '-' || (n-2) || ' months', '-1 day') as month_end
                 FROM (
                     SELECT 1 as n UNION SELECT 2 UNION SELECT 3 
                     UNION SELECT 4 UNION SELECT 5 UNION SELECT 6
@@ -364,7 +364,7 @@ class AdminRepository extends BaseRepository {
             monthly_stats AS (
                 SELECT 
                     ms.month_start,
-                    TO_CHAR(ms.month_start, 'YYYY-MM') as month_label,
+                    strftime('%Y-%m', ms.month_start) as month_label,
                     COUNT(DISTINCT u.id) as new_users,
                     COUNT(DISTINCT sp.id) as new_plans,
                     COUNT(DISTINCT ss.id) as total_sessions,
@@ -413,7 +413,7 @@ class AdminRepository extends BaseRepository {
                     MAX(ss.session_date) as last_activity,
                     COUNT(DISTINCT DATE(ss.session_date)) as active_days,
                     COUNT(DISTINCT sp.id) as plans_created,
-                    DATE_PART('day', MAX(ss.session_date) - u.created_at) as days_active
+                    JULIANDAY(MAX(ss.session_date)) - JULIANDAY(u.created_at) as days_active
                 FROM users u
                 LEFT JOIN study_plans sp ON u.id = sp.user_id
                 LEFT JOIN study_sessions ss ON sp.id = ss.study_plan_id
@@ -425,8 +425,8 @@ class AdminRepository extends BaseRepository {
                         WHEN last_activity IS NULL THEN 'never_active'
                         WHEN days_active < 7 THEN 'churned_week'
                         WHEN days_active < 30 THEN 'churned_month'
-                        WHEN DATE_PART('day', 'now' - last_activity) > 30 THEN 'inactive'
-                        WHEN DATE_PART('day', 'now' - last_activity) > 7 THEN 'at_risk'
+                        WHEN JULIANDAY('now') - JULIANDAY(last_activity) > 30 THEN 'inactive'
+                        WHEN JULIANDAY('now') - JULIANDAY(last_activity) > 7 THEN 'at_risk'
                         ELSE 'active'
                     END as retention_status,
                     COUNT(*) as user_count,
