@@ -466,15 +466,31 @@ class SessionRepository extends BaseRepository {
     /**
      * Conta sessões atrasadas
      */
-    async countOverdueSessions(planId) {
-        const query = `
-            SELECT COUNT(*) as count 
-            FROM study_sessions 
-            WHERE study_plan_id = $1 
-                AND status IN ('pending', 'rescheduled')
-                AND session_date < CURRENT_DATE
-        `;
-        const result = await this.findOne(query, [planId]);
+    async countOverdueSessions(planId, todayStr = null) {
+        let query, params;
+        
+        if (todayStr) {
+            // Para compatibilidade com a implementação original que usa Brazilian timezone
+            query = `
+                SELECT COUNT(*) as count 
+                FROM study_sessions 
+                WHERE study_plan_id = $1 
+                    AND status = 'Pendente'
+                    AND session_date < $2
+            `;
+            params = [planId, todayStr];
+        } else {
+            query = `
+                SELECT COUNT(*) as count 
+                FROM study_sessions 
+                WHERE study_plan_id = $1 
+                    AND status IN ('pending', 'rescheduled')
+                    AND session_date < CURRENT_DATE
+            `;
+            params = [planId];
+        }
+        
+        const result = await this.findOne(query, params);
         return result.count;
     }
 

@@ -541,6 +541,50 @@ const getExcludedTopics = async (req, res) => {
 };
 
 /**
+ * 🔄 REPLANEJAMENTO E CONTROLE DE ATRASOS
+ */
+
+/**
+ * GET /api/plans/:planId/overdue_check - Verificar tarefas atrasadas
+ * FASE 4.1 - MIGRADO PARA USAR REPOSITORY
+ */
+const getOverdueCheck = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        
+        logger.info(`[OVERDUE_CHECK] Verificando tarefas atrasadas - Plano: ${planId}, Usuário: ${userId}`);
+        
+        // NOVA ABORDAGEM: Verificar autorização com repository
+        const plan = await repos.plan.findByIdAndUserId(planId, userId);
+        if (!plan) {
+            logger.warn(`[OVERDUE_CHECK] Plano não encontrado: ${planId}`);
+            return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+        }
+        
+        // Usar Brazilian timezone para cálculo preciso de atraso
+        const todayStr = getBrazilianDateString();
+        logger.info(`[OVERDUE_CHECK] Data brasileira atual: ${todayStr}`);
+        
+        // NOVA ABORDAGEM: Usar repository para buscar sessões atrasadas
+        const overdueCount = await repos.session.countOverdueSessions(planId, todayStr);
+        
+        logger.info(`[OVERDUE_CHECK] Sessões atrasadas encontradas: ${overdueCount}`);
+        
+        res.json({ count: overdueCount });
+        
+    } catch (error) {
+        logger.error('[OVERDUE_CHECK] Erro ao verificar tarefas atrasadas:', {
+            error: error.message,
+            stack: error.stack,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        res.status(500).json({ error: 'Erro ao verificar tarefas atrasadas' });
+    }
+};
+
+/**
  * 🎮 GAMIFICAÇÃO E COMPARTILHAMENTO
  */
 
@@ -1022,6 +1066,9 @@ module.exports = {
     
     // Geração de Cronograma
     generateSchedule,
+    
+    // Replanejamento e Controle de Atrasos
+    getOverdueCheck,
     
     // Estatísticas e Análises
     getPlanStatistics,

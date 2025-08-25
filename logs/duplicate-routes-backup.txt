@@ -1,0 +1,49 @@
+/*
+ * BACKUP DAS ROTAS DUPLICADAS - FASE 4.1
+ * Data: 2025-08-25T16:12:18.279Z
+ * 
+ * Estas rotas estão duplicadas entre server.js e a arquitetura modular.
+ * Elas podem ser removidas do server.js com segurança.
+ */
+
+// POST /api/profile/upload-photo
+// POST /api/register
+// POST /api/login
+// GET /auth/google
+// GET /auth/google/callback
+// GET /auth/session-token
+// GET /auth/google/status
+// POST /api/logout
+// POST /api/request-password-reset
+// POST /api/reset-password
+// GET /api/profile
+// PATCH /api/profile
+// GET /api/plans
+// POST /api/plans
+// GET /api/plans/:planId
+// DELETE /api/plans/:planId
+// PATCH /api/plans/:planId/settings
+// POST /api/plans/:planId/subjects_with_topics
+// PATCH /api/subjects/:subjectId
+// DELETE /api/subjects/:subjectId
+// GET /api/plans/:planId/subjects_with_topics
+// GET /api/subjects/:subjectId/topics
+// PATCH /api/topics/batch_update
+// PATCH /api/topics/batch_update_details
+// PATCH /api/topics/:topicId
+// DELETE /api/topics/:topicId
+// POST /api/plans/:planId/generate
+// GET /api/plans/:planId/exclusions
+// GET /api/plans/:planId/excluded-topics
+// GET /api/plans/:planId/statistics
+// GET /api/plans/:planId/overdue_check
+// GET /api/plans/:planId/schedule
+
+/*
+ * Total de rotas seguras para remoção: 32
+ * 
+ * IMPORTANTE: Antes de remover, certifique-se de que:
+ * 1. Todas as rotas modularizadas estão funcionando
+ * 2. Os testes passaram
+ * 3. A aplicação foi testada em ambiente de desenvolvimento
+ */

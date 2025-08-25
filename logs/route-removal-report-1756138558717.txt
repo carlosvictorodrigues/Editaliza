@@ -1,0 +1,99 @@
+
+🔄 RELATÓRIO DE REMOÇÃO DE ROTAS DUPLICADAS - FASE 4.1
+════════════════════════════════════════════════════════════════════════════════
+
+📊 ESTATÍSTICAS:
+• Linhas originais: 4323
+• Linhas após remoção: 2391
+• Linhas removidas: 1932
+• Rotas removidas: 28
+• Rotas mantidas: 12
+
+💾 BACKUP:
+• Arquivo de backup: server-js-backup-2025-08-25T16-15-58-696Z.js
+• Localização: C:\Users\Gabriel\OneDrive\Área de Trabalho\Editaliza\backups\server-js-backup-2025-08-25T16-15-58-696Z.js
+
+✅ ROTAS REMOVIDAS (já modularizadas):
+1. POST /api/profile/upload-photo
+   └─ Linhas 435-493 (59 linhas)
+2. POST /api/register
+   └─ Linhas 747-768 (22 linhas)
+3. GET /auth/google
+   └─ Linhas 851-853 (3 linhas)
+4. GET /auth/google/callback
+   └─ Linhas 856-885 (30 linhas)
+5. GET /auth/session-token
+   └─ Linhas 888-899 (12 linhas)
+6. GET /auth/google/status
+   └─ Linhas 904-914 (11 linhas)
+7. POST /api/logout
+   └─ Linhas 917-924 (8 linhas)
+8. POST /api/request-password-reset
+   └─ Linhas 927-999 (73 linhas)
+9. POST /api/reset-password
+   └─ Linhas 1002-1021 (20 linhas)
+10. GET /api/profile
+   └─ Linhas 1025-1073 (49 linhas)
+11. PATCH /api/profile
+   └─ Linhas 1076-1254 (179 linhas)
+12. GET /api/plans
+   └─ Linhas 1278-1310 (33 linhas)
+13. POST /api/plans
+   └─ Linhas 1312-1333 (22 linhas)
+14. GET /api/plans/:planId
+   └─ Linhas 1335-1372 (38 linhas)
+15. DELETE /api/plans/:planId
+   └─ Linhas 1374-1399 (26 linhas)
+16. PATCH /api/plans/:planId/settings
+   └─ Linhas 1401-1430 (30 linhas)
+17. PATCH /api/subjects/:subjectId
+   └─ Linhas 1486-1507 (22 linhas)
+18. DELETE /api/subjects/:subjectId
+   └─ Linhas 1509-1535 (27 linhas)
+19. GET /api/plans/:planId/subjects_with_topics
+   └─ Linhas 1537-1590 (54 linhas)
+20. GET /api/subjects/:subjectId/topics
+   └─ Linhas 1592-1615 (24 linhas)
+21. PATCH /api/topics/batch_update
+   └─ Linhas 1617-1708 (92 linhas)
+22. PATCH /api/topics/batch_update_details
+   └─ Linhas 1710-1768 (59 linhas)
+23. PATCH /api/topics/:topicId
+   └─ Linhas 1770-1811 (42 linhas)
+24. DELETE /api/topics/:topicId
+   └─ Linhas 1813-1847 (35 linhas)
+25. POST /api/plans/:planId/generate
+   └─ Linhas 1854-2554 (701 linhas)
+26. GET /api/plans/:planId/exclusions
+   └─ Linhas 3014-3061 (48 linhas)
+27. GET /api/plans/:planId/excluded-topics
+   └─ Linhas 3064-3139 (76 linhas)
+28. GET /api/plans/:planId/statistics
+   └─ Linhas 3142-3278 (137 linhas)
+
+🔴 ROTAS MANTIDAS (complexas ou de sistema):
+1. GET /${file}
+2. GET /api/test-db
+3. GET /api/plans/:planId/replan-preview
+4. POST /api/plans/:planId/replan
+5. GET /api/plans/:planId/detailed_progress
+6. GET /
+7. GET /health
+8. GET /ready
+9. GET /metrics
+10. GET /admin/email/status
+11. POST /admin/email/test
+12. POST /admin/email/reset-limits
+
+🎯 PRÓXIMOS PASSOS:
+1. Testar a aplicação para garantir que tudo funciona
+2. Executar testes automatizados: npm test
+3. Verificar se todas as funcionalidades estão operacionais
+4. Migrar as 9 rotas complexas restantes na Fase 4.2
+
+⚠️  IMPORTANTE:
+Se algo não funcionar, restaure o backup com:
+cp "C:\Users\Gabriel\OneDrive\Área de Trabalho\Editaliza\backups\server-js-backup-2025-08-25T16-15-58-696Z.js" "C:\Users\Gabriel\OneDrive\Área de Trabalho\Editaliza\server.js"
+
+Data: 2025-08-25T16:15:58.717Z
+Progresso da migração: 78% concluído

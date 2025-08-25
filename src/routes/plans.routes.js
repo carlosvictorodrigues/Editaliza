@@ -163,6 +163,22 @@ router.get('/:planId/subjects_with_topics',
 // router.patch('/topics/batch_update', ...)
 
 /**
+ * 🔄 REPLANEJAMENTO E CONTROLE DE ATRASOS
+ */
+
+/**
+ * @route GET /plans/:planId/overdue_check
+ * @desc Verificar tarefas atrasadas
+ * @access Private
+ */
+router.get('/:planId/overdue_check',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getOverdueCheck
+);
+
+/**
  * 📊 ESTATÍSTICAS E ANÁLISES
  */
 
@@ -296,7 +312,7 @@ router.get('/:planId/schedule',
  * ✅ GET /plans/:planId/progress -> planRoutes.js (existente) 
  * ✅ GET /plans/:planId/goal_progress -> planRoutes.js (existente)
  * ✅ GET /plans/:planId/question_radar -> planRoutes.js (existente)
- * ✅ GET /plans/:planId/overdue_check -> planRoutes.js (existente)
+ * ✅ GET /plans/:planId/overdue_check -> planRoutes.js (✅ IMPLEMENTADO)
  * ✅ GET /plans/:planId/activity_summary -> planRoutes.js (existente)
  * ✅ GET /plans/:planId/schedule -> scheduleRoutes.js
  */

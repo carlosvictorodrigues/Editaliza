@@ -561,7 +561,7 @@ class StatisticsRepository extends BaseRepository {
                    AND session_date >= CURRENT_TIMESTAMP) as next_session,
                 
                 -- Dias até o exame
-                (SELECT DATE_PART('day', exam_date - CURRENT_DATE) 
+                (SELECT EXTRACT(DAY FROM exam_date - CURRENT_DATE)::INTEGER
                  FROM study_plans 
                  WHERE id = $1 AND user_id = $2) as days_until_exam,
                 
