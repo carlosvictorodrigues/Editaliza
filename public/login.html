@@ -148,7 +148,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('auth_success') === '1') {
                 // Buscar token da sessão segura ao invés da URL
-                fetch('/auth/session-token')
+                fetch('/api/auth/session-token')
                     .then(response => response.json())
                     .then(data => {
                         if (data.success && data.token) {
@@ -244,7 +244,7 @@
 
                 try {
                     // ATUALIZADO: Usa a função segura app.apiFetch
-                    const data = await app.apiFetch('/auth/login', {
+                    const data = await app.apiFetch('/api/auth/login', {
                         method: 'POST',
                         body: JSON.stringify({ email, password })
                     });
@@ -273,7 +273,7 @@
             // Google OAuth login handler
             googleLoginButton.addEventListener('click', () => {
                 // Redirect to Google OAuth endpoint
-                window.location.href = '/auth/google';
+                window.location.href = '/api/auth/google';
             });
         });
     </script>

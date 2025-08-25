@@ -102,10 +102,10 @@
                 ? 'http://localhost:3000' 
                 : 'https://editaliza.com.br';
             
-            log.innerHTML += `<div>Redirecionando para: ${baseUrl}/auth/google</div>`;
+            log.innerHTML += `<div>Redirecionando para: ${baseUrl}${baseUrl.includes('localhost') ? '/api' : ''}/auth/google</div>`;
             
             // Redirecionar para OAuth
-            window.location.href = `${baseUrl}/auth/google`;
+            window.location.href = `${baseUrl}${baseUrl.includes('localhost') ? '/api' : ''}/auth/google`;
         }
         
         function testOAuthCross() {

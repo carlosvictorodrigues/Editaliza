@@ -239,7 +239,7 @@
 
                 try {
                     // ATUALIZADO: Usa a função segura app.apiFetch
-                    const data = await app.apiFetch('/auth/register', {
+                    const data = await app.apiFetch('/api/auth/register', {
                         method: 'POST',
                         body: JSON.stringify({ email, password })
                     });
@@ -277,7 +277,7 @@
             // Google OAuth register handler
             googleRegisterButton.addEventListener('click', () => {
                 // Redirect to Google OAuth endpoint (same as login)
-                window.location.href = '/auth/google';
+                window.location.href = '/api/auth/google';
             });
         });
     </script>
