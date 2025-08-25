@@ -8,7 +8,7 @@
  * funcionalidades críticas. Proceder com máxima cautela.
  */
 
-const { body } = require('express-validator');
+// Removed unused import: const { body } = require('express-validator');
 const ScheduleGenerationService = require('../services/schedule/ScheduleGenerationService');
 const logger = require('../../src/utils/logger');
 
@@ -21,11 +21,19 @@ function getBrazilianDateString() {
     return `${year}-${month}-${day}`;
 }
 
-// DATABASE HELPERS - CRÍTICOS
+// FASE 4.1 - REPOSITORY INTEGRATION
 const db = require('../../database-postgresql.js');
-const dbGet = (sql, params = []) => new Promise((resolve, reject) => db.get(sql, params, (err, row) => err ? reject(err) : resolve(row)));
-const dbAll = (sql, params = []) => new Promise((resolve, reject) => db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows)));
-const dbRun = (sql, params = []) => new Promise((resolve, reject) => db.run(sql, params, function(err) { err ? reject(err) : resolve(this); }));
+const { createRepositories } = require('../repositories');
+const DatabaseAdapter = require('../adapters/database.adapter');
+
+// Inicializar repositories e adapter
+const repos = createRepositories(db);
+const dbAdapter = new DatabaseAdapter(repos, db);
+
+// Métodos de transição - gradualmente substituir por repositories diretos
+const dbGet = dbAdapter.dbGet;
+const dbAll = dbAdapter.dbAll;
+const dbRun = dbAdapter.dbRun;
 
 /**
  * 📋 CRUD BÁSICO DE PLANOS
@@ -33,13 +41,15 @@ const dbRun = (sql, params = []) => new Promise((resolve, reject) => db.run(sql,
 
 /**
  * GET /api/plans - Listar todos os planos do usuário
+ * FASE 4.1 - MIGRADO PARA USAR REPOSITORY
  */
 const getPlans = async (req, res) => {
     try {
-        console.log(`[PLANS] Usuário ID: ${req.user.id}`);
+        logger.info(`[PLANS] Usuário ID: ${req.user.id}`);
         
-        const rows = await dbAll('SELECT * FROM study_plans WHERE user_id = ? ORDER BY id DESC', [req.user.id]);
-        console.log(`[PLANS] Encontrados ${rows.length} planos`);
+        // NOVA ABORDAGEM: Usar repository diretamente
+        const rows = await repos.plan.findByUserId(req.user.id);
+        logger.info(`[PLANS] Encontrados ${rows.length} planos via REPOSITORY`);
         
         // Processar dados de forma mais robusta - JSON parsing crítico
         const plans = rows.map(plan => {
@@ -59,7 +69,13 @@ const getPlans = async (req, res) => {
             };
         });
         
-        console.log(`[PLANS] Enviando ${plans.length} planos`);
+        logger.info(`[PLANS] Enviando ${plans.length} planos`);
+        
+        // Log estatísticas do adapter para monitoramento
+        if (process.env.NODE_ENV !== 'production') {
+            logger.info('[PLANS] Adapter Stats:', dbAdapter.getStats());
+        }
+        
         res.json(plans);
         
     } catch (error) {
@@ -92,29 +108,32 @@ const createPlan = async (req, res) => {
 
 /**
  * GET /api/plans/:planId - Obter plano específico
+ * FASE 4.1 - MIGRADO PARA USAR REPOSITORY
  */
 const getPlan = async (req, res) => {
     try {
-        console.log('🔍 Buscando plano:', req.params.planId, 'para usuário:', req.user.id);
-        const row = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [req.params.planId, req.user.id]);
+        logger.info(`Buscando plano: ${req.params.planId} para usuário: ${req.user.id}`);
+        
+        // NOVA ABORDAGEM: Usar repository diretamente
+        const row = await repos.plan.findByIdAndUserId(req.params.planId, req.user.id);
         
         if (!row) {
-            console.log('❌ Plano não encontrado ou não autorizado');
+            logger.warn('Plano não encontrado ou não autorizado');
             return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
         }
         
-        console.log('✅ Plano encontrado:', { id: row.id, plan_name: row.plan_name });
+        logger.info('Plano encontrado via REPOSITORY:', { id: row.id, plan_name: row.plan_name });
         
         // CORREÇÃO: study_hours_per_day já é um objeto no PostgreSQL
         if (row.study_hours_per_day && typeof row.study_hours_per_day === 'string') {
             try {
                 row.study_hours_per_day = JSON.parse(row.study_hours_per_day);
             } catch (parseError) {
-                console.log('⚠️ Erro ao processar study_hours_per_day:', parseError.message);
+                logger.warn('Erro ao processar study_hours_per_day:', parseError.message);
             }
         }
         
-        console.log('📤 Enviando resposta do plano');
+        logger.info('Enviando resposta do plano');
         res.json(row);
     } catch (error) {
         console.error('❌ ERRO DETALHADO ao buscar plano:', {
@@ -129,16 +148,19 @@ const getPlan = async (req, res) => {
 
 /**
  * DELETE /api/plans/:planId - Deletar plano com CASCADE manual
+ * FASE 4.1 - PARCIALMENTE MIGRADO (ainda usando adapter para transações)
  */
 const deletePlan = async (req, res) => {
     const planId = req.params.planId;
     const userId = req.user.id;
     
     try {
-        const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+        // NOVA ABORDAGEM: Verificar existência com repository
+        const plan = await repos.plan.findByIdAndUserId(planId, userId);
         if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado ou você não tem permissão.' });
         
         // TRANSAÇÃO CRÍTICA - CASCADE MANUAL
+        // TODO: Mover para PlanService na FASE 4.2
         await dbRun('BEGIN');
         await dbRun('DELETE FROM study_sessions WHERE study_plan_id = ?', [planId]);
         await dbRun('DELETE FROM topics WHERE subject_id IN (SELECT id FROM subjects WHERE study_plan_id = ?)', [planId]);
@@ -324,7 +346,7 @@ const getPlanStatistics = async (req, res) => {
             `;
             
             try {
-                const streakResult = await dbGet(streakQuery, [planId]);
+                // const streakResult = await dbGet(streakQuery, [planId]); // unused
                 // Para simplificar, usar uma versão mais básica
                 const simplifiedStreak = await dbGet(`
                     SELECT COUNT(DISTINCT session_date) as current_streak

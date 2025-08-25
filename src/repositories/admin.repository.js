@@ -1,0 +1,494 @@
+/**
+ * Admin Repository
+ * Centraliza queries administrativas e de gestão do sistema
+ * FASE 3 - Criado manualmente para funcionalidades administrativas
+ */
+
+const BaseRepository = require('./base.repository');
+
+class AdminRepository extends BaseRepository {
+    constructor(db) {
+        super(db);
+    }
+
+    // ======================== GESTÃO DE USUÁRIOS ========================
+
+    /**
+     * Lista todos os usuários com estatísticas
+     */
+    async getAllUsersWithStats(page = 1, limit = 20) {
+        const offset = (page - 1) * limit;
+        
+        const query = `
+            SELECT 
+                u.id,
+                u.email,
+                u.name,
+                u.created_at,
+                u.auth_provider,
+                u.profile_picture,
+                COUNT(DISTINCT sp.id) as plans_count,
+                MAX(sp.created_at) as last_plan_created,
+                COALESCE(SUM(ss.time_studied_seconds), 0) as total_study_seconds
+            FROM users u
+            LEFT JOIN study_plans sp ON u.id = sp.user_id
+            LEFT JOIN study_sessions ss ON sp.id = ss.study_plan_id
+            GROUP BY u.id, u.email, u.name, u.created_at, u.auth_provider, u.profile_picture
+            ORDER BY u.created_at DESC
+            LIMIT $1 OFFSET $2
+        `;
+        
+        return this.findAll(query, [limit, offset]);
+    }
+
+    /**
+     * Estatísticas gerais do sistema
+     */
+    async getSystemStatistics() {
+        const query = `
+            SELECT 
+                (SELECT COUNT(*) FROM users) as total_users,
+                (SELECT COUNT(*) FROM users WHERE created_at > DATE('now', '-30 days')) as new_users_30d,
+                (SELECT COUNT(*) FROM users WHERE auth_provider = 'google') as google_users,
+                (SELECT COUNT(*) FROM study_plans) as total_plans,
+                (SELECT COUNT(*) FROM study_plans WHERE created_at > DATE('now', '-7 days')) as new_plans_7d,
+                (SELECT COUNT(*) FROM study_sessions) as total_sessions,
+                (SELECT COUNT(*) FROM study_sessions WHERE status = 'completed') as completed_sessions,
+                (SELECT COALESCE(SUM(time_studied_seconds), 0) FROM study_sessions) as total_study_seconds,
+                (SELECT COUNT(DISTINCT user_id) FROM study_plans) as active_users,
+                (SELECT COUNT(*) FROM subjects) as total_subjects,
+                (SELECT COUNT(*) FROM topics) as total_topics,
+                (SELECT COUNT(*) FROM topics WHERE completed = 1) as completed_topics
+        `;
+        
+        return this.findOne(query);
+    }
+
+    /**
+     * Usuários mais ativos
+     */
+    async getMostActiveUsers(limit = 10) {
+        const query = `
+            SELECT 
+                u.id,
+                u.name,
+                u.email,
+                u.profile_picture,
+                COUNT(DISTINCT sp.id) as plans_count,
+                COUNT(DISTINCT ss.id) as sessions_count,
+                COALESCE(SUM(ss.time_studied_seconds), 0) as total_seconds,
+                ROUND(COALESCE(SUM(ss.time_studied_seconds), 0) / 3600.0, 2) as total_hours,
+                COALESCE(SUM(ss.questions_solved), 0) as total_questions,
+                MAX(ss.completed_at) as last_activity
+            FROM users u
+            LEFT JOIN study_plans sp ON u.id = sp.user_id
+            LEFT JOIN study_sessions ss ON sp.id = ss.study_plan_id
+            GROUP BY u.id, u.name, u.email, u.profile_picture
+            HAVING COUNT(DISTINCT ss.id) > 0
+            ORDER BY total_seconds DESC
+            LIMIT $1
+        `;
+        
+        return this.findAll(query, [limit]);
+    }
+
+    /**
+     * Busca usuário por ID com todas as informações
+     */
+    async getUserFullDetails(userId) {
+        const userQuery = `
+            SELECT 
+                u.*,
+                COUNT(DISTINCT sp.id) as plans_count,
+                COUNT(DISTINCT ua.id) as achievements_count
+            FROM users u
+            LEFT JOIN study_plans sp ON u.id = sp.user_id
+            LEFT JOIN user_achievements ua ON u.id = ua.user_id
+            WHERE u.id = $1
+            GROUP BY u.id
+        `;
+        
+        const plansQuery = `
+            SELECT 
+                sp.*,
+                COUNT(DISTINCT s.id) as subjects_count,
+                COUNT(DISTINCT ss.id) as sessions_count
+            FROM study_plans sp
+            LEFT JOIN subjects s ON sp.id = s.study_plan_id
+            LEFT JOIN study_sessions ss ON sp.id = ss.study_plan_id
+            WHERE sp.user_id = $1
+            GROUP BY sp.id
+            ORDER BY sp.created_at DESC
+        `;
+        
+        const [user, plans] = await Promise.all([
+            this.findOne(userQuery, [userId]),
+            this.findAll(plansQuery, [userId])
+        ]);
+        
+        return { user, plans };
+    }
+
+    // ======================== GESTÃO DE PLANOS ========================
+
+    /**
+     * Lista todos os planos com estatísticas
+     */
+    async getAllPlansWithStats(page = 1, limit = 20) {
+        const offset = (page - 1) * limit;
+        
+        const query = `
+            SELECT 
+                sp.*,
+                u.name as user_name,
+                u.email as user_email,
+                COUNT(DISTINCT s.id) as subjects_count,
+                COUNT(DISTINCT t.id) as topics_count,
+                COUNT(DISTINCT ss.id) as sessions_count,
+                COUNT(DISTINCT CASE WHEN ss.status = 'completed' THEN ss.id END) as completed_sessions,
+                COALESCE(SUM(ss.time_studied_seconds), 0) as total_study_seconds
+            FROM study_plans sp
+            JOIN users u ON sp.user_id = u.id
+            LEFT JOIN subjects s ON sp.id = s.study_plan_id
+            LEFT JOIN topics t ON s.id = t.subject_id
+            LEFT JOIN study_sessions ss ON sp.id = ss.study_plan_id
+            GROUP BY sp.id, u.name, u.email
+            ORDER BY sp.created_at DESC
+            LIMIT $1 OFFSET $2
+        `;
+        
+        return this.findAll(query, [limit, offset]);
+    }
+
+    /**
+     * Planos próximos do exame
+     */
+    async getUpcomingExams(days = 30) {
+        const query = `
+            SELECT 
+                sp.*,
+                u.name as user_name,
+                u.email as user_email,
+                JULIANDAY(sp.exam_date) - JULIANDAY(DATE('now')) as days_until_exam,
+                COUNT(DISTINCT t.id) as total_topics,
+                COUNT(DISTINCT CASE WHEN t.completed = 1 THEN t.id END) as completed_topics,
+                ROUND(
+                    COUNT(DISTINCT CASE WHEN t.completed = 1 THEN t.id END) * 100.0 / 
+                    NULLIF(COUNT(DISTINCT t.id), 0), 2
+                ) as progress_percentage
+            FROM study_plans sp
+            JOIN users u ON sp.user_id = u.id
+            LEFT JOIN subjects s ON sp.id = s.study_plan_id
+            LEFT JOIN topics t ON s.id = t.subject_id
+            WHERE sp.exam_date BETWEEN DATE('now') AND DATE('now', '+' || $1 || ' days')
+            GROUP BY sp.id, u.name, u.email
+            ORDER BY sp.exam_date ASC
+        `;
+        
+        return this.findAll(query, [days]);
+    }
+
+    // ======================== MONITORAMENTO E LOGS ========================
+
+    /**
+     * Registro de atividades recentes
+     */
+    async getRecentActivities(limit = 50) {
+        const query = `
+            WITH activities AS (
+                -- Novos usuários
+                SELECT 
+                    'new_user' as type,
+                    u.id as entity_id,
+                    u.name as entity_name,
+                    u.created_at as activity_date,
+                    'Novo usuário cadastrado' as description
+                FROM users u
+                WHERE u.created_at > DATE('now', '-7 days')
+                
+                UNION ALL
+                
+                -- Novos planos
+                SELECT 
+                    'new_plan' as type,
+                    sp.id as entity_id,
+                    sp.plan_name as entity_name,
+                    sp.created_at as activity_date,
+                    'Novo plano criado' as description
+                FROM study_plans sp
+                WHERE sp.created_at > DATE('now', '-7 days')
+                
+                UNION ALL
+                
+                -- Sessões completadas
+                SELECT 
+                    'session_completed' as type,
+                    ss.id as entity_id,
+                    ss.subject_name as entity_name,
+                    ss.completed_at as activity_date,
+                    'Sessão de estudo completada' as description
+                FROM study_sessions ss
+                WHERE ss.completed_at > DATE('now', '-7 days')
+                    AND ss.status = 'completed'
+            )
+            SELECT * FROM activities
+            ORDER BY activity_date DESC
+            LIMIT $1
+        `;
+        
+        return this.findAll(query, [limit]);
+    }
+
+    /**
+     * Métricas de uso por período
+     */
+    async getUsageMetrics(startDate, endDate) {
+        const query = `
+            WITH daily_metrics AS (
+                SELECT 
+                    DATE(ss.session_date) as metric_date,
+                    COUNT(DISTINCT ss.study_plan_id) as active_plans,
+                    COUNT(DISTINCT sp.user_id) as active_users,
+                    COUNT(*) as total_sessions,
+                    COUNT(CASE WHEN ss.status = 'completed' THEN 1 END) as completed_sessions,
+                    COALESCE(SUM(ss.time_studied_seconds), 0) as study_seconds,
+                    COALESCE(SUM(ss.questions_solved), 0) as questions_solved
+                FROM study_sessions ss
+                JOIN study_plans sp ON ss.study_plan_id = sp.id
+                WHERE DATE(ss.session_date) BETWEEN $1 AND $2
+                GROUP BY DATE(ss.session_date)
+            )
+            SELECT 
+                metric_date,
+                active_plans,
+                active_users,
+                total_sessions,
+                completed_sessions,
+                ROUND(completed_sessions * 100.0 / NULLIF(total_sessions, 0), 2) as completion_rate,
+                ROUND(study_seconds / 3600.0, 2) as study_hours,
+                questions_solved,
+                ROUND(study_seconds / NULLIF(total_sessions * 60.0, 0), 2) as avg_minutes_per_session
+            FROM daily_metrics
+            ORDER BY metric_date DESC
+        `;
+        
+        return this.findAll(query, [startDate, endDate]);
+    }
+
+    // ======================== MANUTENÇÃO DO SISTEMA ========================
+
+    /**
+     * Limpa dados antigos
+     */
+    async cleanupOldData(daysToKeep = 90) {
+        return this.transaction(async (repo) => {
+            // Limpar sessões antigas completadas
+            const sessionsDeleted = await repo.delete(
+                `DELETE FROM study_sessions 
+                 WHERE status = 'completed' 
+                   AND completed_at < DATE('now', '-' || $1 || ' days')`,
+                [daysToKeep]
+            );
+            
+            // Limpar logs antigos (se houver tabela de logs)
+            const logsDeleted = await repo.delete(
+                `DELETE FROM system_logs 
+                 WHERE created_at < DATE('now', '-' || $1 || ' days')`,
+                [daysToKeep]
+            );
+            
+            // Limpar cache antigo (se houver)
+            const cacheDeleted = await repo.delete(
+                `DELETE FROM cache_entries 
+                 WHERE expires_at < CURRENT_TIMESTAMP`,
+                []
+            );
+            
+            return {
+                sessions_deleted: sessionsDeleted,
+                logs_deleted: logsDeleted,
+                cache_deleted: cacheDeleted,
+                cleanup_date: new Date().toISOString()
+            };
+        });
+    }
+
+    /**
+     * Estatísticas de banco de dados
+     */
+    async getDatabaseStats() {
+        const tables = [
+            'users', 'study_plans', 'subjects', 'topics',
+            'study_sessions', 'user_achievements', 'reta_final_excluded_topics'
+        ];
+        
+        const stats = {};
+        
+        for (const table of tables) {
+            const countQuery = `SELECT COUNT(*) as count FROM ${table}`;
+            const result = await this.findOne(countQuery);
+            stats[table] = result.count;
+        }
+        
+        // Tamanho aproximado do banco (específico para SQLite)
+        const sizeQuery = `SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()`;
+        try {
+            const sizeResult = await this.findOne(sizeQuery);
+            stats.database_size_bytes = sizeResult?.size || 0;
+            stats.database_size_mb = Math.round((sizeResult?.size || 0) / (1024 * 1024) * 100) / 100;
+        } catch (error) {
+            // Se não for SQLite, pular tamanho
+            stats.database_size_bytes = null;
+            stats.database_size_mb = null;
+        }
+        
+        return stats;
+    }
+
+    // ======================== RELATÓRIOS ADMINISTRATIVOS ========================
+
+    /**
+     * Relatório de crescimento
+     */
+    async getGrowthReport(months = 6) {
+        const query = `
+            WITH month_series AS (
+                SELECT 
+                    DATE('now', 'start of month', '-' || (n-1) || ' months') as month_start,
+                    DATE('now', 'start of month', '-' || (n-2) || ' months', '-1 day') as month_end
+                FROM (
+                    SELECT 1 as n UNION SELECT 2 UNION SELECT 3 
+                    UNION SELECT 4 UNION SELECT 5 UNION SELECT 6
+                ) WHERE n <= $1
+            ),
+            monthly_stats AS (
+                SELECT 
+                    ms.month_start,
+                    strftime('%Y-%m', ms.month_start) as month_label,
+                    COUNT(DISTINCT u.id) as new_users,
+                    COUNT(DISTINCT sp.id) as new_plans,
+                    COUNT(DISTINCT ss.id) as total_sessions,
+                    COALESCE(SUM(ss.time_studied_seconds), 0) as study_seconds
+                FROM month_series ms
+                LEFT JOIN users u ON u.created_at >= ms.month_start 
+                    AND u.created_at <= ms.month_end
+                LEFT JOIN study_plans sp ON sp.created_at >= ms.month_start 
+                    AND sp.created_at <= ms.month_end
+                LEFT JOIN study_sessions ss ON DATE(ss.session_date) >= ms.month_start 
+                    AND DATE(ss.session_date) <= ms.month_end
+                GROUP BY ms.month_start, month_label
+            )
+            SELECT 
+                month_label,
+                new_users,
+                new_plans,
+                total_sessions,
+                ROUND(study_seconds / 3600.0, 2) as study_hours,
+                LAG(new_users, 1) OVER (ORDER BY month_start) as prev_users,
+                LAG(new_plans, 1) OVER (ORDER BY month_start) as prev_plans,
+                ROUND(
+                    (new_users - LAG(new_users, 1) OVER (ORDER BY month_start)) * 100.0 / 
+                    NULLIF(LAG(new_users, 1) OVER (ORDER BY month_start), 0), 2
+                ) as user_growth_rate,
+                ROUND(
+                    (new_plans - LAG(new_plans, 1) OVER (ORDER BY month_start)) * 100.0 / 
+                    NULLIF(LAG(new_plans, 1) OVER (ORDER BY month_start), 0), 2
+                ) as plan_growth_rate
+            FROM monthly_stats
+            ORDER BY month_start DESC
+        `;
+        
+        return this.findAll(query, [months]);
+    }
+
+    /**
+     * Análise de retenção de usuários
+     */
+    async getUserRetentionAnalysis() {
+        const query = `
+            WITH user_activity AS (
+                SELECT 
+                    u.id,
+                    u.created_at as signup_date,
+                    MAX(ss.session_date) as last_activity,
+                    COUNT(DISTINCT DATE(ss.session_date)) as active_days,
+                    COUNT(DISTINCT sp.id) as plans_created,
+                    JULIANDAY(MAX(ss.session_date)) - JULIANDAY(u.created_at) as days_active
+                FROM users u
+                LEFT JOIN study_plans sp ON u.id = sp.user_id
+                LEFT JOIN study_sessions ss ON sp.id = ss.study_plan_id
+                GROUP BY u.id, u.created_at
+            ),
+            retention_cohorts AS (
+                SELECT 
+                    CASE 
+                        WHEN last_activity IS NULL THEN 'never_active'
+                        WHEN days_active < 7 THEN 'churned_week'
+                        WHEN days_active < 30 THEN 'churned_month'
+                        WHEN JULIANDAY('now') - JULIANDAY(last_activity) > 30 THEN 'inactive'
+                        WHEN JULIANDAY('now') - JULIANDAY(last_activity) > 7 THEN 'at_risk'
+                        ELSE 'active'
+                    END as retention_status,
+                    COUNT(*) as user_count,
+                    AVG(active_days) as avg_active_days,
+                    AVG(plans_created) as avg_plans
+                FROM user_activity
+                GROUP BY retention_status
+            )
+            SELECT * FROM retention_cohorts
+            ORDER BY 
+                CASE retention_status
+                    WHEN 'active' THEN 1
+                    WHEN 'at_risk' THEN 2
+                    WHEN 'inactive' THEN 3
+                    WHEN 'churned_month' THEN 4
+                    WHEN 'churned_week' THEN 5
+                    WHEN 'never_active' THEN 6
+                END
+        `;
+        
+        return this.findAll(query);
+    }
+
+    // ======================== AUDITORIA ========================
+
+    /**
+     * Registra ação administrativa
+     */
+    async logAdminAction(adminId, action, details) {
+        const query = `
+            INSERT INTO admin_logs (
+                admin_id, action, details, ip_address, created_at
+            ) VALUES (
+                $1, $2, $3, $4, CURRENT_TIMESTAMP
+            )
+        `;
+        
+        return this.create(query, [
+            adminId,
+            action,
+            JSON.stringify(details),
+            details.ip_address || null
+        ]);
+    }
+
+    /**
+     * Busca logs de ações administrativas
+     */
+    async getAdminLogs(limit = 100) {
+        const query = `
+            SELECT 
+                al.*,
+                u.name as admin_name,
+                u.email as admin_email
+            FROM admin_logs al
+            JOIN users u ON al.admin_id = u.id
+            ORDER BY al.created_at DESC
+            LIMIT $1
+        `;
+        
+        return this.findAll(query, [limit]);
+    }
+}
+
+module.exports = AdminRepository;

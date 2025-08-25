@@ -1,0 +1,325 @@
+/**
+ * Plan Repository
+ * Centraliza todas as queries relacionadas a planos de estudo
+ * FASE 3 - Criado manualmente com contexto de negócio adequado
+ */
+
+const BaseRepository = require('./base.repository');
+
+class PlanRepository extends BaseRepository {
+    constructor(db) {
+        super(db);
+    }
+
+    /**
+     * Lista todos os planos de um usuário
+     * FASE 4.1 - Incluindo TODOS os campos para compatibilidade com controller
+     */
+    async findByUserId(userId) {
+        const query = `
+            SELECT * FROM study_plans 
+            WHERE user_id = $1 
+            ORDER BY id DESC
+        `;
+        return this.findAll(query, [userId]);
+    }
+
+    /**
+     * Busca um plano específico validando ownership
+     * FASE 4.1 - Incluindo TODOS os campos para compatibilidade
+     */
+    async findByIdAndUser(planId, userId) {
+        const query = `
+            SELECT * FROM study_plans 
+            WHERE id = $1 AND user_id = $2
+        `;
+        return this.findOne(query, [planId, userId]);
+    }
+
+    /**
+     * Alias para findByIdAndUser (para compatibilidade)
+     */
+    async findByIdAndUserId(planId, userId) {
+        return this.findByIdAndUser(planId, userId);
+    }
+
+    /**
+     * Busca plano apenas por ID (sem validação de usuário)
+     */
+    async findById(planId) {
+        const query = `SELECT * FROM study_plans WHERE id = $1`;
+        return this.findOne(query, [planId]);
+    }
+
+    /**
+     * Cria um novo plano de estudos
+     */
+    async createPlan(planData) {
+        const {
+            user_id, plan_name, exam_date, daily_study_hours,
+            days_per_week, notification_time, daily_question_goal,
+            weekly_question_goal, has_essay, essay_frequency
+        } = planData;
+
+        const query = `
+            INSERT INTO study_plans (
+                user_id, plan_name, exam_date, daily_study_hours,
+                days_per_week, notification_time, daily_question_goal,
+                weekly_question_goal, has_essay, essay_frequency,
+                created_at, updated_at
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+                CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+            ) RETURNING id
+        `;
+
+        const params = [
+            user_id, plan_name, exam_date, daily_study_hours,
+            days_per_week, notification_time, daily_question_goal,
+            weekly_question_goal, has_essay, essay_frequency
+        ];
+
+        return this.create(query, params);
+    }
+
+    /**
+     * Atualiza configurações do plano
+     */
+    async updatePlanSettings(planId, userId, settings) {
+        const allowedFields = [
+            'daily_study_hours', 'days_per_week', 'notification_time',
+            'daily_question_goal', 'weekly_question_goal', 
+            'has_essay', 'essay_frequency'
+        ];
+
+        const updates = {};
+        for (const field of allowedFields) {
+            if (settings[field] !== undefined) {
+                updates[field] = settings[field];
+            }
+        }
+
+        if (Object.keys(updates).length === 0) {
+            return 0;
+        }
+
+        updates.updated_at = 'CURRENT_TIMESTAMP';
+        
+        const { query, params } = this.buildUpdateQuery(
+            'study_plans',
+            updates,
+            'id = $1 AND user_id = $2',
+            [planId, userId]
+        );
+
+        return this.update(query, params);
+    }
+
+    /**
+     * Deleta um plano e todos os dados relacionados (transação)
+     */
+    async deletePlanWithRelatedData(planId, userId) {
+        return this.transaction(async (repo) => {
+            // Verificar ownership
+            const plan = await repo.findOne(
+                'SELECT id FROM study_plans WHERE id = $1 AND user_id = $2',
+                [planId, userId]
+            );
+
+            if (!plan) {
+                throw new Error('Plano não encontrado ou não autorizado');
+            }
+
+            // Deletar em ordem para respeitar foreign keys
+            await repo.delete('DELETE FROM study_sessions WHERE study_plan_id = $1', [planId]);
+            await repo.delete('DELETE FROM topics WHERE subject_id IN (SELECT id FROM subjects WHERE study_plan_id = $1)', [planId]);
+            await repo.delete('DELETE FROM subjects WHERE study_plan_id = $1', [planId]);
+            await repo.delete('DELETE FROM study_plans WHERE id = $1', [planId]);
+
+            return true;
+        });
+    }
+
+    /**
+     * Busca estatísticas completas do plano
+     */
+    async getPlanStatistics(planId, userId) {
+        // Primeiro verificar ownership
+        const plan = await this.findByIdAndUser(planId, userId);
+        if (!plan) return null;
+
+        const query = `
+            SELECT 
+                sp.id,
+                sp.plan_name,
+                sp.exam_date,
+                sp.daily_study_hours,
+                sp.days_per_week,
+                (SELECT COUNT(*) FROM subjects WHERE study_plan_id = sp.id) as total_subjects,
+                (SELECT COUNT(*) FROM topics t 
+                 JOIN subjects s ON t.subject_id = s.id 
+                 WHERE s.study_plan_id = sp.id) as total_topics,
+                (SELECT COUNT(*) FROM topics t 
+                 JOIN subjects s ON t.subject_id = s.id 
+                 WHERE s.study_plan_id = sp.id AND t.completed = 1) as completed_topics,
+                (SELECT COUNT(*) FROM study_sessions 
+                 WHERE study_plan_id = sp.id) as total_sessions,
+                (SELECT COUNT(*) FROM study_sessions 
+                 WHERE study_plan_id = sp.id AND status = 'completed') as completed_sessions,
+                (SELECT SUM(duration_minutes) FROM study_sessions 
+                 WHERE study_plan_id = sp.id AND status = 'completed') as total_study_minutes
+            FROM study_plans sp
+            WHERE sp.id = $1
+        `;
+
+        return this.findOne(query, [planId]);
+    }
+
+    /**
+     * Busca progresso detalhado por disciplina
+     */
+    async getDetailedProgress(planId, userId) {
+        // Verificar ownership
+        const plan = await this.findByIdAndUser(planId, userId);
+        if (!plan) return null;
+
+        const query = `
+            SELECT 
+                s.id as subject_id,
+                s.subject_name,
+                s.priority_weight,
+                COUNT(t.id) as total_topics,
+                COUNT(CASE WHEN t.completed = 1 THEN 1 END) as completed_topics,
+                ROUND(COUNT(CASE WHEN t.completed = 1 THEN 1 END) * 100.0 / NULLIF(COUNT(t.id), 0), 2) as progress_percentage,
+                SUM(t.total_questions) as total_questions,
+                SUM(t.correct_questions) as correct_questions,
+                ROUND(SUM(t.correct_questions) * 100.0 / NULLIF(SUM(t.total_questions), 0), 2) as accuracy_percentage
+            FROM subjects s
+            LEFT JOIN topics t ON s.id = t.subject_id
+            WHERE s.study_plan_id = $1
+            GROUP BY s.id, s.subject_name, s.priority_weight
+            ORDER BY s.priority_weight DESC
+        `;
+
+        return this.findAll(query, [planId]);
+    }
+
+    /**
+     * Conta total de planos de um usuário
+     */
+    async countUserPlans(userId) {
+        return this.count('study_plans', 'user_id = $1', [userId]);
+    }
+
+    /**
+     * Verifica se usuário é dono do plano
+     */
+    async userOwnsPlan(planId, userId) {
+        return this.exists('study_plans', 'id = $1 AND user_id = $2', [planId, userId]);
+    }
+
+    /**
+     * Busca planos próximos do exame (admin/notificações)
+     */
+    async getPlansNearExam(daysAhead = 30) {
+        const query = `
+            SELECT 
+                sp.*,
+                u.email,
+                u.name as user_name,
+                JULIANDAY(sp.exam_date) - JULIANDAY(date('now')) as days_until_exam
+            FROM study_plans sp
+            JOIN users u ON sp.user_id = u.id
+            WHERE sp.exam_date BETWEEN date('now') AND date('now', '+${daysAhead} days')
+            ORDER BY sp.exam_date ASC
+        `;
+        return this.findAll(query);
+    }
+
+    /**
+     * Atualiza data do exame
+     */
+    async updateExamDate(planId, userId, newExamDate) {
+        const query = `
+            UPDATE study_plans 
+            SET exam_date = $3, updated_at = CURRENT_TIMESTAMP
+            WHERE id = $1 AND user_id = $2
+        `;
+        return this.update(query, [planId, userId, newExamDate]);
+    }
+
+    /**
+     * Busca configurações de notificação
+     */
+    async getNotificationSettings(planId, userId) {
+        const query = `
+            SELECT 
+                notification_time,
+                daily_question_goal,
+                weekly_question_goal,
+                has_essay,
+                essay_frequency
+            FROM study_plans
+            WHERE id = $1 AND user_id = $2
+        `;
+        return this.findOne(query, [planId, userId]);
+    }
+
+    /**
+     * Marca plano como gerado (após criar cronograma)
+     */
+    async markAsGenerated(planId, userId) {
+        const query = `
+            UPDATE study_plans 
+            SET schedule_generated = 1, 
+                schedule_generated_at = CURRENT_TIMESTAMP,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = $1 AND user_id = $2
+        `;
+        return this.update(query, [planId, userId]);
+    }
+
+    /**
+     * Reseta cronograma do plano
+     */
+    async resetSchedule(planId, userId) {
+        return this.transaction(async (repo) => {
+            // Verificar ownership
+            const plan = await repo.findOne(
+                'SELECT id FROM study_plans WHERE id = $1 AND user_id = $2',
+                [planId, userId]
+            );
+
+            if (!plan) {
+                throw new Error('Plano não encontrado ou não autorizado');
+            }
+
+            // Deletar sessões existentes
+            await repo.delete('DELETE FROM study_sessions WHERE study_plan_id = $1', [planId]);
+            
+            // Resetar flags
+            await repo.update(
+                `UPDATE study_plans 
+                 SET schedule_generated = 0, 
+                     schedule_generated_at = NULL,
+                     updated_at = CURRENT_TIMESTAMP
+                 WHERE id = $1`,
+                [planId]
+            );
+
+            // Resetar progresso dos tópicos
+            await repo.update(
+                `UPDATE topics 
+                 SET completed = 0, 
+                     correct_questions = 0,
+                     updated_at = CURRENT_TIMESTAMP
+                 WHERE subject_id IN (SELECT id FROM subjects WHERE study_plan_id = $1)`,
+                [planId]
+            );
+
+            return true;
+        });
+    }
+}
+
+module.exports = PlanRepository;
