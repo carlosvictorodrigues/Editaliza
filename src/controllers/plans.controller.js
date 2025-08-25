@@ -10,6 +10,9 @@
 
 // Removed unused import: const { body } = require('express-validator');
 const ScheduleGenerationService = require('../services/schedule/ScheduleGenerationService');
+const ReplanService = require('../services/ReplanService');
+const scheduleService = require('../services/scheduleService');
+const RetaFinalService = require('../services/schedule/RetaFinalService'); // WAVE 3 - Reta Final Service
 const logger = require('../../src/utils/logger');
 
 // FUNÇÃO UTILITÁRIA PARA DATA BRASILEIRA - CRÍTICA
@@ -208,91 +211,86 @@ const updatePlanSettings = async (req, res) => {
 
 /**
  * POST /api/plans/:planId/subjects_with_topics - Criar disciplina com tópicos
+ * WAVE 1 - MIGRADO PARA ReplanService
  */
 const createSubjectWithTopics = async (req, res) => {
-    const { subject_name, priority_weight, topics_list } = req.body;
-    const planId = req.params.planId;
-    
     try {
-        const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
-        if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
-
-        const topics = topics_list.split('\n').map(t => t.trim()).filter(t => t !== '');
+        const { subject_name, priority_weight, topics_list } = req.body;
+        const planId = parseInt(req.params.planId);
+        const userId = req.user.id;
         
-        // TRANSAÇÃO CRÍTICA - DISCIPLINA + TÓPICOS
-        await dbRun('BEGIN');
-        const result = await dbRun('INSERT INTO subjects (study_plan_id, subject_name, priority_weight) VALUES (?,?,?)', [planId, subject_name, priority_weight]);
-        const subjectId = result.lastID;
+        logger.info(`[SUBJECTS_TOPICS] Criando disciplina para plano ${planId}`, {
+            subjectName: subject_name,
+            userId
+        });
         
-        if (topics.length > 0) {
-            // Use dbRun for each topic insert instead of prepared statements
-            // PostgreSQL handles this efficiently with connection pooling
-            for (const topic of topics) {
-                // Tópicos novos recebem peso padrão 3, que pode ser editado depois
-                await dbRun('INSERT INTO topics (subject_id, topic_name, priority_weight) VALUES (?,?,?)', 
-                    [subjectId, topic.substring(0, 500), 3]);
-            }
+        // FASE 6 - WAVE 1: Usar ReplanService para encapsulamento
+        const replanService = new ReplanService(repos, db);
+        const result = await replanService.createSubjectWithTopics(planId, userId, {
+            subject_name,
+            priority_weight,
+            topics_list
+        });
+        
+        res.status(201).json(result);
+        
+    } catch (error) {
+        logger.error('[SUBJECTS_TOPICS] Erro ao criar disciplina:', {
+            error: error.message,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        
+        if (error.message.includes('não encontrado') || error.message.includes('não autorizado')) {
+            return res.status(404).json({ error: error.message });
         }
         
-        await dbRun('COMMIT');
-        res.status(201).json({ message: 'Disciplina e tópicos adicionados com sucesso!' });
-    } catch (error) {
-        await dbRun('ROLLBACK');
-        console.error('Erro ao criar disciplina:', error);
-        res.status(500).json({ 'error': 'Erro ao criar a disciplina e tópicos.' });
+        if (error.message.includes('obrigatório') || error.message.includes('inválido') || 
+            error.message.includes('muito longo') || error.message.includes('vazia')) {
+            return res.status(400).json({ error: error.message });
+        }
+        
+        res.status(500).json({ error: 'Erro ao criar a disciplina e tópicos.' });
     }
 };
 
 /**
  * GET /api/plans/:planId/subjects_with_topics - Listar disciplinas com tópicos
+ * WAVE 1 - MIGRADO PARA ReplanService
  */
 const getSubjectsWithTopics = async (req, res) => {
-    const { planId } = req.params;
-    const { id: userId } = req.user;
-
     try {
-        const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
-        if (!plan) {
-            return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
-        }
-
-        const subjects = await dbAll('SELECT * FROM subjects WHERE study_plan_id = ? ORDER BY id DESC', [planId]);
-        const subjectIds = subjects.map(s => s.id);
-
-        if (subjectIds.length === 0) {
-            return res.json([]);
-        }
-
-        const topics = await dbAll(`
-            SELECT id, subject_id, topic_name, topic_name as description, status, completion_date, priority_weight 
-            FROM topics 
-            WHERE subject_id IN (${subjectIds.map(() => '?').join(',')}) 
-            ORDER BY id ASC
-        `, subjectIds);
-
-        const topicsBySubjectId = new Map();
-        topics.forEach(topic => {
-            // Normalizar tipo do peso para inteiro
-            topic.priority_weight = parseInt(topic.priority_weight, 10) || 3;
-            if (!topicsBySubjectId.has(topic.subject_id)) {
-                topicsBySubjectId.set(topic.subject_id, []);
-            }
-            topicsBySubjectId.get(topic.subject_id).push(topic);
+        const planId = parseInt(req.params.planId);
+        const userId = req.user.id;
+        
+        logger.info(`[SUBJECTS_TOPICS] Listando disciplinas para plano ${planId}`, {
+            userId
         });
-
-        const result = subjects.map(subject => ({
-            ...subject,
-            topics: topicsBySubjectId.get(subject.id) || []
-        }));
-
+        
+        // FASE 6 - WAVE 1: Usar ReplanService para encapsulamento
+        const replanService = new ReplanService(repos, db);
+        const result = await replanService.getSubjectsWithTopics(planId, userId);
+        
         // Evitar cache para refletir rapidamente alterações
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
-        res.json(result);
+        
+        // Manter compatibilidade com formato anterior (retornar apenas data)
+        res.json(result.data);
+        
     } catch (error) {
-        console.error('Erro ao buscar disciplinas com tópicos:', error);
-        res.status(500).json({ 'error': 'Erro ao buscar disciplinas e tópicos' });
+        logger.error('[SUBJECTS_TOPICS] Erro ao listar disciplinas:', {
+            error: error.message,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        
+        if (error.message.includes('não encontrado') || error.message.includes('não autorizado')) {
+            return res.status(404).json({ error: error.message });
+        }
+        
+        res.status(500).json({ error: 'Erro ao buscar disciplinas e tópicos' });
     }
 };
 
@@ -801,6 +799,39 @@ const getRealityCheck = async (req, res) => {
 };
 
 /**
+ * GET /api/plans/:planId/schedule - Get study schedule grouped by date
+ * WAVE 2 INTEGRATION: Migrated from inline implementation to use scheduleService
+ */
+const getSchedule = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        
+        logger.info(`[GET_SCHEDULE] Buscando cronograma para plano ${planId}`);
+        
+        // Use the modular scheduleService instead of inline implementation
+        const schedule = await scheduleService.getSchedule(planId, userId);
+        
+        logger.info(`[GET_SCHEDULE] Cronograma recuperado com ${Object.keys(schedule).length} datas`);
+        
+        res.json(schedule);
+        
+    } catch (error) {
+        logger.error('[GET_SCHEDULE] Erro ao buscar cronograma:', {
+            error: error.message,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        
+        if (error.message.includes('não encontrado') || error.message.includes('não autorizado')) {
+            return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+        }
+        
+        res.status(500).json({ error: 'Erro ao buscar cronograma' });
+    }
+};
+
+/**
  * GET /api/plans/:planId/schedule-preview - Preview do cronograma com análises
  * ENHANCED: Usa PlanService para análise detalhada de cobertura e fases
  */
@@ -863,21 +894,21 @@ const getPerformance = async (req, res) => {
 };
 
 /**
- * POST /api/plans/:planId/replan-preview - Preview de replanejamento inteligente
- * ENHANCED: Usa PlanService para algoritmos de replanejamento avançados
+ * GET /api/plans/:planId/replan-preview - Preview de replanejamento inteligente
+ * WAVE 1 - MIGRADO PARA ReplanService
  */
 const getReplanPreview = async (req, res) => {
     try {
-        const planId = req.params.planId;
+        const planId = parseInt(req.params.planId);
         const userId = req.user.id;
-        const options = req.body || {};
         
         logger.info(`[REPLAN_PREVIEW] Gerando preview de replanejamento para plano ${planId}`);
         
-        // ENHANCED: Usar PlanService para preview de replanejamento
-        const replanData = await planService.replanSchedule(planId, userId, { ...options, preview: true });
+        // FASE 6 - WAVE 1: Usar ReplanService para encapsulamento
+        const replanService = new ReplanService(repos, db);
+        const previewData = await replanService.getReplanPreview(planId, userId);
         
-        res.json(replanData);
+        res.json(previewData);
         
     } catch (error) {
         logger.error('[REPLAN_PREVIEW] Erro no preview de replanejamento:', {
@@ -886,11 +917,47 @@ const getReplanPreview = async (req, res) => {
             userId: req.user?.id
         });
         
-        if (error.message.includes('não encontrado')) {
+        if (error.message.includes('não encontrado') || error.message.includes('não autorizado')) {
             return res.status(404).json({ error: error.message });
         }
         
-        res.status(500).json({ error: 'Erro no preview de replanejamento' });
+        res.status(500).json({ error: 'Erro ao analisar tarefas atrasadas.' });
+    }
+};
+
+/**
+ * POST /api/plans/:planId/replan - Executar replanejamento inteligente
+ * WAVE 1 - MIGRADO PARA ReplanService
+ */
+const executeReplan = async (req, res) => {
+    try {
+        const planId = parseInt(req.params.planId);
+        const userId = req.user.id;
+        
+        logger.info(`[REPLAN] Executando replanejamento para plano ${planId}`);
+        
+        // FASE 6 - WAVE 1: Usar ReplanService para encapsulamento
+        const replanService = new ReplanService(repos, db);
+        const replanResult = await replanService.executeReplan(planId, userId);
+        
+        res.json(replanResult);
+        
+    } catch (error) {
+        logger.error('[REPLAN] Erro no replanejamento:', {
+            error: error.message,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        
+        if (error.message.includes('não encontrado') || error.message.includes('não autorizado')) {
+            return res.status(404).json({ error: 'Plano não encontrado.' });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            error: 'Ocorreu um erro interno ao replanejar as tarefas. Nossa equipe foi notificada.',
+            message: process.env.NODE_ENV === 'development' ? error.message : 'Erro interno do servidor'
+        });
     }
 };
 
@@ -1059,6 +1126,144 @@ const generateSchedule = async (req, res) => {
     }
 };
 
+/**
+ * 🎯 FASE 6 WAVE 3 - RETA FINAL EXCLUSIONS MANAGEMENT
+ * 
+ * Implementa as 3 rotas críticas para gerenciar exclusões do modo Reta Final:
+ * - GET /api/plans/:planId/reta-final-exclusions
+ * - POST /api/plans/:planId/reta-final-exclusions  
+ * - DELETE /api/plans/:planId/reta-final-exclusions/:id
+ */
+
+/**
+ * GET /api/plans/:planId/reta-final-exclusions
+ * Obter todas as exclusões do modo reta final
+ * 
+ * @route GET /api/plans/:planId/reta-final-exclusions
+ * @access Private
+ */
+const getRetaFinalExclusions = async (req, res) => {
+    try {
+        const planId = parseInt(req.params.planId);
+        const userId = req.user.id;
+        
+        logger.info(`[Controller] Consultando exclusões reta final: plano ${planId}, usuário ${userId}`);
+        
+        const result = await RetaFinalService.getRetaFinalExclusions(planId, userId);
+        
+        res.json(result);
+        
+    } catch (error) {
+        logger.error('[Controller] Erro ao consultar exclusões reta final:', error);
+        
+        // Tratamento de erros específicos do RetaFinalService
+        if (error.type === 'NOT_FOUND') {
+            return res.status(404).json({ error: error.message });
+        }
+        
+        if (error.type === 'VALIDATION_ERROR') {
+            return res.status(400).json({ error: error.message });
+        }
+        
+        res.status(500).json({ 
+            error: 'Erro interno ao consultar exclusões do modo reta final',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+/**
+ * POST /api/plans/:planId/reta-final-exclusions
+ * Adicionar nova exclusão manual no modo reta final
+ * 
+ * @route POST /api/plans/:planId/reta-final-exclusions
+ * @access Private
+ */
+const addRetaFinalExclusion = async (req, res) => {
+    try {
+        const planId = parseInt(req.params.planId);
+        const userId = req.user.id;
+        const exclusionData = req.body;
+        
+        logger.info(`[Controller] Adicionando exclusão reta final: plano ${planId}, tópico ${exclusionData.topicId}`);
+        
+        // Validação básica
+        const validation = RetaFinalService.validateExclusionData(exclusionData);
+        if (!validation.isValid) {
+            return res.status(400).json({ 
+                error: 'Dados inválidos para exclusão',
+                details: validation.errors
+            });
+        }
+        
+        const result = await RetaFinalService.addRetaFinalExclusion(planId, userId, exclusionData);
+        
+        res.status(201).json(result);
+        
+    } catch (error) {
+        logger.error('[Controller] Erro ao adicionar exclusão reta final:', error);
+        
+        // Tratamento de erros específicos
+        if (error.type === 'NOT_FOUND') {
+            return res.status(404).json({ error: error.message });
+        }
+        
+        if (error.type === 'VALIDATION_ERROR') {
+            return res.status(400).json({ error: error.message });
+        }
+        
+        if (error.type === 'CONFLICT') {
+            return res.status(409).json({ error: error.message });
+        }
+        
+        res.status(500).json({ 
+            error: 'Erro interno ao adicionar exclusão ao modo reta final',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+/**
+ * DELETE /api/plans/:planId/reta-final-exclusions/:id
+ * Remover exclusão específica do modo reta final
+ * 
+ * @route DELETE /api/plans/:planId/reta-final-exclusions/:id
+ * @access Private
+ */
+const removeRetaFinalExclusion = async (req, res) => {
+    try {
+        const planId = parseInt(req.params.planId);
+        const exclusionId = parseInt(req.params.id);
+        const userId = req.user.id;
+        
+        logger.info(`[Controller] Removendo exclusão reta final: plano ${planId}, exclusão ${exclusionId}`);
+        
+        // Validação básica dos IDs
+        if (isNaN(exclusionId) || exclusionId <= 0) {
+            return res.status(400).json({ 
+                error: 'ID da exclusão deve ser um número positivo válido' 
+            });
+        }
+        
+        const result = await RetaFinalService.removeRetaFinalExclusion(planId, exclusionId, userId);
+        
+        res.json(result);
+        
+    } catch (error) {
+        logger.error('[Controller] Erro ao remover exclusão reta final:', error);
+        
+        // Tratamento de erros específicos
+        if (error.type === 'NOT_FOUND') {
+            return res.status(404).json({ error: error.message });
+        }
+        
+        res.status(500).json({ 
+            error: 'Erro interno ao remover exclusão do modo reta final',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
 module.exports = {
     // CRUD Básico
     getPlans,
@@ -1078,6 +1283,7 @@ module.exports = {
     // Replanejamento e Controle de Atrasos
     getOverdueCheck,
     getReplanPreview,
+    executeReplan,
     
     // Estatísticas e Análises
     getPlanStatistics,
@@ -1091,7 +1297,15 @@ module.exports = {
     getSchedulePreview,
     getPerformance,
     
+    // Schedule Operations - WAVE 2 INTEGRATION
+    getSchedule,
+    
     // Gamificação e Compartilhamento
     getGamification,
-    getShareProgress
+    getShareProgress,
+    
+    // FASE 6 WAVE 3 - RETA FINAL EXCLUSIONS MANAGEMENT
+    getRetaFinalExclusions,
+    addRetaFinalExclusion,
+    removeRetaFinalExclusion
 };

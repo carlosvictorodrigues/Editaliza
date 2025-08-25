@@ -179,6 +179,30 @@ router.get('/:planId/overdue_check',
 );
 
 /**
+ * @route GET /plans/:planId/replan-preview
+ * @desc Preview de replanejamento inteligente
+ * @access Private
+ */
+router.get('/:planId/replan-preview',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getReplanPreview
+);
+
+/**
+ * @route POST /plans/:planId/replan
+ * @desc Executar replanejamento inteligente
+ * @access Private
+ */
+router.post('/:planId/replan',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.executeReplan
+);
+
+/**
  * 📊 ESTATÍSTICAS E ANÁLISES
  */
 
@@ -247,50 +271,64 @@ router.get('/:planId/share-progress',
 );
 
 /**
+ * 🎯 FASE 6 WAVE 3 - RETA FINAL EXCLUSIONS MANAGEMENT
+ * Implementa as 3 rotas críticas para gerenciar exclusões do modo Reta Final
+ */
+
+/**
+ * @route GET /plans/:planId/reta-final-exclusions
+ * @desc Obter todas as exclusões do modo reta final
+ * @access Private
+ */
+router.get('/:planId/reta-final-exclusions',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getRetaFinalExclusions
+);
+
+/**
+ * @route POST /plans/:planId/reta-final-exclusions
+ * @desc Adicionar nova exclusão manual ao modo reta final
+ * @access Private
+ */
+router.post('/:planId/reta-final-exclusions',
+    authenticateToken,
+    validators.numericId('planId'),
+    validators.integer('topicId', 1),
+    body('reason').optional().isString().isLength({ max: 1000 }).withMessage('Razão deve ter até 1000 caracteres'),
+    handleValidationErrors,
+    plansController.addRetaFinalExclusion
+);
+
+/**
+ * @route DELETE /plans/:planId/reta-final-exclusions/:id
+ * @desc Remover exclusão específica do modo reta final
+ * @access Private
+ */
+router.delete('/:planId/reta-final-exclusions/:id',
+    authenticateToken,
+    validators.numericId('planId'),
+    validators.numericId('id'),
+    handleValidationErrors,
+    plansController.removeRetaFinalExclusion
+);
+
+/**
  * @route GET /plans/:planId/schedule
  * @desc Get study schedule grouped by date
  * @access Private
- * @note Route was missing from modular implementation - added for compatibility
+ * @note WAVE 2 INTEGRATION: Migrated from inline to use plansController.getSchedule
  */
 router.get('/:planId/schedule',
     authenticateToken,
     validators.numericId('planId'),
     handleValidationErrors,
-    async (req, res) => {
-        try {
-            const db = req.app.locals.db;
-            // PostgreSQL query com parâmetros $1, $2
-            const plan = await db.query(
-                'SELECT id FROM study_plans WHERE id = $1 AND user_id = $2', 
-                [req.params.planId, req.user.id]
-            );
-            
-            if (!plan.rows || plan.rows.length === 0) {
-                return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
-            }
-
-            const result = await db.query(
-                'SELECT * FROM study_sessions WHERE study_plan_id = $1 ORDER BY session_date ASC, id ASC', 
-                [req.params.planId]
-            );
-            
-            const groupedByDate = result.rows.reduce((acc, session) => {
-                const date = session.session_date;
-                if (!acc[date]) acc[date] = [];
-                acc[date].push(session);
-                return acc;
-            }, {});
-            
-            res.json(groupedByDate);
-        } catch(err) {
-            console.error('Erro ao buscar cronograma:', err);
-            res.status(500).json({ error: 'Erro ao buscar cronograma' });
-        }
-    }
+    plansController.getSchedule
 );
 
 /**
- * 📝 ROTAS COMPLEXAS EM MIGRAÇÃO - FASE 5 WAVE 3
+ * 📝 ROTAS COMPLEXAS EM MIGRAÇÃO - FASE 5 WAVE 4 - REPLAN MIGRATION
  * 
  * ✅ MIGRADAS E APRIMORADAS:
  * - GET /plans/:planId/progress (Progresso avançado com PlanService)
@@ -298,11 +336,11 @@ router.get('/:planId/schedule',
  * - GET /plans/:planId/realitycheck (Diagnóstico preditivo avançado)
  * - GET /plans/:planId/schedule-preview (Preview com análises detalhadas)
  * - GET /plans/:planId/performance (Métricas de performance completas)
- * - POST /plans/:planId/replan-preview (Preview de replanejamento inteligente)
+ * - GET /plans/:planId/replan-preview (Preview de replanejamento inteligente)
+ * - POST /plans/:planId/replan (Replanejamento executivo com algoritmo inteligente)
  * 
  * 🔄 AINDA NO SERVER.JS (próximas waves):
- * - POST /plans/:planId/generate (Algoritmo de geração - 500+ linhas)
- * - POST /plans/:planId/replan (Replanejamento executivo)
+ * - POST /plans/:planId/generate (Algoritmo de geração - 500+ linhas) - MIGRADO
  * - GET /plans/:planId/review_data (Dados de revisão complexos)
  * - GET /plans/:planId/detailed_progress (Progresso ultra-detalhado)
  * - GET /plans/:planId/activity_summary (Resumo de atividades)
@@ -322,7 +360,7 @@ router.get('/:planId/schedule',
  * - POST /plans/:planId/replan-preview (Enhanced com algoritmos de replanejamento)
  * 
  * 🔄 MANTIDAS EM OUTROS CONTROLLERS:
- * - GET /plans/:planId/schedule -> Tem implementação inline neste arquivo
+ * - GET /plans/:planId/schedule -> ✅ MIGRATED: Now uses plansController.getSchedule (WAVE 2)
  * - POST /plans/:planId/generate -> Migrada anteriormente para este controller
  */
 
