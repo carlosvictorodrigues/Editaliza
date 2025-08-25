@@ -765,15 +765,31 @@ app.post('/api/register',
 
 // Import modular routes
 const planRoutes = require('./src/routes/planRoutes');
-const authRoutes = require('./src/routes/authRoutes');
+const plansRoutes = require('./src/routes/plans.routes'); // NOVA ARQUITETURA CONSOLIDADA
+const subjectsRoutes = require('./src/routes/subjects.routes'); // FASE 4 - DISCIPLINAS
+const topicsRoutes = require('./src/routes/topics.routes'); // FASE 4 - TÓPICOS
+const authRoutes = require('./src/routes/auth.routes');
 const userRoutes = require('./src/routes/userRoutes');
 const scheduleRoutes = require('./src/routes/scheduleRoutes');
+const sessionsRoutes = require('./src/routes/sessions.routes'); // FASE 5 - SESSÕES
+const statisticsRoutes = require('./src/routes/statistics.routes'); // FASE 6 - ESTATÍSTICAS
+const gamificationRoutes = require('./src/routes/gamification.routes'); // FASE 7 - GAMIFICAÇÃO
+const adminRoutes = require('./src/routes/admin.routes'); // FASE 8 - ADMINISTRAÇÃO
+const scheduleGenerationRoutes = require('./src/routes/schedule.routes'); // FASE 9 - GERAÇÃO DE CRONOGRAMA
 
 // Use modular routes
-app.use('/api/plans', planRoutes);
-app.use('/auth', authRoutes);
+app.use('/api/plans', planRoutes); // Rotas existentes (analytics, etc)
+app.use('/api/plans', plansRoutes); // NOVAS ROTAS CONSOLIDADAS (CRUD, etc)
+app.use('/', subjectsRoutes); // FASE 4 - DISCIPLINAS (rotas já incluem /api)
+app.use('/', topicsRoutes); // FASE 4 - TÓPICOS (rotas já incluem /api)
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/schedules', scheduleRoutes);
+// app.use('/api/schedules', scheduleRoutes); // COMENTADO - Conflito com schedule.routes.js
+app.use('/', sessionsRoutes); // FASE 5 - SESSÕES (rotas já incluem /api)
+app.use('/api', statisticsRoutes); // FASE 6 - ESTATÍSTICAS E MÉTRICAS
+app.use('/api', gamificationRoutes); // FASE 7 - GAMIFICAÇÃO (XP, níveis, achievements)
+app.use('/api/admin', adminRoutes); // FASE 8 - ADMINISTRAÇÃO (email, system, users, config, audit)
+app.use('/api', scheduleGenerationRoutes); // FASE 9 - GERAÇÃO DE CRONOGRAMA (algoritmo complexo 700+ linhas)
 
 // ============================================================================
 // LEGACY ROUTES - TO BE REFACTORED
@@ -873,18 +889,7 @@ app.get('/auth/session-token', (req, res) => {
     }
 });
 
-// Endpoint para obter token CSRF (para testes e desenvolvimento)
-app.get('/api/csrf-token', (req, res) => {
-    // Gerar token CSRF se não existir na sessão
-    if (!req.session.csrfToken) {
-        req.session.csrfToken = generateCSRFToken();
-    }
-    
-    res.json({ 
-        csrfToken: req.session.csrfToken,
-        info: 'Use este token no header x-csrf-token para requisições POST/PUT/DELETE'
-    });
-});
+// CSRF token endpoint removido - agora está em auth.routes.js para evitar duplicação
 
 // Route to check Google OAuth status (for debugging)
 app.get('/auth/google/status', authenticateToken, (req, res) => {
@@ -1416,26 +1421,18 @@ app.patch('/api/plans/:planId/settings',
 );
 
 // --- ROTAS DE DISCIPLINAS E TÓPICOS --- - MIGRATED TO MODULAR ARCHITECTURE
-/* LEGACY ROUTE - REPLACED BY src/routes/planRoutes.js
-app.get('/api/plans/:planId/subjects', 
-    authenticateToken,
-    validators.numericId('planId'),
-    handleValidationErrors,
-    async (req, res) => {
-        try {
-            const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [req.params.planId, req.user.id]);
-            if (!plan) return res.status(404).json({ "error": "Plano não encontrado ou não autorizado." });
-            
-            const rows = await dbAll("SELECT * FROM subjects WHERE study_plan_id = ? ORDER BY id DESC", [req.params.planId]);
-            res.json(rows);
-        } catch (error) {
-            console.error('Erro ao buscar disciplinas:', error);
-            res.status(500).json({ "error": "Erro ao buscar disciplinas" });
-        }
-    }
-); 
-END LEGACY ROUTE COMMENT */
+// ============================================================================
+// TODAS AS ROTAS ABAIXO FORAM MIGRADAS PARA:
+// - src/routes/subjects.routes.js
+// - src/routes/topics.routes.js  
+// - src/controllers/subjects.controller.js
+// - src/controllers/topics.controller.js
+//
+// PHASE 4 MIGRATION - MANTENDO COMO LEGACY/BACKUP
+// ============================================================================
+/* LEGACY ROUTES - REPLACED BY MODULAR ARCHITECTURE
 
+/*
 app.post('/api/plans/:planId/subjects_with_topics', 
     authenticateToken,
     validators.numericId('planId'),
@@ -1839,8 +1836,12 @@ app.delete('/api/topics/:topicId',
         }
     }
 );
+END LEGACY ROUTES COMMENT */
 
 // --- ROTA DE GERAÇÃO DE CRONOGRAMA OTIMIZADA ---
+// [MIGRADO PARA FASE 9] - Movido para src/routes/schedule.routes.js
+// Esta rota complexa de 700+ linhas foi modularizada com sucesso
+/* COMENTADO - USANDO NOVA IMPLEMENTAÇÃO MODULAR
 app.post('/api/plans/:planId/generate', 
     authenticateToken,
     validators.numericId('planId'),
@@ -2542,6 +2543,7 @@ app.post('/api/plans/:planId/generate',
         }
     }
 );
+*/ // FIM DO COMENTÁRIO - ROTA MIGRADA PARA FASE 9
 
 // --- ROTAS DE SESSÕES E DADOS ---
 
@@ -4065,297 +4067,11 @@ app.post('/api/sessions/:sessionId/time',
     }
 );
 
-// --- ROTA DE GAMIFICAÇÃO --- - ATIVA
-app.get('/api/plans/:planId/gamification', 
-    authenticateToken,
-    validators.numericId('planId'),
-    handleValidationErrors,
-    async (req, res) => {
-        const planId = req.params.planId;
-        const userId = req.user.id;
-
-        try {
-            const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
-            if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
-
-            // CORREÇÃO: Contar tópicos únicos concluídos independente do session_type
-            const completedTopicsResult = await dbGet(`
-                SELECT COUNT(DISTINCT topic_id) as count 
-                FROM study_sessions 
-                WHERE study_plan_id = ? 
-                AND status = 'Concluído' 
-                AND topic_id IS NOT NULL
-            `, [planId]);
-            const completedTopicsCount = parseInt(completedTopicsResult?.count || 0);
-            
-            // Debug: Log para verificar o que está sendo calculado
-            console.log(`[GAMIFICATION DEBUG] Plan ${planId}:`, {
-                completedTopicsCount,
-                queryResult: completedTopicsResult
-            });
-
-            const levels = [
-                { threshold: 0, title: 'Aspirante a Servidor(a) 🌱' },
-                { threshold: 11, title: 'Pagador(a) de Inscrição 💸' },
-                { threshold: 31, title: 'Acima da Nota de Corte (nos simulados) 😉' },
-                { threshold: 51, title: 'Mestre dos Grupos de WhatsApp de Concurso 📲' },
-                { threshold: 101, title: 'Gabaritador(a) da prova de Português da FGV 🎯' },
-                { threshold: 201, title: 'Terror do Cespe/Cebraspe 👹' },
-                { threshold: 351, title: 'Veterano(a) de 7 Bancas Diferentes 😎' },
-                { threshold: 501, title: '✨ Lenda Viva: Assinante Vitalício do Diário Oficial ✨' }
-            ];
-
-            let currentLevel = levels[0];
-            let nextLevel = null;
-            for (let i = levels.length - 1; i >= 0; i--) {
-                if (completedTopicsCount >= levels[i].threshold) {
-                    currentLevel = levels[i];
-                    if (i < levels.length - 1) {
-                        nextLevel = levels[i + 1];
-                    }
-                    break;
-                }
-            }
-            
-            const topicsToNextLevel = nextLevel ? nextLevel.threshold - completedTopicsCount : 0;
-
-            const completedSessions = await dbAll(`
-                SELECT DISTINCT session_date FROM study_sessions 
-                WHERE study_plan_id = ? AND status = 'Concluído' ORDER BY session_date DESC
-            `, [planId]);
-            
-            let studyStreak = 0;
-            if (completedSessions.length > 0) {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const yesterday = new Date(today);
-                yesterday.setDate(today.getDate() - 1);
-
-                const lastStudyDate = new Date(completedSessions[0].session_date + 'T00:00:00');
-                
-                if (lastStudyDate.getTime() === today.getTime() || lastStudyDate.getTime() === yesterday.getTime()) {
-                    studyStreak = 1;
-                    let currentDate = new Date(lastStudyDate);
-                    for (let i = 1; i < completedSessions.length; i++) {
-                        const previousDay = new Date(currentDate);
-                        previousDay.setDate(currentDate.getDate() - 1);
-                        const nextStudyDate = new Date(completedSessions[i].session_date + 'T00:00:00');
-                        if (nextStudyDate.getTime() === previousDay.getTime()) {
-                            studyStreak++;
-                            currentDate = nextStudyDate;
-                        } else {
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            const todayStr = getBrazilianDateString();
-            const todayTasksResult = await dbGet(`
-                SELECT 
-                    COUNT(id) as total, 
-                    SUM(CASE WHEN status = 'Concluído' THEN 1 ELSE 0 END) as completed 
-                FROM study_sessions 
-                WHERE study_plan_id = ? AND session_date = ?
-            `, [planId, todayStr]);
-
-            // Calcular experiência baseada em atividades reais
-            const allCompletedSessionsResult = await dbGet(`
-                SELECT COUNT(*) as count 
-                FROM study_sessions 
-                WHERE study_plan_id = ? AND status = 'Concluído'
-            `, [planId]);
-            const totalCompletedSessions = parseInt(allCompletedSessionsResult?.count || 0);
-            
-            console.log(`[GAMIFICATION DEBUG] Total sessions:`, {
-                totalCompletedSessions,
-                queryResult: allCompletedSessionsResult
-            });
-            
-            // XP baseado em: 10 XP por sessão completada + 50 XP por tópico novo completado
-            const experiencePoints = (totalCompletedSessions * 10) + (completedTopicsCount * 50);
-            
-            // Calcular conquistas baseadas em dados reais (formato compatível com o frontend)
-            // AGORA COM MUITO HUMOR PARA ALIVIAR A PRESSÃO! 😄
-            const achievements = [];
-            const now = new Date().toISOString();
-            
-            // Conquistas por TÓPICOS CONCLUÍDOS (com MUITO humor!)
-            if (completedTopicsCount >= 1) {
-                achievements.push({
-                    title: '🎯 Primeira Lapada no Edital',
-                    description: 'O primeiro soco na cara da procrastinação!',
-                    achieved_date: now
-                });
-            }
-            if (completedTopicsCount >= 5) {
-                achievements.push({
-                    title: '📚 Maratonista do PDF',
-                    description: 'Sua vista já começou a reclamar.',
-                    achieved_date: now
-                });
-            }
-            if (completedTopicsCount >= 10) {
-                achievements.push({
-                    title: '✨ Destruidor de Questões',
-                    description: 'Já discute gabarito com confiança.',
-                    achieved_date: now
-                });
-            }
-            if (completedTopicsCount >= 25) {
-                achievements.push({
-                    title: '👑 Dono do Material',
-                    description: 'Sabe até a cor da caneta que o professor usou no slide.',
-                    achieved_date: now
-                });
-            }
-            if (completedTopicsCount >= 50) {
-                achievements.push({
-                    title: '🌟 Meio Monstro',
-                    description: 'Você está virando uma lenda local no grupo de estudos.',
-                    achieved_date: now
-                });
-            }
-            if (completedTopicsCount >= 100) {
-                achievements.push({
-                    title: '🏛️ Centurião do Conhecimento',
-                    description: 'Bancas já estão te bloqueando no Instagram.',
-                    achieved_date: now
-                });
-            }
-            if (completedTopicsCount >= 200) {
-                achievements.push({
-                    title: '💪 Chuck Norris dos Editais',
-                    description: 'Os editais temem você!',
-                    achieved_date: now
-                });
-            }
-            if (completedTopicsCount >= 501) {
-                achievements.push({
-                    title: '🏛️ Vai Escolher Onde Vai Tomar Posse',
-                    description: 'Não é se vai passar, é onde.',
-                    achieved_date: now
-                });
-            }
-            
-            // Conquistas por SEQUÊNCIA (STREAK) com humor!
-            if (studyStreak >= 3) {
-                achievements.push({
-                    title: 'Resistente ao Netflix 📺',
-                    description: '3 dias seguidos! Resistiu à série nova!',
-                    achieved_date: now
-                });
-            }
-            if (studyStreak >= 7) {
-                achievements.push({
-                    title: 'Imune ao Sofá 🛋️',
-                    description: '7 dias! O sofá esqueceu sua forma!',
-                    achieved_date: now
-                });
-            }
-            if (studyStreak >= 14) {
-                achievements.push({
-                    title: 'Inimigo do Descanso 😤',
-                    description: '14 dias! Descanso? Não conheço!',
-                    achieved_date: now
-                });
-            }
-            if (studyStreak >= 30) {
-                achievements.push({
-                    title: 'Máquina de Aprovar 🤖',
-                    description: '30 dias! Você é um cyborg concurseiro!',
-                    achieved_date: now
-                });
-            }
-            
-            // Conquistas por NÚMERO DE SESSÕES com humor!
-            if (totalCompletedSessions >= 20) {
-                achievements.push({
-                    title: 'Viciado(a) em Questões 💊',
-                    description: '20 sessões! Questões são sua droga legal!',
-                    achieved_date: now
-                });
-            }
-            if (totalCompletedSessions >= 50) {
-                achievements.push({
-                    title: '🪑 Lombar Suprema',
-                    description: 'Já fez mais fisioterapia que simulados.',
-                    achieved_date: now
-                });
-            }
-            if (totalCompletedSessions >= 100) {
-                achievements.push({
-                    title: '🛏️ Travesseiro Vade Mecum',
-                    description: 'Seu travesseiro já está com formato de Vade Mecum.',
-                    achieved_date: now
-                });
-            }
-            if (totalCompletedSessions >= 150) {
-                achievements.push({
-                    title: '📖 Estuda em Fila de Banco',
-                    description: 'Estuda até em fila de banco.',
-                    achieved_date: now
-                });
-            }
-            if (totalCompletedSessions >= 200) {
-                achievements.push({
-                    title: '🏖️ O que é Férias?',
-                    description: 'Férias? Nunca ouvi falar.',
-                    achieved_date: now
-                });
-            }
-            if (totalCompletedSessions >= 300) {
-                achievements.push({
-                    title: '🎉 Destruidor(a) de Finais de Semana',
-                    description: 'Churrasco? Praia? Só depois da posse!',
-                    achieved_date: now
-                });
-            }
-            
-            console.log(`[GAMIFICATION DEBUG] Achievements calculados:`, {
-                count: achievements.length,
-                totalSessions: totalCompletedSessions,
-                streak: studyStreak
-            });
-            
-            // Calcular total de dias únicos com atividades (não streak, mas total)
-            const uniqueStudyDaysResult = await dbGet(`
-                SELECT COUNT(DISTINCT session_date) as count 
-                FROM study_sessions 
-                WHERE study_plan_id = ? AND status = 'Concluído'
-            `, [planId]);
-            const totalStudyDays = uniqueStudyDaysResult.count || 0;
-
-            // Calcular tempo total de estudo (soma de todas as sessões)
-            const totalStudyTimeResult = await dbGet(`
-                SELECT SUM(COALESCE(time_studied_seconds, 0)) as total_time
-                FROM study_sessions 
-                WHERE study_plan_id = ? AND status = 'Concluído'
-            `, [planId]);
-            const totalStudyTime = totalStudyTimeResult.total_time || 0;
-            
-            console.log(`📊 Endpoint gamificação - Plano ${planId}: tempo total = ${totalStudyTime} segundos`);
-
-            res.json({
-                completedTopicsCount,
-                concurseiroLevel: currentLevel.title,
-                nextLevel: nextLevel ? nextLevel.title : null,
-                topicsToNextLevel,
-                studyStreak,
-                completedTodayCount: todayTasksResult.completed || 0,
-                totalTodayCount: todayTasksResult.total || 0,
-                experiencePoints,
-                achievements,
-                totalStudyDays,
-                totalCompletedSessions,
-                totalStudyTime
-            });
-
-        } catch (error) {
-            console.error('Erro na rota de gamificação:', error);
-            return res.status(500).json({ 'error': 'Erro ao buscar dados de gamificação.' });
-        }
-});
+// === ROTA DE GAMIFICAÇÃO MIGRADA PARA MÓDULO ===
+// A rota /api/plans/:planId/gamification foi migrada para:
+// src/controllers/gamification.controller.js
+// src/routes/gamification.routes.js
+// FASE 7 COMPLETA ✅
 
 // Endpoint para gerar dados de compartilhamento
 app.get('/api/plans/:planId/share-progress', 
@@ -4498,12 +4214,17 @@ app.get('/ready', (req, res) => {
     res.status(200).json({ status: 'ready', timestamp: Date.now() });
 });
 
-// Metrics endpoint (protegido para evitar exposição de dados)
+// Legacy metrics endpoint - MIGRATED TO /api/admin/system/metrics
 app.get('/metrics', authenticateToken, (req, res) => {
+    console.warn('DEPRECATED: /metrics - Use /api/admin/system/metrics instead');
     try {
         const { getMetricsReport } = require('./src/middleware/metrics');
         const report = getMetricsReport();
-        res.json(report);
+        res.json({
+            ...report,
+            deprecated: true,
+            newEndpoint: '/api/admin/system/metrics'
+        });
     } catch (error) {
         res.status(500).json({ error: 'Erro ao coletar métricas' });
     }
@@ -4517,9 +4238,13 @@ app.use(errorHandler);
 
 // Sistema de backup foi removido durante migração para PostgreSQL
 
-// --- EMAIL SERVICE ADMINISTRATIVE ROUTES ---
-// Email service status endpoint
+// --- LEGACY ADMIN ROUTES (PHASE 8 - MIGRATED TO /api/admin/*) ---
+// These routes are kept for backward compatibility during transition
+// TODO: Remove after confirming /api/admin/* routes work correctly
+
+// Legacy email service status endpoint - MIGRATED TO /api/admin/email/status
 app.get('/admin/email/status', authenticateToken, (req, res) => {
+    console.warn('DEPRECATED: /admin/email/status - Use /api/admin/email/status instead');
     try {
         const status = emailService.getStatus();
         const rateLimitStats = emailRateLimitService.getStats();
@@ -4527,7 +4252,9 @@ app.get('/admin/email/status', authenticateToken, (req, res) => {
         res.json({
             emailService: status,
             rateLimiting: rateLimitStats,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            deprecated: true,
+            newEndpoint: '/api/admin/email/status'
         });
     } catch (error) {
         console.error('Error getting email status:', error);
@@ -4535,12 +4262,13 @@ app.get('/admin/email/status', authenticateToken, (req, res) => {
     }
 });
 
-// Test email endpoint (for administrators)
+// Legacy test email endpoint - MIGRATED TO /api/admin/email/test
 app.post('/admin/email/test', 
     authenticateToken,
     validators.email,
     handleValidationErrors,
     async (req, res) => {
+        console.warn('DEPRECATED: /admin/email/test - Use /api/admin/email/test instead');
         try {
             const { email } = req.body;
             const result = await emailService.sendTestEmail(email);
@@ -4548,7 +4276,9 @@ app.post('/admin/email/test',
             res.json({
                 success: true,
                 message: 'Test email sent successfully',
-                messageId: result.messageId
+                messageId: result.messageId,
+                deprecated: true,
+                newEndpoint: '/api/admin/email/test'
             });
         } catch (error) {
             console.error('Test email failed:', error);
@@ -4561,19 +4291,22 @@ app.post('/admin/email/test',
     }
 );
 
-// Reset rate limits for specific email (admin function)
+// Legacy reset rate limits endpoint - MIGRATED TO /api/admin/email/reset-limits
 app.post('/admin/email/reset-limits',
     authenticateToken,
     validators.email,
     handleValidationErrors,
     async (req, res) => {
+        console.warn('DEPRECATED: /admin/email/reset-limits - Use /api/admin/email/reset-limits instead');
         try {
             const { email } = req.body;
             emailRateLimitService.resetEmailLimits(email);
             
             res.json({
                 success: true,
-                message: `Rate limits reset for ${email}`
+                message: `Rate limits reset for ${email}`,
+                deprecated: true,
+                newEndpoint: '/api/admin/email/reset-limits'
             });
         } catch (error) {
             console.error('Failed to reset rate limits:', error);

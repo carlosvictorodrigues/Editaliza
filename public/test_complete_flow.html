@@ -123,7 +123,7 @@
         const routes = [
             { method: 'GET', path: '/api/auth/csrf-token', auth: false },
             { method: 'POST', path: '/api/auth/login', auth: false },
-            { method: 'GET', path: '/api/profile', auth: true },
+            { method: 'GET', path: '/api/users/profile', auth: true },
             { method: 'GET', path: '/api/plans', auth: true },
             { method: 'POST', path: '/api/plans', auth: true },
             { method: 'GET', path: '/api/plans/:planId', auth: true },
@@ -200,7 +200,7 @@
 
         async function testProfile() {
             try {
-                const response = await fetch(`${API_URL}/api/profile`, {
+                const response = await fetch(`${API_URL}/api/users/profile`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 

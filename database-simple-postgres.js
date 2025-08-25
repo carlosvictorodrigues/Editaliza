@@ -313,4 +313,31 @@ pool.connect()
         console.error('[POSTGRES] ❌ Erro ao conectar PostgreSQL:', err.message);
     });
 
+// Exportar funções helper para compatibilidade
 module.exports = db;
+module.exports.dbGet = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.get(sql, params, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+};
+
+module.exports.dbAll = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.all(sql, params, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+};
+
+module.exports.dbRun = (sql, params = []) => {
+    return new Promise((resolve, reject) => {
+        db.run(sql, params, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+};

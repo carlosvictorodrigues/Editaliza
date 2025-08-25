@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": false,
+        "amount": 5
+    },
+    "auditLog": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\logs\\.80996ac24f1ca023f9a0a4c4f897e6575ae7a2cd-audit.json",
+    "files": [
+        {
+            "date": 1756082434500,
+            "name": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\logs\\app-2025-08-24.log",
+            "hash": "9c1b634aa96abf6505ab5d4415ffdd2ce190a5957993120ee52bd8eaf5c0b442"
+        }
+    ],
+    "hashType": "sha256"
+}
