@@ -648,7 +648,7 @@
             async function loadUserProfile() {
                 try {
                     console.log('👤 Carregando perfil do usuário...');
-                    const profile = await app.apiFetch("/profile");
+                    const profile = await app.apiFetch("/api/users/profile");
                     const welcomeElement = document.getElementById("welcomeMessage");
                     const userAvatarElement = document.getElementById("userAvatar");
 
@@ -768,7 +768,7 @@
                     const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
                     console.log('📅 Data de hoje (Brasília):', today);
                     
-                    const allScheduleData = await app.apiFetch(`/api/schedules/${planId}`);
+                    const allScheduleData = await app.apiFetch(`/api/sessions/by-date/${planId}`);
                     console.log('📅 Dados do cronograma recebidos:', allScheduleData);
                     
                     // Filtrar apenas as sessões de hoje
@@ -837,7 +837,7 @@
                     const startDate = pastDate.toISOString().split('T')[0];
                     const endDate = futureDate.toISOString().split('T')[0];
                     
-                    const fullScheduleData = await app.apiFetch(`/api/schedules/${planId}`);
+                    const fullScheduleData = await app.apiFetch(`/api/sessions/by-date/${planId}`);
                     // Converter objeto agrupado por data em array flat de sessões
                     window.allSessionsData = [];
                     for (const date in fullScheduleData) {
@@ -1156,7 +1156,7 @@
             // Função para reforçar uma sessão (agenda para 3 dias depois)
             async function reinforceSession(sessionId) {
                 try {
-                    const result = await app.apiFetch(`/sessions/${sessionId}/reinforce`, { method: 'POST' });
+                    const result = await app.apiFetch(`/api/sessions/${sessionId}/reinforce`, { method: 'POST' });
                     if (result.message) {
                         app.showToast('💪 ' + result.message, 'success');
                         // Recarregar as atividades após o reforço
@@ -1200,7 +1200,7 @@
                 closePostponeModal();
 
                 try {
-                    const result = await app.apiFetch(`/sessions/${sessionIdToPostpone}/postpone`, {
+                    const result = await app.apiFetch(`/api/sessions/${sessionIdToPostpone}/postpone`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ days: days })
@@ -1339,7 +1339,7 @@
                 // Recarregar as sessões de hoje primeiro
                 if (app.state.activePlanId) {
                     try {
-                        const response = await app.apiFetch(`/api/schedules/${app.state.activePlanId}`);
+                        const response = await app.apiFetch(`/api/sessions/by-date/${app.state.activePlanId}`);
                         const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
                         const todaySchedule = response[today] || [];
                         if (todaySchedule) {

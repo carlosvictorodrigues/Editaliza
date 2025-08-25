@@ -457,7 +457,7 @@ describe('TimerSystem - Cronômetro Persistente', () => {
             await TimerSystem.stop(sessionId);
             
             expect(global.app.apiFetch).toHaveBeenCalledWith(
-                `/schedules/sessions/${sessionId}/time`,
+                `/api/sessions/${sessionId}/time`,
                 expect.objectContaining({
                     method: 'POST',
                     body: expect.stringContaining('start_time')

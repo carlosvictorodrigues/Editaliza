@@ -314,7 +314,7 @@
         async function reinforceSession(sessionId) {
             app.showSpinner();
             try {
-                const result = await app.apiFetch(`/schedules/sessions/${sessionId}/reinforce`, { method: 'POST' });
+                const result = await app.apiFetch(`/api/sessions/${sessionId}/reinforce`, { method: 'POST' });
                 app.showToast(result.message, 'success');
                 await fetchAndRenderSchedule(activeFilter);
             } catch (error) {
@@ -329,7 +329,7 @@
             closePostponeModal();
             app.showSpinner();
             try {
-                const result = await app.apiFetch(`/schedules/sessions/${sessionIdToPostpone}/postpone`, {
+                const result = await app.apiFetch(`/api/sessions/${sessionIdToPostpone}/postpone`, {
                     method: 'PATCH',
                     body: JSON.stringify({ days })
                 });

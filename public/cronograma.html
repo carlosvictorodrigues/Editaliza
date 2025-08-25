@@ -385,7 +385,7 @@
             container.innerHTML = '<div class="text-center text-gray-500 py-8">Carregando cronograma...</div>';
             app.showSpinner();
             try {
-                fullSchedule = await app.apiFetch(`/api/schedules/${planId}`);
+                fullSchedule = await app.apiFetch(`/api/sessions/by-date/${planId}`);
                 await renderScheduleDOM(filter);
             } catch (error) {
                 app.showToast('Erro ao renderizar cronograma: ' + error.message, 'error');
