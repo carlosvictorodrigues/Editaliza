@@ -154,10 +154,7 @@
                     ? 'http://localhost:3000' 
                     : 'https://editaliza.com.br';
                 
-                const response = await fetch(`${baseUrl}/auth/verify`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                const response = await app.apiFetch('/api/auth/verify');
                 });
                 
                 if (response.ok) {
@@ -172,5 +169,6 @@
             }
         }
     </script>
+    <script src="js/app.js"></script>
 </body>
 </html>

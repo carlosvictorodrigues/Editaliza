@@ -137,7 +137,7 @@
                         totalTests++;
                         
                         try {
-                            const response = await fetch(path);
+                            const response = await app.apiFetch('path');
                             if (response.ok) {
                                 addLog(`✅ SUCESSO: ${path}`);
                                 successCount++;
@@ -195,5 +195,6 @@
         // Run tests on load
         document.addEventListener('DOMContentLoaded', runTests);
     </script>
+    <script src="js/app.js"></script>
 </body>
 </html>

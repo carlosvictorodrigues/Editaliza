@@ -15,9 +15,8 @@
             // Primeiro, fazer login
             results.innerHTML = '<p>1. Fazendo login...</p>';
             
-            const loginResponse = await fetch('/api/auth/login', {
+            const loginResponse = await app.apiFetch('/api/auth/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: 'teste@editaliza.com',
                     password: 'senha123'
@@ -27,9 +26,8 @@
             if (!loginResponse.ok) {
                 // Tentar registrar primeiro
                 results.innerHTML += '<p>Criando conta de teste...</p>';
-                await fetch('/api/auth/register', {
+                await app.apiFetch('/api/auth/register', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         name: 'Teste',
                         email: 'teste@editaliza.com',
@@ -38,9 +36,8 @@
                 });
                 
                 // Tentar login novamente
-                const retry = await fetch('/api/auth/login', {
+                const retry = await app.apiFetch('/api/auth/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         email: 'teste@editaliza.com',
                         password: 'senha123'
@@ -66,12 +63,8 @@
             // Testar criação de plano
             results.innerHTML += '<p>2. Criando plano...</p>';
             
-            const createResponse = await fetch('/api/plans', {
+            const createResponse = await app.apiFetch('/api/plans', {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + token
-                },
                 body: JSON.stringify({
                     plan_name: 'Teste ' + Date.now(),
                     exam_date: '2025-12-01',
@@ -100,15 +93,11 @@
             results.innerHTML += '<p>3. Buscando plano ID ' + planId + '...</p>';
             
             // Testar rota SEM /api (deve dar 404)
-            const wrongResponse = await fetch('/plans/' + planId, {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
+            const wrongResponse = await app.apiFetch('/plans/' + planId);
             results.innerHTML += '<p>Rota /plans/' + planId + ': ' + wrongResponse.status + ' ' + wrongResponse.statusText + '</p>';
             
             // Testar rota COM /api (deve funcionar)
-            const correctResponse = await fetch('/api/plans/' + planId, {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
+            const correctResponse = await app.apiFetch('/api/plans/' + planId);
             
             if (!correctResponse.ok) {
                 results.innerHTML += '<p style="color:red">Erro na rota /api/plans/' + planId + ': ' + correctResponse.status + ' ' + correctResponse.statusText + '</p>';
@@ -128,9 +117,7 @@
             
             results.innerHTML += '<p>URL construída: ' + fullUrl + '</p>';
             
-            const appResponse = await fetch(fullUrl, {
-                headers: { 'Authorization': 'Bearer ' + token }
-            });
+            const appResponse = await app.apiFetch('/api/plans/' + planId);
             
             results.innerHTML += '<p>Resposta: ' + appResponse.status + ' ' + appResponse.statusText + '</p>';
         }
@@ -138,5 +125,6 @@
         // Executar teste ao carregar
         testRoutes();
     </script>
+    <script src="js/app.js"></script>
 </body>
 </html>

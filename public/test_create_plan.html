@@ -21,9 +21,8 @@
 
         document.getElementById('login').addEventListener('click', async () => {
             try {
-                const res = await fetch('http://localhost:3000/login', {
+                const res = await app.apiFetch('/api/auth/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         email: 'c@c.com',
                         password: '123456'
@@ -53,12 +52,8 @@
                 log(`📤 Enviando request para criar plano...`);
                 log(`Token sendo usado: Bearer ${token.substring(0, 20)}...`);
                 
-                const res = await fetch('http://localhost:3000/api/plans', {
+                const res = await app.apiFetch('/api/plans', {
                     method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
                     body: JSON.stringify({
                         plan_name: 'Teste ' + new Date().toLocaleTimeString(),
                         exam_date: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0]
@@ -82,5 +77,6 @@
             }
         });
     </script>
+    <script src="js/app.js"></script>
 </body>
 </html>

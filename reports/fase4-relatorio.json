@@ -1,0 +1,51 @@
+{
+  "processed": [
+    {
+      "file": "test_api_routes.html",
+      "changes": 0
+    },
+    {
+      "file": "test_complete_flow.html",
+      "changes": 1
+    },
+    {
+      "file": "test_statistics_routes.html",
+      "changes": 0
+    },
+    {
+      "file": "test_oauth.html",
+      "changes": 0
+    },
+    {
+      "file": "test_oauth_user.html",
+      "changes": 0
+    },
+    {
+      "file": "test_create_plan_v2.html",
+      "changes": 0
+    },
+    {
+      "file": "test_create_plan.html",
+      "changes": 0
+    }
+  ],
+  "errors": [],
+  "changes": [
+    {
+      "file": "test_complete_flow.html",
+      "line": 148,
+      "from": "fetch(`${API_URL}/health`)",
+      "to": "app.apiFetch('${API_URL}/health')",
+      "url": "${API_URL}/health"
+    }
+  ],
+  "startTime": "2025-08-25T10:40:22.829Z",
+  "endTime": "2025-08-25T10:40:22.864Z",
+  "duration": 35,
+  "summary": {
+    "totalFiles": 7,
+    "totalChanges": 1,
+    "totalErrors": 0,
+    "success": true
+  }
+}

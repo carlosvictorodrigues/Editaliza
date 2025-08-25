@@ -1,0 +1,35 @@
+{
+  "processed": [
+    {
+      "file": "test-csrf-fix.html",
+      "changes": 0
+    },
+    {
+      "file": "test-email-recovery.html",
+      "changes": 0
+    },
+    {
+      "file": "test-ui-excluded-topics.html",
+      "changes": 0
+    },
+    {
+      "file": "test_oauth_user.html",
+      "changes": 0
+    },
+    {
+      "file": "test_statistics_routes.html",
+      "changes": 0
+    }
+  ],
+  "errors": [],
+  "changes": [],
+  "startTime": "2025-08-25T10:44:18.371Z",
+  "endTime": "2025-08-25T10:44:18.409Z",
+  "duration": 38,
+  "summary": {
+    "totalFiles": 5,
+    "totalChanges": 0,
+    "totalErrors": 0,
+    "success": true
+  }
+}

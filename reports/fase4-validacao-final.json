@@ -1,0 +1,229 @@
+{
+  "startTime": "2025-08-25T10:45:06.378Z",
+  "totalFiles": 59,
+  "filesWithFetch": [
+    {
+      "filename": "test-csrf-fix.html",
+      "count": 2
+    },
+    {
+      "filename": "test-email-recovery.html",
+      "count": 1
+    },
+    {
+      "filename": "test-ui-excluded-topics.html",
+      "count": 2
+    },
+    {
+      "filename": "test_oauth_user.html",
+      "count": 1
+    },
+    {
+      "filename": "test_statistics_routes.html",
+      "count": 4
+    }
+  ],
+  "filesWithAppApiFetch": [
+    {
+      "filename": "cronograma.html",
+      "count": 11,
+      "hasAppJs": true
+    },
+    {
+      "filename": "cronograma_fixed.html",
+      "count": 9,
+      "hasAppJs": true
+    },
+    {
+      "filename": "dashboard.html",
+      "count": 3,
+      "hasAppJs": true
+    },
+    {
+      "filename": "forgot-password.html",
+      "count": 1,
+      "hasAppJs": true
+    },
+    {
+      "filename": "home.html",
+      "count": 15,
+      "hasAppJs": true
+    },
+    {
+      "filename": "login.html",
+      "count": 2,
+      "hasAppJs": true
+    },
+    {
+      "filename": "notes.html",
+      "count": 1,
+      "hasAppJs": true
+    },
+    {
+      "filename": "plan.html",
+      "count": 1,
+      "hasAppJs": true
+    },
+    {
+      "filename": "plan_settings.html",
+      "count": 9,
+      "hasAppJs": true
+    },
+    {
+      "filename": "profile.html",
+      "count": 2,
+      "hasAppJs": true
+    },
+    {
+      "filename": "register.html",
+      "count": 1,
+      "hasAppJs": true
+    },
+    {
+      "filename": "reset-password.html",
+      "count": 1,
+      "hasAppJs": true
+    },
+    {
+      "filename": "test-csrf-fix.html",
+      "count": 1,
+      "hasAppJs": true
+    },
+    {
+      "filename": "test-email-recovery.html",
+      "count": 2,
+      "hasAppJs": true
+    },
+    {
+      "filename": "test-interface-pos-correcoes.html",
+      "count": 4,
+      "hasAppJs": true
+    },
+    {
+      "filename": "test-server.html",
+      "count": 1,
+      "hasAppJs": true
+    },
+    {
+      "filename": "test_api_routes.html",
+      "count": 7,
+      "hasAppJs": false
+    },
+    {
+      "filename": "test_complete_flow.html",
+      "count": 8,
+      "hasAppJs": true
+    },
+    {
+      "filename": "test_create_plan.html",
+      "count": 2,
+      "hasAppJs": true
+    },
+    {
+      "filename": "test_create_plan_v2.html",
+      "count": 3,
+      "hasAppJs": true
+    },
+    {
+      "filename": "test_oauth.html",
+      "count": 1,
+      "hasAppJs": false
+    }
+  ],
+  "mainPages": {
+    "status": {
+      "cronograma.html": {
+        "fetchCount": 0,
+        "appFetchCount": 11,
+        "hasAppJs": true,
+        "status": "CONVERTED"
+      },
+      "dashboard.html": {
+        "fetchCount": 0,
+        "appFetchCount": 3,
+        "hasAppJs": true,
+        "status": "CONVERTED"
+      },
+      "home.html": {
+        "fetchCount": 0,
+        "appFetchCount": 15,
+        "hasAppJs": true,
+        "status": "CONVERTED"
+      },
+      "login.html": {
+        "fetchCount": 0,
+        "appFetchCount": 2,
+        "hasAppJs": true,
+        "status": "CONVERTED"
+      },
+      "profile.html": {
+        "fetchCount": 0,
+        "appFetchCount": 2,
+        "hasAppJs": true,
+        "status": "CONVERTED"
+      },
+      "register.html": {
+        "fetchCount": 0,
+        "appFetchCount": 1,
+        "hasAppJs": true,
+        "status": "CONVERTED"
+      }
+    },
+    "files": [
+      "home.html",
+      "cronograma.html",
+      "profile.html",
+      "login.html",
+      "register.html",
+      "dashboard.html"
+    ]
+  },
+  "testFiles": {
+    "converted": [
+      "test-interface-pos-correcoes.html",
+      "test-server.html",
+      "test_api_routes.html",
+      "test_complete_flow.html",
+      "test_create_plan.html",
+      "test_create_plan_v2.html",
+      "test_oauth.html"
+    ],
+    "remaining": [
+      {
+        "filename": "test-csrf-fix.html",
+        "fetchCount": 2,
+        "appFetchCount": 1
+      },
+      {
+        "filename": "test-email-recovery.html",
+        "fetchCount": 1,
+        "appFetchCount": 2
+      },
+      {
+        "filename": "test-ui-excluded-topics.html",
+        "fetchCount": 2,
+        "appFetchCount": 0
+      },
+      {
+        "filename": "test_oauth_user.html",
+        "fetchCount": 1,
+        "appFetchCount": 0
+      },
+      {
+        "filename": "test_statistics_routes.html",
+        "fetchCount": 4,
+        "appFetchCount": 0
+      }
+    ]
+  },
+  "summary": {
+    "conversionRate": 100,
+    "mainPagesConverted": 6,
+    "mainPagesTotal": 6,
+    "totalFetchCalls": 10,
+    "totalAppFetchCalls": 85,
+    "success": false
+  },
+  "endTime": "2025-08-25T10:45:06.418Z",
+  "duration": 40
+}

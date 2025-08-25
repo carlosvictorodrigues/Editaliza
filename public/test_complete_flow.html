@@ -145,7 +145,7 @@
 
         async function checkSystem() {
             try {
-                const response = await fetch(`${API_URL}/health`);
+                const response = await app.apiFetch('${API_URL}/health');
                 const data = await response.json();
                 
                 document.getElementById('system-status').innerHTML = 
@@ -167,9 +167,8 @@
                 log('auth', 'Iniciando teste de autenticação...');
                 
                 // Fazer login
-                const response = await fetch(`${API_URL}/api/auth/login`, {
+                const response = await app.apiFetch('/api/auth/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         email: 'teste@teste.com',
                         password: 'teste123'
@@ -200,9 +199,7 @@
 
         async function testProfile() {
             try {
-                const response = await fetch(`${API_URL}/api/users/profile`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await app.apiFetch('/api/users/profile');
 
                 if (response.ok) {
                     const data = await response.json();
@@ -224,9 +221,7 @@
             try {
                 log('plans', 'Buscando planos...');
                 
-                const response = await fetch(`${API_URL}/api/plans`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await app.apiFetch('/api/plans');
 
                 if (response.ok) {
                     const plans = await response.json();
@@ -258,12 +253,8 @@
             try {
                 log('plans', 'Criando plano de teste...');
                 
-                const response = await fetch(`${API_URL}/api/plans`, {
+                const response = await app.apiFetch('/api/plans', {
                     method: 'POST',
-                    headers: { 
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
                     body: JSON.stringify({
                         plan_name: `Teste ${Date.now()}`,
                         exam_date: '2025-12-31',
@@ -295,9 +286,7 @@
             try {
                 log('stats', `Buscando estatísticas do plano ${planId}...`);
                 
-                const response = await fetch(`${API_URL}/api/plans/${planId}/statistics`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await app.apiFetch(`/api/plans/${planId}/statistics`);
 
                 if (response.ok) {
                     const stats = await response.json();
@@ -325,9 +314,7 @@
             try {
                 log('schedule', `Buscando cronograma do plano ${planId}...`);
                 
-                const response = await fetch(`${API_URL}/api/plans/${planId}/schedule`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await app.apiFetch(`/api/plans/${planId}/schedule`);
 
                 if (response.ok) {
                     const schedule = await response.json();
@@ -382,7 +369,7 @@
                     options.body = JSON.stringify({});
                 }
                 
-                const response = await fetch(`${API_URL}${path}`, options);
+                const response = await app.apiFetch(path, options);
                 
                 if (response.ok) {
                     resultEl.innerHTML = '<span class="status success">✅ OK</span>';
@@ -397,5 +384,6 @@
         // Inicializar
         checkSystem();
     </script>
+    <script src="js/app.js"></script>
 </body>
 </html>
