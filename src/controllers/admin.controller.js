@@ -16,6 +16,7 @@
 const { dbGet, dbAll, dbRun } = require('../../database-postgresql');
 const { systemLogger, securityLogger } = require('../utils/logger');
 const { logAdminAction } = require('../middleware/admin.middleware');
+const { ROUTE_CACHE_CONFIG } = require('../middleware/admin-cache.middleware');
 
 // Importar serviços existentes
 let emailService, emailRateLimitService, getMetricsReport;
@@ -291,29 +292,52 @@ const getSystemMetrics = async (req, res) => {
             }
         }
         
-        // Métricas de banco de dados
+        // Métricas de banco de dados otimizadas
         try {
-            const dbStats = await dbGet(`
-                SELECT 
-                    COUNT(*) as total_users,
-                    COUNT(CASE WHEN role = 'admin' THEN 1 END) as admin_users,
-                    COUNT(CASE WHEN created_at >= NOW() - INTERVAL '24 hours' THEN 1 END) as users_last_24h,
-                    COUNT(CASE WHEN created_at >= NOW() - INTERVAL '7 days' THEN 1 END) as users_last_7d
-                FROM users
-            `);
-            
-            const planStats = await dbGet(`
-                SELECT 
-                    COUNT(*) as total_plans,
-                    COUNT(CASE WHEN is_active = true THEN 1 END) as active_plans,
-                    COUNT(CASE WHEN created_at >= NOW() - INTERVAL '24 hours' THEN 1 END) as plans_last_24h
-                FROM study_plans
-            `);
+            // Usar views materializadas para métricas pesadas (performance crítica)
+            const [userMetrics, planMetrics, systemMetrics] = await Promise.all([
+                // Métricas de usuários da view materializada (cache DB-level)
+                dbGet('SELECT * FROM admin_user_metrics LIMIT 1'),
+                
+                // Métricas de planos da view materializada
+                dbGet('SELECT * FROM admin_plan_metrics LIMIT 1'),
+                
+                // Métricas do sistema usando CTE otimizada
+                dbGet(`
+                    WITH system_stats AS (
+                        SELECT 
+                            (SELECT COUNT(*) FROM sessions WHERE expire > NOW()) as active_sessions,
+                            (SELECT COUNT(*) FROM oauth_providers) as oauth_users,
+                            (SELECT COUNT(*) FROM tasks WHERE completed = true AND completed_at >= NOW() - INTERVAL '24 hours') as tasks_completed_24h,
+                            (SELECT AVG(study_hours_per_day) FROM plans WHERE study_hours_per_day IS NOT NULL) as avg_study_hours
+                    )
+                    SELECT * FROM system_stats
+                `)
+            ]);
             
             metrics.database = {
-                users: dbStats,
-                plans: planStats,
-                connection: 'healthy'
+                users: userMetrics || {
+                    total_users: 0,
+                    admin_users: 0,
+                    users_last_24h: 0,
+                    users_last_7d: 0
+                },
+                plans: planMetrics || {
+                    total_plans: 0,
+                    plans_last_24h: 0,
+                    plans_last_7d: 0
+                },
+                system: systemMetrics || {
+                    active_sessions: 0,
+                    oauth_users: 0,
+                    tasks_completed_24h: 0,
+                    avg_study_hours: 0
+                },
+                connection: 'healthy',
+                cache_source: {
+                    users: userMetrics ? 'materialized_view' : 'fallback',
+                    plans: planMetrics ? 'materialized_view' : 'fallback'
+                }
             };
             
         } catch (dbError) {
@@ -387,42 +411,49 @@ const getUsers = async (req, res) => {
         const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'created_at';
         const order = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
         
-        // Query principal
-        const usersQuery = `
+        // Query principal otimizada com CTE e paginação eficiente
+        const optimizedQuery = `
+            WITH filtered_users AS (
+                SELECT 
+                    id, email, name, role, created_at, 
+                    auth_provider, google_id, avatar_url,
+                    created_at as last_activity,
+                    COUNT(*) OVER() as total_count
+                FROM users 
+                ${whereClause}
+            ),
+            paginated_users AS (
+                SELECT *,
+                       ROW_NUMBER() OVER(ORDER BY ${sortField} ${order}, id) as row_num
+                FROM filtered_users
+            )
             SELECT 
                 id, email, name, role, created_at, 
-                profile_picture, auth_provider,
-                CASE 
-                    WHEN last_login_at IS NOT NULL THEN last_login_at
-                    ELSE created_at 
-                END as last_activity
-            FROM users 
-            ${whereClause}
-            ORDER BY ${sortField} ${order}
-            LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+                auth_provider, google_id, avatar_url, last_activity,
+                total_count
+            FROM paginated_users
+            WHERE row_num > $${paramIndex} AND row_num <= $${paramIndex + 1}
+            ORDER BY ${sortField} ${order}, id
         `;
         
-        queryParams.push(parseInt(limit), offset);
+        queryParams.push(offset, offset + parseInt(limit));
         
-        // Query de contagem
-        const countQuery = `
-            SELECT COUNT(*) as total
-            FROM users 
-            ${whereClause}
-        `;
+        // Executar query única otimizada
+        const users = await dbAll(optimizedQuery, queryParams);
+        const total = users.length > 0 ? users[0].total_count : 0;
         
-        const [users, countResult] = await Promise.all([
-            dbAll(usersQuery, queryParams),
-            dbGet(countQuery, queryParams.slice(0, -2)) // Remove limit e offset
-        ]);
-        
-        const total = countResult?.total || 0;
         const totalPages = Math.ceil(total / limit);
+        
+        // Limpar total_count dos resultados
+        const cleanUsers = users.map(user => {
+            const { total_count, ...cleanUser } = user;
+            return cleanUser;
+        });
         
         res.json({
             success: true,
             data: {
-                users: users || [],
+                users: cleanUsers || [],
                 pagination: {
                     page: parseInt(page),
                     limit: parseInt(limit),

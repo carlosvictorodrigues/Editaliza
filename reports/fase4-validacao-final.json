@@ -1,5 +1,5 @@
 {
-  "startTime": "2025-08-25T10:45:06.378Z",
+  "startTime": "2025-08-25T10:49:35.775Z",
   "totalFiles": 59,
   "filesWithFetch": [
     {
@@ -107,7 +107,7 @@
     {
       "filename": "test_api_routes.html",
       "count": 7,
-      "hasAppJs": false
+      "hasAppJs": true
     },
     {
       "filename": "test_complete_flow.html",
@@ -127,7 +127,7 @@
     {
       "filename": "test_oauth.html",
       "count": 1,
-      "hasAppJs": false
+      "hasAppJs": true
     }
   ],
   "mainPages": {
@@ -224,6 +224,6 @@
     "totalAppFetchCalls": 85,
     "success": false
   },
-  "endTime": "2025-08-25T10:45:06.418Z",
-  "duration": 40
+  "endTime": "2025-08-25T10:49:35.811Z",
+  "duration": 36
 }

@@ -31,6 +31,9 @@ const {
 // Controller de admin
 const adminController = require('../controllers/admin.controller');
 
+// Cache middleware para rotas pesadas
+const { ROUTE_CACHE_CONFIG, cacheStats, cacheClear } = require('../middleware/admin-cache.middleware');
+
 // === MIDDLEWARE GLOBAL PARA ROTAS ADMIN ===
 
 // Aplicar autenticação, verificação de admin e contexto de logging
@@ -80,10 +83,13 @@ router.get('/system/health', adminController.getSystemHealth);
 
 /**
  * GET /admin/system/metrics
- * Métricas detalhadas do sistema
+ * Métricas detalhadas do sistema (COM CACHE - 5min TTL)
  * Expandido da funcionalidade existente /metrics (linha 4221)
  */
-router.get('/system/metrics', adminController.getSystemMetrics);
+router.get('/system/metrics', 
+    ROUTE_CACHE_CONFIG.metrics.get,  // Cache de 5 minutos
+    adminController.getSystemMetrics
+);
 
 /**
  * GET /admin/system/ready
@@ -103,7 +109,7 @@ router.get('/system/ready', (req, res) => {
 
 /**
  * GET /admin/users
- * Listar usuários do sistema com paginação e filtros
+ * Listar usuários do sistema com paginação e filtros (COM CACHE - 2min TTL)
  */
 router.get('/users',
     // Validações de query parameters
@@ -114,6 +120,7 @@ router.get('/users',
     validators.enumParam('sortBy', ['created_at', 'email', 'name', 'last_login_at'], { optional: true }),
     validators.enumParam('sortOrder', ['ASC', 'DESC'], { optional: true }),
     handleValidationErrors,
+    ROUTE_CACHE_CONFIG.users.get,  // Cache de 2 minutos
     adminController.getUsers
 );
 
@@ -188,7 +195,7 @@ router.get('/users/:userId',
 
 /**
  * PATCH /admin/users/:userId/role
- * Atualizar role de um usuário (operação crítica)
+ * Atualizar role de um usuário (operação crítica + INVALIDAR CACHE)
  */
 router.patch('/users/:userId/role',
     requireSecureAdmin, // Requer IP whitelist
@@ -196,7 +203,8 @@ router.patch('/users/:userId/role',
     validators.numericParam('userId', { location: 'params' }),
     validators.enumParam('role', ['user', 'admin']),
     handleValidationErrors,
-    adminController.updateUserRole
+    adminController.updateUserRole,
+    ROUTE_CACHE_CONFIG.users.invalidate  // Invalidar cache de usuários
 );
 
 /**
@@ -265,13 +273,16 @@ router.post('/users/:userId/ban',
 
 /**
  * GET /admin/config
- * Obter configurações do sistema
+ * Obter configurações do sistema (COM CACHE - 30min TTL)
  */
-router.get('/config', adminController.getSystemConfig);
+router.get('/config', 
+    ROUTE_CACHE_CONFIG.config.get,  // Cache de 30 minutos
+    adminController.getSystemConfig
+);
 
 /**
  * POST /admin/config/update
- * Atualizar configurações (operação crítica)
+ * Atualizar configurações (operação crítica + INVALIDAR CACHE)
  */
 router.post('/config/update',
     requireSecureAdmin,
@@ -325,14 +336,15 @@ router.post('/config/update',
                 code: 'UPDATE_CONFIG_ERROR'
             });
         }
-    }
+    },
+    ROUTE_CACHE_CONFIG.config.invalidate  // Invalidar cache de configurações
 );
 
 // === AUDIT LOGS ROUTES ===
 
 /**
  * GET /admin/audit/logs
- * Obter logs de auditoria
+ * Obter logs de auditoria (COM CACHE - 1min TTL)
  */
 router.get('/audit/logs',
     validators.numericParam('page', { min: 1, max: 1000, optional: true }),
@@ -342,6 +354,7 @@ router.get('/audit/logs',
     validators.dateParam('startDate', { optional: true }),
     validators.dateParam('endDate', { optional: true }),
     handleValidationErrors,
+    ROUTE_CACHE_CONFIG.audit.get,  // Cache de 1 minuto
     adminController.getAuditLogs
 );
 
@@ -494,6 +507,77 @@ Object.assign(validators, {
     enumParam,
     dateParam
 });
+
+// === CACHE MANAGEMENT ROUTES ===
+
+/**
+ * GET /admin/cache/stats
+ * Estatísticas do cache administrativo
+ */
+router.get('/cache/stats', cacheStats);
+
+/**
+ * POST /admin/cache/clear
+ * Limpeza manual do cache
+ * Body: { "tag": "users" } ou vazio para limpar tudo
+ */
+router.post('/cache/clear',
+    requireSecureAdmin,
+    validators.textParam('tag', { minLength: 0, maxLength: 50, optional: true }),
+    handleValidationErrors,
+    cacheClear
+);
+
+/**
+ * POST /admin/cache/refresh-views
+ * Refresh manual das views materializadas
+ */
+router.post('/cache/refresh-views',
+    requireSecureAdmin,
+    async (req, res) => {
+        try {
+            const { dbRun } = require('../../database-postgresql');
+            const { logAdminAction } = require('../middleware/admin.middleware');
+            const { systemLogger } = require('../utils/logger');
+            
+            logAdminAction(req, 'refresh_materialized_views');
+            
+            // Refresh das views materializadas em paralelo
+            await Promise.all([
+                dbRun('SELECT refresh_admin_metrics()'),
+                dbRun('REFRESH MATERIALIZED VIEW CONCURRENTLY admin_user_metrics'),
+                dbRun('REFRESH MATERIALIZED VIEW CONCURRENTLY admin_plan_metrics')
+            ]);
+            
+            systemLogger.info('Materialized views refreshed manually', {
+                adminId: req.user.id
+            });
+            
+            res.json({
+                success: true,
+                message: 'Views materializadas atualizadas com sucesso',
+                data: {
+                    refreshedAt: new Date().toISOString(),
+                    refreshedBy: req.user.id,
+                    views: ['admin_user_metrics', 'admin_plan_metrics']
+                }
+            });
+            
+        } catch (error) {
+            const { systemLogger } = require('../utils/logger');
+            systemLogger.error('Error refreshing materialized views', {
+                error: error.message,
+                adminId: req.user.id
+            });
+            
+            res.status(500).json({
+                success: false,
+                error: 'Erro ao atualizar views materializadas',
+                code: 'REFRESH_VIEWS_ERROR'
+            });
+        }
+    }
+);
 
 // === ERROR HANDLING ===
 

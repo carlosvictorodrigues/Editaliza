@@ -21,6 +21,7 @@ const router = express.Router();
 // Middleware
 const authMiddleware = require('../middleware/auth.middleware');
 const { validators, handleValidationErrors, jsonField, integer, numericId } = require('../middleware/validation.middleware');
+const { verifyCsrf } = require('../middleware/csrf.middleware');
 
 // Controllers
 const plansController = require('../controllers/plans.controller');
@@ -51,6 +52,7 @@ const logger = require('../../src/utils/logger');
 router.post('/plans/:planId/generate',
     // 1. Autenticação obrigatória
     authMiddleware.authenticateToken(),
+    verifyCsrf({ skipInDevelopment: true }), // CSRF opcional em dev
     
     // 2. Validação do ID do plano
     numericId('planId'),
