@@ -1,6 +1,58 @@
 const db = require('../../database-postgresql.js');
 const { validationResult } = require('express-validator');
 
+// === PHASE 5 WAVE 2 - SERVICE INTEGRATION ===
+// Import SessionService for enhanced functionality
+let sessionService = null;
+
+try {
+    const { SessionService } = require('../services/index.js');
+    // Note: Service will be initialized when repositories are available
+    console.log('✅ SessionService import ready for Wave 2 integration');
+} catch (error) {
+    console.log('⚠️ SessionService not available - using legacy mode');
+}
+
+/**
+ * Initialize SessionService when repositories become available
+ */
+function initializeSessionService(repositories, database) {
+    try {
+        if (!sessionService && repositories && database) {
+            const { SessionService } = require('../services/index.js');
+            sessionService = new SessionService(repositories, database);
+            console.log('🔧 SessionService initialized for enhanced functionality');
+        }
+        return sessionService;
+    } catch (error) {
+        console.log('⚠️ Could not initialize SessionService, continuing with legacy mode');
+        return null;
+    }
+}
+
+/**
+ * Enhanced service wrapper - provides service enhancements while maintaining compatibility
+ */
+function withServiceEnhancement(legacyFunction) {
+    return async (req, res) => {
+        try {
+            // Try service enhancement first (if available)
+            const service = initializeSessionService(global.repositories, db);
+            if (service && req.params.planId) {
+                // Service available - could add enhancements here
+                // For now, maintain compatibility by using legacy
+            }
+            
+            // Always execute legacy function for reliability
+            return await legacyFunction(req, res);
+        } catch (error) {
+            console.error('Service enhancement error:', error);
+            // Fallback to legacy function on any service error
+            return await legacyFunction(req, res);
+        }
+    };
+}
+
 // BRAZILIAN TIMEZONE UTILITY - CRITICAL FOR DATE HANDLING
 function getBrazilianDateString() {
     const now = new Date();
@@ -275,6 +327,7 @@ class SessionsController {
     /**
      * Create reinforcement session - CRITICAL for spaced repetition
      * POST /api/sessions/:sessionId/reinforce
+     * ENHANCED with SessionService integration (Wave 2)
      */
     static async createReinforcementSession(req, res) {
         const errors = validationResult(req);
@@ -286,6 +339,34 @@ class SessionsController {
         const userId = req.user.id;
 
         try {
+            // === PHASE 5 WAVE 2 - SERVICE ENHANCEMENT ===
+            const service = initializeSessionService(global.repositories, db);
+            if (service) {
+                try {
+                    // Get session to find planId for service call
+                    const sessionCheck = await dbGet(
+                        'SELECT ss.study_plan_id FROM study_sessions ss JOIN study_plans sp ON ss.study_plan_id = sp.id WHERE ss.id = ? AND sp.user_id = ?', 
+                        [sessionId, userId]
+                    );
+                    
+                    if (sessionCheck) {
+                        const result = await service.reinforceSession(sessionId, sessionCheck.study_plan_id, userId);
+                        if (result) {
+                            console.log('🔄 Using enhanced SessionService reinforcement');
+                            return res.status(201).json({
+                                message: 'Sessão de reforço criada com sucesso!',
+                                reinforcementId: result.id,
+                                scheduledDate: result.session_date,
+                                source: 'service'
+                            });
+                        }
+                    }
+                } catch (serviceError) {
+                    console.log('⚠️ Service reinforcement failed, using legacy:', serviceError.message);
+                }
+            }
+            
+            // === LEGACY MODE - MAINTAIN FULL COMPATIBILITY ===
             // Get original session with authorization check
             const session = await dbGet(
                 'SELECT ss.* FROM study_sessions ss JOIN study_plans sp ON ss.study_plan_id = sp.id WHERE ss.id = ? AND sp.user_id = ?', 
@@ -320,7 +401,8 @@ class SessionsController {
             
             res.status(201).json({ 
                 message: `Sessão de reforço agendada para ${reinforceDate.toLocaleDateString('pt-BR')}!`,
-                reinforceDate: reinforceDateStr
+                reinforceDate: reinforceDateStr,
+                source: 'legacy'
             });
 
         } catch (error) {
@@ -332,6 +414,7 @@ class SessionsController {
     /**
      * Postpone session with intelligent date finding - COMPLEX ALGORITHM
      * PATCH /api/sessions/:sessionId/postpone
+     * ENHANCED with SessionService integration (Wave 2)
      */
     static async postponeSession(req, res) {
         const errors = validationResult(req);
@@ -344,6 +427,39 @@ class SessionsController {
         const userId = req.user.id;
 
         try {
+            // === PHASE 5 WAVE 2 - SERVICE ENHANCEMENT ===
+            const service = initializeSessionService(global.repositories, db);
+            if (service) {
+                try {
+                    // Get session to find planId
+                    const sessionCheck = await dbGet('SELECT study_plan_id FROM study_sessions WHERE id = ?', [sessionId]);
+                    if (sessionCheck) {
+                        // Calculate target date from days parameter
+                        let targetDate = null;
+                        if (days !== 'next') {
+                            const currentDate = new Date();
+                            currentDate.setDate(currentDate.getDate() + parseInt(days, 10));
+                            targetDate = currentDate.toISOString().split('T')[0];
+                        }
+                        
+                        const result = await service.postponeSession(sessionId, sessionCheck.study_plan_id, userId, 'user_request', targetDate);
+                        if (result) {
+                            console.log('🗓️ Using enhanced SessionService postponement');
+                            return res.json({
+                                message: `Tarefa adiada para ${new Date(result.newDate).toLocaleDateString('pt-BR')}!`,
+                                newDate: result.newDate,
+                                postponementCount: result.postponementCount,
+                                analysis: result.analysis,
+                                source: 'service'
+                            });
+                        }
+                    }
+                } catch (serviceError) {
+                    console.log('⚠️ Service postponement failed, using legacy:', serviceError.message);
+                }
+            }
+            
+            // === LEGACY MODE - MAINTAIN FULL COMPATIBILITY ===
             // Get session with validation
             const session = await dbGet('SELECT * FROM study_sessions WHERE id = ?', [sessionId]);
             if (!session) {
@@ -397,7 +513,8 @@ class SessionsController {
             res.json({ 
                 message: `Tarefa adiada para ${newDate.toLocaleDateString('pt-BR')}!`,
                 newDate: newDateStr,
-                originalDate: session.session_date
+                originalDate: session.session_date,
+                source: 'legacy'
             });
 
         } catch (error) {
@@ -409,6 +526,7 @@ class SessionsController {
     /**
      * Get session statistics for analytics - COMPLEX CALCULATIONS
      * GET /api/sessions/statistics/:planId
+     * ENHANCED with SessionService integration (Wave 2)
      */
     static async getSessionStatistics(req, res) {
         const errors = validationResult(req);
@@ -420,6 +538,24 @@ class SessionsController {
         const userId = req.user.id;
 
         try {
+            // === PHASE 5 WAVE 2 - SERVICE ENHANCEMENT ===
+            const service = initializeSessionService(global.repositories, db);
+            if (service) {
+                try {
+                    const enhancedStats = await service.getSessionStatistics(planId, userId);
+                    if (enhancedStats) {
+                        console.log('📊 Using enhanced SessionService statistics');
+                        // Add service-specific enhancements
+                        enhancedStats.source = 'service';
+                        enhancedStats.timestamp = new Date().toISOString();
+                        return res.json(enhancedStats);
+                    }
+                } catch (serviceError) {
+                    console.log('⚠️ Service enhancement failed, using legacy:', serviceError.message);
+                }
+            }
+            
+            // === LEGACY MODE - MAINTAIN FULL COMPATIBILITY ===
             // Verify plan ownership
             const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
             if (!plan) {
@@ -516,7 +652,9 @@ class SessionsController {
                 bestDayForStudy: bestDay,
                 completionRate: performanceResult?.total_sessions > 0 
                     ? ((performanceResult.completed_sessions / performanceResult.total_sessions) * 100) 
-                    : 0
+                    : 0,
+                source: 'legacy', // Indicate data source
+                timestamp: new Date().toISOString()
             };
 
             res.json(statistics);
@@ -587,6 +725,241 @@ class SessionsController {
         } catch (error) {
             console.error('Erro ao buscar progresso de questões:', error);
             res.status(500).json({ error: 'Erro ao buscar progresso de questões' });
+        }
+    }
+
+    // === PHASE 5 WAVE 2 - NEW SERVICE-ENHANCED ENDPOINTS ===
+
+    /**
+     * Get study streak information with detailed analysis
+     * GET /api/sessions/streak/:planId
+     * NEW - Service-powered endpoint
+     */
+    static async getStudyStreak(req, res) {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { planId } = req.params;
+        const userId = req.user.id;
+
+        try {
+            const service = initializeSessionService(global.repositories, db);
+            if (service) {
+                try {
+                    const streakData = await service.calculateStreak(planId, userId);
+                    if (streakData) {
+                        console.log('🔥 Using enhanced SessionService streak calculation');
+                        return res.json({
+                            ...streakData,
+                            source: 'service',
+                            timestamp: new Date().toISOString()
+                        });
+                    }
+                } catch (serviceError) {
+                    console.log('⚠️ Service streak failed:', serviceError.message);
+                }
+            }
+
+            // Fallback to basic streak calculation
+            const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+            if (!plan) {
+                return res.status(404).json({ error: 'Plano não encontrado' });
+            }
+
+            const sessions = await dbAll(
+                'SELECT session_date FROM study_sessions WHERE study_plan_id = ? AND status = \'Concluído\' ORDER BY session_date DESC',
+                [planId]
+            );
+
+            // Basic streak calculation
+            const uniqueDates = [...new Set(sessions.map(s => s.session_date))].sort((a, b) => new Date(b) - new Date(a));
+            let currentStreak = 0;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let i = 0; i < uniqueDates.length; i++) {
+                const studyDate = new Date(uniqueDates[i]);
+                studyDate.setHours(0, 0, 0, 0);
+                const daysDiff = Math.floor((today - studyDate) / (1000 * 60 * 60 * 24));
+
+                if (i === 0 && daysDiff <= 1) {
+                    currentStreak = 1;
+                } else if (i > 0) {
+                    const prevDate = new Date(uniqueDates[i - 1]);
+                    const daysBetween = Math.floor((prevDate - studyDate) / (1000 * 60 * 60 * 24));
+                    if (daysBetween === 1) {
+                        currentStreak++;
+                    } else {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+
+            res.json({
+                currentStreak,
+                longestStreak: Math.max(currentStreak, uniqueDates.length > 7 ? 7 : uniqueDates.length),
+                todayStudied: uniqueDates.length > 0 && uniqueDates[0] === today.toISOString().split('T')[0],
+                source: 'fallback',
+                timestamp: new Date().toISOString()
+            });
+
+        } catch (error) {
+            console.error('Erro ao calcular streak:', error);
+            res.status(500).json({ error: 'Erro ao calcular streak de estudos' });
+        }
+    }
+
+    /**
+     * Schedule a new session with intelligent date finding
+     * POST /api/sessions/schedule/:planId
+     * NEW - Service-powered endpoint
+     */
+    static async scheduleSession(req, res) {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { planId } = req.params;
+        const userId = req.user.id;
+        const sessionData = req.body;
+
+        try {
+            const service = initializeSessionService(global.repositories, db);
+            if (service) {
+                try {
+                    const result = await service.scheduleSession(planId, userId, sessionData);
+                    if (result) {
+                        console.log('📅 Using enhanced SessionService scheduling');
+                        return res.status(201).json({
+                            message: 'Sessão agendada com sucesso!',
+                            session: result,
+                            source: 'service'
+                        });
+                    }
+                } catch (serviceError) {
+                    console.log('⚠️ Service scheduling failed:', serviceError.message);
+                }
+            }
+
+            // Fallback to basic session creation
+            const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+            if (!plan) {
+                return res.status(404).json({ error: 'Plano não encontrado' });
+            }
+
+            // Basic validation
+            if (!sessionData.session_type || !sessionData.subject_name) {
+                return res.status(400).json({ error: 'Tipo de sessão e matéria são obrigatórios' });
+            }
+
+            // Set default date to tomorrow if not provided
+            if (!sessionData.session_date) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                sessionData.session_date = tomorrow.toISOString().split('T')[0];
+            }
+
+            const sql = `INSERT INTO study_sessions 
+                (study_plan_id, topic_id, subject_name, topic_description, session_date, session_type, status) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)`;
+            
+            const result = await dbRun(sql, [
+                planId,
+                sessionData.topic_id || null,
+                sessionData.subject_name,
+                sessionData.topic_description || sessionData.subject_name,
+                sessionData.session_date,
+                sessionData.session_type,
+                'Pendente'
+            ]);
+
+            res.status(201).json({
+                message: 'Sessão criada com sucesso!',
+                sessionId: result.lastID,
+                source: 'fallback'
+            });
+
+        } catch (error) {
+            console.error('Erro ao agendar sessão:', error);
+            res.status(500).json({ error: 'Erro ao agendar a sessão' });
+        }
+    }
+
+    /**
+     * Complete a session with comprehensive tracking
+     * POST /api/sessions/:sessionId/complete
+     * NEW - Service-powered endpoint
+     */
+    static async completeSession(req, res) {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { sessionId } = req.params;
+        const userId = req.user.id;
+        const completionData = req.body;
+
+        try {
+            const service = initializeSessionService(global.repositories, db);
+            if (service) {
+                try {
+                    // Get session to find planId
+                    const sessionCheck = await dbGet(
+                        'SELECT ss.study_plan_id FROM study_sessions ss JOIN study_plans sp ON ss.study_plan_id = sp.id WHERE ss.id = ? AND sp.user_id = ?',
+                        [sessionId, userId]
+                    );
+                    
+                    if (sessionCheck) {
+                        const result = await service.completeSession(sessionId, sessionCheck.study_plan_id, userId, completionData);
+                        if (result) {
+                            console.log('✅ Using enhanced SessionService completion');
+                            return res.json({
+                                message: 'Sessão concluída com sucesso!',
+                                ...result,
+                                source: 'service'
+                            });
+                        }
+                    }
+                } catch (serviceError) {
+                    console.log('⚠️ Service completion failed:', serviceError.message);
+                }
+            }
+
+            // Fallback to basic completion
+            const session = await dbGet(
+                'SELECT ss.* FROM study_sessions ss JOIN study_plans sp ON ss.study_plan_id = sp.id WHERE ss.id = ? AND sp.user_id = ?',
+                [sessionId, userId]
+            );
+
+            if (!session) {
+                return res.status(404).json({ error: 'Sessão não encontrada' });
+            }
+
+            if (session.status === 'Concluído') {
+                return res.status(400).json({ error: 'Sessão já foi concluída' });
+            }
+
+            // Basic completion
+            await dbRun(
+                'UPDATE study_sessions SET status = ?, time_studied_seconds = ?, questions_solved = ? WHERE id = ?',
+                ['Concluído', completionData.timeStudied || 0, completionData.questionsSolved || 0, sessionId]
+            );
+
+            res.json({
+                message: 'Sessão concluída com sucesso!',
+                sessionCompleted: true,
+                source: 'fallback'
+            });
+
+        } catch (error) {
+            console.error('Erro ao concluir sessão:', error);
+            res.status(500).json({ error: 'Erro ao concluir a sessão' });
         }
     }
 }

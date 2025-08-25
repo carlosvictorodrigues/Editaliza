@@ -143,6 +143,66 @@ router.post('/:sessionId/reinforce',
     SessionsController.createReinforcementSession
 );
 
+// === PHASE 5 WAVE 2 - NEW SERVICE-ENHANCED ROUTES ===
+
+/**
+ * @route GET /api/sessions/streak/:planId
+ * @desc Get detailed study streak analysis
+ * @access Private
+ * @enhanced Uses SessionService for advanced streak calculations and risk assessment
+ */
+router.get('/streak/:planId',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    SessionsController.getStudyStreak
+);
+
+/**
+ * @route POST /api/sessions/schedule/:planId
+ * @desc Schedule a new session with intelligent date finding
+ * @access Private
+ * @enhanced Uses SessionService for optimal scheduling
+ */
+const scheduleValidators = [
+    body('session_type').isIn(['Novo Tópico', 'Revisão 3d', 'Revisão 7d', 'Revisão 15d', 'Revisão 30d', 'Simulado Direcionado', 'Simulado Completo', 'Redação']).withMessage('Tipo de sessão inválido'),
+    body('subject_name').trim().isLength({ min: 1, max: 100 }).withMessage('Nome da matéria é obrigatório'),
+    body('session_date').optional().isISO8601().withMessage('Data da sessão deve estar no formato ISO8601'),
+    body('topic_id').optional().isInt({ min: 1 }).withMessage('ID do tópico deve ser um número positivo'),
+    body('duration_minutes').optional().isInt({ min: 5, max: 480 }).withMessage('Duração deve estar entre 5 minutos e 8 horas')
+];
+
+router.post('/schedule/:planId',
+    authenticateToken,
+    validators.numericId('planId'),
+    scheduleValidators,
+    handleValidationErrors,
+    SessionsController.scheduleSession
+);
+
+/**
+ * @route POST /api/sessions/:sessionId/complete
+ * @desc Complete a session with comprehensive tracking
+ * @access Private
+ * @enhanced Uses SessionService for automatic reinforcement scheduling and analytics
+ */
+const completionValidators = [
+    body('timeStudied').isInt({ min: 60, max: 28800 }).withMessage('Tempo de estudo deve estar entre 1 minuto e 8 horas'),
+    body('questionsSolved').optional().isInt({ min: 0 }).withMessage('Número de questões deve ser positivo'),
+    body('questionsCorrect').optional().isInt({ min: 0 }).withMessage('Número de questões corretas deve ser positivo'),
+    body('difficultyRating').optional().isInt({ min: 1, max: 5 }).withMessage('Avaliação de dificuldade deve ser entre 1 e 5'),
+    body('confidenceRating').optional().isInt({ min: 1, max: 5 }).withMessage('Avaliação de confiança deve ser entre 1 e 5'),
+    body('notes').optional().isLength({ max: 500 }).withMessage('Notas devem ter até 500 caracteres')
+];
+
+router.post('/:sessionId/complete',
+    authenticateToken,
+    validators.numericId('sessionId'),
+    completionValidators,
+    handleValidationErrors,
+    SessionsController.completeSession
+);
+
 module.exports = router;
 
 /**

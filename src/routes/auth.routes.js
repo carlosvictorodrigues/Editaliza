@@ -23,6 +23,8 @@ const passport = require('passport');
 
 // Importações internas
 const { authLogger, securityLogger } = require('../utils/logger');
+const { dbGet, dbAll, dbRun } = require('../utils/database');
+const bcryptImported = require('bcryptjs');
 const { 
     authenticateToken, 
     generateToken, 
@@ -91,11 +93,25 @@ const registerValidation = [
         .withMessage('Email inválido')
         .normalizeEmail()
         .custom(async (email) => {
-            // Aqui você verificaria se o email já existe no banco
-            // Por enquanto, apenas validamos o formato
+            // Verificar se email já existe no banco
             if (email.length > 255) {
                 throw new Error('Email muito longo');
             }
+            
+            try {
+                const { dbGet } = require('../utils/database');
+                const existingUser = await dbGet('SELECT id FROM users WHERE email = $1', [email]);
+                if (existingUser) {
+                    throw new Error('Email já está em uso');
+                }
+            } catch (error) {
+                if (error.message === 'Email já está em uso') {
+                    throw error;
+                }
+                // Ignora erros de banco para não quebrar validação
+                console.warn('Database error during email validation:', error.message);
+            }
+            
             return true;
         }),
     
@@ -237,34 +253,36 @@ router.post('/register',
             
             logger.info('User registration attempt', { email });
             
-            // TODO: Verificar se usuário já existe no banco de dados
-            // const existingUser = await db.query('SELECT id FROM users WHERE email = $1', [email]);
-            // if (existingUser.rows.length > 0) {
-            //     return res.status(409).json({
-            //         error: 'Email já está em uso',
-            //         code: 'EMAIL_ALREADY_EXISTS'
-            //     });
-            // }
+            // Verificar se usuário já existe no banco de dados
+            const existingUser = await dbGet('SELECT id FROM users WHERE email = $1', [email]);
+            if (existingUser) {
+                return res.status(409).json({
+                    error: 'Email já está em uso',
+                    code: 'EMAIL_ALREADY_EXISTS'
+                });
+            }
             
             // Hash da senha
             const passwordHash = await hashPassword(password);
             
-            // TODO: Inserir usuário no banco de dados
-            // const result = await db.query(
-            //     'INSERT INTO users (email, password_hash, name, role, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id, email, name, role, created_at',
-            //     [email, passwordHash, name || null, 'user']
-            // );
-            // const newUser = result.rows[0];
+            // Inserir usuário no banco de dados
+            const result = await dbRun(
+                'INSERT INTO users (email, password_hash, name, role, created_at) VALUES ($1, $2, $3, $4, NOW()) RETURNING id',
+                [email, passwordHash, name || null, 'user']
+            );
             
-            // Simulação para estrutura (remover quando implementar DB)
-            const newUser = {
-                id: Date.now(), // Temporário
-                email,
-                name: name || null,
-                role: 'user',
-                created_at: new Date(),
-                email_verified: false
-            };
+            // Buscar o usuário recém criado
+            const newUser = await dbGet(
+                'SELECT id, email, name, role, created_at FROM users WHERE id = $1',
+                [result.rows[0].id]
+            );
+            
+            if (!newUser) {
+                throw new Error('Falha ao criar usuário');
+            }
+            
+            // Adicionar email_verified para compatibilidade
+            newUser.email_verified = false;
             
             // Criar sessão
             const sessionId = createSession(newUser.id);
@@ -282,9 +300,9 @@ router.post('/register',
                 sessionId
             });
             
-            // TODO: Salvar refresh token no banco
-            // await db.query(
-            //     'INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES ($1, $2, $3)',
+            // TODO: Salvar refresh token no banco (implementar refresh_tokens table)
+            // await dbRun(
+            //     'INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)',
             //     [newUser.id, crypto.createHash('sha256').update(refreshToken).digest('hex'), 
             //      new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)] // 7 dias
             // );
@@ -341,18 +359,19 @@ router.post('/login',
             
             logger.info('User login attempt', { email });
             
-            // TODO: Buscar usuário no banco
-            // const result = await db.query(
-            //     'SELECT id, email, password_hash, name, role, email_verified, created_at FROM users WHERE email = $1',
-            //     [email]
-            // );
-            // const user = result.rows[0];
-            
-            // Simulação para estrutura (remover quando implementar DB)
-            const user = null; // Será substituído pela query do banco
+            // Buscar usuário no banco de dados
+            const user = await dbGet(
+                'SELECT id, email, password_hash, name, role, email_verified, created_at FROM users WHERE email = $1',
+                [email]
+            );
             
             if (!user) {
-                logger.security('login_attempt_invalid_email', { email });
+                // Usar método security logger se disponível, senão warn
+                if (logger.security) {
+                    logger.security('login_attempt_invalid_email', { email });
+                } else {
+                    logger.warn('Login attempt with invalid email', { email });
+                }
                 
                 return res.status(401).json({
                     error: 'Email ou senha incorretos',
@@ -360,14 +379,30 @@ router.post('/login',
                 });
             }
             
+            // Check if user is a Google OAuth user
+            if (user.auth_provider === 'google') {
+                return res.status(401).json({ 
+                    error: 'Esta conta foi criada com Google. Use o botão "Entrar com Google" para fazer login.',
+                    code: 'GOOGLE_OAUTH_REQUIRED'
+                });
+            }
+            
             // Verificar senha
-            const isValidPassword = await verifyPassword(password, user.password_hash);
+            const isValidPassword = await bcryptImported.compare(password, user.password_hash);
             
             if (!isValidPassword) {
-                logger.security('login_attempt_invalid_password', { 
-                    userId: user.id,
-                    email 
-                });
+                // Usar método security logger se disponível, senão warn
+                if (logger.security) {
+                    logger.security('login_attempt_invalid_password', { 
+                        userId: user.id,
+                        email 
+                    });
+                } else {
+                    logger.warn('Login attempt with invalid password', { 
+                        userId: user.id,
+                        email 
+                    });
+                }
                 
                 return res.status(401).json({
                     error: 'Email ou senha incorretos',
@@ -393,10 +428,15 @@ router.post('/login',
                 sessionId
             });
             
-            // TODO: Salvar refresh token no banco
+            // TODO: Salvar refresh token no banco (implementar refresh_tokens table)
             
-            // TODO: Atualizar último login
-            // await db.query('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+            // Atualizar último login
+            try {
+                await dbRun('UPDATE users SET last_login = NOW() WHERE id = $1', [user.id]);
+            } catch (updateError) {
+                logger.warn('Failed to update last_login', { userId: user.id, error: updateError.message });
+                // Não falha o login por isso
+            }
             
             // Definir cookies
             const cookieOptions = {
@@ -439,23 +479,18 @@ router.get('/me',
     authenticateToken(),
     async (req, res) => {
         try {
-            // TODO: Buscar dados atualizados do usuário no banco
-            // const result = await db.query(
-            //     'SELECT id, email, name, role, email_verified, created_at, last_login FROM users WHERE id = $1',
-            //     [req.user.id]
-            // );
-            // const user = result.rows[0];
+            // Buscar dados atualizados do usuário no banco
+            const user = await dbGet(
+                'SELECT id, email, name, role, email_verified, created_at, last_login FROM users WHERE id = $1',
+                [req.user.id]
+            );
             
-            // Simulação (usar dados do token por enquanto)
-            const user = {
-                id: req.user.id,
-                email: req.user.email,
-                name: null,
-                role: req.user.role,
-                email_verified: false,
-                created_at: new Date(),
-                last_login: new Date()
-            };
+            if (!user) {
+                return res.status(404).json({
+                    error: 'Usuário não encontrado',
+                    code: 'USER_NOT_FOUND'
+                });
+            }
             
             res.json({
                 success: true,

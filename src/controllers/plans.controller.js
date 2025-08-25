@@ -13,6 +13,7 @@ const ScheduleGenerationService = require('../services/schedule/ScheduleGenerati
 const ReplanService = require('../services/ReplanService');
 const scheduleService = require('../services/scheduleService');
 const RetaFinalService = require('../services/schedule/RetaFinalService'); // WAVE 3 - Reta Final Service
+const BatchUpdateService = require('../services/schedule/BatchUpdateService'); // WAVE 4 - Batch Updates
 const logger = require('../../src/utils/logger');
 
 // FUNÇÃO UTILITÁRIA PARA DATA BRASILEIRA - CRÍTICA
@@ -1264,6 +1265,124 @@ const removeRetaFinalExclusion = async (req, res) => {
     }
 };
 
+/**
+ * ===================================================================
+ * FASE 6 WAVE 4 - BATCH UPDATES
+ * ===================================================================
+ */
+
+/**
+ * ATUALIZAÇÃO EM LOTE DO CRONOGRAMA
+ * POST /api/plans/:planId/batch_update
+ */
+const batchUpdateSchedule = async (req, res) => {
+    try {
+        const { planId } = req.params;
+        const { updates } = req.body;
+        const userId = req.user.id;
+        
+        // Validar entrada básica
+        if (!updates) {
+            return res.status(400).json({ 
+                error: 'Campo "updates" é obrigatório' 
+            });
+        }
+        
+        const result = await BatchUpdateService.batchUpdateSchedule(
+            parseInt(planId), 
+            userId, 
+            updates
+        );
+        
+        logger.info('Batch update de cronograma concluído', {
+            planId: parseInt(planId),
+            userId,
+            updatedCount: result.updatedCount,
+            totalRequested: result.totalRequested
+        });
+        
+        res.json(result);
+        
+    } catch (error) {
+        logger.error('Erro no batch update de cronograma:', error, {
+            planId: req.params.planId,
+            userId: req.user?.id,
+            updateCount: req.body?.updates?.length
+        });
+        
+        if (error.message.includes('não encontrado') || error.message.includes('não autorizado')) {
+            return res.status(404).json({ error: error.message });
+        }
+        
+        if (error.message.includes('inválido') || 
+            error.message.includes('obrigatório') ||
+            error.message.includes('Máximo')) {
+            return res.status(400).json({ error: error.message });
+        }
+        
+        res.status(500).json({ 
+            error: 'Erro interno no batch update',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+/**
+ * ATUALIZAÇÃO DETALHADA EM LOTE DO CRONOGRAMA
+ * POST /api/plans/:planId/batch_update_details
+ */
+const batchUpdateScheduleDetails = async (req, res) => {
+    try {
+        const { planId } = req.params;
+        const { updates } = req.body;
+        const userId = req.user.id;
+        
+        // Validar entrada básica
+        if (!updates) {
+            return res.status(400).json({ 
+                error: 'Campo "updates" é obrigatório' 
+            });
+        }
+        
+        const result = await BatchUpdateService.batchUpdateScheduleDetails(
+            parseInt(planId), 
+            userId, 
+            updates
+        );
+        
+        logger.info('Batch update detalhado de cronograma concluído', {
+            planId: parseInt(planId),
+            userId,
+            updatedCount: result.updatedCount,
+            totalRequested: result.totalRequested
+        });
+        
+        res.json(result);
+        
+    } catch (error) {
+        logger.error('Erro no batch update detalhado de cronograma:', error, {
+            planId: req.params.planId,
+            userId: req.user?.id,
+            updateCount: req.body?.updates?.length
+        });
+        
+        if (error.message.includes('não encontrado') || error.message.includes('não autorizado')) {
+            return res.status(404).json({ error: error.message });
+        }
+        
+        if (error.message.includes('inválido') || 
+            error.message.includes('obrigatório') ||
+            error.message.includes('Máximo')) {
+            return res.status(400).json({ error: error.message });
+        }
+        
+        res.status(500).json({ 
+            error: 'Erro interno no batch update detalhado',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
 module.exports = {
     // CRUD Básico
     getPlans,
@@ -1307,5 +1426,9 @@ module.exports = {
     // FASE 6 WAVE 3 - RETA FINAL EXCLUSIONS MANAGEMENT
     getRetaFinalExclusions,
     addRetaFinalExclusion,
-    removeRetaFinalExclusion
+    removeRetaFinalExclusion,
+    
+    // FASE 6 WAVE 4 - BATCH UPDATES
+    batchUpdateSchedule,
+    batchUpdateScheduleDetails
 };

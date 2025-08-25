@@ -243,8 +243,8 @@
                 const password = document.getElementById('password').value;
 
                 try {
-                    // ATUALIZADO: Usa a função segura app.apiFetch
-                    const data = await app.apiFetch('/api/login', {
+                    // ATUALIZADO: Usa a função segura app.apiFetch com rota modular
+                    const data = await app.apiFetch('/api/auth/login', {
                         method: 'POST',
                         body: JSON.stringify({ email, password })
                     });

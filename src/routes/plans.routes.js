@@ -364,4 +364,48 @@ router.get('/:planId/schedule',
  * - POST /plans/:planId/generate -> Migrada anteriormente para este controller
  */
 
+/**
+ * 🔄 FASE 6 WAVE 4 - BATCH UPDATES
+ * Rotas para atualização em lote de cronogramas
+ */
+
+/**
+ * @route POST /plans/:planId/batch_update
+ * @desc Atualização em lote de sessões do cronograma
+ * @access Private
+ * @body { updates: Array<{sessionId: number, status?: string, questionsResolved?: number, timeStudiedSeconds?: number}> }
+ */
+router.post('/:planId/batch_update',
+    authenticateToken,
+    validators.numericId('planId'),
+    body('updates').isArray({ min: 1, max: 100 }).withMessage('Updates deve ser um array com 1-100 itens'),
+    body('updates.*.sessionId').isInt({ min: 1 }).withMessage('sessionId deve ser um inteiro positivo'),
+    body('updates.*.status').optional().isIn(['Pendente', 'Concluído', 'Pulado', 'Adiado']).withMessage('Status inválido'),
+    body('updates.*.questionsResolved').optional().isInt({ min: 0 }).withMessage('questionsResolved deve ser um inteiro não-negativo'),
+    body('updates.*.timeStudiedSeconds').optional().isInt({ min: 0 }).withMessage('timeStudiedSeconds deve ser um inteiro não-negativo'),
+    handleValidationErrors,
+    plansController.batchUpdateSchedule
+);
+
+/**
+ * @route POST /plans/:planId/batch_update_details
+ * @desc Atualização detalhada em lote de sessões com dados adicionais
+ * @access Private
+ * @body { updates: Array<{sessionId: number, status?: string, questionsResolved?: number, timeStudiedSeconds?: number, difficulty?: number, notes?: string, completed_at?: string}> }
+ */
+router.post('/:planId/batch_update_details',
+    authenticateToken,
+    validators.numericId('planId'),
+    body('updates').isArray({ min: 1, max: 50 }).withMessage('Updates deve ser um array com 1-50 itens'),
+    body('updates.*.sessionId').isInt({ min: 1 }).withMessage('sessionId deve ser um inteiro positivo'),
+    body('updates.*.status').optional().isIn(['Pendente', 'Concluído', 'Pulado', 'Adiado']).withMessage('Status inválido'),
+    body('updates.*.questionsResolved').optional().isInt({ min: 0 }).withMessage('questionsResolved deve ser um inteiro não-negativo'),
+    body('updates.*.timeStudiedSeconds').optional().isInt({ min: 0 }).withMessage('timeStudiedSeconds deve ser um inteiro não-negativo'),
+    body('updates.*.difficulty').optional().isInt({ min: 1, max: 5 }).withMessage('difficulty deve ser um inteiro entre 1 e 5'),
+    body('updates.*.notes').optional().isString().isLength({ max: 1000 }).withMessage('notes deve ter até 1000 caracteres'),
+    body('updates.*.completed_at').optional().isISO8601().withMessage('completed_at deve ser uma data válida'),
+    handleValidationErrors,
+    plansController.batchUpdateScheduleDetails
+);
+
 module.exports = router;
