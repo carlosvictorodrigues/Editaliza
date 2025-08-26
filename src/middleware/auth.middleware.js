@@ -191,11 +191,11 @@ function extractToken(req) {
 
 // === VALIDAÇÃO DE TOKEN ===
 
-function validateToken(token, secret = appConfig.security.jwt.secret) {
+function validateToken(token, secret = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'default-dev-secret') {
     return new Promise((resolve, reject) => {
         jwt.verify(token, secret, {
-            issuer: appConfig.security.jwt.issuer,
-            algorithms: [appConfig.security.jwt.algorithm]
+            issuer: process.env.JWT_ISSUER || 'editaliza',
+            algorithms: ['HS256']
         }, (err, decoded) => {
             if (err) {
                 reject(err);
@@ -499,23 +499,23 @@ function requireOwnership(resourceIdParam = 'id', userIdField = 'user_id') {
 // Gerar token JWT
 function generateToken(payload, options = {}) {
     const {
-        expiresIn = appConfig.security.jwt.expiresIn,
-        secret = appConfig.security.jwt.secret
+        expiresIn = process.env.JWT_EXPIRES_IN || '1h',
+        secret = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'default-dev-secret'
     } = options;
 
     return jwt.sign(payload, secret, {
         expiresIn,
-        issuer: appConfig.security.jwt.issuer,
-        algorithm: appConfig.security.jwt.algorithm
+        issuer: process.env.JWT_ISSUER || 'editaliza',
+        algorithm: 'HS256'
     });
 }
 
 // Gerar refresh token
 function generateRefreshToken(payload) {
-    return jwt.sign(payload, appConfig.security.jwt.refreshSecret, {
-        expiresIn: appConfig.security.jwt.refreshExpiresIn,
-        issuer: appConfig.security.jwt.issuer,
-        algorithm: appConfig.security.jwt.algorithm
+    return jwt.sign(payload, process.env.JWT_REFRESH_SECRET || process.env.SESSION_SECRET || 'default-dev-refresh-secret', {
+        expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+        issuer: process.env.JWT_ISSUER || 'editaliza',
+        algorithm: 'HS256'
     });
 }
 
@@ -568,9 +568,9 @@ function getAuthHealth() {
             trackedUsers: userRateLimit.attempts.size
         },
         jwtConfig: {
-            algorithm: appConfig.security.jwt.algorithm,
-            issuer: appConfig.security.jwt.issuer,
-            expiresIn: appConfig.security.jwt.expiresIn
+            algorithm: 'HS256',
+            issuer: process.env.JWT_ISSUER || 'editaliza',
+            expiresIn: process.env.JWT_EXPIRES_IN || '1h'
         }
     };
 }

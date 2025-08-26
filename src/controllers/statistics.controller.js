@@ -929,6 +929,284 @@ function generateRadarInsights(weakTopics, strugglingSubjects) {
     return insights;
 }
 
+/**
+ * GET /api/plans/:planId/progress
+ * Get basic progress stats for a study plan
+ * CRITICAL: Frontend dashboard depends on this route
+ */
+const getPlanProgress = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        
+        // Verificar se o plano pertence ao usuário
+        const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+        if (!plan) {
+            return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+        }
+        
+        // Contar total de tópicos no plano
+        const totalTopicsResult = await dbGet(`
+            SELECT COUNT(t.id) as total 
+            FROM topics t 
+            JOIN subjects s ON t.subject_id = s.id 
+            WHERE s.study_plan_id = ?
+        `, [planId]);
+        const totalTopics = totalTopicsResult?.total || 0;
+        
+        // Contar tópicos concluídos (com sessões de 'Novo Tópico' concluídas)
+        const completedTopicsResult = await dbGet(`
+            SELECT COUNT(DISTINCT ss.topic_id) as completed
+            FROM study_sessions ss
+            WHERE ss.study_plan_id = ? 
+              AND ss.session_type = 'Novo Tópico'
+              AND ss.status = 'Concluído'
+              AND ss.topic_id IS NOT NULL
+        `, [planId]);
+        const completedTopics = completedTopicsResult?.completed || 0;
+        
+        // Calcular progresso percentual
+        const progressPercentage = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+        
+        // Contar sessões pendentes hoje
+        const today = getBrazilianDateString();
+        const pendingTodayResult = await dbGet(`
+            SELECT COUNT(*) as pending
+            FROM study_sessions 
+            WHERE study_plan_id = ? 
+              AND session_date = ?
+              AND status = 'Pendente'
+        `, [planId, today]);
+        const pendingToday = pendingTodayResult?.pending || 0;
+        
+        // Contar sessões concluídas hoje
+        const completedTodayResult = await dbGet(`
+            SELECT COUNT(*) as completed
+            FROM study_sessions 
+            WHERE study_plan_id = ? 
+              AND session_date = ?
+              AND status = 'Concluído'
+        `, [planId, today]);
+        const completedToday = completedTodayResult?.completed || 0;
+        
+        // Calcular dias restantes até a prova
+        const examDate = new Date(plan.exam_date + 'T23:59:59');
+        const today_date = new Date();
+        today_date.setHours(0, 0, 0, 0);
+        const daysRemaining = Math.max(0, Math.ceil((examDate - today_date) / (1000 * 60 * 60 * 24)));
+        
+        const progressData = {
+            totalTopics,
+            completedTopics,
+            progressPercentage,
+            pendingToday,
+            completedToday,
+            daysRemaining,
+            examDate: plan.exam_date,
+            planName: plan.plan_name
+        };
+        
+        res.json(progressData);
+        
+    } catch (error) {
+        console.error('Erro ao buscar progresso do plano:', error);
+        res.status(500).json({ error: 'Erro ao buscar progresso do plano' });
+    }
+};
+
+/**
+ * GET /api/plans/:planId/activity_summary
+ * Get activity summary with time breakdowns and session stats
+ * CRITICAL: Frontend statistics depend on this route
+ */
+const getActivitySummary = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        
+        // Verificar se o plano pertence ao usuário
+        const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+        if (!plan) {
+            return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+        }
+        
+        // Calcular estatísticas gerais
+        const totalSessionsResult = await dbGet(`
+            SELECT COUNT(*) as total
+            FROM study_sessions 
+            WHERE study_plan_id = ?
+        `, [planId]);
+        
+        const completedSessionsResult = await dbGet(`
+            SELECT COUNT(*) as completed
+            FROM study_sessions 
+            WHERE study_plan_id = ? AND status = 'Concluído'
+        `, [planId]);
+        
+        const totalTimeResult = await dbGet(`
+            SELECT COALESCE(SUM(time_studied_seconds), 0) as total_seconds
+            FROM study_sessions 
+            WHERE study_plan_id = ? AND status = 'Concluído'
+        `, [planId]);
+        
+        const questionsResult = await dbGet(`
+            SELECT COALESCE(SUM(questions_solved), 0) as total_questions
+            FROM study_sessions 
+            WHERE study_plan_id = ? AND status = 'Concluído'
+        `, [planId]);
+        
+        // Estatísticas por tipo de sessão
+        const sessionTypeStats = await dbAll(`
+            SELECT 
+                session_type,
+                COUNT(*) as total,
+                COUNT(CASE WHEN status = 'Concluído' THEN 1 END) as completed,
+                COALESCE(SUM(CASE WHEN status = 'Concluído' THEN time_studied_seconds ELSE 0 END), 0) as time_seconds,
+                COALESCE(SUM(CASE WHEN status = 'Concluído' THEN questions_solved ELSE 0 END), 0) as questions
+            FROM study_sessions 
+            WHERE study_plan_id = ?
+            GROUP BY session_type
+            ORDER BY total DESC
+        `, [planId]);
+        
+        // Atividade dos últimos 7 dias
+        const recentActivityResult = await dbAll(`
+            SELECT 
+                session_date,
+                COUNT(*) as sessions,
+                COUNT(CASE WHEN status = 'Concluído' THEN 1 END) as completed,
+                COALESCE(SUM(CASE WHEN status = 'Concluído' THEN time_studied_seconds ELSE 0 END), 0) as time_seconds
+            FROM study_sessions 
+            WHERE study_plan_id = ? 
+              AND session_date >= DATE('now', '-7 days')
+            GROUP BY session_date
+            ORDER BY session_date DESC
+        `, [planId]);
+        
+        // Calcular streak de dias consecutivos
+        const allDatesResult = await dbAll(`
+            SELECT DISTINCT session_date 
+            FROM study_sessions 
+            WHERE study_plan_id = ? AND status = 'Concluído'
+            ORDER BY session_date DESC
+        `, [planId]);
+        
+        let currentStreak = 0;
+        if (allDatesResult.length > 0) {
+            const today = getBrazilianDateString();
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            
+            // Verificar se estudou hoje ou ontem para manter streak
+            const lastStudyDate = allDatesResult[0].session_date;
+            if (lastStudyDate === today || lastStudyDate === yesterdayStr) {
+                currentStreak = 1;
+                
+                // Contar dias consecutivos anteriores
+                for (let i = 1; i < allDatesResult.length; i++) {
+                    const currentDate = new Date(allDatesResult[i-1].session_date);
+                    const prevDate = new Date(allDatesResult[i].session_date);
+                    
+                    const dayDiff = (currentDate - prevDate) / (1000 * 60 * 60 * 24);
+                    if (dayDiff === 1) {
+                        currentStreak++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        
+        const activitySummary = {
+            overview: {
+                totalSessions: totalSessionsResult?.total || 0,
+                completedSessions: completedSessionsResult?.completed || 0,
+                completionRate: totalSessionsResult?.total > 0 ? 
+                    Math.round((completedSessionsResult?.completed || 0) / totalSessionsResult.total * 100) : 0,
+                totalTimeHours: Math.round((totalTimeResult?.total_seconds || 0) / 3600 * 10) / 10,
+                totalQuestions: questionsResult?.total_questions || 0,
+                currentStreak
+            },
+            sessionTypes: sessionTypeStats.map(type => ({
+                name: type.session_type,
+                total: type.total,
+                completed: type.completed,
+                completionRate: type.total > 0 ? Math.round(type.completed / type.total * 100) : 0,
+                timeHours: Math.round(type.time_seconds / 3600 * 10) / 10,
+                questions: type.questions
+            })),
+            recentActivity: recentActivityResult.map(day => ({
+                date: day.session_date,
+                sessions: day.sessions,
+                completed: day.completed,
+                timeHours: Math.round(day.time_seconds / 3600 * 10) / 10
+            }))
+        };
+        
+        res.json(activitySummary);
+        
+    } catch (error) {
+        console.error('Erro ao buscar resumo de atividades:', error);
+        res.status(500).json({ error: 'Erro ao buscar resumo de atividades' });
+    }
+};
+
+/**
+ * GET /api/plans/:planId/review_data
+ * Get review data for weekly/monthly reviews
+ * Migrated from legacy.routes.js with full implementation
+ */
+const getReviewData = async (req, res) => {
+    const { date, type } = req.query;
+    const planId = req.params.planId;
+    const userId = req.user.id;
+    
+    try {
+        // Verify plan ownership
+        const plan = await dbGet('SELECT review_mode FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+        if (!plan) return res.status(404).json({ error: 'Plano não encontrado' });
+        
+        const reviewDate = new Date(date + 'T00:00:00');
+        const daysToLookBack = type === 'mensal' ? 28 : 7;
+        const startDate = new Date(reviewDate);
+        startDate.setDate(reviewDate.getDate() - (daysToLookBack - 1));
+        const reviewDateStr = reviewDate.toISOString().split('T')[0];
+        const startDateStr = startDate.toISOString().split('T')[0];
+        
+        let sql = `
+            SELECT DISTINCT s.subject_name, ss.topic_description, ss.topic_id
+            FROM study_sessions ss
+            JOIN topics t ON ss.topic_id = t.id
+            JOIN subjects s ON t.subject_id = s.id
+            WHERE ss.study_plan_id = ? 
+              AND ss.session_type = 'Novo Tópico'
+              AND ss.session_date >= ? AND ss.session_date <= ?
+        `;
+        
+        const params = [planId, startDateStr, reviewDateStr];
+        
+        if (plan.review_mode === 'focado') {
+            sql += ` AND (SELECT COALESCE(SUM(questions_solved), 0) FROM study_sessions WHERE topic_id = ss.topic_id AND study_plan_id = ?) < 10`;
+            params.push(planId);
+        }
+        
+        sql += ` ORDER BY s.subject_name, ss.topic_description`;
+        
+        const rows = await dbAll(sql, params);
+        const groupedBySubject = rows.reduce((acc, row) => {
+            if (!acc[row.subject_name]) acc[row.subject_name] = [];
+            acc[row.subject_name].push(row.topic_description);
+            return acc;
+        }, {});
+        
+        res.json(groupedBySubject);
+    } catch (error) {
+        console.error('Erro ao buscar dados de revisão:', error);
+        res.status(500).json({ error: 'Erro ao buscar dados de revisão' });
+    }
+};
+
 // Export all methods including new helpers
 module.exports = {
     getPlanStatistics,
@@ -937,6 +1215,9 @@ module.exports = {
     getMetrics,
     getGoalProgress,
     getQuestionRadar,
+    getPlanProgress,
+    getActivitySummary,
+    getReviewData,
     // Wave 1 Helper Methods
     transformActivityStats,
     calculateGoalTrend,

@@ -42,7 +42,7 @@ const router = express.Router();
 // Rate limit rigoroso para login/register
 const strictAuthLimit = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    max: appConfig.environment.isProduction ? 5 : 50, // 5 tentativas em produção
+    max: appConfig?.environment?.isProduction ? 5 : 50, // 5 tentativas em produção
     message: {
         error: 'Muitas tentativas de login. Tente novamente em 15 minutos.',
         code: 'RATE_LIMIT_AUTH'
@@ -67,7 +67,7 @@ const strictAuthLimit = rateLimit({
 // Rate limit para password reset
 const passwordResetLimit = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hora
-    max: appConfig.environment.isProduction ? 3 : 10,
+    max: appConfig?.environment?.isProduction ? 3 : 10,
     message: {
         error: 'Muitas solicitações de reset de senha. Tente novamente em 1 hora.',
         code: 'RATE_LIMIT_PASSWORD_RESET'
@@ -77,7 +77,7 @@ const passwordResetLimit = rateLimit({
 // Rate limit geral para outras operações
 const generalAuthLimit = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: appConfig.environment.isProduction ? 20 : 100,
+    max: appConfig?.environment?.isProduction ? 20 : 100,
     message: {
         error: 'Muitas requisições. Tente novamente em alguns minutos.',
         code: 'RATE_LIMIT_GENERAL'
@@ -186,7 +186,7 @@ function handleValidationErrors(req, res, next) {
 
 // Hash de senha
 async function hashPassword(password) {
-    const saltRounds = appConfig.security.bcrypt.rounds;
+    const saltRounds = appConfig?.security?.bcrypt?.rounds || 12; // Fallback para 12
     return bcrypt.hash(password, saltRounds);
 }
 
@@ -210,7 +210,7 @@ function createAuthResponse(user, tokens) {
             name: user.name,
             role: user.role || 'user',
             created_at: user.created_at,
-            email_verified: user.email_verified
+            email_verified: user.is_email_verified
         },
         tokens: {
             accessToken: tokens.accessToken,
@@ -224,12 +224,23 @@ function createAuthResponse(user, tokens) {
 
 // GET /api/auth/csrf-token - Obter token CSRF
 router.get('/csrf-token', generalAuthLimit, (req, res) => {
-    if (!appConfig.security.csrf.enabled) {
+    // CSRF está sempre habilitado por segurança
+    const csrfEnabled = true;
+    
+    if (!csrfEnabled) {
         return res.json({ csrfToken: null });
     }
     
-    // Se usando middleware CSRF, o token estará em req.csrfToken()
-    const csrfToken = req.csrfToken ? req.csrfToken() : crypto.randomBytes(32).toString('hex');
+    // Gerar token CSRF ou usar do session
+    let csrfToken;
+    if (req.session && req.session.csrfToken) {
+        csrfToken = req.session.csrfToken;
+    } else {
+        csrfToken = crypto.randomBytes(32).toString('hex');
+        if (req.session) {
+            req.session.csrfToken = csrfToken;
+        }
+    }
     
     res.json({ 
         csrfToken,
@@ -274,7 +285,7 @@ router.post('/register',
             // Buscar o usuário recém criado
             const newUser = await dbGet(
                 'SELECT id, email, name, role, created_at FROM users WHERE id = $1',
-                [result.rows[0].id]
+                [result.lastID]
             );
             
             if (!newUser) {
@@ -361,7 +372,7 @@ router.post('/login',
             
             // Buscar usuário no banco de dados
             const user = await dbGet(
-                'SELECT id, email, password_hash, name, role, email_verified, created_at FROM users WHERE email = $1',
+                'SELECT id, email, password_hash, name, role, is_email_verified, created_at FROM users WHERE email = $1',
                 [email]
             );
             
@@ -441,9 +452,9 @@ router.post('/login',
             // Definir cookies
             const cookieOptions = {
                 httpOnly: true,
-                secure: appConfig.security.session.cookie.secure,
-                sameSite: appConfig.security.session.cookie.sameSite,
-                maxAge: 7 * 24 * 60 * 60 * 1000
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict',
+                maxAge: 7 * 24 * 60 * 60 * 1000 // 7 dias
             };
             
             res.cookie('authToken', accessToken, cookieOptions);
@@ -481,7 +492,7 @@ router.get('/me',
         try {
             // Buscar dados atualizados do usuário no banco
             const user = await dbGet(
-                'SELECT id, email, name, role, email_verified, created_at, last_login FROM users WHERE id = $1',
+                'SELECT id, email, name, role, is_email_verified, created_at, last_login FROM users WHERE id = $1',
                 [req.user.id]
             );
             
@@ -499,7 +510,7 @@ router.get('/me',
                     email: user.email,
                     name: user.name,
                     role: user.role,
-                    email_verified: user.email_verified,
+                    email_verified: user.is_email_verified,
                     created_at: user.created_at,
                     last_login: user.last_login
                 }
@@ -519,6 +530,244 @@ router.get('/me',
     }
 );
 
+// POST /api/auth/logout - Logout de usuário
+router.post('/logout',
+    authenticateToken(),
+    async (req, res) => {
+        const logger = authLogger.child({ 
+            requestId: req.logger?.context?.requestId,
+            ip: req.ip 
+        });
+        
+        try {
+            const userId = req.user.id;
+            const sessionId = req.user.sessionId;
+            
+            logger.info('User logout attempt', { userId });
+            
+            // Invalidar sessão no middleware
+            if (sessionId) {
+                invalidateToken(sessionId);
+            }
+            
+            // Limpar cookies
+            const cookieOptions = {
+                httpOnly: true,
+                secure: appConfig.security.session.cookie.secure,
+                sameSite: appConfig.security.session.cookie.sameSite
+            };
+            
+            res.clearCookie('authToken', cookieOptions);
+            res.clearCookie('refreshToken', cookieOptions);
+            
+            // TODO: Invalidar refresh token no banco quando implementado
+            // await dbRun('UPDATE refresh_tokens SET revoked = true WHERE user_id = ? AND token_hash = ?', [userId, tokenHash]);
+            
+            logger.info('User logged out successfully', { userId });
+            
+            res.json({
+                success: true,
+                message: 'Logout realizado com sucesso'
+            });
+            
+        } catch (error) {
+            logger.error('Logout error', {
+                error: error.message,
+                stack: error.stack,
+                userId: req.user.id
+            });
+            
+            res.status(500).json({
+                error: 'Erro interno do servidor',
+                code: 'INTERNAL_ERROR'
+            });
+        }
+    }
+);
+
+// POST /api/auth/request-password-reset - Solicitar reset de senha
+router.post('/request-password-reset',
+    passwordResetLimit,
+    [
+        body('email')
+            .isEmail()
+            .withMessage('Email inválido')
+            .normalizeEmail()
+    ],
+    handleValidationErrors,
+    async (req, res) => {
+        const logger = authLogger.child({ 
+            requestId: req.logger?.context?.requestId,
+            ip: req.ip 
+        });
+        
+        try {
+            const { email } = req.body;
+            
+            logger.info('Password reset request', { email });
+            
+            // Buscar usuário
+            const user = await dbGet(
+                'SELECT id, email, name FROM users WHERE email = $1',
+                [email]
+            );
+            
+            // IMPORTANTE: Sempre retornar sucesso por segurança (não vazar se email existe)
+            if (!user) {
+                logger.warn('Password reset requested for non-existent email', { email });
+                
+                return res.json({
+                    success: true,
+                    message: 'Se o email existir, você receberá instruções para redefinir sua senha.'
+                });
+            }
+            
+            // Gerar token de reset
+            const resetToken = generatePasswordResetToken();
+            const resetTokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+            
+            // Salvar token no banco
+            await dbRun(
+                'UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE id = $3',
+                [resetToken, resetTokenExpiry, user.id]
+            );
+            
+            // TODO: Enviar email com o token
+            // const emailService = require('../services/emailService');
+            // await emailService.sendPasswordReset({
+            //     to: user.email,
+            //     name: user.name,
+            //     resetToken,
+            //     resetUrl: `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
+            // });
+            
+            logger.info('Password reset token generated', { 
+                userId: user.id,
+                email: user.email
+            });
+            
+            res.json({
+                success: true,
+                message: 'Se o email existir, você receberá instruções para redefinir sua senha.',
+                // Em desenvolvimento, incluir o token para facilitar testes
+                ...(process.env.NODE_ENV !== 'production' && { resetToken })
+            });
+            
+        } catch (error) {
+            logger.error('Password reset request error', {
+                error: error.message,
+                stack: error.stack,
+                email: req.body.email
+            });
+            
+            res.status(500).json({
+                error: 'Erro interno do servidor',
+                code: 'INTERNAL_ERROR'
+            });
+        }
+    }
+);
+
+// POST /api/auth/reset-password - Redefinir senha com token
+router.post('/reset-password',
+    passwordResetLimit,
+    [
+        body('token')
+            .isLength({ min: 1 })
+            .withMessage('Token é obrigatório'),
+        body('password')
+            .isLength({ min: 8 })
+            .withMessage('A senha deve ter no mínimo 8 caracteres')
+            .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/)
+            .withMessage('A senha deve conter ao menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial')
+            .isLength({ max: 128 })
+            .withMessage('A senha não pode ter mais de 128 caracteres'),
+        body('confirmPassword')
+            .custom((value, { req }) => {
+                if (value !== req.body.password) {
+                    throw new Error('Confirmação de senha não confere');
+                }
+                return true;
+            })
+    ],
+    handleValidationErrors,
+    async (req, res) => {
+        const logger = authLogger.child({ 
+            requestId: req.logger?.context?.requestId,
+            ip: req.ip 
+        });
+        
+        try {
+            const { token, password } = req.body;
+            
+            logger.info('Password reset attempt', { token: token.substring(0, 8) + '...' });
+            
+            // Buscar usuário pelo token
+            const user = await dbGet(
+                'SELECT id, email, name, reset_token, reset_token_expires FROM users WHERE reset_token = $1',
+                [token]
+            );
+            
+            if (!user) {
+                logger.warn('Password reset with invalid token', { token: token.substring(0, 8) + '...' });
+                
+                return res.status(400).json({
+                    error: 'Token inválido ou expirado',
+                    code: 'INVALID_RESET_TOKEN'
+                });
+            }
+            
+            // Verificar se token não expirou
+            const now = new Date();
+            if (now > new Date(user.reset_token_expires)) {
+                logger.warn('Password reset with expired token', { 
+                    userId: user.id,
+                    expiry: user.reset_token_expires
+                });
+                
+                return res.status(400).json({
+                    error: 'Token expirado. Solicite um novo reset de senha.',
+                    code: 'EXPIRED_RESET_TOKEN'
+                });
+            }
+            
+            // Hash da nova senha
+            const passwordHash = await hashPassword(password);
+            
+            // Atualizar senha e limpar token de reset
+            await dbRun(
+                'UPDATE users SET password_hash = $1, reset_token = NULL, reset_token_expires = NULL WHERE id = $2',
+                [passwordHash, user.id]
+            );
+            
+            // TODO: Invalidar todas as sessões do usuário
+            // invalidateAllUserSessions(user.id);
+            
+            logger.info('Password reset completed successfully', { 
+                userId: user.id,
+                email: user.email
+            });
+            
+            res.json({
+                success: true,
+                message: 'Senha redefinida com sucesso. Faça login com sua nova senha.'
+            });
+            
+        } catch (error) {
+            logger.error('Password reset error', {
+                error: error.message,
+                stack: error.stack,
+                token: req.body.token?.substring(0, 8) + '...'
+            });
+            
+            res.status(500).json({
+                error: 'Erro interno do servidor',
+                code: 'INTERNAL_ERROR'
+            });
+        }
+    }
+);
+
 // === HEALTH CHECK ===
 
 router.get('/health', (req, res) => {
@@ -526,10 +775,10 @@ router.get('/health', (req, res) => {
         status: 'healthy',
         timestamp: new Date().toISOString(),
         features: {
-            registration: appConfig.features.registrationOpen,
-            googleOAuth: appConfig.oauth.google.enabled,
-            passwordReset: appConfig.features.passwordReset,
-            csrf: appConfig.security.csrf.enabled
+            registration: true, // Registro sempre habilitado por padrão
+            googleOAuth: process.env.GOOGLE_CLIENT_ID ? true : false,
+            passwordReset: true, // Password reset sempre habilitado
+            csrf: true // CSRF sempre habilitado por segurança
         }
     });
 });

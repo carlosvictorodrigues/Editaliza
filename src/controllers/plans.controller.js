@@ -14,6 +14,7 @@ const ReplanService = require('../services/ReplanService');
 const scheduleService = require('../services/scheduleService');
 const RetaFinalService = require('../services/schedule/RetaFinalService'); // WAVE 3 - Reta Final Service
 const BatchUpdateService = require('../services/schedule/BatchUpdateService'); // WAVE 4 - Batch Updates
+const ConflictResolutionService = require('../services/schedule/ConflictResolutionService'); // WAVE 7 - Conflict Resolution
 const logger = require('../../src/utils/logger');
 
 // FUNÇÃO UTILITÁRIA PARA DATA BRASILEIRA - CRÍTICA
@@ -1383,6 +1384,165 @@ const batchUpdateScheduleDetails = async (req, res) => {
     }
 };
 
+/**
+ * 🎯 FASE 6 WAVE 7 - CONFLICT RESOLUTION IMPLEMENTATIONS
+ * 
+ * Implementações das 2 rotas críticas para detecção e resolução de conflitos:
+ * - GET /api/plans/:planId/schedule-conflicts
+ * - POST /api/plans/:planId/resolve-conflicts
+ */
+
+/**
+ * GET /api/plans/:planId/schedule-conflicts
+ * Detecta conflitos no cronograma do plano
+ * 
+ * @route GET /api/plans/:planId/schedule-conflicts
+ * @access Private
+ */
+const getScheduleConflicts = async (req, res) => {
+    try {
+        const planId = parseInt(req.params.planId);
+        const userId = req.user.id;
+        
+        logger.info(`[ConflictController] Detectando conflitos: plano ${planId}, usuário ${userId}`);
+        
+        // Validação básica
+        if (!planId || isNaN(planId)) {
+            return res.status(400).json({ 
+                error: 'ID do plano inválido',
+                code: 'INVALID_PLAN_ID'
+            });
+        }
+        
+        const conflictService = new ConflictResolutionService();
+        const conflicts = await conflictService.getScheduleConflicts(planId, userId);
+        
+        // Adicionar metadados úteis
+        const response = {
+            success: true,
+            conflicts,
+            metadata: {
+                hasConflicts: conflicts.summary.totalConflicts > 0,
+                hasCriticalConflicts: conflicts.summary.hasCriticalConflicts,
+                recommendsAction: conflicts.summary.totalConflicts > 5,
+                analyzedAt: getBrazilianDateString()
+            }
+        };
+        
+        logger.info(`[ConflictController] Análise concluída: ${conflicts.summary.totalConflicts} conflitos encontrados`);
+        res.json(response);
+        
+    } catch (error) {
+        logger.error('[ConflictController] Erro ao detectar conflitos:', error);
+        
+        // Tratamento de erros específicos
+        if (error.message.includes('Plano não encontrado')) {
+            return res.status(404).json({ 
+                error: 'Plano não encontrado ou sem permissão',
+                code: 'PLAN_NOT_FOUND'
+            });
+        }
+        
+        if (error.message.includes('não autorizado')) {
+            return res.status(403).json({ 
+                error: 'Acesso negado ao plano',
+                code: 'ACCESS_DENIED'
+            });
+        }
+        
+        res.status(500).json({ 
+            error: 'Erro interno ao detectar conflitos',
+            code: 'INTERNAL_ERROR',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
+/**
+ * POST /api/plans/:planId/resolve-conflicts
+ * Resolve conflitos automaticamente no cronograma
+ * 
+ * @route POST /api/plans/:planId/resolve-conflicts
+ * @access Private
+ */
+const resolveScheduleConflicts = async (req, res) => {
+    try {
+        const planId = parseInt(req.params.planId);
+        const userId = req.user.id;
+        const { conflictIds = [], resolution = {} } = req.body;
+        
+        logger.info(`[ConflictController] Resolvendo conflitos: plano ${planId}, ${conflictIds.length} conflitos`);
+        
+        // Validação básica
+        if (!planId || isNaN(planId)) {
+            return res.status(400).json({ 
+                error: 'ID do plano inválido',
+                code: 'INVALID_PLAN_ID'
+            });
+        }
+        
+        if (!Array.isArray(conflictIds)) {
+            return res.status(400).json({ 
+                error: 'Lista de conflitos deve ser um array',
+                code: 'INVALID_CONFLICT_LIST'
+            });
+        }
+        
+        const conflictService = new ConflictResolutionService();
+        const result = await conflictService.resolveConflicts(planId, userId, conflictIds, resolution);
+        
+        // Determinar status baseado no resultado
+        let status = 200;
+        if (result.resolvedCount === 0 && result.failedCount > 0) {
+            status = 207; // Multi-status - algumas operações falharam
+        }
+        
+        const response = {
+            ...result,
+            metadata: {
+                timestamp: getBrazilianDateString(),
+                planId,
+                userId,
+                requestedConflicts: conflictIds.length
+            }
+        };
+        
+        logger.info(`[ConflictController] Resolução concluída: ${result.resolvedCount}/${result.totalAttempted} conflitos resolvidos`);
+        res.status(status).json(response);
+        
+    } catch (error) {
+        logger.error('[ConflictController] Erro ao resolver conflitos:', error);
+        
+        // Tratamento de erros específicos
+        if (error.message.includes('Plano não encontrado')) {
+            return res.status(404).json({ 
+                error: 'Plano não encontrado ou sem permissão',
+                code: 'PLAN_NOT_FOUND'
+            });
+        }
+        
+        if (error.message.includes('não autorizado')) {
+            return res.status(403).json({ 
+                error: 'Acesso negado ao plano',
+                code: 'ACCESS_DENIED'
+            });
+        }
+        
+        if (error.message.includes('transação')) {
+            return res.status(409).json({ 
+                error: 'Conflito na base de dados. Tente novamente.',
+                code: 'DATABASE_CONFLICT'
+            });
+        }
+        
+        res.status(500).json({ 
+            error: 'Erro interno ao resolver conflitos',
+            code: 'INTERNAL_ERROR',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
+    }
+};
+
 module.exports = {
     // CRUD Básico
     getPlans,
@@ -1430,5 +1590,10 @@ module.exports = {
     
     // FASE 6 WAVE 4 - BATCH UPDATES
     batchUpdateSchedule,
-    batchUpdateScheduleDetails
+    batchUpdateScheduleDetails,
+    
+    // FASE 6 WAVE 7 - CONFLICT RESOLUTION
+    getScheduleConflicts,
+    resolveScheduleConflicts
 };
+

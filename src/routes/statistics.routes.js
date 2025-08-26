@@ -6,6 +6,7 @@
 
 const express = require('express');
 const router = express.Router();
+const { query } = require('express-validator');
 const { authenticateToken } = require('../middleware/auth.middleware');
 const { validators, handleValidationErrors } = require('../middleware/validation.middleware');
 const statisticsController = require('../controllers/statistics.controller');
@@ -38,6 +39,32 @@ router.get('/plans/:planId/detailed_progress',
     validators.numericId('planId'),
     handleValidationErrors,
     statisticsController.getDetailedProgress
+);
+
+/**
+ * GET /api/plans/:planId/progress
+ * Get basic progress stats for a study plan
+ * Original: server.js line 3484 (was direct endpoint)
+ * CRITICAL: Frontend dashboard depends on this route
+ */
+router.get('/plans/:planId/progress',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    statisticsController.getPlanProgress
+);
+
+/**
+ * GET /api/plans/:planId/activity_summary
+ * Get activity summary with time breakdowns and session stats
+ * Original: server.js line 3874
+ * CRITICAL: Frontend statistics depend on this route
+ */
+router.get('/plans/:planId/activity_summary',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    statisticsController.getActivitySummary
 );
 
 /**
@@ -79,6 +106,25 @@ router.get('/plans/:planId/question_radar',
     validators.numericId('planId'),
     handleValidationErrors,
     statisticsController.getQuestionRadar
+);
+
+// ============================================================================
+// REVIEW DATA ROUTES
+// ============================================================================
+
+/**
+ * GET /api/plans/:planId/review_data
+ * Get review data for weekly/monthly reviews
+ * Migrated from legacy.routes.js
+ * CRITICAL: Frontend review system depends on this route
+ */
+router.get('/plans/:planId/review_data',
+    authenticateToken,
+    validators.numericId('planId'),
+    query('date').isISO8601().withMessage('Data inválida'),
+    query('type').isIn(['semanal', 'mensal']).withMessage('Tipo de revisão inválido'),
+    handleValidationErrors,
+    statisticsController.getReviewData
 );
 
 // ============================================================================

@@ -50,7 +50,7 @@ try {
 }
 
 // Garantir que diretório de logs existe
-const logDir = appConfig.paths.logs;
+const logDir = path.join(process.cwd(), 'logs');
 if (!fs.existsSync(logDir)) {
     fs.mkdirSync(logDir, { recursive: true });
 }
@@ -165,8 +165,8 @@ const transports = [];
 // Console transport
 transports.push(
     new winston.transports.Console({
-        level: appConfig.logging.level,
-        format: appConfig.environment.isDevelopment ? developmentFormat : 
+        level: appConfig?.logging?.level || 'info',
+        format: (appConfig?.environment?.isDevelopment || process.env.NODE_ENV !== 'production') ? developmentFormat : 
                (winston.format.combine(
                    winston.format.timestamp(),
                    winston.format.errors({ stack: true }),
@@ -209,7 +209,7 @@ try {
     );
 } catch (error) {
     // winston-daily-rotate-file não disponível, usar transports básicos
-    if (appConfig.environment.isDevelopment) {
+    if (appConfig?.environment?.isDevelopment || process.env.NODE_ENV !== 'production') {
         console.warn('winston-daily-rotate-file não instalado. Usando apenas console transport.');
     }
 }
@@ -217,7 +217,7 @@ try {
 // === LOGGER PRINCIPAL ===
 
 const logger = winston.createLogger({
-    level: appConfig.logging.level,
+    level: appConfig?.logging?.level || 'info',
     transports,
     exitOnError: false
 });
@@ -300,7 +300,7 @@ class ContextualLogger {
 
     // Log de debug
     debug(message, meta = {}) {
-        if (!appConfig.environment.isDevelopment && !appConfig.logging.sql) return this;
+        if (!(appConfig?.environment?.isDevelopment || process.env.NODE_ENV !== 'production') && !appConfig?.logging?.sql) return this;
         if (!shouldLog(message, 'debug')) return this;
         
         const entry = this._buildLogEntry('debug', message, meta);
@@ -415,7 +415,7 @@ function httpLoggingMiddleware() {
         req.logger = createRequestLogger(req);
         
         // Log da requisição entrante (apenas em desenvolvimento)
-        if (appConfig.environment.isDevelopment) {
+        if (appConfig?.environment?.isDevelopment || process.env.NODE_ENV !== 'production') {
             req.logger.info('Request started');
         }
         
@@ -504,7 +504,7 @@ function getLoggerHealth() {
                 logDir,
                 fileCount: 0,
                 totalSize: '0MB',
-                level: appConfig.logging.level,
+                level: appConfig?.logging?.level || 'info',
                 transports: transports.length,
                 note: 'Console only - no file logging'
             };
@@ -522,7 +522,7 @@ function getLoggerHealth() {
             logDir,
             fileCount: logFiles.length,
             totalSize: `${(totalSize / 1024 / 1024).toFixed(2)}MB`,
-            level: appConfig.logging.level,
+            level: appConfig?.logging?.level || 'info',
             transports: transports.length
         };
     } catch (error) {

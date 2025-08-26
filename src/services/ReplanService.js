@@ -293,7 +293,7 @@ class ReplanService {
             this.logger.error('Erro ao criar disciplina com tópicos', {
                 planId,
                 userId,
-                subjectName: sanitizedData.subject_name,
+                subjectName: subjectData?.subject_name || 'Unknown',
                 error: error.message,
                 duration,
                 stack: process.env.NODE_ENV === 'development' ? error.stack : undefined

@@ -408,4 +408,60 @@ router.post('/:planId/batch_update_details',
     plansController.batchUpdateScheduleDetails
 );
 
+/**
+ * 🎯 FASE 6 WAVE 7 - CONFLICT RESOLUTION
+ * Rotas para detecção e resolução de conflitos no cronograma
+ */
+
+/**
+ * @route GET /plans/:planId/schedule-conflicts
+ * @desc Detecta conflitos no cronograma do plano
+ * @access Private
+ * @returns {Object} Relatório completo de conflitos detectados
+ */
+router.get('/:planId/schedule-conflicts',
+    authenticateToken,
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getScheduleConflicts
+);
+
+/**
+ * @route POST /plans/:planId/resolve-conflicts
+ * @desc Resolve conflitos automaticamente no cronograma
+ * @access Private
+ * @body { conflictIds?: Array<string>, resolution?: Object }
+ * @returns {Object} Resultado da resolução dos conflitos
+ */
+router.post('/:planId/resolve-conflicts',
+    authenticateToken,
+    validators.numericId('planId'),
+    body('conflictIds').optional().isArray().withMessage('conflictIds deve ser um array'),
+    body('conflictIds.*').optional().isString().withMessage('Cada conflictId deve ser uma string'),
+    body('resolution').optional().isObject().withMessage('resolution deve ser um objeto'),
+    body('resolution.strategy').optional().isIn(['automatic', 'redistribute', 'remove_duplicates']).withMessage('Estratégia de resolução inválida'),
+    body('resolution.priority').optional().isIn(['speed', 'quality', 'balanced']).withMessage('Prioridade de resolução inválida'),
+    handleValidationErrors,
+    plansController.resolveScheduleConflicts
+);
+
+/**
+ * 📊 WAVE 7 COMPLETION SUMMARY
+ * 
+ * ✅ ROTAS IMPLEMENTADAS:
+ * - GET  /plans/:planId/schedule-conflicts (Detecção de conflitos)
+ * - POST /plans/:planId/resolve-conflicts (Resolução automática)
+ * 
+ * ⚡ FUNCIONALIDADES:
+ * - Detecta conflitos de data/sobrecarga
+ * - Identifica gaps problemáticos
+ * - Remove tópicos duplicados
+ * - Redistribui sessões automaticamente
+ * - Transações atômicas para segurança
+ * - Validações completas de entrada
+ * - Error handling robusto
+ * 
+ * 🎯 FASE 6 CONCLUÍDA - TODAS AS WAVES FINALIZADAS!
+ */
+
 module.exports = router;
