@@ -54,7 +54,7 @@ module.exports = [
     {
         files: ['js/**/*.js', 'public/js/**/*.js'],
         languageOptions: {
-            sourceType: 'script',
+            sourceType: 'module',
             globals: {
                 console: 'readonly',
                 document: 'readonly',
@@ -80,7 +80,18 @@ module.exports = [
                 SpeechSynthesisUtterance: 'readonly',
                 speechSynthesis: 'readonly',
                 confirm: 'readonly',
-                URL: 'readonly'
+                URL: 'readonly',
+                crypto: 'readonly',
+                TextEncoder: 'readonly',
+                TextDecoder: 'readonly',
+                Uint8Array: 'readonly',
+                Array: 'readonly',
+                Object: 'readonly',
+                JSON: 'readonly',
+                Date: 'readonly',
+                Math: 'readonly',
+                Promise: 'readonly',
+                Error: 'readonly'
             }
         }
     },
@@ -98,7 +109,30 @@ module.exports = [
     {
         files: ['tests/**/*.test.js', 'tests/**/*.spec.js'],
         languageOptions: {
+            sourceType: 'module',
             globals: {
+                // Browser globals
+                window: 'readonly',
+                document: 'readonly',
+                localStorage: 'readonly',
+                sessionStorage: 'readonly',
+                console: 'readonly',
+                setTimeout: 'readonly',
+                clearTimeout: 'readonly',
+                setInterval: 'readonly',
+                clearInterval: 'readonly',
+                crypto: 'readonly',
+                TextEncoder: 'readonly',
+                TextDecoder: 'readonly',
+                Uint8Array: 'readonly',
+                Array: 'readonly',
+                Object: 'readonly',
+                JSON: 'readonly',
+                Date: 'readonly',
+                Math: 'readonly',
+                Promise: 'readonly',
+                Error: 'readonly',
+                // Jest globals
                 expect: 'readonly',
                 test: 'readonly',
                 describe: 'readonly',

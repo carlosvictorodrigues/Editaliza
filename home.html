@@ -34,11 +34,16 @@
     <link href="css/style.css" rel="stylesheet">
     <link href="css/footer.css" rel="stylesheet">
     <!-- Theme system removed - light mode only -->
+    <!-- SCRIPTS DE SEGURANÇA (CARREGADOS PRIMEIRO) -->
+    <script src="js/modules/secure-storage.js" type="module"></script>
+    <script src="js/modules/storage-compatibility.js" type="module"></script>
+    <script src="js/modules/security-audit.js" type="module"></script>
+    
     <!-- SCRIPTS CENTRALIZADOS -->
     <script src="js/components.js"></script>
     <script src="js/timer.js"></script>
     <script src="js/checklist.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/app.js" type="module"></script>
     <script src="js/modules/gamification.js"></script>
     <script src="js/modules/study-goals-notifications.js"></script>
     <script src="js/modules/contextual-notifications.js" type="module"></script>

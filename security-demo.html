@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo de Segurança - SecureStorage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        .vulnerability-critical { @apply border-l-4 border-red-500 bg-red-50; }
+        .vulnerability-high { @apply border-l-4 border-orange-500 bg-orange-50; }
+        .vulnerability-medium { @apply border-l-4 border-yellow-500 bg-yellow-50; }
+        .vulnerability-low { @apply border-l-4 border-blue-500 bg-blue-50; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-4">
+                🛡️ Demonstração de Segurança - SecureStorage
+            </h1>
+            <p class="text-gray-600">
+                Esta demonstração mostra vulnerabilidades comuns no localStorage e como o SecureStorage as resolve.
+            </p>
+            <div class="mt-4 flex flex-wrap gap-4">
+                <button id="run-tests" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    🧪 Executar Testes
+                </button>
+                <button id="simulate-vulnerabilities" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                    🔴 Simular Vulnerabilidades
+                </button>
+                <button id="run-audit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                    🔍 Executar Auditoria
+                </button>
+                <button id="clear-storage" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+                    🧹 Limpar Storage
+                </button>
+            </div>
+        </div>
+
+        <!-- Status Dashboard -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-2">🔒 Status de Segurança</h3>
+                <div id="security-status" class="text-2xl font-bold">
+                    <span class="text-gray-500">Verificando...</span>
+                </div>
+                <div id="security-details" class="text-sm text-gray-600 mt-2"></div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-2">📊 Estatísticas</h3>
+                <div id="storage-stats" class="space-y-1">
+                    <div>Itens SecureStorage: <span id="secure-items">0</span></div>
+                    <div>Itens localStorage: <span id="local-items">0</span></div>
+                    <div>Dados sensíveis: <span id="sensitive-items">0</span></div>
+                </div>
+            </div>
+            
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold mb-2">⚠️ Vulnerabilidades</h3>
+                <div id="vulnerability-count" class="space-y-1">
+                    <div>Críticas: <span id="critical-count" class="text-red-600 font-bold">0</span></div>
+                    <div>Altas: <span id="high-count" class="text-orange-600 font-bold">0</span></div>
+                    <div>Médias: <span id="medium-count" class="text-yellow-600 font-bold">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vulnerabilities Demo Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">🔴 Demonstração de Vulnerabilidades</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Vulnerability 1: Plain Text Sensitive Data -->
+                <div class="border rounded-lg p-4">
+                    <h3 class="text-lg font-semibold mb-2 text-red-600">1. Dados Sensíveis em Texto Plano</h3>
+                    <p class="text-gray-600 mb-3">Armazenamento inseguro de tokens e senhas:</p>
+                    
+                    <div class="code-block mb-3 text-sm">
+                        <div class="text-red-400">// ❌ VULNERÁVEL</div>
+                        <div>localStorage.setItem('authToken', 'eyJhbGciOiJIUzI1NiIs...');</div>
+                        <div>localStorage.setItem('password', 'minhaSenha123');</div>
+                    </div>
+                    
+                    <button id="demo-plaintext" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">
+                        Demonstrar
+                    </button>
+                </div>
+
+                <!-- Vulnerability 2: XSS Vectors -->
+                <div class="border rounded-lg p-4">
+                    <h3 class="text-lg font-semibold mb-2 text-red-600">2. Vetores de XSS</h3>
+                    <p class="text-gray-600 mb-3">Dados não sanitizados permitindo XSS:</p>
+                    
+                    <div class="code-block mb-3 text-sm">
+                        <div class="text-red-400">// ❌ VULNERÁVEL</div>
+                        <div>localStorage.setItem('userInput',</div>
+                        <div>&nbsp;&nbsp;'&lt;script&gt;alert("XSS")&lt;/script&gt;');</div>
+                    </div>
+                    
+                    <button id="demo-xss" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">
+                        Demonstrar
+                    </button>
+                </div>
+
+                <!-- Vulnerability 3: Data Manipulation -->
+                <div class="border rounded-lg p-4">
+                    <h3 class="text-lg font-semibold mb-2 text-red-600">3. Manipulação de Dados</h3>
+                    <p class="text-gray-600 mb-3">Dados facilmente modificáveis:</p>
+                    
+                    <div class="code-block mb-3 text-sm">
+                        <div class="text-red-400">// ❌ VULNERÁVEL</div>
+                        <div>localStorage.setItem('userRole', 'user');</div>
+                        <div>localStorage.setItem('balance', '1000');</div>
+                    </div>
+                    
+                    <button id="demo-manipulation" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">
+                        Demonstrar
+                    </button>
+                </div>
+
+                <!-- Vulnerability 4: Token Expiry -->
+                <div class="border rounded-lg p-4">
+                    <h3 class="text-lg font-semibold mb-2 text-red-600">4. Tokens Expirados</h3>
+                    <p class="text-gray-600 mb-3">Tokens não são removidos automaticamente:</p>
+                    
+                    <div class="code-block mb-3 text-sm">
+                        <div class="text-red-400">// ❌ PROBLEMA</div>
+                        <div>// Token expira mas permanece no storage</div>
+                        <div>// Riscos de replay attacks</div>
+                    </div>
+                    
+                    <button id="demo-expired" class="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600">
+                        Demonstrar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SecureStorage Solution Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-green-800 mb-4">✅ Solução com SecureStorage</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Solution 1: Encryption -->
+                <div class="border border-green-200 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold mb-2 text-green-600">1. Criptografia AES-256</h3>
+                    <p class="text-gray-600 mb-3">Todos os dados sensíveis são criptografados:</p>
+                    
+                    <div class="code-block mb-3 text-sm">
+                        <div class="text-green-400">// ✅ SEGURO</div>
+                        <div>await secureStorage.setItem('authToken', token);</div>
+                        <div>// Dados automaticamente criptografados</div>
+                    </div>
+                    
+                    <button id="demo-encryption" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
+                        Demonstrar
+                    </button>
+                </div>
+
+                <!-- Solution 2: XSS Protection -->
+                <div class="border border-green-200 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold mb-2 text-green-600">2. Proteção XSS</h3>
+                    <p class="text-gray-600 mb-3">Sanitização automática de dados:</p>
+                    
+                    <div class="code-block mb-3 text-sm">
+                        <div class="text-green-400">// ✅ SEGURO</div>
+                        <div>await secureStorage.setItem('userInput', xssPayload);</div>
+                        <div>// XSS automaticamente removido</div>
+                    </div>
+                    
+                    <button id="demo-xss-protection" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
+                        Demonstrar
+                    </button>
+                </div>
+
+                <!-- Solution 3: Integrity Check -->
+                <div class="border border-green-200 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold mb-2 text-green-600">3. Verificação de Integridade</h3>
+                    <p class="text-gray-600 mb-3">Detecção de manipulação de dados:</p>
+                    
+                    <div class="code-block mb-3 text-sm">
+                        <div class="text-green-400">// ✅ SEGURO</div>
+                        <div>// Hash de integridade automático</div>
+                        <div>// Manipulação detectada e bloqueada</div>
+                    </div>
+                    
+                    <button id="demo-integrity" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
+                        Demonstrar
+                    </button>
+                </div>
+
+                <!-- Solution 4: Auto Expiry -->
+                <div class="border border-green-200 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold mb-2 text-green-600">4. Expiração Automática</h3>
+                    <p class="text-gray-600 mb-3">Tokens expirados são removidos automaticamente:</p>
+                    
+                    <div class="code-block mb-3 text-sm">
+                        <div class="text-green-400">// ✅ SEGURO</div>
+                        <div>await secureStorage.setItem('token', data,</div>
+                        <div>&nbsp;&nbsp;{ ttl: 2 * 60 * 60 * 1000 }); // 2 horas</div>
+                    </div>
+                    
+                    <button id="demo-expiry" class="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600">
+                        Demonstrar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Results Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">🧪 Resultados dos Testes</h2>
+            <div id="test-results" class="space-y-4">
+                <p class="text-gray-600">Clique em "Executar Testes" para ver os resultados dos testes de segurança.</p>
+            </div>
+        </div>
+
+        <!-- Audit Results Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">🔍 Auditoria de Segurança</h2>
+            <div id="audit-results" class="space-y-4">
+                <p class="text-gray-600">Clique em "Executar Auditoria" para ver a análise completa de vulnerabilidades.</p>
+            </div>
+        </div>
+
+        <!-- Live Demo Section -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">🎮 Demonstração Interativa</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Teste Personalizado</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Chave:</label>
+                            <input type="text" id="test-key" placeholder="Ex: authToken" 
+                                   class="w-full border rounded px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Valor:</label>
+                            <textarea id="test-value" placeholder="Ex: dados sensíveis ou payload XSS" 
+                                      class="w-full border rounded px-3 py-2 h-20"></textarea>
+                        </div>
+                        <div class="flex gap-2">
+                            <button id="test-insecure" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">
+                                Armazenar Inseguro
+                            </button>
+                            <button id="test-secure" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                                Armazenar Seguro
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Console de Resultados</h3>
+                    <div id="demo-console" class="bg-black text-green-400 p-4 rounded h-40 overflow-y-auto font-mono text-sm">
+                        <div>> Pronto para demonstração...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module">
+        // Importar módulos necessários
+        import { secureStorage } from './js/modules/secure-storage.js';
+        import { securityAudit } from './js/modules/security-audit.js';
+
+        let demoConsole, testResults, auditResults;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            demoConsole = document.getElementById('demo-console');
+            testResults = document.getElementById('test-results');
+            auditResults = document.getElementById('audit-results');
+
+            // Aguardar módulos carregarem
+            await waitForModules();
+
+            // Configurar event listeners
+            setupEventListeners();
+
+            // Atualizar dashboard
+            updateDashboard();
+
+            log('Sistema de demonstração inicializado');
+        });
+
+        async function waitForModules() {
+            let attempts = 0;
+            while (!window.secureStorage && attempts < 50) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+            
+            if (!window.secureStorage) {
+                log('❌ SecureStorage não carregou, usando fallbacks');
+            } else {
+                log('✅ SecureStorage carregado com sucesso');
+            }
+        }
+
+        function setupEventListeners() {
+            // Botões principais
+            document.getElementById('run-tests').addEventListener('click', runSecurityTests);
+            document.getElementById('simulate-vulnerabilities').addEventListener('click', simulateVulnerabilities);
+            document.getElementById('run-audit').addEventListener('click', runSecurityAudit);
+            document.getElementById('clear-storage').addEventListener('click', clearAllStorage);
+
+            // Demonstrações de vulnerabilidades
+            document.getElementById('demo-plaintext').addEventListener('click', () => demoPlaintextVulnerability());
+            document.getElementById('demo-xss').addEventListener('click', () => demoXSSVulnerability());
+            document.getElementById('demo-manipulation').addEventListener('click', () => demoManipulationVulnerability());
+            document.getElementById('demo-expired').addEventListener('click', () => demoExpiredTokens());
+
+            // Demonstrações de soluções
+            document.getElementById('demo-encryption').addEventListener('click', () => demoEncryption());
+            document.getElementById('demo-xss-protection').addEventListener('click', () => demoXSSProtection());
+            document.getElementById('demo-integrity').addEventListener('click', () => demoIntegrityCheck());
+            document.getElementById('demo-expiry').addEventListener('click', () => demoAutoExpiry());
+
+            // Teste interativo
+            document.getElementById('test-insecure').addEventListener('click', testInsecureStorage);
+            document.getElementById('test-secure').addEventListener('click', testSecureStorage);
+        }
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warn' ? '⚠️' : '>';
+            const line = `[${timestamp}] ${icon} ${message}`;
+            
+            demoConsole.innerHTML += `<div>${line}</div>`;
+            demoConsole.scrollTop = demoConsole.scrollHeight;
+            
+            console.log(line);
+        }
+
+        async function updateDashboard() {
+            try {
+                // Status de segurança
+                const securityStatus = document.getElementById('security-status');
+                const securityDetails = document.getElementById('security-details');
+                
+                if (window.securityAudit && window.securityAudit.lastAudit) {
+                    const audit = window.securityAudit.lastAudit;
+                    const level = audit.securityLevel;
+                    const emoji = {
+                        'EXCELLENT': '🛡️', 'GOOD': '✅', 'FAIR': '⚠️', 
+                        'POOR': '⚠️', 'CRITICAL': '🚨'
+                    }[level] || '❓';
+                    
+                    securityStatus.innerHTML = `<span class="${getSecurityLevelColor(level)}">${emoji} ${level}</span>`;
+                    securityDetails.textContent = `${audit.vulnerabilitiesFound} vulnerabilidades encontradas`;
+                    
+                    // Contadores de vulnerabilidades
+                    const critical = audit.vulnerabilities.filter(v => v.severity === 'CRITICAL').length;
+                    const high = audit.vulnerabilities.filter(v => v.severity === 'HIGH').length;
+                    const medium = audit.vulnerabilities.filter(v => v.severity === 'MEDIUM').length;
+                    
+                    document.getElementById('critical-count').textContent = critical;
+                    document.getElementById('high-count').textContent = high;
+                    document.getElementById('medium-count').textContent = medium;
+                }
+
+                // Estatísticas de armazenamento
+                const localStorageCount = Object.keys(localStorage).length;
+                document.getElementById('local-items').textContent = localStorageCount;
+
+                if (window.secureStorage) {
+                    const stats = window.secureStorage.getStorageStats();
+                    if (stats) {
+                        document.getElementById('secure-items').textContent = stats.totalItems;
+                        document.getElementById('sensitive-items').textContent = stats.sensitiveItems;
+                    }
+                }
+
+            } catch (error) {
+                console.error('Erro ao atualizar dashboard:', error);
+            }
+        }
+
+        function getSecurityLevelColor(level) {
+            const colors = {
+                'EXCELLENT': 'text-green-600',
+                'GOOD': 'text-green-500',
+                'FAIR': 'text-yellow-500',
+                'POOR': 'text-orange-500',
+                'CRITICAL': 'text-red-600'
+            };
+            return colors[level] || 'text-gray-500';
+        }
+
+        // Demonstrações de vulnerabilidades
+        async function demoPlaintextVulnerability() {
+            log('🔴 Demonstrando armazenamento inseguro...');
+            
+            localStorage.setItem('authToken', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...');
+            localStorage.setItem('userPassword', 'minhaSenha123');
+            localStorage.setItem('apiKey', 'sk-1234567890abcdef');
+            
+            log('❌ Dados sensíveis armazenados em texto plano!', 'error');
+            log('🔍 Verifique o localStorage no DevTools');
+            
+            updateDashboard();
+        }
+
+        async function demoXSSVulnerability() {
+            log('🔴 Demonstrando vetores XSS...');
+            
+            const xssPayloads = [
+                '<script>alert("XSS Attack!")</script>',
+                'javascript:alert("XSS")',
+                '<img src=x onerror=alert("XSS")>',
+                '<iframe src="javascript:alert(`XSS`)"></iframe>'
+            ];
+            
+            xssPayloads.forEach((payload, i) => {
+                localStorage.setItem(`xss_vector_${i}`, payload);
+            });
+            
+            log('❌ Vetores XSS armazenados sem sanitização!', 'error');
+            updateDashboard();
+        }
+
+        async function demoManipulationVulnerability() {
+            log('🔴 Demonstrando manipulação de dados...');
+            
+            localStorage.setItem('userRole', 'user');
+            localStorage.setItem('accountBalance', '1000.00');
+            localStorage.setItem('isPremium', 'false');
+            
+            log('❌ Dados críticos facilmente manipuláveis!', 'error');
+            log('💡 Usuário pode alterar role, saldo, etc.');
+            
+            updateDashboard();
+        }
+
+        async function demoExpiredTokens() {
+            log('🔴 Demonstrando tokens expirados...');
+            
+            // Token expirado (exp: timestamp passado)
+            const expiredJWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyMzkwMjJ9.invalid';
+            
+            localStorage.setItem('expiredToken', expiredJWT);
+            localStorage.setItem('oldToken', 'token-from-last-month');
+            
+            log('❌ Tokens expirados não removidos automaticamente!', 'error');
+            updateDashboard();
+        }
+
+        // Demonstrações de soluções
+        async function demoEncryption() {
+            if (!window.secureStorage) {
+                log('❌ SecureStorage não disponível', 'error');
+                return;
+            }
+            
+            log('✅ Demonstrando criptografia...');
+            
+            await window.secureStorage.setItem('authToken', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...');
+            await window.secureStorage.setItem('userPassword', 'minhaSenhaSegura123');
+            
+            log('🔒 Dados automaticamente criptografados com AES-256', 'success');
+            log('🔍 Verifique que os dados estão criptografados no storage');
+            
+            updateDashboard();
+        }
+
+        async function demoXSSProtection() {
+            if (!window.secureStorage) {
+                log('❌ SecureStorage não disponível', 'error');
+                return;
+            }
+            
+            log('✅ Demonstrando proteção XSS...');
+            
+            const xssPayload = '<script>alert("XSS Attack!")</script>';
+            await window.secureStorage.setItem('userInput', xssPayload);
+            
+            const retrieved = await window.secureStorage.getItem('userInput');
+            log(`🛡️ XSS bloqueado: "${retrieved}"`, 'success');
+            
+            updateDashboard();
+        }
+
+        async function demoIntegrityCheck() {
+            if (!window.secureStorage) {
+                log('❌ SecureStorage não disponível', 'error');
+                return;
+            }
+            
+            log('✅ Demonstrando verificação de integridade...');
+            
+            await window.secureStorage.setItem('importantData', { balance: 1000, role: 'admin' });
+            
+            // Simular tentativa de manipulação
+            try {
+                const storageKey = Object.keys(localStorage).find(k => k.includes('importantData'));
+                if (storageKey) {
+                    localStorage.setItem(storageKey, 'dados_manipulados');
+                    
+                    const retrieved = await window.secureStorage.getItem('importantData');
+                    if (retrieved === null) {
+                        log('🛡️ Manipulação detectada e bloqueada!', 'success');
+                    }
+                }
+            } catch (error) {
+                log('🛡️ Integridade verificada com sucesso', 'success');
+            }
+            
+            updateDashboard();
+        }
+
+        async function demoAutoExpiry() {
+            if (!window.secureStorage) {
+                log('❌ SecureStorage não disponível', 'error');
+                return;
+            }
+            
+            log('✅ Demonstrando expiração automática...');
+            
+            // Token com TTL de 2 segundos para demonstração
+            await window.secureStorage.setItem('shortLivedToken', 'token-data', { ttl: 2000 });
+            
+            log('⏰ Token armazenado com TTL de 2 segundos');
+            
+            setTimeout(async () => {
+                const retrieved = await window.secureStorage.getItem('shortLivedToken');
+                if (retrieved === null) {
+                    log('🗑️ Token expirado e removido automaticamente!', 'success');
+                } else {
+                    log('⚠️ Token ainda presente (pode não ter expirado ainda)', 'warn');
+                }
+                updateDashboard();
+            }, 3000);
+        }
+
+        // Testes de segurança
+        async function runSecurityTests() {
+            if (!window.SecureStorageTests) {
+                log('❌ Módulo de testes não carregado', 'error');
+                return;
+            }
+            
+            log('🧪 Executando testes de segurança...');
+            testResults.innerHTML = '<p class="text-blue-600">Executando testes...</p>';
+            
+            try {
+                const tests = new window.SecureStorageTests();
+                const results = await tests.init();
+                
+                displayTestResults(results);
+                log('✅ Testes concluídos', 'success');
+            } catch (error) {
+                log(`❌ Erro nos testes: ${error.message}`, 'error');
+            }
+            
+            updateDashboard();
+        }
+
+        function displayTestResults(results) {
+            const html = `
+                <div class="bg-gray-50 rounded p-4 mb-4">
+                    <h3 class="font-bold text-lg mb-2">Resultados dos Testes</h3>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div class="bg-green-100 rounded p-3">
+                            <div class="text-2xl font-bold text-green-600">${results.passed}</div>
+                            <div class="text-sm text-green-700">Aprovados</div>
+                        </div>
+                        <div class="bg-red-100 rounded p-3">
+                            <div class="text-2xl font-bold text-red-600">${results.failed}</div>
+                            <div class="text-sm text-red-700">Reprovados</div>
+                        </div>
+                        <div class="bg-blue-100 rounded p-3">
+                            <div class="text-2xl font-bold text-blue-600">${Math.round((results.passed / results.total) * 100)}%</div>
+                            <div class="text-sm text-blue-700">Taxa de Sucesso</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    ${results.results.map(result => `
+                        <div class="flex items-center p-3 rounded ${result.passed ? 'bg-green-50' : 'bg-red-50'}">
+                            <span class="text-lg mr-3">${result.passed ? '✅' : '❌'}</span>
+                            <div>
+                                <div class="font-medium">${result.testName}</div>
+                                <div class="text-sm text-gray-600">${result.message}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            testResults.innerHTML = html;
+        }
+
+        // Auditoria de segurança
+        async function runSecurityAudit() {
+            if (!window.securityAudit) {
+                log('❌ Módulo de auditoria não carregado', 'error');
+                return;
+            }
+            
+            log('🔍 Executando auditoria de segurança...');
+            auditResults.innerHTML = '<p class="text-blue-600">Analisando vulnerabilidades...</p>';
+            
+            try {
+                const auditResult = await window.securityAudit.performAudit();
+                
+                if (auditResult) {
+                    displayAuditResults(auditResult);
+                    log('✅ Auditoria concluída', 'success');
+                } else {
+                    log('❌ Erro na auditoria', 'error');
+                }
+            } catch (error) {
+                log(`❌ Erro na auditoria: ${error.message}`, 'error');
+            }
+            
+            updateDashboard();
+        }
+
+        function displayAuditResults(audit) {
+            const severityColors = {
+                'CRITICAL': 'vulnerability-critical',
+                'HIGH': 'vulnerability-high',
+                'MEDIUM': 'vulnerability-medium',
+                'LOW': 'vulnerability-low'
+            };
+            
+            const html = `
+                <div class="bg-gray-50 rounded p-4 mb-4">
+                    <h3 class="font-bold text-lg mb-2">Resultado da Auditoria</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <div class="text-sm text-gray-600">Nível de Segurança</div>
+                            <div class="text-2xl font-bold ${getSecurityLevelColor(audit.securityLevel)}">
+                                ${audit.securityLevel}
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-sm text-gray-600">Vulnerabilidades</div>
+                            <div class="text-2xl font-bold">${audit.vulnerabilitiesFound}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                ${audit.vulnerabilities.length > 0 ? `
+                    <div class="space-y-3">
+                        <h4 class="font-semibold">Vulnerabilidades Encontradas:</h4>
+                        ${audit.vulnerabilities.map(vuln => `
+                            <div class="p-4 rounded ${severityColors[vuln.severity] || ''}">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h5 class="font-semibold">${vuln.type}</h5>
+                                    <span class="text-xs font-bold px-2 py-1 rounded bg-white">
+                                        ${vuln.severity}
+                                    </span>
+                                </div>
+                                <p class="text-sm mb-2">${vuln.description}</p>
+                                ${vuln.recommendation ? `
+                                    <p class="text-sm font-medium">💡 ${vuln.recommendation}</p>
+                                ` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : '<p class="text-green-600 font-medium">🛡️ Nenhuma vulnerabilidade encontrada!</p>'}
+            `;
+            
+            auditResults.innerHTML = html;
+        }
+
+        // Simulação de vulnerabilidades
+        async function simulateVulnerabilities() {
+            log('🔴 Simulando vulnerabilidades comuns...');
+            
+            // Dados sensíveis em texto plano
+            localStorage.setItem('user_password', 'senha123');
+            localStorage.setItem('credit_card', '1234-5678-9012-3456');
+            localStorage.setItem('api_secret', 'sk-abcdef1234567890');
+            
+            // Vetores XSS
+            localStorage.setItem('user_comment', '<script>alert("Hacked!")</script>');
+            localStorage.setItem('user_bio', '<img src=x onerror=document.location="http://evil.com">');
+            
+            // Dados facilmente manipuláveis
+            localStorage.setItem('user_role', 'admin');
+            localStorage.setItem('account_balance', '999999');
+            localStorage.setItem('subscription_type', 'premium');
+            
+            // Tokens expirados
+            localStorage.setItem('old_session', 'session_12345_expired');
+            
+            log('❌ Vulnerabilidades simuladas com sucesso!', 'error');
+            log('🔍 Execute a auditoria para ver os problemas detectados');
+            
+            updateDashboard();
+        }
+
+        // Limpar storage
+        async function clearAllStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            if (window.secureStorage) {
+                await window.secureStorage.clear();
+            }
+            
+            log('🧹 Todos os dados removidos', 'success');
+            updateDashboard();
+        }
+
+        // Testes interativos
+        async function testInsecureStorage() {
+            const key = document.getElementById('test-key').value;
+            const value = document.getElementById('test-value').value;
+            
+            if (!key || !value) {
+                log('❌ Preencha chave e valor', 'error');
+                return;
+            }
+            
+            localStorage.setItem(key, value);
+            log(`❌ Armazenado inseguro: ${key}`, 'error');
+            
+            updateDashboard();
+        }
+
+        async function testSecureStorage() {
+            const key = document.getElementById('test-key').value;
+            const value = document.getElementById('test-value').value;
+            
+            if (!key || !value) {
+                log('❌ Preencha chave e valor', 'error');
+                return;
+            }
+            
+            if (!window.secureStorage) {
+                log('❌ SecureStorage não disponível', 'error');
+                return;
+            }
+            
+            try {
+                await window.secureStorage.setItem(key, value);
+                log(`✅ Armazenado seguro: ${key}`, 'success');
+                
+                // Mostrar dados recuperados
+                const retrieved = await window.secureStorage.getItem(key);
+                log(`🔍 Dados recuperados: ${JSON.stringify(retrieved).substring(0, 100)}...`);
+            } catch (error) {
+                log(`❌ Erro: ${error.message}`, 'error');
+            }
+            
+            updateDashboard();
+        }
+    </script>
+
+    <!-- Carregar módulos de teste -->
+    <script src="./js/modules/secure-storage.js"></script>
+    <script src="./tests/secure-storage.test.js"></script>
+    <script src="./js/modules/security-audit.js"></script>
+</body>
+</html>

@@ -1,8 +1,11 @@
 /**
  * @file js/app.js
  * @description Script principal da aplicação, gerenciando estado, chamadas de API e utilitários.
- * Versão com melhorias de segurança.
+ * Versão com melhorias de segurança e SecureStorage integrado.
  */
+
+// Importar SecureStorage
+import { secureStorage } from './modules/secure-storage.js';
 
 const app = {
     state: {
@@ -35,10 +38,13 @@ const app = {
     },
 
     async init() {
+        // Aguardar SecureStorage estar pronto
+        await this.initSecureStorage();
+        
         // Limpar token se expirado
         this.checkTokenExpiry();
         
-        this.state.token = localStorage.getItem(this.config.tokenKey);
+        this.state.token = await secureStorage.getItem(this.config.tokenKey);
         
         // Páginas que não requerem autenticação
         const publicPages = ['/login.html', '/register.html', '/forgot-password.html', '/reset-password.html'];
@@ -57,6 +63,40 @@ const app = {
 
         // 🔔 INICIALIZAR SISTEMA DE NOTIFICAÇÕES INTELIGENTES
         await this.initializeNotificationSystem();
+    },
+
+    // Inicializar SecureStorage e migrar dados
+    async initSecureStorage() {
+        try {
+            console.log('🔒 Inicializando SecureStorage...');
+            
+            // Migrar dados existentes do localStorage
+            const migrated = await secureStorage.migrateFromLocalStorage({
+                'editaliza_token': 'token',
+                'authToken': 'authToken',
+                'selectedPlanId': 'selectedPlanId',
+                'editaliza_notifications_enabled': 'notifications_enabled',
+                'editaliza_notification_patterns': 'notification_patterns',
+                'editaliza_timers': 'timers',
+                'editaliza_notes': 'notes',
+                'errorReports': 'error_reports',
+                'editaliza_daily_goal_minutes': 'daily_goal_minutes'
+            });
+            
+            if (migrated > 0) {
+                console.log(`📦 ${migrated} itens migrados para SecureStorage`);
+                this.showToast(`Dados migrados para armazenamento seguro (${migrated} itens)`, 'success');
+            }
+            
+            // Obter estatísticas de segurança
+            const stats = secureStorage.getStorageStats();
+            console.log('📊 SecureStorage inicializado:', stats);
+            
+        } catch (error) {
+            console.error('❌ Erro ao inicializar SecureStorage:', error);
+            // Fallback para localStorage em caso de erro crítico
+            console.warn('⚠️ Fallback para localStorage tradicional');
+        }
     },
 
     // 🔔 Sistema de Notificações Inteligentes
@@ -117,8 +157,8 @@ const app = {
     },
 
     // Verificar se o token expirou
-    checkTokenExpiry() {
-        const token = localStorage.getItem(this.config.tokenKey);
+    async checkTokenExpiry() {
+        const token = await secureStorage.getItem(this.config.tokenKey);
         if (!token) return;
         
         try {
@@ -231,8 +271,8 @@ const app = {
     },
 
     // Check if user is authenticated
-    isAuthenticated() {
-        const token = localStorage.getItem(this.config.tokenKey);
+    async isAuthenticated() {
+        const token = await secureStorage.getItem(this.config.tokenKey);
         if (!token) return false;
         
         try {
@@ -251,10 +291,13 @@ const app = {
         }
     },
 
-    logout() {
-        // Limpar todos os dados sensíveis
-        localStorage.removeItem(this.config.tokenKey);
-        localStorage.removeItem(this.config.planKey);
+    async logout() {
+        // Limpar todos os dados sensíveis do SecureStorage
+        await secureStorage.removeItem(this.config.tokenKey);
+        await secureStorage.removeItem(this.config.planKey);
+        
+        // Limpar dados restantes do localStorage tradicional
+        localStorage.clear();
         sessionStorage.clear();
         
         // Limpar estado
@@ -510,25 +553,86 @@ const app = {
         };
     },
 
-    // Salvar dados localmente de forma segura
-    saveLocal(key, data) {
+    // Salvar dados localmente de forma segura usando SecureStorage
+    async saveLocal(key, data, options = {}) {
         try {
-            const encrypted = btoa(JSON.stringify(data));
-            localStorage.setItem(`editaliza_${key}`, encrypted);
+            await secureStorage.setItem(key, data, options);
+            console.debug(`🔒 Dados salvos com segurança: ${key}`);
         } catch (error) {
             console.error('Erro ao salvar dados localmente:', error);
+            throw error;
         }
     },
 
-    // Recuperar dados locais
-    getLocal(key) {
+    // Recuperar dados locais usando SecureStorage
+    async getLocal(key) {
         try {
-            const encrypted = localStorage.getItem(`editaliza_${key}`);
-            if (!encrypted) return null;
-            return JSON.parse(atob(encrypted));
+            const data = await secureStorage.getItem(key);
+            if (data !== null) {
+                console.debug(`🔓 Dados recuperados com segurança: ${key}`);
+            }
+            return data;
         } catch (error) {
             console.error('Erro ao recuperar dados locais:', error);
             return null;
+        }
+    },
+
+    // Remover dados locais usando SecureStorage
+    async removeLocal(key) {
+        try {
+            await secureStorage.removeItem(key);
+            console.debug(`🗑️ Dados removidos com segurança: ${key}`);
+            return true;
+        } catch (error) {
+            console.error('Erro ao remover dados locais:', error);
+            return false;
+        }
+    },
+
+    // Limpar todos os dados locais
+    async clearLocalData() {
+        try {
+            const removed = secureStorage.clear();
+            console.info(`🧹 SecureStorage limpo: ${removed} itens removidos`);
+            return removed;
+        } catch (error) {
+            console.error('Erro ao limpar dados locais:', error);
+            return 0;
+        }
+    },
+
+    // Obter estatísticas de armazenamento seguro
+    getStorageStats() {
+        return secureStorage.getStorageStats();
+    },
+
+    // Verificar integridade dos dados armazenados
+    async verifyStorageIntegrity() {
+        try {
+            const stats = this.getStorageStats();
+            console.info('📊 Verificação de integridade do armazenamento:', stats);
+            
+            // Teste de leitura/escrita
+            const testKey = '__integrity_test__';
+            const testData = { timestamp: Date.now(), test: true };
+            
+            await this.saveLocal(testKey, testData);
+            const retrieved = await this.getLocal(testKey);
+            await this.removeLocal(testKey);
+            
+            const integrityOk = retrieved && retrieved.timestamp === testData.timestamp;
+            
+            if (integrityOk) {
+                console.log('✅ Integridade do armazenamento verificada');
+                return true;
+            } else {
+                console.error('❌ Falha na verificação de integridade');
+                return false;
+            }
+        } catch (error) {
+            console.error('❌ Erro na verificação de integridade:', error);
+            return false;
         }
     },
 
