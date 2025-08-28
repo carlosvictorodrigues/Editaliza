@@ -1,0 +1,203 @@
+// Minimal, ASCII-only login handler to survive encoding issues in inline script
+/* global URLSearchParams */
+(() => {
+  const log = (...args) => { try { console.info('[login-fallback]', ...args); } catch { /* ignore */ } };
+  const warn = (...args) => { try { console.warn('[login-fallback]', ...args); } catch { /* ignore */ } };
+  const errorLog = (...args) => { try { console.error('[login-fallback]', ...args); } catch { /* ignore */ } };
+
+  function cleanQueryIfCredentialsPresent() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('email') || params.has('password')) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+        log('removed credentials from URL');
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  async function doApiLogin(email, password) {
+    // Prefer app.apiFetch when available
+    if (window.app && typeof window.app.apiFetch === 'function') {
+      return await window.app.apiFetch('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
+    }
+    // Fallback to native fetch
+    const resp = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ email, password })
+    });
+    if (!resp.ok) {
+      let msg = 'Login failed';
+      try {
+        const data = await resp.json();
+        msg = data && (data.message || data.error) || msg;
+      } catch { /* ignore */ }
+      throw new Error(msg);
+    }
+    return await resp.json();
+  }
+
+  function attachHandler() {
+    const form = document.getElementById('loginForm');
+    if (!form) { warn('loginForm not found'); return; }
+
+    if (form.dataset.fallbackBound === '1') {
+      return; // already bound
+    }
+    form.dataset.fallbackBound = '1';
+
+    const messageContainer = document.getElementById('messageContainer');
+    const submitButton = document.getElementById('submitButton');
+
+    form.addEventListener('submit', async (event) => {
+      try {
+        event.preventDefault();
+
+        // prevent double submit across multiple handlers
+        if (window.__loginSubmitting) { return; }
+        window.__loginSubmitting = true;
+
+        if (messageContainer) {
+          messageContainer.textContent = '';
+          messageContainer.className = 'text-sm text-center font-medium';
+        }
+        if (submitButton) {
+          submitButton.disabled = true;
+          submitButton.textContent = 'Entrando...';
+        }
+
+        const emailEl = document.getElementById('email');
+        const passEl = document.getElementById('password');
+        const email = emailEl ? emailEl.value : '';
+        const password = passEl ? passEl.value : '';
+
+        const data = await doApiLogin(email, password);
+
+        try {
+          const key = (window.app && window.app.config && window.app.config.tokenKey) || 'authToken';
+          localStorage.setItem(key, data.token);
+        } catch { /* ignore */ }
+
+        window.location.href = data.redirectUrl || 'home.html';
+      } catch (err) {
+        errorLog('login error:', err);
+        if (window.notifications && typeof window.notifications.error === 'function') {
+          window.notifications.error((err && err.message) || 'Erro ao fazer login. Tente novamente.');
+        }
+        if (messageContainer) {
+          messageContainer.textContent = (err && err.message) || 'Erro ao fazer login';
+          messageContainer.classList.add('text-red-600');
+          messageContainer.style.padding = '10px';
+          messageContainer.style.backgroundColor = '#fee2e2';
+          messageContainer.style.borderRadius = '4px';
+          messageContainer.style.marginTop = '10px';
+        }
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = 'Entrar';
+        }
+        window.__loginSubmitting = false;
+      }
+    });
+
+    log('submit handler attached');
+  }
+
+  async function handleAuthParams() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      // Secure session token retrieval flow
+      if (params.get('auth_success') === '1') {
+        try {
+          const resp = await (window.app && window.app.apiFetch ? window.app.apiFetch('/api/auth/session-token') : fetch('/api/auth/session-token'));
+          const data = typeof resp.json === 'function' ? await resp.json() : resp; // app.apiFetch returns data directly
+          if (data && data.success && data.token) {
+            const key = (window.app && window.app.config && window.app.config.tokenKey) || 'authToken';
+            localStorage.setItem(key, data.token);
+            window.history.replaceState({}, document.title, window.location.pathname);
+            window.location.href = 'home.html';
+            return true;
+          }
+          throw new Error('Token nao encontrado na sessao');
+        } catch (e) {
+          errorLog('Erro ao recuperar token de sessao:', e);
+          window.location.href = '/login.html?error=token_retrieval_failed';
+          return true;
+        }
+      }
+
+      // OAuth direct return with token in URL (legacy)
+      if (params.get('auth') === 'success') {
+        const token = params.get('token');
+        const refresh = params.get('refresh');
+        if (token) {
+          const key = (window.app && window.app.config && window.app.config.tokenKey) || 'authToken';
+          localStorage.setItem(key, decodeURIComponent(token));
+          if (refresh) localStorage.setItem('refreshToken', decodeURIComponent(refresh));
+          const msg = document.getElementById('messageContainer');
+          if (msg) {
+            msg.textContent = 'Login com Google realizado com sucesso!';
+            msg.classList.add('text-green-600');
+          }
+          setTimeout(() => { window.location.href = 'home.html'; }, 1000);
+        }
+        return true;
+      }
+
+      // OAuth error reporting
+      if (params.get('error')) {
+        const errType = params.get('error');
+        let errMsg = 'Erro na autenticacao.';
+        if (errType === 'auth_failed' || errType === 'oauth_failed') {
+          errMsg = 'Falha na autenticacao com Google. Tente novamente.';
+        } else if (errType === 'google_auth_denied') {
+          errMsg = 'Autenticacao cancelada pelo usuario.';
+        } else if (errType === 'no_code') {
+          errMsg = 'Codigo de autenticacao nao recebido.';
+        } else if (errType === 'oauth_callback_failed') {
+          errMsg = 'Erro no processo de autenticacao. Tente novamente.';
+        } else if (errType === 'token_retrieval_failed') {
+          errMsg = 'Erro ao recuperar token de autenticacao. Tente novamente.';
+        }
+        const msg = document.getElementById('messageContainer');
+        if (msg) {
+          msg.textContent = errMsg;
+          msg.classList.add('text-red-600');
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return false;
+      }
+      return false;
+    } catch {
+      // ignore
+      return false;
+    }
+  }
+
+  async function init() {
+    try { cleanQueryIfCredentialsPresent(); } catch { /* ignore */ }
+    // If user already has token, redirect quickly
+    try {
+      const hasToken = !!(window.app && window.app.config && localStorage.getItem(window.app.config.tokenKey));
+      if (hasToken) {
+        window.location.href = 'home.html';
+        return;
+      }
+    } catch { /* ignore */ }
+
+    const handled = await handleAuthParams();
+    if (!handled) attachHandler();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
