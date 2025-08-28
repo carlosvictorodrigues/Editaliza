@@ -82,7 +82,7 @@
         </div>
 
         <div class="bg-white p-8 space-y-6 rounded-2xl shadow-lg">
-            <form id="loginForm" class="space-y-6">
+            <form id="loginForm" method="post" class="space-y-6">
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">E-mail</label>
                     <input id="email" name="email" type="email" autocomplete="email" required class="form-input" placeholder="seu@email.com">
@@ -143,6 +143,8 @@
     </div>
 
     <script>
+        /*
+         disabled inline script due to encoding issues; logic moved to /js/login-fallback.js
         document.addEventListener('DOMContentLoaded', () => {
             // CORREÇÃO DE SEGURANÇA: Buscar token de forma segura via endpoint
             const urlParams = new URLSearchParams(window.location.search);
@@ -276,6 +278,7 @@
             //     window.location.href = '/api/auth/google';
             // });
         });
+        */
     </script>
     
     <!-- Sistema de notificações -->
@@ -286,5 +289,6 @@
 
     <script src="/js/api-interceptors.js"></script>
     <script src="/js/error-handler.js"></script>
+    <script src="/js/login-fallback.js" defer></script>
 </body>
 </html>
