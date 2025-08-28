@@ -1,0 +1,80 @@
+{
+  "timestamp": 1756303300628,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": true,
+      "timestamp": "2025-08-27T14:01:40.810Z",
+      "userId": 57,
+      "email": "teste.completo.1756303300628@editaliza.com"
+    },
+    {
+      "nome": "Login",
+      "sucesso": true,
+      "timestamp": "2025-08-27T14:01:40.889Z"
+    },
+    {
+      "nome": "Criar Plano",
+      "sucesso": true,
+      "timestamp": "2025-08-27T14:01:40.903Z",
+      "planId": 51,
+      "planName": "Concurso TRF - Teste Completo"
+    },
+    {
+      "nome": "Adicionar Disciplinas e Tópicos",
+      "sucesso": true,
+      "timestamp": "2025-08-27T14:01:46.198Z",
+      "disciplinasAdicionadas": 4,
+      "topicosAdicionados": 16
+    },
+    {
+      "nome": "Gerar Cronograma",
+      "sucesso": true,
+      "timestamp": "2025-08-27T14:01:46.509Z"
+    },
+    {
+      "nome": "Verificar Algoritmo",
+      "sucesso": false,
+      "timestamp": "2025-08-27T14:01:46.518Z",
+      "distribuicaoEstudo": {
+        "Direito Constitucional": 4,
+        "Português": 4,
+        "Informática": 4,
+        "Raciocínio Lógico": 4
+      }
+    },
+    {
+      "nome": "Marcar Sessões Concluídas",
+      "sucesso": false,
+      "timestamp": "2025-08-27T14:03:02.891Z",
+      "sessoesConcluidas": 0
+    },
+    {
+      "nome": "Gamificação",
+      "sucesso": false,
+      "timestamp": "2025-08-27T14:03:17.906Z",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "message": "timeout of 15000ms exceeded"
+      }
+    },
+    {
+      "nome": "Dashboard",
+      "sucesso": true,
+      "timestamp": "2025-08-27T14:03:17.916Z",
+      "aviso": "Endpoint não implementado"
+    }
+  ],
+  "erros": [
+    {
+      "etapa": "Gamificação",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "message": "timeout of 15000ms exceeded"
+      }
+    }
+  ],
+  "sucesso": false
+}

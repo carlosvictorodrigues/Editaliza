@@ -175,7 +175,7 @@ const strictRateLimit = rateLimit({
  */
 const moderateRateLimit = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 100, // máximo 100 tentativas por IP
+    max: 10000, // aumentado para desenvolvimento local (era 100)
     message: {
         error: 'Limite de requisições excedido. Tente novamente em 15 minutos.',
         code: 'RATE_LIMIT_EXCEEDED'

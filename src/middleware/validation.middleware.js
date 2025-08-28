@@ -80,7 +80,8 @@ function handleValidationErrors(req, res, next) {
     // Adicionar dados validados ao request
     req.validatedData = matchedData(req);
     
-    next();
+    // CRÍTICO: Sempre chamar next() quando não há erros de validação
+    return next();
 }
 
 // === VALIDADORES PRÉ-DEFINIDOS ===

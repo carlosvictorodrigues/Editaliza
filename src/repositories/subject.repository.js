@@ -28,10 +28,9 @@ class SubjectRepository extends BaseRepository {
         const query = `
             INSERT INTO subjects (
                 study_plan_id, subject_name, priority_weight,
-                study_percentage, difficulty_level,
                 created_at, updated_at
             ) VALUES (
-                $1, $2, $3, $4, $5,
+                $1, $2, $3,
                 CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
             ) RETURNING id
         `;
@@ -39,9 +38,7 @@ class SubjectRepository extends BaseRepository {
         const params = [
             study_plan_id,
             subject_name,
-            priority_weight || 1,
-            study_percentage || 0,
-            difficulty_level || 'medium'
+            priority_weight || 1
         ];
 
         return this.create(query, params);

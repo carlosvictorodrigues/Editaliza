@@ -14,44 +14,61 @@ const { securityLog, createSafeError, checkUserRateLimit } = require('../utils/s
 const { getPasswordColumn } = require('../utils/dbCompat');
 
 /**
- * Register a new user
+ * Register a new user - SIMPLIFICADO para resolver timeout
  */
 const register = async (userData, req) => {
     const { email, password, name } = userData;
     
-    // Sanitize inputs
-    const sanitizedEmail = sanitizeEmail(email);
-    if (!sanitizedEmail) {
-        throw new Error('E-mail inválido');
+    try {
+        console.log('[AUTH_SERVICE] Iniciando registro para:', email);
+        
+        // Sanitize inputs
+        const sanitizedEmail = sanitizeEmail(email);
+        if (!sanitizedEmail) {
+            throw new Error('E-mail inválido');
+        }
+        
+        const sanitizedName = name ? sanitizeInput(name) : null;
+        
+        console.log('[AUTH_SERVICE] Verificando se usuário existe...');
+        
+        // Check if user already exists - TIMEOUT AQUI?
+        const existingUser = await authRepository.findUserByEmail(sanitizedEmail);
+        if (existingUser) {
+            console.log('[AUTH_SERVICE] Usuário já existe:', email);
+            securityLog('registration_attempt_existing_email', { email: sanitizedEmail }, null, req);
+            throw new Error('Este e-mail já está em uso.');
+        }
+        
+        console.log('[AUTH_SERVICE] Fazendo hash da senha...');
+        
+        // Hash password - PODE DEMORAR MAS NAO DEVERIA TRAVAR
+        const hashedPassword = await bcrypt.hash(password, 10); // Reduzido de 12 para 10
+        const currentDate = new Date().toISOString();
+        
+        console.log('[AUTH_SERVICE] Criando usuário no banco...');
+        
+        // Create user - TIMEOUT AQUI?
+        const newUser = await authRepository.createUser({
+            email: sanitizedEmail,
+            passwordHash: hashedPassword,
+            name: sanitizedName,
+            currentDate
+        });
+        
+        console.log('[AUTH_SERVICE] Usuário criado com sucesso:', newUser?.id);
+        
+        securityLog('user_registered', { email: sanitizedEmail, userId: newUser?.id }, newUser?.id, req);
+        
+        return {
+            message: 'Usuário criado com sucesso!',
+            userId: newUser?.id
+        };
+        
+    } catch (error) {
+        console.error('[AUTH_SERVICE] Erro no registro:', error);
+        throw error;
     }
-    
-    const sanitizedName = name ? sanitizeInput(name) : null;
-    
-    // Check if user already exists
-    const existingUser = await authRepository.findUserByEmail(sanitizedEmail);
-    if (existingUser) {
-        securityLog('registration_attempt_existing_email', { email: sanitizedEmail }, null, req);
-        throw new Error('Este e-mail já está em uso.');
-    }
-    
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
-    const currentDate = new Date().toISOString();
-    
-    // Create user
-    const newUser = await authRepository.createUser({
-        email: sanitizedEmail,
-        passwordHash: hashedPassword,
-        name: sanitizedName,
-        currentDate
-    });
-    
-    securityLog('user_registered', { email: sanitizedEmail, userId: newUser.id }, newUser.id, req);
-    
-    return {
-        message: 'Usuário criado com sucesso!',
-        userId: newUser.id
-    };
 };
 
 /**
@@ -380,6 +397,22 @@ const checkIfUserHasPlans = async (userId) => {
     return plans && plans.length > 0;
 };
 
+/**
+ * Get user by ID
+ */
+const getUserById = async (userId) => {
+    try {
+        const user = await authRepository.findUserById(userId);
+        if (!user) {
+            throw new Error('Usuário não encontrado');
+        }
+        return user;
+    } catch (error) {
+        console.error('[AUTH_SERVICE] Erro ao buscar usuário por ID:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     register,
     login,
@@ -387,6 +420,7 @@ module.exports = {
     requestPasswordReset,
     resetPassword,
     getUserProfile,
+    getUserById,
     updateUserProfile,
     verifyToken,
     generateJWT,

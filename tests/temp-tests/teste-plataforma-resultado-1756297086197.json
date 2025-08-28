@@ -1,0 +1,117 @@
+{
+  "timestamp": 1756297086197,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": true,
+      "timestamp": "2025-08-27T12:18:06.400Z",
+      "userId": 29,
+      "email": "teste.completo.1756297086197@editaliza.com"
+    },
+    {
+      "nome": "Login",
+      "sucesso": true,
+      "timestamp": "2025-08-27T12:18:06.477Z"
+    },
+    {
+      "nome": "Criar Plano",
+      "sucesso": true,
+      "timestamp": "2025-08-27T12:18:06.484Z",
+      "planId": 23,
+      "planName": "Concurso TRF - Teste Completo"
+    },
+    {
+      "nome": "Adicionar Disciplinas e Tópicos",
+      "sucesso": true,
+      "timestamp": "2025-08-27T12:18:06.587Z",
+      "disciplinasAdicionadas": 4,
+      "topicosAdicionados": 16
+    },
+    {
+      "nome": "Gerar Cronograma",
+      "sucesso": false,
+      "timestamp": "2025-08-27T12:18:06.597Z",
+      "erro": {
+        "endpoint": "/plans/23/generate-schedule",
+        "method": "POST",
+        "status": 400,
+        "message": "Request failed with status code 400",
+        "data": {
+          "error": "Defina a data da prova nas configurações do plano antes de gerar o cronograma.",
+          "code": "MISSING_EXAM_DATE"
+        }
+      }
+    },
+    {
+      "nome": "Verificar Algoritmo",
+      "sucesso": true,
+      "timestamp": "2025-08-27T12:18:06.602Z",
+      "distribution": {},
+      "sessionsCount": 0
+    },
+    {
+      "nome": "Marcar Sessões Concluídas",
+      "sucesso": false,
+      "timestamp": "2025-08-27T12:18:06.602Z",
+      "sessoesConcluidas": 0
+    },
+    {
+      "nome": "Gamificação",
+      "sucesso": false,
+      "timestamp": "2025-08-27T12:18:33.166Z",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "message": "read ECONNRESET"
+      }
+    },
+    {
+      "nome": "Estatísticas",
+      "sucesso": false,
+      "timestamp": "2025-08-27T12:18:33.169Z",
+      "erro": {
+        "endpoint": "/statistics/general",
+        "method": "GET",
+        "message": ""
+      }
+    },
+    {
+      "nome": "Dashboard",
+      "sucesso": true,
+      "timestamp": "2025-08-27T12:18:33.172Z",
+      "aviso": "Endpoint não implementado"
+    }
+  ],
+  "erros": [
+    {
+      "etapa": "Gerar Cronograma",
+      "erro": {
+        "endpoint": "/plans/23/generate-schedule",
+        "method": "POST",
+        "status": 400,
+        "message": "Request failed with status code 400",
+        "data": {
+          "error": "Defina a data da prova nas configurações do plano antes de gerar o cronograma.",
+          "code": "MISSING_EXAM_DATE"
+        }
+      }
+    },
+    {
+      "etapa": "Gamificação",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "message": "read ECONNRESET"
+      }
+    },
+    {
+      "etapa": "Estatísticas",
+      "erro": {
+        "endpoint": "/statistics/general",
+        "method": "GET",
+        "message": ""
+      }
+    }
+  ],
+  "sucesso": false
+}

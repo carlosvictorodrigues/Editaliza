@@ -49,7 +49,7 @@ class StatisticsRepository extends BaseRepository {
                 WHERE study_plan_id = $1
             ),
             daily_streak AS (
-                SELECT COUNT(DISTINCT DATE(session_date)) as study_days
+                SELECT COUNT(DISTINCT session_date::date) as study_days
                 FROM study_sessions
                 WHERE study_plan_id = $1 
                     AND (status = 'completed' OR time_studied_seconds > 0)
@@ -83,7 +83,7 @@ class StatisticsRepository extends BaseRepository {
     async getStudyStreak(planId) {
         const query = `
             WITH RECURSIVE study_dates AS (
-                SELECT DISTINCT DATE(session_date) as study_date
+                SELECT DISTINCT session_date::date as study_date
                 FROM study_sessions
                 WHERE study_plan_id = $1
                     AND (status = 'completed' OR time_studied_seconds > 0)
@@ -316,13 +316,13 @@ class StatisticsRepository extends BaseRepository {
                     COALESCE(SUM(time_studied_seconds), 0) as today_seconds
                 FROM study_sessions
                 WHERE study_plan_id = $1 
-                    AND DATE(session_date) = CURRENT_DATE
+                    AND session_date::date = CURRENT_DATE
             ),
             week_progress AS (
                 SELECT 
                     COALESCE(SUM(questions_solved), 0) as week_questions,
                     COALESCE(SUM(time_studied_seconds), 0) as week_seconds,
-                    COUNT(DISTINCT DATE(session_date)) as study_days_this_week
+                    COUNT(DISTINCT session_date::date) as study_days_this_week
                 FROM study_sessions
                 WHERE study_plan_id = $1 
                     AND session_date >= DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 day'
@@ -551,7 +551,7 @@ class StatisticsRepository extends BaseRepository {
                 (SELECT COUNT(*) 
                  FROM study_sessions 
                  WHERE study_plan_id = $1 
-                   AND DATE(session_date) = CURRENT_DATE) as sessions_today,
+                   AND session_date::date = CURRENT_DATE) as sessions_today,
                 
                 -- Próxima Sessão
                 (SELECT MIN(session_date) 

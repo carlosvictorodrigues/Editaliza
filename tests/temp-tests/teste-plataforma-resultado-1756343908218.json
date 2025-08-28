@@ -1,0 +1,101 @@
+{
+  "timestamp": 1756343908218,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:18:28.427Z",
+      "userId": 131,
+      "email": "teste.completo.1756343908218@editaliza.com"
+    },
+    {
+      "nome": "Login",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:18:28.504Z"
+    },
+    {
+      "nome": "Criar Plano",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:18:28.514Z",
+      "planId": 124,
+      "planName": "TJPE - Analista Judiciário 2025"
+    },
+    {
+      "nome": "Adicionar Disciplinas e Tópicos",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:18:38.334Z",
+      "disciplinasAdicionadas": 9,
+      "topicosAdicionados": 145
+    },
+    {
+      "nome": "Gerar Cronograma",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:18:38.530Z"
+    },
+    {
+      "nome": "Verificar Algoritmo",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:18:38.541Z",
+      "distribuicaoEstudo": {
+        "Língua Portuguesa": 15,
+        "Direito Civil": 12,
+        "Direito Administrativo": 22,
+        "Direito Constitucional": 24,
+        "Direito Processual Civil": 21,
+        "Legislação Específica TJPE": 5,
+        "Raciocínio Lógico": 8,
+        "Direito Penal": 17,
+        "Direito Processual Penal": 21
+      }
+    },
+    {
+      "nome": "Estatísticas das Sessões",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:18:41.068Z",
+      "sessoesConcluidas": 5,
+      "sessoesCompletadasDiff": 5,
+      "horasEstudadasDiff": 5,
+      "estatisticasAtualizadas": true
+    },
+    {
+      "nome": "Marcar Sessões Concluídas",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:18:41.074Z",
+      "sessoesConcluidas": 5
+    },
+    {
+      "nome": "Gamificação",
+      "sucesso": false,
+      "timestamp": "2025-08-28T01:19:13.107Z",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "message": "timeout of 15000ms exceeded"
+      }
+    },
+    {
+      "nome": "Sessões Home",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:19:13.220Z",
+      "totalDates": 74,
+      "todaySessions": 0
+    },
+    {
+      "nome": "Dashboard",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:19:13.231Z",
+      "aviso": "Endpoint não implementado"
+    }
+  ],
+  "erros": [
+    {
+      "etapa": "Gamificação",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "message": "timeout of 15000ms exceeded"
+      }
+    }
+  ],
+  "sucesso": false
+}

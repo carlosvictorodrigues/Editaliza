@@ -13,12 +13,9 @@ const router = express.Router();
 const { body } = require('express-validator');
 
 // Import middleware
-const { 
-    authenticateToken, 
-    validators, 
-    handleValidationErrors, 
-    sanitizeMiddleware 
-} = require('../../middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
+const { authenticateTokenSimple } = require('../middleware/auth-simple.middleware');
+const { validators, handleValidationErrors, sanitizeMiddleware } = require('../middleware/validation.middleware');
 
 // Import controller
 const plansController = require('../controllers/plans.controller');
@@ -36,7 +33,7 @@ router.use(sanitizeMiddleware);
  * @access Private
  */
 router.get('/', 
-    authenticateToken, 
+    authenticateToken(), 
     plansController.getPlans
 );
 
@@ -46,9 +43,13 @@ router.get('/',
  * @access Private
  */
 router.post('/', 
-    authenticateToken,
-    validators.text('plan_name', 1, 200),
-    validators.date('exam_date'),
+    authenticateToken(),
+    validators.text('plan_name', { minLength: 1, maxLength: 200 }),
+    body('exam_date')
+        .isString()
+        .withMessage('exam_date deve ser uma string')
+        .matches(/^\d{4}-\d{2}-\d{2}$/)
+        .withMessage('exam_date deve ter formato YYYY-MM-DD'),
     handleValidationErrors,
     plansController.createPlan
 );
@@ -59,7 +60,7 @@ router.post('/',
  * @access Private
  */
 router.get('/:planId', 
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getPlan
@@ -71,7 +72,7 @@ router.get('/:planId',
  * @access Private
  */
 router.delete('/:planId', 
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.deletePlan
@@ -83,7 +84,21 @@ router.delete('/:planId',
  * @access Private
  */
 router.patch('/:planId/settings', 
-    authenticateToken,
+    authenticateToken(),
+    validators.numericId('planId'),
+    validators.integer('daily_question_goal', 0, 500),
+    validators.integer('weekly_question_goal', 0, 3500),
+    validators.integer('session_duration_minutes', 10, 240),
+    body('has_essay').isBoolean().withMessage('has_essay deve ser booleano'),
+    body('reta_final_mode').isBoolean().withMessage('reta_final_mode deve ser booleano'),
+    validators.jsonField('study_hours_per_day'),
+    handleValidationErrors,
+    plansController.updatePlanSettings
+);
+
+// Adicionar PUT para compatibilidade
+router.put('/:planId/settings', 
+    authenticateToken(),
     validators.numericId('planId'),
     validators.integer('daily_question_goal', 0, 500),
     validators.integer('weekly_question_goal', 0, 3500),
@@ -105,11 +120,21 @@ router.patch('/:planId/settings',
  * @access Private
  */
 router.post('/:planId/subjects_with_topics', 
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
-    validators.text('subject_name', 1, 200),
+    validators.text('subject_name', { minLength: 1, maxLength: 200 }),
     validators.integer('priority_weight', 1, 5),
-    body('topics_list').isString().isLength({ max: 10000 }).withMessage('Lista de tópicos muito longa'),
+    body('topics_list')
+        .custom((value) => {
+            if (Array.isArray(value)) {
+                return true; // Array de strings é válido
+            }
+            if (typeof value === 'string') {
+                return true; // String também é válida
+            }
+            throw new Error('topics_list deve ser um array de strings ou uma string');
+        })
+        .withMessage('Lista de tópicos inválida'),
     handleValidationErrors,
     plansController.createSubjectWithTopics
 );
@@ -120,7 +145,7 @@ router.post('/:planId/subjects_with_topics',
  * @access Private
  */
 router.get('/:planId/subjects_with_topics', 
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getSubjectsWithTopics
@@ -163,6 +188,47 @@ router.get('/:planId/subjects_with_topics',
 // router.patch('/topics/batch_update', ...)
 
 /**
+ * 📅 GERAÇÃO DE CRONOGRAMA
+ */
+
+/**
+ * @route POST /plans/:planId/generate
+ * @desc Gerar cronograma de estudos
+ * @access Private
+ */
+router.post('/:planId/generate', 
+    authenticateToken(),
+    validators.numericId('planId'),
+    validators.integer('daily_question_goal', 1, 500, false),
+    validators.integer('weekly_question_goal', 1, 3500, false),
+    validators.integer('session_duration_minutes', 10, 240, false),
+    body('study_hours_per_day')
+        .custom((value) => {
+            if (typeof value === 'object' && value !== null) {
+                return true; // Objeto é válido
+            }
+            throw new Error('study_hours_per_day deve ser um objeto');
+        })
+        .withMessage('study_hours_per_day deve ser um objeto válido'),
+    body('has_essay').optional().isBoolean().withMessage('has_essay deve ser booleano'),
+    body('reta_final_mode').optional().isBoolean().withMessage('reta_final_mode deve ser booleano'),
+    handleValidationErrors,
+    plansController.generateSchedule
+);
+
+/**
+ * @route GET /plans/:planId/schedule
+ * @desc Obter cronograma do plano
+ * @access Private
+ */
+router.get('/:planId/schedule', 
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getSchedule
+);
+
+/**
  * 🔄 REPLANEJAMENTO E CONTROLE DE ATRASOS
  */
 
@@ -172,7 +238,7 @@ router.get('/:planId/subjects_with_topics',
  * @access Private
  */
 router.get('/:planId/overdue_check',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getOverdueCheck
@@ -184,7 +250,7 @@ router.get('/:planId/overdue_check',
  * @access Private
  */
 router.get('/:planId/replan-preview',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getReplanPreview
@@ -196,7 +262,7 @@ router.get('/:planId/replan-preview',
  * @access Private
  */
 router.post('/:planId/replan',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.executeReplan
@@ -212,7 +278,7 @@ router.post('/:planId/replan',
  * @access Private
  */
 router.get('/:planId/statistics',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getPlanStatistics
@@ -224,7 +290,7 @@ router.get('/:planId/statistics',
  * @access Private
  */
 router.get('/:planId/exclusions',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getPlanExclusions
@@ -236,7 +302,7 @@ router.get('/:planId/exclusions',
  * @access Private
  */
 router.get('/:planId/excluded-topics',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getExcludedTopics
@@ -252,7 +318,7 @@ router.get('/:planId/excluded-topics',
  * @access Private
  */
 router.get('/:planId/gamification', 
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getGamification
@@ -264,7 +330,7 @@ router.get('/:planId/gamification',
  * @access Private
  */
 router.get('/:planId/share-progress', 
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getShareProgress
@@ -281,7 +347,7 @@ router.get('/:planId/share-progress',
  * @access Private
  */
 router.get('/:planId/reta-final-exclusions',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getRetaFinalExclusions
@@ -293,7 +359,7 @@ router.get('/:planId/reta-final-exclusions',
  * @access Private
  */
 router.post('/:planId/reta-final-exclusions',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     validators.integer('topicId', 1),
     body('reason').optional().isString().isLength({ max: 1000 }).withMessage('Razão deve ter até 1000 caracteres'),
@@ -307,7 +373,7 @@ router.post('/:planId/reta-final-exclusions',
  * @access Private
  */
 router.delete('/:planId/reta-final-exclusions/:id',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     validators.numericId('id'),
     handleValidationErrors,
@@ -321,7 +387,7 @@ router.delete('/:planId/reta-final-exclusions/:id',
  * @note WAVE 2 INTEGRATION: Migrated from inline to use plansController.getSchedule
  */
 router.get('/:planId/schedule',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getSchedule
@@ -376,7 +442,7 @@ router.get('/:planId/schedule',
  * @body { updates: Array<{sessionId: number, status?: string, questionsResolved?: number, timeStudiedSeconds?: number}> }
  */
 router.post('/:planId/batch_update',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     body('updates').isArray({ min: 1, max: 100 }).withMessage('Updates deve ser um array com 1-100 itens'),
     body('updates.*.sessionId').isInt({ min: 1 }).withMessage('sessionId deve ser um inteiro positivo'),
@@ -394,7 +460,7 @@ router.post('/:planId/batch_update',
  * @body { updates: Array<{sessionId: number, status?: string, questionsResolved?: number, timeStudiedSeconds?: number, difficulty?: number, notes?: string, completed_at?: string}> }
  */
 router.post('/:planId/batch_update_details',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     body('updates').isArray({ min: 1, max: 50 }).withMessage('Updates deve ser um array com 1-50 itens'),
     body('updates.*.sessionId').isInt({ min: 1 }).withMessage('sessionId deve ser um inteiro positivo'),
@@ -414,27 +480,32 @@ router.post('/:planId/batch_update_details',
  */
 
 /**
- * @route GET /plans/:planId/schedule-conflicts
- * @desc Detecta conflitos no cronograma do plano
- * @access Private
- * @returns {Object} Relatório completo de conflitos detectados
+ * ROTAS TEMPORARIAMENTE COMENTADAS - IMPLEMENTAÇÃO PENDENTE
+ * 
+ * Essas rotas estão comentadas porque as funções do controller não existem ainda.
+ * Descomente quando implementar getScheduleConflicts e resolveScheduleConflicts
+ * no plans.controller.js
  */
+
+/*
+// @route GET /plans/:planId/schedule-conflicts
+// @desc Detecta conflitos no cronograma do plano
+// @access Private
+// @returns {Object} Relatório completo de conflitos detectados
 router.get('/:planId/schedule-conflicts',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getScheduleConflicts
 );
 
-/**
- * @route POST /plans/:planId/resolve-conflicts
- * @desc Resolve conflitos automaticamente no cronograma
- * @access Private
- * @body { conflictIds?: Array<string>, resolution?: Object }
- * @returns {Object} Resultado da resolução dos conflitos
- */
+// @route POST /plans/:planId/resolve-conflicts
+// @desc Resolve conflitos automaticamente no cronograma
+// @access Private
+// @body { conflictIds?: Array<string>, resolution?: Object }
+// @returns {Object} Resultado da resolução dos conflitos
 router.post('/:planId/resolve-conflicts',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     body('conflictIds').optional().isArray().withMessage('conflictIds deve ser um array'),
     body('conflictIds.*').optional().isString().withMessage('Cada conflictId deve ser uma string'),
@@ -443,6 +514,19 @@ router.post('/:planId/resolve-conflicts',
     body('resolution.priority').optional().isIn(['speed', 'quality', 'balanced']).withMessage('Prioridade de resolução inválida'),
     handleValidationErrors,
     plansController.resolveScheduleConflicts
+);
+*/
+
+
+
+/**
+ * GET /plans/:planId/sessions
+ * Buscar todas as sessões de um plano
+ */
+router.get('/:planId/sessions',
+    authenticateToken(),
+    validators.numericId('planId'),
+    plansController.getSessionsByPlan
 );
 
 /**
@@ -463,5 +547,82 @@ router.post('/:planId/resolve-conflicts',
  * 
  * 🎯 FASE 6 CONCLUÍDA - TODAS AS WAVES FINALIZADAS!
  */
+
+/**
+ * ROTA DE TESTE DE EMEREGÊNCIA - BYPASS TOTAL
+ * Rota que ignora todos os middlewares e services para testar diretamente o PostgreSQL
+ */
+router.post('/TEST_EMERGENCY/:planId/subjects', async (req, res) => {
+    console.log('[EMERGENCY_TEST] Iniciando teste de emergência');
+    console.log('[EMERGENCY_TEST] Body:', req.body);
+    console.log('[EMERGENCY_TEST] PlanId:', req.params.planId);
+    
+    try {
+        const { subject_name = 'Teste Emergency', priority_weight = 3, topics_list = 'Tópico 1\nTópico 2' } = req.body;
+        const planId = parseInt(req.params.planId);
+        
+        console.log('[EMERGENCY_TEST] Dados processados:', { subject_name, priority_weight, planId });
+        
+        // Conectar diretamente ao pool PostgreSQL
+        const { Pool } = require('pg');
+        const pool = new Pool({
+            host: '127.0.0.1',
+            port: 5432,
+            database: 'editaliza_db',
+            user: 'editaliza_user',
+            password: '1a2b3c4d'
+        });
+        
+        console.log('[EMERGENCY_TEST] Pool PostgreSQL criado');
+        
+        // Testar conexão
+        const testQuery = await pool.query('SELECT NOW() as current_time');
+        console.log('[EMERGENCY_TEST] Conexão testada:', testQuery.rows[0]);
+        
+        // Criar disciplina
+        const subjectQuery = 'INSERT INTO subjects (study_plan_id, subject_name, priority_weight, created_at, updated_at) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id';
+        const subjectResult = await pool.query(subjectQuery, [planId, subject_name, priority_weight]);
+        
+        console.log('[EMERGENCY_TEST] Disciplina criada:', subjectResult.rows[0]);
+        const subjectId = subjectResult.rows[0].id;
+        
+        // Criar tópicos
+        const topics = topics_list.split('\n').map(t => t.trim()).filter(t => t.length > 0);
+        const createdTopics = [];
+        
+        for (const topicName of topics) {
+            const topicQuery = 'INSERT INTO topics (subject_id, topic_name, priority_weight, status, created_at, updated_at) VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id';
+            const topicResult = await pool.query(topicQuery, [subjectId, topicName, 3, 'Pendente']);
+            
+            const topicId = topicResult.rows[0].id;
+            createdTopics.push({ id: topicId, name: topicName });
+            console.log('[EMERGENCY_TEST] Tópico criado:', topicId, topicName);
+        }
+        
+        await pool.end();
+        
+        console.log('[EMERGENCY_TEST] Teste concluído com sucesso');
+        
+        res.json({
+            success: true,
+            message: 'EMERGENCY TEST PASSED',
+            subjectId: subjectId,
+            topicsCount: createdTopics.length,
+            createdTopics: createdTopics
+        });
+        
+    } catch (error) {
+        console.error('[EMERGENCY_TEST] ERRO CRÍTICO:', {
+            message: error.message,
+            stack: error.stack
+        });
+        
+        res.status(500).json({
+            error: 'EMERGENCY TEST FAILED',
+            details: error.message,
+            stack: error.stack
+        });
+    }
+});
 
 module.exports = router;

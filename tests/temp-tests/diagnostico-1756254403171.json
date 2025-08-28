@@ -1,0 +1,103 @@
+{
+  "timestamp": "2025-08-27T00:26:31.613Z",
+  "servidor_online": true,
+  "rotas_funcionando": [
+    {
+      "endpoint": "GET /health",
+      "desc": "Health Check Básico",
+      "status": 200,
+      "success": true,
+      "responseTime": "3ms",
+      "data": "{\"status\":\"healthy\",\"uptime\":5014.046955,\"message\":\"OK\",\"database\":\"PostgreSQL\",\"timestamp\":1756254391661,\"environment\":\"development\",\"version\":\"1.0.0\"}..."
+    },
+    {
+      "endpoint": "POST /api/auth/register",
+      "desc": "Registro de Usuário",
+      "status": 201,
+      "success": true,
+      "responseTime": "102ms",
+      "data": "{\"success\":true,\"message\":\"Usuário criado com sucesso!\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjMsImVtYWlsIjoidGVzdGUuZGlhZ25vc3RpY29AZW1haWwuY29tIiwibmFtZSI6IlRlc3RlIERpYWduw7NzdGljby..."
+    },
+    {
+      "endpoint": "POST /api/auth/login",
+      "desc": "Login de Usuário",
+      "status": 200,
+      "success": true,
+      "responseTime": "109ms",
+      "data": "{\"success\":true,\"message\":\"Login bem-sucedido!\",\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NjMsImVtYWlsIjoidGVzdGUuZGlhZ25vc3RpY29AZW1haWwuY29tIiwibmFtZSI6IlRlc3RlIERpYWduw7NzdGljbyIsImlhdC..."
+    },
+    {
+      "endpoint": "GET /api/plans",
+      "desc": "Lista de Planos",
+      "status": 200,
+      "success": true,
+      "responseTime": "25ms",
+      "data": "[]..."
+    },
+    {
+      "endpoint": "GET /api/subjects",
+      "desc": "Lista de Matérias",
+      "status": 200,
+      "success": true,
+      "responseTime": "11ms",
+      "data": "{\"subjects\":[{\"id\":1,\"name\":\"Direito Constitucional\",\"code\":\"DIR_CONST\"},{\"id\":2,\"name\":\"Direito Administrativo\",\"code\":\"DIR_ADM\"},{\"id\":3,\"name\":\"Direito Penal\",\"code\":\"DIR_PENAL\"},{\"id\":4,\"name\":\"Di..."
+    }
+  ],
+  "rotas_com_erro": [
+    {
+      "endpoint": "GET /api/health",
+      "desc": "API Health Check",
+      "status": 404,
+      "success": false,
+      "responseTime": "7ms",
+      "data": "\"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n<title>Error</title>\\n</head>\\n<body>\\n<pre>Cannot GET /api/health</pre>\\n</body>\\n</html>\\n\"..."
+    },
+    {
+      "endpoint": "POST /api/plans",
+      "desc": "Criar Plano",
+      "status": 400,
+      "success": false,
+      "responseTime": "17ms",
+      "data": "{\"success\":false,\"error\":\"Dados de entrada inválidos\",\"code\":\"VALIDATION_ERROR\",\"details\":[{\"message\":\"plan_name deve ter entre 1 e 200 caracteres\",\"location\":\"body\"},{\"message\":\"exam_date deve ser um..."
+    },
+    {
+      "endpoint": "GET /api/gamification/stats",
+      "desc": "Estatísticas de Gamificação",
+      "status": 404,
+      "success": false,
+      "responseTime": "14ms",
+      "data": "\"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n<title>Error</title>\\n</head>\\n<body>\\n<pre>Cannot GET /api/gamification/stats</pre>\\n</body>\\n</html>\\n\"..."
+    },
+    {
+      "endpoint": "GET /api/sessions",
+      "desc": "Sessões de Estudo",
+      "status": 404,
+      "success": false,
+      "responseTime": "3ms",
+      "data": "\"<!DOCTYPE html>\\n<html lang=\\\"en\\\">\\n<head>\\n<meta charset=\\\"utf-8\\\">\\n<title>Error</title>\\n</head>\\n<body>\\n<pre>Cannot GET /api/sessions</pre>\\n</body>\\n</html>\\n\"..."
+    }
+  ],
+  "rotas_travando": [
+    {
+      "endpoint": "GET /api/profile",
+      "desc": "Perfil do Usuário",
+      "error": "ECONNABORTED",
+      "timeout": true,
+      "connection": false
+    },
+    {
+      "endpoint": "GET /api/admin/health",
+      "desc": "Admin Health",
+      "error": "ECONNABORTED",
+      "timeout": true,
+      "connection": false
+    }
+  ],
+  "resumo": {
+    "total": 11,
+    "funcionando": 5,
+    "erro": 4,
+    "travando": 2,
+    "percentual_sucesso": "45.5%"
+  }
+}

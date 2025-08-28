@@ -1,0 +1,118 @@
+{
+  "timestamp": 1756328057310,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": true,
+      "timestamp": "2025-08-27T20:54:17.585Z",
+      "userId": 105,
+      "email": "teste.completo.1756328057310@editaliza.com"
+    },
+    {
+      "nome": "Login",
+      "sucesso": true,
+      "timestamp": "2025-08-27T20:54:17.667Z"
+    },
+    {
+      "nome": "Criar Plano",
+      "sucesso": true,
+      "timestamp": "2025-08-27T20:54:17.677Z",
+      "planId": 99,
+      "planName": "TJPE - Analista Judiciário 2025"
+    },
+    {
+      "nome": "Adicionar Disciplinas e Tópicos",
+      "sucesso": true,
+      "timestamp": "2025-08-27T20:54:27.292Z",
+      "disciplinasAdicionadas": 9,
+      "topicosAdicionados": 145
+    },
+    {
+      "nome": "Gerar Cronograma",
+      "sucesso": true,
+      "timestamp": "2025-08-27T20:54:27.461Z"
+    },
+    {
+      "nome": "Verificar Algoritmo",
+      "sucesso": true,
+      "timestamp": "2025-08-27T20:54:27.478Z",
+      "distribuicaoEstudo": {
+        "Direito Constitucional": 24,
+        "Direito Administrativo": 22,
+        "Direito Civil": 12,
+        "Língua Portuguesa": 15,
+        "Direito Penal": 17,
+        "Legislação Específica TJPE": 5,
+        "Direito Processual Civil": 21,
+        "Raciocínio Lógico": 8,
+        "Direito Processual Penal": 21
+      }
+    },
+    {
+      "nome": "Estatísticas das Sessões",
+      "sucesso": false,
+      "timestamp": "2025-08-27T20:54:29.942Z",
+      "erro": {
+        "endpoint": "/sessions/statistics/99",
+        "method": "GET",
+        "status": 500,
+        "message": "Request failed with status code 500",
+        "data": {
+          "error": "Erro ao calcular estatísticas"
+        }
+      }
+    },
+    {
+      "nome": "Marcar Sessões Concluídas",
+      "sucesso": true,
+      "timestamp": "2025-08-27T20:54:30.049Z",
+      "sessoesConcluidas": 5
+    },
+    {
+      "nome": "Gamificação",
+      "sucesso": false,
+      "timestamp": "2025-08-27T20:55:02.086Z",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "message": "timeout of 15000ms exceeded"
+      }
+    },
+    {
+      "nome": "Sessões Home",
+      "sucesso": true,
+      "timestamp": "2025-08-27T20:55:02.199Z",
+      "totalDates": 74,
+      "todaySessions": 0
+    },
+    {
+      "nome": "Dashboard",
+      "sucesso": true,
+      "timestamp": "2025-08-27T20:55:02.206Z",
+      "aviso": "Endpoint não implementado"
+    }
+  ],
+  "erros": [
+    {
+      "etapa": "Estatísticas das Sessões",
+      "erro": {
+        "endpoint": "/sessions/statistics/99",
+        "method": "GET",
+        "status": 500,
+        "message": "Request failed with status code 500",
+        "data": {
+          "error": "Erro ao calcular estatísticas"
+        }
+      }
+    },
+    {
+      "etapa": "Gamificação",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "message": "timeout of 15000ms exceeded"
+      }
+    }
+  ],
+  "sucesso": false
+}

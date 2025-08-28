@@ -30,7 +30,7 @@ const validators = {
  * @critical Brazilian timezone handling for accurate date grouping
  */
 router.get('/by-date/:planId',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     SessionsController.getSessionsByDate
@@ -43,7 +43,7 @@ router.get('/by-date/:planId',
  * @critical Uses Brazilian timezone to determine what's overdue
  */
 router.get('/overdue-check/:planId',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     SessionsController.getOverdueCheck
@@ -56,7 +56,7 @@ router.get('/overdue-check/:planId',
  * @critical Complex calculations for streaks, study hours, performance metrics
  */
 router.get('/statistics/:planId',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     SessionsController.getSessionStatistics
@@ -69,7 +69,7 @@ router.get('/statistics/:planId',
  * @critical Brazilian timezone for accurate daily/weekly calculations
  */
 router.get('/question-progress/:planId',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     SessionsController.getQuestionProgress
@@ -82,7 +82,7 @@ router.get('/question-progress/:planId',
  * @critical High-performance batch operation with security validation
  */
 router.patch('/batch-update-status',
-    authenticateToken,
+    authenticateToken(),
     validators.batchSessions,
     handleValidationErrors,
     SessionsController.batchUpdateStatus
@@ -94,11 +94,25 @@ router.patch('/batch-update-status',
  * @access Private
  * @critical Individual session updates with ownership validation
  */
+
+// Debug middleware para rastrear onde trava
+const debugTap = (label) => (req, res, next) => {
+    console.log(`[DEBUG SESSIONS] ${label} - ${req.method} ${req.path}`);
+    console.log(`[DEBUG SESSIONS] ${label} - Body:`, req.body);
+    console.log(`[DEBUG SESSIONS] ${label} - Params:`, req.params);
+    next();
+};
+
 router.patch('/:sessionId',
-    authenticateToken,
+    debugTap('1-START'),
+    authenticateToken(),
+    debugTap('2-AFTER-AUTH'),
     validators.numericId('sessionId'),
+    debugTap('3-AFTER-NUMERIC-ID'),
     validators.sessionStatus,
+    debugTap('4-AFTER-SESSION-STATUS'),
     handleValidationErrors,
+    debugTap('5-AFTER-VALIDATION-ERRORS'),
     SessionsController.updateSessionStatus
 );
 
@@ -109,7 +123,7 @@ router.patch('/:sessionId',
  * @critical Complex algorithm to find next available study day
  */
 router.patch('/:sessionId/postpone',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('sessionId'),
     validators.postponeDays,
     handleValidationErrors,
@@ -123,7 +137,7 @@ router.patch('/:sessionId/postpone',
  * @critical Time tracking for analytics and progress calculation
  */
 router.post('/:sessionId/time',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('sessionId'),
     validators.studyTime,
     handleValidationErrors,
@@ -137,7 +151,7 @@ router.post('/:sessionId/time',
  * @critical Spaced repetition algorithm - schedules review 3 days later
  */
 router.post('/:sessionId/reinforce',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('sessionId'),
     handleValidationErrors,
     SessionsController.createReinforcementSession
@@ -152,7 +166,7 @@ router.post('/:sessionId/reinforce',
  * @enhanced Uses SessionService for advanced streak calculations and risk assessment
  */
 router.get('/streak/:planId',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     SessionsController.getStudyStreak
@@ -173,7 +187,7 @@ const scheduleValidators = [
 ];
 
 router.post('/schedule/:planId',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     scheduleValidators,
     handleValidationErrors,
@@ -196,7 +210,7 @@ const completionValidators = [
 ];
 
 router.post('/:sessionId/complete',
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('sessionId'),
     completionValidators,
     handleValidationErrors,

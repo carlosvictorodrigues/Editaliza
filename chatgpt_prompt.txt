@@ -1,0 +1,132 @@
+Estou enfrentando um problema persistente e muito confuso com uma aplicação Node.js e PostgreSQL. Preciso de uma análise aprofundada e sugestões de depuração avançadas.
+
+**Descrição do Problema:**
+A aplicação está apresentando erros de conexão/consulta ao banco de dados nas funcionalidades de estatísticas e gamificação. O erro específico retornado pelo PostgreSQL é: `coluna "time_studied_seconds" não existe` (código de erro `42703`). Isso resulta em um erro HTTP 500 para o endpoint `/api/sessions/statistics/:planId` e um timeout para `/api/gamification/profile`.
+
+**Contexto da Aplicação:**
+- **Backend:** Node.js
+- **Banco de Dados:** PostgreSQL
+- **Driver PostgreSQL:** `pg` (usado via `database-postgres-direct.js`)
+- **Ambiente:** Desenvolvimento local (Windows), mas o problema é replicável.
+
+**O que já tentamos e observamos (e o que torna o problema confuso):**
+
+1.  **A coluna *existe* no banco de dados:**
+    -   Um script de migração (`add-missing-columns-direct.js`) foi executado com sucesso, adicionando a coluna `time_studied_seconds` (tipo `INTEGER`, `DEFAULT 0`) à tabela `study_sessions`.
+    -   Um script de verificação (`check-db-schema.js`) se conecta ao *mesmo banco de dados* (`127.0.0.1:5432/editaliza_db`) e confirma que a coluna `time_studied_seconds` *existe* na tabela `public.study_sessions`. A saída do `check-db-schema.js` é:
+        ```
+        ---
+        Informações da Tabela study_sessions ---
+        Esquema: public
+        Nome da Tabela: study_sessions
+        ----------------------------------------
+        ---
+        Colunas da Tabela study_sessions ---
+        ...
+        Nome: time_studied_seconds, Tipo: integer, Nulo: YES, Padrão: 0
+        ...
+        ✅ Coluna time_studied_seconds encontrada.
+        ```
+
+2.  **Conexão do Banco de Dados da Aplicação:**
+    -   O módulo `database-postgres-direct.js` é o conector principal. Ele usa um pool de conexões.
+    -   Na inicialização, ele loga:
+        ```
+        [POSTGRES] Nova conexão estabelecida com o pool
+        [POSTGRES] Search path configurado: public, app
+        ✅ [POSTGRES-DIRECT] Conectado ao PostgreSQL
+           Host: 127.0.0.1:5432
+           Database: editaliza_db
+        ```
+    -   Isso confirma que a aplicação está se conectando ao banco de dados correto e configurando o `search_path` para `public, app`.
+    -   O arquivo `.env` está vazio, então as credenciais de conexão são os valores padrão do `database-postgres-direct.js` (que correspondem à configuração local).
+
+3.  **Persistência do Erro:**
+    -   Reiniciar o servidor da aplicação não resolve o problema.
+    -   Qualificar explicitamente o nome da tabela na consulta (`FROM public.study_sessions` em vez de `FROM study_sessions`) *também não resolveu o problema*. O erro `coluna "time_studied_seconds" não existe` persiste.
+
+4.  **Local do Erro:**
+    -   O erro ocorre na função `getSessionStatistics` em `src/controllers/sessions.controller.js`, especificamente na consulta que calcula as métricas de desempenho (`performanceResult`).
+
+**Trechos de Código Relevantes:**
+
+**1. Consulta SQL Problemática (em `src/controllers/sessions.controller.js`):**
+```sql
+SELECT
+    COALESCE(SUM(time_studied_seconds) / 3600.0, 0) as total_hours,
+    COUNT(CASE WHEN time_studied_seconds > 0 OR status = 'Concluído' THEN 1 END) as completed_sessions,
+    COUNT(*) as total_sessions,
+    AVG(daily_seconds) / 3600.0 as avg_hours_per_day
+FROM (
+    SELECT
+        session_date::date as study_date,
+        SUM(time_studied_seconds) as daily_seconds
+    FROM public.study_sessions -- Já tentamos com e sem 'public.'
+    WHERE study_plan_id = ?
+    AND time_studied_seconds > 0
+    GROUP BY session_date::date
+) as daily_stats
+```
+
+**2. Trecho de `database-postgres-direct.js` (função `get`):**
+```javascript
+async function get(sql, params = []) {
+    try {
+        const pgSQL = convertToPostgreSQL(sql);
+        
+        // DEBUG: Log completo da query (já existente)
+        if (sql.includes('statistics') || sql.includes('time_studied_seconds')) {
+            console.log('\n[DEBUG QUERY] ===================================');
+            console.log('[DEBUG QUERY] SQL Original:', sql);
+            console.log('[DEBUG QUERY] SQL Convertido:', pgSQL);
+            console.log('[DEBUG QUERY] Params:', params);
+            console.log('[DEBUG QUERY] ===================================\n');
+        }
+        
+        // --- BLOCO DE DEBUG ADICIONADO RECENTEMENTE (para verificar contexto da conexão) ---
+        if (sql.includes('time_studied_seconds')) { // Apenas para consultas relevantes
+            const client = await pool.connect(); // Obter um cliente do pool
+            try {
+                const schemaResult = await client.query('SELECT current_schema, current_setting(\'search_path\') as search_path');
+                console.log('[DEBUG DB CONTEXT] Current Schema:', schemaResult.rows[0].current_schema);
+                console.log('[DEBUG DB CONTEXT] Search Path:', schemaResult.rows[0].search_path);
+
+                const columnCheck = await client.query(`
+                    SELECT column_name
+                    FROM information_schema.columns
+                    WHERE table_schema = \'public\' AND table_name = \'study_sessions\' AND column_name = \'time_studied_seconds\';
+                `);
+                if (columnCheck.rows.length > 0) {
+                    console.log('[DEBUG DB CONTEXT] time_studied_seconds column EXISTS in public.study_sessions (from within dbGet)');
+                } else {
+                    console.error('[DEBUG DB CONTEXT] time_studied_seconds column DOES NOT EXIST in public.study_sessions (from within dbGet)');
+                }
+            } catch (debugError) {
+                console.error('[DEBUG DB CONTEXT] Error checking schema/column:', debugError.message);
+            } finally {
+                client.release(); // Liberar o cliente de volta para o pool
+            }
+        }
+        // --- FIM BLOCO DE DEBUG ---
+        
+        const result = await pool.query(pgSQL, params);
+        return result.rows[0] || null;
+    } catch (error) {
+        console.error('[POSTGRES] Erro em get:', error.message);
+        console.error('[POSTGRES] SQL Original:', sql);
+        console.error('[POSTGRES] SQL Convertido:', convertToPostgreSQL(sql));
+        console.error('[POSTGRES] Params:', params);
+        console.error('[POSTGRES] Erro completo:', error);
+        throw error;
+    }
+}
+```
+
+**Pergunta ao ChatGPT:**
+
+Considerando todas as informações acima, qual pode ser a causa raiz desse problema extremamente persistente? Por que o PostgreSQL continua a relatar que a coluna não existe, mesmo quando todas as verificações indicam o contrário?
+
+Por favor, sugira:
+1.  **Causas-raiz menos óbvias:** O que mais poderia estar acontecendo (além de cache ou erro de digitação)?
+2.  **Etapas de depuração avançadas:** Como posso obter mais informações para diagnosticar isso? (Ex: ferramentas de monitoramento de DB, logs de nível mais baixo, etc.)
+3.  **Soluções potenciais:** Quais seriam as abordagens para resolver isso, mesmo que pareçam incomuns?

@@ -1,837 +1,352 @@
-/**
- * ScheduleGenerationService - Orquestrador principal da geração de cronogramas
- * 
- * ATENÇÃO: Este é o serviço mais crítico do sistema!
- * Responsável por coordenar a geração completa de cronogramas de estudo
- * com algoritmos complexos de distribuição, priorização e spaced repetition.
- * 
- * INTEGRAÇÃO COMPLETA - FASE 9.5:
- * - Valida configurações do plano
- * - Processa modo reta final
- * - Aplica algoritmos de priorização
- * - Distribui sessões otimamente
- * - Calcula revisões com spaced repetition
- * - Garante atomicidade com transações
- */
-
-const db = require('../../../database-postgresql');
-const logger = require('../../../src/utils/logger');
-
-// Importar todos os módulos criados nas fases anteriores
-const TopicPriorizer = require('./algorithms/TopicPriorizer');
-const SessionDistributor = require('./algorithms/SessionDistributor');
-const SpacedRepetitionCalculator = require('./algorithms/SpacedRepetitionCalculator');
-const RetaFinalProcessor = require('./algorithms/RetaFinalProcessor');
-const PlanConfigValidator = require('./validators/PlanConfigValidator');
-const TopicIntegrityValidator = require('./validators/TopicIntegrityValidator');
-const TimeSlotValidator = require('./validators/TimeSlotValidator');
-const DateCalculator = require('./utils/DateCalculator');
-const SessionBatcher = require('./utils/SessionBatcher');
-
-// FUNÇÃO UTILITÁRIA PARA DATA BRASILEIRA (importada do server.js)
-function getBrazilianDateString() {
-    const now = new Date();
-    // Criar objeto Date diretamente no timezone brasileiro
-    const year = parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', year: 'numeric'}));
-    const month = String(parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', month: 'numeric'}))).padStart(2, '0');
-    const day = String(parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', day: 'numeric'}))).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-// Database helpers para manter compatibilidade
-const dbGet = (sql, params = []) => new Promise((resolve, reject) => 
-    db.get(sql, params, (err, row) => err ? reject(err) : resolve(row))
-);
-const dbAll = (sql, params = []) => new Promise((resolve, reject) => 
-    db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows))
-);
-const dbRun = (sql, params = []) => new Promise((resolve, reject) => 
-    db.run(sql, params, function(err) { err ? reject(err) : resolve(this); })
-);
+const { dbGet, dbAll, dbRun } = require('../../../database-postgresql');
+const PlanConfigValidator = require('../../validators/PlanConfigValidator');
 
 class ScheduleGenerationService {
-    /**
-     * Gera um cronograma completo de estudos
-     * @param {Object} config - Configuração do cronograma
-     * @returns {Object} Resultado da geração
-     */
-    static async generate(config) {
-        const startTime = Date.now();
-        logger.info('Iniciando geração de cronograma', { 
-            planId: config.planId, 
-            userId: config.userId 
-        });
 
-        // Usar transação SQLite para manter compatibilidade com implementação existente
+    static async generate(config) {
+        console.log('[SCHEDULE_GEN] Iniciando geração com lógica de Prática Dirigida ponderada...', { planId: config.planId });
+
+        const validation = PlanConfigValidator.validate(config);
+        if (!validation.isValid) {
+            throw new Error(`Configuração inválida: ${validation.errors.join(', ')}`);
+        }
+        const sanitizedConfig = PlanConfigValidator.sanitize(config);
+        const { planId, userId } = sanitizedConfig;
+
+        await dbRun('BEGIN');
         try {
-            await dbRun('BEGIN');
-            
-            // 1. Validar configuração do plano
-            const planValidation = await PlanConfigValidator.validate(config);
-            if (!planValidation.isValid) {
-                throw new Error(planValidation.error);
+            const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+            if (!plan) throw new Error('Plano não encontrado ou não autorizado.');
+
+            await dbRun('DELETE FROM study_sessions WHERE study_plan_id = ? AND status = \'Pendente\'', [planId]);
+
+            const allTopicsFromDB = await dbAll(`
+                SELECT t.id, t.topic_name, s.id as subject_id, s.subject_name, 
+                       COALESCE(s.priority_weight, 3) as subject_priority, 
+                       COALESCE(t.priority_weight, 3) as topic_priority
+                FROM topics t
+                JOIN subjects s ON t.subject_id = s.id
+                WHERE s.study_plan_id = ?
+            `, [planId]);
+
+            const pendingTopics = allTopicsFromDB.filter(t => t.status !== 'Concluído');
+
+            if (pendingTopics.length === 0) {
+                // Se não há tópicos pendentes, vai direto para a fase de manutenção (simulados)
+                console.log('[SCHEDULE_GEN] Nenhum tópico pendente. Pulando para a fase de simulados.');
             }
+
+            const topicsWithPriority = pendingTopics.map(topic => ({
+                ...topic,
+                final_weight: (topic.subject_priority * 10) + topic.topic_priority
+            }));
+
+            const sortedTopics = topicsWithPriority.sort((a, b) => b.final_weight - a.final_weight);
+            const studyDays = this.calculateStudyDays(plan, sanitizedConfig);
+            if (studyDays.length === 0) throw new Error('Não há dias de estudo disponíveis até a data da prova.');
+
+            // 1. Agendar novos tópicos (apenas em dias de semana)
+            let schedule = this.distributeTopics(sortedTopics, studyDays);
             
-            // 2. Carregar dados completos do plano
-            const planData = await this.loadPlanData(config);
-            
-            // 3. Validar integridade dos tópicos
-            const topicValidation = await TopicIntegrityValidator.validate(config.planId);
-            if (!topicValidation.isValid) {
-                logger.warn('Problemas de integridade encontrados', topicValidation.warnings);
+            // 2. Agendar revisões (apenas aos sábados)
+            schedule = this.scheduleReviews(schedule, studyDays, planId);
+
+            // 3. Preencher dias restantes com simulados
+            schedule = this.fillWithSimulados(schedule, allTopicsFromDB, studyDays, planId);
+
+            const insertSql = 'INSERT INTO study_sessions (study_plan_id, topic_id, subject_name, topic_description, session_date, session_type, status) VALUES (?, ?, ?, ?, ?, ?, ?)';
+            for (const session of schedule) {
+                await dbRun(insertSql, [planId, session.topicId, session.subjectName, session.topicDescription, session.date, session.sessionType, 'Pendente']);
             }
-            
-            // 4. Validar viabilidade temporal do cronograma
-            const timeValidation = await TimeSlotValidator.validate(planData, config);
-            if (!timeValidation.isValid) {
-                throw new Error(timeValidation.error);
-            }
-            
-            // 5. Buscar e preparar tópicos
-            const topics = await this.loadTopics(config.planId);
-            if (!topics || topics.length === 0) {
-                throw new Error('Nenhum tópico encontrado para gerar cronograma');
-            }
-            
-            // 6. Aplicar modo reta final se necessário
-            let processedTopics = topics;
-            let excludedTopics = [];
-            
-            if (config.reta_final_mode && timeValidation.needsExclusions) {
-                logger.info('Aplicando modo reta final', {
-                    planId: config.planId,
-                    totalTopics: topics.length,
-                    availableSlots: timeValidation.availableSlots
-                });
-                
-                const retaFinalResult = await RetaFinalProcessor.process(
-                    topics, 
-                    timeValidation.availableSlots,
-                    config
-                );
-                processedTopics = retaFinalResult.selected;
-                excludedTopics = retaFinalResult.excluded;
-                
-                // Salvar exclusões no banco
-                await this.saveExclusions(config.planId, excludedTopics);
-                
-                logger.info('Modo reta final aplicado', {
-                    planId: config.planId,
-                    selected: processedTopics.length,
-                    excluded: excludedTopics.length
-                });
-            }
-            
-            // 7. Priorizar tópicos usando algoritmo round-robin ponderado
-            const prioritizedTopics = await TopicPriorizer.prioritize(
-                processedTopics, 
-                config
-            );
-            
-            logger.info('Tópicos priorizados', {
-                planId: config.planId,
-                count: prioritizedTopics.length
-            });
-            
-            // 8. Distribuir sessões de estudo
-            const sessions = await SessionDistributor.distribute(
-                prioritizedTopics,
-                planData,
-                config
-            );
-            
-            logger.info('Sessões de estudo distribuídas', {
-                planId: config.planId,
-                count: sessions.length
-            });
-            
-            // 9. Aplicar spaced repetition (revisões)
-            const enhancedSessions = await SpacedRepetitionCalculator.apply(
-                sessions,
-                planData,
-                config
-            );
-            
-            logger.info('Revisões calculadas', {
-                planId: config.planId,
-                totalSessions: enhancedSessions.length,
-                reviewSessions: enhancedSessions.length - sessions.length
-            });
-            
-            // 10. Limpar sessões antigas
-            const clearedCount = await this.clearOldSessions(config.planId);
-            logger.info('Sessões antigas removidas', {
-                planId: config.planId,
-                count: clearedCount
-            });
-            
-            // 11. Inserir novas sessões em batch
-            const insertResult = await SessionBatcher.insert(
-                enhancedSessions,
-                config.planId
-            );
-            
-            // 12. Atualizar metadados do plano
-            await this.updatePlanMetadata(config);
-            
-            // Commit da transação
+
             await dbRun('COMMIT');
-            
-            const duration = Date.now() - startTime;
-            logger.info('Cronograma gerado com sucesso', {
-                planId: config.planId,
-                sessionsCreated: insertResult.count,
-                excludedTopics: excludedTopics.length,
-                duration
-            });
-            
+
             return {
                 success: true,
-                message: 'Seu mapa para a aprovação foi traçado com sucesso. 🗺️',
-                statistics: {
-                    totalSessions: insertResult.count,
-                    studySessions: sessions.length,
-                    reviewSessions: enhancedSessions.length - sessions.length,
-                    excludedTopics: excludedTopics.length,
-                    generationTime: duration
-                },
-                plan: planData,
-                excludedTopics: excludedTopics
+                message: `Cronograma gerado com ${schedule.length} sessões.`, 
+                statistics: { totalSessions: schedule.length }
             };
-            
+
         } catch (error) {
-            try {
-                await dbRun('ROLLBACK');
-            } catch (rollbackError) {
-                logger.error('Erro no rollback', {
-                    planId: config.planId,
-                    error: rollbackError.message
-                });
-            }
-            
-            logger.error('Erro na geração de cronograma', {
-                planId: config.planId,
-                error: error.message,
-                stack: error.stack
-            });
+            await dbRun('ROLLBACK');
+            console.error('[SCHEDULE_GEN] Erro ao gerar cronograma:', error);
             throw error;
         }
     }
-    
-    /**
-     * Carrega dados completos do plano
-     */
-    static async loadPlanData(config) {
-        const plan = await dbGet(`
-            SELECT 
-                id, exam_date, plan_name, daily_question_goal,
-                weekly_question_goal, session_duration_minutes,
-                has_essay, reta_final_mode, study_hours_per_day,
-                created_at, updated_at
-            FROM study_plans 
-            WHERE id = ? AND user_id = ?
-        `, [config.planId, config.userId]);
+
+    static calculateStudyDays(plan, config) {
+        console.log('[DEBUG] calculateStudyDays - Input plan:', plan);
+        console.log('[DEBUG] calculateStudyDays - Input config:', config);
         
-        if (!plan) {
-            throw new Error('Plano não encontrado ou sem permissão');
-        }
+        const studyDays = [];
+        const today = new Date();
+        const examDate = new Date(plan.exam_date);
+        let currentDate = new Date(today);
         
-        // Processar study_hours_per_day se for string JSON
-        if (typeof plan.study_hours_per_day === 'string') {
-            try {
-                plan.study_hours_per_day = JSON.parse(plan.study_hours_per_day);
-            } catch (error) {
-                logger.warn('Erro ao parsear study_hours_per_day', {
-                    planId: config.planId,
-                    error: error.message
-                });
-                plan.study_hours_per_day = {};
-            }
-        }
-        
-        return plan;
-    }
-    
-    /**
-     * Carrega todos os tópicos do plano
-     */
-    static async loadTopics(planId) {
-        const topics = await dbAll(`
-            SELECT 
-                t.id,
-                t.topic_name,
-                t.topic_name as description,
-                t.status,
-                t.completion_date,
-                COALESCE(t.priority_weight, 3) as topic_priority,
-                s.id as subject_id,
-                s.subject_name,
-                COALESCE(s.priority_weight, 3) as subject_priority
-            FROM subjects s
-            INNER JOIN topics t ON s.id = t.subject_id
-            WHERE s.study_plan_id = ?
-            ORDER BY 
-                s.priority_weight DESC,
-                COALESCE(t.priority_weight, 3) DESC,
-                t.id ASC
-        `, [planId]);
-        
-        // Normalizar prioridades para inteiros
-        return topics.map(topic => ({
-            ...topic,
-            subject_priority: parseInt(topic.subject_priority, 10) || 3,
-            topic_priority: parseInt(topic.topic_priority, 10) || 3
-        }));
-    }
-    
-    /**
-     * Limpa sessões antigas do plano
-     */
-    static async clearOldSessions(planId) {
-        const result = await dbRun(`
-            DELETE FROM study_sessions 
-            WHERE study_plan_id = ?
-        `, [planId]);
-        
-        logger.info('Sessões antigas removidas', {
-            planId,
-            count: result.changes || 0
+        console.log('[DEBUG] calculateStudyDays - Dates:', {
+            todayMillis: today.getTime(),
+            examDateMillis: examDate.getTime(),
+            examDateString: plan.exam_date,
+            study_hours_per_day: config.study_hours_per_day,
+            study_hours_type: typeof config.study_hours_per_day
         });
         
-        return result.changes || 0;
-    }
-    
-    /**
-     * Salva tópicos excluídos no modo reta final
-     */
-    static async saveExclusions(planId, excludedTopics) {
-        // Limpar exclusões antigas das duas tabelas para compatibilidade
-        await dbRun('DELETE FROM reta_final_exclusions WHERE plan_id = ?', [planId]);
-        await dbRun('DELETE FROM reta_final_excluded_topics WHERE plan_id = ?', [planId]);
-        
-        if (excludedTopics.length === 0) return;
-        
-        // Inserir exclusões uma por uma para máxima compatibilidade
-        for (const topic of excludedTopics) {
-            const priorityCombined = ((topic.subject_priority || 3) * 10) + (topic.topic_priority || 3);
-            const reason = `Tópico excluído automaticamente no Modo Reta Final devido à falta de tempo. Prioridade combinada: ${priorityCombined.toFixed(2)}`;
-            
-            try {
-                // Verificar se o tópico existe antes de inserir na tabela legada
-                const topicExists = await dbGet('SELECT id FROM topics WHERE id = ?', [topic.id]);
-                
-                if (topicExists) {
-                    // Inserir na tabela legada (com FOREIGN KEY)
-                    await dbRun(
-                        'INSERT INTO reta_final_exclusions (plan_id, topic_id, reason) VALUES (?, ?, ?)',
-                        [planId, topic.id, `${topic.subject_name} - ${topic.topic_name || topic.description} (Prioridade: ${priorityCombined.toFixed(2)})`]
-                    );
+        if (!config.study_hours_per_day) {
+            console.error('[ERROR] config.study_hours_per_day is null or undefined!');
+            return studyDays;
+        }
+
+        while (currentDate <= examDate) {
+            const dayOfWeek = currentDate.getDay();
+            // Convert dayOfWeek to string to match JSON keys ("0", "1", etc)
+            const hours = config.study_hours_per_day[String(dayOfWeek)] || 0;
+            if (hours > 0) {
+                const sessions = Math.floor((hours * 60) / config.session_duration_minutes);
+                if (sessions > 0) {
+                    studyDays.push({ date: new Date(currentDate), sessions, dayOfWeek });
                 }
-                
-                // Sempre inserir na nova tabela (sem FOREIGN KEY restrito)
-                await dbRun(
-                    'INSERT INTO reta_final_excluded_topics (plan_id, subject_id, topic_id, reason) VALUES (?, ?, ?, ?)',
-                    [planId, topic.subject_id || null, topic.id, reason]
-                );
-                
-            } catch (insertError) {
-                logger.error('Erro ao salvar exclusão', {
-                    planId,
-                    topicId: topic.id,
-                    error: insertError.message
-                });
-                // Não relançar o erro para não quebrar todo o processo
             }
+            currentDate.setDate(currentDate.getDate() + 1);
         }
         
-        logger.info('Exclusões salvas', {
-            planId,
-            count: excludedTopics.length
+        console.log('[DEBUG] Total study days found:', studyDays.length);
+        if (studyDays.length > 0) {
+            console.log('[DEBUG] First study day:', studyDays[0]);
+            console.log('[DEBUG] Last study day:', studyDays[studyDays.length - 1]);
+        }
+        return studyDays;
+    }
+
+    static distributeTopics(topics, studyDays) {
+        console.log('\n\n[NEW ALGORITHM] Executing new distributeTopics function!\n\n');
+        const schedule = [];
+        if (topics.length === 0) {
+            return schedule;
+        }
+
+        // 1. Agrupar tópicos por matéria e inicializar pesos
+        const subjects = {};
+        topics.forEach(topic => {
+            if (!subjects[topic.subject_name]) {
+                subjects[topic.subject_name] = {
+                    name: topic.subject_name,
+                    weight: topic.subject_priority,
+                    currentWeight: 0, // Inicia o peso corrente para o novo algoritmo
+                    topicQueue: []
+                };
+            }
+            subjects[topic.subject_name].topicQueue.push(topic);
         });
-    }
-    
-    /**
-     * Atualiza metadados do plano após geração
-     */
-    static async updatePlanMetadata(config) {
-        const hoursJson = JSON.stringify(config.study_hours_per_day);
-        
-        await dbRun(`
-            UPDATE study_plans 
-            SET 
-                daily_question_goal = ?,
-                weekly_question_goal = ?,
-                session_duration_minutes = ?,
-                has_essay = ?,
-                reta_final_mode = ?,
-                study_hours_per_day = ?
-            WHERE id = ? AND user_id = ?
-        `, [
-            config.daily_question_goal,
-            config.weekly_question_goal,
-            config.session_duration_minutes,
-            config.has_essay ? 1 : 0,
-            config.reta_final_mode ? 1 : 0,
-            hoursJson,
-            config.planId,
-            config.userId
-        ]);
-        
-        logger.info('Metadados do plano atualizados', {
-            planId: config.planId
+
+        console.log('[DEBUG] Matérias e seus pesos:', Object.values(subjects).map(s => ({
+            name: s.name,
+            weight: s.weight,
+            topics: s.topicQueue.length
+        })));
+
+        const subjectList = Object.values(subjects);
+        const totalWeight = subjectList.reduce((sum, s) => sum + s.weight, 0);
+
+        // 2. Criar todos os "espaços" de sessão disponíveis
+        const sessionSlots = [];
+        const weekdays = studyDays.filter(day => day.dayOfWeek >= 1 && day.dayOfWeek <= 5);
+        weekdays.forEach(day => {
+            for (let i = 0; i < day.sessions; i++) {
+                sessionSlots.push({ date: day.date.toISOString().split('T')[0] });
+            }
         });
-    }
-    
-    /**
-     * Replaneja todas as sessões atrasadas usando algoritmo inteligente
-     * @param {number} planId - ID do plano de estudos
-     * @param {number} userId - ID do usuário
-     * @returns {Object} Resultado do replanejamento
-     */
-    static async replanSchedule(planId, userId) {
-        try {
-            const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
-            if (!plan) {
-                throw new Error('Plano não encontrado.');
-            }
+        
+        console.log('[DEBUG] Total de slots disponíveis:', sessionSlots.length);
 
-            const todayStr = getBrazilianDateString();
-            const overdueSessions = await dbAll('SELECT * FROM study_sessions WHERE study_plan_id = ? AND status = \'Pendente\' AND session_date < ? ORDER BY session_date, id', [planId, todayStr]);
-            
-            if (overdueSessions.length === 0) {
-                return { 
-                    success: true, 
-                    message: 'Nenhuma tarefa atrasada para replanejar.' 
-                };
-            }
+        // 3. Preencher os espaços usando o algoritmo Weighted Round-Robin (versão aprimorada)
+        for (const slot of sessionSlots) {
+            let bestSubject = null;
 
-            const sessionDuration = plan.session_duration_minutes || 50;
-            const studyHoursPerDay = JSON.parse(plan.study_hours_per_day);
-            const examDate = new Date(plan.exam_date + 'T23:59:59');
-
-            // Função para encontrar próximo slot disponível com segurança
-            const findNextAvailableSlot = async (startDate, skipDate = null, maxDaysSearch = 365) => {
-                const currentDate = new Date(startDate);
-                let daysSearched = 0;
-                
-                while (currentDate <= examDate && daysSearched < maxDaysSearch) {
-                    const dateStr = currentDate.toISOString().split('T')[0];
-                    const dayOfWeek = currentDate.getDay();
-
-                    // Pula domingos ou data específica se fornecida
-                    if (dayOfWeek === 0 || (skipDate && dateStr === skipDate)) {
-                        currentDate.setDate(currentDate.getDate() + 1);
-                        daysSearched++;
-                        continue;
+            // Loop para encontrar uma matéria com tópicos disponíveis
+            while (bestSubject === null) {
+                // Adiciona o peso de cada matéria ao seu peso corrente
+                subjectList.forEach(s => {
+                    if (s.topicQueue.length > 0) {
+                        s.currentWeight += s.weight;
                     }
-
-                    const totalMinutes = (studyHoursPerDay[dayOfWeek] || 0) * 60;
-                    const maxSessions = Math.floor(totalMinutes / sessionDuration);
-                    
-                    // Segurança: verificar se há estudo neste dia
-                    if (maxSessions <= 0) {
-                        currentDate.setDate(currentDate.getDate() + 1);
-                        daysSearched++;
-                        continue;
-                    }
-                    
-                    const currentSessionCountResult = await dbGet('SELECT COUNT(*) as count FROM study_sessions WHERE study_plan_id = ? AND session_date = ?', [planId, dateStr]);
-                    const currentSessionCount = currentSessionCountResult.count;
-
-                    if (currentSessionCount < maxSessions) {
-                        return { 
-                            date: currentDate, 
-                            availableSlots: maxSessions - currentSessionCount,
-                            dayOfWeek: dayOfWeek
-                        };
-                    }
-                    currentDate.setDate(currentDate.getDate() + 1);
-                    daysSearched++;
-                }
-                return null;
-            };
-
-            // Estratégia inteligente de replanejamento
-            const smartReplan = async () => {
-                console.log(`[REPLAN] Iniciando replanejamento inteligente para ${overdueSessions.length} sessões atrasadas`);
-                
-                // Cache de sessões por data para performance
-                const sessionDateCache = new Map();
-                const loadSessionsForDate = async (dateStr) => {
-                    if (!sessionDateCache.has(dateStr)) {
-                        const sessions = await dbAll('SELECT id, subject_name FROM study_sessions WHERE study_plan_id = ? AND session_date = ?', [planId, dateStr]);
-                        sessionDateCache.set(dateStr, sessions);
-                    }
-                    return sessionDateCache.get(dateStr);
-                };
-                
-                // Agrupar sessões atrasadas por matéria e tipo (priorizar sessões de estudo inicial)
-                const sessionsBySubject = {};
-                overdueSessions.forEach(session => {
-                    if (!sessionsBySubject[session.subject_name]) {
-                        sessionsBySubject[session.subject_name] = [];
-                    }
-                    sessionsBySubject[session.subject_name].push(session);
-                });
-                
-                // Ordenar por prioridade: sessões de estudo inicial primeiro, depois revisões
-                Object.keys(sessionsBySubject).forEach(subject => {
-                    sessionsBySubject[subject].sort((a, b) => {
-                        const priorityOrder = {'Estudo Inicial': 1, 'Primeira Revisão': 2, 'Segunda Revisão': 3, 'Revisão Final': 4};
-                        return (priorityOrder[a.session_type] || 5) - (priorityOrder[b.session_type] || 5);
-                    });
                 });
 
-                // Buscar sessões futuras por matéria para inserção inteligente
-                const futureSessions = await dbAll(`
-                    SELECT * FROM study_sessions 
-                    WHERE study_plan_id = ? AND status = 'Pendente' AND session_date >= ? 
-                    ORDER BY session_date, id
-                `, [planId, todayStr]);
-
-                const futureSessionsBySubject = {};
-                futureSessions.forEach(session => {
-                    if (!futureSessionsBySubject[session.subject_name]) {
-                        futureSessionsBySubject[session.subject_name] = [];
+                // Encontra a matéria com o maior peso corrente
+                let maxWeight = -Infinity;
+                let potentialBestSubject = null;
+                subjectList.forEach(s => {
+                    if (s.topicQueue.length > 0 && s.currentWeight > maxWeight) {
+                        maxWeight = s.currentWeight;
+                        potentialBestSubject = s;
                     }
-                    futureSessionsBySubject[session.subject_name].push(session);
                 });
+                
+                bestSubject = potentialBestSubject;
 
-                let rescheduledCount = 0;
-                const failedSessions = [];
-                const reschedulingLog = [];
-
-                // Processar cada matéria com segurança
-                for (const [subject, sessions] of Object.entries(sessionsBySubject)) {
-                    console.log(`[REPLAN] Processando ${sessions.length} sessões da matéria: ${subject}`);
-                    
-                    const futureSessionsOfSubject = futureSessionsBySubject[subject] || [];
-                    
-                    for (const session of sessions) {
-                        let rescheduled = false;
-                        let strategy = '';
-                        
-                        // SEGURANÇA: Verificar se a sessão ainda existe e está pendente
-                        const sessionExists = await dbGet('SELECT id, status FROM study_sessions WHERE id = ? AND status = "Pendente"', [session.id]);
-                        if (!sessionExists) {
-                            console.log(`[REPLAN] ⚠ Sessão ${session.id} não existe ou não está pendente - ignorando`);
-                            continue;
-                        }
-                        
-                        // ESTRATÉGIA 1: Tentar inserir antes da próxima sessão da mesma matéria
-                        if (futureSessionsOfSubject.length > 0) {
-                            const nextSessionDate = new Date(futureSessionsOfSubject[0].session_date);
-                            const searchStartDate = new Date();
-                            
-                            // Buscar slot entre hoje e a próxima sessão da matéria
-                            const slot = await findNextAvailableSlot(searchStartDate);
-                            if (slot && slot.date < nextSessionDate) {
-                                const newDateStr = slot.date.toISOString().split('T')[0];
-                                
-                                // Verificar se não há sobrecarga da mesma matéria no mesmo dia
-                                const sessionsOnDate = await loadSessionsForDate(newDateStr);
-                                const sameSubjectCount = sessionsOnDate.filter(s => s.subject_name === session.subject_name).length;
-                                
-                                // Máximo 2 sessões da mesma matéria por dia para evitar fadiga
-                                if (sameSubjectCount < 2) {
-                                    await dbRun('UPDATE study_sessions SET session_date = ? WHERE id = ?', [newDateStr, session.id]);
-                                    sessionDateCache.get(newDateStr).push({id: session.id, subject_name: session.subject_name});
-                                    rescheduled = true;
-                                    strategy = 'inserida antes da próxima sessão';
-                                    rescheduledCount++;
-                                    reschedulingLog.push(`${session.subject_name}: ${session.topic_description} → ${newDateStr} (${strategy})`);
-                                    console.log(`[REPLAN] ✓ Sessão ${session.id} reagendada para ${newDateStr} (${strategy})`);
-                                }
-                            }
-                        }
-                        
-                        // ESTRATÉGIA 2: Encontrar próximo slot disponível com balanceamento
-                        if (!rescheduled) {
-                            let currentSearchDate = new Date();
-                            let attempts = 0;
-                            const maxAttempts = 30; // Procurar por até 30 dias
-                            
-                            while (attempts < maxAttempts && !rescheduled) {
-                                const slot = await findNextAvailableSlot(currentSearchDate);
-                                if (slot) {
-                                    const newDateStr = slot.date.toISOString().split('T')[0];
-                                    const sessionsOnDate = await loadSessionsForDate(newDateStr);
-                                    const sameSubjectCount = sessionsOnDate.filter(s => s.subject_name === session.subject_name).length;
-                                    
-                                    // Preferir dias com menor concentração da mesma matéria
-                                    if (sameSubjectCount < 2) {
-                                        await dbRun('UPDATE study_sessions SET session_date = ? WHERE id = ?', [newDateStr, session.id]);
-                                        sessionDateCache.get(newDateStr).push({id: session.id, subject_name: session.subject_name});
-                                        rescheduled = true;
-                                        strategy = 'próximo slot balanceado';
-                                        rescheduledCount++;
-                                        reschedulingLog.push(`${session.subject_name}: ${session.topic_description} → ${newDateStr} (${strategy})`);
-                                        console.log(`[REPLAN] ✓ Sessão ${session.id} reagendada para ${newDateStr} (${strategy})`);
-                                    } else {
-                                        // Pular para o próximo dia se já há muitas sessões da mesma matéria
-                                        currentSearchDate = new Date(slot.date);
-                                        currentSearchDate.setDate(currentSearchDate.getDate() + 1);
-                                        attempts++;
-                                    }
-                                } else {
-                                    break; // Não há mais slots disponíveis
-                                }
-                            }
-                        }
-                        
-                        // ESTRATÉGIA 3: Se ainda não conseguiu, verificar se há espaço no final do cronograma
-                        if (!rescheduled) {
-                            // Procurar nos últimos dias antes do exame
-                            const examMinusWeek = new Date(examDate);
-                            examMinusWeek.setDate(examMinusWeek.getDate() - 7);
-                            
-                            const lateSlot = await findNextAvailableSlot(examMinusWeek);
-                            if (lateSlot) {
-                                const newDateStr = lateSlot.date.toISOString().split('T')[0];
-                                await dbRun('UPDATE study_sessions SET session_date = ? WHERE id = ?', [newDateStr, session.id]);
-                                rescheduled = true;
-                                strategy = 'slot de emergência próximo ao exame';
-                                rescheduledCount++;
-                                reschedulingLog.push(`${session.subject_name}: ${session.topic_description} → ${newDateStr} (${strategy} - ATENÇÃO!)`);
-                                console.log(`[REPLAN] ⚠ Sessão ${session.id} reagendada para ${newDateStr} (${strategy})`);
-                            }
-                        }
-                        
-                        if (!rescheduled) {
-                            failedSessions.push({
-                                ...session,
-                                reason: 'Sem slots disponíveis até o exame'
-                            });
-                            console.log(`[REPLAN] ✗ Não foi possível reagendar sessão ${session.id} - sem slots disponíveis`);
-                        }
-                    }
+                if (bestSubject === null) {
+                    break; // Sai do loop principal se não houver mais tópicos em nenhuma matéria
                 }
 
-                return { rescheduledCount, failedSessions, reschedulingLog };
-            };
-            
-            await dbRun('BEGIN');
-            
-            const result = await smartReplan();
-            
-            // Atualizar contador de replanejamentos
-            await dbRun('UPDATE study_plans SET postponement_count = postponement_count + 1 WHERE id = ?', [planId]);
-            
-            await dbRun('COMMIT');
-            
-            // Log detalhado para debugging
-            console.log(`[REPLAN] Resultado:`);
-            console.log(`- Sessions reagendadas: ${result.rescheduledCount}/${overdueSessions.length}`);
-            console.log(`- Sessions não reagendadas: ${result.failedSessions.length}`);
-            result.reschedulingLog.forEach(log => console.log(`  - ${log}`));
-            
-            // Preparar mensagem detalhada baseada no resultado
-            let message = '';
-            if (result.rescheduledCount === overdueSessions.length) {
-                message = `✅ Todas as ${result.rescheduledCount} tarefas atrasadas foram replanejadas com sucesso!`;
-            } else if (result.rescheduledCount > 0) {
-                message = `⚠ ${result.rescheduledCount} de ${overdueSessions.length} tarefas foram replanejadas. ${result.failedSessions.length} tarefas não puderam ser reagendadas por falta de espaço até o exame.`;
-            } else {
-                message = `❌ Nenhuma tarefa pôde ser replanejada. Considere estender sua data de exame ou aumentar suas horas diárias de estudo.`;
+                // Deduz o peso total da matéria escolhida e agenda
+                bestSubject.currentWeight -= totalWeight;
+                
+                const topicToSchedule = bestSubject.topicQueue.shift();
+                
+                slot.topicId = topicToSchedule.id;
+                slot.subjectName = topicToSchedule.subject_name;
+                slot.topicDescription = topicToSchedule.topic_name;
+                slot.sessionType = 'Novo Tópico';
+                
+                schedule.push(slot);
             }
-            
-            // Retornar resposta detalhada
-            return { 
-                success: result.rescheduledCount > 0, // Sucesso se pelo menos uma sessão foi reagendada
-                message,
-                details: {
-                    rescheduled: result.rescheduledCount,
-                    failed: result.failedSessions.length,
-                    total: overdueSessions.length,
-                    successRate: Math.round((result.rescheduledCount / overdueSessions.length) * 100),
-                    log: result.reschedulingLog.slice(0, 8), // Mostrar primeiros 8 para dar mais detalhes
-                    failedReasons: result.failedSessions.slice(0, 3).map(s => ({
-                        topic: s.topic_description,
-                        subject: s.subject_name,
-                        reason: s.reason || 'Sem slots disponíveis'
-                    }))
-                }
-            };
 
-        } catch (error) {
-            // Rollback seguro da transação
-            try {
-                await dbRun('ROLLBACK');
-            } catch (rollbackError) {
-                console.error('[REPLAN] Erro ao fazer rollback:', rollbackError);
+            if (bestSubject === null) {
+                break; // Interrompe o loop de slots se não houver mais tópicos
             }
-            
-            console.error('[REPLAN] Erro crítico ao replanejar:', {
-                planId,
-                userId,
-                error: error.message,
-                stack: error.stack
-            });
-            
-            throw new Error(process.env.NODE_ENV === 'development' ? error.message : 'Erro interno do servidor');
         }
-    }
-    
-    /**
-     * Gera preview do replanejamento sem executar
-     * @param {number} planId - ID do plano de estudos
-     * @param {number} userId - ID do usuário
-     * @returns {Object} Preview do replanejamento
-     */
-    static async replanPreview(planId, userId) {
-        try {
-            const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
-            if (!plan) {
-                throw new Error('Plano não encontrado.');
-            }
 
-            const todayStr = getBrazilianDateString();
-            const overdueSessions = await dbAll('SELECT * FROM study_sessions WHERE study_plan_id = ? AND status = \'Pendente\' AND session_date < ? ORDER BY session_date, id', [planId, todayStr]);
-            
-            if (overdueSessions.length === 0) {
-                return { 
-                    hasOverdue: false,
-                    message: 'Nenhuma tarefa atrasada encontrada.' 
+        return schedule;
+    }
+
+    static scheduleReviews(schedule, studyDays) {
+        const reviewsToSchedule = {};
+        const reviewDays = [7, 14, 28];
+        schedule.forEach(session => {
+            if (session.sessionType === 'Novo Tópico') {
+                const baseDate = new Date(session.date + 'T00:00:00');
+                reviewDays.forEach(days => {
+                    const idealReviewDate = new Date(baseDate);
+                    idealReviewDate.setDate(idealReviewDate.getDate() + days);
+                    const nextSaturday = this.findNextSaturday(idealReviewDate, studyDays);
+                    if (nextSaturday) {
+                        const dateStr = nextSaturday.toISOString().split('T')[0];
+                        if (!reviewsToSchedule[dateStr]) reviewsToSchedule[dateStr] = [];
+                        reviewsToSchedule[dateStr].push({ ...session, reviewType: `R${days}` });
+                    }
+                });
+            }
+        });
+
+        for (const dateStr in reviewsToSchedule) {
+            const topicsForDay = reviewsToSchedule[dateStr];
+            const description = 'Revisão consolidada dos seguintes tópicos:\n' +
+                              Object.entries(topicsForDay.reduce((acc, topic) => {
+                                  if (!acc[topic.subjectName]) acc[topic.subjectName] = [];
+                                  acc[topic.subjectName].push(`- ${topic.topicDescription} (${topic.reviewType})`);
+                                  return acc;
+                              }, {})).map(([subject, topics]) => `\n**${subject}:**\n${topics.join('\n')}`).join('');
+            schedule.push({
+                date: dateStr,
+                topicId: null,
+                subjectName: 'Revisão Semanal',
+                topicDescription: description,
+                sessionType: 'Revisão Consolidada'
+            });
+        }
+        return schedule;
+    }
+
+    static fillWithSimulados(schedule, allTopics, studyDays, planId) {
+        const scheduledDates = new Set(schedule.map(s => s.date));
+        const emptySlots = studyDays.filter(day => !scheduledDates.has(day.date.toISOString().split('T')[0]) && day.dayOfWeek !== 0); // Não preencher domingos
+
+        if (emptySlots.length === 0 || allTopics.length === 0) return schedule;
+
+        console.log(`[SCHEDULE_GEN] Preenchendo ${emptySlots.length} dias restantes com Prática Dirigida ponderada.`);
+
+        // Agrupar todos os tópicos por disciplina e capturar os pesos
+        const subjectData = {};
+        allTopics.forEach(topic => {
+            if (!subjectData[topic.subject_name]) {
+                subjectData[topic.subject_name] = {
+                    name: topic.subject_name,
+                    weight: topic.subject_priority || 3, // Peso padrão 3 se não definido
+                    currentWeight: 0, // Para o algoritmo WRR
+                    topics: []
                 };
             }
+            subjectData[topic.subject_name].topics.push(topic.topic_name);
+        });
 
-            const sessionDuration = plan.session_duration_minutes || 50;
-            const studyHoursPerDay = JSON.parse(plan.study_hours_per_day);
-            const examDate = new Date(plan.exam_date + 'T23:59:59');
+        const subjects = Object.values(subjectData);
+        
+        // Se não houver disciplinas, retornar o cronograma sem modificações
+        if (subjects.length === 0) return schedule;
+        
+        const totalWeight = subjects.reduce((sum, s) => sum + s.weight, 0);
 
-            // OTIMIZAÇÃO: Cache único para contagens de sessões por data
-            const endDateStr = examDate.toISOString().split('T')[0];
-            const sessionCountsQuery = `
-                SELECT session_date, COUNT(*) as count 
-                FROM study_sessions 
-                WHERE study_plan_id = ? AND session_date BETWEEN ? AND ?
-                GROUP BY session_date
-            `;
-            const sessionCountsResult = await dbAll(sessionCountsQuery, [planId, todayStr, endDateStr]);
-            
-            // Criar mapa para acesso O(1)
-            const sessionCountsCache = new Map();
-            sessionCountsResult.forEach(row => {
-                sessionCountsCache.set(row.session_date, row.count);
+        console.log('[PRÁTICA_DIRIGIDA] Disciplinas e pesos para prática:', subjects.map(s => ({
+            name: s.name,
+            weight: s.weight,
+            topics: s.topics.length
+        })));
+
+        // Usar Weighted Round-Robin para distribuir as práticas proporcionalmente aos pesos
+        for (const slot of emptySlots) {
+            // Adiciona o peso de cada matéria ao seu peso corrente
+            subjects.forEach(s => {
+                s.currentWeight += s.weight;
             });
 
-            // Simular estratégia inteligente de replanejamento para preview
-            const replanPreview = [];
-            
-            // Buscar sessões futuras por matéria para inserção inteligente
-            const futureSessions = await dbAll(`
-                SELECT * FROM study_sessions 
-                WHERE study_plan_id = ? AND status = 'Pendente' AND session_date >= ? 
-                ORDER BY session_date, id
-            `, [planId, todayStr]);
-
-            const futureSessionsBySubject = {};
-            futureSessions.forEach(session => {
-                if (!futureSessionsBySubject[session.subject_name]) {
-                    futureSessionsBySubject[session.subject_name] = [];
+            // Encontra a matéria com o maior peso corrente
+            let maxWeight = -Infinity;
+            let selectedSubject = null;
+            subjects.forEach(s => {
+                if (s.currentWeight > maxWeight) {
+                    maxWeight = s.currentWeight;
+                    selectedSubject = s;
                 }
-                futureSessionsBySubject[session.subject_name].push(session);
             });
 
-            // Função auxiliar para encontrar slot disponível no preview
-            const findAvailableSlotPreview = (startDate, skipDate = null) => {
-                const currentDate = new Date(startDate);
-                while (currentDate <= examDate) {
-                    const dateStr = currentDate.toISOString().split('T')[0];
-                    const dayOfWeek = currentDate.getDay();
+            if (!selectedSubject) break;
 
-                    if (dayOfWeek === 0 || (skipDate && dateStr === skipDate)) {
-                        currentDate.setDate(currentDate.getDate() + 1);
-                        continue;
-                    }
+            // Deduz o peso total da matéria escolhida
+            selectedSubject.currentWeight -= totalWeight;
 
-                    const totalMinutes = (studyHoursPerDay[dayOfWeek] || 0) * 60;
-                    const maxSessions = Math.floor(totalMinutes / sessionDuration);
-                    const currentSessionCount = sessionCountsCache.get(dateStr) || 0;
+            // Seleciona até 5 tópicos aleatórios da disciplina escolhida para a prática
+            const topicsForPractice = [...selectedSubject.topics]
+                .sort(() => 0.5 - Math.random())
+                .slice(0, Math.min(5, selectedSubject.topics.length));
 
-                    if (totalMinutes > 0 && currentSessionCount < maxSessions) {
-                        return currentDate;
-                    }
-                    currentDate.setDate(currentDate.getDate() + 1);
-                }
-                return null;
-            };
+            const description = `Prática dirigida de ${selectedSubject.name} com foco nos seguintes tópicos:\n` +
+                              topicsForPractice.map(t => `- ${t}`).join('\n') +
+                              `\n\nResolva questões, faça resumos e revise conceitos-chave.`;
 
-            // Agrupar sessões atrasadas por matéria
-            const sessionsBySubject = {};
-            overdueSessions.forEach(session => {
-                if (!sessionsBySubject[session.subject_name]) {
-                    sessionsBySubject[session.subject_name] = [];
-                }
-                sessionsBySubject[session.subject_name].push(session);
+            schedule.push({
+                date: slot.date.toISOString().split('T')[0],
+                topicId: null,
+                subjectName: `Prática: ${selectedSubject.name}`,
+                topicDescription: description,
+                sessionType: 'Prática Dirigida'
             });
+        }
 
-            // Simular estratégia inteligente para cada matéria
-            for (const [subject, sessions] of Object.entries(sessionsBySubject)) {
-                const futureSessionsOfSubject = futureSessionsBySubject[subject] || [];
-                
-                for (const session of sessions) {
-                    let newDate = null;
-                    let strategy = '';
-                    
-                    // ESTRATÉGIA 1: Tentar inserir antes da próxima sessão da mesma matéria
-                    if (futureSessionsOfSubject.length > 0) {
-                        const nextSessionDate = new Date(futureSessionsOfSubject[0].session_date);
-                        const insertDate = new Date(nextSessionDate);
-                        insertDate.setDate(insertDate.getDate() - 1);
-                        
-                        const slot = findAvailableSlotPreview(insertDate > new Date() ? insertDate : new Date());
-                        if (slot && slot < nextSessionDate) {
-                            newDate = slot;
-                            strategy = 'Inserida antes da próxima sessão da matéria';
-                        }
-                    }
-                    
-                    // ESTRATÉGIA 2: Encontrar próximo slot disponível
-                    if (!newDate) {
-                        newDate = findAvailableSlotPreview(new Date());
-                        strategy = 'Próximo slot disponível';
-                    }
-                    
-                    if (newDate) {
-                        const dateStr = newDate.toISOString().split('T')[0];
-                        replanPreview.push({
-                            sessionId: session.id,
-                            topic: session.topic_description,
-                            subject: session.subject_name,
-                            sessionType: session.session_type,
-                            originalDate: session.session_date,
-                            newDate: dateStr,
-                            newDateFormatted: newDate.toLocaleDateString('pt-BR', { 
-                                weekday: 'long', 
-                                day: '2-digit', 
-                                month: 'long' 
-                            }),
-                            strategy: strategy
-                        });
-                        
-                        // Atualizar cache para próximas simulações
-                        const currentCount = sessionCountsCache.get(dateStr) || 0;
-                        sessionCountsCache.set(dateStr, currentCount + 1);
-                    }
+        // Log estatísticas finais
+        const practiceCount = {};
+        schedule.forEach(session => {
+            if (session.sessionType === 'Prática Dirigida') {
+                const subjectName = session.subjectName.replace('Prática: ', '');
+                practiceCount[subjectName] = (practiceCount[subjectName] || 0) + 1;
+            }
+        });
+
+        console.log('[PRÁTICA_DIRIGIDA] Distribuição final de práticas:', practiceCount);
+
+        return schedule;
+    }
+
+    static findNextSaturday(startDate, studyDays) {
+        let currentDate = new Date(startDate);
+        for (let i = 0; i < 365; i++) {
+            if (currentDate.getDay() === 6) { // 6 = Sábado
+                const dateStr = currentDate.toISOString().split('T')[0];
+                if (studyDays.some(d => d.date.toISOString().split('T')[0] === dateStr)) {
+                    return currentDate;
                 }
             }
-
-            return {
-                hasOverdue: true,
-                count: overdueSessions.length,
-                strategy: 'Redistribuição Inteligente',
-                description: 'As tarefas atrasadas serão reagendadas de forma inteligente: preferencialmente antes das próximas sessões da mesma matéria, preservando a continuidade do aprendizado.',
-                replanPreview: replanPreview.slice(0, 5), // Mostrar apenas primeiras 5
-                totalToReplan: replanPreview.length,
-                examDate: plan.exam_date,
-                daysUntilExam: Math.ceil((examDate - new Date()) / (1000 * 60 * 60 * 24))
-            };
-
-        } catch (error) {
-            console.error('Erro ao gerar preview de replanejamento:', error);
-            throw new Error('Erro ao analisar tarefas atrasadas.');
+            currentDate.setDate(currentDate.getDate() + 1);
         }
+        return null;
     }
 }
 

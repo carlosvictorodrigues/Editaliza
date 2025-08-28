@@ -3,8 +3,8 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticateToken } = require('../../middleware');
-const { validators, handleValidationErrors } = require('../../middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
+const { validators, handleValidationErrors } = require('../middleware/validation.middleware');
 const { query } = require('express-validator');
 
 // Utilitários globais (temporário até migração completa)

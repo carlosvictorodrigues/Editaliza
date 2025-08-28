@@ -191,19 +191,17 @@ function extractToken(req) {
 
 // === VALIDAÇÃO DE TOKEN ===
 
-function validateToken(token, secret = process.env.JWT_SECRET || process.env.SESSION_SECRET || 'default-dev-secret') {
-    return new Promise((resolve, reject) => {
-        jwt.verify(token, secret, {
-            issuer: process.env.JWT_ISSUER || 'editaliza',
+function validateToken(token, secret = process.env.JWT_SECRET || 'default-dev-secret') {
+    try {
+        // Use synchronous validation to avoid promise issues
+        const decoded = jwt.verify(token, secret, {
+            issuer: 'editaliza', // Match authService line 347
             algorithms: ['HS256']
-        }, (err, decoded) => {
-            if (err) {
-                reject(err);
-            } else {
-                resolve(decoded);
-            }
         });
-    });
+        return Promise.resolve(decoded);
+    } catch (error) {
+        return Promise.reject(error);
+    }
 }
 
 // === MIDDLEWARE PRINCIPAL DE AUTENTICAÇÃO ===
@@ -217,11 +215,13 @@ function authenticateToken(options = {}) {
     } = options;
 
     return async (req, res, next) => {
+        console.log('[AUTH] Middleware iniciado para:', req.method, req.path);
         const requestId = req.logger?.context?.requestId || crypto.randomBytes(4).toString('hex');
         const logger = authLogger.child({ requestId, ip: req.ip });
 
         try {
             const token = extractToken(req);
+            console.log('[AUTH] Token extraído:', token ? 'SIM' : 'NÃO');
 
             // Token não fornecido
             if (!token) {
@@ -262,7 +262,10 @@ function authenticateToken(options = {}) {
             // Validar token
             let decoded;
             try {
-                decoded = await validateToken(token);
+                console.log('[AUTH] Iniciando validação do token...');
+                const secret = process.env.JWT_SECRET || 'default-dev-secret';
+                decoded = await validateToken(token, secret);
+                console.log('[AUTH] Token validado com sucesso:', decoded ? 'SIM' : 'NÃO');
             } catch (error) {
                 if (logFailures) {
                     const errorType = error.name === 'TokenExpiredError' ? 'token_expired' :
@@ -296,7 +299,9 @@ function authenticateToken(options = {}) {
             }
 
             // Validações adicionais do payload
-            if (!decoded.id || !decoded.email) {
+            // Suporta ambos 'id' e 'userId' para compatibilidade
+            const userId = decoded.id || decoded.userId;
+            if (!userId || !decoded.email) {
                 if (logFailures) {
                     logger.security('auth_token_malformed', {
                         decoded: { ...decoded, iat: undefined, exp: undefined },
@@ -309,9 +314,12 @@ function authenticateToken(options = {}) {
                     code: 'AUTH_TOKEN_MALFORMED'
                 });
             }
+            
+            // Normalizar para sempre ter 'id'
+            decoded.id = userId;
 
-            // Verificar rate limiting
-            if (userRateLimit.isRateLimited(decoded.id)) {
+            // Verificar rate limiting (DESABILITADO EM DEVELOPMENT)
+            if (process.env.NODE_ENV === 'production' && userRateLimit.isRateLimited(decoded.id)) {
                 logger.security('auth_rate_limited', {
                     userId: decoded.id,
                     email: decoded.email
@@ -323,8 +331,8 @@ function authenticateToken(options = {}) {
                 });
             }
 
-            // Verificar sessão se habilitado
-            if (checkSession && decoded.sessionId) {
+            // Verificar sessão se habilitado (simplificado para debug)
+            if (checkSession && decoded.sessionId && process.env.NODE_ENV === 'production') {
                 if (!sessionManager.isValidSession(decoded.id, decoded.sessionId)) {
                     if (logFailures) {
                         logger.security('auth_invalid_session', {
@@ -344,6 +352,7 @@ function authenticateToken(options = {}) {
             req.user = {
                 id: decoded.id,
                 email: decoded.email,
+                name: decoded.name,
                 role: decoded.role || 'user',
                 sessionId: decoded.sessionId,
                 iat: decoded.iat,
@@ -357,7 +366,9 @@ function authenticateToken(options = {}) {
                 role: decoded.role
             });
 
-            next();
+            // next() chamado após validação bem-sucedida
+            console.log('[AUTH] Autenticação concluída, chamando next()...');
+            return next();
 
         } catch (error) {
             logger.error('Authentication middleware error', {
@@ -505,7 +516,7 @@ function generateToken(payload, options = {}) {
 
     return jwt.sign(payload, secret, {
         expiresIn,
-        issuer: process.env.JWT_ISSUER || 'editaliza',
+        issuer: 'editaliza', // Match authService - hardcoded to avoid env var issues
         algorithm: 'HS256'
     });
 }
@@ -514,7 +525,7 @@ function generateToken(payload, options = {}) {
 function generateRefreshToken(payload) {
     return jwt.sign(payload, process.env.JWT_REFRESH_SECRET || process.env.SESSION_SECRET || 'default-dev-refresh-secret', {
         expiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
-        issuer: process.env.JWT_ISSUER || 'editaliza',
+        issuer: 'editaliza', // Match authService - hardcoded to avoid env var issues
         algorithm: 'HS256'
     });
 }

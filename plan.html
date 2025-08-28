@@ -530,7 +530,7 @@
                     console.log('🎮 Carregando gamificação inicial...');
                 }
                 
-                const gamificationData = await app.getGamificationData(planId);
+                const gamificationData = await app.apiFetch('/api/gamification/profile');
                 
                 // Controlar frequência de logs detalhados
                 window._gamificationLoadCount = (window._gamificationLoadCount || 0) + 1;

@@ -1,0 +1,136 @@
+{
+  "timestamp": 1756295191015,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": true,
+      "timestamp": "2025-08-27T11:46:31.274Z",
+      "userId": 21,
+      "email": "teste.completo.1756295191015@editaliza.com"
+    },
+    {
+      "nome": "Login",
+      "sucesso": true,
+      "timestamp": "2025-08-27T11:46:31.351Z"
+    },
+    {
+      "nome": "Criar Plano",
+      "sucesso": true,
+      "timestamp": "2025-08-27T11:46:31.364Z",
+      "planId": 15,
+      "planName": "Concurso TRF - Teste Completo"
+    },
+    {
+      "nome": "Adicionar Disciplinas e Tópicos",
+      "sucesso": true,
+      "timestamp": "2025-08-27T11:46:31.491Z",
+      "disciplinasAdicionadas": 4,
+      "topicosAdicionados": 16
+    },
+    {
+      "nome": "Gerar Cronograma",
+      "sucesso": false,
+      "timestamp": "2025-08-27T11:46:31.496Z",
+      "erro": {
+        "endpoint": "/plans/15/generate-schedule",
+        "method": "POST",
+        "status": 400,
+        "message": "Request failed with status code 400",
+        "data": {
+          "error": "Configuração de horas de estudo inválida",
+          "code": "INVALID_STUDY_HOURS"
+        }
+      }
+    },
+    {
+      "nome": "Buscar Sessões",
+      "sucesso": false,
+      "timestamp": "2025-08-27T11:46:31.502Z",
+      "erro": {
+        "endpoint": "/plans/15/sessions",
+        "method": "GET",
+        "status": 500,
+        "message": "Request failed with status code 500",
+        "data": {
+          "error": "Erro ao buscar sessões do plano"
+        }
+      }
+    },
+    {
+      "nome": "Marcar Sessões Concluídas",
+      "sucesso": false,
+      "timestamp": "2025-08-27T11:46:31.502Z",
+      "sessoesConcluidas": 0
+    },
+    {
+      "nome": "Gamificação",
+      "sucesso": false,
+      "timestamp": "2025-08-27T11:50:33.263Z",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "message": "read ECONNRESET"
+      }
+    },
+    {
+      "nome": "Estatísticas",
+      "sucesso": false,
+      "timestamp": "2025-08-27T11:50:33.266Z",
+      "erro": {
+        "endpoint": "/statistics/general",
+        "method": "GET",
+        "message": ""
+      }
+    },
+    {
+      "nome": "Dashboard",
+      "sucesso": true,
+      "timestamp": "2025-08-27T11:50:33.268Z",
+      "aviso": "Endpoint não implementado"
+    }
+  ],
+  "erros": [
+    {
+      "etapa": "Gerar Cronograma",
+      "erro": {
+        "endpoint": "/plans/15/generate-schedule",
+        "method": "POST",
+        "status": 400,
+        "message": "Request failed with status code 400",
+        "data": {
+          "error": "Configuração de horas de estudo inválida",
+          "code": "INVALID_STUDY_HOURS"
+        }
+      }
+    },
+    {
+      "etapa": "Buscar Sessões",
+      "erro": {
+        "endpoint": "/plans/15/sessions",
+        "method": "GET",
+        "status": 500,
+        "message": "Request failed with status code 500",
+        "data": {
+          "error": "Erro ao buscar sessões do plano"
+        }
+      }
+    },
+    {
+      "etapa": "Gamificação",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "message": "read ECONNRESET"
+      }
+    },
+    {
+      "etapa": "Estatísticas",
+      "erro": {
+        "endpoint": "/statistics/general",
+        "method": "GET",
+        "message": ""
+      }
+    }
+  ],
+  "sucesso": false
+}

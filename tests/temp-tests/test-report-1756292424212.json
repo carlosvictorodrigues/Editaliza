@@ -1,0 +1,48 @@
+{
+  "timestamp": "2025-08-27T11:00:24.212Z",
+  "duration": "0.33",
+  "results": {
+    "total": 8,
+    "passed": 2,
+    "failed": 6,
+    "tests": [
+      {
+        "name": "Criação de Conta",
+        "passed": false
+      },
+      {
+        "name": "Login",
+        "passed": false
+      },
+      {
+        "name": "Criação de Plano com Pesos",
+        "passed": false
+      },
+      {
+        "name": "Geração de Cronograma",
+        "passed": false
+      },
+      {
+        "name": "Cards na Home",
+        "passed": false
+      },
+      {
+        "name": "Conclusão de Sessões",
+        "passed": true
+      },
+      {
+        "name": "Gamificação",
+        "passed": true
+      },
+      {
+        "name": "Validação Round Robin",
+        "passed": false
+      }
+    ]
+  },
+  "environment": {
+    "node": "v22.17.0",
+    "platform": "win32",
+    "baseUrl": "http://localhost:3000"
+  }
+}

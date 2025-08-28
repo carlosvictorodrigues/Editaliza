@@ -1,0 +1,158 @@
+{
+  "timestamp": 1756296248625,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": true,
+      "timestamp": "2025-08-27T12:04:08.828Z",
+      "userId": 25,
+      "email": "teste.completo.1756296248625@editaliza.com"
+    },
+    {
+      "nome": "Login",
+      "sucesso": true,
+      "timestamp": "2025-08-27T12:04:08.903Z"
+    },
+    {
+      "nome": "Criar Plano",
+      "sucesso": true,
+      "timestamp": "2025-08-27T12:04:08.909Z",
+      "planId": 19,
+      "planName": "Concurso TRF - Teste Completo"
+    },
+    {
+      "nome": "Adicionar Disciplinas e Tópicos",
+      "sucesso": true,
+      "timestamp": "2025-08-27T12:04:09.009Z",
+      "disciplinasAdicionadas": 4,
+      "topicosAdicionados": 15
+    },
+    {
+      "nome": "Gerar Cronograma",
+      "sucesso": false,
+      "timestamp": "2025-08-27T12:04:09.011Z",
+      "erro": {
+        "endpoint": "/plans/19/generate-schedule",
+        "method": "POST",
+        "status": 429,
+        "message": "Request failed with status code 429",
+        "data": {
+          "error": "Limite de requisições excedido. Tente novamente em 15 minutos.",
+          "code": "RATE_LIMIT_EXCEEDED"
+        }
+      }
+    },
+    {
+      "nome": "Buscar Sessões",
+      "sucesso": false,
+      "timestamp": "2025-08-27T12:04:09.013Z",
+      "erro": {
+        "endpoint": "/plans/19/sessions",
+        "method": "GET",
+        "status": 429,
+        "message": "Request failed with status code 429",
+        "data": {
+          "error": "Limite de requisições excedido. Tente novamente em 15 minutos.",
+          "code": "RATE_LIMIT_EXCEEDED"
+        }
+      }
+    },
+    {
+      "nome": "Marcar Sessões Concluídas",
+      "sucesso": false,
+      "timestamp": "2025-08-27T12:04:09.013Z",
+      "sessoesConcluidas": 0
+    },
+    {
+      "nome": "Gamificação",
+      "sucesso": false,
+      "timestamp": "2025-08-27T12:04:09.015Z",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "status": 429,
+        "message": "Request failed with status code 429",
+        "data": {
+          "error": "Limite de requisições excedido. Tente novamente em 15 minutos.",
+          "code": "RATE_LIMIT_EXCEEDED"
+        }
+      }
+    },
+    {
+      "nome": "Estatísticas",
+      "sucesso": false,
+      "timestamp": "2025-08-27T12:04:09.017Z",
+      "erro": {
+        "endpoint": "/statistics/general",
+        "method": "GET",
+        "status": 429,
+        "message": "Request failed with status code 429",
+        "data": {
+          "error": "Limite de requisições excedido. Tente novamente em 15 minutos.",
+          "code": "RATE_LIMIT_EXCEEDED"
+        }
+      }
+    },
+    {
+      "nome": "Dashboard",
+      "sucesso": true,
+      "timestamp": "2025-08-27T12:04:09.018Z",
+      "aviso": "Endpoint não implementado"
+    }
+  ],
+  "erros": [
+    {
+      "etapa": "Gerar Cronograma",
+      "erro": {
+        "endpoint": "/plans/19/generate-schedule",
+        "method": "POST",
+        "status": 429,
+        "message": "Request failed with status code 429",
+        "data": {
+          "error": "Limite de requisições excedido. Tente novamente em 15 minutos.",
+          "code": "RATE_LIMIT_EXCEEDED"
+        }
+      }
+    },
+    {
+      "etapa": "Buscar Sessões",
+      "erro": {
+        "endpoint": "/plans/19/sessions",
+        "method": "GET",
+        "status": 429,
+        "message": "Request failed with status code 429",
+        "data": {
+          "error": "Limite de requisições excedido. Tente novamente em 15 minutos.",
+          "code": "RATE_LIMIT_EXCEEDED"
+        }
+      }
+    },
+    {
+      "etapa": "Gamificação",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "status": 429,
+        "message": "Request failed with status code 429",
+        "data": {
+          "error": "Limite de requisições excedido. Tente novamente em 15 minutos.",
+          "code": "RATE_LIMIT_EXCEEDED"
+        }
+      }
+    },
+    {
+      "etapa": "Estatísticas",
+      "erro": {
+        "endpoint": "/statistics/general",
+        "method": "GET",
+        "status": 429,
+        "message": "Request failed with status code 429",
+        "data": {
+          "error": "Limite de requisições excedido. Tente novamente em 15 minutos.",
+          "code": "RATE_LIMIT_EXCEEDED"
+        }
+      }
+    }
+  ],
+  "sucesso": false
+}

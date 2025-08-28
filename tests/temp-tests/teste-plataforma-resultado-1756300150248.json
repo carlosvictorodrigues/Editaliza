@@ -1,0 +1,66 @@
+{
+  "timestamp": 1756300150248,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": true,
+      "timestamp": "2025-08-27T13:09:10.466Z",
+      "userId": 42,
+      "email": "teste.completo.1756300150248@editaliza.com"
+    },
+    {
+      "nome": "Login",
+      "sucesso": true,
+      "timestamp": "2025-08-27T13:09:10.545Z"
+    },
+    {
+      "nome": "Criar Plano",
+      "sucesso": true,
+      "timestamp": "2025-08-27T13:09:10.556Z",
+      "planId": 36,
+      "planName": "Concurso TRF - Teste Completo"
+    },
+    {
+      "nome": "Adicionar Disciplinas e Tópicos",
+      "sucesso": true,
+      "timestamp": "2025-08-27T13:09:10.710Z",
+      "disciplinasAdicionadas": 4,
+      "topicosAdicionados": 14
+    },
+    {
+      "nome": "Gerar Cronograma",
+      "sucesso": false,
+      "timestamp": "2025-08-27T13:09:10.713Z",
+      "erro": {
+        "endpoint": "/plans/36/generate",
+        "method": "POST",
+        "status": 429,
+        "message": "Request failed with status code 429",
+        "data": {
+          "error": "Limite de requisições excedido. Tente novamente em 15 minutos.",
+          "code": "RATE_LIMIT_EXCEEDED"
+        }
+      }
+    }
+  ],
+  "erros": [
+    {
+      "etapa": "Gerar Cronograma",
+      "erro": {
+        "endpoint": "/plans/36/generate",
+        "method": "POST",
+        "status": 429,
+        "message": "Request failed with status code 429",
+        "data": {
+          "error": "Limite de requisições excedido. Tente novamente em 15 minutos.",
+          "code": "RATE_LIMIT_EXCEEDED"
+        }
+      }
+    },
+    {
+      "etapa": "Fatal",
+      "erro": "sessoesConcluidas is not defined"
+    }
+  ],
+  "sucesso": false
+}

@@ -13,11 +13,32 @@ const fs = require('fs');
 const { body, validationResult } = require('express-validator');
 
 // Database
-const db = require('../../database-postgresql');
+const db = require('../../database-simple-postgres');
 
-// Utils
-const logger = require('../utils/logger');
-const { validateFilePath, createSafeError, securityLog } = require('../utils/security');
+// Utils - fazer imports opcionais para evitar erros
+let logger;
+try {
+    logger = require('../utils/logger');
+} catch (e) {
+    logger = {
+        info: (msg, data) => console.log(`[INFO] ${msg}`, data || ''),
+        warn: (msg, data) => console.warn(`[WARN] ${msg}`, data || ''),
+        error: (msg, data) => console.error(`[ERROR] ${msg}`, data || ''),
+        debug: (msg, data) => console.debug(`[DEBUG] ${msg}`, data || '')
+    };
+}
+
+let validateFilePath, createSafeError, securityLog;
+try {
+    const security = require('../utils/security');
+    validateFilePath = security.validateFilePath;
+    createSafeError = security.createSafeError;
+    securityLog = security.securityLog;
+} catch (e) {
+    validateFilePath = (path, basePath) => path.startsWith(basePath);
+    createSafeError = (msg) => new Error(msg);
+    securityLog = (msg, data) => console.log(`[SECURITY] ${msg}`, data || '');
+}
 
 // ============================================================================
 // CONFIGURAÇÃO DO MULTER PARA UPLOAD DE FOTOS

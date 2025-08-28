@@ -325,6 +325,33 @@ Use Conventional Commits:
 - [ ] Rate limiting configurado
 - [ ] CORS configurado corretamente
 
+## 💡 APRENDIZADOS E CORREÇÕES RECENTES
+
+### 🔄 OAuth Google - Remoção Temporária (26/08/2025)
+**Problema:** Erro "Route.get() requires a callback function but got a [object Undefined]" em auth.routes.js:177
+**Causa:** Método authController.getGoogleStatus não existia
+**Solução:** 
+- Comentar rotas do Google OAuth no backend e frontend
+- Integração futura será com Cackto (usuário recebe credenciais por email)
+- **IMPORTANTE:** Manter código comentado, não deletar, para evitar novos erros
+
+### 📋 Rotas de Subjects - Correção (26/08/2025)
+**Problema:** Erro 500 ao acessar /api/plans/:id/subjects
+**Causa:** Rota não existia, apenas /api/plans/:id/subjects_with_topics
+**Solução:**
+- Adicionar rota GET /api/plans/:planId/subjects em subjects.routes.js
+- Criar método getSubjectsByPlan no subjects.controller.js
+
+### 🎨 CSS Design Tokens (26/08/2025)
+**Problema:** Arquivo css/design-tokens.css referenciado mas não existia
+**Solução:** Criar arquivo vazio em /css e /public/css para evitar erros 404
+
+### 📂 Duplicação de Arquivos Estáticos
+**LEMBRETE:** Sempre copiar arquivos modificados para AMBAS as pastas:
+- Arquivos HTML: copiar para /public/
+- Arquivos CSS: copiar para /css/ E /public/css/
+- Arquivos JS: copiar para /js/ E /public/js/
+
 ---
-**Última atualização:** 20/08/2025
-**Versão:** 3.0 - Fluxo Profissional de Desenvolvimento
+**Última atualização:** 26/08/2025
+**Versão:** 3.1 - Fluxo Profissional de Desenvolvimento + Correções OAuth

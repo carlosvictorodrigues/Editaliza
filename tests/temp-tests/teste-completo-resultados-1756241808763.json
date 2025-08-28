@@ -1,0 +1,64 @@
+{
+  "passed": 1,
+  "total": 6,
+  "percentage": 17,
+  "executionTime": 162,
+  "details": {
+    "Health check": {
+      "passed": false,
+      "details": {
+        "uptime": 3585.5820374,
+        "message": "OK",
+        "database": "PostgreSQL",
+        "timestamp": 1756241808644,
+        "environment": "development",
+        "version": "1.0.0"
+      }
+    },
+    "Registro de usuário": {
+      "passed": false,
+      "details": {
+        "status": 409,
+        "message": "Este e-mail já está em uso."
+      }
+    },
+    "Login de usuário": {
+      "passed": true,
+      "details": {
+        "userId": 47,
+        "token": "VÁLIDO"
+      }
+    },
+    "Criação de plano": {
+      "passed": false,
+      "details": {
+        "responseData": {
+          "message": "Plano criado com sucesso!"
+        },
+        "expectedField": "newPlanId",
+        "message": "ID do plano não encontrado na resposta"
+      }
+    },
+    "Criação de disciplina": {
+      "passed": false,
+      "details": {
+        "status": 400,
+        "message": "Dados de entrada inválidos"
+      }
+    },
+    "Geração de cronograma": {
+      "passed": false,
+      "details": {
+        "status": 400,
+        "message": "Dados de entrada inválidos"
+      }
+    },
+    "Consulta de cronograma": {
+      "passed": false,
+      "details": {
+        "status": 400,
+        "message": "Dados de entrada inválidos"
+      }
+    }
+  }
+}

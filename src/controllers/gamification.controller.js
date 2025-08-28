@@ -7,12 +7,14 @@
  * - Desbloqueio de conquistas (achievements)
  * - Sistema de streaks (sequências de estudo)
  * - Tracking de progresso gamificado
+ * - Novos endpoints para gamificação completa
  * 
  * CRÍTICO: Todas as fórmulas de cálculo devem ser mantidas EXATAMENTE como estão
  * para preservar a consistência dos dados existentes.
  */
 
-const { dbGet, dbAll } = require('../config/database');
+const { dbGet, dbAll, dbRun } = require('../../database-postgresql');
+const gamificationService = require('../services/gamificationService');
 
 // Função utilitária para data brasileira (preservada do server.js original)
 function getBrazilianDateString() {
@@ -388,9 +390,183 @@ async function getPlanGamification(req, res) {
     }
 }
 
+/**
+ * NOVOS ENDPOINTS DE GAMIFICAÇÃO COMPLETA
+ */
+
+/**
+ * GET /api/stats/user - Estatísticas do usuário
+ * Retorna XP total, nível atual, streak, sessões completadas, horas estudadas
+ */
+async function getUserStats(req, res) {
+    const userId = req.user.id;
+    
+    try {
+        const stats = await gamificationService.getUserStats(userId);
+        
+        res.json({
+            success: true,
+            data: stats
+        });
+        
+    } catch (error) {
+        console.error('Erro ao buscar estatísticas do usuário:', error);
+        res.status(500).json({
+            error: 'Erro ao buscar estatísticas do usuário',
+            code: 'USER_STATS_ERROR'
+        });
+    }
+}
+
+/**
+ * GET /api/progress - Progresso do plano
+ * Retorna porcentagem de conclusão, sessões completadas vs total, tópicos dominados
+ */
+async function getUserProgress(req, res) {
+    const userId = req.user.id;
+    
+    try {
+        const progress = await gamificationService.getUserProgress(userId);
+        
+        res.json({
+            success: true,
+            data: progress
+        });
+        
+    } catch (error) {
+        console.error('Erro ao buscar progresso do usuário:', error);
+        res.status(500).json({
+            error: 'Erro ao buscar progresso do usuário',
+            code: 'USER_PROGRESS_ERROR'
+        });
+    }
+}
+
+/**
+ * GET /api/achievements - Conquistas do usuário
+ * Retorna lista de conquistas desbloqueadas, progresso para próximas conquistas, badges
+ */
+async function getUserAchievements(req, res) {
+    const userId = req.user.id;
+    
+    try {
+        const achievements = await gamificationService.getUserAchievements(userId);
+        
+        res.json({
+            success: true,
+            data: achievements
+        });
+        
+    } catch (error) {
+        console.error('Erro ao buscar conquistas do usuário:', error);
+        res.status(500).json({
+            error: 'Erro ao buscar conquistas do usuário',
+            code: 'USER_ACHIEVEMENTS_ERROR'
+        });
+    }
+}
+
+/**
+ * GET /api/statistics - Estatísticas gerais
+ * Retorna métricas de desempenho, gráficos de progresso, comparação com metas
+ */
+async function getGeneralStatistics(req, res) {
+    const userId = req.user.id;
+    
+    try {
+        const statistics = await gamificationService.getGeneralStatistics(userId);
+        
+        res.json({
+            success: true,
+            data: statistics
+        });
+        
+    } catch (error) {
+        console.error('Erro ao buscar estatísticas gerais:', error);
+        res.status(500).json({
+            error: 'Erro ao buscar estatísticas gerais',
+            code: 'GENERAL_STATISTICS_ERROR'
+        });
+    }
+}
+
+/**
+ * GET /api/gamification/profile - Perfil completo de gamificação do usuário
+ */
+async function getGamificationProfile(req, res) {
+    const userId = req.user.id;
+    const t0 = process.hrtime.bigint();
+    
+    console.log(`[GAMI CONTROLLER] Iniciando getGamificationProfile para userId: ${userId}`);
+    
+    res.on('finish', () => {
+        const ms = Number((process.hrtime.bigint() - t0) / 1_000_000n);
+        console.log(`[GAMI] finish ${res.statusCode} in ${ms}ms`);
+    });
+    res.on('close',  () => console.warn('[GAMI] close (cliente abortou?)'));
+
+    try {
+        console.log('[GAMI CONTROLLER] Chamando gamificationService.getGamificationProfile...');
+        
+        // Adicionar timeout para evitar travamento
+        const profileDataPromise = gamificationService.getGamificationProfile(userId);
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Timeout ao buscar gamificação')), 5000)
+        );
+        
+        const profileData = await Promise.race([profileDataPromise, timeoutPromise]);
+        
+        console.log('[GAMI CONTROLLER] Dados recebidos do service, enviando resposta...');
+        console.log('[GAMI CONTROLLER] profileData keys:', Object.keys(profileData));
+        console.log('[GAMI CONTROLLER] res.headersSent antes de enviar:', res.headersSent);
+        
+        if (!res.headersSent) {
+            res.status(200).json(profileData);
+            res.end(); // Forçar envio da resposta
+            console.log('[GAMI CONTROLLER] res.json() e res.end() chamados com sucesso');
+        } else {
+            console.warn('[GAMI CONTROLLER] Headers já enviados, não pode enviar resposta');
+        }
+        
+    } catch (error) {
+        console.error('[GAMI CONTROLLER] ERRO capturado:', error.message);
+        console.error('[GAMI CONTROLLER] Stack:', error.stack);
+        
+        // Retornar dados padrão em caso de erro
+        const defaultData = { 
+            xp: 0, 
+            level: 1, 
+            current_streak: 0, 
+            longest_streak: 0, 
+            level_info: { threshold: 0, title: 'Aspirante a Servidor(a) 🌱' }, 
+            achievements: [] 
+        };
+        
+        console.log('[GAMI CONTROLLER] Enviando dados padrão após erro...');
+        console.log('[GAMI CONTROLLER] res.headersSent antes de enviar erro:', res.headersSent);
+        
+        if (!res.headersSent) {
+            res.status(200).json(defaultData);
+            res.end(); // Forçar envio da resposta
+            console.log('[GAMI CONTROLLER] res.json() e res.end() com dados padrão chamados');
+        } else {
+            console.warn('[GAMI CONTROLLER] Headers já enviados, não pode enviar resposta de erro');
+        }
+    }
+}
+
 module.exports = {
+    // Endpoint original preservado
     getPlanGamification,
-    // Exportar funções auxiliares para possível reutilização
+    
+    // Novos endpoints de gamificação completa
+    getUserStats,
+    getUserProgress,
+    getUserAchievements,
+    getGeneralStatistics,
+    getGamificationProfile, // Adicionado novo endpoint
+    
+    // Funções auxiliares para reutilização
     calculateUserLevel,
     calculateStudyStreak,
     generateAchievements,

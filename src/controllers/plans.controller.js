@@ -14,7 +14,6 @@ const ReplanService = require('../services/ReplanService');
 const scheduleService = require('../services/scheduleService');
 const RetaFinalService = require('../services/schedule/RetaFinalService'); // WAVE 3 - Reta Final Service
 const BatchUpdateService = require('../services/schedule/BatchUpdateService'); // WAVE 4 - Batch Updates
-const ConflictResolutionService = require('../services/schedule/ConflictResolutionService'); // WAVE 7 - Conflict Resolution
 const logger = require('../../src/utils/logger');
 
 // FUNÇÃO UTILITÁRIA PARA DATA BRASILEIRA - CRÍTICA
@@ -37,10 +36,24 @@ const repos = createRepositories(db);
 const dbAdapter = new DatabaseAdapter(repos, db);
 const planService = new PlanService(repos, db);
 
-// Métodos de transição - gradualmente substituir por repositories diretos
-const dbGet = dbAdapter.dbGet;
-const dbAll = dbAdapter.dbAll;
-const dbRun = dbAdapter.dbRun;
+// REMOVIDO: Métodos de transição legacy - usar apenas repositories
+// const dbGet = dbAdapter.dbGet;
+// const dbAll = dbAdapter.dbAll;
+// const dbRun = dbAdapter.dbRun;
+
+// HELPER: usar apenas quando necessário para backwards compatibility
+const dbGet = (sql, params) => {
+    console.warn('[PLANS] Usando dbGet legacy para:', sql.substring(0, 50));
+    return dbAdapter.dbGet(sql, params);
+};
+const dbAll = (sql, params) => {
+    console.warn('[PLANS] Usando dbAll legacy para:', sql.substring(0, 50));
+    return dbAdapter.dbAll(sql, params);
+};
+const dbRun = (sql, params) => {
+    console.warn('[PLANS] Usando dbRun legacy para:', sql.substring(0, 50));
+    return dbAdapter.dbRun(sql, params);
+};
 
 /**
  * 📋 CRUD BÁSICO DE PLANOS
@@ -93,23 +106,59 @@ const getPlans = async (req, res) => {
 
 /**
  * POST /api/plans - Criar novo plano
+ * CORRIGIDO: Usando repository para INSERT com RETURNING
  */
 const createPlan = async (req, res) => {
-    const { plan_name, exam_date } = req.body;
-    const defaultHours = JSON.stringify({ '0': 0, '1': 4, '2': 4, '3': 4, '4': 4, '5': 4, '6': 4 });
+    console.log('\n\n🚨🚨🚨 [CREATEPLAN_MODULAR] MÉTODO MODULAR EXECUTADO! 🚨🚨🚨\n\n');
     
-    const sql = `
-        INSERT INTO study_plans 
-        (user_id, plan_name, exam_date, study_hours_per_day, daily_question_goal, weekly_question_goal, session_duration_minutes, review_mode, postponement_count, has_essay) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
+    const { plan_name, exam_date } = req.body;
+    const defaultHours = { '0': 0, '1': 4, '2': 4, '3': 4, '4': 4, '5': 4, '6': 4 };
     
     try {
-        const result = await dbRun(sql, [req.user.id, plan_name, exam_date, defaultHours, 50, 300, 50, 'completo', 0, false]);
-        res.status(201).json({ 'message': 'Plano criado com sucesso!', 'newPlanId': result.lastID });
+        // Usar repository diretamente para INSERT com RETURNING
+        const planData = {
+            user_id: req.user.id,
+            plan_name,
+            exam_date,
+            study_hours_per_day: defaultHours,
+            daily_question_goal: 50,
+            weekly_question_goal: 300,
+            session_duration_minutes: 50,
+            review_mode: 'completo',
+            postponement_count: 0,
+            has_essay: false
+        };
+        
+        console.log('[PLANS_CONTROLLER] Chamando repos.plan.createPlan com:', planData);
+        console.log('[PLANS_CONTROLLER] tipo do repos.plan:', typeof repos.plan, repos.plan.constructor?.name);
+        
+        const result = await repos.plan.createPlan(planData);
+        
+        console.log('[PLANS_CONTROLLER] resultado recebido do repository:', result);
+        
+        // CORREÇÃO: Para PostgreSQL com RETURNING, result é um objeto com id
+        const planId = result?.id || result?.lastID || result;
+        
+        console.log('[PLANS] Resultado completo da criação:', result);
+        console.log('[PLANS] planId extraído:', planId, typeof planId);
+        
+        if (!planId || planId === null || planId === undefined) {
+            console.error('[PLANS] Erro: ID não encontrado no resultado:', result);
+            throw new Error('Falha ao criar plano - ID não retornado');
+        }
+        
+        console.log('[PLANS] Plano criado com sucesso - ID:', planId);
+        console.log('[PLANS] ✅ CONTROLLER RETORNANDO newPlanId:', planId, typeof planId);
+        
+        res.status(201).json({ 
+            'message': 'Plano criado com sucesso!', 
+            'newPlanId': planId,
+            'planId': planId // Dupla compatibilidade
+        });
+        
     } catch (error) {
         console.error('Erro ao criar plano:', error);
-        return res.status(500).json({ 'error': 'Erro ao criar plano' });
+        return res.status(500).json({ 'error': 'Erro ao criar plano: ' + error.message });
     }
 };
 
@@ -166,13 +215,13 @@ const deletePlan = async (req, res) => {
         const plan = await repos.plan.findByIdAndUserId(planId, userId);
         if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado ou você não tem permissão.' });
         
-        // TRANSAÇÃO CRÍTICA - CASCADE MANUAL
+        // TRANSAÇÃO CRÍTICA - CASCADE MANUAL - PostgreSQL compatible
         // TODO: Mover para PlanService na FASE 4.2
         await dbRun('BEGIN');
-        await dbRun('DELETE FROM study_sessions WHERE study_plan_id = ?', [planId]);
-        await dbRun('DELETE FROM topics WHERE subject_id IN (SELECT id FROM subjects WHERE study_plan_id = ?)', [planId]);
-        await dbRun('DELETE FROM subjects WHERE study_plan_id = ?', [planId]);
-        await dbRun('DELETE FROM study_plans WHERE id = ?', [planId]);
+        await dbRun('DELETE FROM study_sessions WHERE study_plan_id = $1', [planId]);
+        await dbRun('DELETE FROM topics WHERE subject_id IN (SELECT id FROM subjects WHERE study_plan_id = $1)', [planId]);
+        await dbRun('DELETE FROM subjects WHERE study_plan_id = $1', [planId]);
+        await dbRun('DELETE FROM study_plans WHERE id = $1', [planId]);
         await dbRun('COMMIT');
         
         res.json({ message: 'Plano e todos os dados associados foram apagados com sucesso' });
@@ -195,7 +244,7 @@ const updatePlanSettings = async (req, res) => {
         return res.status(400).json({ error: 'Modo de revisão inválido' });
     }
     
-    const sql = 'UPDATE study_plans SET daily_question_goal = ?, weekly_question_goal = ?, review_mode = ?, session_duration_minutes = ?, study_hours_per_day = ?, has_essay = ?, reta_final_mode = ? WHERE id = ? AND user_id = ?';
+    const sql = 'UPDATE study_plans SET daily_question_goal = $1, weekly_question_goal = $2, review_mode = $3, session_duration_minutes = $4, study_hours_per_day = $5, has_essay = $6, reta_final_mode = $7 WHERE id = $8 AND user_id = $9';
     
     try {
         const result = await dbRun(sql, [daily_question_goal, weekly_question_goal, review_mode || 'completo', session_duration_minutes, hoursJson, has_essay, reta_final_mode ? 1 : 0, req.params.planId, req.user.id]);
@@ -213,44 +262,101 @@ const updatePlanSettings = async (req, res) => {
 
 /**
  * POST /api/plans/:planId/subjects_with_topics - Criar disciplina com tópicos
- * WAVE 1 - MIGRADO PARA ReplanService
+ * CORRIGIDO: Implementação direta sem ReplanService para evitar complexidade
  */
 const createSubjectWithTopics = async (req, res) => {
+    const { subject_name, priority_weight, topics_list } = req.body;
+    const planId = parseInt(req.params.planId);
+    const userId = req.user.id;
+    
+    console.log('[SUBJECTS_CONTROLLER] Iniciando criação de disciplina:', {
+        planId, userId, subject_name, priority_weight
+    });
+    
     try {
-        const { subject_name, priority_weight, topics_list } = req.body;
-        const planId = parseInt(req.params.planId);
-        const userId = req.user.id;
+        // 1. Verificar se plano existe e pertence ao usuário
+        const plan = await repos.plan.findByIdAndUserId(planId, userId);
+        if (!plan) {
+            return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+        }
         
-        logger.info(`[SUBJECTS_TOPICS] Criando disciplina para plano ${planId}`, {
-            subjectName: subject_name,
-            userId
+        console.log('[SUBJECTS_CONTROLLER] Plano validado:', plan.id);
+        
+        // 2. Processar lista de tópicos
+        let topicsString = topics_list;
+        if (Array.isArray(topics_list)) {
+            topicsString = topics_list.join('\n');
+        }
+        
+        const topicsList = topicsString
+            .split('\n')
+            .map(t => t.trim())
+            .filter(t => t.length > 0);
+            
+        if (topicsList.length === 0) {
+            return res.status(400).json({ error: 'Lista de tópicos não pode estar vazia' });
+        }
+        
+        console.log('[SUBJECTS_CONTROLLER] Tópicos processados:', topicsList.length);
+        
+        // 3. Criar disciplina usando query direta
+        const subjectQuery = `
+            INSERT INTO subjects (study_plan_id, subject_name, priority_weight, created_at, updated_at)
+            VALUES ($1, $2, $3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            RETURNING id
+        `;
+        
+        console.log('[SUBJECTS_CONTROLLER] Executando query de criação da disciplina...');
+        const subjectResult = await db.pool.query(subjectQuery, [planId, subject_name, priority_weight || 3]);
+        
+        if (!subjectResult.rows || subjectResult.rows.length === 0) {
+            throw new Error('Falha ao criar disciplina - nenhum resultado');
+        }
+        
+        const subjectId = subjectResult.rows[0].id;
+        console.log('[SUBJECTS_CONTROLLER] Disciplina criada com ID:', subjectId);
+        
+        // 4. Criar tópicos
+        const createdTopics = [];
+        for (const topicName of topicsList) {
+            const topicQuery = `
+                INSERT INTO topics (subject_id, topic_name, priority_weight, status, created_at, updated_at)
+                VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                RETURNING id
+            `;
+            
+            const topicResult = await db.pool.query(topicQuery, [subjectId, topicName, 3, 'Pendente']);
+            
+            if (topicResult.rows && topicResult.rows.length > 0) {
+                const topicId = topicResult.rows[0].id;
+                createdTopics.push({ id: topicId, name: topicName });
+                console.log('[SUBJECTS_CONTROLLER] Tópico criado:', topicId, topicName);
+            }
+        }
+        
+        console.log('[SUBJECTS_CONTROLLER] Criação concluída:', {
+            subjectId,
+            topicsCount: createdTopics.length
         });
         
-        // FASE 6 - WAVE 1: Usar ReplanService para encapsulamento
-        const replanService = new ReplanService(repos, db);
-        const result = await replanService.createSubjectWithTopics(planId, userId, {
-            subject_name,
-            priority_weight,
-            topics_list
+        res.status(201).json({
+            success: true,
+            message: `Disciplina "${subject_name}" criada com ${createdTopics.length} tópicos`,
+            subject: {
+                id: subjectId,
+                name: subject_name,
+                priority_weight: priority_weight || 3
+            },
+            topics: createdTopics
         });
-        
-        res.status(201).json(result);
         
     } catch (error) {
-        logger.error('[SUBJECTS_TOPICS] Erro ao criar disciplina:', {
-            error: error.message,
-            planId: req.params.planId,
-            userId: req.user?.id
+        console.error('[SUBJECTS_CONTROLLER] ERRO COMPLETO:', {
+            message: error.message,
+            stack: error.stack,
+            planId,
+            userId
         });
-        
-        if (error.message.includes('não encontrado') || error.message.includes('não autorizado')) {
-            return res.status(404).json({ error: error.message });
-        }
-        
-        if (error.message.includes('obrigatório') || error.message.includes('inválido') || 
-            error.message.includes('muito longo') || error.message.includes('vazia')) {
-            return res.status(400).json({ error: error.message });
-        }
         
         res.status(500).json({ error: 'Erro ao criar a disciplina e tópicos.' });
     }
@@ -258,40 +364,70 @@ const createSubjectWithTopics = async (req, res) => {
 
 /**
  * GET /api/plans/:planId/subjects_with_topics - Listar disciplinas com tópicos
- * WAVE 1 - MIGRADO PARA ReplanService
+ * CORRIGIDO: Implementação direta com query SQL
  */
 const getSubjectsWithTopics = async (req, res) => {
+    const planId = parseInt(req.params.planId);
+    const userId = req.user.id;
+    
     try {
-        const planId = parseInt(req.params.planId);
-        const userId = req.user.id;
+        // 1. Verificar se plano existe e pertence ao usuário
+        const plan = await repos.plan.findByIdAndUserId(planId, userId);
+        if (!plan) {
+            return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+        }
         
-        logger.info(`[SUBJECTS_TOPICS] Listando disciplinas para plano ${planId}`, {
-            userId
-        });
+        // 2. Buscar disciplinas com seus tópicos
+        const query = `
+            SELECT 
+                s.id, s.subject_name, s.priority_weight, s.created_at,
+                t.id as topic_id, t.topic_name, t.priority_weight as topic_priority, t.status
+            FROM subjects s
+            LEFT JOIN topics t ON s.id = t.subject_id
+            WHERE s.study_plan_id = $1
+            ORDER BY s.priority_weight DESC, s.subject_name ASC, t.topic_name ASC
+        `;
         
-        // FASE 6 - WAVE 1: Usar ReplanService para encapsulamento
-        const replanService = new ReplanService(repos, db);
-        const result = await replanService.getSubjectsWithTopics(planId, userId);
+        const result = await db.pool.query(query, [planId]);
+        
+        // 3. Agrupar resultados por disciplina
+        const subjectsMap = new Map();
+        
+        for (const row of result.rows) {
+            if (!subjectsMap.has(row.id)) {
+                subjectsMap.set(row.id, {
+                    id: row.id,
+                    subject_name: row.subject_name,
+                    priority_weight: row.priority_weight,
+                    created_at: row.created_at,
+                    topics: [],
+                    topics_count: 0
+                });
+            }
+            
+            if (row.topic_id) {
+                const subject = subjectsMap.get(row.id);
+                subject.topics.push({
+                    id: row.topic_id,
+                    topic_name: row.topic_name,
+                    priority_weight: row.topic_priority || 3,
+                    status: row.status || 'Pendente'
+                });
+                subject.topics_count = subject.topics.length;
+            }
+        }
+        
+        const subjects = Array.from(subjectsMap.values());
         
         // Evitar cache para refletir rapidamente alterações
         res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
         res.setHeader('Pragma', 'no-cache');
         res.setHeader('Expires', '0');
         
-        // Manter compatibilidade com formato anterior (retornar apenas data)
-        res.json(result.data);
+        res.json(subjects);
         
     } catch (error) {
-        logger.error('[SUBJECTS_TOPICS] Erro ao listar disciplinas:', {
-            error: error.message,
-            planId: req.params.planId,
-            userId: req.user?.id
-        });
-        
-        if (error.message.includes('não encontrado') || error.message.includes('não autorizado')) {
-            return res.status(404).json({ error: error.message });
-        }
-        
+        console.error('[GET_SUBJECTS_TOPICS] Erro:', error.message);
         res.status(500).json({ error: 'Erro ao buscar disciplinas e tópicos' });
     }
 };
@@ -316,15 +452,15 @@ const getPlanStatistics = async (req, res) => {
     
     try {
         // Verificar autorização
-        const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
+        const plan = await dbGet('SELECT * FROM study_plans WHERE id = $1 AND user_id = $2', [planId, req.user.id]);
         if (!plan) return res.status(404).json({ error: 'Plano não encontrado.' });
 
         // Calcular total de dias até a prova
         const totalDaysResult = await dbGet(`
             SELECT 
                 CASE 
-                    WHEN ? IS NOT NULL THEN 
-                        CAST((julianday(?) - julianday(?)) AS INTEGER) + 1
+                    WHEN $1 IS NOT NULL THEN 
+                        EXTRACT(DAY FROM $2::date - $3::date)::INTEGER + 1
                     ELSE 0 
                 END as total_days
         `, [plan.exam_date, plan.exam_date, getBrazilianDateString()]);
@@ -364,52 +500,52 @@ const getPlanStatistics = async (req, res) => {
             }
         }
 
-        // Horas totais de estudo planejadas
+        // Horas totais de estudo planejadas - PostgreSQL compatible
         const totalHoursResult = await dbGet(`
             SELECT 
                 SUM(
                     CASE 
-                        WHEN session_type = 'Novo Tópico' THEN ?
-                        WHEN session_type = 'Revisão' THEN ? * 0.7
-                        ELSE ?
+                        WHEN session_type = 'Novo Tópico' THEN $1
+                        WHEN session_type = 'Revisão' THEN $2 * 0.7
+                        ELSE $3
                     END
                 ) / 60.0 as total_hours
             FROM study_sessions 
-            WHERE study_plan_id = ?
+            WHERE study_plan_id = $4
         `, [plan.session_duration_minutes, plan.session_duration_minutes, plan.session_duration_minutes, planId]);
 
-        // Média de estudo por dia (baseada nas configurações)
+        // Média de estudo por dia (baseada nas configurações) - PostgreSQL compatible
         const avgStudyResult = await dbGet(`
             SELECT AVG(daily_minutes) as avg_minutes
             FROM (
                 SELECT 
-                    (json_extract(study_hours_per_day, '$."1"') + 
-                     json_extract(study_hours_per_day, '$."2"') + 
-                     json_extract(study_hours_per_day, '$."3"') + 
-                     json_extract(study_hours_per_day, '$."4"') + 
-                     json_extract(study_hours_per_day, '$."5"') + 
-                     json_extract(study_hours_per_day, '$."6"') + 
-                     json_extract(study_hours_per_day, '$."0"')) * 60.0 / 7.0 as daily_minutes
+                    ((study_hours_per_day->>'1')::numeric + 
+                     (study_hours_per_day->>'2')::numeric + 
+                     (study_hours_per_day->>'3')::numeric + 
+                     (study_hours_per_day->>'4')::numeric + 
+                     (study_hours_per_day->>'5')::numeric + 
+                     (study_hours_per_day->>'6')::numeric + 
+                     (study_hours_per_day->>'0')::numeric) * 60.0 / 7.0 as daily_minutes
                 FROM study_plans 
                 WHERE id = ?
             )
         `, [planId]);
 
-        // Melhor dia da semana (simplificado)
+        // Melhor dia da semana (simplificado) - PostgreSQL compatible
         const bestDayResult = await dbGet(`
             SELECT 
                 CASE EXTRACT(DOW FROM session_date)
-                    WHEN '0' THEN 'Domingo'
-                    WHEN '1' THEN 'Segunda'
-                    WHEN '2' THEN 'Terça'
-                    WHEN '3' THEN 'Quarta'
-                    WHEN '4' THEN 'Quinta'
-                    WHEN '5' THEN 'Sexta'
-                    WHEN '6' THEN 'Sábado'
+                    WHEN 0 THEN 'Domingo'
+                    WHEN 1 THEN 'Segunda'
+                    WHEN 2 THEN 'Terça'
+                    WHEN 3 THEN 'Quarta'
+                    WHEN 4 THEN 'Quinta'
+                    WHEN 5 THEN 'Sexta'
+                    WHEN 6 THEN 'Sábado'
                 END as day_name,
                 COUNT(*) as session_count
             FROM study_sessions 
-            WHERE study_plan_id = ? AND status = 'Concluído'
+            WHERE study_plan_id = $1 AND status = 'Concluído'
             GROUP BY EXTRACT(DOW FROM session_date)
             ORDER BY session_count DESC
             LIMIT 1
@@ -440,12 +576,12 @@ const getPlanExclusions = async (req, res) => {
     
     try {
         // Verificar se o plano pertence ao usuário
-        const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
+        const plan = await dbGet('SELECT * FROM study_plans WHERE id = $1 AND user_id = $2', [planId, req.user.id]);
         if (!plan) {
             return res.status(404).json({ error: 'Plano não encontrado.' });
         }
 
-        // Buscar exclusões/tópicos removidos no modo reta final
+        // Buscar exclusões/tópicos removidos no modo reta final - PostgreSQL compatible
         const exclusions = await dbAll(
             `SELECT 
                 t.id, t.topic_name, s.subject_name,
@@ -453,15 +589,15 @@ const getPlanExclusions = async (req, res) => {
                 COALESCE(t.priority_weight, 3) as priority_weight
             FROM topics t
             JOIN subjects s ON t.subject_id = s.id
-            WHERE s.study_plan_id = ? 
+            WHERE s.study_plan_id = $1 
             AND t.id NOT IN (
                 SELECT DISTINCT topic_id 
                 FROM study_sessions 
-                WHERE study_plan_id = ? 
+                WHERE study_plan_id = $2 
                 AND topic_id IS NOT NULL
-                AND session_date >= ?
+                AND session_date >= $3
             )
-            AND ? = 1
+            AND $4 = 1
             ORDER BY s.subject_name, t.topic_name`,
             [planId, planId, getBrazilianDateString(), plan.reta_final_mode ? 1 : 0]
         );
@@ -492,12 +628,12 @@ const getExcludedTopics = async (req, res) => {
     
     try {
         // Verificar se o plano pertence ao usuário
-        const plan = await dbGet('SELECT * FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
+        const plan = await dbGet('SELECT * FROM study_plans WHERE id = $1 AND user_id = $2', [planId, req.user.id]);
         if (!plan) {
             return res.status(404).json({ error: 'Plano não encontrado.' });
         }
 
-        // Buscar tópicos que foram excluídos no modo reta final
+        // Buscar tópicos que foram excluídos no modo reta final - PostgreSQL compatible
         const excludedTopics = await dbAll(`
             SELECT DISTINCT
                 t.id,
@@ -507,16 +643,16 @@ const getExcludedTopics = async (req, res) => {
                 'Excluído automaticamente no modo Reta Final' as exclusion_reason
             FROM topics t
             JOIN subjects s ON t.subject_id = s.id
-            WHERE s.study_plan_id = ?
+            WHERE s.study_plan_id = $1
             AND t.status != 'Concluído'
             AND t.id NOT IN (
                 SELECT DISTINCT ss.topic_id
                 FROM study_sessions ss
-                WHERE ss.study_plan_id = ?
+                WHERE ss.study_plan_id = $2
                 AND ss.topic_id IS NOT NULL
-                AND ss.session_date >= ?
+                AND ss.session_date >= $3
             )
-            AND ? = 1
+            AND $4 = 1
             ORDER BY s.subject_name ASC, t.topic_name ASC
         `, [planId, planId, getBrazilianDateString(), plan.reta_final_mode ? 1 : 0]);
 
@@ -645,25 +781,25 @@ const getShareProgress = async (req, res) => {
 
     try {
         // Verificar autorização
-        const plan = await dbGet('SELECT plan_name, exam_date FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+        const plan = await dbGet('SELECT plan_name, exam_date FROM study_plans WHERE id = $1 AND user_id = $2', [planId, userId]);
         if (!plan) return res.status(404).json({ error: 'Plano não encontrado.' });
 
         // Buscar dados do usuário
-        const user = await dbGet('SELECT name FROM users WHERE id = ?', [userId]);
+        const user = await dbGet('SELECT name FROM users WHERE id = $1', [userId]);
         
-        // Estatísticas de progresso
+        // Estatísticas de progresso - PostgreSQL compatible
         const completedTopicsResult = await dbGet(`
             SELECT COUNT(DISTINCT ss.topic_id) as completed_topics,
                    COUNT(DISTINCT s.id) as total_subjects
             FROM study_sessions ss
             JOIN topics t ON ss.topic_id = t.id
             JOIN subjects s ON t.subject_id = s.id
-            WHERE ss.study_plan_id = ? 
+            WHERE ss.study_plan_id = $1 
             AND ss.status = 'Concluído'
             AND ss.session_type = 'Novo Tópico'
         `, [planId]);
 
-        // Sessões concluídas recentemente
+        // Sessões concluídas recentemente - PostgreSQL compatible
         const completedSessions = await dbAll(`
             SELECT 
                 session_date,
@@ -671,7 +807,7 @@ const getShareProgress = async (req, res) => {
                 COUNT(*) as session_count,
                 SUM(COALESCE(questions_solved, 0)) as total_questions
             FROM study_sessions
-            WHERE study_plan_id = ? 
+            WHERE study_plan_id = $1 
             AND status = 'Concluído'
             AND session_date >= CURRENT_DATE - INTERVAL '7 days'
             GROUP BY session_date, subject_name
@@ -1034,6 +1170,9 @@ const generateSchedule = async (req, res) => {
             });
         }
 
+        // Debug: verificar config antes de chamar o service
+        console.log('[CONTROLLER DEBUG] Config antes de chamar ScheduleGenerationService:', JSON.stringify(config, null, 2));
+        
         // Chamar o service principal
         const result = await ScheduleGenerationService.generate(config);
         
@@ -1385,161 +1524,31 @@ const batchUpdateScheduleDetails = async (req, res) => {
 };
 
 /**
- * 🎯 FASE 6 WAVE 7 - CONFLICT RESOLUTION IMPLEMENTATIONS
- * 
- * Implementações das 2 rotas críticas para detecção e resolução de conflitos:
- * - GET /api/plans/:planId/schedule-conflicts
- * - POST /api/plans/:planId/resolve-conflicts
+ * GET /plans/:planId/sessions
+ * Buscar todas as sessões de um plano
  */
-
-/**
- * GET /api/plans/:planId/schedule-conflicts
- * Detecta conflitos no cronograma do plano
- * 
- * @route GET /api/plans/:planId/schedule-conflicts
- * @access Private
- */
-const getScheduleConflicts = async (req, res) => {
+const getSessionsByPlan = async (req, res) => {
+    const { planId } = req.params;
+    const userId = req.user?.id;
+    
     try {
-        const planId = parseInt(req.params.planId);
-        const userId = req.user.id;
-        
-        logger.info(`[ConflictController] Detectando conflitos: plano ${planId}, usuário ${userId}`);
-        
-        // Validação básica
-        if (!planId || isNaN(planId)) {
-            return res.status(400).json({ 
-                error: 'ID do plano inválido',
-                code: 'INVALID_PLAN_ID'
-            });
+        // Validar ownership do plano
+        const plan = await repos.plan.findByIdAndUser(planId, userId);
+        if (!plan) {
+            return res.status(404).json({ error: 'Plano não encontrado ou não autorizado' });
         }
         
-        const conflictService = new ConflictResolutionService();
-        const conflicts = await conflictService.getScheduleConflicts(planId, userId);
+        // Buscar sessões
+        const sessions = await repos.session.findByPlanId(planId);
         
-        // Adicionar metadados úteis
-        const response = {
-            success: true,
-            conflicts,
-            metadata: {
-                hasConflicts: conflicts.summary.totalConflicts > 0,
-                hasCriticalConflicts: conflicts.summary.hasCriticalConflicts,
-                recommendsAction: conflicts.summary.totalConflicts > 5,
-                analyzedAt: getBrazilianDateString()
-            }
-        };
-        
-        logger.info(`[ConflictController] Análise concluída: ${conflicts.summary.totalConflicts} conflitos encontrados`);
-        res.json(response);
+        res.json({ 
+            sessions: sessions || [],
+            total: sessions ? sessions.length : 0
+        });
         
     } catch (error) {
-        logger.error('[ConflictController] Erro ao detectar conflitos:', error);
-        
-        // Tratamento de erros específicos
-        if (error.message.includes('Plano não encontrado')) {
-            return res.status(404).json({ 
-                error: 'Plano não encontrado ou sem permissão',
-                code: 'PLAN_NOT_FOUND'
-            });
-        }
-        
-        if (error.message.includes('não autorizado')) {
-            return res.status(403).json({ 
-                error: 'Acesso negado ao plano',
-                code: 'ACCESS_DENIED'
-            });
-        }
-        
-        res.status(500).json({ 
-            error: 'Erro interno ao detectar conflitos',
-            code: 'INTERNAL_ERROR',
-            details: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
-    }
-};
-
-/**
- * POST /api/plans/:planId/resolve-conflicts
- * Resolve conflitos automaticamente no cronograma
- * 
- * @route POST /api/plans/:planId/resolve-conflicts
- * @access Private
- */
-const resolveScheduleConflicts = async (req, res) => {
-    try {
-        const planId = parseInt(req.params.planId);
-        const userId = req.user.id;
-        const { conflictIds = [], resolution = {} } = req.body;
-        
-        logger.info(`[ConflictController] Resolvendo conflitos: plano ${planId}, ${conflictIds.length} conflitos`);
-        
-        // Validação básica
-        if (!planId || isNaN(planId)) {
-            return res.status(400).json({ 
-                error: 'ID do plano inválido',
-                code: 'INVALID_PLAN_ID'
-            });
-        }
-        
-        if (!Array.isArray(conflictIds)) {
-            return res.status(400).json({ 
-                error: 'Lista de conflitos deve ser um array',
-                code: 'INVALID_CONFLICT_LIST'
-            });
-        }
-        
-        const conflictService = new ConflictResolutionService();
-        const result = await conflictService.resolveConflicts(planId, userId, conflictIds, resolution);
-        
-        // Determinar status baseado no resultado
-        let status = 200;
-        if (result.resolvedCount === 0 && result.failedCount > 0) {
-            status = 207; // Multi-status - algumas operações falharam
-        }
-        
-        const response = {
-            ...result,
-            metadata: {
-                timestamp: getBrazilianDateString(),
-                planId,
-                userId,
-                requestedConflicts: conflictIds.length
-            }
-        };
-        
-        logger.info(`[ConflictController] Resolução concluída: ${result.resolvedCount}/${result.totalAttempted} conflitos resolvidos`);
-        res.status(status).json(response);
-        
-    } catch (error) {
-        logger.error('[ConflictController] Erro ao resolver conflitos:', error);
-        
-        // Tratamento de erros específicos
-        if (error.message.includes('Plano não encontrado')) {
-            return res.status(404).json({ 
-                error: 'Plano não encontrado ou sem permissão',
-                code: 'PLAN_NOT_FOUND'
-            });
-        }
-        
-        if (error.message.includes('não autorizado')) {
-            return res.status(403).json({ 
-                error: 'Acesso negado ao plano',
-                code: 'ACCESS_DENIED'
-            });
-        }
-        
-        if (error.message.includes('transação')) {
-            return res.status(409).json({ 
-                error: 'Conflito na base de dados. Tente novamente.',
-                code: 'DATABASE_CONFLICT'
-            });
-        }
-        
-        res.status(500).json({ 
-            error: 'Erro interno ao resolver conflitos',
-            code: 'INTERNAL_ERROR',
-            details: process.env.NODE_ENV === 'development' ? error.message : undefined
-        });
+        console.error('[PLANS] Erro ao buscar sessões:', error);
+        res.status(500).json({ error: 'Erro ao buscar sessões do plano' });
     }
 };
 
@@ -1558,6 +1567,7 @@ module.exports = {
     
     // Geração de Cronograma
     generateSchedule,
+    getSessionsByPlan,
     
     // Replanejamento e Controle de Atrasos
     getOverdueCheck,
@@ -1590,10 +1600,5 @@ module.exports = {
     
     // FASE 6 WAVE 4 - BATCH UPDATES
     batchUpdateSchedule,
-    batchUpdateScheduleDetails,
-    
-    // FASE 6 WAVE 7 - CONFLICT RESOLUTION
-    getScheduleConflicts,
-    resolveScheduleConflicts
+    batchUpdateScheduleDetails
 };
-

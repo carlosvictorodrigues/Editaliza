@@ -2,10 +2,10 @@
 
 const express = require('express');
 const router = express.Router();
-const { authenticateToken } = require('../../middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
 const emailService = require('../services/emailService');
 const { emailRateLimitService } = require('../services/emailRateLimitService');
-const { validators, handleValidationErrors } = require('../../middleware');
+const { validators, handleValidationErrors } = require('../middleware/validation.middleware');
 
 // ==========================================
 // HEALTH CHECKS
@@ -14,6 +14,7 @@ const { validators, handleValidationErrors } = require('../../middleware');
 // Health check endpoint for Docker/K8s (SIMPLIFICADO)
 router.get('/health', (req, res) => {
     const healthCheck = {
+        status: 'healthy',
         uptime: process.uptime(),
         message: 'OK',
         database: 'PostgreSQL',
@@ -36,7 +37,7 @@ router.get('/ready', (req, res) => {
 // ==========================================
 
 // Legacy metrics endpoint - MIGRATED TO /api/admin/system/metrics
-router.get('/metrics', authenticateToken, (req, res) => {
+router.get('/metrics', authenticateToken(), (req, res) => {
     console.warn('DEPRECATED: /metrics - Use /api/admin/system/metrics instead');
     try {
         const { getMetricsReport } = require('../middleware/metrics');
@@ -56,7 +57,7 @@ router.get('/metrics', authenticateToken, (req, res) => {
 // ==========================================
 
 // Legacy email service status endpoint - MIGRATED TO /api/admin/email/status
-router.get('/admin/email/status', authenticateToken, (req, res) => {
+router.get('/admin/email/status', authenticateToken(), (req, res) => {
     console.warn('DEPRECATED: /admin/email/status - Use /api/admin/email/status instead');
     try {
         const status = emailService.getStatus();
@@ -77,7 +78,7 @@ router.get('/admin/email/status', authenticateToken, (req, res) => {
 
 // Legacy test email endpoint - MIGRATED TO /api/admin/email/test
 router.post('/admin/email/test', 
-    authenticateToken,
+    authenticateToken(),
     validators.email,
     handleValidationErrors,
     async (req, res) => {
@@ -106,7 +107,7 @@ router.post('/admin/email/test',
 
 // Legacy reset rate limits endpoint - MIGRATED TO /api/admin/email/reset-limits
 router.post('/admin/email/reset-limits',
-    authenticateToken,
+    authenticateToken(),
     validators.email,
     handleValidationErrors,
     async (req, res) => {

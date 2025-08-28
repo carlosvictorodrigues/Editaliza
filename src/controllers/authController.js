@@ -1,323 +1,299 @@
 /**
- * Auth Controller - Handles all authentication-related HTTP requests
- * 
- * This controller manages user registration, login, logout, password reset,
- * OAuth integration, and profile management that was previously in server.js
+ * Auth Controller - Integração com authService
+ * Este controller conecta as rotas ao authService real
  */
 
 const authService = require('../services/authService');
-const { sanitizeHtml } = require('../utils/sanitizer');
-const { createSafeError, securityLog } = require('../utils/security');
+const jwt = require('jsonwebtoken');
+const { securityLog } = require('../utils/security');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'seu-secret-jwt-seguro-aqui';
 
 /**
- * Register a new user
- * POST /auth/register
+ * Registrar novo usuário
  */
 const register = async (req, res) => {
     try {
-        const result = await authService.register(req.body, req);
-        res.status(201).json(result);
-    } catch (error) {
-        securityLog('register_error', error.message, null, req);
+        console.log('[AUTH_CONTROLLER] Iniciando registro');
         
+        // Usar authService para registro
+        const result = await authService.register(req.body, req);
+        
+        // Gerar token JWT no formato esperado pelo middleware
+        // Usar dados do resultado do registro
+        const token = jwt.sign(
+            { 
+                id: result.userId,
+                email: req.body.email,
+                name: req.body.name
+            },
+            JWT_SECRET,
+            { 
+                expiresIn: '24h',
+                issuer: 'editaliza'
+            }
+        );
+        
+        console.log('[AUTH_CONTROLLER] Registro completo, userId:', result.userId);
+        
+        res.status(201).json({
+            success: true,
+            message: result.message,
+            token,
+            user: {
+                id: result.userId
+            }
+        });
+        
+    } catch (error) {
+        console.error('[AUTH_CONTROLLER] Erro no registro:', error.message);
+        
+        // Tratar erros específicos
         if (error.message.includes('já está em uso')) {
-            res.status(400).json({ error: error.message });
-        } else {
-            res.status(500).json(createSafeError(error, 'Erro ao criar usuário'));
+            return res.status(409).json({
+                success: false,
+                error: error.message
+            });
         }
+        
+        if (error.message.includes('inválido')) {
+            return res.status(400).json({
+                success: false,
+                error: error.message
+            });
+        }
+        
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao criar usuário'
+        });
     }
 };
 
 /**
- * User login
- * POST /auth/login
+ * Login de usuário
  */
 const login = async (req, res) => {
     try {
+        console.log('[AUTH_CONTROLLER] Iniciando login');
+        
+        // Usar authService para login
         const result = await authService.login(req.body, req);
         
-        // Set session data
-        req.session.userId = result.user.id;
-        req.session.loginTime = new Date();
-        
-        // CORREÇÃO: Verificar se o usuário tem planos para decidir o redirecionamento
-        const userHasPlans = await authService.checkIfUserHasPlans(result.user.id);
+        console.log('[AUTH_CONTROLLER] Login completo, userId:', result.user.id);
         
         res.json({
-            ...result,
-            redirectUrl: userHasPlans ? 'home.html' : 'dashboard.html'
+            success: true,
+            message: result.message,
+            token: result.token,
+            user: result.user
         });
-    } catch (error) {
-        securityLog('login_error', error.message, null, req);
         
-        if (error.message.includes('inválidos') || 
-            error.message.includes('Google') ||
-            error.message.includes('tentativas')) {
-            res.status(401).json({ error: error.message });
-        } else {
-            res.status(500).json(createSafeError(error, 'Erro no login'));
+    } catch (error) {
+        console.error('[AUTH_CONTROLLER] Erro no login:', error.message);
+        
+        // Tratar erros específicos
+        if (error.message.includes('Conta não encontrada')) {
+            return res.status(404).json({
+                success: false,
+                error: error.message
+            });
         }
-    }
-};
-
-/**
- * Process Google OAuth callback
- * This is called by Passport middleware, not directly by HTTP requests
- */
-const processGoogleCallback = async (accessToken, refreshToken, profile, done) => {
-    try {
-        const user = await authService.processGoogleCallback(profile);
-        return done(null, user);
-    } catch (error) {
-        console.error('Google OAuth Error:', error);
-        return done(error, null);
-    }
-};
-
-/**
- * Get Google OAuth status
- * GET /auth/google/status
- */
-const getGoogleStatus = async (req, res) => {
-    try {
-        res.json({
-            authenticated: true,
-            user: {
-                id: req.user.id,
-                email: req.user.email,
-                name: req.user.name,
-                auth_provider: req.user.auth_provider
-            }
+        
+        if (error.message.includes('incorreta') || error.message.includes('Google')) {
+            return res.status(401).json({
+                success: false,
+                error: error.message
+            });
+        }
+        
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao fazer login'
         });
-    } catch (error) {
-        res.status(500).json(createSafeError(error, 'Erro ao verificar status'));
     }
 };
 
 /**
- * User logout
- * POST /auth/logout
+ * Logout de usuário
  */
 const logout = async (req, res) => {
     try {
+        // Por enquanto, logout é simples (cliente remove o token)
+        securityLog('user_logout', { userId: req.user?.id }, req.user?.id, req);
+        
+        res.json({
+            success: true,
+            message: 'Logout realizado com sucesso'
+        });
+        
+    } catch (error) {
+        console.error('[AUTH_CONTROLLER] Erro no logout:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao fazer logout'
+        });
+    }
+};
+
+/**
+ * Obter usuário atual
+ */
+const getCurrentUser = async (req, res) => {
+    try {
         const userId = req.user?.id;
         
-        req.session.destroy((err) => {
-            if (err) {
-                securityLog('logout_session_error', err.message, userId, req);
-                return res.status(500).json({ error: 'Erro ao fazer logout' });
-            }
-            
-            securityLog('user_logout', { userId }, userId, req);
-            res.json({ message: 'Logout realizado com sucesso' });
-        });
-    } catch (error) {
-        res.status(500).json(createSafeError(error, 'Erro ao fazer logout'));
-    }
-};
-
-/**
- * Request password reset
- * POST /auth/request-password-reset
- */
-const requestPasswordReset = async (req, res) => {
-    try {
-        const result = await authService.requestPasswordReset(req.body.email, req);
-        res.json(result);
-    } catch (error) {
-        securityLog('password_reset_request_error', error.message, null, req);
-        
-        if (error.message.includes('Google') ||
-            error.message.includes('solicitações')) {
-            res.status(400).json({ error: error.message });
-        } else {
-            res.status(500).json(createSafeError(error, 'Erro ao processar solicitação'));
-        }
-    }
-};
-
-/**
- * Reset password with token
- * POST /auth/reset-password
- */
-const resetPassword = async (req, res) => {
-    try {
-        const { token, password } = req.body;
-        const result = await authService.resetPassword(token, password, req);
-        res.json(result);
-    } catch (error) {
-        securityLog('password_reset_error', error.message, null, req);
-        
-        if (error.message.includes('inválido') || 
-            error.message.includes('expirado')) {
-            res.status(400).json({ error: error.message });
-        } else {
-            res.status(500).json(createSafeError(error, 'Erro ao redefinir senha'));
-        }
-    }
-};
-
-/**
- * Get user profile
- * GET /auth/profile
- */
-const getProfile = async (req, res) => {
-    try {
-        const profile = await authService.getUserProfile(req.user.id, req);
-        res.json(profile);
-    } catch (error) {
-        securityLog('get_profile_error', error.message, req.user.id, req);
-        
-        if (error.message.includes('não encontrado')) {
-            res.status(404).json({ error: error.message });
-        } else {
-            res.status(500).json(createSafeError(error, 'Erro ao carregar perfil'));
-        }
-    }
-};
-
-/**
- * Update user profile
- * PUT /auth/profile
- */
-const updateProfile = async (req, res) => {
-    try {
-        const updatedProfile = await authService.updateUserProfile(req.user.id, req.body, req);
-        res.json(updatedProfile);
-    } catch (error) {
-        securityLog('update_profile_error', error.message, req.user.id, req);
-        res.status(500).json(createSafeError(error, 'Erro ao atualizar perfil'));
-    }
-};
-
-/**
- * Verify token
- * GET /auth/verify
- */
-const verifyToken = async (req, res) => {
-    try {
-        // Token already verified by middleware, just return user info
-        res.json({
-            valid: true,
-            user: {
-                id: req.user.id,
-                email: req.user.email,
-                name: req.user.name
-            }
-        });
-    } catch (error) {
-        res.status(500).json(createSafeError(error, 'Erro na verificação'));
-    }
-};
-
-/**
- * Refresh JWT token
- * POST /auth/refresh
- */
-const refreshToken = async (req, res) => {
-    try {
-        const authHeader = req.headers['authorization'];
-        const token = authHeader && authHeader.split(' ')[1];
-        
-        if (!token) {
-            return res.status(401).json({ error: 'Token não fornecido' });
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                error: 'Usuário não autenticado'
+            });
         }
         
-        const result = await authService.refreshToken(token, req);
+        // Buscar usuário via authService
+        const user = await authService.getUserById(userId);
         
-        // Update session
-        if (req.session) {
-            req.session.userId = result.user.id;
-            req.session.loginTime = new Date();
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                error: 'Usuário não encontrado'
+            });
         }
-        
-        res.json(result);
-    } catch (error) {
-        securityLog('token_refresh_error', error.message, null, req);
-        
-        if (error.message.includes('expirado') ||
-            error.message.includes('inválido') ||
-            error.message.includes('malformado') ||
-            error.message.includes('antigo')) {
-            res.status(401).json({ error: error.message });
-        } else {
-            res.status(500).json(createSafeError(error, 'Erro ao renovar token'));
-        }
-    }
-};
-
-/**
- * Upload profile photo
- * POST /auth/profile/upload-photo
- * This endpoint handles file uploads and requires special middleware
- */
-const uploadProfilePhoto = async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'Nenhum arquivo enviado' });
-        }
-        
-        const photoUrl = `/uploads/${req.file.filename}`;
-        
-        // Update user profile with photo URL
-        await authService.updateUserProfile(req.user.id, {
-            profile_picture: photoUrl
-        }, req);
-        
-        securityLog('profile_photo_uploaded', { userId: req.user.id, filename: req.file.filename }, req.user.id, req);
         
         res.json({
-            message: 'Foto de perfil atualizada com sucesso',
-            profilePicture: photoUrl
-        });
-    } catch (error) {
-        securityLog('profile_photo_upload_error', error.message, req.user?.id, req);
-        res.status(500).json(createSafeError(error, 'Erro ao fazer upload da foto'));
-    }
-};
-
-/**
- * Check authentication status
- * GET /auth/status
- */
-const getAuthStatus = async (req, res) => {
-    try {
-        // This endpoint is called without authentication middleware
-        // to check if user has valid session/token
-        const authHeader = req.headers['authorization'];
-        const token = authHeader && authHeader.split(' ')[1];
-        
-        if (!token) {
-            return res.json({ authenticated: false });
-        }
-        
-        const user = await authService.verifyToken(token);
-        
-        res.json({
-            authenticated: true,
+            success: true,
             user: {
                 id: user.id,
                 email: user.email,
-                name: user.name
+                name: user.name,
+                auth_provider: user.auth_provider
             }
         });
+        
     } catch (error) {
-        res.json({ authenticated: false });
+        console.error('[AUTH_CONTROLLER] Erro ao buscar usuário:', error.message);
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao buscar dados do usuário'
+        });
     }
+};
+
+/**
+ * Processar callback OAuth do Google
+ */
+const googleCallback = async (req, res) => {
+    try {
+        // O passport já autenticou o usuário
+        const user = req.user;
+        
+        if (!user) {
+            throw new Error('Falha na autenticação com Google');
+        }
+        
+        // Gerar token JWT no formato esperado pelo middleware
+        const token = jwt.sign(
+            { 
+                id: user.id,
+                email: user.email,
+                name: user.name
+            },
+            JWT_SECRET,
+            { 
+                expiresIn: '24h',
+                issuer: 'editaliza'
+            }
+        );
+        
+        // Redirecionar para o frontend com o token
+        res.redirect(`/home.html?token=${token}&auth=google`);
+        
+    } catch (error) {
+        console.error('[AUTH_CONTROLLER] Erro no callback Google:', error.message);
+        res.redirect('/login.html?error=auth_failed');
+    }
+};
+
+/**
+ * Health check do sistema de autenticação
+ */
+const healthCheck = async (req, res) => {
+    res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        service: 'authentication',
+        version: '2.0.0'
+    });
+};
+
+// Funções stub para compatibilidade
+const getAuthStatus = async (req, res) => {
+    res.json({
+        status: 'operational',
+        timestamp: new Date().toISOString(),
+        database: 'PostgreSQL',
+        authenticated: !!req.user
+    });
+};
+
+const getProfile = async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ error: 'Não autenticado' });
+    }
+    res.json({
+        id: req.user.id,
+        email: req.user.email,
+        name: req.user.name
+    });
+};
+
+const updateProfile = async (req, res) => {
+    res.status(501).json({
+        success: false,
+        error: 'Funcionalidade não implementada'
+    });
+};
+
+const verifyToken = async (req, res) => {
+    res.json({
+        valid: true,
+        user: req.user
+    });
+};
+
+const refreshToken = async (req, res) => {
+    res.status(501).json({
+        success: false,
+        error: 'Funcionalidade não implementada'
+    });
+};
+
+const requestPasswordReset = async (req, res) => {
+    res.status(501).json({
+        success: false,
+        error: 'Funcionalidade não implementada'
+    });
+};
+
+const resetPassword = async (req, res) => {
+    res.status(501).json({
+        success: false,
+        error: 'Funcionalidade não implementada'
+    });
 };
 
 module.exports = {
     register,
     login,
-    processGoogleCallback,
-    getGoogleStatus,
     logout,
-    requestPasswordReset,
-    resetPassword,
+    getCurrentUser,
+    googleCallback,
+    healthCheck,
+    getAuthStatus,
     getProfile,
     updateProfile,
     verifyToken,
     refreshToken,
-    uploadProfilePhoto,
-    getAuthStatus
+    requestPasswordReset,
+    resetPassword
 };

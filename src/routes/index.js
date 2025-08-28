@@ -11,6 +11,7 @@ const sessionsRoutes = require('./sessions.routes');
 const statisticsRoutes = require('./statistics.routes');
 const gamificationRoutes = require('./gamification.routes');
 const adminRoutes = require('./admin.routes');
+const adminFastRoutes = require('./admin-fast.routes');
 
 // FASE 8 - Rotas modularizadas
 const legacyRoutes = require('./legacy.routes');
@@ -28,11 +29,12 @@ function configureRoutes(app) {
     app.use('/api', subjectsRoutes);
     app.use('/api', topicsRoutes);
     app.use('/api/auth', authRoutes);
-    app.use('/api/profile', profileRoutes);
+    app.use('/api/users', profileRoutes);
     app.use('/api/sessions', sessionsRoutes);
     app.use('/api', statisticsRoutes);
     app.use('/api', gamificationRoutes);
     app.use('/api/admin', adminRoutes);
+    app.use('/api/admin', adminFastRoutes);
     app.use('/api', scheduleRoutes);
 
     // ==========================================

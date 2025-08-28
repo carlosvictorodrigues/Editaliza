@@ -1,0 +1,26 @@
+{
+  "timestamp": 1756340740591,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": false,
+      "timestamp": "2025-08-28T00:25:40.631Z",
+      "erro": {
+        "endpoint": "/auth/register",
+        "method": "POST",
+        "message": ""
+      }
+    }
+  ],
+  "erros": [
+    {
+      "etapa": "Registro",
+      "erro": {
+        "endpoint": "/auth/register",
+        "method": "POST",
+        "message": ""
+      }
+    }
+  ],
+  "sucesso": false
+}

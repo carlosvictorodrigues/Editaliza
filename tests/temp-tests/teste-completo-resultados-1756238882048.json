@@ -1,0 +1,53 @@
+{
+  "passed": 1,
+  "total": 6,
+  "percentage": 17,
+  "executionTime": 175,
+  "details": {
+    "Health check": {
+      "passed": false,
+      "details": {
+        "uptime": 658.8538301,
+        "message": "OK",
+        "database": "PostgreSQL",
+        "timestamp": 1756238881916,
+        "environment": "development",
+        "version": "1.0.0"
+      }
+    },
+    "Registro de usuário": {
+      "passed": true,
+      "details": {
+        "userId": 47,
+        "token": "GERADO"
+      }
+    },
+    "Criação de plano": {
+      "passed": false,
+      "details": {
+        "message": "Plano criado com sucesso!"
+      }
+    },
+    "Criação de disciplina": {
+      "passed": false,
+      "details": {
+        "status": 400,
+        "message": "Dados de entrada inválidos"
+      }
+    },
+    "Geração de cronograma": {
+      "passed": false,
+      "details": {
+        "status": 400,
+        "message": "Dados de entrada inválidos"
+      }
+    },
+    "Consulta de cronograma": {
+      "passed": false,
+      "details": {
+        "status": 400,
+        "message": "Dados de entrada inválidos"
+      }
+    }
+  }
+}

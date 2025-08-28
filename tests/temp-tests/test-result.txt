@@ -1,0 +1,338 @@
+🚀 Iniciando teste completo da plataforma Editaliza...
+
+======================================================================
+🚀 TESTE COMPLETO DA PLATAFORMA EDITALIZA
+======================================================================
+Timestamp: 2025-08-27T21:25:20.666Z
+
+
+📝 ETAPA 1: REGISTRO DE NOVO USUÁRIO
+----------------------------------------
+✅ Usuário registrado com sucesso
+   Email: teste.completo.1756329920663@editaliza.com
+   User ID: 113
+   Token: Recebido
+
+🔐 ETAPA 2: LOGIN
+----------------------------------------
+✅ Login realizado com sucesso
+   Token atualizado: Sim
+
+📚 ETAPA 3: CRIAÇÃO DO PLANO DE ESTUDOS
+----------------------------------------
+✅ Plano criado com sucesso
+   Plan ID: 106
+   Nome: TJPE - Analista Judiciário 2025
+   Data do concurso: 2025-11-21
+
+📖 ETAPA 4: ADIÇÃO DE DISCIPLINAS E TÓPICOS (EDITAL TJPE)
+----------------------------------------
+
+   📚 Adicionando: Língua Portuguesa (peso 4)
+   ✅ Disciplina adicionada (ID: 669)
+      ✅ Compreensão e interpretação de textos (peso: 5, prioridade: 45)
+      ✅ Ortografia, acentuação e pontuação (peso: 4, prioridade: 44)
+      ✅ Concordância nominal e verbal (peso: 4, prioridade: 44)
+      ✅ Regência nominal e verbal (peso: 4, prioridade: 44)
+      ✅ Morfossintaxe e análise sintática (peso: 4, prioridade: 44)
+      ✅ Pronomes - emprego e colocação (peso: 3, prioridade: 43)
+      ✅ Semântica e vocabulário (peso: 3, prioridade: 43)
+      ✅ Formação de palavras (peso: 3, prioridade: 43)
+      ✅ Vozes do verbo (peso: 2, prioridade: 42)
+      ✅ Correlação de tempos e modos verbais (peso: 2, prioridade: 42)
+      ✅ Coordenação e subordinação (peso: 2, prioridade: 42)
+      ✅ Figuras de linguagem (peso: 2, prioridade: 42)
+      ✅ Redação - reescrita de frases (peso: 3, prioridade: 43)
+      ✅ Redação oficial (peso: 2, prioridade: 42)
+      ✅ Níveis de linguagem (peso: 2, prioridade: 42)
+
+   📚 Adicionando: Raciocínio Lógico (peso 3)
+   ✅ Disciplina adicionada (ID: 670)
+      ✅ Lógica proposicional (peso: 5, prioridade: 35)
+      ✅ Argumentação lógica (peso: 4, prioridade: 34)
+      ✅ Análise combinatória (peso: 4, prioridade: 34)
+      ✅ Probabilidade (peso: 4, prioridade: 34)
+      ✅ Raciocínio sequencial (peso: 3, prioridade: 33)
+      ✅ Raciocínio lógico quantitativo (peso: 3, prioridade: 33)
+      ✅ Raciocínio lógico analítico (peso: 3, prioridade: 33)
+      ✅ Diagramas lógicos (peso: 3, prioridade: 33)
+
+   📚 Adicionando: Direito Administrativo (peso 5)
+   ✅ Disciplina adicionada (ID: 671)
+      ✅ Princípios do Direito Administrativo (peso: 5, prioridade: 55)
+      ✅ Administração Pública - conceito e princípios (peso: 5, prioridade: 55)
+      ✅ Administração direta e indireta (peso: 4, prioridade: 54)
+      ✅ Poderes Administrativos (peso: 4, prioridade: 54)
+      ✅ Atos administrativos (peso: 5, prioridade: 55)
+      ✅ Contratos administrativos (peso: 4, prioridade: 54)
+      ✅ Licitação - conceito e princípios (peso: 5, prioridade: 55)
+      ✅ Licitação - modalidades (peso: 5, prioridade: 55)
+      ✅ Licitação - dispensa e inexigibilidade (peso: 4, prioridade: 54)
+      ✅ Sistema de Registro de Preços (peso: 3, prioridade: 53)
+      ✅ Serviços Públicos (peso: 4, prioridade: 54)
+      ✅ Servidores Públicos - regime jurídico (peso: 4, prioridade: 54)
+      ✅ Direitos e deveres do servidor (peso: 4, prioridade: 54)
+      ✅ Responsabilidade do servidor público (peso: 4, prioridade: 54)
+      ✅ Bens Públicos (peso: 3, prioridade: 53)
+      ✅ Controle da Administração (peso: 4, prioridade: 54)
+      ✅ Responsabilidade civil do Estado (peso: 4, prioridade: 54)
+      ✅ Desapropriação (peso: 3, prioridade: 53)
+      ✅ Servidão administrativa (peso: 2, prioridade: 52)
+      ✅ Processo Administrativo (peso: 3, prioridade: 53)
+      ✅ Lei de Improbidade Administrativa (peso: 5, prioridade: 55)
+      ✅ Nova Lei de Licitações - Lei 14.133/21 (peso: 5, prioridade: 55)
+
+   📚 Adicionando: Direito Constitucional (peso 5)
+   ✅ Disciplina adicionada (ID: 672)
+      ✅ Dos Princípios Fundamentais (peso: 5, prioridade: 55)
+      ✅ Dos Direitos e Garantias Fundamentais (peso: 5, prioridade: 55)
+      ✅ Direitos e deveres individuais e coletivos (peso: 5, prioridade: 55)
+      ✅ Direitos sociais (peso: 3, prioridade: 53)
+      ✅ Da nacionalidade (peso: 2, prioridade: 52)
+      ✅ Dos direitos políticos (peso: 3, prioridade: 53)
+      ✅ Da Organização do Estado (peso: 4, prioridade: 54)
+      ✅ Da União (peso: 3, prioridade: 53)
+      ✅ Dos Estados federados (peso: 3, prioridade: 53)
+      ✅ Dos Municípios (peso: 3, prioridade: 53)
+      ✅ Da Organização dos Poderes (peso: 5, prioridade: 55)
+      ✅ Do Poder Legislativo (peso: 4, prioridade: 54)
+      ✅ Do Poder Executivo (peso: 3, prioridade: 53)
+      ✅ Do Poder Judiciário (peso: 5, prioridade: 55)
+      ✅ Das Funções Essenciais à Justiça (peso: 4, prioridade: 54)
+      ✅ Do Ministério Público (peso: 4, prioridade: 54)
+      ✅ Da Administração Pública (peso: 5, prioridade: 55)
+      ✅ Dos servidores públicos (peso: 5, prioridade: 55)
+      ✅ Do Sistema Tributário Nacional (peso: 2, prioridade: 52)
+      ✅ Da Ordem Econômica e Financeira (peso: 2, prioridade: 52)
+      ✅ Da Ordem Social (peso: 2, prioridade: 52)
+      ✅ Constituição do Estado de Pernambuco (peso: 4, prioridade: 54)
+      ✅ Lei de Ação Civil Pública (peso: 3, prioridade: 53)
+      ✅ Mandado de Segurança (peso: 4, prioridade: 54)
+
+   📚 Adicionando: Direito Civil (peso 4)
+   ✅ Disciplina adicionada (ID: 673)
+      ✅ Fontes do direito civil (peso: 2, prioridade: 42)
+      ✅ Princípios do direito civil (peso: 3, prioridade: 43)
+      ✅ Pessoas naturais (peso: 4, prioridade: 44)
+      ✅ Pessoas jurídicas (peso: 4, prioridade: 44)
+      ✅ Domicílio (peso: 2, prioridade: 42)
+      ✅ Bens (peso: 3, prioridade: 43)
+      ✅ Atos jurídicos (peso: 5, prioridade: 45)
+      ✅ Negócio jurídico (peso: 5, prioridade: 45)
+      ✅ Prescrição e decadência (peso: 4, prioridade: 44)
+      ✅ Prova (peso: 3, prioridade: 43)
+      ✅ Obrigações (peso: 4, prioridade: 44)
+      ✅ Responsabilidade Civil (peso: 5, prioridade: 45)
+
+   📚 Adicionando: Direito Processual Civil (peso 4)
+   ✅ Disciplina adicionada (ID: 674)
+      ✅ Jurisdição e ação (peso: 4, prioridade: 44)
+      ✅ Partes e procuradores (peso: 3, prioridade: 43)
+      ✅ Litisconsórcio e assistência (peso: 3, prioridade: 43)
+      ✅ Intervenção de terceiros (peso: 3, prioridade: 43)
+      ✅ Ministério Público (peso: 3, prioridade: 43)
+      ✅ Competência (peso: 5, prioridade: 45)
+      ✅ O juiz (peso: 3, prioridade: 43)
+      ✅ Atos processuais (peso: 4, prioridade: 44)
+      ✅ Formação, suspensão e extinção do processo (peso: 3, prioridade: 43)
+      ✅ Procedimento comum (peso: 4, prioridade: 44)
+      ✅ Resposta do réu (peso: 4, prioridade: 44)
+      ✅ Revelia (peso: 3, prioridade: 43)
+      ✅ Julgamento conforme o estado do processo (peso: 3, prioridade: 43)
+      ✅ Provas (peso: 5, prioridade: 45)
+      ✅ Audiência (peso: 3, prioridade: 43)
+      ✅ Sentença e coisa julgada (peso: 4, prioridade: 44)
+      ✅ Liquidação e cumprimento de sentença (peso: 4, prioridade: 44)
+      ✅ Recursos (peso: 5, prioridade: 45)
+      ✅ Processo de execução (peso: 4, prioridade: 44)
+      ✅ Processo cautelar e medidas cautelares (peso: 4, prioridade: 44)
+      ✅ Procedimentos especiais (peso: 3, prioridade: 43)
+
+   📚 Adicionando: Direito Penal (peso 3)
+   ✅ Disciplina adicionada (ID: 675)
+      ✅ Sujeito ativo e passivo da infração penal (peso: 3, prioridade: 33)
+      ✅ Tipicidade, ilicitude e culpabilidade (peso: 5, prioridade: 35)
+      ✅ Punibilidade (peso: 3, prioridade: 33)
+      ✅ Excludentes de ilicitude (peso: 4, prioridade: 34)
+      ✅ Excludentes de culpabilidade (peso: 4, prioridade: 34)
+      ✅ Erro de tipo (peso: 3, prioridade: 33)
+      ✅ Erro de proibição (peso: 3, prioridade: 33)
+      ✅ Imputabilidade penal (peso: 3, prioridade: 33)
+      ✅ Concurso de pessoas (peso: 3, prioridade: 33)
+      ✅ Crimes contra a fé pública (peso: 4, prioridade: 34)
+      ✅ Crimes contra a Administração Pública (peso: 5, prioridade: 35)
+      ✅ Crimes contra a inviolabilidade dos segredos (peso: 2, prioridade: 32)
+      ✅ Crimes contra o patrimônio (peso: 4, prioridade: 34)
+      ✅ Crimes contra a vida (peso: 3, prioridade: 33)
+      ✅ Lesões corporais (peso: 3, prioridade: 33)
+      ✅ Periclitação da vida e da saúde (peso: 2, prioridade: 32)
+      ✅ Atos de improbidade praticados por agentes públicos (peso: 5, prioridade: 35)
+
+   📚 Adicionando: Direito Processual Penal (peso 3)
+   ✅ Disciplina adicionada (ID: 676)
+      ✅ Ação Penal Pública (peso: 4, prioridade: 34)
+      ✅ Ação Penal Privada (peso: 3, prioridade: 33)
+      ✅ A Denúncia (peso: 4, prioridade: 34)
+      ✅ A Queixa (peso: 3, prioridade: 33)
+      ✅ Representação, Renúncia e Perdão (peso: 3, prioridade: 33)
+      ✅ Sujeitos do processo (peso: 3, prioridade: 33)
+      ✅ Juiz, Acusador e Defensor (peso: 3, prioridade: 33)
+      ✅ Assistente e Auxiliar da Justiça (peso: 2, prioridade: 32)
+      ✅ Atos Processuais - forma, lugar e tempo (peso: 3, prioridade: 33)
+      ✅ Comunicações processuais (peso: 3, prioridade: 33)
+      ✅ Citação, notificação e intimação (peso: 3, prioridade: 33)
+      ✅ Prisão temporária (peso: 4, prioridade: 34)
+      ✅ Prisão em flagrante (peso: 4, prioridade: 34)
+      ✅ Prisão preventiva (peso: 5, prioridade: 35)
+      ✅ Liberdade Provisória e Fiança (peso: 4, prioridade: 34)
+      ✅ Despachos e decisões interlocutórias (peso: 3, prioridade: 33)
+      ✅ Sentença penal (peso: 4, prioridade: 34)
+      ✅ Apelação criminal (peso: 4, prioridade: 34)
+      ✅ Recurso em Sentido Estrito (peso: 3, prioridade: 33)
+      ✅ Habeas Corpus (peso: 4, prioridade: 34)
+      ✅ Mandado de Segurança criminal (peso: 3, prioridade: 33)
+
+   📚 Adicionando: Legislação Específica TJPE (peso 4)
+   ✅ Disciplina adicionada (ID: 677)
+      ✅ Regimento Interno do TJPE - Resolução 395/2017 (peso: 5, prioridade: 45)
+      ✅ Código de Organização Judiciária de PE - LC 100/2007 (peso: 5, prioridade: 45)
+      ✅ Regime Jurídico dos Servidores de PE - Lei 6.123/1968 (peso: 5, prioridade: 45)
+      ✅ Sistema PJe - Resolução CNJ 185/2013 (peso: 4, prioridade: 44)
+      ✅ Informatização do Processo - Lei 11.419/2006 (peso: 3, prioridade: 43)
+
+   📊 Resumo:
+      Disciplinas adicionadas: 9/9
+      Tópicos adicionados: 145/145
+
+📅 ETAPA 5: GERAÇÃO DO CRONOGRAMA
+----------------------------------------
+   Configurações do cronograma:
+   - Data início: 2025-08-27
+   - Data concurso: 2025-11-21
+   - Horas por dia: 4
+   - Dias disponíveis: Seg-Sáb
+✅ Cronograma gerado com sucesso
+
+⚙️ ETAPA 6: ANÁLISE DO ALGORITMO ROUND-ROBIN PONDERADO
+----------------------------------------
+✅ 182 sessões encontradas
+
+   📊 Distribuição por Matéria de Estudo (excluindo simulados/revisões):
+      Direito: 122 sessões (84.1%)
+      Português: 15 sessões (10.3%)
+      Informática: 0 sessões (0.0%)
+      Raciocínio Lógico: 8 sessões (5.5%)
+
+   ✔️ Validação da Ponderação (Round-Robin Ponderado):
+      Ordem de Frequência (Direito >= Português >= RL): ✅
+      Distribuição Proporcional: ✅
+
+      Diagnóstico do Algoritmo: ✅ PARECE CORRETO
+
+✅ ETAPA 7: MARCAÇÃO DE SESSÕES COMO CONCLUÍDAS E ESTATÍSTICAS
+----------------------------------------
+
+   📊 Estatísticas ANTES de completar sessões:
+
+❌ Erro em GET /sessions/statistics/106:
+   Status: 500
+   Mensagem: Request failed with status code 500
+
+   🎯 Marcando sessões como concluídas:
+   ✅ Sessão 6969 marcada como concluída
+      ⏱️ Tempo registrado: 1h
+   ✅ Sessão 6968 marcada como concluída
+      ⏱️ Tempo registrado: 1h
+   ✅ Sessão 6971 marcada como concluída
+      ⏱️ Tempo registrado: 1h
+   ✅ Sessão 6970 marcada como concluída
+      ⏱️ Tempo registrado: 1h
+   ✅ Sessão 6975 marcada como concluída
+      ⏱️ Tempo registrado: 1h
+
+   Total: 5/5 sessões concluídas
+
+   ⏳ Aguardando processamento das estatísticas...
+
+   📊 Estatísticas DEPOIS de completar sessões:
+
+❌ Erro em GET /sessions/statistics/106:
+   Status: 500
+   Mensagem: Request failed with status code 500
+   ❌ Erro ao buscar estatísticas após conclusão
+
+   📝 Verificando progresso de questões:
+      Meta diária: 50 questões
+      Progresso diário: 40 questões (80%)
+      Meta semanal: 300 questões
+      Progresso semanal: 40 questões (13%)
+      ✅ Progresso de questões registrado!
+
+🎮 ETAPA 8: VERIFICAÇÃO DE ESTATÍSTICAS E GAMIFICAÇÃO
+----------------------------------------
+
+   📊 Estado ANTES de completar sessões:
+
+❌ Erro em GET /gamification/profile:
+   Status: undefined
+   Mensagem: timeout of 15000ms exceeded
+
+   ⏳ Aguardando processamento da gamificação...
+
+   📊 Estado DEPOIS de completar sessões:
+
+❌ Erro em GET /gamification/profile:
+   Status: undefined
+   Mensagem: timeout of 15000ms exceeded
+   ❌ Erro ao buscar gamificação após conclusão
+
+   🎲 Testando endpoint alternativo de gamificação do plano:
+
+❌ Erro em GET /gamification/plan/106:
+   Status: 404
+   Mensagem: Request failed with status code 404
+      ⚠️ Endpoint de gamificação do plano não disponível
+
+🏠 ETAPA 9: VERIFICAÇÃO DE CARDS NA HOME E CRONOGRAMA
+----------------------------------------
+
+   📅 Verificando sessões para HOME (hoje):
+      Total de datas com sessões: 74
+      Sessões para hoje (2025-08-27): 0
+
+      📆 Datas futuras com sessões: 74
+         Próxima data: Wed Aug 27 2025 00:00:00 GMT-0300 (Horário Padrão de Brasília) (4 sessões)
+
+   ⚠️ Verificando sessões atrasadas:
+      Sessões atrasadas: 0
+      ✅ Nenhuma sessão atrasada
+
+   📊 Verificando dashboard:
+
+❌ Erro em GET /dashboard:
+   Status: 404
+   Mensagem: Request failed with status code 404
+   ⚠️ Dashboard não disponível (não crítico)
+
+   🗓️ Verificando endpoint alternativo de sessões:
+      Total de sessões via /plans/:id/sessions: 182
+
+      📈 Distribuição por status:
+         Concluído: 5 (2.7%)
+         Pendente: 177 (97.3%)
+
+======================================================================
+📋 RESUMO DO TESTE
+======================================================================
+
+   ✅ Etapas bem-sucedidas: 9/11 (81.8%)
+
+   ❌ Erros encontrados:
+      - Estatísticas das Sessões: Request failed with status code 500
+      - Gamificação: timeout of 15000ms exceeded
+
+⚠️ TESTE COMPLETO COM PROBLEMAS. VERIFICAR ERROS ACIMA.
+
+📁 Resultados salvos em: teste-plataforma-resultado-1756329920663.json
+
+✨ Teste finalizado

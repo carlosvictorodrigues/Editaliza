@@ -1,0 +1,103 @@
+{
+  "timestamp": 1756345255725,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:40:55.939Z",
+      "userId": 141,
+      "email": "teste.completo.1756345255725@editaliza.com"
+    },
+    {
+      "nome": "Login",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:40:56.016Z"
+    },
+    {
+      "nome": "Criar Plano",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:40:56.026Z",
+      "planId": 133,
+      "planName": "TJPE - Analista Judiciário 2025"
+    },
+    {
+      "nome": "Adicionar Disciplinas e Tópicos",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:41:06.384Z",
+      "disciplinasAdicionadas": 9,
+      "topicosAdicionados": 145
+    },
+    {
+      "nome": "Gerar Cronograma",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:41:06.608Z"
+    },
+    {
+      "nome": "Verificar Algoritmo",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:41:06.619Z",
+      "distribuicaoEstudo": {
+        "Direito Administrativo": 22,
+        "Língua Portuguesa": 15,
+        "Direito Civil": 12,
+        "Direito Constitucional": 24,
+        "Direito Processual Civil": 21,
+        "Legislação Específica TJPE": 5,
+        "Raciocínio Lógico": 8,
+        "Direito Penal": 17,
+        "Direito Processual Penal": 21
+      }
+    },
+    {
+      "nome": "Estatísticas das Sessões",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:41:09.007Z",
+      "sessoesConcluidas": 5,
+      "sessoesCompletadasDiff": 5,
+      "horasEstudadasDiff": 5,
+      "estatisticasAtualizadas": true
+    },
+    {
+      "nome": "Marcar Sessões Concluídas",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:41:09.015Z",
+      "sessoesConcluidas": 5
+    },
+    {
+      "nome": "Gamificação",
+      "sucesso": false,
+      "timestamp": "2025-08-28T01:41:11.035Z",
+      "xpBefore": 500,
+      "xpAfter": 500,
+      "xpGanho": 0,
+      "levelBefore": 1,
+      "levelAfter": 1,
+      "streakBefore": 2,
+      "streakAfter": 2,
+      "achievementsBefore": 2,
+      "achievementsAfter": 2,
+      "sessoesConcluidas": 5,
+      "gamificacaoAtualizada": false
+    },
+    {
+      "nome": "Sessões Home",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:41:11.047Z",
+      "totalDates": 74,
+      "todaySessions": 0
+    },
+    {
+      "nome": "Dashboard",
+      "sucesso": true,
+      "timestamp": "2025-08-28T01:41:11.055Z",
+      "aviso": "Endpoint não implementado"
+    }
+  ],
+  "erros": [
+    {
+      "etapa": "Fatal",
+      "erro": "sessionsData is not defined"
+    }
+  ],
+  "sucesso": false
+}

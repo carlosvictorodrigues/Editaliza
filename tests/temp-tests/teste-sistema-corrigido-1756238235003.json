@@ -1,0 +1,24 @@
+{
+  "timestamp": "2025-08-26T19:57:15.003Z",
+  "totalTests": 1,
+  "passed": 0,
+  "failed": 1,
+  "errors": [
+    {
+      "message": "Health Check: FALHOU - Servidor não está saudável",
+      "timestamp": "2025-08-26T19:57:15.053Z"
+    },
+    {
+      "message": "Teste falhou: Servidor não está saudável",
+      "timestamp": "2025-08-26T19:57:15.053Z"
+    }
+  ],
+  "warnings": [],
+  "details": {
+    "Health Check": {
+      "status": "FAILED",
+      "error": "Servidor não está saudável",
+      "stack": "Error: Servidor não está saudável\n    at C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\test-complete-system-fixed.js:116:23\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async SystemTester.test (C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\test-complete-system-fixed.js:58:28)\n    at async SystemTester.testServerHealth (C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\test-complete-system-fixed.js:113:16)\n    at async SystemTester.runAllTests (C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\test-complete-system-fixed.js:352:13)\n    at async main (C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\test-complete-system-fixed.js:441:5)"
+    }
+  }
+}

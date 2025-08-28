@@ -1,7 +1,7 @@
 /**
- * Topic Repository
+ * Topic Repository - CORRIGIDO
  * Centraliza todas as queries relacionadas a tópicos de estudo
- * FASE 3 - Criado manualmente com contexto de negócio adequado
+ * CORREÇÃO: Usando apenas colunas que existem na tabela real
  */
 
 const BaseRepository = require('./base.repository');
@@ -11,10 +11,9 @@ class TopicRepository extends BaseRepository {
         super(db);
     }
 
-    // ======================== CRIAÇÃO E ATUALIZAÇÃO ========================
-
     /**
      * Cria um novo tópico
+     * CORRIGIDO: Usando apenas campos que existem na tabela real
      */
     async createTopic(topicData) {
         const {
@@ -22,7 +21,7 @@ class TopicRepository extends BaseRepository {
             topic_name,
             description,
             priority_weight,
-            difficulty_level,
+            difficulty,
             estimated_hours,
             status
         } = topicData;
@@ -30,10 +29,10 @@ class TopicRepository extends BaseRepository {
         const query = `
             INSERT INTO topics (
                 subject_id, topic_name, description, priority_weight,
-                difficulty_level, estimated_hours, status, completed,
+                difficulty, estimated_hours, status,
                 created_at, updated_at
             ) VALUES (
-                $1, $2, $3, $4, $5, $6, $7, $8,
+                $1, $2, $3, $4, $5, $6, $7,
                 CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
             ) RETURNING id
         `;
@@ -42,11 +41,10 @@ class TopicRepository extends BaseRepository {
             subject_id,
             topic_name,
             description || topic_name,
-            priority_weight || 1,
-            difficulty_level || 'medium',
+            priority_weight || 3,
+            difficulty || 2, // 1=fácil, 2=médio, 3=difícil
             estimated_hours || 2,
-            status || 'pending',
-            0
+            status || 'Pendente'
         ];
 
         return this.create(query, params);
@@ -72,7 +70,7 @@ class TopicRepository extends BaseRepository {
                     subjectId,
                     topic.topic_name,
                     topic.description || topic.topic_name,
-                    topic.priority_weight || 1
+                    topic.priority_weight || 3
                 ]);
                 ids.push(result);
             }
@@ -82,13 +80,13 @@ class TopicRepository extends BaseRepository {
 
     /**
      * Atualiza dados de um tópico
+     * CORRIGIDO: Usando apenas campos que existem
      */
     async updateTopic(topicId, updates) {
         const allowedFields = [
             'topic_name', 'description', 'priority_weight',
-            'difficulty_level', 'estimated_hours', 'status',
-            'completed', 'completion_date', 'notes',
-            'total_questions', 'correct_questions'
+            'difficulty', 'estimated_hours', 'status',
+            'completion_date', 'notes', 'actual_hours'
         ];
 
         const updateData = {};
@@ -116,24 +114,18 @@ class TopicRepository extends BaseRepository {
 
     /**
      * Marca tópico como completo
+     * CORRIGIDO: Usando campo 'status' em vez de 'completed'
      */
     async markAsCompleted(topicId, completionStats = {}) {
         const query = `
             UPDATE topics 
-            SET completed = 1,
-                status = 'completed',
+            SET status = 'Concluído',
                 completion_date = CURRENT_DATE,
-                total_questions = COALESCE($2, total_questions),
-                correct_questions = COALESCE($3, correct_questions),
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = $1
         `;
         
-        return this.update(query, [
-            topicId,
-            completionStats.totalQuestions || null,
-            completionStats.correctQuestions || null
-        ]);
+        return this.update(query, [topicId]);
     }
 
     /**
@@ -142,30 +134,13 @@ class TopicRepository extends BaseRepository {
     async markAsIncomplete(topicId) {
         const query = `
             UPDATE topics 
-            SET completed = 0,
-                status = 'pending',
+            SET status = 'Pendente',
                 completion_date = NULL,
                 updated_at = CURRENT_TIMESTAMP
             WHERE id = $1
         `;
         return this.update(query, [topicId]);
     }
-
-    /**
-     * Atualiza estatísticas de questões
-     */
-    async updateQuestionStats(topicId, totalQuestions, correctQuestions) {
-        const query = `
-            UPDATE topics 
-            SET total_questions = $2,
-                correct_questions = $3,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id = $1
-        `;
-        return this.update(query, [topicId, totalQuestions, correctQuestions]);
-    }
-
-    // ======================== BUSCA E LISTAGEM ========================
 
     /**
      * Busca tópicos por disciplina
@@ -215,7 +190,7 @@ class TopicRepository extends BaseRepository {
             FROM topics t
             JOIN subjects s ON t.subject_id = s.id
             WHERE s.study_plan_id = $1 
-                AND t.status != 'completed'
+                AND t.status != 'Concluído'
             ORDER BY s.priority_weight DESC, t.priority_weight DESC
         `;
         return this.findAll(query, [planId]);
@@ -232,81 +207,26 @@ class TopicRepository extends BaseRepository {
             FROM topics t
             JOIN subjects s ON t.subject_id = s.id
             WHERE s.study_plan_id = $1 
-                AND t.status = 'completed'
+                AND t.status = 'Concluído'
             ORDER BY t.completion_date DESC
         `;
         return this.findAll(query, [planId]);
     }
 
     /**
-     * Busca tópicos por prioridade
-     */
-    async findHighPriorityTopics(planId, limit = 10) {
-        const query = `
-            SELECT 
-                t.*,
-                s.subject_name,
-                (s.priority_weight * t.priority_weight) as combined_priority
-            FROM topics t
-            JOIN subjects s ON t.subject_id = s.id
-            WHERE s.study_plan_id = $1 
-                AND t.status != 'completed'
-            ORDER BY combined_priority DESC
-            LIMIT $2
-        `;
-        return this.findAll(query, [planId, limit]);
-    }
-
-    /**
-     * Busca tópicos com estatísticas
-     */
-    async findWithStatistics(subjectId) {
-        const query = `
-            SELECT 
-                t.*,
-                COALESCE(ss.study_time_seconds, 0) as total_study_time,
-                COALESCE(ss.sessions_count, 0) as sessions_count,
-                ROUND(
-                    t.correct_questions * 100.0 / 
-                    NULLIF(t.total_questions, 0), 2
-                ) as accuracy_percentage
-            FROM topics t
-            LEFT JOIN (
-                SELECT 
-                    topic_id,
-                    SUM(time_studied_seconds) as study_time_seconds,
-                    COUNT(*) as sessions_count
-                FROM study_sessions
-                WHERE topic_id IS NOT NULL
-                GROUP BY topic_id
-            ) ss ON t.id = ss.topic_id
-            WHERE t.subject_id = $1
-            ORDER BY t.priority_weight DESC
-        `;
-        return this.findAll(query, [subjectId]);
-    }
-
-    // ======================== ESTATÍSTICAS ========================
-
-    /**
      * Estatísticas gerais dos tópicos
+     * CORRIGIDO: Removido referências a colunas inexistentes
      */
     async getTopicStatistics(planId) {
         const query = `
             SELECT 
                 COUNT(*) as total_topics,
-                COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_topics,
-                COUNT(CASE WHEN completed = 0 THEN 1 END) as pending_topics,
+                COUNT(CASE WHEN status = 'Concluído' THEN 1 END) as completed_topics,
+                COUNT(CASE WHEN status != 'Concluído' THEN 1 END) as pending_topics,
                 ROUND(
-                    COUNT(CASE WHEN status = 'completed' THEN 1 END) * 100.0 / 
+                    COUNT(CASE WHEN status = 'Concluído' THEN 1 END) * 100.0 / 
                     NULLIF(COUNT(*), 0), 2
-                ) as completion_percentage,
-                SUM(total_questions) as total_questions,
-                SUM(correct_questions) as correct_questions,
-                ROUND(
-                    SUM(correct_questions) * 100.0 / 
-                    NULLIF(SUM(total_questions), 0), 2
-                ) as overall_accuracy
+                ) as completion_percentage
             FROM topics t
             JOIN subjects s ON t.subject_id = s.id
             WHERE s.study_plan_id = $1
@@ -323,9 +243,9 @@ class TopicRepository extends BaseRepository {
                 s.id as subject_id,
                 s.subject_name,
                 COUNT(t.id) as total_topics,
-                COUNT(CASE WHEN t.status = 'completed' THEN 1 END) as completed_topics,
+                COUNT(CASE WHEN t.status = 'Concluído' THEN 1 END) as completed_topics,
                 ROUND(
-                    COUNT(CASE WHEN t.status = 'completed' THEN 1 END) * 100.0 / 
+                    COUNT(CASE WHEN t.status = 'Concluído' THEN 1 END) * 100.0 / 
                     NULLIF(COUNT(t.id), 0), 2
                 ) as progress_percentage
             FROM subjects s
@@ -338,106 +258,12 @@ class TopicRepository extends BaseRepository {
     }
 
     /**
-     * Tópicos mais difíceis (menor taxa de acerto)
-     */
-    async findMostDifficultTopics(planId, limit = 5) {
-        const query = `
-            SELECT 
-                t.*,
-                s.subject_name,
-                ROUND(
-                    t.correct_questions * 100.0 / 
-                    NULLIF(t.total_questions, 0), 2
-                ) as accuracy_percentage
-            FROM topics t
-            JOIN subjects s ON t.subject_id = s.id
-            WHERE s.study_plan_id = $1 
-                AND t.total_questions > 0
-            ORDER BY accuracy_percentage ASC
-            LIMIT $2
-        `;
-        return this.findAll(query, [planId, limit]);
-    }
-
-    // ======================== RETA FINAL ========================
-
-    /**
-     * Adiciona tópico à lista de excluídos da reta final
-     */
-    async excludeFromRetaFinal(planId, topicId, reason = 'manual') {
-        // Buscar subject_id do tópico
-        const topic = await this.findOne(
-            'SELECT subject_id FROM topics WHERE id = $1',
-            [topicId]
-        );
-
-        if (!topic) {
-            throw new Error('Tópico não encontrado');
-        }
-
-        const query = `
-            INSERT INTO reta_final_excluded_topics 
-                (plan_id, subject_id, topic_id, reason, created_at)
-            VALUES 
-                ($1, $2, $3, $4, CURRENT_TIMESTAMP)
-            ON CONFLICT (plan_id, topic_id) DO UPDATE SET
-                reason = EXCLUDED.reason,
-                created_at = CURRENT_TIMESTAMP
-        `;
-        
-        return this.create(query, [planId, topic.subject_id, topicId, reason]);
-    }
-
-    /**
-     * Remove tópico da lista de excluídos
-     */
-    async includeInRetaFinal(planId, topicId) {
-        const query = `
-            DELETE FROM reta_final_excluded_topics 
-            WHERE plan_id = $1 AND topic_id = $2
-        `;
-        return this.delete(query, [planId, topicId]);
-    }
-
-    /**
-     * Limpa todos os tópicos excluídos
-     */
-    async clearExcludedTopics(planId) {
-        const query = `DELETE FROM reta_final_excluded_topics WHERE plan_id = $1`;
-        return this.delete(query, [planId]);
-    }
-
-    /**
-     * Busca tópicos excluídos da reta final
-     */
-    async getExcludedTopics(planId) {
-        const query = `
-            SELECT 
-                e.*,
-                t.topic_name,
-                t.priority_weight,
-                s.subject_name
-            FROM reta_final_excluded_topics e
-            JOIN topics t ON e.topic_id = t.id
-            JOIN subjects s ON t.subject_id = s.id
-            WHERE e.plan_id = $1
-            ORDER BY s.priority_weight DESC, t.priority_weight DESC
-        `;
-        return this.findAll(query, [planId]);
-    }
-
-    // ======================== DELEÇÃO ========================
-
-    /**
      * Deleta um tópico e dados relacionados
      */
     async deleteWithRelatedData(topicId) {
         return this.transaction(async (repo) => {
             // Deletar sessões de estudo relacionadas
             await repo.delete('DELETE FROM study_sessions WHERE topic_id = $1', [topicId]);
-            
-            // Deletar exclusões da reta final
-            await repo.delete('DELETE FROM reta_final_excluded_topics WHERE topic_id = $1', [topicId]);
             
             // Deletar o tópico
             await repo.delete('DELETE FROM topics WHERE id = $1', [topicId]);
@@ -453,8 +279,6 @@ class TopicRepository extends BaseRepository {
         const query = `DELETE FROM topics WHERE subject_id = $1`;
         return this.delete(query, [subjectId]);
     }
-
-    // ======================== VALIDAÇÃO ========================
 
     /**
      * Verifica se tópico existe
@@ -478,7 +302,7 @@ class TopicRepository extends BaseRepository {
             SELECT COUNT(t.id) as count
             FROM topics t
             JOIN subjects s ON t.subject_id = s.id
-            WHERE s.study_plan_id = $1 AND t.status != 'completed'
+            WHERE s.study_plan_id = $1 AND t.status != 'Concluído'
         `;
         const result = await this.findOne(query, [planId]);
         return result.count;

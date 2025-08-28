@@ -1,0 +1,54 @@
+{
+  "createAccount": {
+    "status": "✅",
+    "details": "Conta criada e login realizado com sucesso",
+    "data": {
+      "userId": 19,
+      "email": "teste_1756202810420@editaliza.com.br",
+      "tokenReceived": true
+    }
+  },
+  "login": {
+    "status": "✅",
+    "details": "JWT token válido e acesso a rotas protegidas",
+    "data": {
+      "token": true,
+      "protectedRoute": true
+    }
+  },
+  "createPlan": {
+    "status": "❌",
+    "details": "Request failed with status code 500",
+    "data": null
+  },
+  "generateSchedule": {
+    "status": "❌",
+    "details": "Plan ID não disponível",
+    "data": null
+  },
+  "verifyInterface": {
+    "status": "✅",
+    "details": "Páginas acessíveis e dados do plano disponíveis",
+    "data": {
+      "homeAccessible": true,
+      "cronogramaAccessible": true,
+      "planDataAvailable": false
+    }
+  },
+  "markSessions": {
+    "status": "❌",
+    "details": "Sessões não disponíveis",
+    "data": null
+  },
+  "verifyStats": {
+    "status": "✅",
+    "details": "Sistema de estatísticas e gamificação funcionando",
+    "data": {
+      "statsAvailable": false,
+      "progressTracking": false,
+      "gamificationActive": true,
+      "xpGained": false
+    }
+  },
+  "overallStatus": "❌"
+}

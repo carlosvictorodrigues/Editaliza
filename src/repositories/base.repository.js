@@ -9,6 +9,16 @@ class BaseRepository {
         if (!db) {
             throw new Error('Database instance is required for repository');
         }
+        
+        // DEBUG: Ver que tipo de db está sendo passado
+        console.log('[BASE_REPOSITORY] Inicializado com db:', {
+            constructor: db.constructor?.name,
+            hasRun: typeof db.run,
+            hasGet: typeof db.get,
+            hasAll: typeof db.all,
+            isAdapter: !!db.legacyDbRun
+        });
+        
         this.db = db;
     }
 
@@ -41,15 +51,34 @@ class BaseRepository {
 
     /**
      * Executa uma query INSERT e retorna o ID inserido
-     * FASE 4.1 - Corrigido para usar interface PostgreSQL Promise
+     * FASE 4.1 - CORRIGIDO PARA POSTGRESQL
      */
     async create(query, params = []) {
         try {
-            // Usar db.run sem callback retorna Promise
-            const result = await this.db.run(query, params);
-            return result.lastID || result.id;
+            console.log('[BASE_REPO] CREATE - Query:', query.substring(0, 100) + '...');
+            console.log('[BASE_REPO] CREATE - Params:', params);
+            
+            // Para PostgreSQL, sempre use RETURNING para obter ID
+            let finalQuery = query;
+            if (!query.toUpperCase().includes('RETURNING') && query.toUpperCase().includes('INSERT')) {
+                finalQuery = query.replace(/;?$/, ' RETURNING id;');
+                console.log('[BASE_REPO] CREATE - Adicionado RETURNING id');
+            }
+            
+            const result = await this.db.get(finalQuery, params);
+            console.log('[BASE_REPO] CREATE - Result:', result);
+            
+            // Para PostgreSQL com RETURNING, retorna o ID diretamente
+            if (result && result.id !== undefined) {
+                console.log('[BASE_REPO] CREATE - ID encontrado:', result.id, typeof result.id);
+                return result.id;
+            }
+            
+            // Fallback
+            console.warn('[BASE_REPO] CREATE - ID não encontrado no result, usando fallback');
+            return result?.lastID || result;
         } catch (error) {
-            console.error('Repository create error:', error);
+            console.error('[BASE_REPO] Repository create error:', error);
             throw this.handleDatabaseError(error);
         }
     }

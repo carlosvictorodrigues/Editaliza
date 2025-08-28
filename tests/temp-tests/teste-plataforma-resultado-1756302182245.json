@@ -1,0 +1,33 @@
+{
+  "timestamp": 1756302182245,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": true,
+      "timestamp": "2025-08-27T13:43:02.429Z",
+      "userId": 51,
+      "email": "teste.completo.1756302182245@editaliza.com"
+    },
+    {
+      "nome": "Login",
+      "sucesso": true,
+      "timestamp": "2025-08-27T13:43:02.508Z"
+    },
+    {
+      "nome": "Criar Plano",
+      "sucesso": true,
+      "timestamp": "2025-08-27T13:43:02.525Z",
+      "planId": 45,
+      "planName": "Concurso TRF - Teste Completo"
+    },
+    {
+      "nome": "Adicionar Disciplinas e Tópicos",
+      "sucesso": false,
+      "timestamp": "2025-08-27T13:43:02.538Z",
+      "disciplinasAdicionadas": 0,
+      "topicosAdicionados": 0
+    }
+  ],
+  "erros": [],
+  "sucesso": false
+}

@@ -382,7 +382,7 @@ const getUserStatistics = async (userId) => {
     
     // Calculate streak (simplified - would need more complex logic for real streaks)
     const streakSQL = db.isPostgreSQL 
-        ? `SELECT COUNT(DISTINCT DATE(created_at)) as streak_days 
+        ? `SELECT COUNT(DISTINCT created_at::date) as streak_days 
         FROM user_activities 
         WHERE user_id = $1 AND created_at >= CURRENT_DATE - INTERVAL '30 days'`
         : `SELECT COUNT(DISTINCT DATE(created_at)) as streak_days 

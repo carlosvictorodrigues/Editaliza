@@ -19,23 +19,32 @@ const { systemLogger } = require('../utils/logger');
 // =====================================================
 
 const CACHE_CONFIG = {
-    // TTL padrão para diferentes tipos de dados
+    // TTL ultra-agressivo para performance sub-segundo
     TTL: {
-        users: 2 * 60 * 1000,        // 2 minutos - dados que mudam frequentemente
-        metrics: 5 * 60 * 1000,      // 5 minutos - métricas agregadas
-        system: 10 * 60 * 1000,      // 10 minutos - configurações do sistema
-        config: 30 * 60 * 1000,      // 30 minutos - dados estáticos
-        audit: 1 * 60 * 1000         // 1 minuto - logs de auditoria
+        users: 60 * 1000,           // 60 segundos - cache mais longo
+        metrics: 5 * 60 * 1000,     // 5 minutos - métricas são estáticas
+        system: 10 * 60 * 1000,     // 10 minutos - configurações
+        config: 30 * 60 * 1000,     // 30 minutos - dados raramente mudam
+        audit: 2 * 60 * 1000,       // 2 minutos - logs
+        health: 30 * 1000           // 30 segundos - health check
     },
     
-    // Tamanho máximo do cache
-    MAX_SIZE: 1000,
+    // Cache ultra-agressivo para performance
+    MAX_SIZE: 5000,                  // 5x mais cache
+    MAX_MEMORY_MB: 100,              // 100MB de cache
     
-    // Configurações de limpeza
-    CLEANUP_INTERVAL: 5 * 60 * 1000, // 5 minutos
+    // Configurações de limpeza otimizada
+    CLEANUP_INTERVAL: 2 * 60 * 1000, // 2 minutos - mais frequente
     
-    // Configurações de cache warming
-    WARM_INTERVAL: 2 * 60 * 1000     // 2 minutos
+    // Cache warming agressivo
+    WARM_INTERVAL: 30 * 1000,        // 30 segundos
+    
+    // Compressão para economizar memória
+    COMPRESSION_THRESHOLD: 1024,     // Comprimir dados > 1KB
+    
+    // Performance thresholds
+    SLOW_QUERY_THRESHOLD: 500,       // 500ms = query lenta
+    CACHE_HIT_TARGET: 80            // 80% hit rate target
 };
 
 // =====================================================
@@ -82,7 +91,7 @@ class AdminCache {
     }
     
     /**
-     * Buscar item no cache
+     * Buscar item no cache com descompressão automática
      */
     get(key) {
         const item = this.cache.get(key);
@@ -102,35 +111,86 @@ class AdminCache {
         
         this.stats.hits++;
         
-        // Atualizar último acesso
+        // Atualizar estatísticas de uso
         item.lastAccessed = Date.now();
+        item.hitCount = (item.hitCount || 0) + 1;
         
-        return item.data;
+        // Descompressão automática
+        let data = item.data;
+        if (item.compressed && data && data._compressed) {
+            try {
+                data = JSON.parse(data._data);
+            } catch (decompError) {
+                systemLogger.error('Cache decompression error', { error: decompError.message, key });
+                // Remover item corrompido
+                this.cache.delete(key);
+                this.stats.misses++; // Contar como miss
+                return null;
+            }
+        }
+        
+        return data;
     }
     
     /**
-     * Armazenar item no cache
+     * Armazenar item no cache com compressão inteligente
      */
-    set(key, data, ttl = CACHE_CONFIG.TTL.metrics, tags = []) {
-        // Verificar limite de tamanho
-        if (this.cache.size >= CACHE_CONFIG.MAX_SIZE) {
-            this.evictOldest();
+    set(key, data, ttl = CACHE_CONFIG.TTL.users, tags = []) {
+        try {
+            // Verificar limite de tamanho e memória
+            if (this.cache.size >= CACHE_CONFIG.MAX_SIZE) {
+                this.evictOldest();
+            }
+            
+            // Verificar limite de memória
+            if (this.getMemoryUsageMB() > CACHE_CONFIG.MAX_MEMORY_MB) {
+                this.evictLargest();
+            }
+            
+            const rawSize = this.estimateSize(data);
+            let processedData = data;
+            let compressed = false;
+            
+            // Compressão automática para objetos grandes
+            if (rawSize > CACHE_CONFIG.COMPRESSION_THRESHOLD && data && typeof data === 'object') {
+                try {
+                    // Compressão simples: stringify + básico
+                    const jsonString = JSON.stringify(data);
+                    if (jsonString.length > rawSize * 0.8) { // Só comprimir se valer a pena
+                        processedData = {
+                            _compressed: true,
+                            _data: jsonString
+                        };
+                        compressed = true;
+                    }
+                } catch (compError) {
+                    // Falha na compressão: usar dados originais
+                    processedData = data;
+                }
+            }
+            
+            const item = {
+                data: processedData,
+                createdAt: Date.now(),
+                lastAccessed: Date.now(),
+                expiresAt: Date.now() + ttl,
+                tags: Array.isArray(tags) ? tags : [tags],
+                size: this.estimateSize(processedData),
+                originalSize: rawSize,
+                compressed,
+                hitCount: 0
+            };
+            
+            this.cache.set(key, item);
+            this.stats.sets++;
+            this.stats.size = this.cache.size;
+            
+            return true;
+            
+        } catch (error) {
+            systemLogger.error('Cache set error', { error: error.message, key });
+            return false;
         }
-        
-        const item = {
-            data,
-            createdAt: Date.now(),
-            lastAccessed: Date.now(),
-            expiresAt: Date.now() + ttl,
-            tags: Array.isArray(tags) ? tags : [tags],
-            size: this.estimateSize(data)
-        };
-        
-        this.cache.set(key, item);
-        this.stats.sets++;
-        this.stats.size = this.cache.size;
-        
-        return true;
     }
     
     /**
@@ -198,23 +258,69 @@ class AdminCache {
     }
     
     /**
-     * Remover item mais antigo (LRU)
+     * Remover item mais antigo (LRU inteligente)
      */
     evictOldest() {
-        let oldestKey = null;
+        let targetKey = null;
         let oldestTime = Date.now();
+        let lowestValue = Infinity;
         
+        // LRU com peso por hit count e tamanho
         for (const [key, item] of this.cache.entries()) {
+            const age = Date.now() - item.lastAccessed;
+            const hitRate = item.hitCount / Math.max(1, Date.now() - item.createdAt) * 1000;
+            const value = hitRate / Math.max(1, item.size); // Valor por byte
+            
+            if (age > 60000 && value < lowestValue) { // Priorizar itens antigos com baixo valor
+                lowestValue = value;
+                targetKey = key;
+            }
+            
             if (item.lastAccessed < oldestTime) {
                 oldestTime = item.lastAccessed;
-                oldestKey = key;
+                if (!targetKey) targetKey = key; // Fallback
             }
         }
         
-        if (oldestKey) {
-            this.cache.delete(oldestKey);
+        if (targetKey) {
+            this.cache.delete(targetKey);
             this.stats.deletes++;
+            this.stats.evictions = (this.stats.evictions || 0) + 1;
         }
+    }
+    
+    /**
+     * Remover item maior para liberar memória
+     */
+    evictLargest() {
+        let largestKey = null;
+        let largestSize = 0;
+        
+        for (const [key, item] of this.cache.entries()) {
+            if (item.size > largestSize) {
+                largestSize = item.size;
+                largestKey = key;
+            }
+        }
+        
+        if (largestKey) {
+            this.cache.delete(largestKey);
+            this.stats.deletes++;
+            this.stats.evictions = (this.stats.evictions || 0) + 1;
+        }
+    }
+    
+    /**
+     * Calcular uso de memória em MB
+     */
+    getMemoryUsageMB() {
+        let totalSize = 0;
+        for (const [key, item] of this.cache.entries()) {
+            totalSize += key.length * 2; // chars = 2 bytes
+            totalSize += item.size;
+            totalSize += 200; // overhead estimado do objeto
+        }
+        return totalSize / (1024 * 1024);
     }
     
     /**
@@ -229,18 +335,97 @@ class AdminCache {
     }
     
     /**
-     * Obter estatísticas do cache
+     * Obter estatísticas avançadas do cache
      */
     getStats() {
         const totalRequests = this.stats.hits + this.stats.misses;
         const hitRate = totalRequests > 0 ? (this.stats.hits / totalRequests * 100).toFixed(2) : '0.00';
+        const memoryMB = this.getMemoryUsageMB();
+        
+        // Calcular estatísticas avançadas
+        let totalHits = 0;
+        let compressedItems = 0;
+        let totalOriginalSize = 0;
+        let totalCompressedSize = 0;
+        
+        for (const [key, item] of this.cache.entries()) {
+            totalHits += item.hitCount || 0;
+            if (item.compressed) {
+                compressedItems++;
+                totalOriginalSize += item.originalSize || 0;
+                totalCompressedSize += item.size;
+            }
+        }
+        
+        const compressionRatio = totalOriginalSize > 0 ? 
+            ((totalOriginalSize - totalCompressedSize) / totalOriginalSize * 100).toFixed(1) : '0.0';
         
         return {
             ...this.stats,
             hitRate: `${hitRate}%`,
-            memoryUsage: this.estimateMemoryUsage(),
-            uptime: Date.now() - this.startTime || Date.now()
+            hitRateNumeric: parseFloat(hitRate),
+            memoryUsage: `${memoryMB.toFixed(2)} MB`,
+            memoryUsageMB: memoryMB,
+            uptime: Date.now() - (this.startTime || Date.now()),
+            evictions: this.stats.evictions || 0,
+            compression: {
+                enabled: true,
+                compressedItems,
+                totalItems: this.cache.size,
+                compressionRatio: `${compressionRatio}%`,
+                savedBytes: totalOriginalSize - totalCompressedSize
+            },
+            performance: {
+                avgHitsPerItem: this.cache.size > 0 ? (totalHits / this.cache.size).toFixed(1) : '0.0',
+                healthStatus: this.getHealthStatus(),
+                recommendations: this.getRecommendations()
+            }
         };
+    }
+    
+    /**
+     * Status de saúde do cache
+     */
+    getHealthStatus() {
+        const hitRate = this.stats.hits / Math.max(1, this.stats.hits + this.stats.misses) * 100;
+        const memoryUsage = this.getMemoryUsageMB();
+        
+        if (hitRate >= CACHE_CONFIG.CACHE_HIT_TARGET && memoryUsage < CACHE_CONFIG.MAX_MEMORY_MB * 0.8) {
+            return 'excellent';
+        } else if (hitRate >= 60 && memoryUsage < CACHE_CONFIG.MAX_MEMORY_MB * 0.9) {
+            return 'good';
+        } else if (hitRate >= 40) {
+            return 'fair';
+        } else {
+            return 'poor';
+        }
+    }
+    
+    /**
+     * Recomendações de otimização
+     */
+    getRecommendations() {
+        const recommendations = [];
+        const hitRate = this.stats.hits / Math.max(1, this.stats.hits + this.stats.misses) * 100;
+        const memoryUsage = this.getMemoryUsageMB();
+        
+        if (hitRate < CACHE_CONFIG.CACHE_HIT_TARGET) {
+            recommendations.push('Considere aumentar TTL para melhor hit rate');
+        }
+        
+        if (memoryUsage > CACHE_CONFIG.MAX_MEMORY_MB * 0.8) {
+            recommendations.push('Uso de memória alto - considere ajustar MAX_SIZE');
+        }
+        
+        if (this.stats.evictions > this.stats.sets * 0.1) {
+            recommendations.push('Muitas evictions - considere aumentar MAX_SIZE');
+        }
+        
+        if (recommendations.length === 0) {
+            recommendations.push('Cache funcionando otimamente');
+        }
+        
+        return recommendations;
     }
     
     /**
@@ -303,12 +488,22 @@ const adminCache = new AdminCache();
 // =====================================================
 
 /**
- * Middleware para cache de leitura
+ * Middleware para cache de leitura com performance otimizada
  */
-const cacheGet = (cacheType = 'metrics', ttl = null, tags = []) => {
+const cacheGet = (cacheType = 'users', ttl = null, tags = []) => {
     return (req, res, next) => {
+        const startTime = Date.now();
+        
         // Skip cache se explicitamente solicitado
-        if (req.query.no_cache === 'true' || req.headers['cache-control'] === 'no-cache') {
+        if (req.query.no_cache === 'true' || 
+            req.headers['cache-control'] === 'no-cache' || 
+            req.headers['pragma'] === 'no-cache') {
+            
+            systemLogger.debug('Cache bypassed', {
+                reason: 'explicit_no_cache',
+                adminId: req.user?.id
+            });
+            
             return next();
         }
         
@@ -316,43 +511,94 @@ const cacheGet = (cacheType = 'metrics', ttl = null, tags = []) => {
         const cachedData = adminCache.get(cacheKey);
         
         if (cachedData) {
-            // Cache hit - retornar dados em cache
-            systemLogger.debug('Cache hit', {
+            const responseTime = Date.now() - startTime;
+            
+            // Cache hit - performance excelente
+            systemLogger.debug('Cache hit - ultra fast response', {
                 key: cacheKey,
+                responseTime: `${responseTime}ms`,
+                cacheType,
                 adminId: req.user?.id
+            });
+            
+            // Headers HTTP para cache
+            res.set({
+                'X-Cache': 'HIT',
+                'X-Cache-Type': cacheType,
+                'X-Response-Time': `${responseTime}ms`,
+                'Cache-Control': 'public, max-age=' + Math.floor((CACHE_CONFIG.TTL[cacheType] || 30000) / 1000),
+                'ETag': `"${cacheKey.substring(0, 16)}"`
             });
             
             return res.json({
                 ...cachedData,
                 _cache: {
                     hit: true,
-                    timestamp: new Date().toISOString()
+                    responseTime: `${responseTime}ms`,
+                    timestamp: new Date().toISOString(),
+                    cacheKey: cacheKey.substring(0, 32) + '...'
                 }
             });
         }
         
         // Cache miss - interceptar response para cache
         const originalJson = res.json;
+        const queryStartTime = Date.now();
         
         res.json = function(data) {
+            const totalTime = Date.now() - startTime;
+            const queryTime = Date.now() - queryStartTime;
+            
+            // Headers HTTP para cache miss
+            res.set({
+                'X-Cache': 'MISS',
+                'X-Cache-Type': cacheType,
+                'X-Response-Time': `${totalTime}ms`,
+                'X-Query-Time': `${queryTime}ms`
+            });
+            
             // Armazenar no cache apenas se for sucesso
             if (res.statusCode >= 200 && res.statusCode < 300) {
-                const cacheTtl = ttl || CACHE_CONFIG.TTL[cacheType] || CACHE_CONFIG.TTL.metrics;
+                const cacheTtl = ttl || CACHE_CONFIG.TTL[cacheType] || CACHE_CONFIG.TTL.users;
                 
-                adminCache.set(cacheKey, data, cacheTtl, tags);
+                const cacheSuccess = adminCache.set(cacheKey, data, cacheTtl, tags);
                 
-                systemLogger.debug('Cache miss - stored', {
-                    key: cacheKey,
-                    ttl: cacheTtl,
-                    tags,
-                    adminId: req.user?.id
-                });
+                if (cacheSuccess) {
+                    systemLogger.debug('Cache miss - stored successfully', {
+                        key: cacheKey,
+                        ttl: cacheTtl,
+                        queryTime: `${queryTime}ms`,
+                        tags,
+                        adminId: req.user?.id
+                    });
+                } else {
+                    systemLogger.warn('Cache storage failed', {
+                        key: cacheKey,
+                        adminId: req.user?.id
+                    });
+                }
                 
-                // Adicionar metadata de cache
-                data._cache = {
-                    hit: false,
-                    timestamp: new Date().toISOString()
-                };
+                // Adicionar metadata de cache detalhada
+                if (data && typeof data === 'object') {
+                    data._cache = {
+                        hit: false,
+                        stored: cacheSuccess,
+                        responseTime: `${totalTime}ms`,
+                        queryTime: `${queryTime}ms`,
+                        ttl: cacheTtl,
+                        timestamp: new Date().toISOString()
+                    };
+                }
+                
+                // Performance warning para queries lentas
+                if (queryTime > CACHE_CONFIG.SLOW_QUERY_THRESHOLD) {
+                    systemLogger.warn('Slow query detected in admin endpoint', {
+                        endpoint: req.originalUrl,
+                        queryTime: `${queryTime}ms`,
+                        adminId: req.user?.id,
+                        cacheKey
+                    });
+                }
             }
             
             return originalJson.call(this, data);
@@ -443,10 +689,10 @@ const cacheClear = (req, res) => {
 // =====================================================
 
 const ROUTE_CACHE_CONFIG = {
-    // Usuários - cache por 2 minutos, invalidar em mudanças de usuário
+    // Usuários - cache agressivo por 30s, invalidar em mudanças de usuário
     users: {
-        get: cacheGet('users', CACHE_CONFIG.TTL.users, ['users']),
-        invalidate: cacheInvalidate(['users'])
+        get: cacheGet('users', CACHE_CONFIG.TTL.users, ['users', 'admin']),
+        invalidate: cacheInvalidate(['users', 'admin'])
     },
     
     // Métricas do sistema - cache por 5 minutos

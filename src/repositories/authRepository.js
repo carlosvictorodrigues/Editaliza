@@ -143,36 +143,46 @@ const createUser = async (userData) => {
         params = [email, passwordHash, name || null, currentDate];
     }
     
-    const result = await executeQuery('run', sql, params, 'createUser');
-    
-    // Adaptação para obter userId
-    let userId;
-    
-    if (db.isPostgreSQL) {
-        // No PostgreSQL com RETURNING, o ID vem no resultado
-        if (result && result.rows && result.rows[0]) {
-            userId = result.rows[0].id;
+    try {
+        const result = await executeQuery('run', sql, params, 'createUser');
+        
+        // Adaptação para obter userId
+        let userId;
+        
+        if (db.isPostgreSQL) {
+            // No PostgreSQL com RETURNING, o ID vem diretamente no lastID
+            userId = result.lastID;
+            
+            // Se não tiver lastID, tentar obter do rows
+            if (!userId && result && result.rows && result.rows[0]) {
+                userId = result.rows[0].id;
+            }
         } else {
-            // Fallback: buscar último ID inserido
-            const lastIdResult = await executeQuery('get', 'SELECT lastval() as id', [], 'createUser_lastval');
-            userId = lastIdResult?.id;
+            // SQLite tradicional
+            userId = result.lastID || result.lastInsertRowid;
         }
-    } else {
-        // SQLite tradicional
-        userId = result.lastID || result.lastInsertRowid;
-    }
-    
-    if (userId) {
-        securityLog('auth_repository_user_created', {
-            userId,
+        
+        if (userId) {
+            securityLog('auth_repository_user_created', {
+                userId,
+                email,
+                dialect: db.dialect
+            });
+            
+            // Buscar usuário criado diretamente
+            return await findUserById(userId);
+        }
+        
+        throw new Error('Failed to create user - no ID returned');
+        
+    } catch (error) {
+        securityLog('auth_repository_create_user_error', {
+            error: error.message,
             email,
             dialect: db.dialect
         });
-        
-        return await findUserById(userId);
+        throw error;
     }
-    
-    throw new Error('Failed to create user - no ID returned');
 };
 
 /**
@@ -194,34 +204,46 @@ const createGoogleUser = async (profileData) => {
         params = [email, name, googleId, avatar, currentDate];
     }
     
-    const result = await executeQuery('run', sql, params, 'createGoogleUser');
-    
-    // Adaptação para obter userId
-    let userId;
-    
-    if (db.isPostgreSQL) {
-        if (result && result.rows && result.rows[0]) {
-            userId = result.rows[0].id;
+    try {
+        const result = await executeQuery('run', sql, params, 'createGoogleUser');
+        
+        // Adaptação para obter userId
+        let userId;
+        
+        if (db.isPostgreSQL) {
+            // No PostgreSQL com RETURNING, o ID vem diretamente no lastID
+            userId = result.lastID;
+            
+            // Se não tiver lastID, tentar obter do rows
+            if (!userId && result && result.rows && result.rows[0]) {
+                userId = result.rows[0].id;
+            }
         } else {
-            const lastIdResult = await executeQuery('get', 'SELECT lastval() as id', [], 'createGoogleUser_lastval');
-            userId = lastIdResult?.id;
+            userId = result.lastID || result.lastInsertRowid;
         }
-    } else {
-        userId = result.lastID || result.lastInsertRowid;
-    }
-    
-    if (userId) {
-        securityLog('auth_repository_google_user_created', {
-            userId,
+        
+        if (userId) {
+            securityLog('auth_repository_google_user_created', {
+                userId,
+                email,
+                googleId,
+                dialect: db.dialect
+            });
+            
+            return await findUserById(userId);
+        }
+        
+        throw new Error('Failed to create Google user - no ID returned');
+        
+    } catch (error) {
+        securityLog('auth_repository_create_google_user_error', {
+            error: error.message,
             email,
             googleId,
             dialect: db.dialect
         });
-        
-        return await findUserById(userId);
+        throw error;
     }
-    
-    throw new Error('Failed to create Google user - no ID returned');
 };
 
 /**

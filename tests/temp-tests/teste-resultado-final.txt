@@ -1,0 +1,132 @@
+🚀 Iniciando teste completo da plataforma Editaliza...
+
+======================================================================
+🚀 TESTE COMPLETO DA PLATAFORMA EDITALIZA
+======================================================================
+Timestamp: 2025-08-27T11:51:19.664Z
+
+
+📝 ETAPA 1: REGISTRO DE NOVO USUÁRIO
+----------------------------------------
+✅ Usuário registrado com sucesso
+   Email: teste.completo.1756295479662@editaliza.com
+   User ID: 22
+   Token: Recebido
+
+🔐 ETAPA 2: LOGIN
+----------------------------------------
+✅ Login realizado com sucesso
+   Token atualizado: Sim
+
+📚 ETAPA 3: CRIAÇÃO DO PLANO DE ESTUDOS
+----------------------------------------
+✅ Plano criado com sucesso
+   Plan ID: 16
+   Nome: Concurso TRF - Teste Completo
+   Data do concurso: 2025-11-27
+
+📖 ETAPA 4: ADIÇÃO DE DISCIPLINAS E TÓPICOS
+----------------------------------------
+
+   📚 Adicionando: Direito Constitucional (peso 5)
+   ✅ Disciplina adicionada (ID: 202)
+      ✅ Princípios Fundamentais (peso: 5, prioridade: 55)
+      ✅ Direitos e Garantias Fundamentais (peso: 4, prioridade: 54)
+      ✅ Organização do Estado (peso: 4, prioridade: 54)
+      ✅ Organização dos Poderes (peso: 3, prioridade: 53)
+
+   📚 Adicionando: Português (peso 4)
+   ✅ Disciplina adicionada (ID: 203)
+      ✅ Interpretação de Texto (peso: 5, prioridade: 45)
+      ✅ Gramática (peso: 3, prioridade: 43)
+      ✅ Redação Oficial (peso: 3, prioridade: 43)
+      ✅ Ortografia (peso: 2, prioridade: 42)
+
+   📚 Adicionando: Informática (peso 3)
+   ✅ Disciplina adicionada (ID: 204)
+      ✅ Windows (peso: 2, prioridade: 32)
+      ✅ Word (peso: 2, prioridade: 32)
+      ✅ Excel (peso: 4, prioridade: 34)
+      ✅ Segurança da Informação (peso: 4, prioridade: 34)
+
+   📚 Adicionando: Raciocínio Lógico (peso 2)
+   ✅ Disciplina adicionada (ID: 205)
+      ✅ Proposições (peso: 3, prioridade: 23)
+      ✅ Argumentação (peso: 3, prioridade: 23)
+      ✅ Quantificadores (peso: 2, prioridade: 22)
+      ✅ Diagramas Lógicos (peso: 2, prioridade: 22)
+
+   📊 Resumo:
+      Disciplinas adicionadas: 4/4
+      Tópicos adicionados: 16/16
+
+📅 ETAPA 5: GERAÇÃO DO CRONOGRAMA
+----------------------------------------
+   Configurações do cronograma:
+   - Data início: 2025-08-27
+   - Data concurso: 2025-11-27
+   - Horas por dia: 4
+   - Dias disponíveis: Seg-Sáb
+
+❌ Erro em POST /plans/16/generate-schedule:
+   Status: 400
+   Mensagem: Request failed with status code 400
+❌ Falha ao gerar cronograma
+
+⚙️ ETAPA 6: ANÁLISE DO ALGORITMO ROUND-ROBIN PONDERADO
+----------------------------------------
+✅ 0 sessões encontradas
+
+   📊 Distribuição por Disciplina:
+
+   🏆 Top 10 Tópicos Mais Frequentes:
+
+   ✔️ Validação da Ponderação:
+      Direito (0) >= Português (0): ✅
+      Português (0) >= Informática (0): ✅
+      Informática (0) >= Raciocínio (0): ✅
+
+      Algoritmo Round-Robin Ponderado: ✅ CORRETO
+
+✅ ETAPA 7: MARCAÇÃO DE SESSÕES COMO CONCLUÍDAS
+----------------------------------------
+
+   Total: 0/0 sessões concluídas
+
+🎮 ETAPA 8: VERIFICAÇÃO DE ESTATÍSTICAS E GAMIFICAÇÃO
+----------------------------------------
+
+❌ Erro em GET /gamification/profile:
+   Status: undefined
+   Mensagem: read ECONNRESET
+   ❌ Erro ao buscar gamificação
+
+❌ Erro em GET /statistics/general:
+   Status: undefined
+   Mensagem: 
+   ❌ Erro ao buscar estatísticas
+
+🏠 ETAPA 9: VERIFICAÇÃO DE CARDS NA HOME
+----------------------------------------
+
+❌ Erro em GET /dashboard:
+   Status: undefined
+   Mensagem: 
+   ⚠️ Dashboard não disponível (não crítico)
+
+======================================================================
+📋 RESUMO DO TESTE
+======================================================================
+
+   ✅ Etapas bem-sucedidas: 6/10 (60.0%)
+
+   ❌ Erros encontrados:
+      - Gerar Cronograma: Request failed with status code 400
+      - Gamificação: read ECONNRESET
+      - Estatísticas: 
+
+⚠️ TESTE COMPLETO COM PROBLEMAS. VERIFICAR ERROS ACIMA.
+
+📁 Resultados salvos em: teste-plataforma-resultado-1756295479662.json
+
+✨ Teste finalizado

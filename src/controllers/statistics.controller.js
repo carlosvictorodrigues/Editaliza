@@ -83,7 +83,7 @@ const getPlanStatistics = async (req, res) => {
         
         // 1. Total de dias com estudo
         const totalDaysResult = await dbGet(`
-            SELECT COUNT(DISTINCT DATE(session_date)) as total_days
+            SELECT COUNT(DISTINCT session_date::date) as total_days
             FROM study_sessions
             WHERE study_plan_id = ?
             AND (time_studied_seconds > 0 OR status = 'completed')
@@ -96,7 +96,7 @@ const getPlanStatistics = async (req, res) => {
         const streakQuery = `
             WITH RECURSIVE study_dates AS (
                 -- Obter todas as datas com estudo
-                SELECT DISTINCT DATE(session_date) as study_date
+                SELECT DISTINCT session_date::date as study_date
                 FROM study_sessions
                 WHERE study_plan_id = ?
                 AND (time_studied_seconds > 0 OR status = 'completed')
@@ -132,7 +132,7 @@ const getPlanStatistics = async (req, res) => {
             // Fallback: cálculo simplificado se a query recursiva falhar
             console.log('Usando cálculo simplificado de streak');
             const simplifiedStreak = await dbGet(`
-                SELECT COUNT(DISTINCT DATE(session_date)) as streak
+                SELECT COUNT(DISTINCT session_date::date) as streak
                 FROM study_sessions
                 WHERE study_plan_id = ?
                 AND (time_studied_seconds > 0 OR status = 'completed')
@@ -157,12 +157,12 @@ const getPlanStatistics = async (req, res) => {
                 AVG(daily_seconds) / 3600.0 as avg_hours_per_day
             FROM (
                 SELECT 
-                    DATE(session_date) as study_date,
+                    session_date::date as study_date,
                     SUM(time_studied_seconds) as daily_seconds
                 FROM study_sessions
                 WHERE study_plan_id = ?
                 AND time_studied_seconds > 0
-                GROUP BY DATE(session_date)
+                GROUP BY session_date::date
             ) as daily_stats
         `, [planId]);
         
@@ -1078,7 +1078,7 @@ const getActivitySummary = async (req, res) => {
                 COALESCE(SUM(CASE WHEN status = 'Concluído' THEN time_studied_seconds ELSE 0 END), 0) as time_seconds
             FROM study_sessions 
             WHERE study_plan_id = ? 
-              AND session_date >= DATE('now', '-7 days')
+              AND session_date >= CURRENT_DATE - INTERVAL '7 days'
             GROUP BY session_date
             ORDER BY session_date DESC
         `, [planId]);

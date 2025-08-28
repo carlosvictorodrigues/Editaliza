@@ -1,5 +1,6 @@
 const db = require('../../database-postgresql.js');
 const { validationResult } = require('express-validator');
+const gamificationService = require('../services/gamificationService');
 
 // === PHASE 5 WAVE 2 - SERVICE INTEGRATION ===
 // Import SessionService for enhanced functionality
@@ -64,43 +65,44 @@ function getBrazilianDateString() {
 }
 
 // DATABASE HELPER FUNCTIONS
-const dbRun = (sql, params = []) => {
-    return new Promise((resolve, reject) => {
-        db.run(sql, params, function(err) {
-            if (err) {
-                console.error('Database run error:', err.message);
-                reject(err);
-            } else {
-                resolve({ changes: this.changes, lastID: this.lastID });
-            }
-        });
-    });
+// Usar as funções assíncronas do PostgreSQL diretamente
+const dbRun = async (sql, params = []) => {
+    try {
+        console.log('[dbRun] Executando comando:', sql.substring(0, 100) + '...', 'com params:', params);
+        
+        // db.run já é assíncrono no PostgreSQL
+        const result = await db.run(sql, params);
+        console.log('[dbRun] Comando executado com sucesso - changes:', result.changes);
+        return result;
+    } catch (err) {
+        console.error('[dbRun] Database run error:', err.message);
+        throw err;
+    }
 };
 
-const dbGet = (sql, params = []) => {
-    return new Promise((resolve, reject) => {
-        db.get(sql, params, (err, row) => {
-            if (err) {
-                console.error('Database get error:', err.message);
-                reject(err);
-            } else {
-                resolve(row);
-            }
-        });
-    });
+const dbGet = async (sql, params = []) => {
+    try {
+        console.log('[dbGet] Executando query:', sql.substring(0, 100) + '...', 'com params:', params);
+        
+        // db.get já é assíncrono no PostgreSQL
+        const result = await db.get(sql, params);
+        console.log('[dbGet] Query executada com sucesso');
+        return result;
+    } catch (err) {
+        console.error('[dbGet] Database get error:', err.message);
+        throw err;
+    }
 };
 
-const dbAll = (sql, params = []) => {
-    return new Promise((resolve, reject) => {
-        db.all(sql, params, (err, rows) => {
-            if (err) {
-                console.error('Database all error:', err.message);
-                reject(err);
-            } else {
-                resolve(rows);
-            }
-        });
-    });
+const dbAll = async (sql, params = []) => {
+    try {
+        // db.all já é assíncrono no PostgreSQL
+        const result = await db.all(sql, params);
+        return result;
+    } catch (err) {
+        console.error('Database all error:', err.message);
+        throw err;
+    }
 };
 
 class SessionsController {
@@ -187,39 +189,97 @@ class SessionsController {
      * PATCH /api/sessions/:sessionId
      */
     static async updateSessionStatus(req, res) {
+        console.log('[updateSessionStatus] ========== INÍCIO DO MÉTODO ==========');
+        console.log('[updateSessionStatus] Headers:', req.headers);
+        console.log('[updateSessionStatus] Params:', req.params);
+        console.log('[updateSessionStatus] Body:', req.body);
+        console.log('[updateSessionStatus] User:', req.user);
+        
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
+            console.log('[updateSessionStatus] Erros de validação:', errors.array());
             return res.status(400).json({ errors: errors.array() });
         }
 
         const { sessionId } = req.params;
-        const { status } = req.body;
+        const { status, notes, questions_solved } = req.body;
         const userId = req.user.id;
 
+        console.log('[updateSessionStatus] Dados extraídos - sessionId:', sessionId, 'userId:', userId, 'status:', status);
+
         try {
-            // Verify session exists and user has access
+            console.log('[updateSessionStatus] Executando query SELECT para verificar sessão...');
             const session = await dbGet(`
                 SELECT ss.* FROM study_sessions ss
                 JOIN study_plans sp ON ss.study_plan_id = sp.id
                 WHERE ss.id = ? AND sp.user_id = ?
             `, [sessionId, userId]);
+            
+            console.log('[updateSessionStatus] Resultado da query SELECT:', session);
 
             if (!session) {
                 return res.status(404).json({ error: 'Sessão não encontrada ou não autorizada.' });
             }
 
-            // Update session status
-            await dbRun('UPDATE study_sessions SET status = ? WHERE id = ?', [status, sessionId]);
+            // Construir a query de atualização dinamicamente
+            const updates = [];
+            const values = [];
+            if (status !== undefined) {
+                updates.push('status = ?');
+                values.push(status);
+            }
+            if (notes !== undefined) {
+                updates.push('notes = ?');
+                values.push(notes);
+            }
+            if (questions_solved !== undefined) {
+                updates.push('questions_solved = ?');
+                values.push(questions_solved);
+            }
+
+            if (updates.length === 0) {
+                return res.status(400).json({ error: 'Nenhum campo para atualizar.' });
+            }
+
+            // O database-postgresql.js já converte ? para $n automaticamente
+            // Então podemos usar ? normalmente
+            const sql = `UPDATE study_sessions SET ${updates.join(', ')} WHERE id = ?`;
+            values.push(sessionId);
+            
+            console.log('[DEBUG UPDATE SESSION] SQL:', sql);
+            console.log('[DEBUG UPDATE SESSION] Values:', values);
+
+            await dbRun(sql, values);
+
+            if (status === 'Concluído') {
+                // Processar gamificação imediatamente para garantir que funcione
+                console.log(`[GAMIFICATION] Iniciando processamento para sessão ${sessionId}, usuário ${userId}`);
+                try {
+                    // Processar de forma síncrona para garantir que o XP seja atualizado
+                    await gamificationService.processSessionCompletion(userId, sessionId);
+                    console.log(`[GAMIFICATION_SUCCESS] XP processado para sessão ${sessionId}`);
+                } catch (err) {
+                    console.error('[GAMIFICATION_ERROR] Erro ao processar gamificação:', err);
+                    // Não bloqueia a resposta, continua mesmo com erro
+                }
+            }
 
             res.json({ 
-                message: 'Sessão atualizada com sucesso!', 
-                status,
+                message: 'Sessão atualizada com sucesso!',
                 sessionId: parseInt(sessionId)
             });
 
         } catch (error) {
-            console.error('Erro ao atualizar sessão:', error);
-            res.status(500).json({ error: 'Erro ao atualizar a sessão.' });
+            console.error('[updateSessionStatus] ERRO CAPTURADO:', error);
+            console.error('[updateSessionStatus] Stack trace:', error.stack);
+            
+            // Garantir que sempre retornamos uma resposta
+            if (!res.headersSent) {
+                res.status(500).json({ 
+                    error: 'Erro ao atualizar a sessão.',
+                    details: error.message 
+                });
+            }
         }
     }
 
@@ -564,8 +624,8 @@ class SessionsController {
 
             // 1. Total study days
             const totalDaysResult = await dbGet(`
-                SELECT COUNT(DISTINCT DATE(session_date)) as total_days
-                FROM study_sessions
+                SELECT COUNT(DISTINCT session_date::date) as total_days
+                FROM public.study_sessions
                 WHERE study_plan_id = ?
                 AND (time_studied_seconds > 0 OR status = 'Concluído')
             `, [planId]);
@@ -575,8 +635,8 @@ class SessionsController {
             try {
                 const streakQuery = `
                     WITH RECURSIVE study_dates AS (
-                        SELECT DISTINCT DATE(session_date) as study_date
-                        FROM study_sessions
+                        SELECT DISTINCT session_date::date as study_date
+                        FROM public.study_sessions
                         WHERE study_plan_id = ?
                         AND (time_studied_seconds > 0 OR status = 'Concluído')
                         ORDER BY study_date DESC
@@ -590,7 +650,7 @@ class SessionsController {
                     SELECT COUNT(*) as streak
                     FROM recent_dates
                     WHERE CURRENT_DATE - INTERVAL '1 days' <= study_date
-                    AND (prev_date IS NULL OR DATE(prev_date, '+1 day') = study_date)
+                    AND (prev_date IS NULL OR prev_date + INTERVAL '1 day' = study_date)
                 `;
                 
                 const streakResult = await dbGet(streakQuery, [planId]);
@@ -598,7 +658,7 @@ class SessionsController {
             } catch (error) {
                 console.log('Usando cálculo simplificado de streak');
                 const simplifiedStreak = await dbGet(`
-                    SELECT COUNT(DISTINCT DATE(session_date)) as streak
+                    SELECT COUNT(DISTINCT session_date::date) as streak
                     FROM study_sessions
                     WHERE study_plan_id = ?
                     AND (time_studied_seconds > 0 OR status = 'Concluído')
@@ -607,30 +667,46 @@ class SessionsController {
                 currentStreak = Math.min(simplifiedStreak?.streak || 0, 7);
             }
 
-            // 3. Study hours and performance metrics
-            const performanceResult = await dbGet(`
-                SELECT 
-                    COALESCE(SUM(time_studied_seconds) / 3600.0, 0) as total_hours,
-                    COUNT(CASE WHEN time_studied_seconds > 0 OR status = 'Concluído' THEN 1 END) as completed_sessions,
-                    COUNT(*) as total_sessions,
-                    AVG(daily_seconds) / 3600.0 as avg_hours_per_day
-                FROM (
-                    SELECT 
-                        DATE(session_date) as study_date,
-                        SUM(time_studied_seconds) as daily_seconds
-                    FROM study_sessions
-                    WHERE study_plan_id = ?
-                    AND time_studied_seconds > 0
-                    GROUP BY DATE(session_date)
-                ) as daily_stats
-            `, [planId]);
-            
+            // 3. Study hours and performance metrics (Corrected SQL with CTEs)
+            const statsQuery = `
+                WITH base AS (
+                    SELECT session_date::date AS study_date,
+                           time_studied_seconds,
+                           status
+                    FROM public.study_sessions
+                    WHERE study_plan_id = $1
+                ),
+                daily AS (
+                    SELECT study_date,
+                           SUM(time_studied_seconds) AS daily_seconds
+                    FROM base
+                    GROUP BY study_date
+                ),
+                tot AS (
+                    SELECT
+                        COALESCE(SUM(time_studied_seconds) / 3600.0, 0) AS total_hours,
+                        COUNT(*) FILTER (WHERE time_studied_seconds > 0 OR status = 'Concluído') AS completed_sessions,
+                        COUNT(*) AS total_sessions
+                    FROM base
+                ),
+                avgd AS (
+                    SELECT COALESCE(AVG(daily_seconds) / 3600.0, 0) AS avg_hours_per_day
+                    FROM daily
+                )
+                SELECT tot.total_hours,
+                       tot.completed_sessions,
+                       tot.total_sessions,
+                       avgd.avg_hours_per_day
+                FROM tot, avgd;
+            `;
+            const performanceResult = await dbGet(statsQuery, [planId]);
+
             // 4. Best day of week for studying
             const bestDayResult = await dbGet(`
                 SELECT 
                     EXTRACT(DOW FROM session_date) as day_of_week,
                     COUNT(*) as sessions_count
-                FROM study_sessions
+                FROM public.study_sessions
                 WHERE study_plan_id = ?
                 AND (time_studied_seconds > 0 OR status = 'Concluído')
                 GROUP BY EXTRACT(DOW FROM session_date)

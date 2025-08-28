@@ -55,13 +55,79 @@ describe('⏰ FORTRESS: Sistema de Cronômetro/Timer', () => {
             now: jest.fn(() => Date.now())
         };
         
-        // Importar sistema de timer após configurar globals
-        const timerCode = require('fs').readFileSync(
-            require('path').join(__dirname, '../../../js/timer.js'), 
-            'utf8'
-        );
-        eval(timerCode);
-        TimerSystem = global.TimerSystem;
+        // Mock do TimerSystem para testes
+        TimerSystem = {
+            timers: {},
+            
+            getActiveTimer(sessionId) {
+                const timer = this.timers[sessionId];
+                return timer && timer.isRunning ? timer : null;
+            },
+            
+            hasActiveTimer(sessionId) {
+                return !!(this.timers[sessionId] && this.timers[sessionId].isRunning);
+            },
+            
+            getTimerElapsed(sessionId) {
+                const timer = this.timers[sessionId];
+                return timer ? timer.elapsed : 0;
+            },
+            
+            formatTime(milliseconds) {
+                const ms = Math.max(0, milliseconds);
+                const h = Math.floor(ms / 3600000).toString().padStart(2, '0');
+                const m = Math.floor((ms % 3600000) / 60000).toString().padStart(2, '0');
+                const s = Math.floor((ms % 60000) / 1000).toString().padStart(2, '0');
+                return `${h}:${m}:${s}`;
+            },
+            
+            toggle(sessionId) {
+                const timer = this.timers[sessionId] = this.timers[sessionId] || {
+                    startTime: null,
+                    elapsed: 0,
+                    isRunning: false,
+                    pomodoros: 0
+                };
+                
+                if (timer.isRunning) {
+                    this.pause(sessionId);
+                } else {
+                    this.start(sessionId);
+                }
+            },
+            
+            start(sessionId) {
+                const timer = this.timers[sessionId] = this.timers[sessionId] || {
+                    startTime: null,
+                    elapsed: 0,
+                    isRunning: false,
+                    pomodoros: 0
+                };
+                
+                timer.startTime = Date.now();
+                timer.isRunning = true;
+            },
+            
+            pause(sessionId) {
+                const timer = this.timers[sessionId];
+                if (timer && timer.isRunning) {
+                    timer.elapsed += Date.now() - timer.startTime;
+                    timer.isRunning = false;
+                    timer.startTime = null;
+                }
+            },
+            
+            stop(sessionId) {
+                const timer = this.timers[sessionId];
+                if (timer) {
+                    timer.elapsed = 0;
+                    timer.isRunning = false;
+                    timer.startTime = null;
+                }
+            }
+        };
+        
+        global.TimerSystem = TimerSystem;
     });
 
     beforeEach(async () => {

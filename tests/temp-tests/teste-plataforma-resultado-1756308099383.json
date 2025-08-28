@@ -1,0 +1,33 @@
+{
+  "timestamp": 1756308099383,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": true,
+      "timestamp": "2025-08-27T15:21:39.565Z",
+      "userId": 70,
+      "email": "teste.completo.1756308099383@editaliza.com"
+    },
+    {
+      "nome": "Login",
+      "sucesso": true,
+      "timestamp": "2025-08-27T15:21:39.644Z"
+    },
+    {
+      "nome": "Criar Plano",
+      "sucesso": true,
+      "timestamp": "2025-08-27T15:21:39.658Z",
+      "planId": 64,
+      "planName": "TJPE - Analista Judiciário 2025"
+    },
+    {
+      "nome": "Adicionar Disciplinas e Tópicos",
+      "sucesso": false,
+      "timestamp": "2025-08-27T15:21:46.658Z",
+      "disciplinasAdicionadas": 6,
+      "topicosAdicionados": 91
+    }
+  ],
+  "erros": [],
+  "sucesso": false
+}

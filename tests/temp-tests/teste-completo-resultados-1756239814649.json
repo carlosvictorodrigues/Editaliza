@@ -1,0 +1,65 @@
+{
+  "passed": 0,
+  "total": 6,
+  "percentage": 0,
+  "executionTime": 67,
+  "details": {
+    "Health check": {
+      "passed": false,
+      "details": {
+        "uptime": 1591.5562917,
+        "message": "OK",
+        "database": "PostgreSQL",
+        "timestamp": 1756239814619,
+        "environment": "development",
+        "version": "1.0.0"
+      }
+    },
+    "Registro de usuário": {
+      "passed": false,
+      "details": {
+        "status": 409,
+        "message": "Este e-mail já está em uso."
+      }
+    },
+    "Login de usuário": {
+      "passed": false,
+      "details": {
+        "status": 500,
+        "message": "Erro ao fazer login"
+      }
+    },
+    "Criação de plano": {
+      "passed": false,
+      "details": {
+        "status": 401,
+        "message": "Token inválido",
+        "fullError": {
+          "error": "Token inválido",
+          "code": "AUTH_TOKEN_INVALID"
+        }
+      }
+    },
+    "Criação de disciplina": {
+      "passed": false,
+      "details": {
+        "status": 401,
+        "message": "Token inválido"
+      }
+    },
+    "Geração de cronograma": {
+      "passed": false,
+      "details": {
+        "status": 401,
+        "message": "Token inválido"
+      }
+    },
+    "Consulta de cronograma": {
+      "passed": false,
+      "details": {
+        "status": 401,
+        "message": "Token inválido"
+      }
+    }
+  }
+}

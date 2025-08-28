@@ -7,27 +7,30 @@ const rateLimit = require('express-rate-limit');
  */
 const strictRateLimit = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 5, // máximo 5 tentativas
+    max: process.env.NODE_ENV === 'production' ? 10 : 50, // 10 tentativas em produção, 50 em dev
     message: { 
         error: 'Muitas tentativas. Tente novamente em 15 minutos.',
         code: 'RATE_LIMIT_STRICT' 
     },
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    skipFailedRequests: false,
+    skipSuccessfulRequests: false
 });
 
 /**
  * Rate limiting moderado para APIs
  */
 const moderateRateLimit = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 100, // máximo 100 requisições
+    windowMs: 1 * 60 * 1000, // 1 minuto para permitir mais requisições
+    max: process.env.NODE_ENV === 'production' ? 100 : 1000, // 100 req/min por IP em produção
     message: { 
-        error: 'Limite de requisições atingido. Tente novamente em 15 minutos.',
+        error: 'Limite de requisições atingido. Tente novamente em alguns instantes.',
         code: 'RATE_LIMIT_MODERATE' 
     },
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    skipFailedRequests: false
 });
 
 /**
@@ -35,24 +38,56 @@ const moderateRateLimit = rateLimit({
  */
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5,
+    max: process.env.NODE_ENV === 'production' ? 5 : 50, // 5 tentativas falhas em produção
     message: { error: 'Muitas tentativas de login. Por favor, tente novamente em 15 minutos.' },
-    skipSuccessfulRequests: true
+    skipSuccessfulRequests: true // Só conta tentativas falhas
 });
 
 /**
- * Aplicar rate limits específicos por rota
+ * Aplicar rate limits específicos por rota - CORRIGIDO
  * @param {Express} app - Instância do Express
  */
 function applyRateLimits(app) {
-    // Rate limiting para rotas de autenticação
-    app.use('/login', strictRateLimit);
-    app.use('/register', strictRateLimit);
-    app.use('/forgot-password', strictRateLimit);
-    app.use('/reset-password', strictRateLimit);
+    console.log('[RATE_LIMITS] Aplicando rate limits específicos...');
     
-    // Rate limiting para APIs
-    app.use('/api/', moderateRateLimit);
+    // Desabilitar completamente se configurado
+    if (process.env.DISABLE_RATE_LIMIT === 'true') {
+        console.log('[RATE_LIMITS] Rate limits DESABILITADOS (DISABLE_RATE_LIMIT=true)');
+        return;
+    }
+    
+    try {
+        // Rate limiting ESPECÍFICO para rotas de autenticação (apenas legadas)
+        app.use('/login', (req, res, next) => {
+            console.log('[RATE_LIMIT] Aplicando strict limit para /login');
+            strictRateLimit(req, res, next);
+        });
+        
+        app.use('/register', (req, res, next) => {
+            console.log('[RATE_LIMIT] Aplicando strict limit para /register');
+            strictRateLimit(req, res, next);
+        });
+        
+        app.use('/forgot-password', strictRateLimit);
+        app.use('/reset-password', strictRateLimit);
+        
+        // Rate limiting moderado para APIs gerais (EXCLUINDO auth)
+        app.use('/api/', (req, res, next) => {
+            // Pular rate limit para rotas de auth
+            if (req.path.startsWith('/api/auth/')) {
+                console.log(`[RATE_LIMIT] Pulando rate limit para auth: ${req.path}`);
+                return next();
+            }
+            
+            console.log(`[RATE_LIMIT] Aplicando moderate limit para: ${req.path}`);
+            moderateRateLimit(req, res, next);
+        });
+        
+        console.log('[RATE_LIMITS] Rate limits específicos aplicados com sucesso!');
+    } catch (error) {
+        console.error('[RATE_LIMITS] Erro ao aplicar rate limits:', error.message);
+        throw error;
+    }
 }
 
 module.exports = {

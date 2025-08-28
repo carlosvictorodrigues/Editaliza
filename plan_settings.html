@@ -836,8 +836,17 @@
                     const hoursInputs = document.querySelectorAll('.hours-input');
                     hoursInputs.forEach(input => {
                         const day = input.dataset.day;
+                        // Verificar tanto chaves string quanto número para compatibilidade
                         if (plan.study_hours_per_day[day] !== undefined) {
                             input.value = plan.study_hours_per_day[day];
+                        } else {
+                            // Mapeamento de números para strings se necessário
+                            const dayMap = {'0': 'Dom', '1': 'Seg', '2': 'Ter', '3': 'Qua', '4': 'Qui', '5': 'Sex', '6': 'Sab'};
+                            Object.keys(dayMap).forEach(numDay => {
+                                if (dayMap[numDay] === day && plan.study_hours_per_day[numDay] !== undefined) {
+                                    input.value = plan.study_hours_per_day[numDay];
+                                }
+                            });
                         }
                     });
                 }
@@ -851,11 +860,23 @@
 
         function renderHoursInputs() {
             const grid = document.getElementById('hours-grid');
-            const days = [{d:1,l:'Seg'}, {d:2,l:'Ter'}, {d:3,l:'Qua'}, {d:4,l:'Qui'}, {d:5,l:'Sex'}, {d:6,l:'Sáb'}, {d:0,l:'Dom'}];
+            // IMPORTANTE: usar os nomes dos dias como strings para compatibilidade com o backend
+            const days = [
+                {key: 'Seg', label: 'Segunda', defaultHours: 4},
+                {key: 'Ter', label: 'Terça', defaultHours: 4},
+                {key: 'Qua', label: 'Quarta', defaultHours: 4},
+                {key: 'Qui', label: 'Quinta', defaultHours: 4},
+                {key: 'Sex', label: 'Sexta', defaultHours: 4},
+                {key: 'Sab', label: 'Sábado', defaultHours: 2},
+                {key: 'Dom', label: 'Domingo', defaultHours: 0}
+            ];
             grid.innerHTML = days.map(day => `
                 <div>
-                    <label class="text-xs font-medium text-gray-500">${day.l}</label>
-                    <input type="number" class="form-input py-2 text-center hours-input" data-day="${day.d}" value="${(day.d >= 1 && day.d <= 5) ? 4 : (day.d === 6 ? 2 : 0)}" min="0" max="24">
+                    <label class="text-xs font-medium text-gray-500">${day.label}</label>
+                    <input type="number" class="form-input py-2 text-center hours-input" 
+                           data-day="${day.key}" 
+                           value="${day.defaultHours}" 
+                           min="0" max="24">
                 </div>
             `).join('');
         }
@@ -870,7 +891,7 @@
             
             loadingSubjects = true;
             try {
-                                const subjects = await app.apiFetch(`/api/plans/${planId}/subjects`);
+                                const subjects = await app.apiFetch(`/api/plans/${planId}/subjects_with_topics`);
                 const container = document.getElementById('subjectsContainer');
                 container.innerHTML = '';
 
@@ -1371,9 +1392,15 @@
                 reta_final_mode: document.getElementById('retaFinalMode').checked,
                 study_hours_per_day: {}
             };
+            
+            // CORREÇÃO: Backend espera dias como strings ('Seg', 'Ter', etc)
+            // NÃO como números (0-6)
             document.querySelectorAll('.hours-input').forEach(input => {
-                settings.study_hours_per_day[input.dataset.day] = parseInt(input.value, 10) || 0;
+                const dayKey = input.dataset.day; // Já é string: 'Seg', 'Ter', etc
+                settings.study_hours_per_day[dayKey] = parseInt(input.value, 10) || 0;
             });
+            
+            console.log('[DEBUG] study_hours_per_day enviado:', settings.study_hours_per_day);
             return settings;
         }
         function showRetaFinalReport(excludedTopics, prioritizedSubjects) {

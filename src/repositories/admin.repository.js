@@ -246,7 +246,7 @@ class AdminRepository extends BaseRepository {
         const query = `
             WITH daily_metrics AS (
                 SELECT 
-                    DATE(ss.session_date) as metric_date,
+                    ss.session_date::date as metric_date,
                     COUNT(DISTINCT ss.study_plan_id) as active_plans,
                     COUNT(DISTINCT sp.user_id) as active_users,
                     COUNT(*) as total_sessions,
@@ -255,8 +255,8 @@ class AdminRepository extends BaseRepository {
                     COALESCE(SUM(ss.questions_solved), 0) as questions_solved
                 FROM study_sessions ss
                 JOIN study_plans sp ON ss.study_plan_id = sp.id
-                WHERE DATE(ss.session_date) BETWEEN $1 AND $2
-                GROUP BY DATE(ss.session_date)
+                WHERE ss.session_date::date BETWEEN $1 AND $2
+                GROUP BY ss.session_date::date
             )
             SELECT 
                 metric_date,
@@ -374,8 +374,8 @@ class AdminRepository extends BaseRepository {
                     AND u.created_at <= ms.month_end
                 LEFT JOIN study_plans sp ON sp.created_at >= ms.month_start 
                     AND sp.created_at <= ms.month_end
-                LEFT JOIN study_sessions ss ON DATE(ss.session_date) >= ms.month_start 
-                    AND DATE(ss.session_date) <= ms.month_end
+                LEFT JOIN study_sessions ss ON ss.session_date::date >= ms.month_start 
+                    AND ss.session_date::date <= ms.month_end
                 GROUP BY ms.month_start, month_label
             )
             SELECT 
@@ -411,7 +411,7 @@ class AdminRepository extends BaseRepository {
                     u.id,
                     u.created_at as signup_date,
                     MAX(ss.session_date) as last_activity,
-                    COUNT(DISTINCT DATE(ss.session_date)) as active_days,
+                    COUNT(DISTINCT ss.session_date::date) as active_days,
                     COUNT(DISTINCT sp.id) as plans_created,
                     DATE_PART('day', MAX(ss.session_date) - u.created_at) as days_active
                 FROM users u

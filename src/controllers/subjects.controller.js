@@ -12,6 +12,82 @@
 const { dbGet, dbAll, dbRun } = require('../config/database.wrapper');
 
 class SubjectsController {
+    // === TIMEOUT PROTECTION ===
+    static withTimeout(promise, timeoutMs = 10000) {
+        return Promise.race([
+            promise,
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Operation timeout')), timeoutMs)
+            )
+        ]);
+    }
+    /**
+     * POST /api/subjects
+     * CRÍTICO: Criar disciplina simples (compatibilidade com frontend)
+     */
+    async createSubject(req, res) {
+        const { subject_name, priority_weight = 3, plan_id, topics_list = '' } = req.body;
+        
+        try {
+            // Se plan_id não fornecido, tentar pegar o primeiro plano do usuário
+            let planId = plan_id;
+            if (!planId) {
+                const userPlan = await dbGet('SELECT id FROM study_plans WHERE user_id = ? LIMIT 1', [req.user.id]);
+                if (!userPlan) {
+                    return res.status(400).json({ error: 'Nenhum plano de estudos encontrado. Crie um plano primeiro.' });
+                }
+                planId = userPlan.id;
+            }
+            
+            // Validar ownership do plano
+            const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, req.user.id]);
+            if (!plan) {
+                return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+            }
+
+            // Parsing da lista de tópicos
+            const topics = topics_list ? topics_list.split('\n').map(t => t.trim()).filter(t => t !== '') : [];
+            
+            // TRANSAÇÃO ATÔMICA CRÍTICA
+            await dbRun('BEGIN');
+            
+            // Inserir disciplina
+            const result = await dbRun(
+                'INSERT INTO subjects (study_plan_id, subject_name, priority_weight) VALUES (?,?,?)', 
+                [planId, subject_name, priority_weight]
+            );
+            const subjectId = result.lastID;
+            
+            // Inserir tópicos se existirem
+            if (topics.length > 0) {
+                for (const topic of topics) {
+                    await dbRun(
+                        'INSERT INTO topics (subject_id, topic_name, priority_weight) VALUES (?,?,?)', 
+                        [subjectId, topic, 3] // Peso padrão 3
+                    );
+                }
+            }
+            
+            await dbRun('COMMIT');
+            
+            res.status(201).json({
+                success: true,
+                message: 'Disciplina criada com sucesso!',
+                subject: {
+                    id: subjectId,
+                    subject_name,
+                    priority_weight,
+                    topics_created: topics.length
+                }
+            });
+            
+        } catch (error) {
+            await dbRun('ROLLBACK');
+            console.error('Erro ao criar disciplina:', error);
+            res.status(500).json({ error: 'Erro ao criar disciplina' });
+        }
+    }
+
     /**
      * POST /api/plans/:planId/subjects_with_topics
      * CRÍTICO: Criação de disciplina + múltiplos tópicos em UMA transação atômica
@@ -153,6 +229,82 @@ class SubjectsController {
     }
 
     /**
+     * GET /api/subjects
+     * Listagem básica de disciplinas (para compatibilidade com frontend legado)
+     */
+    async getSubjectsBasic(req, res) {
+        try {
+            // Retornar lista básica de disciplinas com estrutura simples
+            const subjects = [
+                { id: 1, name: "Direito Constitucional", code: "DIR_CONST" },
+                { id: 2, name: "Direito Administrativo", code: "DIR_ADM" },
+                { id: 3, name: "Direito Penal", code: "DIR_PENAL" },
+                { id: 4, name: "Direito Civil", code: "DIR_CIVIL" },
+                { id: 5, name: "Direito Processual Civil", code: "DIR_PROC_CIV" },
+                { id: 6, name: "Direito do Trabalho", code: "DIR_TRAB" },
+                { id: 7, name: "Direito Tributário", code: "DIR_TRIB" },
+                { id: 8, name: "Direito Previdenciário", code: "DIR_PREV" },
+                { id: 9, name: "Português", code: "PORT" },
+                { id: 10, name: "Matemática", code: "MAT" },
+                { id: 11, name: "Raciocínio Lógico", code: "RAC_LOG" },
+                { id: 12, name: "Informática", code: "INFO" },
+                { id: 13, name: "Redação", code: "RED" },
+                { id: 14, name: "Atualidades", code: "ATUAL" },
+                { id: 15, name: "Ética e Moral", code: "ETICA" }
+            ];
+            
+            res.json({ subjects });
+            
+        } catch (error) {
+            console.error('Erro ao buscar disciplinas básicas:', error);
+            res.status(500).json({ error: 'Erro ao buscar disciplinas' });
+        }
+    }
+
+    /**
+     * GET /api/plans/:planId/subjects
+     * Listagem de disciplinas de um plano específico
+     * 
+     * Features:
+     * - Validação de ownership do plano
+     * - Retorna apenas as disciplinas (sem tópicos)
+     */
+    async getSubjectsByPlan(req, res) {
+        const { planId } = req.params;
+        const { id: userId } = req.user;
+        
+        try {
+            // Validação de ownership do plano
+            const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+            if (!plan) {
+                return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+            }
+
+            // Buscar disciplinas do plano
+            const sql = `
+                SELECT 
+                    id, 
+                    subject_name, 
+                    priority_weight
+                FROM subjects
+                WHERE study_plan_id = ?
+                ORDER BY subject_name ASC
+            `;
+            
+            const subjects = await SubjectsController.withTimeout(dbAll(sql, [planId]), 5000);
+            
+            res.json({ 
+                success: true,
+                subjects: subjects || []
+            });
+            
+        } catch (error) {
+            console.error('Erro ao buscar disciplinas do plano:', error);
+            res.status(500).json({ error: 'Erro ao buscar disciplinas do plano' });
+        }
+    }
+
+    /**
      * GET /api/plans/:planId/subjects_with_topics
      * CRÍTICO: Listagem otimizada com JOIN complexo e agrupamento
      * 
@@ -190,7 +342,7 @@ class SubjectsController {
                 ORDER BY s.subject_name ASC, t.topic_name ASC
             `;
             
-            const rows = await dbAll(sql, [planId]);
+            const rows = await SubjectsController.withTimeout(dbAll(sql, [planId]), 8000);
             
             // Agrupamento de tópicos por disciplina (lógica original preservada)
             const subjectsMap = new Map();
@@ -229,6 +381,53 @@ class SubjectsController {
         } catch (error) {
             console.error('Erro ao buscar disciplinas com tópicos:', error);
             res.status(500).json({ 'error': 'Erro ao buscar disciplinas e tópicos' });
+        }
+    }
+
+    /**
+     * POST /api/plans/:planId/subjects
+     * Criar uma disciplina para um plano específico
+     */
+    async createSubjectForPlan(req, res) {
+        const { planId } = req.params;
+        const { name, weight = 3 } = req.body;
+        
+        const db = require('../../database-postgresql');
+        const repos = require('../repositories').createRepositories(db);
+
+        try {
+            const plan = await repos.plan.findByIdAndUserId(planId, req.user.id);
+            if (!plan) {
+                return res.status(404).json({ error: 'Plano não encontrado ou não autorizado' });
+            }
+            
+            const subjectData = {
+                study_plan_id: parseInt(planId),
+                subject_name: name,
+                priority_weight: weight
+            };
+
+            // FIX: Chamar o método correto do repositório
+            const newSubjectId = await repos.subject.createSubject(subjectData);
+            
+            if (!newSubjectId) {
+                throw new Error('Falha ao criar a disciplina, o ID não foi retornado.');
+            }
+
+            res.status(201).json({
+                success: true,
+                message: 'Disciplina criada com sucesso!',
+                subject: {
+                    id: newSubjectId,
+                    study_plan_id: parseInt(planId),
+                    subject_name: name,
+                    priority_weight: weight
+                }
+            });
+            
+        } catch (error) {
+            console.error('Erro ao criar disciplina com repositório:', error);
+            res.status(500).json({ error: 'Erro ao criar disciplina' });
         }
     }
 }

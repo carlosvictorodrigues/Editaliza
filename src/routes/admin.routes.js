@@ -34,12 +34,118 @@ const adminController = require('../controllers/admin.controller');
 // Cache middleware para rotas pesadas
 const { ROUTE_CACHE_CONFIG, cacheStats, cacheClear } = require('../middleware/admin-cache.middleware');
 
+// Performance testing middleware (desenvolvimento apenas)
+const { performanceTestBypass, performanceMonitor } = require('../middleware/admin-performance-test.middleware');
+
+// Compressão HTTP para responses grandes
+const compression = require('compression');
+
+// Rate limiting específico para admin
+const rateLimit = require('express-rate-limit');
+
+// === MIDDLEWARE DE COMPRESSÃO E PERFORMANCE ===
+
+// Compressão HTTP agressiva para admin
+const adminCompression = compression({
+    // Comprimir tudo acima de 512 bytes
+    threshold: 512,
+    // Nível de compressão alto (9 = máximo)
+    level: 6, // Balanço entre compressão e CPU
+    // Filtros para tipos de conteúdo
+    filter: (req, res) => {
+        // Não comprimir se já comprimido
+        if (req.headers['x-no-compression']) {
+            return false;
+        }
+        // Usar filtro padrão do compression
+        return compression.filter(req, res);
+    }
+});
+
+// Rate limiting para admin endpoints
+const adminRateLimit = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minuto
+    max: 300, // 300 requests por minuto (5/segundo)
+    message: {
+        success: false,
+        error: 'Muitas requisições administrativas. Tente novamente em 1 minuto.',
+        code: 'ADMIN_RATE_LIMIT_EXCEEDED'
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    // Apenas para usuários admin
+    skip: (req) => req.user?.role !== 'admin',
+    // Headers customizados
+    keyGenerator: (req) => `admin_${req.user?.id}_${req.ip}`
+});
+
+// Rate limiting otimizado para endpoints críticos
+const optimizedRateLimit = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minuto
+    max: 120, // 120 requests por minuto (2/segundo) - mais permissivo
+    message: {
+        success: false,
+        error: 'Rate limit: máximo 2 req/segundo.',
+        code: 'OPTIMIZED_RATE_LIMIT'
+    },
+    standardHeaders: false,
+    legacyHeaders: false,
+    skip: (req) => process.env.NODE_ENV === 'development' // Skip em desenvolvimento
+});
+
 // === MIDDLEWARE GLOBAL PARA ROTAS ADMIN ===
 
-// Aplicar autenticação, verificação de admin e contexto de logging
+// 1. Compressão HTTP (antes de qualquer processamento)
+router.use(adminCompression);
+
+// 2. Performance test bypass (apenas desenvolvimento)
+router.use(performanceTestBypass);
+
+// 3. Monitoramento de performance
+router.use(performanceMonitor);
+
+// 4. Rate limiting geral
+router.use(adminRateLimit);
+
+// 5. Autenticação e autorização
 router.use(authenticateToken);
 router.use(requireAdmin);
 router.use(adminLoggingContext);
+
+// 4. Middleware de performance monitoring
+router.use((req, res, next) => {
+    req.startTime = Date.now();
+    
+    // Interceptar response para medir performance
+    const originalSend = res.send;
+    res.send = function(data) {
+        const responseTime = Date.now() - req.startTime;
+        
+        // Headers de performance
+        res.set({
+            'X-Response-Time': `${responseTime}ms`,
+            'X-Admin-Endpoint': 'true',
+            'Server-Timing': `total;dur=${responseTime}`
+        });
+        
+        // Log performance crítico se > 1s
+        if (responseTime > 1000) {
+            const { systemLogger } = require('../utils/logger');
+            systemLogger.error('CRITICAL: Admin endpoint exceeding 1s threshold', {
+                endpoint: req.originalUrl,
+                method: req.method,
+                responseTime: `${responseTime}ms`,
+                adminId: req.user?.id,
+                query: req.query,
+                body: req.method === 'POST' ? req.body : undefined
+            });
+        }
+        
+        return originalSend.call(this, data);
+    };
+    
+    next();
+});
 
 // === EMAIL MANAGEMENT ROUTES ===
 
@@ -82,11 +188,24 @@ router.post('/email/reset-limits',
 router.get('/system/health', adminController.getSystemHealth);
 
 /**
- * GET /admin/system/metrics
- * Métricas detalhadas do sistema (COM CACHE - 5min TTL)
- * Expandido da funcionalidade existente /metrics (linha 4221)
+ * GET /admin/system/metrics - VERSÃO SEM I/O
+ * Métricas instantâneas do sistema (SEM DATABASE)
+ * 
+ * OTIMIZAÇÕES EXTREMAS:
+ * - Sem queries de banco
+ * - Cache de 5 minutos
+ * - Apenas métricas do processo
  */
 router.get('/system/metrics', 
+    // Rate limiting relaxado para métricas rápidas
+    rateLimit({
+        windowMs: 1 * 60 * 1000,
+        max: 300, // 5 requests por segundo
+        message: { error: 'Rate limit métricas: 5 req/s' },
+        standardHeaders: false,
+        legacyHeaders: false
+    }),
+    
     ROUTE_CACHE_CONFIG.metrics.get,  // Cache de 5 minutos
     adminController.getSystemMetrics
 );
@@ -108,19 +227,29 @@ router.get('/system/ready', (req, res) => {
 // === USER MANAGEMENT ROUTES ===
 
 /**
- * GET /admin/users
- * Listar usuários do sistema com paginação e filtros (COM CACHE - 2min TTL)
+ * GET /admin/users - ENDPOINT ULTRA-OTIMIZADO
+ * Listar usuários com performance sub-segundo
+ * 
+ * OTIMIZAÇÕES EXTREMAS:
+ * - Cache agressivo de 60 segundos
+ * - Validação mínima apenas
+ * - Rate limiting relaxado
+ * - Timeout de 800ms
  */
 router.get('/users',
-    // Validações de query parameters
-    validators.numericParam('page', { min: 1, max: 1000, optional: true }),
-    validators.numericParam('limit', { min: 1, max: 100, optional: true }),
-    validators.textParam('search', { minLength: 0, maxLength: 100, optional: true }),
+    // Rate limiting otimizado
+    optimizedRateLimit,
+    
+    // Validações mínimas apenas
+    validators.numericParam('page', { min: 1, max: 50, optional: true }),
+    validators.numericParam('limit', { min: 5, max: 25, optional: true }),
+    validators.textParam('search', { minLength: 0, maxLength: 30, optional: true }),
     validators.enumParam('role', ['all', 'user', 'admin'], { optional: true }),
-    validators.enumParam('sortBy', ['created_at', 'email', 'name', 'last_login_at'], { optional: true }),
-    validators.enumParam('sortOrder', ['ASC', 'DESC'], { optional: true }),
     handleValidationErrors,
-    ROUTE_CACHE_CONFIG.users.get,  // Cache de 2 minutos
+    
+    // Cache agressivo - 60 segundos
+    ROUTE_CACHE_CONFIG.users.get,  
+    
     adminController.getUsers
 );
 

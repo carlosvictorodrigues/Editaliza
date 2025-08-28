@@ -109,8 +109,8 @@
                 </div>
             </form>
             
-            <!-- Google OAuth Section -->
-            <div class="mt-6">
+            <!-- Google OAuth Section - DESABILITADO (Integração com Cackto) -->
+            <!-- <div class="mt-6">
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center">
                         <div class="w-full border-t border-gray-300"></div>
@@ -131,7 +131,7 @@
                         Entrar com Google
                     </button>
                 </div>
-            </div>
+            </div> -->
 
             <p class="text-center text-sm text-gray-600">
                 Ainda não tem uma conta?
@@ -229,7 +229,7 @@
             const loginForm = document.getElementById('loginForm');
             const messageContainer = document.getElementById('messageContainer');
             const submitButton = document.getElementById('submitButton');
-            const googleLoginButton = document.getElementById('googleLoginButton');
+            // const googleLoginButton = document.getElementById('googleLoginButton'); // DESABILITADO - OAuth removido
 
             loginForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -270,11 +270,11 @@
                 }
             });
             
-            // Google OAuth login handler
-            googleLoginButton.addEventListener('click', () => {
-                // Redirect to Google OAuth endpoint
-                window.location.href = '/auth/google';
-            });
+            // Google OAuth login handler - DESABILITADO
+            // googleLoginButton?.addEventListener('click', () => {
+            //     // Redirect to Google OAuth endpoint  
+            //     window.location.href = '/auth/google';
+            // });
         });
     </script>
     

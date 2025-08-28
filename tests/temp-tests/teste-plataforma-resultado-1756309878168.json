@@ -1,0 +1,85 @@
+{
+  "timestamp": 1756309878168,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": true,
+      "timestamp": "2025-08-27T15:51:18.350Z",
+      "userId": 74,
+      "email": "teste.completo.1756309878168@editaliza.com"
+    },
+    {
+      "nome": "Login",
+      "sucesso": true,
+      "timestamp": "2025-08-27T15:51:18.432Z"
+    },
+    {
+      "nome": "Criar Plano",
+      "sucesso": true,
+      "timestamp": "2025-08-27T15:51:18.444Z",
+      "planId": 68,
+      "planName": "TJPE - Analista Judiciário 2025"
+    },
+    {
+      "nome": "Adicionar Disciplinas e Tópicos",
+      "sucesso": true,
+      "timestamp": "2025-08-27T15:51:28.376Z",
+      "disciplinasAdicionadas": 9,
+      "topicosAdicionados": 145
+    },
+    {
+      "nome": "Gerar Cronograma",
+      "sucesso": true,
+      "timestamp": "2025-08-27T15:51:28.558Z"
+    },
+    {
+      "nome": "Verificar Algoritmo",
+      "sucesso": false,
+      "timestamp": "2025-08-27T15:51:28.569Z",
+      "distribuicaoEstudo": {
+        "Língua Portuguesa": 15,
+        "Direito Civil": 12,
+        "Direito Constitucional": 24,
+        "Direito Administrativo": 22,
+        "Legislação Específica TJPE": 5,
+        "Direito Penal": 17,
+        "Direito Processual Civil": 21,
+        "Raciocínio Lógico": 8,
+        "Direito Processual Penal": 21
+      }
+    },
+    {
+      "nome": "Marcar Sessões Concluídas",
+      "sucesso": false,
+      "timestamp": "2025-08-27T15:52:43.913Z",
+      "sessoesConcluidas": 0
+    },
+    {
+      "nome": "Gamificação",
+      "sucesso": false,
+      "timestamp": "2025-08-27T15:52:58.922Z",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "message": "timeout of 15000ms exceeded"
+      }
+    },
+    {
+      "nome": "Dashboard",
+      "sucesso": true,
+      "timestamp": "2025-08-27T15:52:58.930Z",
+      "aviso": "Endpoint não implementado"
+    }
+  ],
+  "erros": [
+    {
+      "etapa": "Gamificação",
+      "erro": {
+        "endpoint": "/gamification/profile",
+        "method": "GET",
+        "message": "timeout of 15000ms exceeded"
+      }
+    }
+  ],
+  "sucesso": false
+}

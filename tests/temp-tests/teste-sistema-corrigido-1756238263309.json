@@ -1,0 +1,58 @@
+{
+  "timestamp": "2025-08-26T19:57:43.309Z",
+  "totalTests": 4,
+  "passed": 3,
+  "failed": 1,
+  "errors": [
+    {
+      "message": "Plan Creation: FALHOU - ID do plano não retornado",
+      "timestamp": "2025-08-26T19:57:43.541Z"
+    },
+    {
+      "message": "Teste falhou: ID do plano não retornado",
+      "timestamp": "2025-08-26T19:57:43.541Z"
+    }
+  ],
+  "warnings": [
+    {
+      "message": "Usuário de teste não existe, criando...",
+      "timestamp": "2025-08-26T19:57:43.428Z"
+    }
+  ],
+  "details": {
+    "Health Check": {
+      "status": "PASSED",
+      "duration": "45ms",
+      "result": {
+        "uptime": 40.2872505,
+        "message": "OK",
+        "database": "PostgreSQL",
+        "timestamp": 1756238263349,
+        "environment": "development",
+        "version": "1.0.0"
+      }
+    },
+    "Database Connection": {
+      "status": "PASSED",
+      "duration": "4ms",
+      "result": "PostgreSQL"
+    },
+    "User Authentication": {
+      "status": "PASSED",
+      "duration": "166ms",
+      "result": {
+        "success": true,
+        "message": "Usuário criado com sucesso!",
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDYsImVtYWlsIjoidGVzdGVAZWRpdGFsaXphLmNvbSIsIm5hbWUiOiJVc3XDoXJpbyBUZXN0ZSBTaXN0ZW1hIiwiaWF0IjoxNzU2MjM4MjYzLCJleHAiOjE3NTYzMjQ2NjMsImlzcyI6ImVkaXRhbGl6YSJ9._moK2sh-RhTkGaY8nQtnuUVAmgwbAlET278CF9H-pkg",
+        "user": {
+          "id": 46
+        }
+      }
+    },
+    "Plan Creation": {
+      "status": "FAILED",
+      "error": "ID do plano não retornado",
+      "stack": "Error: ID do plano não retornado\n    at C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\test-complete-system-fixed.js:181:23\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async SystemTester.test (C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\test-complete-system-fixed.js:58:28)\n    at async SystemTester.testPlanCreation (C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\test-complete-system-fixed.js:169:16)\n    at async SystemTester.runAllTests (C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\test-complete-system-fixed.js:359:13)\n    at async main (C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza\\test-complete-system-fixed.js:441:5)"
+    }
+  }
+}

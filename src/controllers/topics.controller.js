@@ -333,6 +333,50 @@ class TopicsController {
             res.status(500).json({ 'error': 'Erro ao apagar tópico' });
         }
     }
+
+    /**
+     * POST /api/subjects/:subjectId/topics
+     * Criar novo tópico para uma disciplina
+     */
+    async createTopicForSubject(req, res) {
+        const { subjectId } = req.params;
+        const { topic_description, weight = 3, subject_id } = req.body;
+        
+        try {
+            // Validar ownership da disciplina
+            const subject = await dbGet(
+                `SELECT s.* FROM subjects s 
+                 JOIN study_plans p ON s.study_plan_id = p.id 
+                 WHERE s.id = ? AND p.user_id = ?`,
+                [subject_id || subjectId, req.user.id]
+            );
+            
+            if (!subject) {
+                return res.status(404).json({ error: 'Disciplina não encontrada ou não autorizada' });
+            }
+            
+            // Inserir tópico
+            const result = await dbRun(
+                `INSERT INTO topics (subject_id, topic_name, priority_weight, status, created_at) 
+                 VALUES (?, ?, ?, 'Pendente', NOW())`,
+                [subject_id || subjectId, topic_description, weight]
+            );
+            
+            res.status(201).json({
+                topic: {
+                    id: result.lastID,
+                    subject_id: subject_id || subjectId,
+                    topic_name: topic_description,
+                    priority_weight: weight,
+                    status: 'Pendente'
+                }
+            });
+            
+        } catch (error) {
+            console.error('Erro ao criar tópico:', error);
+            res.status(500).json({ error: 'Erro ao criar tópico' });
+        }
+    }
 }
 
 module.exports = new TopicsController();

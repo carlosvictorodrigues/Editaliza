@@ -129,11 +129,13 @@ class DatabaseAdapter {
 
             // Fallback para método legacy
             return new Promise((resolve, reject) => {
+                console.log('[DB_ADAPTER] Executando db.run com params:', params);
                 this.db.run(sql, params, function(err) {
                     if (err) {
-                        this.stats.errors++;
+                        console.error('[DB_ADAPTER] Erro no callback:', err);
                         reject(err);
                     } else {
+                        console.log('[DB_ADAPTER] Callback success, this context:', this);
                         resolve(this);
                     }
                 });
@@ -221,6 +223,37 @@ class DatabaseAdapter {
             return this.repos.plan.findByIdAndUserId(params[0], params[1]);
         }
 
+        // INSERT INTO study_plans - use direct PostgreSQL execution
+        if (method === 'RUN' && sql.includes('insert into study_plans')) {
+            console.log('[DB_ADAPTER] Handling INSERT study_plans with direct PostgreSQL');
+            let { sql: pgSql, params: pgParams } = this.convertSqlParams(sql, params);
+            
+            // CORREÇÃO: Garantir que tenha RETURNING id para obter o ID
+            if (!pgSql.toLowerCase().includes('returning')) {
+                pgSql = pgSql.replace(/;?$/, ' RETURNING id;');
+                console.log('[DB_ADAPTER] Adicionado RETURNING id à query');
+            }
+            
+            console.log('[DB_ADAPTER] Query final:', pgSql.substring(0, 100) + '...');
+            
+            // Execute directly with PostgreSQL pool
+            const result = await this.db.pool.query(pgSql, pgParams);
+            
+            let lastID = null;
+            if (result.rows && result.rows.length > 0 && result.rows[0].id !== undefined) {
+                lastID = parseInt(result.rows[0].id, 10) || result.rows[0].id;
+                console.log('[DB_ADAPTER] ID retornado:', lastID);
+            } else {
+                console.warn('[DB_ADAPTER] Nenhum ID retornado:', result.rows);
+            }
+            
+            return {
+                lastID: lastID,
+                changes: result.rowCount || 0,
+                id: lastID // Compatibilidade adicional
+            };
+        }
+
         return null;
     }
 
@@ -281,6 +314,64 @@ class DatabaseAdapter {
     logStats() {
         const stats = this.getStats();
         logger.info('[DB_ADAPTER] Migration Stats:', stats);
+    }
+
+    /**
+     * Converter parâmetros SQLite para PostgreSQL
+     */
+    convertSqlParams(sql, params) {
+        // Se já está no formato PostgreSQL, retornar como está
+        if (sql.includes('$1')) {
+            return { sql, params };
+        }
+
+        // Converter ? para $1, $2, etc.
+        let pgSql = sql;
+        let pgParams = [...params];
+        let paramIndex = 1;
+        
+        while (pgSql.includes('?')) {
+            pgSql = pgSql.replace('?', `$${paramIndex}`);
+            paramIndex++;
+        }
+
+        return { sql: pgSql, params: pgParams };
+    }
+
+    /**
+     * Método específico para INSERT com retorno de ID
+     * Garante compatibilidade entre SQLite (lastID) e PostgreSQL (RETURNING id)
+     */
+    async insertAndGetId(table, data) {
+        try {
+            const columns = Object.keys(data).join(', ');
+            const placeholders = Object.keys(data).map((_, i) => `$${i + 1}`).join(', ');
+            const values = Object.values(data);
+            
+            // Query com RETURNING id para PostgreSQL
+            const sql = `INSERT INTO ${table} (${columns}) VALUES (${placeholders}) RETURNING id`;
+            
+            logger.info(`[DB_ADAPTER] insertAndGetId: ${table}`, {
+                columns: Object.keys(data).length,
+                type: 'insert'
+            });
+            
+            // Executar diretamente no PostgreSQL
+            const result = await this.db.pool.query(sql, values);
+            
+            if (result.rows && result.rows.length > 0) {
+                const id = result.rows[0].id;
+                logger.info(`[DB_ADAPTER] Inserted into ${table} with ID: ${id}`);
+                return id;
+            }
+            
+            logger.warn(`[DB_ADAPTER] Insert into ${table} did not return ID`);
+            return null;
+            
+        } catch (error) {
+            logger.error('[DB_ADAPTER] Error in insertAndGetId:', error);
+            throw error;
+        }
     }
 }
 

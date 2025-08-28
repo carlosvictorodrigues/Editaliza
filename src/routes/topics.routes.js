@@ -15,8 +15,8 @@ const router = express.Router();
 
 // Controllers e Middleware
 const topicsController = require('../controllers/topics.controller');
-const { authenticateToken, handleValidationErrors } = require('../../middleware');
-const { validators } = require('../../middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
+const { validators, handleValidationErrors } = require('../middleware/validation.middleware');
 
 /**
  * GET /api/subjects/:subjectId/topics
@@ -31,6 +31,29 @@ router.get('/api/subjects/:subjectId/topics',
     validators.numericId('subjectId'),
     handleValidationErrors,
     topicsController.getTopicsBySubject
+);
+
+/**
+ * POST /api/subjects/:subjectId/topics
+ * Criar novo tópico para uma disciplina
+ * 
+ * Validações:
+ * - subjectId numérico
+ * - topic_description: descrição do tópico (1-500 chars)
+ * - weight: peso do tópico (1-5)
+ */
+router.post('/subjects/:subjectId/topics',
+    authenticateToken(),
+    validators.numericId('subjectId'),
+    body('topic_description')
+        .isString()
+        .isLength({ min: 1, max: 500 })
+        .withMessage('Descrição do tópico deve ter entre 1 e 500 caracteres'),
+    body('weight')
+        .isInt({ min: 1, max: 5 })
+        .withMessage('Peso deve ser entre 1 e 5'),
+    handleValidationErrors,
+    topicsController.createTopicForSubject
 );
 
 /**

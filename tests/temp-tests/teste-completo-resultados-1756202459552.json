@@ -1,0 +1,42 @@
+{
+  "createAccount": {
+    "status": "❌",
+    "details": "Request failed with status code 400",
+    "data": null
+  },
+  "login": {
+    "status": "❌",
+    "details": "Request failed with status code 400",
+    "data": null
+  },
+  "createPlan": {
+    "status": "❌",
+    "details": "Request failed with status code 403",
+    "data": null
+  },
+  "generateSchedule": {
+    "status": "❌",
+    "details": "Plan ID não disponível",
+    "data": null
+  },
+  "verifyInterface": {
+    "status": "✅",
+    "details": "Páginas acessíveis e dados do plano disponíveis",
+    "data": {
+      "homeAccessible": true,
+      "cronogramaAccessible": true,
+      "planDataAvailable": false
+    }
+  },
+  "markSessions": {
+    "status": "❌",
+    "details": "Sessões não disponíveis",
+    "data": null
+  },
+  "verifyStats": {
+    "status": "❌",
+    "details": "Request failed with status code 404",
+    "data": null
+  },
+  "overallStatus": "❌"
+}

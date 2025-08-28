@@ -1,7 +1,7 @@
 /**
- * Plan Repository
+ * Plan Repository - CORRIGIDO
  * Centraliza todas as queries relacionadas a planos de estudo
- * FASE 3 - Criado manualmente com contexto de negócio adequado
+ * CORREÇÃO: Usando apenas colunas que existem na tabela real
  */
 
 const BaseRepository = require('./base.repository');
@@ -9,15 +9,26 @@ const BaseRepository = require('./base.repository');
 class PlanRepository extends BaseRepository {
     constructor(db) {
         super(db);
+        console.log('[PLAN_REPOSITORY] Inicializado com db:', {
+            hasRun: typeof db.run,
+            hasGet: typeof db.get, 
+            hasAll: typeof db.all,
+            constructor: db.constructor.name
+        });
     }
 
     /**
      * Lista todos os planos de um usuário
-     * FASE 4.1 - Incluindo TODOS os campos para compatibilidade com controller
+     * CORRIGIDO: Usando apenas campos que existem
      */
     async findByUserId(userId) {
         const query = `
-            SELECT * FROM study_plans 
+            SELECT 
+                id, user_id, plan_name, exam_date, 
+                study_hours_per_day, daily_question_goal, weekly_question_goal,
+                session_duration_minutes, review_mode, postponement_count,
+                has_essay, reta_final_mode, created_at
+            FROM study_plans 
             WHERE user_id = $1 
             ORDER BY id DESC
         `;
@@ -26,11 +37,15 @@ class PlanRepository extends BaseRepository {
 
     /**
      * Busca um plano específico validando ownership
-     * FASE 4.1 - Incluindo TODOS os campos para compatibilidade
      */
     async findByIdAndUser(planId, userId) {
         const query = `
-            SELECT * FROM study_plans 
+            SELECT 
+                id, user_id, plan_name, exam_date, 
+                study_hours_per_day, daily_question_goal, weekly_question_goal,
+                session_duration_minutes, review_mode, postponement_count,
+                has_essay, reta_final_mode, created_at
+            FROM study_plans 
             WHERE id = $1 AND user_id = $2
         `;
         return this.findOne(query, [planId, userId]);
@@ -53,43 +68,60 @@ class PlanRepository extends BaseRepository {
 
     /**
      * Cria um novo plano de estudos
+     * CORRIGIDO: Usando apenas campos que existem na tabela real
      */
     async createPlan(planData) {
+        console.log('[PLAN_REPOSITORY] createPlan chamado com:', planData);
+        
         const {
-            user_id, plan_name, exam_date, daily_study_hours,
-            days_per_week, notification_time, daily_question_goal,
-            weekly_question_goal, has_essay, essay_frequency
+            user_id, plan_name, exam_date,
+            daily_question_goal, weekly_question_goal, 
+            session_duration_minutes, review_mode,
+            has_essay, reta_final_mode, study_hours_per_day
         } = planData;
 
         const query = `
             INSERT INTO study_plans (
-                user_id, plan_name, exam_date, daily_study_hours,
-                days_per_week, notification_time, daily_question_goal,
-                weekly_question_goal, has_essay, essay_frequency,
-                created_at, updated_at
+                user_id, plan_name, exam_date,
+                daily_question_goal, weekly_question_goal,
+                session_duration_minutes, review_mode,
+                has_essay, reta_final_mode, study_hours_per_day,
+                created_at
             ) VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-                CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                CURRENT_TIMESTAMP
             ) RETURNING id
         `;
 
         const params = [
-            user_id, plan_name, exam_date, daily_study_hours,
-            days_per_week, notification_time, daily_question_goal,
-            weekly_question_goal, has_essay, essay_frequency
+            user_id, 
+            plan_name, 
+            exam_date,
+            daily_question_goal || 50,
+            weekly_question_goal || 300,
+            session_duration_minutes || 50,
+            review_mode || 'completo',
+            has_essay || false,
+            reta_final_mode || false,
+            study_hours_per_day ? JSON.stringify(study_hours_per_day) : '{"0": 0, "1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 0}'
         ];
 
-        return this.create(query, params);
+        const result = await this.create(query, params);
+        console.log('[PLAN_REPOSITORY] create retornou:', result);
+        
+        // Para RETURNING id, result será um objeto { id: X }
+        // Retornar o objeto completo para que o controller extraia o id
+        return result;
     }
 
     /**
      * Atualiza configurações do plano
+     * CORRIGIDO: Usando apenas campos que existem
      */
     async updatePlanSettings(planId, userId, settings) {
         const allowedFields = [
-            'daily_study_hours', 'days_per_week', 'notification_time',
-            'daily_question_goal', 'weekly_question_goal', 
-            'has_essay', 'essay_frequency'
+            'study_hours_per_day', 'daily_question_goal', 'weekly_question_goal', 
+            'session_duration_minutes', 'review_mode', 'has_essay', 'reta_final_mode'
         ];
 
         const updates = {};
@@ -103,7 +135,13 @@ class PlanRepository extends BaseRepository {
             return 0;
         }
 
-        updates.updated_at = 'CURRENT_TIMESTAMP';
+        // Converter study_hours_per_day para JSON se necessário
+        if (updates.study_hours_per_day && typeof updates.study_hours_per_day === 'object') {
+            updates.study_hours_per_day = JSON.stringify(updates.study_hours_per_day);
+        }
+
+        // Remover updated_at pois a coluna não existe na tabela
+        // updates.updated_at = 'CURRENT_TIMESTAMP';
         
         const { query, params } = this.buildUpdateQuery(
             'study_plans',
@@ -116,7 +154,7 @@ class PlanRepository extends BaseRepository {
     }
 
     /**
-     * Deleta um plano e todos os dados relacionados (transação)
+     * Deleta um plano e todos os dados relacionados
      */
     async deletePlanWithRelatedData(planId, userId) {
         return this.transaction(async (repo) => {
@@ -141,70 +179,6 @@ class PlanRepository extends BaseRepository {
     }
 
     /**
-     * Busca estatísticas completas do plano
-     */
-    async getPlanStatistics(planId, userId) {
-        // Primeiro verificar ownership
-        const plan = await this.findByIdAndUser(planId, userId);
-        if (!plan) return null;
-
-        const query = `
-            SELECT 
-                sp.id,
-                sp.plan_name,
-                sp.exam_date,
-                sp.daily_study_hours,
-                sp.days_per_week,
-                (SELECT COUNT(*) FROM subjects WHERE study_plan_id = sp.id) as total_subjects,
-                (SELECT COUNT(*) FROM topics t 
-                 JOIN subjects s ON t.subject_id = s.id 
-                 WHERE s.study_plan_id = sp.id) as total_topics,
-                (SELECT COUNT(*) FROM topics t 
-                 JOIN subjects s ON t.subject_id = s.id 
-                 WHERE s.study_plan_id = sp.id AND t.status = 'completed') as completed_topics,
-                (SELECT COUNT(*) FROM study_sessions 
-                 WHERE study_plan_id = sp.id) as total_sessions,
-                (SELECT COUNT(*) FROM study_sessions 
-                 WHERE study_plan_id = sp.id AND status = 'completed') as completed_sessions,
-                (SELECT SUM(duration_minutes) FROM study_sessions 
-                 WHERE study_plan_id = sp.id AND status = 'completed') as total_study_minutes
-            FROM study_plans sp
-            WHERE sp.id = $1
-        `;
-
-        return this.findOne(query, [planId]);
-    }
-
-    /**
-     * Busca progresso detalhado por disciplina
-     */
-    async getDetailedProgress(planId, userId) {
-        // Verificar ownership
-        const plan = await this.findByIdAndUser(planId, userId);
-        if (!plan) return null;
-
-        const query = `
-            SELECT 
-                s.id as subject_id,
-                s.subject_name,
-                s.priority_weight,
-                COUNT(t.id) as total_topics,
-                COUNT(CASE WHEN t.status = 'completed' THEN 1 END) as completed_topics,
-                ROUND(COUNT(CASE WHEN t.status = 'completed' THEN 1 END) * 100.0 / NULLIF(COUNT(t.id), 0), 2) as progress_percentage,
-                SUM(t.total_questions) as total_questions,
-                SUM(t.correct_questions) as correct_questions,
-                ROUND(SUM(t.correct_questions) * 100.0 / NULLIF(SUM(t.total_questions), 0), 2) as accuracy_percentage
-            FROM subjects s
-            LEFT JOIN topics t ON s.id = t.subject_id
-            WHERE s.study_plan_id = $1
-            GROUP BY s.id, s.subject_name, s.priority_weight
-            ORDER BY s.priority_weight DESC
-        `;
-
-        return this.findAll(query, [planId]);
-    }
-
-    /**
      * Conta total de planos de um usuário
      */
     async countUserPlans(userId) {
@@ -219,106 +193,15 @@ class PlanRepository extends BaseRepository {
     }
 
     /**
-     * Busca planos próximos do exame (admin/notificações)
-     */
-    async getPlansNearExam(daysAhead = 30) {
-        const query = `
-            SELECT 
-                sp.*,
-                u.email,
-                u.name as user_name,
-                DATE_PART('day', sp.exam_date - CURRENT_DATE) as days_until_exam
-            FROM study_plans sp
-            JOIN users u ON sp.user_id = u.id
-            WHERE sp.exam_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '1 day' * ${daysAhead}
-            ORDER BY sp.exam_date ASC
-        `;
-        return this.findAll(query);
-    }
-
-    /**
      * Atualiza data do exame
      */
     async updateExamDate(planId, userId, newExamDate) {
         const query = `
             UPDATE study_plans 
-            SET exam_date = $3, updated_at = CURRENT_TIMESTAMP
+            SET exam_date = $3
             WHERE id = $1 AND user_id = $2
         `;
         return this.update(query, [planId, userId, newExamDate]);
-    }
-
-    /**
-     * Busca configurações de notificação
-     */
-    async getNotificationSettings(planId, userId) {
-        const query = `
-            SELECT 
-                notification_time,
-                daily_question_goal,
-                weekly_question_goal,
-                has_essay,
-                essay_frequency
-            FROM study_plans
-            WHERE id = $1 AND user_id = $2
-        `;
-        return this.findOne(query, [planId, userId]);
-    }
-
-    /**
-     * Marca plano como gerado (após criar cronograma)
-     */
-    async markAsGenerated(planId, userId) {
-        const query = `
-            UPDATE study_plans 
-            SET schedule_generated = 1, 
-                schedule_generated_at = CURRENT_TIMESTAMP,
-                updated_at = CURRENT_TIMESTAMP
-            WHERE id = $1 AND user_id = $2
-        `;
-        return this.update(query, [planId, userId]);
-    }
-
-    /**
-     * Reseta cronograma do plano
-     */
-    async resetSchedule(planId, userId) {
-        return this.transaction(async (repo) => {
-            // Verificar ownership
-            const plan = await repo.findOne(
-                'SELECT id FROM study_plans WHERE id = $1 AND user_id = $2',
-                [planId, userId]
-            );
-
-            if (!plan) {
-                throw new Error('Plano não encontrado ou não autorizado');
-            }
-
-            // Deletar sessões existentes
-            await repo.delete('DELETE FROM study_sessions WHERE study_plan_id = $1', [planId]);
-            
-            // Resetar flags
-            await repo.update(
-                `UPDATE study_plans 
-                 SET schedule_generated = 0, 
-                     schedule_generated_at = NULL,
-                     updated_at = CURRENT_TIMESTAMP
-                 WHERE id = $1`,
-                [planId]
-            );
-
-            // Resetar progresso dos tópicos
-            await repo.update(
-                `UPDATE topics 
-                 SET completed = 0, 
-                     correct_questions = 0,
-                     updated_at = CURRENT_TIMESTAMP
-                 WHERE subject_id IN (SELECT id FROM subjects WHERE study_plan_id = $1)`,
-                [planId]
-            );
-
-            return true;
-        });
     }
 }
 

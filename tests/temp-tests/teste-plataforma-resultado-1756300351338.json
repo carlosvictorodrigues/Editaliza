@@ -1,0 +1,36 @@
+{
+  "timestamp": 1756300351338,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": false,
+      "timestamp": "2025-08-27T13:12:31.384Z",
+      "erro": {
+        "endpoint": "/auth/register",
+        "method": "POST",
+        "status": 429,
+        "message": "Request failed with status code 429",
+        "data": {
+          "error": "Limite de requisições excedido. Tente novamente em 15 minutos.",
+          "code": "RATE_LIMIT_EXCEEDED"
+        }
+      }
+    }
+  ],
+  "erros": [
+    {
+      "etapa": "Registro",
+      "erro": {
+        "endpoint": "/auth/register",
+        "method": "POST",
+        "status": 429,
+        "message": "Request failed with status code 429",
+        "data": {
+          "error": "Limite de requisições excedido. Tente novamente em 15 minutos.",
+          "code": "RATE_LIMIT_EXCEEDED"
+        }
+      }
+    }
+  ],
+  "sucesso": false
+}

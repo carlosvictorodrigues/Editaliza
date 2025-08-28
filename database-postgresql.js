@@ -1,33 +1,22 @@
-// Tentar usar PostgreSQL, mas fallback para memória se falhar
-let db;
+/**
+ * Database PostgreSQL
+ * 
+ * Usa conexão direta com PostgreSQL
+ * Sem fallbacks - desenvolvimento = produção
+ */
 
-try {
-    // Tentar carregar PostgreSQL
-    db = require('./database-simple-postgres');
-    
-    // Testar conexão
-    const { Client } = require('pg');
-    const testClient = new Client({
-        database: process.env.DB_NAME || 'editaliza_db',
-        user: process.env.DB_USER || 'editaliza_user',
-        password: process.env.DB_PASSWORD || '1a2b3c4d',
+const postgres = require('./database-postgres-direct');
+
+// Testar conexão ao carregar
+postgres.testConnection().catch(err => {
+    console.error('❌ [DATABASE] PostgreSQL não está disponível');
+    console.error('   Certifique-se que o PostgreSQL está rodando');
+    console.error('   Config:', {
         host: process.env.DB_HOST || '127.0.0.1',
-        port: process.env.DB_PORT || 5432
+        port: process.env.DB_PORT || 5432,
+        database: process.env.DB_NAME || 'editaliza_db'
     });
-    
-    testClient.connect()
-        .then(() => {
-            console.log('[DATABASE] PostgreSQL conectado com sucesso');
-            testClient.end();
-        })
-        .catch(err => {
-            console.log('[DATABASE] PostgreSQL não disponível, usando banco em memória');
-            db = require('./database-memory');
-        });
-    
-} catch (err) {
-    console.log('[DATABASE] Erro ao conectar PostgreSQL, usando banco em memória');
-    db = require('./database-memory');
-}
+    process.exit(1);
+});
 
-module.exports = db;
+module.exports = postgres;

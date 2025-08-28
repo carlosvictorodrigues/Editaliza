@@ -330,13 +330,13 @@ const getDailyProgress = async (planId, date) => {
         ? `SELECT SUM(questions_solved) as count
         FROM study_sessions
         WHERE study_plan_id = $1 
-        AND DATE(session_date) = DATE($2)
+        AND session_date::date = $2::date
         AND status = 'Concluído'
         AND questions_solved > 0`
         : `SELECT SUM(questions_solved) as count
         FROM study_sessions
         WHERE study_plan_id = ? 
-        AND DATE(session_date) = DATE(?)
+        AND session_date::date = ?::date
         AND status = 'Concluído'
         AND questions_solved > 0`;
     
@@ -354,13 +354,13 @@ const getWeeklyProgress = async (planId, weekStart) => {
         ? `SELECT SUM(questions_solved) as count
         FROM study_sessions
         WHERE study_plan_id = $1 
-        AND DATE(session_date) >= DATE($2)
+        AND session_date::date >= $2::date
         AND status = 'Concluído'
         AND questions_solved > 0`
         : `SELECT SUM(questions_solved) as count
         FROM study_sessions
         WHERE study_plan_id = ? 
-        AND DATE(session_date) >= DATE(?)
+        AND session_date::date >= ?::date
         AND status = 'Concluído'
         AND questions_solved > 0`;
     
@@ -469,7 +469,7 @@ const getOverdueTasks = async (planId) => {
         LEFT JOIN topics t ON ss.topic_id = t.id
         LEFT JOIN subjects s ON t.subject_id = s.id
         WHERE ss.study_plan_id = $1 
-        AND DATE(ss.session_date) < DATE($2)
+        AND ss.session_date::date < $2::date
         AND ss.status = 'Pendente'
         ORDER BY ss.session_date ASC`
         : `SELECT 
@@ -481,7 +481,7 @@ const getOverdueTasks = async (planId) => {
         LEFT JOIN topics t ON ss.topic_id = t.id
         LEFT JOIN subjects s ON t.subject_id = s.id
         WHERE ss.study_plan_id = ? 
-        AND DATE(ss.session_date) < DATE(?)
+        AND ss.session_date::date < ?::date
         AND ss.status = 'Pendente'
         ORDER BY ss.session_date ASC`;
     
@@ -509,7 +509,7 @@ const getActivitySummaryByDate = async (planId, date) => {
         LEFT JOIN topics t ON ss.topic_id = t.id
         LEFT JOIN subjects s ON t.subject_id = s.id
         WHERE ss.study_plan_id = $1 
-        AND DATE(ss.session_date) = DATE($2)
+        AND ss.session_date::date = $2::date
         ORDER BY ss.session_type, s.subject_name`
         : `SELECT 
             ss.session_type,
@@ -520,7 +520,7 @@ const getActivitySummaryByDate = async (planId, date) => {
         LEFT JOIN topics t ON ss.topic_id = t.id
         LEFT JOIN subjects s ON t.subject_id = s.id
         WHERE ss.study_plan_id = ? 
-        AND DATE(ss.session_date) = DATE(?)
+        AND ss.session_date::date = ?::date
         ORDER BY ss.session_type, s.subject_name`;
     
     return await executeQuery('all', sql, [planId, date], 'getActivitySummaryByDate');

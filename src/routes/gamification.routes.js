@@ -14,15 +14,17 @@ const router = express.Router();
 
 // Importar controller de gamificação
 const {
-    getPlanGamification
+    getPlanGamification,
+    getUserStats,
+    getUserProgress,
+    getUserAchievements,
+    getGeneralStatistics,
+    getGamificationProfile
 } = require('../controllers/gamification.controller');
 
 // Importar middlewares de segurança (mantidos do servidor original)
-const {
-    authenticateToken,
-    validators,
-    handleValidationErrors
-} = require('../../middleware');
+const { authenticateToken } = require('../middleware/auth.middleware');
+const { validators, handleValidationErrors } = require('../middleware/validation.middleware');
 
 /**
  * GET /api/plans/:planId/gamification
@@ -49,10 +51,80 @@ const {
  * - totalStudyTime: Tempo total estudado (em segundos)
  */
 router.get('/plans/:planId/gamification', 
-    authenticateToken,
+    authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     getPlanGamification
+);
+
+/**
+ * GET /api/stats/user
+ * 
+ * Rota para estatísticas do usuário:
+ * - XP total
+ * - Nível atual
+ * - Streak de dias
+ * - Total de sessões completadas
+ * - Horas estudadas
+ * - Total de dias de estudo
+ * - Tempo médio por sessão
+ */
+router.get('/stats/user',
+    authenticateToken(),
+    getUserStats
+);
+
+/**
+ * GET /api/progress
+ * 
+ * Rota para progresso do plano:
+ * - Porcentagem de conclusão
+ * - Sessões completadas vs total
+ * - Tópicos dominados
+ * - Próximas sessões
+ * - Planos ativos
+ */
+router.get('/progress',
+    authenticateToken(),
+    getUserProgress
+);
+
+/**
+ * GET /api/achievements
+ * 
+ * Rota para conquistas do usuário:
+ * - Lista de conquistas desbloqueadas
+ * - Progresso para próximas conquistas
+ * - Badges ganhos
+ * - Total de conquistas
+ */
+router.get('/achievements',
+    authenticateToken(),
+    getUserAchievements
+);
+
+/**
+ * GET /api/statistics
+ * 
+ * Rota para estatísticas gerais:
+ * - Métricas de desempenho
+ * - Gráficos de progresso
+ * - Comparação com metas
+ * - Estatistias semanais e mensais
+ */
+router.get('/statistics',
+    authenticateToken(),
+    getGeneralStatistics
+);
+
+/**
+ * GET /api/gamification/profile
+ * 
+ * Rota para obter o perfil completo de gamificação do usuário.
+ */
+router.get('/gamification/profile',
+    authenticateToken(),
+    getGamificationProfile
 );
 
 module.exports = router;
