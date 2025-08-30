@@ -94,7 +94,7 @@ async function verifyUserAndAuth() {
         console.log(`   - Sessões existentes: ${sessions.length}`);
         
         console.log('\n✅ === VERIFICAÇÃO CONCLUÍDA ===');
-        console.log(`\nUse estes dados para teste:`);
+        console.log("\nUse estes dados para teste:");
         console.log(`- User ID: ${user.id}`);
         console.log(`- Plan ID: ${plan.id}`);
         console.log(`- Token: ${token}`);

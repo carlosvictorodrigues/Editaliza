@@ -31,7 +31,7 @@ const generateScheduleWithValidation = async (planId, planData) => {
     // **NOVA FUNCIONALIDADE: Modo Reta Final**
     const isRetaFinal = planData.reta_final_mode === true || planData.reta_final_mode === 1;
     if (isRetaFinal) {
-        console.log(`🚨 [MODO RETA FINAL ATIVADO] - Priorizando disciplinas de maior peso`);
+        console.log("🚨 [MODO RETA FINAL ATIVADO] - Priorizando disciplinas de maior peso");
     }
     
     let agenda = {};

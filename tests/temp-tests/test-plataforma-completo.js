@@ -438,7 +438,7 @@ async function testarPlataformaCompleta() {
         }
     }
     
-    console.log(`\n   📊 Resumo:`);
+    console.log("\n   📊 Resumo:");
     console.log(`      Disciplinas adicionadas: ${disciplinasAdicionadas}/${disciplinas.length}`);
     console.log(`      Tópicos adicionados: ${topicosAdicionados}/${disciplinas.reduce((sum, d) => sum + d.topicos.length, 0)}`);
     
@@ -471,7 +471,7 @@ async function testarPlataformaCompleta() {
     console.log(`   - Data início: ${scheduleData.start_date}`);
     console.log(`   - Data concurso: ${scheduleData.exam_date}`);
     console.log(`   - Horas por dia: ${scheduleData.hours_per_day}`);
-    console.log(`   - Dias disponíveis: Seg-Sáb`);
+    console.log("- Dias disponíveis: Seg-Sáb");
     
     await delay(50) // Reduzido - rate limit desabilitado;
     const scheduleResult = await makeRequest('POST', `/plans/${planId}/generate`, scheduleData);
@@ -617,7 +617,7 @@ async function testarPlataformaCompleta() {
         });
         
         if (statusResult.success) {
-            console.log(`      ✅ Marcada como concluída`);
+            console.log("✅ Marcada como concluída");
             
             // Registrar tempo de estudo
             const timeResult = await makeRequest('POST', `/sessions/${sessionId}/time`, {
@@ -629,7 +629,7 @@ async function testarPlataformaCompleta() {
             }
             
             // AGUARDAR e VERIFICAR XP APÓS CADA SESSÃO
-            console.log(`      ⏳ Aguardando processamento de XP...`);
+            console.log("⏳ Aguardando processamento de XP...");
             await delay(2000); // Aguardar 2 segundos para garantir processamento
             
             const xpCheck = await makeRequest('GET', '/gamification/profile');
@@ -641,7 +641,7 @@ async function testarPlataformaCompleta() {
                     console.log(`      🎆 XP GANHO: +${xpGanho} XP`);
                     console.log(`      📊 XP total agora: ${xpAtual}`);
                 } else {
-                    console.log(`      ⚠️ PROBLEMA: Nenhum XP ganho!`);
+                    console.log("⚠️ PROBLEMA: Nenhum XP ganho!");
                     console.log(`      🔍 XP continua em: ${xpAtual}`);
                 }
                 xpAcumulado = xpAtual;
@@ -655,7 +655,7 @@ async function testarPlataformaCompleta() {
     }
     
     // Resumo do XP ganho
-    console.log(`\n   📊 RESUMO DE XP:`);
+    console.log("\n   📊 RESUMO DE XP:");
     console.log(`      XP inicial: ${xpInicial}`);
     console.log(`      XP final: ${xpAcumulado}`);
     console.log(`      XP total ganho: ${xpAcumulado - xpInicial}`);
@@ -700,12 +700,12 @@ async function testarPlataformaCompleta() {
             console.log(`      Horas adicionadas: ${horasEstudadasDiff.toFixed(2)}h (esperado: ${(sessoesConcluidas * tempoEstudoSimulado / 3600).toFixed(2)}h)`);
             
             if (estatisticasAtualizadas) {
-                console.log(`      ✅ Estatísticas atualizadas corretamente!`);
+                console.log("✅ Estatísticas atualizadas corretamente!");
             } else {
-                console.log(`      ⚠️ Estatísticas parcialmente atualizadas`);
+                console.log("⚠️ Estatísticas parcialmente atualizadas");
             }
         } else {
-            console.log(`      ℹ️ Nenhuma sessão concluída`);
+            console.log("ℹ️ Nenhuma sessão concluída");
         }
         
         registrarEtapa('Estatísticas das Sessões', estatisticasAtualizadas || sessoesConcluidas === 0, {
@@ -731,7 +731,7 @@ async function testarPlataformaCompleta() {
         console.log(`      Progresso semanal: ${progress.weeklyProgress || 0} questões (${progress.weeklyPercentage || 0}%)`);
         
         if (sessoesConcluidas > 0 && progress.dailyProgress > 0) {
-            console.log(`      ✅ Progresso de questões registrado!`);
+            console.log("✅ Progresso de questões registrado!");
         }
     }
     
@@ -795,14 +795,14 @@ async function testarPlataformaCompleta() {
             console.log(`      XP por sessão: ${xpGanho > 0 ? (xpGanho / sessoesConcluidas).toFixed(1) : 0} XP`);
             
             if (xpGanho >= xpEsperado) {
-                console.log(`      ✅ Gamificação atualizada corretamente!`);
+                console.log("✅ Gamificação atualizada corretamente!");
             } else if (xpGanho > 0) {
-                console.log(`      ⚠️ Gamificação parcialmente atualizada (XP menor que esperado)`);
+                console.log("⚠️ Gamificação parcialmente atualizada (XP menor que esperado)");
             } else {
-                console.log(`      ❌ ERRO: Gamificação NÃO foi atualizada após conclusão de sessões!`);
+                console.log("❌ ERRO: Gamificação NÃO foi atualizada após conclusão de sessões!");
             }
         } else {
-            console.log(`      ℹ️ Nenhuma sessão concluída, gamificação não deveria mudar`);
+            console.log("ℹ️ Nenhuma sessão concluída, gamificação não deveria mudar");
         }
         
         // 8.5 - Detalhes das conquistas
@@ -858,7 +858,7 @@ async function testarPlataformaCompleta() {
             console.log(`      Conquistas do plano: ${planStats.achievements.length}`);
         }
     } else {
-        console.log(`      ⚠️ Endpoint de gamificação do plano não disponível`);
+        console.log("⚠️ Endpoint de gamificação do plano não disponível");
     }
     
     // ========== 9. TESTE DE INTERFACE (CARDS NA HOME E CRONOGRAMA) ========== 
@@ -911,7 +911,7 @@ async function testarPlataformaCompleta() {
         if (overdueCount > 0) {
             console.log(`      ⚠️ Existem ${overdueCount} sessões pendentes de dias anteriores`);
         } else {
-            console.log(`      ✅ Nenhuma sessão atrasada`);
+            console.log("✅ Nenhuma sessão atrasada");
         }
     }
     
@@ -1120,7 +1120,7 @@ async function testarPlataformaCompleta() {
     console.log(`\n   ✅ Etapas bem-sucedidas: ${etapasSucesso}/${totalEtapas} (${percentualSucesso}%)`);
     
     if (testResults.erros.length > 0) {
-        console.log(`\n   ❌ Erros encontrados:`);
+        console.log("\n   ❌ Erros encontrados:");
         testResults.erros.forEach(erro => {
             console.log(`      - ${erro.etapa}: ${erro.erro.message}`);
         });

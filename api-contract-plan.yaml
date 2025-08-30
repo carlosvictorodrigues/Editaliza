@@ -1,0 +1,478 @@
+openapi: 3.0.3
+info:
+  title: Editaliza Plan Dashboard API
+  description: API endpoints used by plan.html page
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://app.editaliza.com.br/api
+    description: Production server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          example: "Invalid input data"
+        details:
+          type: object
+          additionalProperties: true
+    
+    Plan:
+      type: object
+      required:
+        - id
+        - plan_name
+        - exam_date
+      properties:
+        id:
+          type: integer
+          example: 1
+        plan_name:
+          type: string
+          example: "Concurso TJ-PE 2025"
+        exam_date:
+          type: string
+          format: date
+          example: "2025-03-15"
+        reta_final_mode:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          format: date-time
+    
+    GamificationProfile:
+      type: object
+      required:
+        - studyStreak
+        - totalStudyDays
+        - experiencePoints
+        - concurseiroLevel
+      properties:
+        studyStreak:
+          type: integer
+          example: 5
+          description: Current consecutive study days
+        totalStudyDays:
+          type: integer
+          example: 20
+          description: Total days studied
+        experiencePoints:
+          type: integer
+          example: 1500
+          description: Total XP earned
+        concurseiroLevel:
+          type: string
+          example: "Aspirante a Servidor(a) 🌱"
+          description: Current level title
+        achievements:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              name:
+                type: string
+              description:
+                type: string
+              unlockedAt:
+                type: string
+                format: date-time
+        completedTopicsCount:
+          type: integer
+          example: 25
+        totalCompletedSessions:
+          type: integer
+          example: 30
+    
+    SchedulePreview:
+      type: object
+      properties:
+        phases:
+          type: object
+          properties:
+            current:
+              type: string
+              example: "Fase de Aprendizado"
+        completedTopics:
+          type: integer
+          example: 10
+        totalTopics:
+          type: integer
+          example: 100
+        pendingTopics:
+          type: integer
+          example: 90
+        simulados:
+          type: object
+          properties:
+            total:
+              type: integer
+            direcionados:
+              type: integer
+            gerais:
+              type: integer
+        revisoes:
+          type: object
+          properties:
+            programadas:
+              type: integer
+            ciclos:
+              type: integer
+    
+    PerformanceCheck:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: ["completed", "on-track", "off-track"]
+          example: "on-track"
+        completedTopics:
+          type: integer
+          example: 25
+        totalTopics:
+          type: integer
+          example: 100
+        daysRemaining:
+          type: integer
+          example: 60
+        averageDailyProgress:
+          type: number
+          format: float
+          example: 2.5
+        postponementCount:
+          type: integer
+          example: 0
+        isMaintenanceMode:
+          type: boolean
+          example: false
+        shouldRegenerateForSimulations:
+          type: boolean
+          example: false
+        projectedCompletion:
+          type: string
+          format: date
+        message:
+          type: string
+          description: Optional message for edge cases
+    
+    GoalProgress:
+      type: object
+      properties:
+        weeklyGoals:
+          type: array
+          items:
+            type: object
+            properties:
+              week:
+                type: string
+              target:
+                type: integer
+              achieved:
+                type: integer
+        dailyAverage:
+          type: number
+          example: 3.5
+        currentWeekProgress:
+          type: integer
+          example: 15
+        targetPerWeek:
+          type: integer
+          example: 21
+    
+    ReviewData:
+      type: object
+      properties:
+        questionsTotal:
+          type: integer
+          example: 500
+        questionsProgress:
+          type: array
+          items:
+            type: object
+            properties:
+              date:
+                type: string
+                format: date
+              count:
+                type: integer
+        bySubject:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              total:
+                type: integer
+              solved:
+                type: integer
+              accuracy:
+                type: number
+    
+    DetailedProgress:
+      type: object
+      properties:
+        subjects:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              totalTopics:
+                type: integer
+              completedTopics:
+                type: integer
+              progress:
+                type: number
+              priority:
+                type: integer
+              estimatedHours:
+                type: number
+        globalProgress:
+          type: number
+          example: 25.5
+        totalCompleted:
+          type: integer
+        totalPending:
+          type: integer
+
+security:
+  - bearerAuth: []
+
+paths:
+  /plans/{planId}:
+    get:
+      summary: Get plan details
+      description: Retrieve basic plan information
+      tags:
+        - Plans
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Plan details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /gamification/profile:
+    get:
+      summary: Get gamification profile
+      description: Retrieve user's gamification stats and achievements
+      tags:
+        - Gamification
+      responses:
+        '200':
+          description: Gamification profile retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GamificationProfile'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /plans/{planId}/schedule_preview:
+    get:
+      summary: Get schedule preview
+      description: Get overview of schedule status and metrics
+      tags:
+        - Statistics
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Schedule preview retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchedulePreview'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /plans/{planId}/realitycheck:
+    get:
+      summary: Get performance diagnostics
+      description: Analyze current progress and project completion
+      tags:
+        - Statistics
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Performance check data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PerformanceCheck'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /plans/{planId}/goal_progress:
+    get:
+      summary: Get goal progress
+      description: Track weekly and daily study goals
+      tags:
+        - Statistics
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Goal progress retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GoalProgress'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /plans/{planId}/review_data:
+    get:
+      summary: Get review and questions data
+      description: Retrieve question solving progress and review metrics
+      tags:
+        - Statistics
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Review data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewData'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /plans/{planId}/detailed_progress:
+    get:
+      summary: Get detailed progress by subject
+      description: Retrieve progress breakdown for each subject
+      tags:
+        - Statistics
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Detailed progress retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetailedProgress'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

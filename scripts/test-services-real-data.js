@@ -48,7 +48,7 @@ async function testServicesWithRealData() {
         
         try {
             // 2.1 Testar checkOverdue
-            console.log(`  Testando checkOverdue...`);
+            console.log("Testando checkOverdue...");
             const overdueResult = await services.plan.checkOverdue(testPlanId, testUserId);
             
             if (overdueResult && typeof overdueResult === 'object') {
@@ -61,7 +61,7 @@ async function testServicesWithRealData() {
         } catch (error) {
             // Se não houver dados, não é erro crítico
             if (error.message.includes('não encontrado') || error.message.includes('not found')) {
-                console.log(`    ⚠️ checkOverdue: Sem dados de teste (esperado)`);
+                console.log("⚠️ checkOverdue: Sem dados de teste (esperado)");
                 passedTests++;
             } else {
                 console.log(`    ❌ checkOverdue falhou: ${error.message}`);
@@ -73,7 +73,7 @@ async function testServicesWithRealData() {
 
         try {
             // 2.2 Testar calculateProgress
-            console.log(`  Testando calculateProgress...`);
+            console.log("Testando calculateProgress...");
             const progressResult = await services.plan.calculateProgress(testPlanId, testUserId);
             
             if (progressResult && typeof progressResult.percentage !== 'undefined') {
@@ -85,7 +85,7 @@ async function testServicesWithRealData() {
             totalTests++;
         } catch (error) {
             if (error.message.includes('não encontrado') || error.message.includes('not found')) {
-                console.log(`    ⚠️ calculateProgress: Sem dados de teste (esperado)`);
+                console.log("⚠️ calculateProgress: Sem dados de teste (esperado)");
                 passedTests++;
             } else {
                 console.log(`    ❌ calculateProgress falhou: ${error.message}`);
@@ -97,7 +97,7 @@ async function testServicesWithRealData() {
 
         try {
             // 2.3 Testar getGamificationData
-            console.log(`  Testando getGamificationData...`);
+            console.log("Testando getGamificationData...");
             const gamificationResult = await services.plan.getGamificationData(testPlanId, testUserId);
             
             if (gamificationResult && gamificationResult.xp !== undefined) {
@@ -109,7 +109,7 @@ async function testServicesWithRealData() {
             totalTests++;
         } catch (error) {
             if (error.message.includes('não encontrado') || error.message.includes('not found')) {
-                console.log(`    ⚠️ getGamificationData: Sem dados de teste (esperado)`);
+                console.log("⚠️ getGamificationData: Sem dados de teste (esperado)");
                 passedTests++;
             } else {
                 console.log(`    ❌ getGamificationData falhou: ${error.message}`);
@@ -128,7 +128,7 @@ async function testServicesWithRealData() {
         
         try {
             // 3.1 Testar calculateStreak
-            console.log(`  Testando calculateStreak...`);
+            console.log("Testando calculateStreak...");
             const streakResult = await services.session.calculateStreak(testPlanId, testUserId);
             
             if (streakResult && typeof streakResult.currentStreak !== 'undefined') {
@@ -140,7 +140,7 @@ async function testServicesWithRealData() {
             totalTests++;
         } catch (error) {
             if (error.message.includes('não encontrado') || error.message.includes('not found')) {
-                console.log(`    ⚠️ calculateStreak: Sem dados de teste (esperado)`);
+                console.log("⚠️ calculateStreak: Sem dados de teste (esperado)");
                 passedTests++;
             } else {
                 console.log(`    ❌ calculateStreak falhou: ${error.message}`);
@@ -152,7 +152,7 @@ async function testServicesWithRealData() {
 
         try {
             // 3.2 Testar getSessionStatistics
-            console.log(`  Testando getSessionStatistics...`);
+            console.log("Testando getSessionStatistics...");
             const statsResult = await services.session.getSessionStatistics(testPlanId, testUserId);
             
             if (statsResult && typeof statsResult.totalSessions !== 'undefined') {
@@ -164,7 +164,7 @@ async function testServicesWithRealData() {
             totalTests++;
         } catch (error) {
             if (error.message.includes('não encontrado') || error.message.includes('not found')) {
-                console.log(`    ⚠️ getSessionStatistics: Sem dados de teste (esperado)`);
+                console.log("⚠️ getSessionStatistics: Sem dados de teste (esperado)");
                 passedTests++;
             } else {
                 console.log(`    ❌ getSessionStatistics falhou: ${error.message}`);
@@ -181,7 +181,7 @@ async function testServicesWithRealData() {
         
         try {
             // 4.1 Testar getDashboardMetrics
-            console.log(`  Testando getDashboardMetrics...`);
+            console.log("Testando getDashboardMetrics...");
             const metricsResult = await services.statistics.getDashboardMetrics(testPlanId, testUserId);
             
             if (metricsResult && typeof metricsResult.totalTopics !== 'undefined') {
@@ -193,7 +193,7 @@ async function testServicesWithRealData() {
             totalTests++;
         } catch (error) {
             if (error.message.includes('não encontrado') || error.message.includes('not found')) {
-                console.log(`    ⚠️ getDashboardMetrics: Sem dados de teste (esperado)`);
+                console.log("⚠️ getDashboardMetrics: Sem dados de teste (esperado)");
                 passedTests++;
             } else {
                 console.log(`    ❌ getDashboardMetrics falhou: ${error.message}`);
@@ -205,7 +205,7 @@ async function testServicesWithRealData() {
 
         try {
             // 4.2 Testar calculatePerformance
-            console.log(`  Testando calculatePerformance...`);
+            console.log("Testando calculatePerformance...");
             const perfResult = await services.statistics.calculatePerformance(testPlanId, testUserId);
             
             if (perfResult && typeof perfResult.score !== 'undefined') {
@@ -217,7 +217,7 @@ async function testServicesWithRealData() {
             totalTests++;
         } catch (error) {
             if (error.message.includes('não encontrado') || error.message.includes('not found')) {
-                console.log(`    ⚠️ calculatePerformance: Sem dados de teste (esperado)`);
+                console.log("⚠️ calculatePerformance: Sem dados de teste (esperado)");
                 passedTests++;
             } else {
                 console.log(`    ❌ calculatePerformance falhou: ${error.message}`);
@@ -229,11 +229,11 @@ async function testServicesWithRealData() {
 
         try {
             // 4.3 Testar getStudyPatterns
-            console.log(`  Testando getStudyPatterns...`);
+            console.log("Testando getStudyPatterns...");
             const patternsResult = await services.statistics.getStudyPatterns(testPlanId, testUserId);
             
             if (patternsResult && patternsResult.patterns) {
-                console.log(`    ✅ getStudyPatterns retornou padrões de estudo`);
+                console.log("✅ getStudyPatterns retornou padrões de estudo");
                 passedTests++;
             } else {
                 throw new Error('getStudyPatterns retornou formato inválido');
@@ -241,7 +241,7 @@ async function testServicesWithRealData() {
             totalTests++;
         } catch (error) {
             if (error.message.includes('não encontrado') || error.message.includes('not found')) {
-                console.log(`    ⚠️ getStudyPatterns: Sem dados de teste (esperado)`);
+                console.log("⚠️ getStudyPatterns: Sem dados de teste (esperado)");
                 passedTests++;
             } else {
                 console.log(`    ❌ getStudyPatterns falhou: ${error.message}`);
@@ -253,7 +253,7 @@ async function testServicesWithRealData() {
 
         try {
             // 4.4 Testar generateRecommendations
-            console.log(`  Testando generateRecommendations...`);
+            console.log("Testando generateRecommendations...");
             const recsResult = await services.statistics.generateRecommendations(testPlanId, testUserId);
             
             if (recsResult && Array.isArray(recsResult.recommendations)) {
@@ -265,7 +265,7 @@ async function testServicesWithRealData() {
             totalTests++;
         } catch (error) {
             if (error.message.includes('não encontrado') || error.message.includes('not found')) {
-                console.log(`    ⚠️ generateRecommendations: Sem dados de teste (esperado)`);
+                console.log("⚠️ generateRecommendations: Sem dados de teste (esperado)");
                 passedTests++;
             } else {
                 console.log(`    ❌ generateRecommendations falhou: ${error.message}`);

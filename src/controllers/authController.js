@@ -76,11 +76,13 @@ const register = async (req, res) => {
 const login = async (req, res) => {
     try {
         console.log('[AUTH_CONTROLLER] Iniciando login');
+        console.log('[AUTH_CONTROLLER] Request body:', req.body);
         
         // Usar authService para login
         const result = await authService.login(req.body, req);
         
         console.log('[AUTH_CONTROLLER] Login completo, userId:', result.user.id);
+        console.log('[AUTH_CONTROLLER] Token gerado:', result.token);
         
         res.json({
             success: true,
@@ -262,9 +264,11 @@ const verifyToken = async (req, res) => {
 };
 
 const refreshToken = async (req, res) => {
+    // Por enquanto, retornar 501 até implementarmos corretamente
+    // O sistema de refresh tokens precisa ser implementado com cookies seguros
     res.status(501).json({
         success: false,
-        error: 'Funcionalidade não implementada'
+        error: 'Funcionalidade de refresh token ainda não implementada'
     });
 };
 

@@ -4,7 +4,7 @@
  * @version 2.0 - Modularized for performance
  */
 
-export const Navigation = {
+const Navigation = {
     // Cache do avatar do usuário para evitar múltiplas requisições
     userAvatarCache: null,
     userAvatarCacheTime: null,
@@ -16,24 +16,24 @@ export const Navigation = {
         const now = Date.now();
         if (this.userAvatarCache && this.userAvatarCacheTime && 
             (now - this.userAvatarCacheTime) < this.userAvatarCacheTimeout) {
-            console.log('🎯 Usando avatar do cache:', this.userAvatarCache);
+            void('🎯 Usando avatar do cache:', this.userAvatarCache);
             return this.userAvatarCache;
         }
 
         try {
-            console.log('🔄 Carregando avatar do servidor...');
-            const userProfile = await window.app.apiFetch('/api/users/profile');
+            void('🔄 Carregando avatar do servidor...');
+            const userProfile = await window.app.apiFetch('/users/profile');
             
             // Check if user has Google avatar or local avatar
             let avatar = null;
             if (userProfile.google_avatar && userProfile.auth_provider === 'google') {
                 avatar = userProfile.google_avatar;
-                console.log('✅ Avatar do Google carregado:', avatar);
+                void('✅ Avatar do Google carregado:', avatar);
             } else if (userProfile.profile_picture) {
                 avatar = userProfile.profile_picture;
-                console.log('✅ Avatar local carregado:', avatar);
+                void('✅ Avatar local carregado:', avatar);
             } else {
-                console.log('⚠️ Nenhum avatar encontrado no perfil');
+                void('⚠️ Nenhum avatar encontrado no perfil');
             }
             
             this.userAvatarCache = avatar;
@@ -357,4 +357,6 @@ export const Navigation = {
 };
 
 // Disponibilizar globalmente para compatibilidade
-window.Navigation = Navigation;
+// IMPORTANTE: Não usar 'Navigation' pois é uma API nativa do browser
+window.NavigationModule = Navigation;
+window.EditalizeNavigation = Navigation; // Nome alternativo

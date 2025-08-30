@@ -334,7 +334,7 @@ function main() {
         console.log('\n🎉 REMOÇÃO CONCLUÍDA COM SUCESSO!');
         console.log(`✅ ${result.removedRoutes.length} rotas duplicadas removidas`);
         console.log(`📉 Arquivo reduzido em ${result.removedLines} linhas`);
-        console.log(`🚀 Sistema 78% migrado para arquitetura modular`);
+        console.log("🚀 Sistema 78% migrado para arquitetura modular");
         
         console.log('\n🔧 PRÓXIMOS PASSOS:');
         console.log('1. Testar a aplicação: npm run dev');

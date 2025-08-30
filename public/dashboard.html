@@ -13,7 +13,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F7FAFC">
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="css/tailwind.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/footer.css" rel="stylesheet">
@@ -22,36 +22,24 @@
     <!-- SCRIPTS CENTRALIZADOS -->
     <script src="js/app.js"></script>
     <script src="js/components.js"></script>
+    <script src="js/navigation-init.js"></script>
     <script src="js/modules/contextual-notifications.js" type="module"></script>
     <script src="js/modules/notification-integrations.js" type="module"></script>
     
     <!-- Registro do Service Worker para Notificações Push -->
     <script>
-        if ('serviceWorker' in navigator && 'PushManager' in window) {
+        if ('serviceWorker' in navigator && 'PushManager' in window && location.hostname !== 'localhost' && location.protocol === 'https:') {
             navigator.serviceWorker.register('/sw.js')
                 .then(registration => {
-                    console.log('✅ Service Worker registrado:', registration.scope);
+
                 })
                 .catch(error => {
                     console.error('❌ Erro ao registrar Service Worker:', error);
                 });
         }
     </script>
-    <!-- Config do Tailwind para reconhecer as cores customizadas -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'editaliza-blue': '#0528f2',
-                        'editaliza-green': '#1ad937',
-                        'editaliza-black': '#0d0d0d',
-                        'editaliza-gray': '#969696',
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tailwind config removed - using compiled CSS -->
+    <!-- Custom colors now available through compiled tailwind.css -->
     <style>
         /* Estilos específicos da página */
         .modal-overlay { transition: opacity 0.3s ease; }
@@ -384,7 +372,7 @@
                     planElement.style.animationDelay = `${index * 0.1}s`;
                     // Corrigir parsing de data para evitar Invalid Date
                     let examDate;
-                    console.log('DEBUG - Processando data do plano:', plan.plan_name, 'exam_date:', plan.exam_date);
+
                     
                     if (plan.exam_date) {
                         // Verificar diferentes formatos de data
@@ -409,8 +397,7 @@
                         console.warn('Data inválida para plano:', plan.id, plan.exam_date);
                         examDate = new Date(); // Fallback para hoje
                     }
-                    
-                    console.log('DEBUG - Data processada:', examDate);
+
 
                     planElement.innerHTML = `
                         <a href="plan_settings.html?id=${plan.id}" class="flex-grow group flex items-center">
@@ -566,8 +553,5 @@
     <!-- Script do rodapé modular -->
     <script src="js/footer.js"></script>
     <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
-
-    <script src="/js/api-interceptors.js"></script>
-    <script src="/js/error-handler.js"></script>
 </body>
 </html>

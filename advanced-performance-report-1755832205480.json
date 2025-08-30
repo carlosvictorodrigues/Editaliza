@@ -102,7 +102,7 @@
     ],
     "postgresql_status": {
       "status": "DISCONNECTED",
-      "error": "autentica��o do tipo senha falhou para o usu�rio \"editaliza_user\""
+      "error": "autenticao do tipo senha falhou para o usurio \"editaliza_user\""
     },
     "query_performance": [
       {

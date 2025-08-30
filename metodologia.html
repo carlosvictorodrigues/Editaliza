@@ -846,7 +846,7 @@
             
             // Generate algorithm distribution dots
             function generateDots(containerId, count, colorClass = 'bg-blue-500') {
-                console.log(`Generating dots for ${containerId} with count ${count}`);
+
                 const container = document.getElementById(containerId);
                 if (container) {
                     container.innerHTML = ''; // Clear existing content
@@ -855,7 +855,7 @@
                         dot.className = `w-3 h-3 ${colorClass} rounded-full mr-1 inline-block`;
                         container.appendChild(dot);
                     }
-                    console.log(`✅ Generated ${count} dots for ${containerId}`);
+
                 } else {
                     console.error(`❌ Container ${containerId} not found`);
                 }
@@ -863,7 +863,7 @@
             
             // Generate rating stars
             function generateStars(containerId, count = 5) {
-                console.log(`Generating stars for ${containerId}`);
+
                 const container = document.getElementById(containerId);
                 if (container) {
                     container.innerHTML = '';
@@ -879,7 +879,7 @@
                         star.appendChild(path);
                         container.appendChild(star);
                     }
-                    console.log(`✅ Generated ${count} stars for ${containerId}`);
+
                 } else {
                     console.error(`❌ Container ${containerId} not found`);
                 }
@@ -887,7 +887,7 @@
             
             // Wait a bit for the DOM to be fully ready, then initialize dynamic elements
             setTimeout(() => {
-                console.log('🎯 Initializing dynamic content...');
+
                 
                 // Initialize dynamic elements with fallback
                 try {
@@ -895,30 +895,29 @@
                     generateDots('administrative-dots', 4, 'bg-blue-500');  
                     generateDots('informatics-dots', 2, 'bg-gray-400');
                     generateStars('rating-stars', 5);
-                    
-                    console.log('✅ All dynamic elements initialized successfully');
+
                 } catch (error) {
                     console.error('❌ Error initializing dynamic elements:', error);
                 }
                 
                 // Ensure all content cards are visible
                 const contentCards = document.querySelectorAll('.content-card');
-                console.log(`Found ${contentCards.length} content cards`);
+
                 
                 contentCards.forEach((card, index) => {
                     card.style.opacity = '1';
                     card.style.transform = 'none';
-                    console.log(`✅ Made card ${index + 1} visible`);
+
                 });
                 
                 // Make sure timeline content is visible
                 const timelineItems = document.querySelectorAll('.relative.flex.items-start');
-                console.log(`Found ${timelineItems.length} timeline items`);
+
                 
                 timelineItems.forEach((item, index) => {
                     item.style.opacity = '1';
                     item.style.transform = 'none';
-                    console.log(`✅ Made timeline item ${index + 1} visible`);
+
                 });
                 
             }, 500); // Wait 500ms to ensure everything is loaded

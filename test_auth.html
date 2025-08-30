@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Authentication</title>
+</head>
+<body>
+    <h1>Authentication Test</h1>
+    <div id="status">Testing...</div>
+    <div id="token-info"></div>
+    <div id="api-test"></div>
+    
+    <script>
+        // Check localStorage for token
+        const token = localStorage.getItem('editaliza_token');
+        const statusDiv = document.getElementById('status');
+        const tokenInfoDiv = document.getElementById('token-info');
+        const apiTestDiv = document.getElementById('api-test');
+        
+        if (token) {
+            statusDiv.innerHTML = '✅ Token found in localStorage';
+            
+            // Decode token (without verification)
+            try {
+                const parts = token.split('.');
+                if (parts.length === 3) {
+                    const payload = JSON.parse(atob(parts[1]));
+                    tokenInfoDiv.innerHTML = `
+                        <h3>Token Info:</h3>
+                        <pre>${JSON.stringify(payload, null, 2)}</pre>
+                    `;
+                }
+            } catch (e) {
+                tokenInfoDiv.innerHTML = '❌ Could not decode token';
+            }
+            
+            // Test API call
+            fetch('/api/auth/check', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                apiTestDiv.innerHTML = `
+                    <h3>API Test Result:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            })
+            .catch(err => {
+                apiTestDiv.innerHTML = `❌ API Test Failed: ${err.message}`;
+            });
+            
+        } else {
+            statusDiv.innerHTML = '❌ No token found in localStorage';
+            tokenInfoDiv.innerHTML = '<p>Please login first at <a href="/login.html">login.html</a></p>';
+        }
+    </script>
+</body>
+</html>

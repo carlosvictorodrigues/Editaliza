@@ -72,7 +72,7 @@ class FortressRunner {
             // 8. Verificar alertas
             await this.checkAlerts();
             
-            console.log(`✅ Testing Fortress executada com sucesso!`);
+            console.log("✅ Testing Fortress executada com sucesso!");
             console.log(`⏱️  Tempo total: ${this.getExecutionTime()}ms`);
             
         } catch (error) {

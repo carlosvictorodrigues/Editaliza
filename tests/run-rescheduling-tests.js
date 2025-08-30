@@ -177,9 +177,9 @@ class ReschedulingTestRunner {
           this.testResults.manual[test.name] = result;
           
           if (result.success) {
-            console.log(`     ✅ PASSED`);
+            console.log("✅ PASSED");
           } else {
-            console.log(`     ❌ FAILED`);
+            console.log("❌ FAILED");
           }
         }
       } else {

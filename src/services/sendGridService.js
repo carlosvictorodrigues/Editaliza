@@ -42,7 +42,7 @@ class SendGridService {
                 console.log('═'.repeat(80));
                 console.log(`📧 DESTINATÁRIO: ${email}`);
                 console.log(`👤 NOME: ${userName || 'Usuário'}`);
-                console.log(`🔗 LINK DE RECUPERAÇÃO:`);
+                console.log("🔗 LINK DE RECUPERAÇÃO:");
                 console.log(`   ${resetLink}`);
                 console.log(`⏰ EXPIRA EM: ${expirationTime}`);
                 console.log('═'.repeat(80));

@@ -118,7 +118,7 @@ db.get(`SELECT id, email, name FROM users WHERE email = 'c@c.com'`, (err, user) 
                                     console.log(`     - Tempo em study_sessions: ${item.time_studied_seconds}s`);
                                     console.log(`     - Tempo em time_logs: ${item.total_log_time}s`);
                                     console.log(`     - Logs associados: ${item.log_count}`);
-                                    console.log(`     → Possível duplicação!`);
+                                    console.log("→ Possível duplicação!");
                                     console.log('');
                                 }
                             });

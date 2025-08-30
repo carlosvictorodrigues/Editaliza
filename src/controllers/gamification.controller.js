@@ -13,7 +13,7 @@
  * para preservar a consistência dos dados existentes.
  */
 
-const { dbGet, dbAll, dbRun } = require('../../database-postgresql');
+const { dbGet, dbAll, dbRun } = require('../config/database');
 const gamificationService = require('../services/gamificationService');
 
 // Função utilitária para data brasileira (preservada do server.js original)
@@ -77,7 +77,7 @@ function calculateUserLevel(completedTopicsCount) {
 async function calculateStudyStreak(planId) {
     const completedSessions = await dbAll(`
         SELECT DISTINCT session_date FROM study_sessions 
-        WHERE study_plan_id = ? AND status = 'Concluído' ORDER BY session_date DESC
+        WHERE study_plan_id = $1 AND status IN ('Concluído', 'Concluída', 'Concluida') ORDER BY session_date DESC
     `, [planId]);
     
     let studyStreak = 0;
@@ -285,7 +285,7 @@ async function getPlanGamification(req, res) {
 
     try {
         // Verificar se o plano pertence ao usuário
-        const plan = await dbGet('SELECT id FROM study_plans WHERE id = ? AND user_id = ?', [planId, userId]);
+        const plan = await dbGet('SELECT id FROM study_plans WHERE id = $1 AND user_id = $2', [planId, userId]);
         if (!plan) {
             return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
         }
@@ -295,8 +295,8 @@ async function getPlanGamification(req, res) {
         const completedTopicsResult = await dbGet(`
             SELECT COUNT(DISTINCT topic_id) as count 
             FROM study_sessions 
-            WHERE study_plan_id = ? 
-            AND status = 'Concluído' 
+            WHERE study_plan_id = $1 
+            AND status IN ('Concluído', 'Concluída', 'Concluida') 
             AND topic_id IS NOT NULL
         `, [planId]);
         const completedTopicsCount = parseInt(completedTopicsResult?.count || 0);
@@ -318,9 +318,9 @@ async function getPlanGamification(req, res) {
         const todayTasksResult = await dbGet(`
             SELECT 
                 COUNT(id) as total, 
-                SUM(CASE WHEN status = 'Concluído' THEN 1 ELSE 0 END) as completed 
+                SUM(CASE WHEN status IN ('Concluído', 'Concluída', 'Concluida') THEN 1 ELSE 0 END) as completed 
             FROM study_sessions 
-            WHERE study_plan_id = ? AND session_date = ?
+            WHERE study_plan_id = $1 AND session_date = $2
         `, [planId, todayStr]);
 
         // 5. CALCULAR EXPERIÊNCIA TOTAL
@@ -328,7 +328,7 @@ async function getPlanGamification(req, res) {
         const allCompletedSessionsResult = await dbGet(`
             SELECT COUNT(*) as count 
             FROM study_sessions 
-            WHERE study_plan_id = ? AND status = 'Concluído'
+            WHERE study_plan_id = $1 AND status IN ('Concluído', 'Concluída', 'Concluida')
         `, [planId]);
         const totalCompletedSessions = parseInt(allCompletedSessionsResult?.count || 0);
         
@@ -354,7 +354,7 @@ async function getPlanGamification(req, res) {
         const uniqueStudyDaysResult = await dbGet(`
             SELECT COUNT(DISTINCT session_date) as count 
             FROM study_sessions 
-            WHERE study_plan_id = ? AND status = 'Concluído'
+            WHERE study_plan_id = $1 AND status IN ('Concluído', 'Concluída', 'Concluida')
         `, [planId]);
         const totalStudyDays = uniqueStudyDaysResult.count || 0;
 
@@ -362,7 +362,7 @@ async function getPlanGamification(req, res) {
         const totalStudyTimeResult = await dbGet(`
             SELECT SUM(COALESCE(time_studied_seconds, 0)) as total_time
             FROM study_sessions 
-            WHERE study_plan_id = ? AND status = 'Concluído'
+            WHERE study_plan_id = $1 AND status IN ('Concluído', 'Concluída', 'Concluida')
         `, [planId]);
         const totalStudyTime = totalStudyTimeResult.total_time || 0;
         

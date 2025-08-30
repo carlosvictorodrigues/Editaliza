@@ -94,9 +94,9 @@ async function testarSemAuth() {
         console.log(`🤔 Sem auth deu status: ${response.status}`);
     } catch (error) {
         if (error.code === 'ECONNABORTED') {
-            console.log(`❌ AINDA TRAVA mesmo sem auth - problema não é no middleware de auth`);
+            console.log("❌ AINDA TRAVA mesmo sem auth - problema não é no middleware de auth");
         } else if (error.response && error.response.status === 401) {
-            console.log(`✅ Sem auth retorna 401 rapidamente - middleware de auth não está travando`);
+            console.log("✅ Sem auth retorna 401 rapidamente - middleware de auth não está travando");
         } else {
             console.log(`❌ Erro inesperado: ${error.message}`);
         }

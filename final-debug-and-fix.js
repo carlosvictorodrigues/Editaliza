@@ -196,7 +196,7 @@ async function debuggingFinal() {
                 console.log(`      Health: ${JSON.stringify(response.data)}`);
                 
                 if (port !== 3000) {
-                    console.log(`   ⚠️ Servidor não está na porta padrão 3000!`);
+                    console.log("⚠️ Servidor não está na porta padrão 3000!");
                 }
                 break;
             }

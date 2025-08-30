@@ -100,7 +100,7 @@ async function diagnosePostgresIdentity() {
                                      viewDef.def.includes('datetime(') || 
                                      viewDef.def.includes('strftime(');
                     if (hasSQLite) {
-                        console.log(`      ⚠️ CONTÉM SINTAXE SQLITE!`);
+                        console.log("⚠️ CONTÉM SINTAXE SQLITE!");
                     }
                 }
             }

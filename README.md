@@ -626,6 +626,6 @@ npm run dev
 
 **📅 Última atualização:** 25/08/2025  
 **🏷️ Versão:** 2.0.0 "Phoenix Rising"  
-**👨‍💻 Mantido por:** [Gabriel](https://github.com/carlosvictorodrigues) & Team  
+**👨💻 Mantido por:** [Gabriel](https://github.com/carlosvictorodrigues) & Team  
 **📊 Status:** ✅ Production Ready  
 **❤️ Feito com amor para a comunidade de concurseiros**

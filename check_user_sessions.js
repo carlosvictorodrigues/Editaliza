@@ -44,7 +44,7 @@ async function checkUserSessions() {
                     byDate[s.session_date].push(s);
                 });
                 
-                console.log(`\n   Distribuição por data:`);
+                console.log("\n   Distribuição por data:");
                 Object.keys(byDate).slice(0, 5).forEach(date => {
                     console.log(`   - ${date}: ${byDate[date].length} sessões`);
                 });

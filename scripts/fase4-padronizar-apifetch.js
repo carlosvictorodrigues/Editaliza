@@ -180,7 +180,7 @@ class ApiFetchStandardizer {
             if (bodyCloseIndex !== -1) {
                 const scriptTag = '    <script src="js/app.js"></script>\n';
                 content = content.substring(0, bodyCloseIndex) + scriptTag + content.substring(bodyCloseIndex);
-                console.log(`📜 Adicionado script js/app.js`);
+                console.log("📜 Adicionado script js/app.js");
             }
         }
 
@@ -220,7 +220,7 @@ class ApiFetchStandardizer {
         const duration = endTime - this.report.startTime;
 
         console.log(`\n${'='.repeat(60)}`);
-        console.log(`📊 RELATÓRIO FINAL - FASE 4: Padronização app.apiFetch()`);
+        console.log("📊 RELATÓRIO FINAL - FASE 4: Padronização app.apiFetch()");
         console.log(`${'='.repeat(60)}`);
         console.log(`⏱️  Tempo total: ${duration}ms`);
         console.log(`📁 Arquivos processados: ${this.report.processed.length}`);
@@ -228,14 +228,14 @@ class ApiFetchStandardizer {
         console.log(`❌ Erros: ${this.report.errors.length}`);
 
         if (this.report.processed.length > 0) {
-            console.log(`\n📋 ARQUIVOS PROCESSADOS:`);
+            console.log("\n📋 ARQUIVOS PROCESSADOS:");
             this.report.processed.forEach(p => {
                 console.log(`   ✅ ${p.file}: ${p.changes} alterações`);
             });
         }
 
         if (this.report.changes.length > 0) {
-            console.log(`\n🔄 RESUMO DE MUDANÇAS:`);
+            console.log("\n🔄 RESUMO DE MUDANÇAS:");
             const groupedChanges = {};
             this.report.changes.forEach(change => {
                 if (!groupedChanges[change.file]) {
@@ -253,7 +253,7 @@ class ApiFetchStandardizer {
         }
 
         if (this.report.errors.length > 0) {
-            console.log(`\n❌ ERROS:`);
+            console.log("\n❌ ERROS:");
             this.report.errors.forEach(error => {
                 console.log(`   • ${error}`);
             });
@@ -287,7 +287,7 @@ class ApiFetchStandardizer {
 
     // Executar padronização completa
     async execute() {
-        console.log(`🚀 INICIANDO FASE 4: Padronização app.apiFetch()`);
+        console.log("🚀 INICIANDO FASE 4: Padronização app.apiFetch()");
         console.log(`📁 Diretório: ${PUBLIC_DIR}`);
         console.log(`📋 Arquivos para processar: ${FILES_TO_UPDATE.length}`);
 
@@ -301,11 +301,11 @@ class ApiFetchStandardizer {
         this.generateReport();
 
         if (this.report.errors.length === 0) {
-            console.log(`🎉 FASE 4 CONCLUÍDA COM SUCESSO!`);
-            console.log(`✨ Todas as chamadas fetch() foram padronizadas para app.apiFetch()`);
+            console.log("🎉 FASE 4 CONCLUÍDA COM SUCESSO!");
+            console.log("✨ Todas as chamadas fetch() foram padronizadas para app.apiFetch()");
             return true;
         } else {
-            console.log(`⚠️  FASE 4 CONCLUÍDA COM ERROS - Verifique o relatório`);
+            console.log("⚠️  FASE 4 CONCLUÍDA COM ERROS - Verifique o relatório");
             return false;
         }
     }

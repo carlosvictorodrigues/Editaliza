@@ -1,10 +1,10 @@
 /**
- * Plans Controller - FASE 3 MIGRAÇÃO COMPLETA
+ * Plans Controller - FASE 3 MIGRAÃ‡ÃƒO COMPLETA
  * 
  * Controller consolidado para todas as operações relacionadas a planos de estudo.
  * Migra TODA a complexidade do server.js mantendo 100% da funcionalidade.
  * 
- * ATENÇÃO: Este é o CORE BUSINESS da aplicação. Qualquer alteração pode quebrar
+ * ATENÃ‡ÃƒO: Este é o CORE BUSINESS da aplicação. Qualquer alteração pode quebrar
  * funcionalidades críticas. Proceder com máxima cautela.
  */
 
@@ -16,7 +16,7 @@ const RetaFinalService = require('../services/schedule/RetaFinalService'); // WA
 const BatchUpdateService = require('../services/schedule/BatchUpdateService'); // WAVE 4 - Batch Updates
 const logger = require('../../src/utils/logger');
 
-// FUNÇÃO UTILITÁRIA PARA DATA BRASILEIRA - CRÍTICA
+// FUNÃ‡ÃƒO UTILITÁRIA PARA DATA BRASILEIRA - CRÍTICA
 function getBrazilianDateString() {
     const now = new Date();
     const year = parseInt(now.toLocaleString('en-CA', {timeZone: 'America/Sao_Paulo', year: 'numeric'}));
@@ -56,7 +56,7 @@ const dbRun = (sql, params) => {
 };
 
 /**
- * 📋 CRUD BÁSICO DE PLANOS
+ * 🎯“‹ CRUD BÁSICO DE PLANOS
  */
 
 /**
@@ -109,7 +109,7 @@ const getPlans = async (req, res) => {
  * CORRIGIDO: Usando repository para INSERT com RETURNING
  */
 const createPlan = async (req, res) => {
-    console.log('\n\n🚨🚨🚨 [CREATEPLAN_MODULAR] MÉTODO MODULAR EXECUTADO! 🚨🚨🚨\n\n');
+    console.log('\n\n🎯š¨🎯š¨🎯š¨ [CREATEPLAN_MODULAR] MÃ‰TODO MODULAR EXECUTADO! 🎯š¨🎯š¨🎯š¨\n\n');
     
     const { plan_name, exam_date } = req.body;
     const defaultHours = { '0': 0, '1': 4, '2': 4, '3': 4, '4': 4, '5': 4, '6': 4 };
@@ -136,7 +136,7 @@ const createPlan = async (req, res) => {
         
         console.log('[PLANS_CONTROLLER] resultado recebido do repository:', result);
         
-        // CORREÇÃO: Para PostgreSQL com RETURNING, result é um objeto com id
+        // CORREÃ‡ÃƒO: Para PostgreSQL com RETURNING, result é um objeto com id
         const planId = result?.id || result?.lastID || result;
         
         console.log('[PLANS] Resultado completo da criação:', result);
@@ -148,7 +148,7 @@ const createPlan = async (req, res) => {
         }
         
         console.log('[PLANS] Plano criado com sucesso - ID:', planId);
-        console.log('[PLANS] ✅ CONTROLLER RETORNANDO newPlanId:', planId, typeof planId);
+        console.log('[PLANS] âœ… CONTROLLER RETORNANDO newPlanId:', planId, typeof planId);
         
         res.status(201).json({ 
             'message': 'Plano criado com sucesso!', 
@@ -180,7 +180,7 @@ const getPlan = async (req, res) => {
         
         logger.info('Plano encontrado via REPOSITORY:', { id: row.id, plan_name: row.plan_name });
         
-        // CORREÇÃO: study_hours_per_day já é um objeto no PostgreSQL
+        // CORREÃ‡ÃƒO: study_hours_per_day já é um objeto no PostgreSQL
         if (row.study_hours_per_day && typeof row.study_hours_per_day === 'string') {
             try {
                 row.study_hours_per_day = JSON.parse(row.study_hours_per_day);
@@ -192,7 +192,7 @@ const getPlan = async (req, res) => {
         logger.info('Enviando resposta do plano');
         res.json(row);
     } catch (error) {
-        console.error('❌ ERRO DETALHADO ao buscar plano:', {
+        console.error('âŒ ERRO DETALHADO ao buscar plano:', {
             message: error.message,
             stack: error.stack,
             planId: req.params.planId,
@@ -215,7 +215,7 @@ const deletePlan = async (req, res) => {
         const plan = await repos.plan.findByIdAndUserId(planId, userId);
         if (!plan) return res.status(404).json({ 'error': 'Plano não encontrado ou você não tem permissão.' });
         
-        // TRANSAÇÃO CRÍTICA - CASCADE MANUAL - PostgreSQL compatible
+        // TRANSAÃ‡ÃƒO CRÍTICA - CASCADE MANUAL - PostgreSQL compatible
         // TODO: Mover para PlanService na FASE 4.2
         await dbRun('BEGIN');
         await dbRun('DELETE FROM study_sessions WHERE study_plan_id = $1', [planId]);
@@ -236,6 +236,11 @@ const deletePlan = async (req, res) => {
  * PATCH /api/plans/:planId/settings - Atualizar configurações do plano
  */
 const updatePlanSettings = async (req, res) => {
+    console.log('[updatePlanSettings] Iniciando...');
+    console.log('[updatePlanSettings] Body recebido:', req.body);
+    console.log('[updatePlanSettings] PlanId:', req.params.planId);
+    console.log('[updatePlanSettings] UserId:', req.user?.id);
+    
     const { daily_question_goal, weekly_question_goal, review_mode, session_duration_minutes, study_hours_per_day, has_essay, reta_final_mode } = req.body;
     const hoursJson = JSON.stringify(study_hours_per_day);
     
@@ -246,18 +251,44 @@ const updatePlanSettings = async (req, res) => {
     
     const sql = 'UPDATE study_plans SET daily_question_goal = $1, weekly_question_goal = $2, review_mode = $3, session_duration_minutes = $4, study_hours_per_day = $5, has_essay = $6, reta_final_mode = $7 WHERE id = $8 AND user_id = $9';
     
+    console.log('[updatePlanSettings] SQL:', sql);
+    console.log('[updatePlanSettings] Params:', [
+        daily_question_goal, 
+        weekly_question_goal, 
+        review_mode || 'completo', 
+        session_duration_minutes, 
+        hoursJson, 
+        has_essay, 
+        reta_final_mode ? 1 : 0, 
+        req.params.planId, 
+        req.user.id
+    ]);
+    
     try {
+        console.log('[updatePlanSettings] Executando dbRun...');
         const result = await dbRun(sql, [daily_question_goal, weekly_question_goal, review_mode || 'completo', session_duration_minutes, hoursJson, has_essay, reta_final_mode ? 1 : 0, req.params.planId, req.user.id]);
-        if (result.changes === 0) return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+        console.log('[updatePlanSettings] Resultado do dbRun:', result);
+        
+        // PostgreSQL retorna rowCount, não changes
+        const affectedRows = result.rowCount || result.changes || 0;
+        console.log('[updatePlanSettings] Linhas afetadas:', affectedRows);
+        
+        if (affectedRows === 0) {
+            console.log('[updatePlanSettings] Nenhuma linha afetada');
+            return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+        }
+        
+        console.log('[updatePlanSettings] Sucesso! Enviando resposta...');
         res.json({ message: 'Configurações salvas com sucesso!' });
     } catch (error) {
-        console.error('Erro ao atualizar configurações:', error);
+        console.error('[updatePlanSettings] ERRO:', error);
+        console.error('[updatePlanSettings] Stack:', error.stack);
         res.status(500).json({ 'error': 'Erro ao salvar configurações' });
     }
 };
 
 /**
- * 📚 DISCIPLINAS E TÓPICOS
+ * 🎯“š DISCIPLINAS E TÃ“PICOS
  */
 
 /**
@@ -441,7 +472,7 @@ const getSubjectsWithTopics = async (req, res) => {
 // batchUpdateTopics - MANTIDA NO SERVER.JS como /api/topics/batch_update
 
 /**
- * 📊 ESTATÍSTICAS E ANÁLISES
+ * 🎯“Š ESTATÍSTICAS E ANÁLISES
  */
 
 /**
@@ -459,8 +490,8 @@ const getPlanStatistics = async (req, res) => {
         const totalDaysResult = await dbGet(`
             SELECT 
                 CASE 
-                    WHEN $1 IS NOT NULL THEN 
-                        EXTRACT(DAY FROM $2::date - $3::date)::INTEGER + 1
+                    WHEN $1::timestamp IS NOT NULL THEN 
+                        (($2::date - $3::date)::INTEGER) + 1
                     ELSE 0 
                 END as total_days
         `, [plan.exam_date, plan.exam_date, getBrazilianDateString()]);
@@ -679,7 +710,7 @@ const getExcludedTopics = async (req, res) => {
 };
 
 /**
- * 🔄 REPLANEJAMENTO E CONTROLE DE ATRASOS
+ * 🎯”„ REPLANEJAMENTO E CONTROLE DE ATRASOS
  */
 
 /**
@@ -732,7 +763,7 @@ const getOverdueCheck = async (req, res) => {
 };
 
 /**
- * 🎮 GAMIFICAÇÃO E COMPARTILHAMENTO
+ * 🎯Ž® GAMIFICAÃ‡ÃƒO E COMPARTILHAMENTO
  */
 
 /**
@@ -839,7 +870,7 @@ const getShareProgress = async (req, res) => {
 };
 
 /**
- * 🔄 ENHANCED ENDPOINTS - POWERED BY PLANSERVICE
+ * 🎯”„ ENHANCED ENDPOINTS - POWERED BY PLANSERVICE
  * FASE 5 WAVE 3 - Novos endpoints com lógica avançada do service
  */
 
@@ -847,7 +878,7 @@ const getShareProgress = async (req, res) => {
  * GET /api/plans/:planId/progress - Progresso do plano com métricas avançadas
  * ENHANCED: Usa PlanService para cálculos precisos e métricas detalhadas
  */
-const getPlanProgress = async (req, res) => {
+const getPlanProgressLegacy = async (req, res) => {
     try {
         const planId = req.params.planId;
         const userId = req.user.id;
@@ -1100,13 +1131,13 @@ const executeReplan = async (req, res) => {
 };
 
 /**
- * 📅 GERAÇÃO DE CRONOGRAMA - INTEGRAÇÃO COM SERVICE
+ * 🎯“… GERAÃ‡ÃƒO DE CRONOGRAMA - INTEGRAÃ‡ÃƒO COM SERVICE
  */
 
 /**
  * POST /api/plans/:planId/generate - Gerar cronograma de estudos
  * 
- * ATENÇÃO: Esta é a funcionalidade mais crítica do sistema!
+ * ATENÃ‡ÃƒO: Esta é a funcionalidade mais crítica do sistema!
  * Mantém 100% da funcionalidade da rota original em server.js
  * com tratamento de erros robusto e auditoria completa.
  */
@@ -1203,13 +1234,13 @@ const generateSchedule = async (req, res) => {
                     topic_name: t.topic_name,
                     importance: t.topic_priority || 3,
                     priority_weight: ((t.subject_priority || 3) * 10) + (t.topic_priority || 3),
-                    reason: `Tópico excluído automaticamente no Modo Reta Final devido à falta de tempo`
+                    reason: `Tópico excluído automaticamente no Modo Reta Final devido Ã  falta de tempo`
                 })) || [],
                 totalExcluded: result.excludedTopics?.length || 0,
                 totalIncluded: result.statistics.studySessions,
                 message: (result.excludedTopics?.length || 0) > 0 ? 
-                    `⚠️ ${result.excludedTopics.length} tópicos foram excluídos para adequar o cronograma ao tempo disponível.` :
-                    '✅ Todos os tópicos puderam ser incluídos no cronograma.'
+                    `âš ï¸ ${result.excludedTopics.length} tópicos foram excluídos para adequar o cronograma ao tempo disponível.` :
+                    'âœ… Todos os tópicos puderam ser incluídos no cronograma.'
             },
             statistics: result.statistics,
             generationTime: result.statistics.generationTime
@@ -1268,7 +1299,7 @@ const generateSchedule = async (req, res) => {
 };
 
 /**
- * 🎯 FASE 6 WAVE 3 - RETA FINAL EXCLUSIONS MANAGEMENT
+ * 🎯Ž¯ FASE 6 WAVE 3 - RETA FINAL EXCLUSIONS MANAGEMENT
  * 
  * Implementa as 3 rotas críticas para gerenciar exclusões do modo Reta Final:
  * - GET /api/plans/:planId/reta-final-exclusions
@@ -1412,7 +1443,7 @@ const removeRetaFinalExclusion = async (req, res) => {
  */
 
 /**
- * ATUALIZAÇÃO EM LOTE DO CRONOGRAMA
+ * ATUALIZAÃ‡ÃƒO EM LOTE DO CRONOGRAMA
  * POST /api/plans/:planId/batch_update
  */
 const batchUpdateSchedule = async (req, res) => {
@@ -1468,7 +1499,7 @@ const batchUpdateSchedule = async (req, res) => {
 };
 
 /**
- * ATUALIZAÇÃO DETALHADA EM LOTE DO CRONOGRAMA
+ * ATUALIZAÃ‡ÃƒO DETALHADA EM LOTE DO CRONOGRAMA
  * POST /api/plans/:planId/batch_update_details
  */
 const batchUpdateScheduleDetails = async (req, res) => {
@@ -1552,6 +1583,70 @@ const getSessionsByPlan = async (req, res) => {
     }
 };
 
+const getPlanProgress = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        
+        const progressData = await planService.getProgress(planId, userId);
+        
+        res.json(progressData);
+        
+    } catch (error) {
+        if (error.message.includes('não encontrado')) {
+            return res.status(404).json({ error: error.message });
+        }
+        res.status(500).json({ error: 'Erro ao buscar progresso do plano' });
+    }
+};
+
+const getOverdueDetails = async (req, res) => {
+    try {
+        const planId = req.params.planId;
+        const userId = req.user.id;
+        
+        const overdueDetails = await planService.getOverdueDetails(planId, userId);
+        
+        res.json(overdueDetails);
+        
+    } catch (error) {
+        if (error.message.includes('não encontrado')) {
+            return res.status(404).json({ error: error.message });
+        }
+        res.status(500).json({ error: 'Erro ao buscar detalhes de tarefas atrasadas' });
+    }
+};
+
+/**
+ * GET /api/plans/:planId/question_radar
+ * Radar de questões - identificar pontos fracos
+ * Delegated to statistics controller
+ */
+const getQuestionRadar = async (req, res) => {
+    try {
+        const statisticsController = require('./statistics.controller');
+        await statisticsController.getQuestionRadar(req, res);
+    } catch (error) {
+        console.error('Erro ao buscar question radar:', error);
+        res.status(500).json({ error: 'Erro ao buscar análise de questões' });
+    }
+};
+
+/**
+ * GET /api/plans/:planId/detailed_progress
+ * Progresso detalhado com breakdown de tempo
+ * Delegated to statistics controller
+ */
+const getDetailedProgress = async (req, res) => {
+    try {
+        const statisticsController = require('./statistics.controller');
+        await statisticsController.getDetailedProgress(req, res);
+    } catch (error) {
+        console.error('Erro ao buscar progresso detalhado:', error);
+        res.status(500).json({ error: 'Erro ao buscar progresso detalhado' });
+    }
+};
+
 module.exports = {
     // CRUD Básico
     getPlans,
@@ -1563,7 +1658,6 @@ module.exports = {
     // Disciplinas e Tópicos
     createSubjectWithTopics,
     getSubjectsWithTopics,
-    // updateSubject, deleteSubject, getSubjectTopics, batchUpdateTopics - mantidas no server.js
     
     // Geração de Cronograma
     generateSchedule,
@@ -1573,6 +1667,7 @@ module.exports = {
     getOverdueCheck,
     getReplanPreview,
     executeReplan,
+    getOverdueDetails,
     
     // Estatísticas e Análises
     getPlanStatistics,
@@ -1600,5 +1695,9 @@ module.exports = {
     
     // FASE 6 WAVE 4 - BATCH UPDATES
     batchUpdateSchedule,
-    batchUpdateScheduleDetails
+    batchUpdateScheduleDetails,
+    
+    // MISSING ROUTES FIX - DELEGATED TO STATISTICS
+    getQuestionRadar,
+    getDetailedProgress
 };

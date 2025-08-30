@@ -13,30 +13,20 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=4">
     <meta name="theme-color" content="#0528f2">
 
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="css/tailwind.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="css/design-tokens.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/footer.css" rel="stylesheet">
     <!-- Theme system removed - light mode only -->
-    <!-- SCRIPTS CENTRALIZADOS -->
-    <script src="js/app.js"></script>
-    <script src="js/components.js"></script>
-    <!-- Config do Tailwind para reconhecer as cores customizadas -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'editaliza-blue': '#0528f2',
-                        'editaliza-green': '#1ad937',
-                        'editaliza-black': '#0d0d0d',
-                        'editaliza-gray': '#969696',
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- SCRIPTS CENTRALIZADOS - ORDEM TOPOLÓGICA CORRETA -->
+    <!-- Todos com defer para garantir ordem e evitar bloqueio -->
+    <script src="js/app.js" defer></script>
+    <script src="js/components.js" defer></script>
+    <script src="js/modules/contextual-notifications.js" defer></script>
+    <script src="js/modules/notification-integrations.js" defer></script>
+    <!-- Tailwind config removed - using compiled CSS -->
+    <!-- Custom colors now available through compiled tailwind.css -->
     <style>
         .tooltip { 
             position: relative; 
@@ -247,7 +237,7 @@
     <!-- Container de Toast para Notificações -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3"></div>
 
-    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
+    <!-- NAVEGA!ÒO PRINCIPAL (GERADA PELO JS) -->
     <div id="main-nav-container"></div>
 
     <!-- Modal para Edição/Exclusão -->
@@ -259,7 +249,7 @@
     </div>
 
     <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-6xl">
-        <!-- CABEÇALHO DO PLANO (GERADO PELO JS) -->
+        <!-- CABE!ALHO DO PLANO (GERADO PELO JS) -->
         <div id="plan-header-container"></div>
         
         <!-- Welcome Message Aprimorado -->
@@ -267,7 +257,7 @@
             <div class="flex items-start space-x-4">
                 <div class="flex-shrink-0">
                     <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                        <span class="text-2xl">🎉</span>
+                        <span class="text-2xl">✨</span>
                     </div>
                 </div>
                 <div class="flex-grow">
@@ -335,14 +325,14 @@
                     <!-- Dicas para Primeira Vez -->
                     <div id="first-time-tips" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
                         <div class="flex items-start space-x-3">
-                            <span class="text-2xl">💡</span>
+                            <span class="text-2xl">x</span>
                             <div>
                                 <h3 class="font-semibold text-yellow-800 mb-2">Primeira vez configurando? Aqui estão algumas dicas!</h3>
                                 <ul class="text-sm text-yellow-700 space-y-1">
-                                    <li>• <strong>Disciplinas:</strong> Adicione as matérias do seu edital (ex: Direito Constitucional, Matemática)</li>
-                                    <li>• <strong>Prioridade:</strong> 5 = muito importante, 1 = menos importante</li>
-                                    <li>• <strong>Tópicos:</strong> Divida cada disciplina em assuntos menores para melhor controle</li>
-                                    <li>• <strong>Já estudou?</strong> Marque os tópicos já vistos para ajustar o cronograma</li>
+                                    <li>⬢ <strong>Disciplinas:</strong> Adicione as matérias do seu edital (ex: Direito Constitucional, Matemática)</li>
+                                    <li>⬢ <strong>Prioridade:</strong> 5 = muito importante, 1 = menos importante</li>
+                                    <li>⬢ <strong>Tópicos:</strong> Divida cada disciplina em assuntos menores para melhor controle</li>
+                                    <li>⬢ <strong>Já estudou?</strong> Marque os tópicos já vistos para ajustar o cronograma</li>
                                 </ul>
                                 <div class="mt-3">
                                     <button id="showExampleBtn" class="text-blue-600 hover:text-blue-800 text-sm font-medium underline">
@@ -384,9 +374,9 @@
                     
                     <div class="bg-gradient-to-br from-slate-50 to-blue-50 p-6 rounded-xl border border-blue-200 mb-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-700">🎯 Adicionar Disciplina e Tópicos</h3>
+                            <h3 class="text-lg font-semibold text-gray-700">➕ Adicionar Disciplina e Tópicos</h3>
                             <button id="loadTemplateBtn" class="text-blue-600 hover:bg-blue-100 px-3 py-1 rounded-lg text-sm font-medium transition-colors">
-                                🗂️ Usar Template
+                                📋 Usar Template
                             </button>
                         </div>
                         
@@ -442,7 +432,7 @@
                                         Nome da Disciplina <span class="text-red-500">*</span>
                                     </label>
                                     <input type="text" id="subject_name" class="form-input" placeholder="Ex: Direito Constitucional" required>
-                                    <p class="text-xs text-gray-500 mt-1">📝 Use o nome exato do edital</p>
+                                    <p class="text-xs text-gray-500 mt-1">✓ Use o nome exato do edital</p>
                                 </div>
                                 <div>
                                     <label for="priority_weight" class="block text-sm font-medium text-gray-700 mb-1">
@@ -480,7 +470,7 @@
 4. Poder Legislativo
 ..."></textarea>
                                 <div class="flex items-center justify-between mt-2">
-                                    <p class="text-xs text-gray-500">📝 Um tópico por linha | Deixe em branco para adicionar depois</p>
+                                    <p class="text-xs text-gray-500">• Um tópico por linha | Deixe em branco para adicionar depois</p>
                                     <span id="topicCount" class="text-xs text-blue-600 font-medium">0 tópicos</span>
                                 </div>
                             </div>
@@ -586,7 +576,7 @@
                             <div class="border-b pb-3 mb-3"></div>
                             <div class="bg-blue-50 p-4 rounded-lg mb-4">
                                 <div class="flex items-start space-x-2">
-                                    <span class="text-blue-600">🎯</span>
+                                    <span class="text-blue-600">✔️</span>
                                     <div class="text-sm text-blue-800">
                                         <p class="font-medium mb-1">Dica de Ouro:</p>
                                         <p>Para concursos: 30-50 questões/dia. Para ENEM: 20-30 questões/dia. Ajuste conforme seu ritmo!</p>
@@ -614,7 +604,7 @@
                                 <div>
                                     <label for="weekly_goal" class="text-sm font-medium text-gray-700">Meta Semanal</label>
                                     <input type="number" id="weekly_goal" class="form-input" value="300" min="0" readonly>
-                                    <p class="text-xs text-gray-500 mt-1">Calculado automaticamente: meta diária × 7</p>
+                                    <p class="text-xs text-gray-500 mt-1">Calculado automaticamente: meta diária  7</p>
                                 </div>
                             </div>
                         </div>
@@ -635,7 +625,7 @@
                                 <div class="flex items-start space-x-3">
                                     <input type="checkbox" id="retaFinalMode" class="w-5 h-5 text-red-600 bg-white border-red-300 rounded focus:ring-red-500 focus:ring-2">
                                     <div>
-                                        <label for="retaFinalMode" class="text-lg font-bold text-red-700">🚨 Modo Reta Final</label>
+                                        <label for="retaFinalMode" class="text-lg font-bold text-red-700">🔥 Modo Reta Final</label>
                                         <p class="text-sm text-red-600 mt-2">Prioriza matérias mais importantes quando o tempo é curto. Tópicos menos relevantes podem ficar de fora.</p>
                                     </div>
                                 </div>
@@ -645,11 +635,11 @@
                                 <span class="flex items-center justify-center">
                                     <span class="mr-2">🚀</span>
                                     Gerar Meu Cronograma!
-                                    <span class="ml-2 transform group-hover:translate-x-1 transition-transform">✨</span>
+                                    <span class="ml-2 transform group-hover:translate-x-1 transition-transform">➡</span>
                                 </span>
                             </button>
                             <p class="text-xs text-center text-gray-500 mt-2">
-                                📊 Vou criar um cronograma otimizado baseado em suas configurações
+                                🤖 Vou criar um cronograma otimizado baseado em suas configurações
                             </p>
                         </div>
                     </form>
@@ -811,7 +801,7 @@
             renderHoursInputs();
             app.showSpinner();
             try {
-                                const plan = await app.apiFetch(`/api/plans/${planId}`);
+                                const plan = await app.apiFetch(`/plans/${planId}`);
                 components.renderPlanHeader(planId, plan.plan_name, 'plan_settings.html');
                 
                 document.getElementById('daily_goal').value = plan.daily_question_goal;
@@ -829,7 +819,7 @@
                 if (retaFinalCheckbox) {
                     const isRetaFinal = plan.reta_final_mode === 1 || plan.reta_final_mode === true || plan.reta_final_mode === '1';
                     retaFinalCheckbox.checked = isRetaFinal;
-                    console.log('🔍 Plan_settings - Carregando modo Reta Final:', plan.reta_final_mode, '-> checkbox:', isRetaFinal);
+
                 }
 
                 if (plan.study_hours_per_day) {
@@ -885,13 +875,13 @@
         async function loadSubjects() {
             // Evitar múltiplas chamadas simultâneas
             if (loadingSubjects) {
-                console.log('🔄 LoadSubjects já em execução, ignorando...');
+
                 return;
             }
             
             loadingSubjects = true;
             try {
-                                const subjects = await app.apiFetch(`/api/plans/${planId}/subjects_with_topics`);
+                                const subjects = await app.apiFetch(`/plans/${planId}/subjects_with_topics`);
                 const container = document.getElementById('subjectsContainer');
                 container.innerHTML = '';
 
@@ -941,7 +931,7 @@
                                 <div class="flex flex-col space-y-2">
                                     <button class="save-changes-btn w-full bg-editaliza-green hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow disabled:opacity-50 disabled:cursor-not-allowed" data-subject-id="${subject.id}" disabled>
                                         <span class="flex items-center justify-center">
-                                            <span class="mr-2">💾</span>
+                                            <span class="mr-2">x</span>
                                             <span class="save-btn-text">Salvar Alterações</span>
                                             <span class="changes-count ml-2 hidden bg-white bg-opacity-20 px-2 py-1 rounded-full text-xs"></span>
                                         </span>
@@ -949,7 +939,7 @@
                                     
                                     <button class="cancel-changes-btn hidden w-full bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded-lg transition-colors text-sm" data-subject-id="${subject.id}">
                                         <span class="flex items-center justify-center">
-                                            <span class="mr-2">↶</span>
+                                            <span class="mr-2"> </span>
                                             Cancelar Alterações
                                         </span>
                                     </button>
@@ -988,7 +978,7 @@
             const header = document.getElementById(`topics-header-${subjectId}`);
             
             try {
-                                const topics = await app.apiFetch(`/api/subjects/${subjectId}/topics`);
+                                const topics = await app.apiFetch(`/subjects/${subjectId}/topics`);
                 const todayStr = new Date().toISOString().split('T')[0];
 
                 // Salvar dados originais para comparação
@@ -1082,7 +1072,7 @@
                                 <button class="delete-topic-btn text-sm px-3 py-1 rounded bg-red-50 hover:bg-red-100" 
                                         data-topic-id="${topic.id}" 
                                         data-description="${topic.description}">
-                                    🗑️ Excluir
+                                    ❌ Excluir
                                 </button>
                             </div>
                         </div>`;
@@ -1124,19 +1114,19 @@
             // SINCRONIZAR SELECTS DE PRIORIDADE (desktop e mobile)
             if (event.target.classList.contains('priority-select')) {
                 const topicItemDiv = event.target.closest('.topic-item');
-                console.log('SYNC - Buscando container:', topicItemDiv);
+
                 if (topicItemDiv) {
                     const allPrioritySelects = topicItemDiv.querySelectorAll('.priority-select');
                     const newValue = event.target.value;
-                    console.log('SYNC - Sincronizando selects de prioridade:');
-                    console.log('  Novo valor:', newValue);
-                    console.log('  Total de selects:', allPrioritySelects.length);
+
+
+
                     allPrioritySelects.forEach((select, idx) => {
-                        console.log(`  Select ${idx} antes: ${select.value}`);
+
                         if (select !== event.target) {
                             select.value = newValue;
                         }
-                        console.log(`  Select ${idx} depois: ${select.value}`);
+
                     });
                 }
             }
@@ -1276,12 +1266,12 @@
 
                 app.showSpinner();
                 try {
-                                        const response = await app.apiFetch('/api/topics/batch_update_details', {
+                                        const response = await app.apiFetch('/topics/batch_update_details', {
                         method: 'PATCH',
                         body: JSON.stringify({ topics: topicsToUpdate })
                     });
 
-                    app.showToast(`✅ ${topicsToUpdate.length} tópico${topicsToUpdate.length > 1 ? 's' : ''} atualizado${topicsToUpdate.length > 1 ? 's' : ''} com sucesso!`, 'success');
+                    app.showToast(`✓ ${topicsToUpdate.length} tópico${topicsToUpdate.length > 1 ? 's' : ''} atualizado${topicsToUpdate.length > 1 ? 's' : ''} com sucesso!`, 'success');
                     
                     // Invalidar cache e limpar mudanças
                     app.invalidatePlanCache(planId);
@@ -1353,15 +1343,15 @@
             // Atualizar botões
             updateSubjectSaveButton(subjectId);
             
-            app.showToast('Alterações canceladas com sucesso!', 'info');
+            app.showToast('ℹ️ Alterações canceladas com sucesso!', 'info');
         }
 
         // Função para deletar um tópico
         async function deleteTopic(topicId) {
             app.showSpinner();
             try {
-                                await app.apiFetch(`/api/topics/${topicId}`, { method: 'DELETE' });
-                app.showToast('Tópico excluído com sucesso!', 'success');
+                                await app.apiFetch(`/topics/${topicId}`, { method: 'DELETE' });
+                app.showToast('✓ Tópico excluído com sucesso!', 'success');
                 
                 // Recarregar a disciplina que contém este tópico
                 const topicElement = document.querySelector(`[data-topic-id="${topicId}"]`);
@@ -1393,14 +1383,26 @@
                 study_hours_per_day: {}
             };
             
-            // CORREÇÃO: Backend espera dias como strings ('Seg', 'Ter', etc)
-            // NÃO como números (0-6)
-            document.querySelectorAll('.hours-input').forEach(input => {
-                const dayKey = input.dataset.day; // Já é string: 'Seg', 'Ter', etc
-                settings.study_hours_per_day[dayKey] = parseInt(input.value, 10) || 0;
-            });
+            // CORREÇÃO: Backend espera dias como NÚMEROS (0-6)
+            // 0=Domingo, 1=Segunda, 2=Terça, etc.
+            const dayMapping = {
+                'Dom': 0,
+                'Seg': 1,
+                'Ter': 2,
+                'Qua': 3,
+                'Qui': 4,
+                'Sex': 5,
+                'Sab': 6
+            };
             
-            console.log('[DEBUG] study_hours_per_day enviado:', settings.study_hours_per_day);
+            document.querySelectorAll('.hours-input').forEach(input => {
+                const dayKey = input.dataset.day; // String: 'Seg', 'Ter', etc
+                const dayNumber = dayMapping[dayKey];
+                if (dayNumber !== undefined) {
+                    settings.study_hours_per_day[dayNumber] = parseInt(input.value, 10) || 0;
+                }
+            });
+
             return settings;
         }
         function showRetaFinalReport(excludedTopics, prioritizedSubjects) {
@@ -1423,7 +1425,7 @@
                 <div class="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[85vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold text-red-700 flex items-center">
-                            🎯 Relatório do Modo Reta Final
+                            📊 Relatório do Modo Reta Final
                         </h2>
                         <button class="text-gray-500 hover:text-gray-700 text-2xl font-bold">&times;</button>
                     </div>
@@ -1443,7 +1445,7 @@
                     <!-- Alerta Informativo -->
                     <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
                         <h3 class="font-semibold text-blue-800 mb-2">💡 Como funciona a priorização?</h3>
-                        <p class="text-sm text-blue-700">O algoritmo usa a fórmula: <strong>(Peso da Disciplina × 10) + Peso do Assunto</strong></p>
+                        <p class="text-sm text-blue-700">O algoritmo usa a fórmula: <strong>(Peso da Disciplina  10) + Peso do Assunto</strong></p>
                         <p class="text-xs text-blue-600 mt-1">Exemplo: Direito Constitucional (peso 5) + Direitos Fundamentais (prioridade 5) = 55 pontos</p>
                     </div>
                     
@@ -1476,7 +1478,7 @@
                                         <h4 class="font-semibold text-red-800 mb-2">${subject} (${topics.length} tópicos)</h4>
                                         <div class="max-h-32 overflow-y-auto">
                                             <ul class="space-y-1">
-                                                ${topics.map(topic => `<li class="text-sm text-red-700">• ${topic}</li>`).join('')}
+                                                ${topics.map(topic => `<li class="text-sm text-red-700">⬢ ${topic}</li>`).join('')}
                                             </ul>
                                         </div>
                                     </div>
@@ -1486,22 +1488,22 @@
                         
                         <!-- Dicas de Otimização -->
                         <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6">
-                            <h3 class="font-semibold text-yellow-800 mb-2">📝 Estratégias de Estudo</h3>
+                            <h3 class="font-semibold text-yellow-800 mb-2">📚 Estratégias de Estudo</h3>
                             <ul class="text-sm text-yellow-700 space-y-1">
-                                <li>• <strong>Prioridade máxima:</strong> Foque nos tópicos do cronograma</li>
-                                <li>• <strong>Tempo extra:</strong> Estude os excluídos nas disciplinas mais importantes</li>
-                                <li>• <strong>Revisão rápida:</strong> Faça leitura dinâmica dos tópicos excluídos</li>
-                                <li>• <strong>Questões:</strong> Resolva questões dos tópicos excluídos se sobrar tempo</li>
+                                <li>⬢ <strong>Prioridade máxima:</strong> Foque nos tópicos do cronograma</li>
+                                <li>⬢ <strong>Tempo extra:</strong> Estude os excluídos nas disciplinas mais importantes</li>
+                                <li>⬢ <strong>Revisão rápida:</strong> Faça leitura dinâmica dos tópicos excluídos</li>
+                                <li>⬢ <strong>Questões:</strong> Resolva questões dos tópicos excluídos se sobrar tempo</li>
                             </ul>
                         </div>
                         
                         <!-- Botões de Ação -->
                         <div class="flex flex-col sm:flex-row gap-3 mb-4">
                             <button id="exportExclusionsCsv" class="btn-secondary text-sm px-4 py-2">
-                                📄 Exportar Lista (CSV)
+                                💾 Exportar Lista (CSV)
                             </button>
                             <button id="viewOnSchedule" class="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-lg transition-colors">
-                                📅 Ver no Cronograma
+                                🔗 Ver no Cronograma
                             </button>
                         </div>
                     ` : ''}
@@ -1556,7 +1558,7 @@
             link.click();
             document.body.removeChild(link);
             
-            app.showToast('📄 Lista exportada com sucesso!', 'success');
+            app.showToast('✓ Lista exportada com sucesso!', 'success');
         }
         
         function handleEditSubject(id, name, priority) {
@@ -1626,10 +1628,10 @@
             event.preventDefault();
             const id = event.target.dataset.id;
             const body = { subject_name: document.getElementById('edit_subject_name').value, priority_weight: document.getElementById('edit_priority_weight').value };
-                        await submitApiRequestWrapper(`/api/subjects/${id}`, 'PATCH', body, 'Disciplina atualizada!');
+                        await submitApiRequestWrapper(`/subjects/${id}`, 'PATCH', body, '✓ Disciplina atualizada!');
         }
         async function submitDeleteSubject(event) {
-                        await submitApiRequestWrapper(`/api/subjects/${event.target.dataset.id}`, 'DELETE', null, 'Disciplina apagada!');
+                        await submitApiRequestWrapper(`/subjects/${event.target.dataset.id}`, 'DELETE', null, '✓ Disciplina apagada!');
         }
         async function submitEditTopic(event) {
             event.preventDefault();
@@ -1638,10 +1640,10 @@
                 description: document.getElementById('edit_topic_description').value,
                 priority_weight: parseInt(document.getElementById('edit_topic_priority').value)
             };
-                        await submitApiRequestWrapper(`/api/topics/${id}`, 'PATCH', body, 'Tópico atualizado!');
+                        await submitApiRequestWrapper(`/topics/${id}`, 'PATCH', body, '✓ Tópico atualizado!');
         }
         async function submitDeleteTopic(event) {
-                        await submitApiRequestWrapper(`/api/topics/${event.target.dataset.id}`, 'DELETE', null, 'Tópico apagado!');
+                        await submitApiRequestWrapper(`/topics/${event.target.dataset.id}`, 'DELETE', null, '✓ Tópico apagado!');
         }
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -1685,7 +1687,7 @@
                 const body = { subject_name: document.getElementById('subject_name').value, priority_weight: document.getElementById('priority_weight').value, topics_list: document.getElementById('topics_list').value };
                 app.showSpinner();
                 try {
-                                        const data = await app.apiFetch(`/api/plans/${planId}/subjects_with_topics`, { method: 'POST', body: JSON.stringify(body) });
+                                        const data = await app.apiFetch(`/plans/${planId}/subjects_with_topics`, { method: 'POST', body: JSON.stringify(body) });
                     app.showToast(data.message, 'success');
                     form.reset();
                     await loadSubjects();
@@ -1745,32 +1747,117 @@
 
             generalSettingsForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
+                
+                // Feedback visual imediato no botão
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="flex items-center"><svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Salvando...</span>';
+                
+                // Função para restaurar o botão
+                const restoreButton = () => {
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('bg-green-600');
+                    generalSettingsForm.style.borderColor = '';
+                    generalSettingsForm.style.borderWidth = '';
+                    generalSettingsForm.style.borderStyle = '';
+                };
+                
+                // Timeout de segurança - reduzido para 5 segundos para teste
+                const timeoutId = setTimeout(() => {
+                    console.warn('Timeout ao salvar configurações (5s)');
+                    app.hideSpinner();
+                    app.showToast("⚠️ A operação está demorando muito. Verifique o console para mais detalhes.", 'error', true);
+                    restoreButton();
+                }, 5000);
+                
                 app.showSpinner();
                 try {
                     const settings = getSettingsFromForm();
-                                        await app.apiFetch(`/api/plans/${planId}/settings`, {
-                        method: 'PATCH',
-                        body: JSON.stringify(settings)
-                    });
-                    app.showToast("Configurações salvas com sucesso!", 'success');
+                    console.log('Salvando configurações:', settings);
+                    console.log('Plan ID:', planId);
+                    
+                    // Debug: verificar URL completa
+                    const url = `/api/plans/${planId}/settings`;
+                    console.log('URL da requisição:', url);
+                    console.log('Iniciando requisição PATCH...');
+                    
+                    // Verificar se app.apiFetch existe
+                    if (!app || !app.apiFetch) {
+                        console.error('ERRO: app.apiFetch não está definido!');
+                        console.error('app:', app);
+                        throw new Error('Função apiFetch não encontrada');
+                    }
+                    
+                    console.log('app.apiFetch existe, chamando...');
+                    
+                    let response;
+                    try {
+                        console.log('Antes de chamar app.apiFetch');
+                        response = await app.apiFetch(url, {
+                            method: 'PATCH',
+                            body: JSON.stringify(settings),
+                            timeout: 15000 // Aumentar timeout para 15 segundos
+                        });
+                        console.log('apiFetch retornou:', response);
+                    } catch (fetchError) {
+                        console.error('Erro no app.apiFetch:', fetchError);
+                        console.error('Stack:', fetchError.stack);
+                        throw fetchError;
+                    }
+                    
+                    console.log('Resposta recebida:', response);
+                    
+                    // Limpar timeout se a requisição foi bem sucedida
+                    clearTimeout(timeoutId);
+                    
+                    // Múltiplos feedbacks visuais de sucesso - forçar exibição
+                    app.showToast("✅ Configurações salvas com sucesso!", 'success', true);
+                    
+                    // Persistir o planId como plano ativo ao salvar configurações também
+                    localStorage.setItem('activePlanId', planId);
+                    if (window.app && window.app.state) {
+                        window.app.state.activePlanId = planId;
+                    }
+                    console.log('✅ Plan ID ativo definido ao salvar:', planId);
+                    
+                    // Adicionar animação de sucesso no botão
+                    submitBtn.innerHTML = '<span class="flex items-center"><svg class="w-4 h-4 mr-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Salvo!</span>';
+                    submitBtn.classList.add('bg-green-600');
+                    
+                    // Feedback adicional visual - piscar borda verde no formulário
+                    generalSettingsForm.style.borderColor = '#10b981';
+                    generalSettingsForm.style.borderWidth = '2px';
+                    generalSettingsForm.style.borderStyle = 'solid';
+                    generalSettingsForm.style.transition = 'all 0.3s ease';
+                    
+                    // Restaurar aparência normal após 3 segundos
+                    setTimeout(restoreButton, 3000);
+                    
                 } catch (error) {
-                    app.showToast(error.message, 'error');
+                    // Limpar timeout em caso de erro
+                    clearTimeout(timeoutId);
+                    
+                    console.error('Erro ao salvar configurações:', error);
+                    app.showToast(error.message || 'Erro ao salvar configurações', 'error', true);
+                    restoreButton();
                 } finally {
                     app.hideSpinner();
                 }
             });
 
             generateButton.addEventListener('click', async (event) => {
-                console.log('🚀 Botão de gerar cronograma clicado!');
+
                 const btn = event.target.closest('button') || event.target;
-                console.log('Botão encontrado:', btn);
+
                 btn.disabled = true;
                 btn.textContent = 'Gerando...';
                 app.showSpinner();
                 
                 try {
                     const settings = getSettingsFromForm();
-                                        const result = await app.apiFetch(`/api/plans/${planId}/generate`, {
+                                        const result = await app.apiFetch(`/plans/${planId}/generate`, {
                         method: 'POST',
                         body: JSON.stringify(settings)
                     });
@@ -1778,8 +1865,21 @@
                     if (result.retaFinal && result.retaFinal.excludedTopics.length > 0) {
                         showRetaFinalReport(result.retaFinal.excludedTopics, result.retaFinal.prioritizedSubjects || []);
                     }
+                    
+                    // Persistir o planId como plano ativo
+                    localStorage.setItem('activePlanId', planId);
+                    if (window.app && window.app.state) {
+                        window.app.state.activePlanId = planId;
+                    }
+                    console.log('✅ Plan ID ativo definido:', planId);
+                    
                     app.showToast(result.message, 'success');
                     app.invalidatePlanCache(planId);
+                    
+                    // Redirecionar para home após sucesso
+                    setTimeout(() => {
+                        window.location.href = '/home.html';
+                    }, 1500);
                 } catch (error) {
                     app.showToast(error.message, 'error');
                 } finally {
@@ -1941,3 +2041,5 @@
     <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
 </body>
 </html>
+
+

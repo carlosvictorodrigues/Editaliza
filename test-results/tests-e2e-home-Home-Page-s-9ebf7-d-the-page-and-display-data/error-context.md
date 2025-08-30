@@ -1,0 +1,185 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e6]: 📢
+    - generic [ref=e7]:
+      - paragraph [ref=e8]: ☀️ Bom dia, Ressuscitado(a)!
+      - paragraph [ref=e9]: Você sumiu tanto que já pensei em abrir um B.O. Bem-vindo de volta, desaparecido(a)! 🕵️‍♂️
+    - button "Close" [ref=e11] [cursor=pointer]:
+      - generic [ref=e12] [cursor=pointer]: Close
+      - img [ref=e13] [cursor=pointer]
+  - banner [ref=e16]:
+    - generic [ref=e18]:
+      - link [ref=e20] [cursor=pointer]:
+        - /url: home.html
+        - img [ref=e21] [cursor=pointer]
+      - navigation [ref=e40]:
+        - link "Painel Principal" [ref=e41] [cursor=pointer]:
+          - /url: home.html
+        - button "Gerenciar Planos" [ref=e43] [cursor=pointer]:
+          - text: Gerenciar Planos
+          - img [ref=e44] [cursor=pointer]
+        - link "Metodologia" [ref=e46] [cursor=pointer]:
+          - /url: metodologia.html
+        - link "FAQ" [ref=e47] [cursor=pointer]:
+          - /url: faq.html
+      - generic [ref=e48]:
+        - link "Perfil" [ref=e49] [cursor=pointer]:
+          - /url: profile.html
+          - img [ref=e51] [cursor=pointer]
+          - generic [ref=e53] [cursor=pointer]: Perfil
+        - button "Sair" [ref=e54] [cursor=pointer]:
+          - img [ref=e55] [cursor=pointer]
+          - generic [ref=e57] [cursor=pointer]: Sair
+  - main [ref=e59]:
+    - generic [ref=e60]:
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - heading "Olá, Test User!" [level=1] [ref=e63]:
+            - generic [ref=e64]: Olá, Test User!
+          - paragraph [ref=e65]: Acompanhe seu progresso e organize seus estudos
+        - generic [ref=e67]:
+          - generic [ref=e68]: "Plano ativo:"
+          - combobox "Plano ativo:" [ref=e69]:
+            - option "tjtj" [selected]
+      - generic [ref=e70]:
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - paragraph [ref=e74]: Data de hoje
+            - paragraph [ref=e75]: 29 de agosto
+          - img [ref=e77]
+        - generic [ref=e80]:
+          - generic [ref=e81]:
+            - paragraph [ref=e82]: Dias para prova
+            - paragraph [ref=e83]: "23"
+          - img [ref=e85]
+        - generic [ref=e88]:
+          - generic [ref=e89]:
+            - paragraph [ref=e90]: Progresso geral
+            - paragraph [ref=e91]: 0%
+          - img [ref=e93]
+        - generic [ref=e96]:
+          - generic [ref=e97]:
+            - paragraph [ref=e98]: Progresso hoje
+            - paragraph [ref=e99]: 0/0
+          - img [ref=e101]
+      - generic [ref=e103]:
+        - generic [ref=e105]:
+          - generic [ref=e106]:
+            - paragraph [ref=e107]: Total de dias
+            - paragraph [ref=e108]: "0"
+          - img [ref=e110]
+        - generic [ref=e114]:
+          - generic [ref=e115]:
+            - paragraph [ref=e116]: Sequência atual
+            - paragraph [ref=e117]: "0"
+          - img [ref=e119]
+        - generic [ref=e122]:
+          - generic [ref=e123]:
+            - paragraph [ref=e124]: Total de horas
+            - paragraph [ref=e125]: 0h
+          - img [ref=e127]
+        - generic [ref=e130]:
+          - generic [ref=e131]:
+            - paragraph [ref=e132]: Média diária
+            - paragraph [ref=e133]: 0h
+          - img [ref=e135]
+    - generic [ref=e137]:
+      - generic [ref=e139]:
+        - generic [ref=e140]:
+          - heading "Atividades de hoje" [level=2] [ref=e141]
+          - paragraph [ref=e142]: Concentre-se nas tarefas programadas para hoje
+        - generic [ref=e146]: Prioridade alta
+      - generic [ref=e148]:
+        - img [ref=e150]
+        - heading "Erro ao carregar atividades" [level=3] [ref=e152]
+        - paragraph [ref=e153]: Não foi possível carregar as atividades de hoje.
+        - button "Recarregar página" [ref=e154] [cursor=pointer]
+  - generic:
+    - generic [ref=e155] [cursor=pointer]:
+      - generic [ref=e156] [cursor=pointer]: ⚠️
+      - generic [ref=e157] [cursor=pointer]: Ocorreu um erro inesperado. Tente novamente
+      - button "×" [ref=e158] [cursor=pointer]
+    - generic [ref=e159] [cursor=pointer]:
+      - generic [ref=e160] [cursor=pointer]: ⚠️
+      - generic [ref=e161] [cursor=pointer]: Ocorreu um erro inesperado. Tente novamente
+      - button "×" [ref=e162] [cursor=pointer]
+    - generic [ref=e163] [cursor=pointer]:
+      - generic [ref=e164] [cursor=pointer]: ⚠️
+      - generic [ref=e165] [cursor=pointer]: Ocorreu um erro inesperado. Tente novamente
+      - button "×" [ref=e166] [cursor=pointer]
+    - generic [ref=e167] [cursor=pointer]:
+      - generic [ref=e168] [cursor=pointer]: ⚠️
+      - generic [ref=e169] [cursor=pointer]: Ocorreu um erro inesperado. Tente novamente
+      - button "×" [ref=e170] [cursor=pointer]
+  - contentinfo "Rodap do site" [ref=e171]:
+    - generic [ref=e175]:
+      - generic [ref=e176]:
+        - img [ref=e178]
+        - paragraph [ref=e196]: Plataforma inteligente de estudos para concursos pblicos com metodologia personalizada e gamificao.
+        - generic [ref=e198]:
+          - link "Siga-nos no Instagram" [ref=e199] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e200] [cursor=pointer]
+          - link "Conecte-se no LinkedIn" [ref=e202] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e203] [cursor=pointer]
+          - link "Contato via WhatsApp" [ref=e205] [cursor=pointer]:
+            - /url: "#"
+            - img [ref=e206] [cursor=pointer]
+      - navigation "Navegao da plataforma" [ref=e208]:
+        - heading "Plataforma" [level=3] [ref=e209]
+        - list [ref=e210]:
+          - listitem [ref=e211]:
+            - link "Painel Principal" [ref=e212] [cursor=pointer]:
+              - /url: home.html
+          - listitem [ref=e213]:
+            - link "Cronograma" [ref=e214] [cursor=pointer]:
+              - /url: cronograma.html
+          - listitem [ref=e215]:
+            - link "Gerenciar Planos" [ref=e216] [cursor=pointer]:
+              - /url: plan.html
+          - listitem [ref=e217]:
+            - link "Minhas Anotaes" [ref=e218] [cursor=pointer]:
+              - /url: notes.html
+          - listitem [ref=e219]:
+            - link "Meu Perfil" [ref=e220] [cursor=pointer]:
+              - /url: profile.html
+      - navigation "Recursos da plataforma" [ref=e221]:
+        - heading "Recursos" [level=3] [ref=e222]
+        - list [ref=e223]:
+          - listitem [ref=e224]:
+            - link "Nossa Metodologia" [ref=e225] [cursor=pointer]:
+              - /url: metodologia.html
+          - listitem [ref=e226]:
+            - link "Central de Ajuda" [ref=e227] [cursor=pointer]:
+              - /url: faq.html
+          - listitem [ref=e228]:
+            - link "Configuraes" [ref=e229] [cursor=pointer]:
+              - /url: plan_settings.html
+      - navigation "Suporte e ajuda" [ref=e230]:
+        - heading "Suporte" [level=3] [ref=e231]
+        - list [ref=e232]:
+          - listitem [ref=e233]:
+            - link "Contato" [ref=e234] [cursor=pointer]:
+              - /url: mailto:suporte@editaliza.com.br
+          - listitem [ref=e235]:
+            - link "FAQ" [ref=e236] [cursor=pointer]:
+              - /url: faq.html
+          - listitem [ref=e237]:
+            - link "Privacidade" [ref=e238] [cursor=pointer]:
+              - /url: politica-privacidade.html
+    - generic [ref=e242]:
+      - paragraph [ref=e243]: "2025 Editaliza - CNPJ: 62.189.551/0001-00. Todos os direitos reservados."
+      - generic [ref=e244]:
+        - link "Poltica de Privacidade" [ref=e245] [cursor=pointer]:
+          - /url: politica-privacidade.html
+        - link "Metodologia" [ref=e246] [cursor=pointer]:
+          - /url: metodologia.html
+        - link "FAQ" [ref=e247] [cursor=pointer]:
+          - /url: faq.html
+        - link "Suporte" [ref=e248] [cursor=pointer]:
+          - /url: mailto:suporte@editaliza.com.br
+```

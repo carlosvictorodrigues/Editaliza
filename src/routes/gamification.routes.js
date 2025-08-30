@@ -29,7 +29,9 @@ const { validators, handleValidationErrors } = require('../middleware/validation
 /**
  * GET /api/plans/:planId/gamification
  * 
- * Rota principal de gamificação - obtém todos os dados gamificados de um plano
+ * ROTA COMENTADA - CONFLITO COM plans.routes.js
+ * Esta rota foi movida para plans.routes.js para evitar conflitos de roteamento.
+ * A gamificação por plano deve ser acessada via /api/plans/:planId/gamification
  * 
  * PRESERVADO: Middlewares e validações exatamente como no servidor original:
  * - authenticateToken: Verificar autenticação JWT
@@ -50,12 +52,14 @@ const { validators, handleValidationErrors } = require('../middleware/validation
  * - totalCompletedSessions: Total de sessões concluídas
  * - totalStudyTime: Tempo total estudado (em segundos)
  */
+/*
 router.get('/plans/:planId/gamification', 
     authenticateToken(),
     validators.numericId('planId'),
     handleValidationErrors,
     getPlanGamification
 );
+*/
 
 /**
  * GET /api/stats/user

@@ -147,32 +147,23 @@
 
             state.refreshTokenPromise = new Promise(async (resolve, reject) => {
                 try {
-                    console.info('🔄 Renovando token...');
+                    // DESABILITADO: Refresh token não implementado
+                    // Redirecionar direto para login em vez de tentar refresh
+                    console.warn('⚠️ Token expirado, redirecionando para login...');
                     
-                    const response = await fetch(config.tokenRefreshEndpoint, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        credentials: 'include'
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        
-                        // Atualizar token no localStorage
-                        if (data.token) {
-                            localStorage.setItem('authToken', data.token);
-                        }
-                        
-                        console.info('✅ Token renovado com sucesso');
-                        resolve(data.token);
-                        
-                        // Processar fila de requisições
-                        this.processQueue();
-                    } else {
-                        throw new Error('Falha na renovação do token');
+                    // Limpar token inválido
+                    localStorage.removeItem('editaliza_token');
+                    localStorage.removeItem('authToken');
+                    
+                    // Evitar loop - só redirecionar se não estiver já no login
+                    if (!window.location.pathname.includes('/login.html')) {
+                        setTimeout(() => {
+                            window.location.href = '/login.html';
+                        }, 100);
                     }
+                    
+                    reject(new Error('Token expirado - faça login novamente'));
+                    return;
                 } catch (error) {
                     console.error('❌ Erro ao renovar token:', error);
                     
@@ -216,9 +207,12 @@
      * Retry Manager - Gerencia tentativas de retry
      */
     class RetryManager {
-        static shouldRetry(error, attempt) {
+        static shouldRetry(error, attempt, url) {
             // Não fazer retry se circuit breaker está aberto
             if (CircuitBreaker.isOpen()) return false;
+            
+            // NUNCA fazer retry para endpoint do timer
+            if (this.isTimerEndpoint(url)) return false;
             
             // Não fazer retry em erros de cliente (4xx)
             if (error.status >= 400 && error.status < 500) return false;
@@ -226,23 +220,36 @@
             // Fazer retry em erros de rede ou servidor (5xx)
             return attempt < config.maxRetries;
         }
+        
+        static isTimerEndpoint(url) {
+            return /\/api\/sessions\/\d+\/time$/.test(url || '');
+        }
 
-        static async retry(fn, attempt = 0) {
+        static async retry(fn, attempt = 0, url = '') {
             try {
                 const result = await fn();
-                CircuitBreaker.recordSuccess();
+                // Não registrar sucesso no circuit breaker para timer endpoint
+                if (!this.isTimerEndpoint(url)) {
+                    CircuitBreaker.recordSuccess();
+                }
                 return result;
             } catch (error) {
+                // Marcar erro como timer se for endpoint do timer
+                if (this.isTimerEndpoint(url)) {
+                    error.isTimer = true;
+                    throw error; // Não fazer retry, nem registrar no circuit breaker
+                }
+                
                 CircuitBreaker.recordFailure();
                 
-                if (this.shouldRetry(error, attempt)) {
+                if (this.shouldRetry(error, attempt, url)) {
                     metrics.retriedRequests++;
                     const delay = config.retryDelay * Math.pow(2, attempt); // Exponential backoff
                     
                     console.warn(`⏳ Retry ${attempt + 1}/${config.maxRetries} após ${delay}ms`);
                     
                     await new Promise(resolve => setTimeout(resolve, delay));
-                    return this.retry(fn, attempt + 1);
+                    return this.retry(fn, attempt + 1, url);
                 }
                 
                 throw error;
@@ -306,8 +313,8 @@
 
             // Função de requisição encapsulada para retry
             const makeRequest = async () => {
-                // Adicionar token se existir
-                const token = localStorage.getItem('authToken');
+                // Adicionar token se existir (usar a chave correta)
+                const token = localStorage.getItem('editaliza_token') || localStorage.getItem('authToken');
                 if (token) {
                     options.headers = {
                         ...options.headers,
@@ -342,8 +349,8 @@
             };
 
             try {
-                // Executar com retry
-                const response = await RetryManager.retry(makeRequest);
+                // Executar com retry (passando URL para verificação de timer)
+                const response = await RetryManager.retry(makeRequest, 0, url);
                 
                 // Clone response para cache
                 const responseClone = response.clone();

@@ -421,12 +421,12 @@ const TimeVisualization = {
         
         // Se não encontrar o chartVisualization, tentar criar o container
         if (!mainContainer.querySelector('#chartVisualization')) {
-            console.log('📊 Criando estrutura de visualização...');
+            void('📊 Criando estrutura de visualização...');
             mainContainer.innerHTML = this.createVisualizationContainer();
         }
         
         // Filtrar disciplinas com tempo
-        console.log('📊 Dados recebidos para visualização:', {
+        void('📊 Dados recebidos para visualização:', {
             totalProgress: data.totalProgress,
             subjectCount: data.subjectDetails?.length || 0,
             withTime: data.subjectDetails?.filter(s => s.totalTime > 0).length || 0
@@ -489,10 +489,10 @@ const TimeVisualization = {
         
         // Sempre renderizar acordeão (mesmo sem tempo)
         if (data.subjectDetails && data.subjectDetails.length > 0) {
-            console.log('📋 Renderizando acordeão com', data.subjectDetails.length, 'disciplinas');
+            void('📋 Renderizando acordeão com', data.subjectDetails.length, 'disciplinas');
             this.renderEnhancedAccordion(data.subjectDetails, sanitizeHtml, formatTime);
         } else {
-            console.log('⚠️ Sem disciplinas para renderizar');
+            void('⚠️ Sem disciplinas para renderizar');
             const accordionContainer = document.getElementById('detailedProgressAccordion');
             if (accordionContainer) {
                 accordionContainer.innerHTML = '<p class="text-gray-500 text-center">Nenhuma disciplina para exibir. Adicione disciplinas e tópicos para ver a análise.</p>';

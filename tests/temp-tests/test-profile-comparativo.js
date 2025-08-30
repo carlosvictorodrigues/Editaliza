@@ -22,7 +22,7 @@ async function testeComparativo() {
         }, { timeout: 5000 });
         
         token = loginResponse.data.token;
-        console.log(`✅ Login OK!`);
+        console.log("✅ Login OK!");
         
         const headers = {
             'Authorization': `Bearer ${token}`

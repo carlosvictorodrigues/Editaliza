@@ -26,4 +26,4 @@ import './modules/components-core.js';
  * All existing code will work without changes.
  */
 
-console.log('🚀 Modular Components System loaded - 81.6% smaller initial bundle!');
+void('🚀 Modular Components System loaded - 81.6% smaller initial bundle!');

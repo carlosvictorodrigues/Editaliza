@@ -131,7 +131,7 @@ const tests = {
 
         const res = await makeRequest(`/api/sessions/overdue-check/${planId}`);
         if (res.status === 200) {
-            console.log(`   ✅ Verificação concluída`);
+            console.log("✅ Verificação concluída");
             console.log(`      - Tem atrasadas: ${res.data.hasOverdue}`);
             console.log(`      - Total atrasadas: ${res.data.overdueCount}`);
             if (res.data.overdueCount > 0) {

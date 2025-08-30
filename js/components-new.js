@@ -128,7 +128,8 @@ class ComponentsCore {
     async loadModuleFallback(moduleUrl, moduleName) {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = moduleUrl.replace('./js/modules/', './js/modules/legacy-');
+            // Avoid duplicating legacy- if already present
+            script.src = moduleUrl.includes('/legacy-') ? moduleUrl : moduleUrl.replace('./js/modules/', './js/modules/legacy-');
             script.onload = () => {
                 const moduleKey = this.getModuleKey(moduleName);
                 if (window[moduleKey]) {

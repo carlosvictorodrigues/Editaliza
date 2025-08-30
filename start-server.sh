@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "�� Iniciando servidor Editaliza..."
+echo " Iniciando servidor Editaliza..."
 echo ""
 echo "📋 Verificando dependências..."
 

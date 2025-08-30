@@ -1,7 +1,7 @@
 /**
  * @file js/app.js
- * @description Script principal da aplicação, gerenciando estado, chamadas de API e utilitários.
- * Versão com melhorias de segurança.
+ * @description Script principal da aplica��o, gerenciando estado, chamadas de API e utilit�rios.
+ * Vers�o com melhorias de seguran�a.
  */
 
 const app = {
@@ -13,14 +13,14 @@ const app = {
         overdueTasks: { count: 0, checked: false }
     },
 
-    // Configurações de segurança
+    // Configura��es de seguran�a
     config: {
         apiUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000' : window.location.origin,
         tokenKey: 'editaliza_token',
         planKey: 'selectedPlanId',
         sessionTimeout: 24 * 60 * 60 * 1000, // 24 horas em ms
         
-        // 🔔 Configurações do Sistema de Notificações Inteligentes
+        // x Configura��es do Sistema de Notifica��es Inteligentes
         notifications: {
             enabled: true,
             maxPerDay: 6,
@@ -40,7 +40,7 @@ const app = {
         
         this.state.token = localStorage.getItem(this.config.tokenKey);
         
-        // Páginas que não requerem autenticação
+        // P�ginas que n�o requerem autentica��o
         const publicPages = ['/login.html', '/register.html', '/forgot-password.html', '/reset-password.html'];
         const currentPath = window.location.pathname;
         const isPublicPage = publicPages.some(page => currentPath.includes(page));
@@ -50,59 +50,59 @@ const app = {
             return;
         }
         
-        // Configurar interceptador para renovar token se necessário
+        // Configurar interceptador para renovar token se necess�rio
         if (this.state.token) {
             this.setupTokenRefresh();
         }
 
-        // 🔔 INICIALIZAR SISTEMA DE NOTIFICAÇÕES INTELIGENTES
+        // x INICIALIZAR SISTEMA DE NOTIFICA!"ES INTELIGENTES
         await this.initializeNotificationSystem();
     },
 
-    // 🔔 Sistema de Notificações Inteligentes
+    // x Sistema de Notifica��es Inteligentes
     async initializeNotificationSystem() {
         try {
-            console.log('🔔 Inicializando Sistema de Notificações Inteligentes...');
+            // Inicializando Sistema de Notifica��es Inteligentes...
             
-            // Aguardar carregamento dos módulos
+            // Aguardar carregamento dos m�dulos
             const modulesLoaded = await this.waitForNotificationModules();
             
             if (modulesLoaded) {
-                // Inicializar sistema de notificações contextuais
+                // Inicializar sistema de notifica��es contextuais
                 if (window.ContextualNotifications) {
                     await window.ContextualNotifications.init();
-                    console.log('✅ ContextualNotifications inicializado');
+                    // ContextualNotifications inicializado
                 }
                 
-                // Inicializar integrações de notificação
+                // Inicializar integra��es de notifica��o
                 if (window.NotificationIntegrations) {
                     await window.NotificationIntegrations.init();
-                    console.log('✅ NotificationIntegrations inicializado');
+                    // NotificationIntegrations inicializado
                 }
                 
-                console.log('🎯 Sistema de Notificações Inteligentes ativado com sucesso!');
+                // Sistema de Notifica��es Inteligentes ativado com sucesso!
             } else {
-                console.log('💤 Sistema de Notificações executando em modo simplificado');
+                // Sistema de Notifica��es executando em modo simplificado
             }
             
         } catch (error) {
             console.warn('⚠️ Erro ao inicializar sistema de notificações:', error);
-            // Não quebra a aplicação se as notificações falharem
+            // N�o quebra a aplica��o se as notifica��es falharem
         }
     },
 
-    // Aguardar módulos de notificação estarem disponíveis
+    // Aguardar m�dulos de notifica��o estarem dispon�veis
     async waitForNotificationModules(maxWait = 10000) {
         const startTime = Date.now();
         let attempts = 0;
-        const maxAttempts = 100; // Máximo 100 tentativas
+        const maxAttempts = 100; // M�ximo 100 tentativas
         
         while (Date.now() - startTime < maxWait && attempts < maxAttempts) {
             attempts++;
             
             try {
                 if (window.ContextualNotifications && window.NotificationIntegrations) {
-                    console.log(`✅ Módulos de notificação carregados após ${attempts} tentativas`);
+                    // M�dulos de notifica��o carregados
                     return true;
                 }
                 await new Promise(resolve => setTimeout(resolve, 100));
@@ -130,12 +130,12 @@ const app = {
                 this.logout();
             }
         } catch (error) {
-            // Token inválido, fazer logout
+            // Token inv�lido, fazer logout
             this.logout();
         }
     },
 
-    // Configurar renovação automática de token
+    // Configurar renova��o autom�tica de token
     setupTokenRefresh() {
         // Verificar token a cada 30 minutos
         setInterval(() => {
@@ -154,7 +154,7 @@ const app = {
     isValidUrl(url) {
         try {
             const urlObj = new URL(url, window.location.origin);
-            // Permitir apenas URLs do mesmo domínio
+            // Permitir apenas URLs do mesmo dom�nio
             return urlObj.origin === window.location.origin;
         } catch {
             return false;
@@ -171,34 +171,57 @@ const app = {
         const config = { ...defaultOptions, ...options, headers: { ...defaultOptions.headers, ...options.headers } };
 
         try {
-            const response = await fetch(`${this.config.apiUrl}${url}`, config);
+            // Normalizar endpoint para evitar '/api/api' e suportar '/auth', '/plans', etc.
+            let fullUrl;
+            if (typeof url !== 'string') {
+                throw new Error('endpoint deve ser string');
+            }
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+                fullUrl = url;
+            } else if (url.startsWith('/api/')) {
+                fullUrl = `${this.config.apiUrl}${url}`;
+            } else if (url.startsWith('/')) {
+                fullUrl = `${this.config.apiUrl}/api${url}`;
+            } else {
+                fullUrl = `${this.config.apiUrl}/api/${url}`;
+            }
 
-            // Tratamento específico para respostas vazias
+            console.log('Fazendo requisição para:', fullUrl);
+            console.log('Método:', config.method || 'GET');
+            console.log('Token presente?', !!this.state.token);
+            console.log('Headers:', config.headers);
+            console.log('Body:', config.body);
+            
+            const response = await fetch(fullUrl, config);
+            
+            console.log('Status da resposta:', response.status);
+
+            // Tratamento espec�fico para respostas vazias
             let data = {};
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
                 try {
                     data = await response.json();
                 } catch (jsonError) {
-                    console.warn('Resposta JSON inválida:', jsonError);
+                    console.warn('Resposta JSON inv�lida:', jsonError);
                     data = {};
                 }
             }
 
             if (response.status === 401 || response.status === 403) {
                 this.logout();
-                throw new Error('Sua sessão expirou. Por favor, faça o login novamente.');
+                throw new Error('Sua sess�o expirou. Por favor, fa�a o login novamente.');
             }
 
             if (!response.ok) {
-                throw new Error(data.error || `Erro na requisição: ${response.statusText}`);
+                throw new Error(data.error || `Erro na requisi��o: ${response.statusText}`);
             }
             
             return data;
         } catch (error) {
-            // Se for erro de rede, tentar mostrar mensagem mais amigável
+            // Se for erro de rede, tentar mostrar mensagem mais amig�vel
             if (error.message === 'Failed to fetch') {
-                throw new Error('Erro de conexão. Verifique sua internet e tente novamente.');
+                throw new Error('Erro de conex�o. Verifique sua internet e tente novamente.');
             }
             console.error('API Fetch Error:', error);
             throw error;
@@ -227,7 +250,7 @@ const app = {
     },
 
     logout() {
-        // Limpar todos os dados sensíveis
+        // Limpar todos os dados sens�veis
         localStorage.removeItem(this.config.tokenKey);
         localStorage.removeItem(this.config.planKey);
         sessionStorage.clear();
@@ -246,7 +269,7 @@ const app = {
             components.clearUserAvatarCache();
         }
         
-        // Fazer logout no servidor (se possível)
+        // Fazer logout no servidor (se poss�vel)
         if (this.state.token) {
             this.apiFetch('/api/logout', {
                 method: 'POST'
@@ -262,17 +285,17 @@ const app = {
         if (this.state.plans.length > 0 && !forceRefresh) {
             return this.state.plans;
         }
-        const plans = await this.apiFetch('/api/plans');
+        const plans = await this.apiFetch('/plans');
         this.state.plans = plans;
         return plans;
     },
 
-    // Logging inteligente - só loga quando necessário
+    // Logging inteligente - s� loga quando necess�rio
     _smartLog(key, message, data = null, level = 'log') {
         const logKey = `_lastLog_${key}`;
         const now = Date.now();
         
-        // Não logar a mesma mensagem mais de uma vez por minuto
+        // N�o logar a mesma mensagem mais de uma vez por minuto
         if (this[logKey] && (now - this[logKey]) < 60000) {
             return;
         }
@@ -285,23 +308,23 @@ const app = {
         }
     },
 
-    // CORREÇÃO: Melhorar função de dados do plano com log detalhado
+    // CORRE!�O: Melhorar fun��o de dados do plano com log detalhado
     async getActivePlanData(planId, dataType, forceRefresh = false) {
         // Validar inputs
         if (!planId || !dataType) {
-            throw new Error('ID do plano e tipo de dados são obrigatórios');
+            throw new Error('ID do plano e tipo de dados s�o obrigat�rios');
         }
         
-        console.log(`📊 Buscando dados: ${dataType} (forceRefresh: ${forceRefresh})`);
+        // Buscando dados
         
-        // Se for forçar refresh, invalidar cache primeiro
+        // Se for for�ar refresh, invalidar cache primeiro
         if (forceRefresh) {
             this.invalidatePlanCache(planId, dataType);
         }
         
-        // Verificar se já temos dados em cache e não é forçado
+        // Verificar se j� temos dados em cache e n�o � for�ado
         if (this.state.activePlanData[planId] && this.state.activePlanData[planId][dataType] && !forceRefresh) {
-            console.log(`📋 Usando dados em cache para ${dataType}`);
+            // Usando dados em cache
             return this.state.activePlanData[planId][dataType];
         }
 
@@ -309,22 +332,22 @@ const app = {
             this.state.activePlanData[planId] = {};
         }
         
-        console.log(`🌍 Buscando dados frescos da API: ${dataType}`);
-        const data = await this.apiFetch(`/api/plans/${planId}/${dataType}`);
+        // Buscando dados frescos da API
+        const data = await this.apiFetch(`/plans/${planId}/${dataType}`);
         
         // Salvar no cache
         this.state.activePlanData[planId][dataType] = data;
-        console.log(`✅ Dados de ${dataType} atualizados no cache`);
+        // Dados atualizados no cache
         
         return data;
     },
     
     async getGamificationData(planId) {
-        if (!planId) throw new Error('ID do plano é necessário para buscar dados de gamificação.');
-        return await this.apiFetch(`/api/plans/${planId}/gamification`);
+        if (!planId) throw new Error('ID do plano � necess�rio para buscar dados de gamifica��o.');
+        return await this.apiFetch(`/plans/${planId}/gamification`);
     },
 
-    // CORREÇÃO: Melhorar sistema de invalidação de cache com logs
+    // CORRE!�O: Melhorar sistema de invalida��o de cache com logs
     invalidatePlanCache(planId, dataType = null) {
         if (!planId) {
             console.warn('⚠️ Tentativa de invalidar cache sem planId');
@@ -333,24 +356,29 @@ const app = {
         
         if (this.state.activePlanData[planId]) {
             if (dataType) {
-                console.log(`🗑️ Invalidando cache de ${dataType} para plano ${planId}`);
+                void(`x? Invalidando cache de ${dataType} para plano ${planId}`);
                 delete this.state.activePlanData[planId][dataType];
             } else {
-                console.log(`🗑️ Invalidando todo o cache do plano ${planId}`);
+                void(`x? Invalidando todo o cache do plano ${planId}`);
                 delete this.state.activePlanData[planId];
             }
         } else {
-            console.log(`📋 Cache já vazio para plano ${planId}`);
+            void(`x9 Cache j� vazio para plano ${planId}`);
         }
     },
 
-    showToast(message, type = 'success') {
+    showToast(message, type = 'success', force = false) {
+        // Se force=true, usar implementa��o direta sem passar por sistemas de notifica��o
+        if (force) {
+            return this.forceShowToast(message, type);
+        }
+        
         const toastContainer = document.getElementById('toast-container');
         if (!toastContainer) return;
         
         const toast = document.createElement('div');
         const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-        const icon = type === 'success' ? '✓' : '✕';
+        const icon = type === 'success' ? '?' : '?';
         
         // Sanitizar mensagem
         const safeMessage = this.sanitizeHtml(message);
@@ -365,7 +393,7 @@ const app = {
             toast.classList.remove('translate-x-full', 'opacity-0');
         });
         
-        // Remover após 3 segundos
+        // Remover ap�s 3 segundos
         setTimeout(() => {
             toast.classList.add('translate-x-full', 'opacity-0');
             toast.addEventListener('transitionend', () => {
@@ -375,12 +403,56 @@ const app = {
             }, { once: true });
         }, 3000);
     },
+    
+    // M�todo para for�ar exibi��o de toast cr�tico (bypassa cooldowns)
+    forceShowToast(message, type = 'success') {
+        // Criar container se n�o existir
+        let toastContainer = document.getElementById('toast-container');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toast-container';
+            toastContainer.className = 'fixed top-5 right-5 z-50 space-y-3';
+            toastContainer.style.zIndex = '9999';
+            document.body.appendChild(toastContainer);
+        }
+        
+        const toast = document.createElement('div');
+        const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-yellow-500';
+        const icon = type === 'success' ? '?' : type === 'error' ? '?' : '??';
+        
+        // Sanitizar mensagem
+        const safeMessage = this.sanitizeHtml(message);
+        
+        // Usar z-index alto para garantir visibilidade
+        toast.className = `p-4 rounded-lg text-white shadow-lg ${bgColor} transform transition-all duration-300 translate-x-full opacity-0 flex items-center space-x-2`;
+        toast.style.zIndex = '9999';
+        toast.innerHTML = `<span class="text-xl">${icon}</span><span>${safeMessage}</span>`;
+        
+        toastContainer.appendChild(toast);
+        
+        // Animar entrada
+        requestAnimationFrame(() => {
+            toast.classList.remove('translate-x-full', 'opacity-0');
+        });
+        
+        // Remover ap�s 4 segundos (um pouco mais para toasts importantes)
+        setTimeout(() => {
+            toast.classList.add('translate-x-full', 'opacity-0');
+            toast.addEventListener('transitionend', () => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, { once: true });
+        }, 4000);
+        
+        console.log('? Toast for�ado exibido:', message);
+    },
 
     showSpinner() {
         const spinner = document.getElementById('spinner-overlay');
         if (spinner) {
             spinner.classList.remove('hidden');
-            // Prevenir múltiplos spinners
+            // Prevenir m�ltiplos spinners
             spinner.dataset.count = (parseInt(spinner.dataset.count || 0) + 1).toString();
         }
     },
@@ -398,52 +470,119 @@ const app = {
         }
     },
     
-    getSubjectStyle(name) {
-        if (!name) return { color: 'border-gray-400', icon: '📚' };
+        getSubjectStyle(name) {
+        if (!name) return { color: 'border-gray-400', icon: '\uD83D\uDCDA' }; // ??
 
+        // Sistema expandido de cores por disciplina para melhor identidade visual
         const predefined = {
-            'Constitucional': { color: 'border-green-500', icon: '⚖️' }, 
-            'Administrativo': { color: 'border-red-500', icon: '🏛️' },
-            'Português': { color: 'border-orange-500', icon: '✍️' }, 
-            'Civil': { color: 'border-blue-500', icon: '👨‍⚖️' },
-            'Raciocínio Lógico': { color: 'border-cyan-500', icon: '🧠' }, 
-            'Processual Civil': { color: 'border-sky-500', icon: '📂' },
-            'Penal': { color: 'border-rose-500', icon: '🔪' }, 
-            'Processual Penal': { color: 'border-pink-500', icon: '⛓️' },
-            'Legislação': { color: 'border-purple-500', icon: '📜' }, 
-            'Revisão Consolidada': { color: 'border-yellow-400', icon: '⭐' },
-            'Revisão Semanal': { color: 'border-yellow-400', icon: '⭐' },
-            'Revisão Mensal': { color: 'border-amber-500', icon: '🗓️' }, 
-            'Reforço Extra': { color: 'border-indigo-500', icon: '🎯' },
-            'Simulado Direcionado': { color: 'border-purple-500', icon: '🎯' },
-            'Simulado Completo': { color: 'border-slate-700', icon: '🏆' },
-            'Redação': { color: 'border-rose-500', icon: '📝' }
+            // Disciplinas Jur�dicas - Mantendo cores existentes e expandindo
+            'Constitucional': { color: 'border-green-500', icon: '\u2696\uFE0F' }, // ??
+            'Administrativo': { color: 'border-red-500', icon: '\uD83C\uDFDB\uFE0F' }, // ???
+            'Portugu�s': { color: 'border-orange-500', icon: '\uD83D\uDCD8' }, // ??
+            'Civil': { color: 'border-blue-500', icon: '\uD83D\uDCD7' }, // ??
+            'Racioc�nio L�gico': { color: 'border-cyan-500', icon: '\uD83E\uDDE0' }, // ??
+            'Racioc�nio': { color: 'border-cyan-500', icon: '\uD83E\uDDE0' }, // ??
+            'L�gico': { color: 'border-cyan-500', icon: '\uD83E\uDDE0' }, // ??
+            'Matem�tica': { color: 'border-cyan-500', icon: '\uD83D\uDCCA' }, // ??
+            'Processual Civil': { color: 'border-sky-500', icon: '\uD83D\uDCD8' }, // ??
+            'Penal': { color: 'border-rose-500', icon: '\uD83D\uDE94' }, // ??
+            'Processual Penal': { color: 'border-pink-500', icon: '\uD83D\uDC69\u200D\u2696\uFE0F' }, // ?????
+            'Legisla��o': { color: 'border-purple-500', icon: '\uD83D\uDCDC' }, // ??
+            'Tribut�rio': { color: 'border-yellow-600', icon: '\uD83D\uDCB0' }, // ??
+            'Trabalhista': { color: 'border-amber-500', icon: '\uD83D\uDC54' }, // ??
+            'Empresarial': { color: 'border-indigo-500', icon: '\uD83C\uDFE2' }, // ??
+            
+            // Tipos de Sess�o - Mantendo existentes
+            'Revis�o Consolidada': { color: 'border-yellow-400', icon: '\uD83D\uDD01' }, // ??
+            'Revis�o Semanal': { color: 'border-yellow-400', icon: '\uD83D\uDD01' }, // ??
+            'Revis�o Mensal': { color: 'border-amber-500', icon: '\uD83D\uDCC5' }, // ??
+            'Refor�o Extra': { color: 'border-indigo-500', icon: '\uD83D\uDCAA' }, // ??
+            'Simulado Direcionado': { color: 'border-purple-500', icon: '\uD83C\uDFAF' }, // ??
+            'Simulado Completo': { color: 'border-slate-700', icon: '\uD83E\uDDE9' }, // ??
+            'Reda��o': { color: 'border-rose-500', icon: '\u270D\uFE0F' }, // ??
+            
+            // Disciplinas T�cnicas
+            'Inform�tica': { color: 'border-purple-600', icon: '\uD83D\uDCBB' }, // ??
+            'Tecnologia': { color: 'border-purple-600', icon: '\u26A1' }, // ?
+            'Computa��o': { color: 'border-purple-600', icon: '\uD83D\uDDA5\uFE0F' }, // ???
+            'Sistemas': { color: 'border-purple-600', icon: '\uD83D\uDD27' }, // ??
+            'Redes': { color: 'border-purple-600', icon: '\uD83C\uDF10' }, // ??
+            'Seguran�a': { color: 'border-purple-600', icon: '\uD83D\uDD12' }, // ??
+            
+            // Disciplinas de Gest�o
+            'Administra��o': { color: 'border-orange-600', icon: '\uD83D\uDCCA' }, // ??
+            'Gest�o': { color: 'border-orange-600', icon: '\uD83D\uDC68\u200D\uD83D\uDCBC' }, // ?????
+            'Economia': { color: 'border-orange-600', icon: '\uD83D\uDCB9' }, // ??
+            'Contabilidade': { color: 'border-orange-600', icon: '\uD83D\uDCC8' }, // ??
+            'Financeira': { color: 'border-orange-600', icon: '\uD83D\uDCB0' }, // ??
+            'Or�amento': { color: 'border-orange-600', icon: '\uD83D\uDCB5' }, // ??
+            
+            // Disciplinas de Sa�de
+            'Sa�de': { color: 'border-teal-500', icon: '\uD83C\uDFE5' }, // ??
+            'Medicina': { color: 'border-teal-500', icon: '\u2695\uFE0F' }, // ??
+            'Enfermagem': { color: 'border-teal-500', icon: '\uD83D\uDC69\u200D\u2695\uFE0F' }, // ?????
+            'Farm�cia': { color: 'border-teal-500', icon: '\uD83D\uDC8A' }, // ??
+            'Psicologia': { color: 'border-teal-500', icon: '\uD83E\uDDE0' }, // ??
+            
+            // Disciplinas de Educa��o
+            'Educa��o': { color: 'border-pink-600', icon: '\uD83C\uDF93' }, // ??
+            'Pedagogia': { color: 'border-pink-600', icon: '\uD83D\uDCDA' }, // ??
+            'Did�tica': { color: 'border-pink-600', icon: '\uD83D\uDC69\u200D\uD83C\uDFEB' }, // ?????
+            
+            // Disciplinas de Engenharia
+            'Engenharia': { color: 'border-yellow-500', icon: '\u2699\uFE0F' }, // ??
+            'Arquitetura': { color: 'border-yellow-500', icon: '\uD83C\uDFD7\uFE0F' }, // ???
+            'Urbanismo': { color: 'border-yellow-500', icon: '\uD83C\uDF06' }, // ??
+            
+            // Conhecimentos Gerais
+            'Hist�ria': { color: 'border-amber-600', icon: '\uD83C\uDFDB\uFE0F' }, // ???
+            'Geografia': { color: 'border-emerald-500', icon: '\uD83C\uDF0D' }, // ??
+            'Sociologia': { color: 'border-indigo-600', icon: '\uD83D\uDC65' }, // ??
+            'Filosofia': { color: 'border-violet-500', icon: '\uD83E\uDD14' }, // ??
+            'Atualidades': { color: 'border-cyan-600', icon: '\uD83D\uDCF0' }, // ??
+            'Conhecimentos Gerais': { color: 'border-slate-500', icon: '\uD83C\uDF10' }, // ??
+            'Realidade': { color: 'border-slate-500', icon: '\uD83C\uDFD9\uFE0F' } // ???
         };
 
+        // Busca exata primeiro
+        if (predefined[name]) {
+            return predefined[name];
+        }
+        
+        // Busca por palavras-chave (case insensitive)
+        const normalizedName = name.toLowerCase();
         for (const keyword in predefined) {
-            if (name.includes(keyword)) return predefined[keyword];
+            if (normalizedName.includes(keyword.toLowerCase())) {
+                return predefined[keyword];
+            }
         }
 
-        const colors = [
-            'border-teal-500', 'border-lime-500', 'border-fuchsia-500', 
-            'border-violet-500', 'border-emerald-500', 'border-cyan-600',
-            'border-sky-600', 'border-indigo-600', 'border-pink-600',
-            'border-amber-600', 'border-yellow-500', 'border-green-600'
+        // Cores de fallback mais vibrantes e diversificadas
+        const fallbackColors = [
+            { color: 'border-blue-500', icon: '\uD83D\uDCDA' }, // ??
+            { color: 'border-green-500', icon: '\uD83D\uDCD7' }, // ??
+            { color: 'border-red-500', icon: '\uD83D\uDCD5' }, // ??
+            { color: 'border-purple-500', icon: '\uD83D\uDCD8' }, // ??
+            { color: 'border-orange-500', icon: '\uD83D\uDCD9' }, // ??
+            { color: 'border-teal-500', icon: '\uD83D\uDCC4' }, // ??
+            { color: 'border-pink-500', icon: '\uD83D\uDCD6' }, // ??
+            { color: 'border-cyan-500', icon: '\uD83D\uDCDC' }, // ??
+            { color: 'border-yellow-500', icon: '\uD83D\uDCC3' }, // ??
+            { color: 'border-indigo-500', icon: '\uD83D\uDCC1' }, // ??
         ];
-        
-        // Hash mais robusto
+
+        // Hash consistente baseado no nome
         let hash = 0;
         for (let i = 0; i < name.length; i++) {
             const char = name.charCodeAt(i);
             hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Converter para 32-bit integer
+            hash = hash & hash;
         }
-        const index = Math.abs(hash % colors.length);
-        
-        return { color: colors[index], icon: '📚' };
+        const index = Math.abs(hash % fallbackColors.length);
+        return fallbackColors[index];
     },
 
-    // Função para validar dados de entrada
+    // Fun��o para validar dados de entrada
     validateInput(value, type, options = {}) {
         switch (type) {
             case 'email':
@@ -472,7 +611,7 @@ const app = {
         }
     },
 
-    // Debounce para evitar múltiplas chamadas
+    // Debounce para evitar m�ltiplas chamadas
     debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -507,7 +646,7 @@ const app = {
         }
     },
 
-    // Sistema de debounce para evitar múltiplas chamadas rápidas
+    // Sistema de debounce para evitar m�ltiplas chamadas r�pidas
     _debounceGamificationCalls(planId, forceRefresh, callback) {
         const key = `${planId}_${forceRefresh}`;
         if (!this._gamificationDebounce) this._gamificationDebounce = {};
@@ -517,11 +656,11 @@ const app = {
             clearTimeout(this._gamificationDebounce[key]);
         }
         
-        // Agendar nova chamada com delay mínimo
+        // Agendar nova chamada com delay m�nimo
         this._gamificationDebounce[key] = setTimeout(callback, forceRefresh ? 0 : 100);
     },
 
-    // CORREÇÃO: Função de gamificação sempre busca dados frescos quando solicitado
+    // CORRE!�O: Fun��o de gamifica��o sempre busca dados frescos quando solicitado
     async getGamificationData(planId, forceRefresh = false) {
         // Sistema de debounce para evitar chamadas excessivas
         return new Promise((resolve, reject) => {
@@ -537,23 +676,23 @@ const app = {
 
     async _getGamificationDataInternal(planId, forceRefresh = false) {
         try {
-            // Log apenas se for forçado ou primeira chamada
+            // Log apenas se for for�ado ou primeira chamada
             if (forceRefresh || !this._gamificationDataCache?.[planId]) {
-                console.log('📊 Carregando dados de gamificação...', forceRefresh ? '(forçado)' : '');
+                void('x` Carregando dados de gamifica��o...', forceRefresh ? '(for�ado)' : '');
             }
             
-            // CORREÇÃO: Usar getActivePlanData para aproveitar o sistema de cache
+            // CORRE!�O: Usar getActivePlanData para aproveitar o sistema de cache
             const response = await this.getActivePlanData(planId, 'gamification', forceRefresh);
             
             // Cache simples para controlar logs
             if (!this._gamificationDataCache) this._gamificationDataCache = {};
             const previousData = this._gamificationDataCache[planId];
             
-            // Só logar se houve mudança significativa nos dados
+            // S� logar se houve mudan�a significativa nos dados
             if (!previousData || 
                 previousData.completedTopicsCount !== response.completedTopicsCount ||
                 previousData.concurseiroLevel !== response.concurseiroLevel) {
-                console.log('✅ Dados atualizados:', {
+                void('S& Dados atualizados:', {
                     nivel: response.concurseiroLevel,
                     topicos: response.completedTopicsCount,
                     streak: response.studyStreak
@@ -564,35 +703,35 @@ const app = {
             return response;
         } catch (error) {
             console.error('❌ Erro gamificação:', error.message || error);
-            // Fallback com dados básicos
+            // Fallback com dados b�sicos
             return {
                 studyStreak: 0,
                 totalStudyDays: 0,
                 experiencePoints: 0,
-                concurseiroLevel: 'Aspirante a Servidor(a) 🌱',
+                concurseiroLevel: 'Aspirante a Servidor(a) xR',
                 achievements: [],
                 completedTopicsCount: 0,
                 totalCompletedSessions: 0,
                 currentStreak: 0,
                 totalXP: 0,
                 level: 1,
-                levelName: 'Aspirante a Servidor(a) 🌱',
+                levelName: 'Aspirante a Servidor(a) xR',
                 achievementsCount: 0
             };
         }
     },
 
-    // Função para notificar atualização do avatar do usuário
+    // Fun��o para notificar atualiza��o do avatar do usu�rio
     async onUserAvatarUpdated() {
         if (typeof components !== 'undefined' && components.updateNavigationAvatar) {
             await components.updateNavigationAvatar();
         }
     },
     
-    // CORREÇÃO: Sistema de eventos para atualização de métricas
+    // CORRE!�O: Sistema de eventos para atualiza��o de m�tricas
     eventListeners: new Map(),
     
-    // Registrar listener para eventos de atualização de métricas
+    // Registrar listener para eventos de atualiza��o de m�tricas
     onMetricsUpdate(callback) {
         const id = Date.now() + Math.random();
         this.eventListeners.set(id, callback);
@@ -604,80 +743,113 @@ const app = {
         this.eventListeners.delete(id);
     },
     
-    // Disparar evento de atualização de métricas
+    // Disparar evento de atualiza��o de m�tricas
     triggerMetricsUpdate(planId, eventType = 'session_completed') {
-        console.log(`📡 Disparando evento de atualização de métricas: ${eventType}`);
+        void(`x Disparando evento de atualiza��o de m�tricas: ${eventType}`);
         this.eventListeners.forEach(callback => {
             try {
                 callback(planId, eventType);
             } catch (error) {
-                console.error('Erro em listener de métricas:', error);
+                console.error('Erro em listener de m�tricas:', error);
             }
         });
+    },
+
+    // Marca sess�o como conclu�da e atualiza m�tricas/cards
+    async markSessionAsCompleted(sessionId) {
+        try {
+            await app.apiFetch(`/api/sessions/${sessionId}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'Concluido' })
+            });
+
+            if (window.todaySessionsData && Array.isArray(window.todaySessionsData)) {
+                const idx = window.todaySessionsData.findIndex(s => String(s.id) === String(sessionId));
+                if (idx !== -1) {
+                    window.todaySessionsData[idx].status = 'completed';
+                    window.todaySessionsData[idx].completed_at = new Date().toISOString();
+                }
+            }
+
+            app.showToast('Sess�o marcada como conclu�da!', 'success');
+            if (app.state?.activePlanId) {
+                app.triggerMetricsUpdate(app.state.activePlanId, 'session_completed');
+            }
+            document.dispatchEvent(new CustomEvent('sessionCompleted', { detail: { sessionId } }));
+
+            if (typeof updateTodayProgress === 'function') updateTodayProgress();
+            if (typeof updateStudyStatistics === 'function' && app.state?.activePlanId) {
+                updateStudyStatistics(app.state.activePlanId);
+            }
+        } catch (error) {
+            console.error('Erro ao concluir sess�o:', error);
+            app.showToast('Erro ao concluir sess�o. Tente novamente.', 'error');
+        }
     }
 };
 
-// CORREÇÃO MISSÃO 2: Função global inteligente para abrir sessões de estudo
-// Resolve problema do checklist reabrindo ao pausar cronômetro
+// CORRE!�O MISS�O 2: Fun��o global inteligente para abrir sess�es de estudo
+// Resolve problema do checklist reabrindo ao pausar cron�metro
 async function openStudySession(sessionId) {
     try {
-        console.log(`🎯 Iniciando sessão ${sessionId}...`);
+        void(`x} Iniciando sess�o ${sessionId}...`);
         
-        // CORREÇÃO 1: Verificar se há um timer ativo/pausado para essa sessão
+        // CORRE!�O 1: Verificar se h� um timer ativo/pausado para essa sess�o
         const hasActiveTimer = window.TimerSystem && TimerSystem.hasActiveTimer(sessionId);
         const hasElapsedTime = window.TimerSystem && TimerSystem.getTimerElapsed(sessionId) > 1000; // Mais de 1 segundo
         
         if (hasActiveTimer) {
-            console.log(`⏰ Timer ativo encontrado para sessão ${sessionId} - continuando sem abrir checklist`);
+            void(`? Timer ativo encontrado para sess�o ${sessionId} - continuando sem abrir checklist`);
             TimerSystem.continueTimer(sessionId);
-            app.showToast('⏱️ Timer retomado! Continue estudando.', 'success');
+            app.showToast('?? Timer retomado! Continue estudando.', 'success');
             return;
         }
         
         if (hasElapsedTime) {
-            console.log(`⏸️ Timer pausado com tempo encontrado para sessão ${sessionId} - perguntando ao usuário`);
+            void(`?? Timer pausado com tempo encontrado para sess�o ${sessionId} - perguntando ao usu�rio`);
             
-            // Mostrar modal de confirmação se há tempo estudado mas timer pausado
+            // Mostrar modal de confirma��o se h� tempo estudado mas timer pausado
             const shouldContinue = await showContinueStudyModal(sessionId);
             
             if (shouldContinue) {
-                // Continuar timer sem abrir checklist
+                // Continuar timer e reabrir modal do cron�metro
                 const session = await fetchSessionData(sessionId);
                 if (session) {
                     TimerSystem.continueTimer(sessionId);
-                    StudyChecklist.startStudySession(false); // CORREÇÃO: Não iniciar novo timer
-                    StudyChecklist.session = session; // Definir sessão para modal
-                    app.showToast('⏱️ Continuando estudos! Timer retomado.', 'success');
+                    // Definir sess�o ANTES de montar a UI do timer
+                    StudyChecklist.session = session;
+                    StudyChecklist.startStudySession(false);
+                    app.showToast('Continuando estudos! Timer retomado.', 'success');
                 } else {
-                    console.error('❌ Não foi possível carregar dados da sessão');
-                    app.showToast('Erro ao carregar sessão. Tente novamente.', 'error');
+                    console.error('R N�o foi poss�vel carregar dados da sess�o');
+                    app.showToast('Erro ao carregar sess�o. Tente novamente.', 'error');
                 }
                 return;
             }
         }
         
-        // CORREÇÃO 2: Buscar dados da sessão do servidor (não do localStorage)
+        // CORRE!�O 2: Buscar dados da sess�o do servidor (n�o do localStorage)
         const session = await fetchSessionData(sessionId);
 
         if (!session) {
-            console.error('❌ Sessão não encontrada:', sessionId);
-            app.showToast('Erro: Sessão não encontrada. Recarregue a página.', 'error');
+            console.error('R Sess�o n�o encontrada:', sessionId);
+            app.showToast('Erro: Sess�o n�o encontrada. Recarregue a p�gina.', 'error');
             return;
         }
 
         let sessionRescheduled = false;
-        // Usar horário de Brasília corretamente
+        // Usar hor�rio de Bras�lia corretamente
         const todayStr = new Date().toLocaleDateString('en-CA', {timeZone: 'America/Sao_Paulo'});
         
         // Debug de datas
-        console.log('📅 Comparação de datas:', {
+        void('x& Compara��o de datas:', {
             session_date: session.session_date,
             session_date_type: typeof session.session_date,
             todayStr: todayStr,
             comparison: session.session_date !== todayStr
         });
         
-        // Converter session_date para string no formato correto se necessário
+        // Converter session_date para string no formato correto se necess�rio
         let sessionDateStr = session.session_date;
         if (session.session_date instanceof Date) {
             sessionDateStr = session.session_date.toISOString().split('T')[0];
@@ -688,14 +860,14 @@ async function openStudySession(sessionId) {
         }
         
         if (sessionDateStr && sessionDateStr !== todayStr) {
-            const confirmReschedule = confirm('Esta sessão estava marcada para outro dia. Deseja reagendá-la para hoje?');
+            const confirmReschedule = confirm('Esta sess�o estava marcada para outro dia. Deseja reagend�-la para hoje?');
             if (!confirmReschedule) {
                 return;
             }
 
             const oldDate = session.session_date;
             try {
-                await app.apiFetch(`/api/sessions/${sessionId}`, {
+                await app.apiFetch(`/sessions/${sessionId}`, {
                     method: 'PATCH',
                     body: JSON.stringify({ session_date: todayStr })
                 });
@@ -755,22 +927,22 @@ async function openStudySession(sessionId) {
 
                 sessionRescheduled = true;
             } catch (err) {
-                console.error('❌ Erro ao atualizar data da sessão:', err);
-                app.showToast('Erro ao reagendar sessão.', 'error');
+                console.error('R Erro ao atualizar data da sess�o:', err);
+                app.showToast('Erro ao reagendar sess�o.', 'error');
                 return;
             }
         }
 
-        console.log('✅ Sessão carregada:', session.subject_name);
+        void('S& Sess�o carregada:', session.subject_name);
 
-        // CORREÇÃO: Verificar se sessão já foi concluída
-        if (session.status === 'Concluído') {
-            console.log('⚠️ Sessão já foi concluída');
-            app.showToast('✅ Esta sessão já foi concluída!', 'info');
+        // CORRE!�O: Verificar se sess�o j� foi conclu�da
+        if (session.status === 'Conclu�do') {
+            void('a? Sess�o j� foi conclu�da');
+            app.showToast('S& Esta sess�o j� foi conclu�da!', 'info');
             
-            // Atualizar visual do card para mostrar como concluída
+            // Atualizar visual do card para mostrar como conclu�da
             if (window.TimerSystem) {
-                // Forçar estado de concluído no timer
+                // For�ar estado de conclu�do no timer
                 if (!TimerSystem.timers[sessionId]) {
                     TimerSystem.timers[sessionId] = { elapsed: 0 };
                 }
@@ -781,27 +953,33 @@ async function openStudySession(sessionId) {
             return;
         }
 
-        // CORREÇÃO 3: Sempre mostrar checklist para novas sessões ou quando usuário escolheu reiniciar
-        StudyChecklist.show(session);
+        // CORRE!�O 3: Sempre mostrar checklist para novas sess�es ou quando usu�rio escolheu reiniciar
+        if (window.StudyChecklist && window.StudyChecklist.show) {
+            window.StudyChecklist.show(session);
+        } else {
+            console.error('StudyChecklist n�o est� dispon�vel');
+            app.showToast('Erro ao carregar m�dulo de checklist. Recarregue a p�gina.', 'error');
+            return;
+        }
 
         if (sessionRescheduled) {
-            app.showToast('Sessão reagendada para hoje!', 'success');
+            app.showToast('Sess�o reagendada para hoje!', 'success');
         }
         
     } catch (error) {
-        console.error('❌ Erro ao abrir sessão de estudo:', error);
-        app.showToast('Erro inesperado ao abrir sessão. Tente novamente.', 'error');
+        console.error('R Erro ao abrir sess�o de estudo:', error);
+        app.showToast('Erro inesperado ao abrir sess�o. Tente novamente.', 'error');
     }
 }
 
-// Função auxiliar para buscar dados da sessão
+// Fun��o auxiliar para buscar dados da sess�o
 async function fetchSessionData(sessionId) {
     try {
-        // Primeiro tentar buscar de dados já carregados na página atual
+        // Primeiro tentar buscar de dados j� carregados na p�gina atual
         if (window.todaySessionsData) {
             const localSession = window.todaySessionsData.find(s => s.id == sessionId);
             if (localSession) {
-                console.log('📦 Sessão encontrada em dados locais');
+                void('x Sess�o encontrada em dados locais');
                 return localSession;
             }
         }
@@ -809,41 +987,41 @@ async function fetchSessionData(sessionId) {
         if (window.sessionsData) {
             const localSession = window.sessionsData.find(s => s.id == sessionId);
             if (localSession) {
-                console.log('📦 Sessão encontrada em dados do cronograma');
+                void('x Sess�o encontrada em dados do cronograma');
                 return localSession;
             }
         }
 
-        // Procurar no cronograma completo se disponível
+        // Procurar no cronograma completo se dispon�vel
         if (window.fullSchedule) {
             for (const dateStr in window.fullSchedule) {
                 const sessions = window.fullSchedule[dateStr];
                 const fullSession = sessions.find(s => s.id == sessionId);
                 if (fullSession) {
-                    console.log('📚 Sessão encontrada no fullSchedule');
+                    void('xa Sess�o encontrada no fullSchedule');
                     return fullSession;
                 }
             }
         }
 
-        // Se não encontrou localmente, buscar no servidor
-        console.log('🌐 Buscando sessão no servidor...');
-        const response = await app.apiFetch(`/api/sessions/${sessionId}`);
+        // Se n�o encontrou localmente, buscar no servidor
+        void('xR Buscando sess�o no servidor...');
+        const response = await app.apiFetch(`/sessions/${sessionId}`);
         return response;
         
     } catch (error) {
-        console.error('❌ Erro ao buscar dados da sessão:', error);
+        console.error('R Erro ao buscar dados da sess�o:', error);
         return null;
     }
 }
 
-// Função auxiliar para mostrar modal de continuação de estudo
+// Fun��o auxiliar para mostrar modal de continua��o de estudo
 function showContinueStudyModal(sessionId) {
     return new Promise((resolve) => {
         const timerData = TimerSystem.timers[sessionId];
         const timeStr = TimerSystem.formatTime(timerData.elapsed);
         
-        // Criar modal dinâmico
+        // Criar modal din�mico
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4';
         modal.innerHTML = `
@@ -900,11 +1078,142 @@ function showContinueStudyModal(sessionId) {
     });
 }
 
-// CORREÇÃO: Expor funções globalmente
+/**
+ * Adiar uma sess�o de estudo para o pr�ximo dia dispon�vel
+ * @param {number} sessionId - ID da sess�o
+ * @param {string} reason - Motivo do adiamento (opcional)
+ */
+async function postponeSession(sessionId, reason = 'user_request') {
+    try {
+        // Buscar dados da sess�o para valida��o
+        const session = await fetchSessionData(sessionId);
+        if (!session) {
+            app.showToast('Sess�o n�o encontrada!', 'error');
+            return;
+        }
+
+        if (session.status === 'Conclu�do') {
+            app.showToast('N�o � poss�vel adiar uma sess�o j� conclu�da!', 'info');
+            return;
+        }
+
+        // Mostrar loading no bot�o
+        const postponeBtn = document.querySelector(`[data-session-id="${sessionId}"] .postpone-btn`);
+        if (postponeBtn) {
+            postponeBtn.innerHTML = '<span class="animate-spin">?</span> Adiando...';
+            postponeBtn.disabled = true;
+        }
+
+        // Fazer requisi��o para adiar
+        const response = await app.apiFetch(`/sessions/${sessionId}/postpone`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+                days: 'next',
+                reason: reason
+            })
+        });
+
+        if (response.success) {
+            app.showToast('?? Sess�o adiada com sucesso!', 'success');
+            
+            // Atualizar dados locais
+            if (window.todaySessionsData) {
+                const idx = window.todaySessionsData.findIndex(s => s.id == sessionId);
+                if (idx !== -1) {
+                    window.todaySessionsData.splice(idx, 1);
+                }
+            }
+
+            // Recarregar interface
+            if (typeof window.renderScheduleDOM === 'function') {
+                window.renderScheduleDOM(window.activeFilter || 'week');
+            }
+            
+            // Remover ou atualizar o card
+            const sessionCard = document.getElementById(`session-card-${sessionId}`);
+            if (sessionCard) {
+                sessionCard.style.opacity = '0.5';
+                setTimeout(() => {
+                    sessionCard.remove();
+                }, 300);
+            }
+        }
+
+    } catch (error) {
+        console.error('Erro ao adiar sess�o:', error);
+        app.showToast('? Erro ao adiar sess�o. Tente novamente.', 'error');
+        
+        // Restaurar bot�o
+        const postponeBtn = document.querySelector(`[data-session-id="${sessionId}"] .postpone-btn`);
+        if (postponeBtn) {
+            postponeBtn.innerHTML = '?? Adiar';
+            postponeBtn.disabled = false;
+        }
+    }
+}
+
+/**
+ * Criar sess�o de refor�o para revis�o espa�ada
+ * @param {number} sessionId - ID da sess�o
+ */
+async function reinforceSession(sessionId) {
+    try {
+        // Buscar dados da sess�o para valida��o
+        const session = await fetchSessionData(sessionId);
+        if (!session) {
+            app.showToast('Sess�o n�o encontrada!', 'error');
+            return;
+        }
+
+        // Mostrar loading no bot�o
+        const reinforceBtn = document.querySelector(`[data-session-id="${sessionId}"] .reinforce-btn`);
+        if (reinforceBtn) {
+            reinforceBtn.innerHTML = '<span class="animate-spin">?</span> Criando...';
+            reinforceBtn.disabled = true;
+        }
+
+        // Fazer requisi��o para criar refor�o
+        const response = await app.apiFetch(`/sessions/${sessionId}/reinforce`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.success) {
+            app.showToast('?? Sess�o de refor�o criada! Aparecer� em 3 dias.', 'success');
+            
+            // Recarregar cronograma para mostrar nova sess�o
+            if (typeof window.renderScheduleDOM === 'function') {
+                setTimeout(() => {
+                    window.renderScheduleDOM(window.activeFilter || 'week');
+                }, 500);
+            }
+        }
+
+    } catch (error) {
+        console.error('Erro ao criar sess�o de refor�o:', error);
+        app.showToast('? Erro ao criar refor�o. Tente novamente.', 'error');
+        
+        // Restaurar bot�o
+        const reinforceBtn = document.querySelector(`[data-session-id="${sessionId}"] .reinforce-btn`);
+        if (reinforceBtn) {
+            reinforceBtn.innerHTML = '?? Refor�ar';
+            reinforceBtn.disabled = false;
+        }
+    }
+}
+
+// CORRE!�O: Expor fun��es globalmente
 window.app = app;
 window.openStudySession = openStudySession;
 window.fetchSessionData = fetchSessionData;
 window.showContinueStudyModal = showContinueStudyModal;
+window.postponeSession = postponeSession;
+window.reinforceSession = reinforceSession;
 
 // Inicializar quando o DOM estiver pronto
 if (document.readyState === 'loading') {
@@ -912,3 +1221,25 @@ if (document.readyState === 'loading') {
 } else {
     app.init();
 }
+
+// Safe override: reabrir modal do timer quando j� houver timer ativo
+if (typeof window.openStudySession === 'function') {
+    const __originalOpenStudySession = window.openStudySession;
+    window.openStudySession = async function(sessionId) {
+        try {
+            const hasActiveTimer = window.TimerSystem && TimerSystem.hasActiveTimer(sessionId);
+            if (hasActiveTimer && window.StudyChecklist) {
+                const session = await (typeof fetchSessionData === 'function' ? fetchSessionData(sessionId) : null);
+                if (session) {
+                    TimerSystem.continueTimer(sessionId);
+                    StudyChecklist.session = session;
+                    StudyChecklist.startStudySession(false);
+                    app.showToast('Timer retomado! Continue estudando.', 'success');
+                    return;
+                }
+            }
+        } catch (_) { /* fallback below */ }
+        return __originalOpenStudySession(sessionId);
+    };
+}
+

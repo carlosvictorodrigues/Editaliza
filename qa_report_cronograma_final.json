@@ -1,0 +1,156 @@
+{
+  "page": "cronograma.html",
+  "test_date": "2025-08-29T12:15:00.000Z",
+  "status": "CORRIGIDO",
+  "interactive_map": [
+    {
+      "selector": ".filter-btn[data-filter=\"week\"]",
+      "label": "Esta Semana",
+      "expected": "Filtrar cronograma para semana atual",
+      "status": "OK"
+    },
+    {
+      "selector": ".filter-btn[data-filter=\"month\"]",
+      "label": "Este Mês",
+      "expected": "Filtrar cronograma para mês atual",
+      "status": "OK"
+    },
+    {
+      "selector": ".filter-btn[data-filter=\"all\"]",
+      "label": "Tudo",
+      "expected": "Mostrar todo o cronograma",
+      "status": "OK"
+    },
+    {
+      "selector": "#exportButton",
+      "label": "Exportar para Calendário",
+      "expected": "Abrir modal de exportação",
+      "status": "OK"
+    },
+    {
+      "selector": "#cancelPostponeButton",
+      "label": "Cancelar",
+      "expected": "Fechar modal de adiamento",
+      "status": "OK"
+    },
+    {
+      "selector": "#downloadIcsButton",
+      "label": "Baixar arquivo .ics",
+      "expected": "Download do arquivo de calendário",
+      "status": "OK"
+    },
+    {
+      "selector": "#closeCalendarModalButton",
+      "label": "Fechar",
+      "expected": "Fechar modal de calendário",
+      "status": "OK"
+    },
+    {
+      "selector": "#viewFullReportBtn",
+      "label": "Relatório Detalhado",
+      "expected": "Mostrar relatório completo de transparência",
+      "status": "OK"
+    },
+    {
+      "selector": "#exportExclusionsBtn",
+      "label": "Exportar Lista CSV",
+      "expected": "Download de exclusões em CSV",
+      "status": "OK"
+    },
+    {
+      "selector": "#toggleTransparencyBtn",
+      "label": "Minimizar",
+      "expected": "Toggle seção de transparência",
+      "status": "OK"
+    }
+  ],
+  "issues_fixed": [
+    {
+      "id": "PG-001",
+      "description": "Caractere corrompido NAVEGA!ÒO → NAVEGAÇÃO",
+      "status": "FIXED",
+      "file": "cronograma.html",
+      "line": 94
+    },
+    {
+      "id": "PG-002",
+      "description": "Caractere corrompido CABE!ALHO → CABEÇALHO",
+      "status": "FIXED",
+      "file": "cronograma.html",
+      "line": 142
+    },
+    {
+      "id": "PG-003",
+      "description": "Múltiplos CORRE!ÒO → CORREÇÃO",
+      "status": "FIXED",
+      "file": "cronograma.html",
+      "lines": [252, 517, 1035, 1046]
+    },
+    {
+      "id": "PG-004",
+      "description": "Elemento #examDate adicionado ao DOM",
+      "status": "FIXED",
+      "file": "cronograma.html",
+      "line": 144
+    },
+    {
+      "id": "PG-005",
+      "description": "Console.logs de debug removidos",
+      "status": "FIXED",
+      "file": "cronograma.html",
+      "lines": "múltiplas"
+    },
+    {
+      "id": "PG-006",
+      "description": "void() substituído por comentários em app.js",
+      "status": "FIXED",
+      "file": "js/app.js",
+      "lines": [65, 74, 80, 83, 85, 105, 318, 327, 335, 340]
+    },
+    {
+      "id": "PG-007",
+      "description": "Onclick do modal corrigido",
+      "status": "FIXED",
+      "file": "cronograma.html",
+      "line": 817
+    },
+    {
+      "id": "PG-008",
+      "description": "Classes Tailwind dinâmicas",
+      "status": "LOW_PRIORITY",
+      "note": "Não causa erro funcional, pode ser otimizado depois"
+    },
+    {
+      "id": "PG-009",
+      "description": "Caractere 'R' removido",
+      "status": "FIXED",
+      "file": "cronograma.html",
+      "line": 721
+    }
+  ],
+  "validation_steps": [
+    "1. Abrir http://localhost:3000/cronograma.html",
+    "2. Verificar console sem erros de JavaScript",
+    "3. Testar filtros (Esta Semana, Este Mês, Tudo)",
+    "4. Testar botão 'Exportar para Calendário'",
+    "5. Verificar modal abre e fecha corretamente",
+    "6. Testar download de arquivo .ics",
+    "7. Se houver modo Reta Final, testar botões de transparência",
+    "8. Verificar que não há caracteres corrompidos visíveis",
+    "9. Confirmar que requisições de API retornam 200 OK"
+  ],
+  "files_modified": [
+    "cronograma.html",
+    "public/cronograma.html",
+    "js/app.js",
+    "public/js/app.js"
+  ],
+  "summary": {
+    "total_issues": 9,
+    "fixed": 8,
+    "low_priority": 1,
+    "critical_fixed": 4,
+    "encoding_fixed": 3,
+    "functional_fixed": 1
+  }
+}

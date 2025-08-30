@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Test - Cronograma</title>
+</head>
+<body>
+    <h1>Teste de QA - Cronograma.html</h1>
+    <div id="results"></div>
+    
+    <script>
+        const testResults = [];
+        let issueId = 1;
+        
+        async function runTests() {
+            console.log('🔍 Iniciando testes de QA em cronograma.html...');
+            
+            // Configurar localStorage para simular usuário logado
+            localStorage.setItem('editaliza_token', 'test_token_123');
+            localStorage.setItem('selectedPlanId', '1');
+            
+            // Abrir página cronograma em iframe ou nova aba
+            const testWindow = window.open('/cronograma.html?id=1', '_blank');
+            
+            setTimeout(() => {
+                // Aguardar carregamento
+                console.log('✅ Página carregada, iniciando testes...');
+                
+                // Teste 1: Filtros
+                testFilters(testWindow);
+                
+                // Teste 2: Botão de exportação
+                testExportButton(testWindow);
+                
+                // Teste 3: Modal de adiamento
+                testPostponeModal(testWindow);
+                
+                // Teste 4: Transparência (Reta Final)
+                testTransparencySection(testWindow);
+                
+                // Gerar relatório
+                generateReport();
+            }, 3000);
+        }
+        
+        function testFilters(win) {
+            console.log('🧪 Testando filtros...');
+            
+            try {
+                const filterButtons = win.document.querySelectorAll('.filter-btn');
+                
+                filterButtons.forEach(btn => {
+                    console.log(`  Clicando em: ${btn.textContent}`);
+                    btn.click();
+                    
+                    // Verificar se o filtro foi aplicado
+                    if (!btn.classList.contains('active')) {
+                        recordIssue({
+                            element: `.filter-btn[data-filter="${btn.dataset.filter}"]`,
+                            symptom: 'Botão não fica ativo após clique',
+                            console: 'Classe "active" não aplicada',
+                            risk: 'baixo'
+                        });
+                    }
+                });
+            } catch (error) {
+                recordIssue({
+                    element: '.filter-btn',
+                    symptom: 'Erro ao testar filtros',
+                    console: error.message,
+                    risk: 'médio'
+                });
+            }
+        }
+        
+        function testExportButton(win) {
+            console.log('🧪 Testando botão de exportação...');
+            
+            try {
+                const exportBtn = win.document.getElementById('exportButton');
+                if (exportBtn) {
+                    exportBtn.click();
+                    
+                    // Verificar se modal abriu
+                    const modal = win.document.getElementById('calendarModal');
+                    if (!modal || modal.classList.contains('hidden')) {
+                        recordIssue({
+                            element: '#exportButton',
+                            symptom: 'Modal de exportação não abre',
+                            console: 'Modal não visível após clique',
+                            risk: 'médio'
+                        });
+                    }
+                } else {
+                    recordIssue({
+                        element: '#exportButton',
+                        symptom: 'Botão de exportação não encontrado',
+                        console: 'Elemento não existe no DOM',
+                        risk: 'alto'
+                    });
+                }
+            } catch (error) {
+                recordIssue({
+                    element: '#exportButton',
+                    symptom: 'Erro ao testar exportação',
+                    console: error.message,
+                    risk: 'médio'
+                });
+            }
+        }
+        
+        function testPostponeModal(win) {
+            console.log('🧪 Testando modal de adiamento...');
+            
+            try {
+                // Simular clique em botão de adiar (se existir)
+                const postponeBtn = win.document.querySelector('[onclick*="postponeSession"]');
+                if (postponeBtn) {
+                    postponeBtn.click();
+                    
+                    const modal = win.document.getElementById('postponeModal');
+                    if (!modal || modal.classList.contains('hidden')) {
+                        recordIssue({
+                            element: 'postponeModal',
+                            symptom: 'Modal de adiamento não abre',
+                            console: 'Modal não visível',
+                            risk: 'médio'
+                        });
+                    }
+                }
+            } catch (error) {
+                recordIssue({
+                    element: 'postponeModal',
+                    symptom: 'Erro ao testar adiamento',
+                    console: error.message,
+                    risk: 'baixo'
+                });
+            }
+        }
+        
+        function testTransparencySection(win) {
+            console.log('🧪 Testando seção de transparência...');
+            
+            try {
+                const section = win.document.getElementById('transparencySection');
+                if (section && section.style.display !== 'none') {
+                    // Testar botões da transparência
+                    const buttons = ['viewFullReportBtn', 'exportExclusionsBtn', 'toggleTransparencyBtn'];
+                    
+                    buttons.forEach(btnId => {
+                        const btn = win.document.getElementById(btnId);
+                        if (btn) {
+                            console.log(`  Testando botão: ${btnId}`);
+                            btn.click();
+                        } else {
+                            recordIssue({
+                                element: `#${btnId}`,
+                                symptom: 'Botão de transparência não encontrado',
+                                console: 'Elemento não existe',
+                                risk: 'baixo'
+                            });
+                        }
+                    });
+                }
+            } catch (error) {
+                recordIssue({
+                    element: 'transparencySection',
+                    symptom: 'Erro ao testar transparência',
+                    console: error.message,
+                    risk: 'baixo'
+                });
+            }
+        }
+        
+        function recordIssue(issue) {
+            testResults.push({
+                id: `PG-${String(issueId++).padStart(3, '0')}`,
+                ...issue,
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        function generateReport() {
+            const report = {
+                page: 'cronograma.html',
+                test_date: new Date().toISOString(),
+                interactive_map: [
+                    { selector: '.filter-btn[data-filter="week"]', label: 'Esta Semana', expected: 'Filtrar para semana atual' },
+                    { selector: '.filter-btn[data-filter="month"]', label: 'Este Mês', expected: 'Filtrar para mês atual' },
+                    { selector: '.filter-btn[data-filter="all"]', label: 'Tudo', expected: 'Mostrar todo cronograma' },
+                    { selector: '#exportButton', label: 'Exportar para Calendário', expected: 'Abrir modal de exportação' },
+                    { selector: '#cancelPostponeButton', label: 'Cancelar', expected: 'Fechar modal de adiamento' },
+                    { selector: '#downloadIcsButton', label: 'Baixar .ics', expected: 'Download do arquivo' },
+                    { selector: '#closeCalendarModalButton', label: 'Fechar', expected: 'Fechar modal de calendário' },
+                    { selector: '#viewFullReportBtn', label: 'Relatório Detalhado', expected: 'Mostrar relatório completo' },
+                    { selector: '#exportExclusionsBtn', label: 'Exportar CSV', expected: 'Download CSV' },
+                    { selector: '#toggleTransparencyBtn', label: 'Minimizar', expected: 'Toggle transparência' }
+                ],
+                issues: testResults
+            };
+            
+            console.log('📊 RELATÓRIO DE TESTES:', report);
+            document.getElementById('results').innerHTML = `<pre>${JSON.stringify(report, null, 2)}</pre>`;
+            
+            // Salvar no localStorage para análise
+            localStorage.setItem('qa_report_cronograma', JSON.stringify(report));
+        }
+        
+        // Iniciar testes
+        runTests();
+    </script>
+</body>
+</html>

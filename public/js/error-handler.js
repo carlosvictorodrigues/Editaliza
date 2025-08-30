@@ -139,7 +139,16 @@
             });
 
             window.addEventListener('error', (event) => {
-                this.handleError(event.error || event.message);
+                const extra = {
+                    source: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno
+                };
+                const err = event.error || { message: event.message, ...extra };
+                this.handleError(err);
+                if (config.debugMode) {
+                    console.error('GlobalError:', { message: event.message, ...extra });
+                }
                 event.preventDefault();
             });
 
@@ -172,7 +181,13 @@
                     try {
                         return await originalIntercept.apply(this, args);
                     } catch (error) {
-                        window.ErrorHandler.handleError(error);
+                        // Usar a instância para tratar erros (método não é estático)
+                        if (window.errorHandler && typeof window.errorHandler.handleError === 'function') {
+                            window.errorHandler.handleError(error);
+                        } else if (window.ErrorHandler && typeof window.ErrorHandler.error === 'function') {
+                            // Fallback para método estático que delega para a instância
+                            window.ErrorHandler.error(error);
+                        }
                         throw error;
                     }
                 };
@@ -404,10 +419,12 @@
             };
 
             if (config.debugMode) {
+                // Normalizar o erro para evitar "Error: Object"
+                const normalizedError = this.normalizeError(error);
                 console.group('🔴 Error Handler');
-                console.error('Error:', logEntry);
-                if (error.stack) {
-                    console.error('Stack:', error.stack);
+                console.error('Error:', normalizedError.message, normalizedError.url || '', normalizedError.status || '');
+                if (normalizedError.stack) {
+                    console.error('Stack:', normalizedError.stack);
                 }
                 console.groupEnd();
             }

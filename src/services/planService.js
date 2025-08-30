@@ -782,10 +782,10 @@ class PlanService {
             throw new Error('Plano não encontrado');
         }
 
-        // Get completed topics count
+        // Get completed topics count - handle all completion status variations
         const completedTopicsResult = await this.db.get(
-            'SELECT COUNT(DISTINCT topic_id) as count FROM study_sessions WHERE study_plan_id = $1 AND session_type = $2 AND status = $3 AND topic_id IS NOT NULL',
-            [planId, 'Novo Tópico', 'completed']
+            'SELECT COUNT(DISTINCT topic_id) as count FROM study_sessions WHERE study_plan_id = $1 AND status IN ($2, $3, $4) AND topic_id IS NOT NULL',
+            [planId, 'Concluído', 'Concluída', 'Concluida']
         );
         const completedTopicsCount = completedTopicsResult.count || 0;
 
@@ -1423,6 +1423,23 @@ class PlanService {
             goals: goalProgress,
             projections: realityCheck,
             lastUpdated: new Date()
+        };
+    }
+
+    async getOverdueDetails(planId, userId) {
+        const plan = await this.repos.plan.findByIdAndUser(planId, userId);
+        if (!plan) {
+            throw new Error('Plano não encontrado');
+        }
+
+        const overdueSessions = await this.repos.session.getOverdueSessions(planId, this.getBrazilianDateString());
+
+        const replanStrategy = `O sistema irá reagendar as ${overdueSessions.length} tarefas atrasadas nos próximos dias disponíveis, priorizando os tópicos mais importantes e mantendo sua meta de estudos e data da prova.`;
+
+        return {
+            replanStrategy,
+            overdueCount: overdueSessions.length,
+            overdueTasks: overdueSessions.slice(0, 5) // Retorna uma amostra das tarefas
         };
     }
 

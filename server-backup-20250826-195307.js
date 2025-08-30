@@ -1262,7 +1262,7 @@ app.patch('/api/profile',
 // --- ROTAS DE TESTE E DEBUG ---
 app.get('/api/test-db', authenticateToken, async (req, res) => {
     try {
-        console.log(`[DEBUG TEST] Testando conexão do banco...`);
+        console.log("[DEBUG TEST] Testando conexão do banco...");
         
         // Teste 1: Query simples sem parâmetros
         const test1 = await dbAll('SELECT 1 as test');
@@ -1550,7 +1550,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Health check disponível em: http://localhost:${PORT}/health`);
-    console.log(`Sistema de backup automático ativado`);
+    console.log("Sistema de backup automático ativado");
 });
 
 // Graceful shutdown

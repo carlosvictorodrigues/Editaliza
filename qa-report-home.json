@@ -1,0 +1,221 @@
+{
+  "page": "/home.html",
+  "timestamp": "2025-08-29T00:35:00.000Z",
+  "interactive_map": [
+    {
+      "selector": "#planSelector",
+      "label": "Seletor de plano",
+      "expected": "Dropdown com lista de planos do usuário",
+      "type": "select"
+    },
+    {
+      "selector": "#viewTransparencyBtn",
+      "label": "Ver detalhes",
+      "expected": "Abrir modal com detalhes do modo Reta Final",
+      "type": "button"
+    },
+    {
+      "selector": ".postpone-option-btn",
+      "label": "Botões de adiar tarefa",
+      "expected": "Adiar tarefa para próxima data/1 dia/7 dias",
+      "type": "button"
+    },
+    {
+      "selector": "#cancelPostponeButton",
+      "label": "Cancelar",
+      "expected": "Fechar modal de adiamento",
+      "type": "button"
+    },
+    {
+      "selector": "[onclick*='reload']",
+      "label": "Recarregar página",
+      "expected": "Recarregar a página",
+      "type": "button"
+    }
+  ],
+  "issues": [
+    {
+      "id": "PG-001",
+      "element": "home.html:948-956",
+      "symptom": "Caracteres corrompidos em tipos de sessão",
+      "console": "Caracteres não-UTF8 detectados: T�pico, Refor�o, Revis�o, Reda��o",
+      "network": null,
+      "root_cause": "Encoding incorreto - caracteres salvos com encoding errado",
+      "fix_plan": [
+        {
+          "file": "public/home.html",
+          "line_hint": 948,
+          "change": "Substituir 'Novo T�pico' por 'Novo Tópico'"
+        },
+        {
+          "file": "public/home.html",
+          "line_hint": 949,
+          "change": "Substituir 'Refor�o Extra' por 'Reforço Extra'"
+        },
+        {
+          "file": "public/home.html",
+          "line_hint": 951,
+          "change": "Substituir 'Revis�o Consolidada' por 'Revisão Consolidada'"
+        },
+        {
+          "file": "public/home.html",
+          "line_hint": 956,
+          "change": "Substituir 'Reda��o' por 'Redação'"
+        }
+      ],
+      "risk": "médio",
+      "test_after_fix": "Verificar se os cards de sessão são renderizados corretamente"
+    },
+    {
+      "id": "PG-002",
+      "element": "home.html:282",
+      "symptom": "Caractere corrompido no botão 'Amanhã'",
+      "console": "Caractere não visível: 'x ' antes de 'Amanhã'",
+      "network": null,
+      "root_cause": "Caractere invisível ou emoji corrompido",
+      "fix_plan": [
+        {
+          "file": "public/home.html",
+          "line_hint": 282,
+          "change": "Substituir '<span class=\"text-lg\">x </span>' por '<span class=\"text-lg\">➡️</span>'"
+        }
+      ],
+      "risk": "baixo",
+      "test_after_fix": "Verificar visual do botão de adiar para amanhã"
+    },
+    {
+      "id": "PG-003",
+      "element": "home.html:672,1272",
+      "symptom": "Caracteres corrompidos em mensagens de warning",
+      "console": "a️ usado ao invés de ⚠️",
+      "network": null,
+      "root_cause": "Emoji corrompido durante copy/paste ou encoding",
+      "fix_plan": [
+        {
+          "file": "public/home.html",
+          "line_hint": 672,
+          "change": "Substituir 'a️' por '⚠️'"
+        },
+        {
+          "file": "public/home.html",
+          "line_hint": 1272,
+          "change": "Substituir 'a️' por '⚠️'"
+        }
+      ],
+      "risk": "baixo",
+      "test_after_fix": "Verificar console warnings com emoji correto"
+    },
+    {
+      "id": "PG-004",
+      "element": "home.html:558,968,1238,1248",
+      "symptom": "Caractere 'R' solto em mensagens de erro",
+      "console": "Mensagens começam com 'R' sem contexto",
+      "network": null,
+      "root_cause": "Possível caractere residual de copy/paste",
+      "fix_plan": [
+        {
+          "file": "public/home.html",
+          "line_hint": 558,
+          "change": "Substituir 'console.error('R Usuário' por 'console.error('❌ Usuário'"
+        },
+        {
+          "file": "public/home.html",
+          "line_hint": 594,
+          "change": "Substituir 'console.error('R Função' por 'console.error('❌ Função'"
+        },
+        {
+          "file": "public/home.html",
+          "line_hint": 968,
+          "change": "Substituir 'console.warn('R activePlanId' por 'console.warn('⚠️ activePlanId'"
+        },
+        {
+          "file": "public/home.html",
+          "line_hint": 1238,
+          "change": "Substituir 'console.error('R Elemento' por 'console.error('❌ Elemento'"
+        },
+        {
+          "file": "public/home.html",
+          "line_hint": 1248,
+          "change": "Substituir 'console.error('R Nenhum' por 'console.error('❌ Nenhum'"
+        },
+        {
+          "file": "public/home.html",
+          "line_hint": 1388,
+          "change": "Substituir 'console.error('R PROBLEMA:' por 'console.error('❌ PROBLEMA:'"
+        },
+        {
+          "file": "public/home.html",
+          "line_hint": 1390,
+          "change": "Substituir 'console.error('R PROBLEMA:' por 'console.error('❌ PROBLEMA:'"
+        }
+      ],
+      "risk": "baixo",
+      "test_after_fix": "Verificar mensagens de erro no console"
+    },
+    {
+      "id": "PG-005",
+      "element": "home.html:743",
+      "symptom": "Uso incorreto de comentário em código",
+      "console": "CORRE!O usado ao invés de CORREÇÃO",
+      "network": null,
+      "root_cause": "Caractere corrompido em comentário",
+      "fix_plan": [
+        {
+          "file": "public/home.html",
+          "line_hint": 743,
+          "change": "Substituir '// CORRE!O:' por '// CORREÇÃO:'"
+        }
+      ],
+      "risk": "baixo",
+      "test_after_fix": "Nenhum teste necessário (apenas comentário)"
+    },
+    {
+      "id": "PG-006",
+      "element": "#planSelector",
+      "symptom": "Seletor de planos pode ficar desabilitado",
+      "console": null,
+      "network": null,
+      "root_cause": "Atributo disabled hardcoded no HTML",
+      "fix_plan": [
+        {
+          "file": "public/home.html",
+          "line_hint": 320,
+          "change": "Remover atributo 'disabled' do select, deixar JS controlar"
+        }
+      ],
+      "risk": "médio",
+      "test_after_fix": "Verificar se o seletor fica habilitado após carregar planos"
+    },
+    {
+      "id": "PG-007",
+      "element": "home.html:26",
+      "symptom": "app.js carregado como module pode causar problemas de escopo",
+      "console": "Possível erro de 'app is not defined' em outros scripts",
+      "network": null,
+      "root_cause": "type=\"module\" isola o escopo do script",
+      "fix_plan": [
+        {
+          "file": "public/home.html",
+          "line_hint": 26,
+          "change": "Remover 'type=\"module\"' de app.js para garantir escopo global"
+        }
+      ],
+      "risk": "alto",
+      "test_after_fix": "Verificar se 'app' está acessível globalmente no console"
+    }
+  ],
+  "summary": {
+    "total_issues": 7,
+    "high_risk": 1,
+    "medium_risk": 2,
+    "low_risk": 4,
+    "character_encoding_issues": 5,
+    "functionality_issues": 2
+  },
+  "recommendations": [
+    "Configurar editor para sempre salvar em UTF-8",
+    "Revisar todos os emojis e caracteres especiais",
+    "Remover type='module' de scripts que precisam escopo global",
+    "Fazer auditoria completa de encoding em todos os arquivos"
+  ]
+}

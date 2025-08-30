@@ -18,7 +18,7 @@ const StudyGoalsNotifications = {
         if (this.initialized) return;
 
         try {
-            console.log('🎯 Inicializando Sistema de Notificações de Metas...');
+            void('🎯 Inicializando Sistema de Notificações de Metas...');
 
             // Carregar configurações do usuário
             await this.loadUserGoals();
@@ -30,7 +30,7 @@ const StudyGoalsNotifications = {
             this.setupEventListeners();
             
             this.initialized = true;
-            console.log('✅ Sistema de Notificações de Metas inicializado');
+            void('✅ Sistema de Notificações de Metas inicializado');
             
         } catch (error) {
             console.error('❌ Erro na inicialização das notificações de metas:', error);
@@ -42,7 +42,7 @@ const StudyGoalsNotifications = {
         try {
             // Tentar buscar do plano ativo
             if (window.app && window.app.state?.activePlanId) {
-                const plan = await window.app.apiFetch(`/api/plans/${window.app.state.activePlanId}`);
+                const plan = await window.app.apiFetch(`/plans/${window.app.state.activePlanId}`);
                 if (plan && plan.daily_goal_minutes) {
                     this.dailyGoalMinutes = plan.daily_goal_minutes;
                 }
@@ -54,7 +54,7 @@ const StudyGoalsNotifications = {
                 this.dailyGoalMinutes = parseInt(savedGoal);
             }
             
-            console.log(`🎯 Meta diária carregada: ${this.dailyGoalMinutes} minutos`);
+            void(`🎯 Meta diária carregada: ${this.dailyGoalMinutes} minutos`);
             
         } catch (error) {
             console.warn('⚠️ Erro ao carregar metas, usando padrão:', error);
@@ -74,7 +74,7 @@ const StudyGoalsNotifications = {
                 this.achievedMilestones = new Set(data.milestones || []);
             }
             
-            console.log(`📊 Progresso do dia carregado: ${this.totalDailyMinutes} minutos`);
+            void(`📊 Progresso do dia carregado: ${this.totalDailyMinutes} minutos`);
             
         } catch (error) {
             console.warn('⚠️ Erro ao carregar progresso do dia:', error);
@@ -125,7 +125,7 @@ const StudyGoalsNotifications = {
         if (!this.initialized) return;
 
         const minutesStudied = sessionData.duration || 0;
-        console.log(`📚 Sessão concluída: +${minutesStudied} minutos`);
+        void(`📚 Sessão concluída: +${minutesStudied} minutos`);
         
         this.addStudyTime(minutesStudied);
     },
@@ -145,7 +145,7 @@ const StudyGoalsNotifications = {
         const previousTotal = this.totalDailyMinutes;
         this.totalDailyMinutes += minutes;
         
-        console.log(`⏱️ Tempo total hoje: ${this.totalDailyMinutes} minutos (+${minutes})`);
+        void(`⏱️ Tempo total hoje: ${this.totalDailyMinutes} minutos (+${minutes})`);
         
         // Verificar marcos alcançados
         this.checkMilestones(previousTotal, this.totalDailyMinutes);
@@ -206,7 +206,7 @@ const StudyGoalsNotifications = {
             window.app?.showToast(`🎯 ${milestone} minutos estudados hoje! ${message}`, 'success');
         }
         
-        console.log(`🎯 Marco de ${milestone} minutos alcançado!`);
+        void(`🎯 Marco de ${milestone} minutos alcançado!`);
     },
 
     // Mostrar notificação de meta diária
@@ -246,7 +246,7 @@ const StudyGoalsNotifications = {
             window.app?.showToast(`🏆 META DIÁRIA CONQUISTADA! ${message}`, 'success');
         }
         
-        console.log(`🏆 Meta diária de ${this.dailyGoalMinutes} minutos alcançada!`);
+        void(`🏆 Meta diária de ${this.dailyGoalMinutes} minutos alcançada!`);
     },
 
     // Mensagens para diferentes marcos
@@ -310,13 +310,13 @@ const StudyGoalsNotifications = {
                 title: 'Editaliza - Meta Diária Conquistada!',
                 text: text,
                 url: window.location.href
-            }).catch(err => console.log('Erro ao compartilhar:', err));
+            }).catch(err => void('Erro ao compartilhar:', err));
         } else {
             // Fallback para clipboard
             navigator.clipboard.writeText(text).then(() => {
                 window.app?.showToast('📋 Texto copiado! Cole onde quiser compartilhar! 🚀', 'success');
             }).catch(() => {
-                console.log('Fallback de compartilhamento');
+                void('Fallback de compartilhamento');
             });
         }
     },
@@ -338,12 +338,12 @@ const StudyGoalsNotifications = {
 
     // Método de debug para testar notificações
     testMilestone(milestone) {
-        console.log(`🧪 Testando notificação de marco: ${milestone} minutos`);
+        void(`🧪 Testando notificação de marco: ${milestone} minutos`);
         this.showMilestoneNotification(milestone);
     },
 
     testDailyGoal() {
-        console.log('🧪 Testando notificação de meta diária');
+        void('🧪 Testando notificação de meta diária');
         this.showDailyGoalNotification();
     }
 };
@@ -360,4 +360,4 @@ if (document.readyState === 'loading') {
     setTimeout(() => StudyGoalsNotifications.init(), 2000);
 }
 
-console.log('🎯 Módulo StudyGoalsNotifications carregado');
+void('🎯 Módulo StudyGoalsNotifications carregado');

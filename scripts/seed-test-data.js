@@ -18,8 +18,7 @@ const args = process.argv.slice(2);
 const command = args[0] || 'seed';
 
 const showUsage = () => {
-    console.log(`
-🌱 TEST DATA SEEDER PARA TESTING FORTRESS
+    console.log("🌱 TEST DATA SEEDER PARA TESTING FORTRESS
 
 Uso:
     node scripts/seed-test-data.js [command]
@@ -33,8 +32,7 @@ Comandos:
 Exemplos:
     node scripts/seed-test-data.js
     node scripts/seed-test-data.js clean
-    node scripts/seed-test-data.js validate
-    `);
+    node scripts/seed-test-data.js validate");
 };
 
 const main = async () => {

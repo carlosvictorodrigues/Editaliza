@@ -46,10 +46,10 @@ db.all("SELECT id, email, password_hash FROM users LIMIT 5", (err, users) => {
             if (err) {
                 console.error('❌ Erro ao criar usuário de teste:', err);
             } else {
-                console.log(`✅ Usuário de teste criado:`);
+                console.log("✅ Usuário de teste criado:");
                 console.log(`  Email: ${testEmail}`);
                 console.log(`  Senha: ${testPassword}`);
-                console.log(`  ID: 999`);
+                console.log("ID: 999");
                 
                 // Criar um plano de teste para este usuário
                 console.log('\n📚 Criando plano de teste...');
@@ -63,7 +63,7 @@ db.all("SELECT id, email, password_hash FROM users LIMIT 5", (err, users) => {
                             console.log('✅ Plano de teste criado (ID: 999)');
                             console.log('\n🎯 Dados para teste:');
                             console.log(`  Login: ${testEmail} / ${testPassword}`);
-                            console.log(`  Plano ID: 999`);
+                            console.log("Plano ID: 999");
                         }
                         db.close();
                     });

@@ -400,7 +400,7 @@ async function main() {
         
         console.log('\n🎉 RESTORATION COMPLETED SUCCESSFULLY!');
         console.log('\n📊 SUMMARY:');
-        console.log(`   ✅ Plan restored: "Tec Jud TJPE"`);
+        console.log("✅ Plan restored: "Tec Jud TJPE"");
         console.log(`   ✅ Subjects: ${result.subjectsCount}`);
         console.log(`   ✅ Topics: ${result.topicsCount}`);
         console.log(`   ✅ Sessions: ${result.sessionsCount}`);

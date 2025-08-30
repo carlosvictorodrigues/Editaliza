@@ -113,7 +113,7 @@ async function checkSchema() {
         
         // Verificar dados existentes
         const usersCount = await pool.query('SELECT COUNT(*) FROM users');
-        console.log(`\n📊 DADOS EXISTENTES:`);
+        console.log("\n📊 DADOS EXISTENTES:");
         console.log(`  - Usuários: ${usersCount.rows[0].count}`);
         
         if (plansColumns.rows.length > 0) {

@@ -4,27 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meu Cronograma - Editaliza</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="css/tailwind.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <!-- SCRIPTS CENTRALIZADOS -->
-    <script src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
     <script src="js/components.js"></script>
-    <!-- Config do Tailwind para reconhecer as cores customizadas -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'editaliza-blue': '#0528f2',
-                        'editaliza-green': '#1ad937',
-                        'editaliza-black': '#0d0d0d',
-                        'editaliza-gray': '#969696',
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tailwind config removed - using compiled CSS -->
+    <!-- Custom colors now available through compiled tailwind.css -->
     <style> 
         body { font-family: 'Inter', sans-serif; } 
         .filter-btn.active {
@@ -34,22 +21,22 @@
         }
         .modal-overlay { transition: opacity 0.3s ease; }
         .modal-container { transition: all 0.3s ease; }
-        /* Estilos para o conteúdo gerado dinamicamente (descrições de simulado) */
+        /* Estilos para o contedo gerado dinamicamente (descries de simulado) */
         .prose { max-width: none; }
         .prose-sm { font-size: 0.875rem; line-height: 1.5; }
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800">
-    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
+    <!-- NAVEGAO PRINCIPAL (GERADA PELO JS) -->
     <div id="main-nav-container"></div>
 
     <!-- Modal para Adiar Tarefa -->
     <div id="postponeModal" class="modal-overlay hidden fixed inset-0 bg-editaliza-black bg-opacity-70 z-30 flex items-center justify-center p-4 opacity-0">
         <div class="modal-container bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm transform scale-95">
             <h2 class="text-2xl font-bold text-editaliza-black">Adiar Tarefa</h2>
-            <p class="mt-2 text-gray-600">Para quando você gostaria de mover esta tarefa?</p>
+            <p class="mt-2 text-gray-600">Para quando voc gostaria de mover esta tarefa?</p>
             <div class="mt-6 space-y-3">
-                <button data-days="next" class="postpone-option-btn btn-primary py-2">Próximo dia de estudo</button>
+                <button data-days="next" class="postpone-option-btn btn-primary py-2">Prximo dia de estudo</button>
                 <button data-days="7" class="postpone-option-btn w-full bg-blue-100 text-editaliza-blue font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:bg-blue-200">Adiar em 7 dias</button>
             </div>
             <div class="mt-6 text-center">
@@ -58,16 +45,16 @@
         </div>
     </div>
 
-    <!-- Modal para Exportar para Calendário -->
+    <!-- Modal para Exportar para Calendrio -->
     <div id="calendarModal" class="modal-overlay hidden fixed inset-0 bg-editaliza-black bg-opacity-70 z-30 flex items-center justify-center p-4 opacity-0">
         <div class="modal-container bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform scale-95">
             <h2 class="text-2xl font-bold text-editaliza-black">Exportar para Agenda</h2>
-            <p class="mt-2 text-gray-600">Escolha uma opção de exportação para os próximos 7 dias.</p>
+            <p class="mt-2 text-gray-600">Escolha uma opo de exportao para os prximos 7 dias.</p>
             <div class="mt-6 space-y-4">
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 mb-2">ADICIONAR AO GOOGLE CALENDAR (DIA A DIA)</h3>
                     <div id="calendarLinksContainer" class="space-y-2">
-                        <!-- Links serão inseridos aqui dinamicamente -->
+                        <!-- Links sero inseridos aqui dinamicamente -->
                     </div>
                 </div>
                 <div class="relative flex py-3 items-center">
@@ -76,7 +63,7 @@
                     <div class="flex-grow border-t border-gray-200"></div>
                 </div>
                 <div>
-                     <h3 class="text-sm font-semibold text-gray-500 mb-2">BAIXAR ARQUIVO PARA OUTROS CALENDÁRIOS</h3>
+                     <h3 class="text-sm font-semibold text-gray-500 mb-2">BAIXAR ARQUIVO PARA OUTROS CALENDRIOS</h3>
                     <button id="downloadIcsButton" class="w-full text-center btn-secondary py-2">Baixar arquivo .ics da semana</button>
                 </div>
             </div>
@@ -88,18 +75,18 @@
 
     <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl">
         
-        <!-- CABEÇALHO DO PLANO (GERADO PELO JS) -->
+        <!-- CABEALHO DO PLANO (GERADO PELO JS) -->
         <div id="plan-header-container"></div>
 
         <!-- ALERTA DE TAREFAS ATRASADAS (GERADO PELO JS) -->
         <div id="overdue-alert-container"></div>
 
-        <!-- Controles de Filtro e Exportação -->
+        <!-- Controles de Filtro e Exportao -->
         <div class="bg-white p-4 rounded-xl shadow-md mb-8">
             <div class="flex flex-col sm:flex-row justify-between items-center">
                 <div id="filterControls" class="flex items-center space-x-2 mb-4 sm:mb-0">
                     <button data-filter="week" class="filter-btn active px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 transition-colors">Esta Semana</button>
-                    <button data-filter="month" class="filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 transition-colors">Este Mês</button>
+                    <button data-filter="month" class="filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 transition-colors">Este Ms</button>
                     <button data-filter="all" class="filter-btn px-4 py-2 text-sm font-semibold rounded-lg border border-gray-300 transition-colors">Tudo</button>
                 </div>
                 <button id="exportButton" class="btn-secondary w-full sm:w-auto">
@@ -109,7 +96,7 @@
         </div>
 
         <div id="scheduleContainer" class="space-y-10">
-            <!-- Conteúdo do cronograma será inserido aqui -->
+            <!-- Contedo do cronograma ser inserido aqui -->
         </div>
     </main>
 
@@ -169,7 +156,7 @@
             container.innerHTML = '<div class="text-center text-gray-500 py-8">Carregando cronograma...</div>';
             app.showSpinner();
             try {
-                fullSchedule = await app.apiFetch(`/schedules/${planId}`);
+                fullSchedule = await app.apiFetch(`/sessions/by-date/${planId}`);
                 await renderScheduleDOM(filter);
             } catch (error) {
                 app.showToast('Erro ao renderizar cronograma: ' + error.message, 'error');
@@ -210,7 +197,7 @@
                 });
 
             if (dates.length === 0) {
-                container.innerHTML = `<div class="content-card text-center"><h3 class="text-xl font-semibold text-gray-700">Nenhuma tarefa</h3><p class="text-gray-500 mt-2">Não há tarefas agendadas para este período.</p></div>`;
+                container.innerHTML = `<div class="content-card text-center"><h3 class="text-xl font-semibold text-gray-700">Nenhuma tarefa</h3><p class="text-gray-500 mt-2">No h tarefas agendadas para este perodo.</p></div>`;
                 return;
             }
 
@@ -229,20 +216,20 @@
         }
         
         function renderIndividualCard(session) {
-            // Delega a renderização para o components.js
+            // Delega a renderizao para o components.js
             switch (session.session_type) {
-                case 'Novo Tópico':
-                case 'Reforço Extra':
+                case 'Novo Tpico':
+                case 'Reforo Extra':
                     return components.createSessionCard(session);
-                case 'Revisão Consolidada':
+                case 'Reviso Consolidada':
                     return components.createReviewCard(session);
                 case 'Simulado Direcionado':
                 case 'Simulado Completo':
                     return components.createSimuladCard(session);
-                case 'Redação':
+                case 'Redao':
                     return components.createEssayCard(session);
                 default:
-                    console.warn(`Tipo de sessão desconhecido: ${session.session_type}. Usando card padrão.`);
+                    console.warn(`Tipo de sesso desconhecido: ${session.session_type}. Usando card padro.`);
                     return components.createSessionCard(session);
             }
         }
@@ -250,11 +237,11 @@
         async function markReviewAsCompleted(sessionId) {
             app.showSpinner();
             try {
-                await app.apiFetch(`/schedules/sessions/${sessionId}`, {
+                await app.apiFetch(`/sessions/by-date/sessions/${sessionId}`, {
                     method: 'PATCH',
-                    body: JSON.stringify({ status: 'Concluído' })
+                    body: JSON.stringify({ status: 'Concludo' })
                 });
-                app.showToast('Revisão marcada como concluída!', 'success');
+                app.showToast('Reviso marcada como concluda!', 'success');
                 await fetchAndRenderSchedule(activeFilter);
             } catch (error) {
                 app.showToast(error.message, 'error');
@@ -267,27 +254,27 @@
             const container = document.getElementById('scheduleContainer');
             if (!container) return;
 
-            // Debounce para inputs de texto e número
+            // Debounce para inputs de texto e nmero
             container.addEventListener('input', app.debounce((event) => {
                 const target = event.target;
                 const sessionId = target.dataset.sessionId;
                 if (sessionId && target.dataset.field) { 
                     const data = { [target.dataset.field]: target.value };
-                    app.apiFetch(`/schedules/sessions/${sessionId}`, {
+                    app.apiFetch(`/sessions/by-date/sessions/${sessionId}`, {
                         method: 'PATCH',
                         body: JSON.stringify(data)
-                    }).catch(err => app.showToast('Erro ao salvar alteração.', 'error'));
+                    }).catch(err => app.showToast('Erro ao salvar alterao.', 'error'));
                 }
             }, 800));
 
-            // Listener para o checkbox de conclusão
+            // Listener para o checkbox de concluso
             container.addEventListener('change', async (event) => {
                 const target = event.target;
                 const sessionId = target.dataset.sessionId;
                 if (sessionId && target.type === 'checkbox') {
-                    const data = { status: target.checked ? 'Concluído' : 'Pendente' };
+                    const data = { status: target.checked ? 'Concludo' : 'Pendente' };
                     try {
-                        await app.apiFetch(`/schedules/sessions/${sessionId}`, {
+                        await app.apiFetch(`/sessions/by-date/sessions/${sessionId}`, {
                             method: 'PATCH',
                             body: JSON.stringify(data)
                         });
@@ -295,16 +282,16 @@
                         if (card) {
                             card.classList.toggle('bg-slate-100', target.checked);
                         }
-                        // ***** CORREÇÃO APLICADA AQUI *****
-                        // Invalida o cache do plano para forçar a atualização dos gráficos de progresso.
+                        // ***** CORREO APLICADA AQUI *****
+                        // Invalida o cache do plano para forar a atualizao dos grficos de progresso.
                         app.invalidatePlanCache(planId);
                         
-                        // Atualizar painéis na tela plan.html se ela estiver aberta em outra aba/janela
-                        // ou se o usuário navegar para ela depois
+                        // Atualizar painis na tela plan.html se ela estiver aberta em outra aba/janela
+                        // ou se o usurio navegar para ela depois
                         app.showToast('Progresso atualizado!', 'success');
 
                     } catch(err) {
-                        app.showToast('Erro ao salvar alteração.', 'error');
+                        app.showToast('Erro ao salvar alterao.', 'error');
                         target.checked = !target.checked;
                     };
                 }
@@ -314,7 +301,7 @@
         async function reinforceSession(sessionId) {
             app.showSpinner();
             try {
-                const result = await app.apiFetch(`/api/sessions/${sessionId}/reinforce`, { method: 'POST' });
+                const result = await app.apiFetch(`/sessions/by-date/${sessionId}/reinforce`, { method: 'POST' });
                 app.showToast(result.message, 'success');
                 await fetchAndRenderSchedule(activeFilter);
             } catch (error) {
@@ -329,7 +316,7 @@
             closePostponeModal();
             app.showSpinner();
             try {
-                const result = await app.apiFetch(`/api/sessions/${sessionIdToPostpone}/postpone`, {
+                const result = await app.apiFetch(`/sessions/by-date/${sessionIdToPostpone}/postpone`, {
                     method: 'PATCH',
                     body: JSON.stringify({ days })
                 });
@@ -374,7 +361,7 @@
             }).filter(date => fullSchedule[date.toISOString().split('T')[0]]);
             
             if (weekDates.length === 0) {
-                app.showToast("Nenhuma tarefa para exportar nos próximos 7 dias.", "info");
+                app.showToast("Nenhuma tarefa para exportar nos prximos 7 dias.", "info");
                 return;
             }
 
@@ -382,7 +369,7 @@
                 const dateStr = date.toISOString().split('T')[0];
                 const sessions = fullSchedule[dateStr];
                 const text = encodeURIComponent('Editaliza: Estudos do Dia');
-                const details = encodeURIComponent(sessions.map(s => `• ${s.subject_name}: ${s.topic_description}`).join('\n'));
+                const details = encodeURIComponent(sessions.map(s => `" ${s.subject_name}: ${s.topic_description}`).join('\n'));
                 const startDate = dateStr.replace(/-/g, '');
                 const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${startDate}/${startDate}&details=${details}`;
                 
@@ -401,7 +388,7 @@
                     const dateStr = date.toISOString().split('T')[0];
                     fullSchedule[dateStr].forEach(session => {
                         const startDate = dateStr.replace(/-/g, '');
-                        icsContent.push('BEGIN:VEVENT', `UID:${session.id}@editaliza.com`, `DTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '')}Z`, `DTSTART;VALUE=DATE:${startDate}`, `SUMMARY:Estudar: ${session.subject_name || session.session_type}`, `DESCRIPTION:${session.topic_description || 'Revisão geral.'}`, 'END:VEVENT');
+                        icsContent.push('BEGIN:VEVENT', `UID:${session.id}@editaliza.com`, `DTSTAMP:${new Date().toISOString().replace(/[-:.]/g, '')}Z`, `DTSTART;VALUE=DATE:${startDate}`, `SUMMARY:Estudar: ${session.subject_name || session.session_type}`, `DESCRIPTION:${session.topic_description || 'Reviso geral.'}`, 'END:VEVENT');
                     });
                 });
                 icsContent.push('END:VCALENDAR');
@@ -418,8 +405,8 @@
             setTimeout(() => { calendarModal.classList.remove('opacity-0'); calendarModal.querySelector('.modal-container').classList.remove('scale-95'); }, 10);
         }
 
-        // ===== CORREÇÃO CRÍTICA: Função global para abrir sessões de estudo melhorada =====
-        // Tornar funções globais acessíveis
+        // ===== CORREO CRTICA: Funo global para abrir sesses de estudo melhorada =====
+        // Tornar funes globais acessveis
         window.markReviewAsCompleted = markReviewAsCompleted;
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -443,7 +430,7 @@
                 if (event.target === postponeModal) closePostponeModal();
             });
             
-            // CORREÇÃO 1: Adicionar listener para fechar modal de estudo ao clicar fora
+            // CORREO 1: Adicionar listener para fechar modal de estudo ao clicar fora
             const studyModal = document.getElementById('studySessionModal');
             if (studyModal) {
                 studyModal.addEventListener('click', (event) => {
@@ -453,7 +440,7 @@
                 });
             }
 
-            // CORREÇÃO 2: Adicionar listener para fechar modal de calendário ao clicar fora
+            // CORREO 2: Adicionar listener para fechar modal de calendrio ao clicar fora
             const calendarModal = document.getElementById('calendarModal');
             document.getElementById('closeCalendarModalButton').addEventListener('click', () => {
                 calendarModal.classList.add('opacity-0');

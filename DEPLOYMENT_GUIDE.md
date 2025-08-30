@@ -1346,6 +1346,6 @@ curl -s https://app.editaliza.com.br/health | jq -r '.status' || echo "ERRO"
 **🎯 Este guia cobre 100% do processo de deploy do Sistema Editaliza v2.0, desde desenvolvimento local até produção enterprise. Siga os procedimentos com atenção e mantenha sempre backups atualizados.**
 
 **📅 Última atualização:** 25/08/2025  
-**👨‍💻 Documentado por:** Claude + DevOps Team  
+**👨💻 Documentado por:** Claude + DevOps Team  
 **📊 Status:** ✅ Produção Ready  
 **🔄 Próxima revisão:** 01/09/2025

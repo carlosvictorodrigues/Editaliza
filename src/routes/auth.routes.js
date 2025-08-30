@@ -95,6 +95,10 @@ router.post('/login',
     // strictAuthLimit,  // Temporariamente desabilitado para debug
     // loginValidation,  // Temporariamente desabilitado para debug
     // handleValidationErrors,  // Temporariamente desabilitado para debug
+    (req, res, next) => {
+        console.log('[AUTH_ROUTE] Request to /login received');
+        next();
+    },
     authController.login
 );
 

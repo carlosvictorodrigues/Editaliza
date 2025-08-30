@@ -72,7 +72,7 @@ async function removeAppSchemaUsage() {
                 } else {
                     // Não existe em public, simplesmente mover
                     await client.query(`ALTER TABLE app."${tableName}" SET SCHEMA public`);
-                    console.log(`      ✅ Movida para public`);
+                    console.log("✅ Movida para public");
                 }
             }
         } else {

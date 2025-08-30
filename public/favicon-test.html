@@ -107,15 +107,15 @@
     
     <script>
         // Verificação JavaScript adicional
-        console.log('🔍 Favicon Test Page Loaded');
-        console.log('📋 Title:', document.title);
-        console.log('🎨 Theme color:', document.querySelector('meta[name="theme-color"]')?.content);
+
+
+        void('🎨 Theme color:', document.querySelector('meta[name="theme-color"]')?.content);
         
         // Verificar se os ícones carregam
         const icons = document.querySelectorAll('link[rel*="icon"]');
-        console.log('🖼️ Favicon links found:', icons.length);
+
         icons.forEach((icon, index) => {
-            console.log(`Icon ${index + 1}:`, icon.href, `(${icon.type || 'no type'})`);
+            void(`Icon ${index + 1}:`, icon.href, `(${icon.type || 'no type'})`);
         });
     </script>
 </body>

@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Principal - Editaliza</title>
     
+    <!-- Feature Flag for Gamification -->
+    <script>
+        // Feature flag para desativar gamificação na home
+        window.APP_FEATURES = Object.assign({}, window.APP_FEATURES, {
+            GAMIFICATION: false
+        });
+        // Marcar a página atual
+        document.documentElement.setAttribute('data-page', 'home');
+    </script>
+    
     <!-- Favicon and Web App Icons -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -13,65 +23,41 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#F7FAFC">
     
-    <!-- SCRIPT DE TESTE INICIAL -->
-    <script>
-        console.log('🚨🚨🚨 TESTE INICIAL - FUNCIONANDO! 🚨🚨🚨');
-        console.log('🚨🚨🚨 Timestamp:', new Date().toISOString());
-        
-        // Teste de emergência - verificar se JavaScript está funcionando
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚨🚨🚨 DOMContentLoaded disparado! 🚨🚨🚨');
-        });
-        
-        window.addEventListener('load', function() {
-            console.log('🚨🚨🚨 Window load disparado! 🚨🚨🚨');
-        });
-    </script>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Debug inicial removido -->
+<link href="css/tailwind.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="css/light-mode-only.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/footer.css" rel="stylesheet">
     <!-- Theme system removed - light mode only -->
-    <!-- SCRIPTS CENTRALIZADOS -->
-    <script src="js/components.js"></script>
-    <script src="js/timer.js"></script>
-    <script src="js/checklist.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/modules/gamification.js"></script>
-    <script src="js/modules/study-goals-notifications.js"></script>
-    <script src="js/modules/contextual-notifications.js" type="module"></script>
-    <script src="js/modules/notification-integrations.js" type="module"></script>
-    <!-- <script src="js/ux-improvements.js"></script> -->
+    <!-- SCRIPTS DETERMINÍSTICOS - NOVA ARQUITETURA -->
+    <!-- Sistema modular com pipeline controlado -->
+    <script src="js/app.js?v=deterministic-v2" defer></script>
+    <script src="js/modules/navigation.js" defer></script>
+    <script src="js/modules/cards.js" defer></script>
+    <script src="js/modules/ui-core.js" defer></script>
+    <script src="js/modules/smart-buttons.js" defer></script>
+    <script src="js/timer.js?v=deterministic-v2" defer></script>
+    <script src="js/components.js?v=deterministic-v2" defer></script>
+    <script src="js/api-interceptors.js?v=deterministic-v2" defer></script>
+    <script src="js/error-handler.js?v=deterministic-v2" defer></script>
+    <script src="js/checklist.js" defer></script>
+    <script src="js/modules/study-goals-notifications.js" defer></script>
+    <script src="js/modules/contextual-notifications.js?v=deterministic-v2" defer></script>
+    <script src="js/modules/notification-integrations.js" defer></script>
+    <!-- Novos módulos determinísticos -->
+    <script src="js/state/plan-context.js?v=deterministic-v2" defer></script>
+    <script src="js/home-init.js?v=deterministic-v2" defer></script>
     
     <!-- Registro do Service Worker para Notificações Push -->
     <script>
         if ('serviceWorker' in navigator && 'PushManager' in window) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(registration => {
-                    console.log('✅ Service Worker registrado:', registration.scope);
-                })
-                .catch(error => {
-                    console.error('❌ Erro ao registrar Service Worker:', error);
-                });
-        }
-    </script>
-    <!-- Config do Tailwind para cores da marca -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'editaliza-blue': '#0528f2',
-                        'editaliza-green': '#1ad937',
-                        'editaliza-black': '#0d0d0d',
-                        'editaliza-gray': '#969696',
-                    }
-                }
+            if (location.hostname !== 'localhost' && location.protocol === 'https:') { 
+                navigator.serviceWorker.register('/sw.js').then(r => void('SW registrado:', r.scope)).catch(e => console.error('SW erro:', e)); 
             }
         }
     </script>
+    <!-- Tailwind config removida - agora usa CSS compilado -->
     <style>
         body { 
             font-family: 'Inter', sans-serif;
@@ -281,13 +267,13 @@
 </head>
 <body class="bg-slate-50 text-gray-800">
 
-    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
+    <!-- NAVEGA!O PRINCIPAL (GERADA PELO JS) -->
     <div id="main-nav-container"></div>
     
     <!-- Main content wrapper with flex-1 to push footer to bottom -->
     <div class="flex-1">
     
-    <!-- MODAL DE SESSÃO DE ESTUDO -->
+    <!-- MODAL DE SESSO DE ESTUDO -->
     <div id="studySessionModal" class="modal-overlay hidden fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center p-4 opacity-0">
         <div id="studySessionModalContainer" class="modal-container bg-white rounded-xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl transform scale-95 max-h-[90vh] overflow-y-auto">
             <!-- O conteúdo do modal será injetado aqui pelo JavaScript -->
@@ -311,11 +297,11 @@
                     <span class="text-lg">Próxima data desta disciplina</span>
                 </button>
                 <button data-days="1" class="postpone-option-btn w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 hover:shadow-lg flex items-center justify-center space-x-2">
-                    <span class="text-lg">📆</span>
+                    <span class="text-lg">➡️</span>
                     <span>Amanhã</span>
                 </button>
                 <button data-days="7" class="postpone-option-btn w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 hover:shadow-lg flex items-center justify-center space-x-2">
-                    <span class="text-lg">🗓️</span>
+                    <span class="text-lg">🏆</span>
                     <span>Em 7 dias</span>
                 </button>
             </div>
@@ -356,7 +342,7 @@
                         <div id="retaFinalIndicator" class="hidden bg-red-50 border-2 border-red-300 rounded-lg p-3 mt-3">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center">
-                                    <span class="text-red-600 mr-2 text-xl">🚨</span>
+                                    <span class="text-red-600 mr-2 text-xl">🔥</span>
                                     <div>
                                         <p class="font-bold text-red-700 text-sm">Modo Reta Final Ativo</p>
                                         <p class="text-xs text-red-600">Cronograma prioriza tópicos mais importantes</p>
@@ -449,9 +435,10 @@
                             <p id="totalStudyDaysText" class="text-xl font-semibold text-gray-900">0</p>
                         </div>
                         <div class="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 1 1 0 000 2H6a2 2 0 100 4h2a2 2 0 100 4h2a1 1 0 100 2 2 2 0 01-2 2H6a2 2 0 01-2-2V5z" clip-rule="evenodd" />
+                            <svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                                <!-- Heroicons solid: calendar -->
+                                <path d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1z" />
+                                <path d="M18 9H2v7a2 2 0 002 2h12a2 2 0 002-2V9z" />
                             </svg>
                         </div>
                     </div>
@@ -523,7 +510,7 @@
             </div>
             
             <!-- Container das atividades -->
-            <div id="todaySchedule" class="p-6">
+            <div id="todaySchedule" class="p-6" data-testid="todaySchedule">
                 <!-- Atividades serão carregadas aqui -->
             </div>
         </div>
@@ -533,295 +520,187 @@
     </main>
 
     <script>
-            // Expose session lists globally
-            window.todaySessionsData = [];
-            window.allSessionsData = []; // Store all sessions for flexible access
-
-            // Importar módulo de gamificação se disponível
-            // Gamification carregado via script tag
-
-            // LOG IMEDIATO PARA CONFIRMAR CARREGAMENTO
-            console.log('🎯 Sistema modular de footer ativo');
-            console.log('✅ CONFIRMAÇÃO: Esta página carregou com sucesso!');
-
-            document.addEventListener('DOMContentLoaded', async () => {
-                console.log('🚀 Inicializando página home.html');
+        // ============================================================================
+        // INICIALIZAÇÃO DETERMINÍSTICA - HOME V2.0
+        // ============================================================================
+        
+        // Compatibilidade com código antigo
+        window.todaySessionsData = [];
+        window.allSessionsData = [];
+        
+        // Telemetria de inicialização
+        const initMetrics = {
+            startTime: Date.now(),
+            phases: {},
+            errors: []
+        };
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Home v2.0: Inicialização determinística...');
+            
+            try {
+                // Aguardar app estar disponível
+                await waitForApp();
                 
-                // Exibir data de hoje imediatamente
-                const today = new Date();
-                const todayElement = document.getElementById('todayDateHero');
-                if (todayElement) {
-                    todayElement.textContent = today.toLocaleDateString('pt-BR', { 
-                        day: 'numeric', 
-                        month: 'long',
-                        year: 'numeric'
-                    });
+                // Inicializar via HomeInitializer
+                if (window.HomeInitializer) {
+                    await window.HomeInitializer.initialize();
+                } else {
+                    console.warn('⚠️ HomeInitializer não disponível, usando inicialização de fallback');
+                    await fallbackInitialization();
                 }
                 
-                // Footer agora está inline no HTML - não precisa de verificação
+                console.log('✅ Home v2.0: Inicialização concluída com sucesso!');
+                logInitMetrics();
                 
-                app.showSpinner();
-
-                try {
-                    console.log('🔧 Renderizando navegação principal...');
-                    // Renderizar navegação principal
-                    await components.renderMainNavigation('home.html');
+            } catch (error) {
+                console.error('❌ Erro crítico na inicialização:', error);
+                initMetrics.errors.push(error.message);
+                showCriticalError(error);
+            }
+        });
+        
+        // Aguardar app estar disponível
+        async function waitForApp(maxWait = 5000) {
+            const startTime = Date.now();
+            
+            while (Date.now() - startTime < maxWait) {
+                if (window.app && window.app.apiFetch) {
+                    console.log('✅ App disponível');
                     
-                    console.log('📋 Carregando planos...');
-                    const plans = await app.getPlans();
-                    console.log('📋 Planos carregados:', plans);
-                    console.log('📊 Quantidade de planos:', plans ? plans.length : 0);
-                    
-                    if (!plans || plans.length === 0) {
-                        console.warn('⚠️ Nenhum plano encontrado');
-                        
-                        // Verificar se o problema é de autenticação
-                        if (!app.isAuthenticated()) {
-                            console.error('❌ Usuário não está autenticado');
-                            app.logout();
-                            return;
-                        }
-                        
-                        console.log('📝 Redirecionando para dashboard para criar primeiro plano');
-                        window.location.href = 'dashboard.html';
+                    // Verificar autenticação
+                    if (!app.isAuthenticated()) {
+                        console.error('❌ Usuário não autenticado');
+                        window.location.href = 'login.html';
                         return;
                     }
-
-                    let planId = localStorage.getItem(app.config.planKey);
-                    const planExists = plans.some(p => p.id == planId);
-
-                    if (!planId || !planExists) {
-                        planId = plans[0].id;
-                        localStorage.setItem(app.config.planKey, planId);
-                    }
-
-                    app.state.activePlanId = planId;
-
-                    // Carrega cada seção de forma independente
-                    loadUserProfile();
-                    loadMetrics(planId);
-                    loadTodaySchedule(planId);
-                    updateStudyStatistics(planId); // Carregar estatísticas imediatamente
-                    checkOverdueTasks();
-                    loadTransparencyData();
                     
-                    // Configurar seletor de planos imediatamente após o carregamento dos planos
-                    console.log('🔄 Configurando seletor de planos...');
-                    console.log('🔄 planId atual:', planId);
-                    console.log('🔄 plans array:', plans);
-                    
-                    // Verificar se setupPlanSelector existe
-                    if (typeof setupPlanSelector === 'function') {
-                        setupPlanSelector(plans, planId);
-                    } else {
-                        console.error('❌ Função setupPlanSelector não encontrada!');
-                        
-                        // Fallback direto
-                        const planSelector = document.getElementById('planSelector');
-                        if (planSelector && plans && plans.length > 0) {
-                            planSelector.innerHTML = plans.map(p => 
-                                `<option value="${p.id}" ${p.id == planId ? 'selected' : ''}>${p.plan_name}</option>`
-                            ).join('');
-                            planSelector.disabled = false;
-                            console.log('✅ Seletor configurado via fallback direto');
-                        }
-                    }
-
-                    // Rodapé agora está inline no HTML - carregamento garantido
-
-                } catch (error) {
-                    console.error("Erro ao inicializar a página:", error);
-                    if (error.message.includes("Sua sessão expirou")) {
-                         app.logout();
-                    } else {
-                        document.body.innerHTML = `<div class="h-screen flex flex-col items-center justify-center">
-                            <h1 class="text-2xl font-bold mb-4">Erro ao carregar seus dados</h1>
-                            <p class="text-gray-600 mb-8">Não foi possível carregar seus planos de estudo. Tente recarregar a página.</p>
-                            <button onclick="window.location.reload()" class="btn-primary">Recarregar</button>
-                        </div>`;
-                    }
-                } finally {
-                    app.hideSpinner();
+                    return;
                 }
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            throw new Error('Timeout aguardando app');
+        }
+        
+        // Inicialização de fallback (caso HomeInitializer falhe)
+        async function fallbackInitialization() {
+            console.log('🔄 Executando inicialização de fallback...');
+            
+            // Mostrar data de hoje
+            const today = new Date();
+            const todayElement = document.getElementById('todayDateHero');
+            if (todayElement) {
+                todayElement.textContent = today.toLocaleDateString('pt-BR', { 
+                    day: 'numeric', 
+                    month: 'long',
+                    year: 'numeric'
+                });
+            }
+            
+            // Tentar carregar planos
+            try {
+                const plans = await app.getPlans();
+                
+                if (!plans || plans.length === 0) {
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+                
+                // Configurar plano ativo
+                let planId = localStorage.getItem(app.config.planKey);
+                const planExists = plans.some(p => p.id == planId);
+                
+                if (!planId || !planExists) {
+                    planId = plans[0].id;
+                    localStorage.setItem(app.config.planKey, planId);
+                }
+                
+                app.state.activePlanId = planId;
+                
+                // Configurar seletor de planos básico
+                const planSelector = document.getElementById('planSelector');
+                if (planSelector) {
+                    planSelector.innerHTML = plans.map(p => 
+                        `<option value="${p.id}" ${p.id == planId ? 'selected' : ''}>${app.sanitizeHtml(p.plan_name)}</option>`
+                    ).join('');
+                    planSelector.disabled = false;
+                }
+                
+                // Mostrar mensagem de carregamento
+                const container = document.getElementById('todaySchedule');
+                if (container) {
+                    container.innerHTML = `
+                        <div class="text-center py-12">
+                            <div class="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+                            <p class="text-gray-600">Carregando suas atividades...</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Erro no fallback:', error);
+                throw error;
+            }
+        }
+        
+        // Mostrar erro crítico
+        function showCriticalError(error) {
+            const mainContainer = document.querySelector('main');
+            if (mainContainer) {
+                mainContainer.innerHTML = `
+                    <div class="h-screen flex flex-col items-center justify-center">
+                        <div class="text-center">
+                            <div class="text-6xl mb-4">⚠️</div>
+                            <h1 class="text-2xl font-bold mb-4 text-gray-900">Erro ao carregar painel</h1>
+                            <p class="text-gray-600 mb-2">Ocorreu um erro durante o carregamento:</p>
+                            <p class="text-red-600 mb-8 font-mono text-sm">${error.message}</p>
+                            <div class="space-x-4">
+                                <button onclick="location.reload()" class="btn-primary">
+                                    🔄 Recarregar página
+                                </button>
+                                <button onclick="location.href='dashboard.html'" class="btn-secondary">
+                                    📊 Ir para Dashboard
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+        
+        // Log de métricas
+        function logInitMetrics() {
+            const totalTime = Date.now() - initMetrics.startTime;
+            console.log('📊 Métricas de inicialização:', {
+                tempoTotal: `${totalTime}ms`,
+                fases: initMetrics.phases,
+                erros: initMetrics.errors.length,
+                timestamp: new Date().toISOString()
             });
+        }
 
+            // Funções de compatibilidade com código antigo
+            // (agora delegadas para o novo sistema)
+            
             async function loadUserProfile() {
-                try {
-                    console.log('👤 Carregando perfil do usuário...');
-                    const profile = await app.apiFetch("/api/users/profile");
-                    const welcomeElement = document.getElementById("welcomeMessage");
-                    const userAvatarElement = document.getElementById("userAvatar");
-
-                    if (profile && profile.name) {
-                        welcomeElement.textContent = "Olá, " + app.sanitizeHtml(profile.name) + "!";
-                    } else {
-                        // Tenta obter o nome do token como fallback
-                        const token = localStorage.getItem(app.config.tokenKey);
-                        if (token) {
-                            try {
-                                const payload = JSON.parse(atob(token.split('.')[1]));
-                                if (payload.name) {
-                                    welcomeElement.textContent = "Olá, " + app.sanitizeHtml(payload.name) + "!";
-                                } else {
-                                    welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
-                                }
-                            } catch (e) {
-                                welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
-                            }
-                        } else {
-                            welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
-                        }
-                    }
-
-                    // AVATAR FORCE DISABLED - 2025-01-21
-                    if (false && userAvatarElement && profile.profile_picture && profile.profile_picture.trim() !== '') {
-                        const cacheBuster = '?t=' + new Date().getTime();
-                        let avatarUrl;
-
-                        if (profile.profile_picture.startsWith('https://')) {
-                            avatarUrl = profile.profile_picture;
-                        } else if (profile.profile_picture.startsWith('/')) {
-                            avatarUrl = profile.profile_picture + cacheBuster;
-                        } else if (profile.profile_picture.startsWith('./')) {
-                            avatarUrl = profile.profile_picture + cacheBuster;
-                        } else {
-                            avatarUrl = './' + profile.profile_picture + cacheBuster;
-                        }
-                        
-                        console.log('🖼️ Carregando avatar:', avatarUrl);
-                        userAvatarElement.src = avatarUrl;
-                        
-                        // Add error handling for avatar loading
-                        userAvatarElement.onerror = function() {
-                            console.warn('⚠️ Erro ao carregar avatar, mantendo padrão');
-                            this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 48 48'%3E%3Ccircle cx='24' cy='24' r='24' fill='%23e5e7eb'/%3E%3Ccircle cx='24' cy='18' r='8' fill='%236b7280'/%3E%3Cellipse cx='24' cy='38' rx='12' ry='8' fill='%236b7280'/%3E%3C/svg%3E";
-                        };
-                        
-                        userAvatarElement.onload = function() {
-                            console.log('✅ Avatar carregado com sucesso');
-                        };
-                    }
-                } catch (error) {
-                    console.error('Erro ao carregar perfil:', error);
-                    const welcomeElement = document.getElementById("welcomeMessage");
-                    if (welcomeElement) {
-                        // Tenta obter o nome do token como fallback em caso de erro na API
-                        const token = localStorage.getItem(app.config.tokenKey);
-                        if (token) {
-                            try {
-                                const payload = JSON.parse(atob(token.split('.')[1]));
-                                if (payload.name) {
-                                    welcomeElement.textContent = "Olá, " + app.sanitizeHtml(payload.name) + "! (offline)"; // Adiciona um indicador de que o dado é do cache
-                                } else {
-                                    welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
-                                }
-                            } catch (e) {
-                                welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
-                            }
-                        } else {
-                            welcomeElement.textContent = "Olá! Bem-vindo ao seu painel";
-                        }
-                    }
+                // Delegada para HomeInitializer
+                if (window.HomeInitializer) {
+                    return window.HomeInitializer._loadUserProfile();
                 }
             }
 
             async function loadMetrics(planId) {
-                try {
-                    const [plan, progress] = await Promise.all([
-                        app.apiFetch(`/api/plans/${planId}`),
-                        app.getActivePlanData(planId, 'progress')
-                    ]);
-
-                    // Verificar e mostrar indicador de Reta Final
-                    console.log('🔍 Home - Verificando modo Reta Final:', plan.reta_final_mode);
-                    console.log('📋 Home - Dados completos do plano:', plan);
-                    
-                    // Verificação mais robusta para reta_final_mode
-                    const isRetaFinalMode = plan.reta_final_mode === 1 || plan.reta_final_mode === true || plan.reta_final_mode === '1';
-                    components.renderRetaFinalIndicator(isRetaFinalMode);
-
-                    const today = new Date();
-                    document.getElementById('todayDateHero').textContent = today.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
-
-                    if (plan.exam_date) {
-                        const examDate = new Date(plan.exam_date);
-                        const diffTime = examDate - today;
-                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                        document.getElementById('daysToExamHero').textContent = diffDays > 0 ? `${diffDays}` : 'Hoje!';
-                    } else {
-                        document.getElementById('daysToExamHero').textContent = '--';
-                    }
-
-                    document.getElementById('generalProgressHero').textContent = `${progress.percentage || 0}%`;
-
-                } catch (error) {
-                    console.error('Erro ao carregar métricas:', error);
+                // Delegada para HomeInitializer
+                if (window.HomeInitializer) {
+                    return window.HomeInitializer._loadMetrics(planId);
                 }
             }
 
             async function loadTodaySchedule(planId) {
-                const container = document.getElementById('todaySchedule');
-                console.log('📅 Carregando cronograma para planId:', planId);
-                
-                try {
-                    // CORREÇÃO: Usar horário de Brasília ao invés de UTC
-                    const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
-                    console.log('📅 Data de hoje (Brasília):', today);
-                    
-                    const allScheduleData = await app.apiFetch(`/api/sessions/by-date/${planId}`);
-                    console.log('📅 Dados do cronograma recebidos:', allScheduleData);
-                    
-                    // Filtrar apenas as sessões de hoje
-                    const todaysSessions = allScheduleData[today] || [];
-                    window.todaySessionsData = todaysSessions;
-                    
-                    // Also load all sessions for flexible access (removing date restrictions)
-                    await loadAllSessions(planId);
-
-                    if (window.todaySessionsData.length === 0) {
-                        container.innerHTML = `
-                            <div class="text-center py-12">
-                                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                </div>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhuma atividade para hoje</h3>
-                                <p class="text-gray-600">Aproveite para descansar ou revisar conteúdos anteriores!</p>
-                            </div>
-                        `;
-                        // Update progress card even with no sessions
-                        updateTodayProgress();
-                        // Update study statistics cards
-                        updateStudyStatistics(planId);
-                        
-                            return;
-                    }
-
-                    const sessionsHtml = window.todaySessionsData.map(session => renderIndividualCard(session)).join('');
-                    container.innerHTML = `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">${sessionsHtml}</div>`;
-
-                    // Update today's progress card
-                    updateTodayProgress();
-                    
-                    // Update study statistics cards
-                    updateStudyStatistics(planId);
-                    
-
-                } catch (error) {
-                    console.error('Erro ao carregar cronograma de hoje:', error);
-                    container.innerHTML = `
-                        <div class="text-center py-12">
-                            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                            </div>
-                            <h3 class="text-lg font-medium text-gray-900 mb-2">Erro ao carregar atividades</h3>
-                            <p class="text-gray-600 mb-4">Não foi possível carregar as atividades de hoje.</p>
-                            <button onclick="window.location.reload()" class="btn-primary">Recarregar página</button>
-                        </div>
-                    `;
+                // Delegada para HomeInitializer
+                if (window.HomeInitializer) {
+                    return window.HomeInitializer._renderTodaySchedule();
                 }
             }
 
@@ -837,7 +716,7 @@
                     const startDate = pastDate.toISOString().split('T')[0];
                     const endDate = futureDate.toISOString().split('T')[0];
                     
-                    const fullScheduleData = await app.apiFetch(`/api/sessions/by-date/${planId}`);
+                    const fullScheduleData = await app.apiFetch(`/sessions/by-date/${planId}`);
                     // Converter objeto agrupado por data em array flat de sessões
                     window.allSessionsData = [];
                     for (const date in fullScheduleData) {
@@ -846,7 +725,7 @@
                         }
                     }
 
-                    console.log(`📅 Carregadas ${window.allSessionsData.length} sessões (${startDate} a ${endDate})`);
+                    void(`📈 Carregadas ${window.allSessionsData.length} sessões (${startDate} a ${endDate})`);
                 } catch (error) {
                     console.error('Erro ao carregar todas as sessões:', error);
                     window.allSessionsData = window.todaySessionsData; // Fallback to today's sessions
@@ -866,7 +745,7 @@
                     const progressElement = document.getElementById('todayProgressText');
                     if (progressElement) {
                         progressElement.textContent = `${completed}/${total}`;
-                        console.log(`📊 Progresso hoje atualizado: ${completed}/${total} sessões`);
+
                         
                         // Update color based on progress
                         if (completed === total && total > 0) {
@@ -890,21 +769,21 @@
             async function updateStudyStatistics(planId) {
                 try {
                     // Chamar o endpoint correto do backend para obter as estatísticas
-                    const stats = await app.apiFetch(`/api/plans/${planId}/statistics`);
-                    console.log('📊 Estatísticas recebidas do servidor:', stats);
+                    const stats = await app.apiFetch(`/plans/${planId}/statistics`);
+
                     
                     // Update Total de Dias
                     const totalDaysElement = document.getElementById('totalStudyDaysText');
                     if (totalDaysElement && stats.totalStudyDays !== undefined) {
                         totalDaysElement.textContent = stats.totalStudyDays.toString();
-                        console.log(`📈 Total de dias atualizado: ${stats.totalStudyDays}`);
+
                     }
                     
                     // Update Sequência Atual
                     const currentStreakElement = document.getElementById('currentStreakText');
                     if (currentStreakElement && stats.currentStreak !== undefined) {
                         currentStreakElement.textContent = stats.currentStreak.toString();
-                        console.log(`🔥 Sequência atual atualizada: ${stats.currentStreak} dias`);
+
                         
                         // Update color based on streak
                         if (stats.currentStreak > 7) {
@@ -929,7 +808,7 @@
                         } else {
                             totalHoursElement.textContent = `${minutes}min`;
                         }
-                        console.log(`⏱️ Total de horas atualizado: ${stats.totalHours.toFixed(2)}h`);
+                        void(`⏱️ Total de horas atualizado: ${stats.totalHours.toFixed(2)}h`);
                     }
                     
                     // Update Média Diária
@@ -942,7 +821,7 @@
                         } else {
                             avgHoursElement.textContent = `${avgMinutes}min`;
                         }
-                        console.log(`📊 Média diária atualizada: ${stats.averageHoursPerDay.toFixed(2)}h`);
+                        void(`Média diária atualizada: ${stats.averageHoursPerDay.toFixed(2)}h`);
                         
                         // Update color based on average
                         if (stats.averageHoursPerDay >= 3) {
@@ -967,18 +846,20 @@
                 }
             }
 
-            function renderIndividualCard(session) {
+            async function renderIndividualCard(session) {
                 switch (session.session_type) {
-                    case 'Novo Tópico': case 'Reforço Extra':
-                        return components.createSessionCard(session);
+                    case 'Novo Tópico':
+                    case 'Reforço Extra':
+                        return await components.createSessionCard(session);
                     case 'Revisão Consolidada':
-                        return components.createReviewCard(session);
-                    case 'Simulado Direcionado': case 'Simulado Completo':
-                        return components.createSimuladCard(session);
+                        return await components.createReviewCard(session);
+                    case 'Simulado Direcionado':
+                    case 'Simulado Completo':
+                        return await components.createSimuladCard(session);
                     case 'Redação':
-                        return components.createEssayCard(session);
+                        return await components.createEssayCard(session);
                     default:
-                        return components.createSessionCard(session);
+                        return await components.createSessionCard(session);
                 }
             }
 
@@ -987,10 +868,10 @@
             async function checkOverdueTasks() {
                 try {
                     if (!app.state.activePlanId) {
-                        console.warn('❌ activePlanId não definido para verificar tarefas atrasadas');
+                        console.warn('⚠️ activePlanId não definido para verificar tarefas atrasadas');
                         return;
                     }
-                    const overdueData = await app.apiFetch(`/api/plans/${app.state.activePlanId}/overdue_check`);
+                    const overdueData = await app.apiFetch(`/sessions/overdue-check/${app.state.activePlanId}`);
                     if (overdueData.count > 0) {
                         components.renderOverdueAlert(overdueData);
                         addReplanListener();
@@ -1010,7 +891,7 @@
                     if (!app.state.activePlanId) return;
                     
                     // Obter dados do plano para verificar se está no modo Reta Final
-                    const plan = await app.apiFetch(`/api/plans/${app.state.activePlanId}`);
+                    const plan = await app.apiFetch(`/plans/${app.state.activePlanId}`);
                     
                     if (plan.reta_final_mode) {
                         // Mostrar indicador do Modo Reta Final
@@ -1018,7 +899,7 @@
                         indicator.classList.remove('hidden');
                         
                         // Carregar exclusões
-                        const exclusionsData = await app.apiFetch(`/api/plans/${app.state.activePlanId}/exclusions`);
+                        const exclusionsData = await app.apiFetch(`/plans/${app.state.activePlanId}/exclusions`);
                         
                         if (exclusionsData.totalExclusions > 0) {
                             // Mostrar contador de exclusões
@@ -1053,13 +934,13 @@
                         `;
                         
                         try {
-                            const response = await app.apiFetch(`/api/plans/${app.state.activePlanId}/replan`, {
+                            const response = await app.apiFetch(`/plans/${app.state.activePlanId}/replan`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' }
                             });
                             
                             if (response.success) {
-                                app.showToast('✅ Cronograma replanejado com sucesso! As tarefas atrasadas foram redistribuídas.', 'success');
+                                app.showToast('✓ Cronograma replanejado com sucesso! As tarefas atrasadas foram redistribuídas.', 'success');
                                 
                                 setTimeout(() => {
                                     window.location.reload();
@@ -1077,7 +958,7 @@
                                     <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
                                 </svg>
                                 <span class="text-lg">Replanejar Agora</span>
-                                <span class="text-2xl">🚀</span>
+                                <span class="text-2xl">🔥</span>
                             `;
                         }
                     };
@@ -1095,29 +976,29 @@
                                     <path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"></path>
                                 </svg>
                                 <span class="text-lg">Ocultar Detalhes</span>
-                                <span class="text-xl">📋</span>
+                                <span class="text-xl">x9</span>
                             `;
                             
                             try {
-                                const planData = await app.apiFetch(`/api/plans/${app.state.activePlanId}/overdue_details`);
+                                const planData = await app.apiFetch(`/plans/${app.state.activePlanId}/overdue_details`);
                                 if (planData && planData.replanStrategy) {
                                     detailsContent.innerHTML = `
                                         <div class="space-y-4">
                                             <div class="flex items-start space-x-3">
-                                                <span class="text-2xl">🎯</span>
+                                                <span class="text-2xl">✅</span>
                                                 <div>
                                                     <p class="font-semibold text-blue-800 mb-2">Estratégia de Redistribuição:</p>
                                                     <p class="text-blue-700">${planData.replanStrategy}</p>
                                                 </div>
                                             </div>
                                             <div class="flex items-start space-x-3">
-                                                <span class="text-2xl">📅</span>
+                                                <span class="text-2xl">📌</span>
                                                 <div>
                                                     <p class="font-semibold text-blue-800 mb-2">Próximos Passos:</p>
                                                     <ul class="text-blue-700 space-y-1">
-                                                        <li>• Tarefas atrasadas serão reagendadas para os próximos dias disponíveis</li>
-                                                        <li>• Seu cronograma será otimizado para manter o ritmo de estudos</li>
-                                                        <li>• As datas da prova e metas serão preservadas</li>
+                                                        <li>⬢ Tarefas atrasadas serão reagendadas para os próximos dias disponíveis</li>
+                                                        <li>⬢ Seu cronograma será otimizado para manter o ritmo de estudos</li>
+                                                        <li>⬢ As datas da prova e metas serão preservadas</li>
                                                     </ul>
                                                 </div>
                                             </div>
@@ -1128,7 +1009,7 @@
                                 console.warn('Erro ao carregar detalhes do replanejamento:', error);
                                 detailsContent.innerHTML = `
                                     <div class="flex items-start space-x-3">
-                                        <span class="text-2xl">⚡</span>
+                                        <span class="text-2xl">💡</span>
                                         <div>
                                             <p class="font-semibold text-blue-800 mb-2">Replanejamento Inteligente:</p>
                                             <p class="text-blue-700">O sistema irá automaticamente reorganizar suas tarefas atrasadas nos próximos dias disponíveis, mantendo sua meta de estudos e data da prova.</p>
@@ -1143,7 +1024,7 @@
                                     <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                                 </svg>
                                 <span class="text-lg">Ver Detalhes</span>
-                                <span class="text-xl">📋</span>
+                                <span class="text-xl">x9</span>
                             `;
                         }
                     };
@@ -1156,9 +1037,9 @@
             // Função para reforçar uma sessão (agenda para 3 dias depois)
             async function reinforceSession(sessionId) {
                 try {
-                    const result = await app.apiFetch(`/api/sessions/${sessionId}/reinforce`, { method: 'POST' });
+                    const result = await app.apiFetch(`/sessions/${sessionId}/reinforce`, { method: 'POST' });
                     if (result.message) {
-                        app.showToast('💪 ' + result.message, 'success');
+                        app.showToast('✅ ' + result.message, 'success');
                         // Recarregar as atividades após o reforço
                         if (app.state.activePlanId) {
                             loadTodaySchedule(app.state.activePlanId);
@@ -1200,14 +1081,14 @@
                 closePostponeModal();
 
                 try {
-                    const result = await app.apiFetch(`/api/sessions/${sessionIdToPostpone}/postpone`, {
+                    const result = await app.apiFetch(`/sessions/${sessionIdToPostpone}/postpone`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ days: days })
                     });
                     
                     if (result.message) {
-                        app.showToast('📅 ' + result.message, 'success');
+                        app.showToast('✅ ' + result.message, 'success');
                         // Recarregar as atividades após o adiamento
                         if (app.state.activePlanId) {
                             loadTodaySchedule(app.state.activePlanId);
@@ -1228,7 +1109,9 @@
                 const postponeButtons = document.querySelectorAll('.postpone-option-btn');
 
                 // Botão de cancelar
-                cancelButton.addEventListener('click', closePostponeModal);
+                if (cancelButton) {
+                    cancelButton.addEventListener('click', closePostponeModal);
+                }
 
                 // Botões de opções de adiamento
                 postponeButtons.forEach(btn => {
@@ -1239,20 +1122,22 @@
                 });
 
                 // Fechar modal ao clicar fora
-                postponeModal.addEventListener('click', (event) => {
-                    if (event.target === postponeModal) {
-                        closePostponeModal();
-                    }
-                });
+                if (postponeModal) {
+                    postponeModal.addEventListener('click', (event) => {
+                        if (event.target === postponeModal) {
+                            closePostponeModal();
+                        }
+                    });
+                }
             });
 
             // Função de rodapé removida - agora está inline no HTML
 
             // Função para configurar o seletor de planos
             function setupPlanSelector(plans, selectedPlanId) {
-                console.log('⚙️ Configurando seletor de planos...');
-                console.log('📋 Lista de planos recebida:', plans);
-                console.log('🎯 Plano selecionado:', selectedPlanId);
+
+
+
                 
                 // Aguardar o DOM estar completamente pronto
                 const planSelector = document.getElementById('planSelector');
@@ -1260,16 +1145,36 @@
                     console.error('❌ Elemento planSelector não encontrado no DOM');
                     // Tentar novamente após um pequeno delay
                     setTimeout(() => {
-                        console.log('🔄 Tentando novamente configurar seletor de planos...');
+
                         setupPlanSelector(plans, selectedPlanId);
                     }, 500);
                     return;
                 }
                 
                 if (!plans || plans.length === 0) {
-                    console.error('❌ Nenhum plano disponível');
-                    planSelector.innerHTML = '<option value="">Nenhum plano encontrado</option>';
+                    console.warn('⚠️ Nenhum plano disponível');
+                    planSelector.innerHTML = '<option value="">Crie seu primeiro plano</option>';
                     planSelector.disabled = true;
+                    
+                    // Mostrar CTA para criar plano
+                    const todaySchedule = document.getElementById('todaySchedule');
+                    if (todaySchedule) {
+                        todaySchedule.innerHTML = `
+                            <div class="text-center py-12">
+                                <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
+                                    <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2">Comece sua jornada!</h3>
+                                <p class="text-gray-600 mb-6">Crie seu primeiro plano de estudos personalizado</p>
+                                <a href="/plan.html?new=true" class="btn-primary inline-flex items-center">
+                                    <span class="mr-2">🎯</span>
+                                    Criar Plano de Estudos
+                                </a>
+                            </div>
+                        `;
+                    }
                     return;
                 }
                 
@@ -1283,11 +1188,11 @@
                         `<option value="${p.id}" ${p.id == selectedPlanId ? 'selected' : ''}>${app.sanitizeHtml(p.plan_name)}</option>`
                     ).join('');
                     newPlanSelector.disabled = false;
-                    console.log('✅ Seletor de planos populado com', plans.length, 'planos');
+
                     
                     // Adicionar event listener ao novo seletor
                     newPlanSelector.addEventListener('change', async (e) => {
-                        console.log('🔄 Seletor de plano alterado para:', e.target.value);
+
                         const newPlanId = e.target.value;
                         
                         if (!newPlanId) {
@@ -1302,14 +1207,12 @@
                             localStorage.setItem(app.config.planKey, newPlanId);
                             
                             // Atualizar indicador de Reta Final dinamicamente
-                            const newPlan = await app.apiFetch(`/api/plans/${newPlanId}`);
+                            const newPlan = await app.apiFetch(`/plans/${newPlanId}`);
                             const isRetaFinalMode = newPlan.reta_final_mode === 1 || newPlan.reta_final_mode === true || newPlan.reta_final_mode === '1';
                             components.renderRetaFinalIndicator(isRetaFinalMode);
                             
-                            // Recarregar a página após um pequeno delay para mostrar as mudanças
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 300);
+                            // REMOVIDO: location.reload() substituído por sistema reativo
+                            console.log('🔄 Plano alterado via sistema reativo, sem reload');
                             
                         } catch (error) {
                             console.error('Erro ao alterar plano:', error);
@@ -1317,8 +1220,7 @@
                             e.target.disabled = false;
                         }
                     });
-                    
-                    console.log('✅ Seletor de planos configurado com sucesso');
+
                     
                 } catch (error) {
                     console.error('❌ Erro ao configurar seletor de planos:', error);
@@ -1339,12 +1241,12 @@
                 // Recarregar as sessões de hoje primeiro
                 if (app.state.activePlanId) {
                     try {
-                        const response = await app.apiFetch(`/api/sessions/by-date/${app.state.activePlanId}`);
+                        const response = await app.apiFetch(`/sessions/by-date/${app.state.activePlanId}`);
                         const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
                         const todaySchedule = response[today] || [];
                         if (todaySchedule) {
                             window.todaySessionsData = todaySchedule;
-                            console.log('📊 Sessões de hoje recarregadas:', window.todaySessionsData.length);
+
                         }
                     } catch (error) {
                         console.error('Erro ao recarregar sessões:', error);
@@ -1358,158 +1260,78 @@
                 }
             };
             
-            // Listener para sessão concluída - atualizar estatísticas
+            // Listener para sessão concluída - usar sistema reativo
             document.addEventListener('sessionCompleted', function(event) {
-                console.log('📊 Sessão concluída detectada, atualizando estatísticas...');
-                if (app.state.activePlanId) {
-                    // Atualizar todas as métricas
+                console.log('🎉 Sessão completada detectada');
+                if (window.PlanContext) {
+                    // Atualizar via PlanContext (sem reload)
                     setTimeout(() => {
-                        updateStudyStatistics(app.state.activePlanId);
-                        loadMetrics(app.state.activePlanId);
-                        updateTodayProgress();
-                        loadTodaySchedule(app.state.activePlanId);
-                    }, 1000); // Pequeno delay para garantir que o backend processou
+                        window.PlanContext.refreshSessions();
+                    }, 1000);
                 }
             });
 
         </script>
 
     <script>
-        // TESTE DE DEBUG FINAL - Verificar se elementos existem após carregamento completo
+        // Verificação de integridade após carregamento completo
         window.addEventListener('load', function() {
-            console.log('🔍 TESTE FINAL - Verificando elementos após load completo:');
+            console.log('📋 Verificação final de integridade...');
             
-            const planSelector = document.getElementById('planSelector');
-            console.log('   - planSelector existe:', !!planSelector);
-            if (planSelector) {
-                console.log('   - planSelector valor atual:', planSelector.value);
-                console.log('   - planSelector options:', Array.from(planSelector.options).map(o => ({value: o.value, text: o.text})));
+            // Verificar se HomeInitializer inicializou corretamente
+            if (window.HomeInitializer && window.HomeInitializer.initialized) {
+                console.log('✅ HomeInitializer: OK');
+            } else {
+                console.warn('⚠️ HomeInitializer: Não inicializado');
             }
             
-            const footer = document.querySelector('.editaliza-footer');
-            console.log('   - rodapé existe:', !!footer);
-            
-            const navContainer = document.getElementById('main-nav-container');
-            console.log('   - navegação container existe:', !!navContainer);
-            
-            // Forçar tentativa de configurar seletor se não funcionou
-            if (planSelector && (!planSelector.options.length || planSelector.options[0].value === "")) {
-                console.log('🔧 Forçando reconfiguração do seletor...');
-                if (window.setupPlanSelector && app.state.plans) {
-                    window.setupPlanSelector(app.state.plans, app.state.activePlanId);
-                }
+            // Verificar se PlanContext está funcionando
+            if (window.PlanContext && window.PlanContext.isInitialized) {
+                console.log('✅ PlanContext: OK');
+            } else {
+                console.warn('⚠️ PlanContext: Não inicializado');
             }
             
-            // Verificação final de ambos os componentes após 5 segundos
-            setTimeout(() => {
-                console.log('🔍 VERIFICAÇÃO FINAL APÓS 5 SEGUNDOS:');
-                
-                const finalPlanSelector = document.getElementById('planSelector');
-                const finalFooter = document.querySelector('.editaliza-footer, .editaliza-footer-refatorado');
-                
-                if (!finalPlanSelector) {
-                    console.error('❌ PROBLEMA: Seletor de planos ainda não existe');
-                } else if (finalPlanSelector.options.length === 0 || finalPlanSelector.options[0].value === "") {
-                    console.error('❌ PROBLEMA: Seletor existe mas não tem opções válidas');
-                    console.log('   - Tentando forçar carregamento emergencial...');
-                    // Última tentativa emergencial
-                    app.apiFetch('/api/plans').then(plans => {
-                        if (plans && plans.length > 0) {
-                            finalPlanSelector.innerHTML = plans.map(p => `<option value="${p.id}">${p.plan_name}</option>`).join('');
-                            finalPlanSelector.disabled = false;
-                            console.log('✅ Seletor corrigido via chamada emergencial');
-                        }
-                    }).catch(e => console.error('❌ Falha na chamada emergencial:', e));
+            // Verificar elementos críticos
+            const criticalElements = {
+                'planSelector': document.getElementById('planSelector'),
+                'todaySchedule': document.getElementById('todaySchedule'),
+                'welcomeMessage': document.getElementById('welcomeMessage')
+            };
+            
+            Object.entries(criticalElements).forEach(([name, element]) => {
+                if (element) {
+                    console.log(`✅ ${name}: OK`);
                 } else {
-                    console.log('✅ Seletor de planos funcionando corretamente');
+                    console.error(`❌ ${name}: Ausente`);
                 }
-                
-                if (!finalFooter) {
-                    console.log('ℹ️ Rodapé será carregado pelo sistema modular footer.js');
-                } else {
-                    console.log('✅ Rodapé carregado corretamente');
-                }
-                
-                // Log final de sucesso
-                console.log('🎯 VERIFICAÇÃO COMPLETA - STATUS:');
-                console.log('   Seletor:', finalPlanSelector ? '✅ OK' : '❌ PROBLEMA');
-                console.log('   Rodapé:', finalFooter ? '✅ OK' : '❌ PROBLEMA');
-                
-            }, 5000);
+            });
+            
+            console.log('📊 Verificação de integridade concluída');
         });
-        
-        // Scripts de força emergencial removidos - usando sistema modular footer.js
     </script>
 
     </div> <!-- End main content wrapper -->
-    
-    <!-- SCRIPT DE TESTE ANTES DO FOOTER -->
-    <script>
-        console.log('🚨🚨🚨 TESTE ANTES DO FOOTER - FUNCIONANDO! 🚨🚨🚨');
-        console.log('🚨🚨🚨 Timestamp:', new Date().toISOString());
-    </script>
     
     <!-- Script do rodapé modular -->
     <script src="js/footer.js"></script>
     <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
     
-    <!-- SCRIPT DE TESTE EMERGENCIA -->
     <script>
-        console.log('🚨🚨🚨 TESTE EMERGENCIA - SCRIPT INCLUÍDO! 🚨🚨🚨');
-        console.log('🚨🚨🚨 Verificando se footer.js foi carregado... 🚨🚨🚨');
-        
-        // Verificar se o arquivo foi carregado
-        if (typeof EditalizaFooterRefatorado !== 'undefined') {
-            console.log('✅ footer.js carregado com sucesso!');
-            console.log('✅ Classe EditalizaFooterRefatorado disponível');
-        } else {
-            console.error('❌ footer.js NÃO foi carregado!');
-            console.error('❌ Classe EditalizaFooterRefatorado NÃO encontrada');
-        }
-        
-        // Verificar se há erros de rede
-        console.log('🔍 Verificando erros de rede...');
-        const scripts = document.querySelectorAll('script[src]');
-        scripts.forEach(script => {
-            console.log('📜 Script encontrado:', script.src);
-        });
-    </script>
-    
-    <script>
-        // ========================================
-        // CARREGAMENTO DINÂMICO DO CSS DO FOOTER
-        // ========================================
-        // Solução para o problema de CSS não carregar via link estático
-        window.addEventListener('load', function() {
-            console.log('🎨 Verificando CSS do footer...');
-            
-            // Verificar se o CSS já foi carregado
+        // Carregamento otimizado do CSS do footer
+        (function() {
             const existingCSS = document.querySelector('link[href="css/footer.css"]');
-            if (existingCSS) {
-                console.log('✅ CSS do footer já está no DOM');
-                return;
+            if (!existingCSS) {
+                const cssLink = document.createElement('link');
+                cssLink.rel = 'stylesheet';
+                cssLink.href = 'css/footer.css';
+                cssLink.onload = () => console.log('✅ Footer CSS carregado');
+                cssLink.onerror = () => console.error('❌ Erro ao carregar Footer CSS');
+                document.head.appendChild(cssLink);
             }
-            
-            console.log('🔄 CSS do footer não encontrado, carregando dinamicamente...');
-            
-            // Carregar CSS dinamicamente
-            const cssLink = document.createElement('link');
-            cssLink.rel = 'stylesheet';
-            cssLink.href = 'css/footer.css';
-            
-            cssLink.onload = function() {
-                console.log('✅ CSS do footer carregado dinamicamente com sucesso');
-            };
-            
-            cssLink.onerror = function() {
-                console.error('❌ Erro ao carregar CSS do footer dinamicamente');
-            };
-            
-            document.head.appendChild(cssLink);
-        });
+        })();
     </script>
 
-    <script src="/js/api-interceptors.js"></script>
-    <script src="/js/error-handler.js"></script>
+    <!-- Scripts já carregados no head com defer -->
 </body>
 </html>

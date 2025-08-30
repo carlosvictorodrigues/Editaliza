@@ -266,8 +266,7 @@
 
                 const subjects = await app.apiFetch(`/plans/${planId}/subjects`);
                 planSubjects = subjects.map(s => s.subject_name).sort();
-                
-                console.log(`📚 Carregadas ${planSubjects.length} disciplinas do plano ${planId}:`, planSubjects);
+
                 
                 updateSubjectOptions();
                 
@@ -400,7 +399,7 @@
                 }
                 
                 localStorage.setItem('editaliza_notes', JSON.stringify(allNotes));
-                console.log(`💾 Nota salva: "${note.title}" (Plano: ${note.planId})`);
+                void(`💾 Nota salva: "${note.title}" (Plano: ${note.planId})`);
             } catch (error) {
                 console.error('Erro ao salvar nota:', error);
                 app.showToast('Erro ao salvar anotação', 'error');
@@ -424,7 +423,7 @@
                 const allNotes = savedNotes ? JSON.parse(savedNotes) : [];
                 const filteredNotes = allNotes.filter(n => n.id !== noteId);
                 localStorage.setItem('editaliza_notes', JSON.stringify(filteredNotes));
-                console.log(`🗑️ Nota deletada: ID ${noteId}`);
+
             } catch (error) {
                 console.error('Erro ao deletar nota:', error);
                 app.showToast('Erro ao deletar anotação', 'error');

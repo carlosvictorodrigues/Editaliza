@@ -311,7 +311,7 @@ class NotificationSystemValidator {
 
         const successRate = Math.round((successfulTests / totalTests) * 100);
 
-        console.log(`📊 ESTATÍSTICAS GERAIS:`);
+        console.log("📊 ESTATÍSTICAS GERAIS:");
         console.log(`   Total de testes: ${totalTests}`);
         console.log(`   Sucessos: ${successfulTests} (${Math.round((successfulTests/totalTests)*100)}%)`);
         console.log(`   Avisos: ${warningTests} (${Math.round((warningTests/totalTests)*100)}%)`);
@@ -337,8 +337,8 @@ class NotificationSystemValidator {
         console.log('\n🔗 RECURSOS DISPONÍVEIS:');
         console.log(`   • Página Principal: ${this.baseURL}/`);
         console.log(`   • Página de Testes: ${this.baseURL}/tests/test-notifications-complete.html`);
-        console.log(`   • Sistema de Notificações: Integrado na aplicação`);
-        console.log(`   • Documentação de Testes: tests/integration/notifications.test.js`);
+        console.log("• Sistema de Notificações: Integrado na aplicação");
+        console.log("• Documentação de Testes: tests/integration/notifications.test.js");
 
         console.log('\n📋 COMPONENTES VALIDADOS:');
         console.log('   ✅ Sistema Base de Notificações (success, error, warning, info)');

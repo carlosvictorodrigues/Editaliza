@@ -116,7 +116,7 @@ try {
             console.log(`   ⚠️  Referências SQLite encontradas: ${foundRefs.join(', ')}`);
             console.log(`      Execute: npm uninstall ${foundRefs.join(' ')}`);
         } else {
-            console.log(`   ✅ Nenhuma referência SQLite no package.json`);
+            console.log("✅ Nenhuma referência SQLite no package.json");
         }
     }
 } catch (error) {
@@ -125,16 +125,16 @@ try {
 
 // Resumo
 console.log('\n' + '=' .repeat(50));
-console.log(`✅ LIMPEZA CONCLUÍDA`);
+console.log("✅ LIMPEZA CONCLUÍDA");
 console.log(`📊 Arquivos removidos: ${removedCount}`);
-console.log(`\n🎯 Próximos passos:`);
-console.log(`1. Remover dependências SQLite:`);
-console.log(`   npm uninstall better-sqlite3 sqlite3 connect-sqlite3`);
-console.log(`\n2. Testar conexão PostgreSQL:`);
-console.log(`   npm run db:test-connection`);
-console.log(`\n3. Iniciar servidor:`);
-console.log(`   npm start`);
-console.log(`\n4. Verificar logs:`);
-console.log(`   Deve mostrar apenas "PostgreSQL" sem fallbacks`);
+console.log("\n🎯 Próximos passos:");
+console.log("1. Remover dependências SQLite:");
+console.log("npm uninstall better-sqlite3 sqlite3 connect-sqlite3");
+console.log("\n2. Testar conexão PostgreSQL:");
+console.log("npm run db:test-connection");
+console.log("\n3. Iniciar servidor:");
+console.log("npm start");
+console.log("\n4. Verificar logs:");
+console.log("Deve mostrar apenas "PostgreSQL" sem fallbacks");
 
-console.log(`\n🚀 Sistema agora usa APENAS PostgreSQL!`);
+console.log("\n🚀 Sistema agora usa APENAS PostgreSQL!");

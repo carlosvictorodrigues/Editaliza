@@ -247,7 +247,7 @@ class ApiFetchStandardizerV2 {
         console.log(`  📊 Encontradas ${fetchCalls.length} chamadas fetch()`);
 
         if (fetchCalls.length === 0) {
-            console.log(`  ✅ Nenhuma alteração necessária`);
+            console.log("✅ Nenhuma alteração necessária");
             this.report.processed.push({ file: filename, changes: 0 });
             return true;
         }
@@ -259,7 +259,7 @@ class ApiFetchStandardizerV2 {
             if (bodyCloseIndex !== -1) {
                 const scriptTag = '    <script src="js/app.js"></script>\n';
                 content = content.substring(0, bodyCloseIndex) + scriptTag + content.substring(bodyCloseIndex);
-                console.log(`  📜 Adicionado script js/app.js`);
+                console.log("📜 Adicionado script js/app.js");
             }
         }
 
@@ -308,7 +308,7 @@ class ApiFetchStandardizerV2 {
         const duration = endTime - this.report.startTime;
 
         console.log(`\n${'='.repeat(70)}`);
-        console.log(`📊 RELATÓRIO FINAL - FASE 4 V2: Padronização app.apiFetch()`);
+        console.log("📊 RELATÓRIO FINAL - FASE 4 V2: Padronização app.apiFetch()");
         console.log(`${'='.repeat(70)}`);
         console.log(`⏱️  Tempo total: ${duration}ms`);
         console.log(`📁 Arquivos processados: ${this.report.processed.length}`);
@@ -316,7 +316,7 @@ class ApiFetchStandardizerV2 {
         console.log(`❌ Erros: ${this.report.errors.length}`);
 
         if (this.report.processed.length > 0) {
-            console.log(`\n📋 ARQUIVOS PROCESSADOS:`);
+            console.log("\n📋 ARQUIVOS PROCESSADOS:");
             this.report.processed.forEach(p => {
                 const status = p.changes > 0 ? '🔄' : '✅';
                 console.log(`   ${status} ${p.file}: ${p.changes} alterações`);
@@ -324,7 +324,7 @@ class ApiFetchStandardizerV2 {
         }
 
         if (this.report.changes.length > 0) {
-            console.log(`\n🔄 RESUMO DE MUDANÇAS POR TIPO:`);
+            console.log("\n🔄 RESUMO DE MUDANÇAS POR TIPO:");
             const changesByType = {};
             this.report.changes.forEach(change => {
                 if (!changesByType[change.type]) {
@@ -337,7 +337,7 @@ class ApiFetchStandardizerV2 {
                 console.log(`   📊 ${type}: ${count} conversões`);
             });
 
-            console.log(`\n📄 MUDANÇAS DETALHADAS:`);
+            console.log("\n📄 MUDANÇAS DETALHADAS:");
             const groupedChanges = {};
             this.report.changes.forEach(change => {
                 if (!groupedChanges[change.file]) {
@@ -355,7 +355,7 @@ class ApiFetchStandardizerV2 {
         }
 
         if (this.report.errors.length > 0) {
-            console.log(`\n❌ ERROS:`);
+            console.log("\n❌ ERROS:");
             this.report.errors.forEach(error => {
                 console.log(`   • ${error}`);
             });
@@ -389,7 +389,7 @@ class ApiFetchStandardizerV2 {
 
     // Executar padronização completa
     async execute() {
-        console.log(`🚀 INICIANDO FASE 4 V2: Padronização Robusta app.apiFetch()`);
+        console.log("🚀 INICIANDO FASE 4 V2: Padronização Robusta app.apiFetch()");
         console.log(`📁 Diretório: ${PUBLIC_DIR}`);
 
         this.createBackupDir();
@@ -399,11 +399,11 @@ class ApiFetchStandardizerV2 {
         console.log(`📋 Arquivos encontrados com fetch(): ${filesToUpdate.length}`);
         
         if (filesToUpdate.length === 0) {
-            console.log(`🎉 Nenhum arquivo precisa de atualização!`);
+            console.log("🎉 Nenhum arquivo precisa de atualização!");
             return true;
         }
 
-        console.log(`📄 Arquivos a serem processados:`);
+        console.log("📄 Arquivos a serem processados:");
         filesToUpdate.forEach(file => console.log(`   • ${file}`));
 
         // Processar cada arquivo
@@ -420,12 +420,12 @@ class ApiFetchStandardizerV2 {
         this.generateReport();
 
         if (this.report.errors.length === 0) {
-            console.log(`🎉 FASE 4 V2 CONCLUÍDA COM SUCESSO!`);
-            console.log(`✨ Todas as chamadas fetch() foram padronizadas para app.apiFetch()`);
+            console.log("🎉 FASE 4 V2 CONCLUÍDA COM SUCESSO!");
+            console.log("✨ Todas as chamadas fetch() foram padronizadas para app.apiFetch()");
             console.log(`🔍 Total de conversões: ${this.report.changes.length}`);
             return true;
         } else {
-            console.log(`⚠️  FASE 4 V2 CONCLUÍDA COM ERROS - Verifique o relatório`);
+            console.log("⚠️  FASE 4 V2 CONCLUÍDA COM ERROS - Verifique o relatório");
             return false;
         }
     }

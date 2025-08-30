@@ -142,7 +142,7 @@ class ApiFetchValidator {
         const duration = endTime - this.report.startTime;
 
         console.log(`\n${'='.repeat(80)}`);
-        console.log(`📊 RELATÓRIO FINAL - VALIDAÇÃO FASE 4: Padronização app.apiFetch()`);
+        console.log("📊 RELATÓRIO FINAL - VALIDAÇÃO FASE 4: Padronização app.apiFetch()");
         console.log(`${'='.repeat(80)}`);
         console.log(`⏱️  Tempo de análise: ${duration}ms`);
         console.log(`📁 Total de arquivos HTML: ${this.report.totalFiles}`);
@@ -150,7 +150,7 @@ class ApiFetchValidator {
         console.log(`🟢 Arquivos usando app.apiFetch(): ${this.report.filesWithAppApiFetch.length}`);
 
         // Status das páginas principais
-        console.log(`\n📋 STATUS DAS PÁGINAS PRINCIPAIS:`);
+        console.log("\n📋 STATUS DAS PÁGINAS PRINCIPAIS:");
         const mainPageStatuses = Object.entries(this.report.mainPages.status);
         if (mainPageStatuses.length === 0) {
             console.log('   ❌ Nenhuma página principal encontrada!');
@@ -164,18 +164,18 @@ class ApiFetchValidator {
                     console.log(`      ⚠️  Ainda tem ${status.fetchCount} chamadas fetch() diretas!`);
                 }
                 if (status.appFetchCount > 0 && !status.hasAppJs) {
-                    console.log(`      ⚠️  Usando app.apiFetch() mas falta incluir js/app.js!`);
+                    console.log("⚠️  Usando app.apiFetch() mas falta incluir js/app.js!");
                 }
             });
         }
 
         // Arquivos de teste
-        console.log(`\n🧪 STATUS DOS ARQUIVOS DE TESTE:`);
+        console.log("\n🧪 STATUS DOS ARQUIVOS DE TESTE:");
         console.log(`   🟢 Convertidos: ${this.report.testFiles.converted.length}`);
         console.log(`   🔴 Ainda precisam de conversão: ${this.report.testFiles.remaining.length}`);
 
         if (this.report.testFiles.remaining.length > 0) {
-            console.log(`\n   📄 Arquivos que ainda precisam de conversão:`);
+            console.log("\n   📄 Arquivos que ainda precisam de conversão:");
             this.report.testFiles.remaining.forEach(file => {
                 console.log(`      🔴 ${file.filename}: ${file.fetchCount} fetch() diretas`);
             });
@@ -183,7 +183,7 @@ class ApiFetchValidator {
 
         // Arquivos com problemas
         if (this.report.filesWithFetch.length > 0) {
-            console.log(`\n⚠️  ARQUIVOS COM FETCH() DIRETO:`);
+            console.log("\n⚠️  ARQUIVOS COM FETCH() DIRETO:");
             this.report.filesWithFetch.forEach(file => {
                 console.log(`   🔴 ${file.filename}: ${file.count} ocorrências`);
             });
@@ -205,17 +205,17 @@ class ApiFetchValidator {
                     this.report.filesWithFetch.every(f => f.filename.includes('js/app.js') || f.filename.includes('sw.js'))
         };
 
-        console.log(`\n📊 RESUMO GERAL:`);
+        console.log("\n📊 RESUMO GERAL:");
         console.log(`   🎯 Taxa de conversão páginas principais: ${conversionRate}%`);
         console.log(`   📞 Total de chamadas fetch() restantes: ${this.report.summary.totalFetchCalls}`);
         console.log(`   ✨ Total de chamadas app.apiFetch(): ${this.report.summary.totalAppFetchCalls}`);
         
         if (this.report.summary.success) {
-            console.log(`\n🎉 FASE 4 VALIDAÇÃO: SUCESSO TOTAL!`);
-            console.log(`✨ Todas as chamadas foram padronizadas para app.apiFetch()`);
+            console.log("\n🎉 FASE 4 VALIDAÇÃO: SUCESSO TOTAL!");
+            console.log("✨ Todas as chamadas foram padronizadas para app.apiFetch()");
         } else {
-            console.log(`\n⚠️  FASE 4 VALIDAÇÃO: PENDÊNCIAS ENCONTRADAS`);
-            console.log(`🔧 Alguns arquivos ainda precisam de conversão manual`);
+            console.log("\n⚠️  FASE 4 VALIDAÇÃO: PENDÊNCIAS ENCONTRADAS");
+            console.log("🔧 Alguns arquivos ainda precisam de conversão manual");
         }
 
         console.log(`${'='.repeat(80)}\n`);

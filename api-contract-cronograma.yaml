@@ -1,0 +1,517 @@
+openapi: 3.0.3
+info:
+  title: Editaliza Cronograma API
+  description: API endpoints used by cronograma.html page
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://app.editaliza.com.br/api
+    description: Production server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          example: "Invalid input data"
+        details:
+          type: object
+          additionalProperties: true
+    
+    Plan:
+      type: object
+      required:
+        - id
+        - plan_name
+        - exam_date
+      properties:
+        id:
+          type: integer
+          example: 1
+        plan_name:
+          type: string
+          example: "Concurso TJ-PE 2025"
+        exam_date:
+          type: string
+          format: date
+          example: "2025-03-15"
+        reta_final_mode:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+    
+    Session:
+      type: object
+      required:
+        - id
+        - subject_name
+        - topic_description
+        - session_type
+        - status
+        - scheduled_date
+      properties:
+        id:
+          type: integer
+          example: 123
+        subject_name:
+          type: string
+          example: "Português"
+        topic_description:
+          type: string
+          example: "Concordância Verbal"
+        session_type:
+          type: string
+          enum: ["Novo Tópico", "Revisão Consolidada", "Reforço Extra", "Simulado Direcionado", "Simulado Completo", "Redação"]
+        status:
+          type: string
+          enum: ["Pendente", "Concluído"]
+        scheduled_date:
+          type: string
+          format: date
+          example: "2025-08-29"
+        time_studied_seconds:
+          type: integer
+          example: 3600
+        questions_solved:
+          type: integer
+          example: 25
+        notes:
+          type: string
+    
+    SessionsByDate:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          $ref: '#/components/schemas/Session'
+      example:
+        "2025-08-29":
+          - id: 1
+            subject_name: "Português"
+            topic_description: "Concordância Verbal"
+            session_type: "Novo Tópico"
+            status: "Pendente"
+            scheduled_date: "2025-08-29"
+    
+    OverdueCheck:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          example: 5
+        sessions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Session'
+    
+    ExclusionsData:
+      type: object
+      required:
+        - isRetaFinalActive
+        - totalExclusions
+        - exclusionsBySubject
+      properties:
+        isRetaFinalActive:
+          type: boolean
+          example: true
+        totalExclusions:
+          type: integer
+          example: 45
+        lastUpdated:
+          type: string
+          format: date-time
+        exclusionsBySubject:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: object
+              properties:
+                description:
+                  type: string
+                priority_combined:
+                  type: integer
+                exclusion_date:
+                  type: string
+                  format: date
+
+security:
+  - bearerAuth: []
+
+paths:
+  /plans/{planId}:
+    get:
+      summary: Get plan details
+      description: Retrieve plan information including name, exam date, and reta final mode
+      tags:
+        - Plans
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Plan details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plan'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /plans:
+    get:
+      summary: List all user plans
+      description: Get all plans belonging to the authenticated user
+      tags:
+        - Plans
+      responses:
+        '200':
+          description: List of plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plan'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /sessions/by-date/{planId}:
+    get:
+      summary: Get sessions grouped by date
+      description: Retrieve all sessions for a plan grouped by scheduled date
+      tags:
+        - Sessions
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Sessions grouped by date
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionsByDate'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /sessions/overdue-check/{planId}:
+    get:
+      summary: Check for overdue sessions
+      description: Get count and list of overdue sessions for a plan
+      tags:
+        - Sessions
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Overdue sessions information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OverdueCheck'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /sessions/{sessionId}:
+    patch:
+      summary: Update session status
+      description: Update the status of a specific session (Pendente/Concluído)
+      tags:
+        - Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: ["Pendente", "Concluído"]
+                notes:
+                  type: string
+                  maxLength: 500
+      responses:
+        '200':
+          description: Session updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Status atualizado com sucesso"
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /sessions/{sessionId}/postpone:
+    patch:
+      summary: Postpone a session
+      description: Postpone a session to next available day or specific number of days
+      tags:
+        - Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - days
+              properties:
+                days:
+                  oneOf:
+                    - type: string
+                      enum: ["next"]
+                    - type: integer
+                      minimum: 1
+                      maximum: 30
+      responses:
+        '200':
+          description: Session postponed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Sessão adiada com sucesso"
+                  newDate:
+                    type: string
+                    format: date
+                    example: "2025-08-30"
+        '400':
+          description: Invalid postpone days value
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /sessions/{sessionId}/reinforce:
+    post:
+      summary: Create reinforcement session
+      description: Schedule a reinforcement session for spaced repetition
+      tags:
+        - Sessions
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '201':
+          description: Reinforcement session created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Reforço agendado com sucesso"
+                  newSessionId:
+                    type: integer
+                    example: 456
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Reinforcement already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /plans/{planId}/replan:
+    post:
+      summary: Replan overdue sessions
+      description: Redistribute overdue sessions to future dates
+      tags:
+        - Plans
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Replanning completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Cronograma replanejado com sucesso"
+                  rescheduledCount:
+                    type: integer
+                    example: 5
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Plan not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /plans/{planId}/exclusions:
+    get:
+      summary: Get excluded topics (Reta Final mode)
+      description: Retrieve list of topics excluded due to Reta Final optimization
+      tags:
+        - Plans
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        '200':
+          description: Exclusions data retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExclusionsData'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Plan not found or not in Reta Final mode
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'

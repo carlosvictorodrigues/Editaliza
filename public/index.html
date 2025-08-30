@@ -18,21 +18,8 @@
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
     
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'editaliza-blue': '#0528f2',
-                        'editaliza-green': '#1ad937',
-                        'editaliza-dark': '#0d0d0d'
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- Tailwind CSS Compilado (não usar CDN em produção) -->
+    <link href="css/tailwind.css" rel="stylesheet">
     
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -117,7 +104,7 @@
                     <a href="#precos" class="text-gray-600 hover:text-editaliza-blue transition-colors">Planos</a>
                 </nav>
                 
-                <a href="https://app.editaliza.com.br/login.html" class="bg-editaliza-blue text-white px-6 py-2 rounded-xl font-medium hover:bg-blue-700 transition-colors">
+                <a href="/login.html" class="bg-editaliza-blue text-white px-6 py-2 rounded-xl font-medium hover:bg-blue-700 transition-colors">
                     Entrar
                 </a>
             </div>
@@ -985,7 +972,7 @@
                 <a href="#precos" class="pulse-glow bg-editaliza-green text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-green-600 transition-all duration-300">
                     Criar cronograma agora
                 </a>
-                <a href="https://app.editaliza.com.br/login.html" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-editaliza-blue transition-colors">
+                <a href="/login.html" class="border-2 border-white text-white px-8 py-4 rounded-xl font-semibold hover:bg-white hover:text-editaliza-blue transition-colors">
                     Já tenho conta
                 </a>
             </div>
@@ -1055,7 +1042,7 @@
                         <li><a href="#como-funciona" class="hover:text-white transition-colors">Como funciona</a></li>
                         <li><a href="#metodologia" class="hover:text-white transition-colors">Metodologia</a></li>
                         <li><a href="#precos" class="hover:text-white transition-colors">Preços</a></li>
-                        <li><a href="https://app.editaliza.com.br/login.html" class="hover:text-white transition-colors">Login</a></li>
+                        <li><a href="/login.html" class="hover:text-white transition-colors">Login</a></li>
                     </ul>
                 </div>
                 

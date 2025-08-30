@@ -338,6 +338,109 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 0 0 2px rgba(79, 148, 255, 0.3);
 }
 
+/* Enhanced Checkbox Styles for Checklist Modal - Professional Design */
+input[type="checkbox"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid #D1D5DB;
+    border-radius: 0.375rem;
+    background-color: #FFFFFF;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Hover state for better user feedback */
+input[type="checkbox"]:hover {
+    border-color: var(--editaliza-blue);
+    box-shadow: 0 0 0 3px rgba(5, 40, 242, 0.1);
+    transform: scale(1.05);
+}
+
+/* Checked state with enhanced styling */
+input[type="checkbox"]:checked {
+    background-color: var(--editaliza-blue);
+    border-color: var(--editaliza-blue);
+    box-shadow: 0 2px 8px rgba(5, 40, 242, 0.25);
+}
+
+/* Professional checkmark with better visibility */
+input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    color: #FFFFFF;
+    font-size: 1rem;
+    font-weight: 900;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    line-height: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    display: block;
+}
+
+/* Focus state for accessibility */
+input[type="checkbox"]:focus {
+    outline: 2px solid var(--editaliza-blue);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(5, 40, 242, 0.2);
+}
+
+/* Disabled state */
+input[type="checkbox"]:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    border-color: #E5E7EB;
+    background-color: #F9FAFB;
+}
+
+/* Enhanced checklist item wrapper */
+.checklist-item {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Label hover effects for checklist items */
+label.checklist-item:hover input[type="checkbox"]:not(:disabled) {
+    border-color: var(--editaliza-blue);
+    box-shadow: 0 0 0 3px rgba(5, 40, 242, 0.1);
+}
+
+/* Ensure checkboxes work properly in modal context */
+#studySessionModal input[type="checkbox"],
+.modal input[type="checkbox"],
+[role="dialog"] input[type="checkbox"] {
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    background-color: #FFFFFF !important;
+}
+
+#studySessionModal input[type="checkbox"]:checked::after,
+.modal input[type="checkbox"]:checked::after,
+[role="dialog"] input[type="checkbox"]:checked::after {
+    content: '✓' !important;
+    color: #FFFFFF !important;
+    font-size: 1rem !important;
+    font-weight: 900 !important;
+    display: block !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 10 !important;
+    line-height: 1 !important;
+}
+
     border-color: var(--border-primary);
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
 }
@@ -1285,6 +1388,31 @@ button[onclick*="openPostponeModal"] span {
     color: #FFFFFF !important;
 }
 
+/* Overrides: ensure gray action buttons use dark text */
+.study-card button.reinforce-btn[onclick*="reinforceSession"],
+.study-card button.reinforce-btn[onclick*="reinforceSession"] *,
+.study-card button.reinforce-btn[onclick*="reinforceSession"] span {
+    color: var(--text-primary) !important;
+}
+
+.study-card button.reinforce-btn[onclick*="reinforceSession"]:hover,
+.study-card button.reinforce-btn[onclick*="reinforceSession"]:hover *,
+.study-card button.reinforce-btn[onclick*="reinforceSession"]:hover span {
+    color: var(--text-strong, #111827) !important;
+}
+
+.study-card button.postpone-btn[onclick*="openPostponeModal"],
+.study-card button.postpone-btn[onclick*="openPostponeModal"] *,
+.study-card button.postpone-btn[onclick*="openPostponeModal"] span {
+    color: var(--text-primary) !important;
+}
+
+.study-card button.postpone-btn[onclick*="openPostponeModal"]:hover,
+.study-card button.postpone-btn[onclick*="openPostponeModal"]:hover *,
+.study-card button.postpone-btn[onclick*="openPostponeModal"]:hover span {
+    color: var(--text-strong, #111827) !important;
+}
+
 .text-adaptive-secondary {
     color: var(--text-secondary);
 }
@@ -1621,3 +1749,87 @@ footer {
     background: var(--bg) !important;
     color: var(--text) !important;
 }
+
+/* ===============================================
+ * STUDY CARDS - ENHANCED SUBJECT BORDERS 
+ * =============================================== */
+
+/* Cards de estudo com bordas coloridas mais visíveis */
+.study-card {
+    border-left-width: 4px !important;
+    border-left-style: solid !important;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* Hover effect para cards de estudo */
+.study-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* Tailwind color classes with enhanced visibility for study cards */
+.study-card.border-blue-500 { border-left-color: #3B82F6 !important; }
+.study-card.border-green-500 { border-left-color: #10B981 !important; }
+.study-card.border-red-500 { border-left-color: #EF4444 !important; }
+.study-card.border-purple-500 { border-left-color: #A855F7 !important; }
+.study-card.border-purple-600 { border-left-color: #9333EA !important; }
+.study-card.border-orange-500 { border-left-color: #F97316 !important; }
+.study-card.border-orange-600 { border-left-color: #EA580C !important; }
+.study-card.border-teal-500 { border-left-color: #14B8A6 !important; }
+.study-card.border-pink-500 { border-left-color: #EC4899 !important; }
+.study-card.border-pink-600 { border-left-color: #DB2777 !important; }
+.study-card.border-yellow-500 { border-left-color: #EAB308 !important; }
+.study-card.border-yellow-600 { border-left-color: #CA8A04 !important; }
+.study-card.border-cyan-500 { border-left-color: #06B6D4 !important; }
+.study-card.border-cyan-600 { border-left-color: #0891B2 !important; }
+.study-card.border-sky-500 { border-left-color: #0EA5E9 !important; }
+.study-card.border-rose-500 { border-left-color: #F43F5E !important; }
+.study-card.border-amber-500 { border-left-color: #F59E0B !important; }
+.study-card.border-amber-600 { border-left-color: #D97706 !important; }
+.study-card.border-emerald-500 { border-left-color: #10B981 !important; }
+.study-card.border-indigo-500 { border-left-color: #6366F1 !important; }
+.study-card.border-indigo-600 { border-left-color: #4F46E5 !important; }
+.study-card.border-violet-500 { border-left-color: #8B5CF6 !important; }
+.study-card.border-slate-500 { border-left-color: #64748B !important; }
+.study-card.border-slate-700 { border-left-color: #334155 !important; }
+.study-card.border-gray-400 { border-left-color: #9CA3AF !important; }
+.study-card.border-gray-500 { border-left-color: #6B7280 !important; }
+
+/* Cores padrão do Tailwind para garantir compatibilidade */
+.border-blue-500 { border-color: #3B82F6; }
+.border-green-500 { border-color: #10B981; }
+.border-red-500 { border-color: #EF4444; }
+.border-purple-500 { border-color: #A855F7; }
+.border-purple-600 { border-color: #9333EA; }
+.border-orange-500 { border-color: #F97316; }
+.border-orange-600 { border-color: #EA580C; }
+.border-teal-500 { border-color: #14B8A6; }
+.border-pink-500 { border-color: #EC4899; }
+.border-pink-600 { border-color: #DB2777; }
+.border-yellow-500 { border-color: #EAB308; }
+.border-yellow-600 { border-color: #CA8A04; }
+.border-cyan-500 { border-color: #06B6D4; }
+.border-cyan-600 { border-color: #0891B2; }
+.border-sky-500 { border-color: #0EA5E9; }
+.border-rose-500 { border-color: #F43F5E; }
+.border-amber-500 { border-color: #F59E0B; }
+.border-amber-600 { border-color: #D97706; }
+.border-emerald-500 { border-color: #10B981; }
+.border-indigo-500 { border-color: #6366F1; }
+.border-indigo-600 { border-color: #4F46E5; }
+.border-violet-500 { border-color: #8B5CF6; }
+.border-slate-500 { border-color: #64748B; }
+.border-slate-700 { border-color: #334155; }
+.border-gray-400 { border-color: #9CA3AF; }
+.border-gray-500 { border-color: #6B7280; }
+/* Checklist Modal - visual checkmarks */
+.checklist-row { position: relative; border: 1px solid transparent; }
+.checklist-item { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+.checklist-row .checkmark-visual { background: #fff; }
+.checklist-item:focus-visible + .checkmark-visual { box-shadow: 0 0 0 3px rgba(59,130,246,0.35); border-color: #3B82F6 !important; }
+.checklist-row.checked { background: #F0FDF4 !important; border-color: #BBF7D0 !important; }
+.checklist-row.checked .checkmark-visual { background: #16A34A !important; border-color: #16A34A !important; color: #FFFFFF !important; box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+.checklist-row.checked .checkmark-icon { opacity: 1 !important; transform: scale(1) !important; }
+.checklist-row.checked .checklist-text { text-decoration: line-through; color: #4B5563; }
+.checklist-row:hover { border-color: #E5E7EB; }

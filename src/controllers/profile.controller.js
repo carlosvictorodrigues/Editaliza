@@ -93,10 +93,11 @@ const getProfile = async (req, res) => {
     try {
         const user = await db.getAsync(`
             SELECT 
-                id, email, name, profile_picture, phone, whatsapp, created_at,
-                state, city, birth_date, education, work_status, first_time, concursos_count,
-                difficulties, area_interest, level_desired, timeline_goal, study_hours, motivation_text,
-                google_id, auth_provider, google_avatar
+                id, 
+                email, 
+                name, 
+                created_at,
+                password_hash
             FROM users 
             WHERE id = ?
         `, [req.user.id]);
@@ -106,19 +107,8 @@ const getProfile = async (req, res) => {
             return res.status(404).json({ error: 'Usuário não encontrado.' });
         }
         
-        // Parse difficulties JSON string back to array
-        let difficulties = [];
-        if (user.difficulties) {
-            try {
-                difficulties = JSON.parse(user.difficulties);
-            } catch (e) {
-                logger.error('PARSE_DIFFICULTIES_ERROR', { 
-                    userId: req.user.id, 
-                    error: e.message 
-                });
-                difficulties = [];
-            }
-        }
+        // Não enviar password_hash na resposta
+        delete user.password_hash;
         
         logger.info('PROFILE_FETCHED', { userId: req.user.id });
         
@@ -126,27 +116,23 @@ const getProfile = async (req, res) => {
             id: user.id,
             email: user.email,
             name: user.name,
-            profile_picture: user.profile_picture,
-            phone: user.phone,
-            whatsapp: user.whatsapp,
             created_at: user.created_at,
-            state: user.state,
-            city: user.city,
-            birth_date: user.birth_date,
-            education: user.education,
-            work_status: user.work_status,
-            first_time: user.first_time,
-            concursos_count: user.concursos_count,
-            difficulties: difficulties,
-            area_interest: user.area_interest,
-            level_desired: user.level_desired,
-            timeline_goal: user.timeline_goal,
-            study_hours: user.study_hours,
-            motivation_text: user.motivation_text,
-            // Campos OAuth
-            google_id: user.google_id,
-            auth_provider: user.auth_provider,
-            google_avatar: user.google_avatar
+            // Campos que a página profile.html espera (retornar vazio se não existir)
+            phone: user.phone || '',
+            whatsapp: user.whatsapp || '',
+            state: user.state || '',
+            city: user.city || '',
+            birth_date: user.birth_date || '',
+            education: user.education || '',
+            work_status: user.work_status || '',
+            first_time: user.first_time || false,
+            concursos_count: user.concursos_count || 0,
+            difficulties: user.difficulties || [],
+            area_interest: user.area_interest || '',
+            level_desired: user.level_desired || '',
+            timeline_goal: user.timeline_goal || '',
+            study_hours: user.study_hours || '',
+            motivation_text: user.motivation_text || ''
         });
     } catch (error) {
         logger.error('GET_PROFILE_ERROR', { 

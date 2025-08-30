@@ -1,0 +1,226 @@
+{
+  "page": "cronograma.html",
+  "test_date": "2025-08-29T12:10:00.000Z",
+  "interactive_map": [
+    {
+      "selector": ".filter-btn[data-filter=\"week\"]",
+      "label": "Esta Semana",
+      "expected": "Filtrar cronograma para semana atual"
+    },
+    {
+      "selector": ".filter-btn[data-filter=\"month\"]",
+      "label": "Este Mês",
+      "expected": "Filtrar cronograma para mês atual"
+    },
+    {
+      "selector": ".filter-btn[data-filter=\"all\"]",
+      "label": "Tudo",
+      "expected": "Mostrar todo o cronograma"
+    },
+    {
+      "selector": "#exportButton",
+      "label": "Exportar para Calendário",
+      "expected": "Abrir modal de exportação"
+    },
+    {
+      "selector": "#cancelPostponeButton",
+      "label": "Cancelar",
+      "expected": "Fechar modal de adiamento"
+    },
+    {
+      "selector": "#downloadIcsButton",
+      "label": "Baixar arquivo .ics",
+      "expected": "Download do arquivo de calendário"
+    },
+    {
+      "selector": "#closeCalendarModalButton",
+      "label": "Fechar",
+      "expected": "Fechar modal de calendário"
+    },
+    {
+      "selector": "#viewFullReportBtn",
+      "label": "Relatório Detalhado",
+      "expected": "Mostrar relatório completo de transparência"
+    },
+    {
+      "selector": "#exportExclusionsBtn",
+      "label": "Exportar Lista CSV",
+      "expected": "Download de exclusões em CSV"
+    },
+    {
+      "selector": "#toggleTransparencyBtn",
+      "label": "Minimizar",
+      "expected": "Toggle seção de transparência"
+    }
+  ],
+  "issues": [
+    {
+      "id": "PG-001",
+      "element": "#main-nav-container (linha 95)",
+      "symptom": "Comentário com caractere corrompido: NAVEGA!ÒO",
+      "console": "Caractere Ò em vez de Ç",
+      "network": null,
+      "root_cause": "Encoding UTF-8 incorreto no HTML",
+      "fix_plan": [
+        {
+          "file": "cronograma.html",
+          "line_hint": 94,
+          "change": "Substituir 'NAVEGA!ÒO' por 'NAVEGAÇÃO'"
+        }
+      ],
+      "risk": "baixo",
+      "test_after_fix": "Verificar se o comentário está correto no código fonte"
+    },
+    {
+      "id": "PG-002",
+      "element": "#postponeModal heading (linha 100)",
+      "symptom": "Caractere corrompido no cabeçalho: 'CABE!ALHO'",
+      "console": "Caractere ! em vez de Ç",
+      "network": null,
+      "root_cause": "Encoding UTF-8 incorreto",
+      "fix_plan": [
+        {
+          "file": "cronograma.html",
+          "line_hint": 142,
+          "change": "Substituir 'CABE!ALHO' por 'CABEÇALHO'"
+        }
+      ],
+      "risk": "baixo",
+      "test_after_fix": "Verificar comentário no código fonte"
+    },
+    {
+      "id": "PG-003",
+      "element": "Comentários múltiplos",
+      "symptom": "Caracteres corrompidos em comentários: CORRE!ÒO",
+      "console": "Múltiplos caracteres incorretos em comentários",
+      "network": null,
+      "root_cause": "Encoding UTF-8 incorreto em múltiplas linhas",
+      "fix_plan": [
+        {
+          "file": "cronograma.html",
+          "line_hint": [252, 517, 1035, 1046],
+          "change": "Substituir 'CORRE!ÒO' por 'CORREÇÃO' em todas ocorrências"
+        }
+      ],
+      "risk": "baixo",
+      "test_after_fix": "Buscar por '!' em comentários"
+    },
+    {
+      "id": "PG-004",
+      "element": "#examDate",
+      "symptom": "Elemento referenciado na linha 322 mas não existe no DOM",
+      "console": "TypeError: Cannot set property 'textContent' of null",
+      "network": null,
+      "root_cause": "Elemento #examDate não está definido no HTML",
+      "fix_plan": [
+        {
+          "file": "cronograma.html",
+          "line_hint": 143,
+          "change": "Adicionar <div id=\"examDate\"></div> dentro do plan-header-container ou remover referência na linha 322"
+        }
+      ],
+      "risk": "médio",
+      "test_after_fix": "Verificar se erro no console desaparece ao carregar página"
+    },
+    {
+      "id": "PG-005",
+      "element": "Console logs de debug",
+      "symptom": "Múltiplos console.log de debug em produção",
+      "console": "Logs desnecessários expostos",
+      "network": null,
+      "root_cause": "Debug logs deixados no código",
+      "fix_plan": [
+        {
+          "file": "cronograma.html",
+          "line_hint": [254-278, 325-336, 350-352, 357-362, 683-710],
+          "change": "Remover ou comentar todos console.log de debug"
+        }
+      ],
+      "risk": "baixo",
+      "test_after_fix": "Verificar console limpo em produção"
+    },
+    {
+      "id": "PG-006",
+      "element": "void() statements",
+      "symptom": "Uso incorreto de void() em vez de console.log",
+      "console": "void is not a function",
+      "network": null,
+      "root_cause": "Código em js/app.js usando void() incorretamente",
+      "fix_plan": [
+        {
+          "file": "js/app.js",
+          "line_hint": [65, 74, 81, 83, 105],
+          "change": "Substituir void('...') por console.log('...') ou remover"
+        }
+      ],
+      "risk": "médio",
+      "test_after_fix": "Verificar se não há erros de void no console"
+    },
+    {
+      "id": "PG-007",
+      "element": "Modal close button (linha 838)",
+      "symptom": "Botão de fechar modal com onclick incorreto",
+      "console": "TypeError: this.closest is not a function",
+      "network": null,
+      "root_cause": "Uso incorreto de this em onclick inline",
+      "fix_plan": [
+        {
+          "file": "cronograma.html",
+          "line_hint": 838,
+          "change": "Mudar onclick para usar event.currentTarget ao invés de this"
+        }
+      ],
+      "risk": "médio",
+      "test_after_fix": "Testar fechamento do modal de transparência"
+    },
+    {
+      "id": "PG-008",
+      "element": "Color classes in template strings",
+      "symptom": "Classes dinâmicas de Tailwind podem não funcionar",
+      "console": "Tailwind não compila classes dinâmicas",
+      "network": null,
+      "root_cause": "Template literals com classes Tailwind dinâmicas",
+      "fix_plan": [
+        {
+          "file": "cronograma.html",
+          "line_hint": [897-914],
+          "change": "Usar classes estáticas ou adicionar ao safelist do Tailwind"
+        }
+      ],
+      "risk": "baixo",
+      "test_after_fix": "Verificar se cores aparecem corretamente no relatório"
+    },
+    {
+      "id": "PG-009",
+      "element": "Character R without context",
+      "symptom": "Caractere 'R' solto na linha 721",
+      "console": "Unexpected token",
+      "network": null,
+      "root_cause": "Caractere digitado por engano",
+      "fix_plan": [
+        {
+          "file": "cronograma.html",
+          "line_hint": 721,
+          "change": "Remover 'R' antes de 'Dados de exclusão inválidos'"
+        }
+      ],
+      "risk": "baixo",
+      "test_after_fix": "Verificar console sem erros de sintaxe"
+    }
+  ],
+  "summary": {
+    "total_issues": 9,
+    "by_risk": {
+      "alto": 0,
+      "médio": 4,
+      "baixo": 5
+    },
+    "by_category": {
+      "encoding": 3,
+      "missing_elements": 1,
+      "debug_code": 2,
+      "syntax_errors": 2,
+      "css_issues": 1
+    }
+  }
+}

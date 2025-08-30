@@ -1,0 +1,12 @@
+/* Placeholder for theme utilities in local dev.
+   Real theme system is disabled (light mode only).
+   This file prevents 404 and MIME errors when referenced by login.html. */
+
+:root {
+  /* Define minimal CSS variables, if referenced elsewhere */
+  --editaliza-blue: #0528f2;
+  --editaliza-green: #1ad937;
+}
+
+.hidden { display: none !important; }
+

@@ -4,7 +4,7 @@
  * @version 2.0 - Modularized for performance
  */
 
-export const UICore = {
+const UICore = {
     // Renderiza os componentes globais da UI (spinner, toast)
     renderGlobalUI() {
         if (document.getElementById('toast-container')) return; // Evitar duplicação

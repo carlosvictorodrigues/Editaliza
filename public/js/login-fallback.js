@@ -1,8 +1,8 @@
 // Minimal, ASCII-only login handler to survive encoding issues in inline script
 (() => {
-  const log = (...args) => { try { console.log('[login-fallback]', ...args); } catch (_) {} };
-  const warn = (...args) => { try { console.warn('[login-fallback]', ...args); } catch (_) {} };
-  const errorLog = (...args) => { try { console.error('[login-fallback]', ...args); } catch (_) {} };
+  const log = function() { try { console.log.apply(console, ['[login-fallback]'].concat(Array.prototype.slice.call(arguments))); } catch (_) {} };
+  const warn = function() { try { console.warn.apply(console, ['[login-fallback]'].concat(Array.prototype.slice.call(arguments))); } catch (_) {} };
+  const errorLog = function() { try { console.error.apply(console, ['[login-fallback]'].concat(Array.prototype.slice.call(arguments))); } catch (_) {} };
 
   function cleanQueryIfCredentialsPresent() {
     try {
@@ -19,7 +19,7 @@
   async function doApiLogin(email, password) {
     // Prefer app.apiFetch when available
     if (window.app && typeof window.app.apiFetch === 'function') {
-      return await window.app.apiFetch('/api/auth/login', {
+      return await window.app.apiFetch('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
@@ -114,7 +114,7 @@
       // Secure session token retrieval flow
       if (params.get('auth_success') === '1') {
         try {
-          const resp = await (window.app && window.app.apiFetch ? window.app.apiFetch('/api/auth/session-token') : fetch('/api/auth/session-token'));
+          const resp = await ((window.app && window.app.apiFetch ? window.app.apiFetch('/auth/session-token') : fetch('/api/auth/session-token')));
           const data = typeof resp.json === 'function' ? await resp.json() : resp; // app.apiFetch returns data directly
           if (data && data.success && data.token) {
             const key = (window.app && window.app.config && window.app.config.tokenKey) || 'authToken';
@@ -198,3 +198,5 @@
     init();
   }
 })();
+
+

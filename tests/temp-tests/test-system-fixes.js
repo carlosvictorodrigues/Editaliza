@@ -215,7 +215,7 @@ async function testVerifySessions() {
         console.log(`   Total de sessões: ${response.length}`);
         
         if (response.length > 0) {
-            console.log(`   Primeira sessão:`);
+            console.log("Primeira sessão:");
             console.log(`     - Data: ${response[0].session_date}`);
             console.log(`     - Disciplina: ${response[0].subject_name}`);
             console.log(`     - Status: ${response[0].status}`);

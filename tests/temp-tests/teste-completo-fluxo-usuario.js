@@ -578,52 +578,52 @@ function generateFinalReport() {
     // Status geral
     testResults.overallStatus = failedCount === 0 ? '✅' : '❌';
 
-    console.log(`\n🎯 RESUMO GERAL:`);
+    console.log("\n🎯 RESUMO GERAL:");
     console.log(`   Status: ${testResults.overallStatus} ${failedCount === 0 ? 'TODOS OS TESTES PASSARAM' : 'ALGUNS TESTES FALHARAM'}`);
     console.log(`   Total: ${testCount} testes`);
     console.log(`   ✅ Passou: ${passedCount}`);
     console.log(`   ❌ Falhou: ${failedCount}`);
 
-    console.log(`\n📋 DETALHES POR ETAPA:`);
+    console.log("\n📋 DETALHES POR ETAPA:");
     
-    console.log(`\n1️⃣ CRIAR CONTA E LOGIN:`);
+    console.log("\n1️⃣ CRIAR CONTA E LOGIN:");
     console.log(`   Status: ${testResults.createAccount.status}`);
     console.log(`   Detalhes: ${testResults.createAccount.details}`);
     if (testResults.createAccount.data) {
         console.log(`   Dados: User ID ${testResults.createAccount.data.userId}, Email: ${testResults.createAccount.data.email}`);
     }
 
-    console.log(`\n2️⃣ CRIAR PLANO DE ESTUDOS:`);
+    console.log("\n2️⃣ CRIAR PLANO DE ESTUDOS:");
     console.log(`   Status: ${testResults.createPlan.status}`);
     console.log(`   Detalhes: ${testResults.createPlan.details}`);
     if (testResults.createPlan.data) {
         console.log(`   Dados: Plan ID ${testResults.createPlan.data.planId}, ${testResults.createPlan.data.subjectsCount} disciplinas, ${testResults.createPlan.data.topicsCount} tópicos`);
     }
 
-    console.log(`\n3️⃣ GERAR CRONOGRAMA:`);
+    console.log("\n3️⃣ GERAR CRONOGRAMA:");
     console.log(`   Status: ${testResults.generateSchedule.status}`);
     console.log(`   Detalhes: ${testResults.generateSchedule.details}`);
     if (testResults.generateSchedule.data) {
         console.log(`   Dados: ${testResults.generateSchedule.data.sessionsCount} sessões geradas`);
     }
 
-    console.log(`\n4️⃣ VERIFICAR INTERFACE:`);
+    console.log("\n4️⃣ VERIFICAR INTERFACE:");
     console.log(`   Status: ${testResults.verifyInterface.status}`);
     console.log(`   Detalhes: ${testResults.verifyInterface.details}`);
 
-    console.log(`\n5️⃣ MARCAR SESSÕES COMO CONCLUÍDAS:`);
+    console.log("\n5️⃣ MARCAR SESSÕES COMO CONCLUÍDAS:");
     console.log(`   Status: ${testResults.markSessions.status}`);
     console.log(`   Detalhes: ${testResults.markSessions.details}`);
     if (testResults.markSessions.data) {
         console.log(`   Dados: ${testResults.markSessions.data.completedCount} sessões concluídas`);
     }
 
-    console.log(`\n6️⃣ VERIFICAR ESTATÍSTICAS E GAMIFICAÇÃO:`);
+    console.log("\n6️⃣ VERIFICAR ESTATÍSTICAS E GAMIFICAÇÃO:");
     console.log(`   Status: ${testResults.verifyStats.status}`);
     console.log(`   Detalhes: ${testResults.verifyStats.details}`);
 
     // DADOS CRIADOS NO TESTE
-    console.log(`\n📦 DADOS CRIADOS NO TESTE:`);
+    console.log("\n📦 DADOS CRIADOS NO TESTE:");
     if (testResults.createAccount.data) {
         console.log(`   - Usuário: ${testResults.createAccount.data.email} (ID: ${testResults.createAccount.data.userId})`);
     }
@@ -637,7 +637,7 @@ function generateFinalReport() {
         console.log(`   - Concluídas: ${testResults.markSessions.data.completedCount} sessões marcadas como concluídas`);
     }
 
-    console.log(`\n🔧 FUNCIONALIDADES VALIDADAS:`);
+    console.log("\n🔧 FUNCIONALIDADES VALIDADAS:");
     console.log(`   ${testResults.createAccount.status} Autenticação JWT`);
     console.log(`   ${testResults.createAccount.status} Proteção de rotas`);
     console.log(`   ${testResults.createPlan.status} CRUD de planos`);

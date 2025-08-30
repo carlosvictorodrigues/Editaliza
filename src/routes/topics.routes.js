@@ -26,8 +26,8 @@ const { validators, handleValidationErrors } = require('../middleware/validation
  * - subjectId numérico
  * - Cache headers automáticos no controller
  */
-router.get('/api/subjects/:subjectId/topics', 
-    authenticateToken,
+router.get('/subjects/:subjectId/topics', 
+    authenticateToken(),
     validators.numericId('subjectId'),
     handleValidationErrors,
     topicsController.getTopicsBySubject
@@ -69,8 +69,8 @@ router.post('/subjects/:subjectId/topics',
  * 
  * ATENÇÃO: CORE DO SISTEMA - VALIDAÇÕES CRÍTICAS ⚠️⚠️⚠️
  */
-router.patch('/api/topics/batch_update', 
-    authenticateToken,
+router.patch('/topics/batch_update', 
+    authenticateToken(),
     body('topics')
         .isArray()
         .withMessage('O corpo deve conter um array de tópicos'),
@@ -105,8 +105,8 @@ router.patch('/api/topics/batch_update',
  * 
  * ATENÇÃO: CORE DO SISTEMA - VALIDAÇÕES CRÍTICAS ⚠️⚠️⚠️
  */
-router.patch('/api/topics/batch_update_details',
-    authenticateToken,
+router.patch('/topics/batch_update_details',
+    authenticateToken(),
     body('topics')
         .isArray()
         .withMessage('O corpo deve conter um array de tópicos'),
@@ -135,8 +135,8 @@ router.patch('/api/topics/batch_update_details',
  * - description string (1-500 chars)
  * - priority_weight opcional mas int (1-5) se presente
  */
-router.patch('/api/topics/:topicId', 
-    authenticateToken,
+router.patch('/topics/:topicId', 
+    authenticateToken(),
     validators.numericId('topicId'),
     validators.text('description', 1, 500),
     body('priority_weight')
@@ -155,8 +155,8 @@ router.patch('/api/topics/:topicId',
  * - topicId numérico
  * - CASCADE delete automático no controller
  */
-router.delete('/api/topics/:topicId', 
-    authenticateToken,
+router.delete('/topics/:topicId', 
+    authenticateToken(),
     validators.numericId('topicId'),
     handleValidationErrors,
     topicsController.deleteTopic

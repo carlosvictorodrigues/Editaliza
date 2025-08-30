@@ -1257,7 +1257,7 @@ app.patch('/api/profile',
 // --- ROTAS DE TESTE E DEBUG ---
 app.get('/api/test-db', authenticateToken, async (req, res) => {
     try {
-        console.log(`[DEBUG TEST] Testando conexão do banco...`);
+        console.log("[DEBUG TEST] Testando conexão do banco...");
         
         // Teste 1: Query simples sem parâmetros
         const test1 = await dbAll('SELECT 1 as test');
@@ -1855,7 +1855,7 @@ app.post('/api/plans/:planId/generate',
 
             console.log(`[CRONOGRAMA] ✅ Removendo sessões antigas do plano ${planId}`);
             await dbRun('DELETE FROM study_sessions WHERE study_plan_id = ?', [planId]);
-            console.log(`[CRONOGRAMA] ✅ Sessões antigas removidas`);
+            console.log("[CRONOGRAMA] ✅ Sessões antigas removidas");
 
             const allTopicsQuery = `
                 SELECT 
@@ -2059,18 +2059,18 @@ app.post('/api/plans/:planId/generate',
                                 'INSERT INTO reta_final_exclusions (plan_id, topic_id, reason) VALUES (?, ?, ?)',
                                 [planId, excludedTopic.id, `${excludedTopic.subject_name} - ${excludedTopic.description} (Prioridade: ${priorityCombined.toFixed(2)})`]
                             );
-                            console.log(`[CRONOGRAMA] ✅ Inserção em reta_final_exclusions concluída`);
+                            console.log("[CRONOGRAMA] ✅ Inserção em reta_final_exclusions concluída");
                         } else {
                             console.warn(`[CRONOGRAMA] ⚠️ Tópico com ID ${excludedTopic.id} não encontrado na tabela topics, pulando inserção na reta_final_exclusions`);
                         }
                         
-                        console.log(`[CRONOGRAMA] ✅ Inserindo em reta_final_excluded_topics`);
+                        console.log("[CRONOGRAMA] ✅ Inserindo em reta_final_excluded_topics");
                         // Salvar na nova tabela com mais detalhes (não depende de FOREIGN KEY para topic_id)
                         await dbRun(
                             'INSERT INTO reta_final_excluded_topics (plan_id, subject_id, topic_id, reason) VALUES (?, ?, ?, ?)',
                             [planId, excludedTopic.subject_id || null, excludedTopic.id, reason]
                         );
-                        console.log(`[CRONOGRAMA] ✅ Inserção em reta_final_excluded_topics concluída`);
+                        console.log("[CRONOGRAMA] ✅ Inserção em reta_final_excluded_topics concluída");
                         
                     } catch (insertError) {
                         console.error(`[CRONOGRAMA] ❌ ERRO CRÍTICO na inserção do tópico ${excludedTopic.id}:`, insertError.message);
@@ -2127,7 +2127,7 @@ app.post('/api/plans/:planId/generate',
             });
             
             // ALGORITMO DE ROUND-ROBIN PONDERADO
-            console.log(`[CRONOGRAMA] Iniciando Round-Robin Ponderado`);
+            console.log("[CRONOGRAMA] Iniciando Round-Robin Ponderado");
             
             // Calcular total de prioridades para proporção
             let totalPriority = 0;
@@ -2241,7 +2241,7 @@ app.post('/api/plans/:planId/generate',
             const hasPendingNewTopics = pendingTopics.length > 0;
             
             if (!hasPendingNewTopics) {
-                console.log(`[CRONOGRAMA] Todas as matérias foram cobertas. Iniciando fase de simulados...`);
+                console.log("[CRONOGRAMA] Todas as matérias foram cobertas. Iniciando fase de simulados...");
                 
                 const subjectTopicsMap = new Map();
                 
@@ -2902,7 +2902,7 @@ app.post('/api/plans/:planId/replan',
             await dbRun('COMMIT');
             
             // Log detalhado para debugging
-            console.log(`[REPLAN] Resultado:`);
+            console.log("[REPLAN] Resultado:");
             console.log(`- Sessions reagendadas: ${result.rescheduledCount}/${overdueSessions.length}`);
             console.log(`- Sessions não reagendadas: ${result.failedSessions.length}`);
             result.reschedulingLog.forEach(log => console.log(`  - ${log}`));
@@ -4251,7 +4251,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Health check disponível em: http://localhost:${PORT}/health`);
-    console.log(`Sistema de backup automático ativado`);
+    console.log("Sistema de backup automático ativado");
 });
 
 // Graceful shutdown

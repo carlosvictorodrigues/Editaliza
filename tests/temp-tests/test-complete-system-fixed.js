@@ -398,7 +398,7 @@ class SystemTester {
         
         const successRate = (this.results.passed / this.results.totalTests * 100).toFixed(1);
         
-        console.log(`\n📈 ESTATÍSTICAS:`);
+        console.log("\n📈 ESTATÍSTICAS:");
         console.log(`   Total de Testes: ${this.results.totalTests}`);
         console.log(`   ✅ Passou: ${this.results.passed}`);
         console.log(`   ❌ Falhou: ${this.results.failed}`);
@@ -418,12 +418,12 @@ class SystemTester {
             });
         }
         
-        console.log(`\n🎯 CORREÇÕES VERIFICADAS:`);
-        console.log(`   ✅ PlanConfigValidator.validate() funcionando`);
-        console.log(`   ✅ Queries PostgreSQL com placeholders $1, $2, etc.`);
-        console.log(`   ✅ Status em português (Pendente, Concluído)`);
-        console.log(`   ✅ Endpoint PUT /api/plans/:id/settings disponível`);
-        console.log(`   ✅ JSON parsing funcionando corretamente`);
+        console.log("\n🎯 CORREÇÕES VERIFICADAS:");
+        console.log("✅ PlanConfigValidator.validate() funcionando");
+        console.log("✅ Queries PostgreSQL com placeholders $1, $2, etc.");
+        console.log("✅ Status em português (Pendente, Concluído)");
+        console.log("✅ Endpoint PUT /api/plans/:id/settings disponível");
+        console.log("✅ JSON parsing funcionando corretamente");
         
         if (successRate >= 80) {
             this.log('🎉 SISTEMA FUNCIONANDO CORRETAMENTE!', 'success');

@@ -227,11 +227,11 @@ app.get('/health', (req, res) => {
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log(`🚀 Performance Test Server running on port ${PORT}`);
-    console.log(`📊 Test endpoints:`);
+    console.log("📊 Test endpoints:");
     console.log(`   GET http://localhost:${PORT}/health`);
     console.log(`   GET http://localhost:${PORT}/api/admin/users`);
     console.log(`   GET http://localhost:${PORT}/api/admin/system/metrics`);
-    console.log(`\n🧪 Test commands:`);
+    console.log("\n🧪 Test commands:");
     console.log(`   curl -s -w "Time: %{time_total}s | Status: %{http_code}\\n" http://localhost:${PORT}/api/admin/users?limit=5`);
     console.log(`   curl -s -w "Time: %{time_total}s | Status: %{http_code}\\n" http://localhost:${PORT}/api/admin/system/metrics`);
 });

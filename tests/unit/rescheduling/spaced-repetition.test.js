@@ -803,9 +803,9 @@ describe('Spaced Repetition Preservation Tests', () => {
         expect(peakCognitiveHours).toContain(optimalHour);
       }
 
-      console.log(`Complex session rescheduling:`);
+      console.log("Complex session rescheduling:");
       console.log(`  Current time: ${now.getHours()}:00`);
-      console.log(`  Optimal window: 10:00-14:00`);
+      console.log("Optimal window: 10:00-14:00");
       console.log(`  Recommended slot: ${nextOptimalSlot.getHours()}:00`);
     });
   });
@@ -868,7 +868,7 @@ describe('Spaced Repetition Preservation Tests', () => {
       expect(adaptedInterval).toBeGreaterThan(baseInterval); // High performance = longer intervals
       expect(adaptedInterval).toBeLessThanOrEqual(baseInterval * 2);
 
-      console.log(`Adaptive learning analysis:`);
+      console.log("Adaptive learning analysis:");
       console.log(`  Performance trend: ${performances.map(p => Math.round(p * 100)).join('% → ')}%`);
       console.log(`  Learning rate: ${(performanceTrend * 100).toFixed(1)}% improvement`);
       console.log(`  Adapted interval: ${baseInterval} → ${adaptedInterval} days`);

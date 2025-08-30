@@ -13,28 +13,14 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0528f2">
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS Compilado (não usar CDN em produção) -->
+    <link href="css/tailwind.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/footer.css" rel="stylesheet">
     <link href="css/theme-utilities.css" rel="stylesheet">
     <!-- SCRIPT CENTRALIZADO -->
     <script src="js/app.js"></script>
-    <!-- Config do Tailwind para reconhecer as cores customizadas -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'editaliza-blue': '#0528f2',
-                        'editaliza-green': '#1ad937',
-                        'editaliza-black': '#0d0d0d',
-                        'editaliza-gray': '#969696',
-                    }
-                }
-            }
-        }
-    </script>
     <script src="js/theme-toggle.js" defer></script>
 </head>
 <body class="bg-slate-50 flex items-center justify-center min-h-screen p-4">
@@ -82,7 +68,7 @@
         </div>
 
         <div class="bg-white p-8 space-y-6 rounded-2xl shadow-lg">
-            <form id="loginForm" method="post" class="space-y-6">
+            <form id="loginForm" method="post" action="/api/auth/login" data-testid="login-form" class="space-y-6">
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">E-mail</label>
                     <input id="email" name="email" type="email" autocomplete="email" required class="form-input" placeholder="seu@email.com">
@@ -222,8 +208,12 @@
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
             
-            // ATUALIZADO: Verifica o token usando a chave de configuração do app.js
-            if (localStorage.getItem(app.config.tokenKey)) {
+            // Verificar se já está autenticado usando a chave do token diretamente
+            const tokenKey = 'editaliza_token';
+            const existingToken = localStorage.getItem(tokenKey);
+            
+            // Se tiver um token válido, redirecionar para home
+            if (existingToken && existingToken.length > 20) {
                 window.location.href = 'home.html';
                 return;
             }
@@ -251,9 +241,18 @@
                         body: JSON.stringify({ email, password })
                     });
 
-                    // ATUALIZADO: Usa a chave de configuração para salvar o token
-                    localStorage.setItem(app.config.tokenKey, data.token);
-                    window.location.href = data.redirectUrl || 'home.html'; 
+                    // Salvar o token usando a chave correta
+                    if (data.token) {
+                        localStorage.setItem('editaliza_token', data.token);
+                        console.log('✅ Token salvo com sucesso');
+                        
+                        // Pequeno delay para garantir que o token foi salvo
+                        setTimeout(() => {
+                            window.location.href = 'home.html';
+                        }, 100);
+                    } else {
+                        throw new Error('Token não recebido do servidor');
+                    } 
                     
                 } catch (error) {
                     // Usar sistema de notificações melhorado

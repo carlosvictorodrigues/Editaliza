@@ -1,4 +1,4 @@
-# 🧑‍💻 Guia de Resolução - Avatares não Aparecem
+# 🧑💻 Guia de Resolução - Avatares não Aparecem
 
 ## 🎯 Problema
 Os avatares na página `profile.html` não estão sendo exibidos corretamente.

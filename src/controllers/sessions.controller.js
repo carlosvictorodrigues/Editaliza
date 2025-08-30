@@ -129,15 +129,29 @@ class SessionsController {
 
             // Get all sessions ordered by date
             const rows = await dbAll(
-                'SELECT * FROM study_sessions WHERE study_plan_id = ? ORDER BY session_date ASC, id ASC', 
+                'SELECT * FROM study_sessions WHERE study_plan_id = ? ORDER BY session_date ASC, id ASC',
                 [planId]
             );
 
-            // Group sessions by date - CRITICAL for frontend display
+            // Group sessions by normalized date key YYYY-MM-DD (handles Date or string)
             const groupedByDate = rows.reduce((acc, session) => {
-                const date = session.session_date;
-                if (!acc[date]) acc[date] = [];
-                acc[date].push(session);
+                let dateStr;
+                if (typeof session.session_date === 'string') {
+                    dateStr = session.session_date.split('T')[0];
+                } else {
+                    try {
+                        const d = new Date(session.session_date);
+                        // If invalid date, fallback to string cast split
+                        dateStr = isNaN(d.getTime())
+                            ? String(session.session_date).split('T')[0]
+                            : d.toISOString().split('T')[0];
+                    } catch (_) {
+                        dateStr = String(session.session_date).split('T')[0];
+                    }
+                }
+
+                if (!acc[dateStr]) acc[dateStr] = [];
+                acc[dateStr].push(session);
                 return acc;
             }, {});
 
@@ -340,6 +354,10 @@ class SessionsController {
     /**
      * Register study time for a session - CRITICAL for analytics
      * POST /api/sessions/:sessionId/time
+     * 
+     * Contrato padronizado:
+     * Body: { incrementSeconds: number } ou { seconds: number }
+     * Response: { ok: true, sessionId: number, totalSeconds: number, updatedAt: string }
      */
     static async registerStudyTime(req, res) {
         const errors = validationResult(req);
@@ -347,35 +365,60 @@ class SessionsController {
             return res.status(400).json({ errors: errors.array() });
         }
 
-        const { sessionId } = req.params;
-        const { seconds } = req.body;
+        const sessionIdParam = req.params.sessionId;
         const userId = req.user.id;
+        
+        // Parse sessionId de forma segura
+        const sessionId = Number(sessionIdParam);
+        if (!Number.isInteger(sessionId) || sessionId <= 0) {
+            return res.status(400).json({ error: 'sessionId must be a valid integer' });
+        }
+        
+        // Parse increment de forma segura - aceita incrementSeconds ou seconds
+        const inc = Number.isFinite(req.body.incrementSeconds) ? req.body.incrementSeconds
+                  : Number.isFinite(req.body.seconds) ? req.body.seconds
+                  : NaN;
+        
+        // Validação: incrementSeconds deve ser inteiro entre 1 e 600
+        if (!Number.isInteger(inc) || inc <= 0 || inc > 600) {
+            return res.status(400).json({ error: 'incrementSeconds must be integer between 1 and 600' });
+        }
+        
+        // Log útil (sem token)
+        console.log(`[registerStudyTime] sessionId: ${sessionId}, inc: ${inc}, userId: ${userId}`);
 
         try {
-            // Verify session exists and user has access
+            // Primeiro verificar se a sessão existe e pertence ao usuário
             const session = await dbGet(`
-                SELECT ss.* FROM study_sessions ss 
+                SELECT ss.*, ss.time_studied_seconds FROM study_sessions ss 
                 JOIN study_plans sp ON ss.study_plan_id = sp.id 
                 WHERE ss.id = ? AND sp.user_id = ?
             `, [sessionId, userId]);
 
             if (!session) {
-                return res.status(404).json({ error: 'Sessão não encontrada ou não autorizada.' });
+                return res.status(404).json({ error: 'Session not found or not authorized' });
             }
-
-            // Add time to existing time_studied_seconds
+            
+            // Atualizar com SQL atômico
             await dbRun(`
                 UPDATE study_sessions 
-                SET time_studied_seconds = COALESCE(time_studied_seconds, 0) + ?
+                SET time_studied_seconds = COALESCE(time_studied_seconds, 0) + ?,
+                    updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
-            `, [seconds, sessionId]);
+            `, [inc, sessionId]);
+            
+            // Calcular novo total
+            const totalSeconds = (session.time_studied_seconds || 0) + inc;
+            const updatedAt = new Date().toISOString();
+            
+            console.log(`[registerStudyTime] Success - totalSeconds: ${totalSeconds}`);
 
-            const newTotalTime = (session.time_studied_seconds || 0) + seconds;
-
-            res.json({ 
-                message: 'Tempo registrado com sucesso!', 
-                totalTime: newTotalTime,
-                addedSeconds: seconds
+            // Resposta padronizada
+            return res.json({ 
+                ok: true, 
+                sessionId: sessionId, 
+                totalSeconds: totalSeconds, 
+                updatedAt: updatedAt 
             });
 
         } catch (error) {

@@ -48,8 +48,8 @@ async function createTestUser() {
             console.log(`   ID: ${result.rows[0].id}`);
         }
         
-        console.log(`   Email: ui-test-user@editaliza.com`);
-        console.log(`   Senha: TestUser123!`);
+        console.log("Email: ui-test-user@editaliza.com");
+        console.log("Senha: TestUser123!");
         
     } catch (error) {
         console.error('❌ Erro ao criar usuário:', error.message);

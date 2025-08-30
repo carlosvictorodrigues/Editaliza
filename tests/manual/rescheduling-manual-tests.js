@@ -408,7 +408,7 @@ class ManualReschedulingTester {
 
       const [userCount, planCount, sessionCount, overdueCount] = stats;
 
-      console.log(`Database Statistics:`);
+      console.log("Database Statistics:");
       console.log(`  Users: ${userCount[0].count}`);
       console.log(`  Study Plans: ${planCount[0].count}`);
       console.log(`  Total Sessions: ${sessionCount[0].count}`);
@@ -489,7 +489,7 @@ class ManualReschedulingTester {
       console.log('\n--- Simulating Rescheduling ---');
       const rescheduled = await this.simulateRescheduling(planData, overdueBefore);
 
-      console.log(`\nRescheduling Results:`);
+      console.log("\nRescheduling Results:");
       console.log(`  Successfully rescheduled: ${rescheduled.success}`);
       console.log(`  Failed to reschedule: ${rescheduled.failed}`);
       console.log(`  Total: ${rescheduled.total}`);

@@ -481,7 +481,7 @@ Equipe Editaliza
         console.log('═'.repeat(60));
         console.log(`📧 DESTINATÁRIO: ${email}`);
         console.log(`👤 NOME: ${userName || 'Usuário'}`);
-        console.log(`🔗 LINK DE RECUPERAÇÃO:`);
+        console.log("🔗 LINK DE RECUPERAÇÃO:");
         console.log(`   ${resetLink}`);
         console.log(`⏰ EXPIRA EM: ${expirationTime}`);
         if (error) {

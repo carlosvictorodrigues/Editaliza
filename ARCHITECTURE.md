@@ -854,6 +854,6 @@ Arquitetura Enterprise (242 linhas server.js)
 **🎯 Esta arquitetura representa o estado da arte em desenvolvimento Node.js modular, alcançando 100% de modularização com zero breaking changes. É a base sólida para o crescimento sustentável da plataforma Editaliza.**
 
 **📅 Última atualização:** 25/08/2025  
-**👨‍💻 Arquiteto:** Claude + Backend Architect Agent  
+**👨💻 Arquiteto:** Claude + Backend Architect Agent  
 **📊 Status:** ✅ Produção Ready  
 **🔄 Próxima revisão:** 01/09/2025

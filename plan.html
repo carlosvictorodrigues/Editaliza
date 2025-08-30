@@ -13,31 +13,20 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0528f2">
     
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="css/tailwind.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="css/design-tokens.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/footer.css" rel="stylesheet">
     <!-- Theme system removed - light mode only -->
-    <!-- SCRIPTS CENTRALIZADOS -->
-    <script src="js/app.js"></script>
-    <script src="js/components.js"></script>
-    <script src="js/modules/gamification.js"></script>
-    <!-- Config do Tailwind para reconhecer as cores customizadas -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'editaliza-blue': '#0528f2',
-                        'editaliza-green': '#1ad937',
-                        'editaliza-black': '#0d0d0d',
-                        'editaliza-gray': '#969696',
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- SCRIPTS CENTRALIZADOS - ORDEM TOPOLÓGICA CORRETA -->
+    <!-- Todos com defer, sem type="module" para compatibilidade -->
+    <script src="js/app.js" defer></script>
+    <script src="js/modules/gamification.js" defer></script>
+    <script src="js/components.js" defer></script>
+    <script src="js/navigation-init.js" defer></script>
+    <!-- Tailwind config removed - using compiled CSS -->
+    <!-- Custom colors now available through compiled tailwind.css -->
     <style>
         /* CORREÇÃO: Progress bars padronizadas para consistência visual */
         .progress-bar-container { 
@@ -48,7 +37,7 @@
             position: relative;
         }
         
-        /* Progress bar padrão - tamanho médio */
+        /* Progress bar padro - tamanho mdio */
         .progress-bar { 
             height: 1.25rem; 
             text-align: center; 
@@ -74,7 +63,7 @@
             z-index: 1;
         }
         
-        /* Progress bar destacada - para métricas principais */
+        /* Progress bar destacada - para mtricas principais */
         .progress-bar-large { 
             height: 1.5rem; 
             text-align: center; 
@@ -111,7 +100,7 @@
         .on-track { color: #16a34a; } /* green-600 */
         .off-track { color: #dc2626; } /* red-600 */
         .completed { color: #0528f2; } /* editaliza-blue */
-         /* Animação para o ícone de fogo */
+         /* Animao para o cone de fogo */
         @keyframes pulse-fire {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
@@ -275,27 +264,30 @@
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800">
-    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
+    <!-- NAVEGAO PRINCIPAL (GERADA PELO JS) -->
     <div id="main-nav-container"></div>
 
     <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-6xl">
         
-        <!-- CABEÇALHO DO PLANO (GERADO PELO JS) -->
+        <!-- CABEALHO DO PLANO (GERADO PELO JS) -->
         <div id="plan-header-container"></div>
 
         <!-- CORREÇÃO: Container para o painel de gamificação com botão de refresh -->
         <div id="gamification-dashboard"></div>
         
         <!-- AUTOMATIC UPDATES: Metrics update automatically after session completion -->
-        <div class="mb-6 text-center">
+        <div class="mb-6 flex items-center justify-center gap-3">
             <div id="last-update-indicator" class="text-xs text-gray-600">
                 <span class="inline-flex items-center">
                     <svg class="w-3 h-3 mr-1 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                     </svg>
-                    Métricas atualizadas automaticamente
+                    Dados atualizados automaticamente
                 </span>
             </div>
+            <button id="refresh-metrics-btn" class="px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700">
+                Atualizar Métricas
+            </button>
         </div>
 
         <div class="space-y-8">
@@ -311,7 +303,7 @@
                 </div>
             </div>
 
-            <!-- Seção de Cronograma Previsto -->
+            <!-- Seo de Cronograma Previsto -->
             <div class="content-card">
                 <div class="mb-4">
                     <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
@@ -337,7 +329,7 @@
                 <!-- Análise Detalhada Integrada -->
                 <div class="mt-6">
                     <h3 class="text-lg font-semibold text-gray-700 mb-3 flex items-center">
-                        <span class="text-lg mr-2">🔬</span>Análise Detalhada por Disciplina
+                        <span class="text-lg mr-2">🔍</span>Análise Detalhada por Disciplina
                     </h3>
                     <div id="detailedProgressAccordion" class="space-y-2">
                         <div class="text-gray-500 text-center p-4">Carregando análise detalhada...</div>
@@ -346,7 +338,7 @@
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:items-start">
-                <!-- Seção de Metas -->
+                <!-- Seo de Metas -->
                 <div class="content-card">
                     <div class="mb-4">
                         <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
@@ -358,11 +350,11 @@
                     </div>
                 </div>
 
-                <!-- Seção de Radar de Questões -->
+                <!-- Seo de Radar de Questes -->
                 <div class="content-card">
                     <div class="mb-4">
                         <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
-                            <span class="text-2xl mr-3">📡</span>Radar de Questões (Pontos Fracos)
+                            <span class="text-2xl mr-3">🎯</span>Radar de Questões (Pontos Fracos)
                         </h2>
                     </div>
                     <div id="questionRadarDashboard">
@@ -378,8 +370,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         const planId = urlParams.get('id');
 
-        // Função para formatar tempo em segundos para HH:MM:SS
-        // Retorna placeholder se o tempo for zero ou inválido
+        // Funo para formatar tempo em segundos para HH:MM:SS
+        // Retorna placeholder se o tempo for zero ou invlido
         function formatTime(seconds, placeholder = '00:00:00') {
             if (isNaN(seconds) || seconds <= 0) return placeholder;
             const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
@@ -389,7 +381,7 @@
         }
 
         async function initialize() {
-            await components.renderMainNavigation('home.html');
+        await components.renderMainNavigation('plan.html');
             if (!planId) {
                 window.location.href = 'dashboard.html';
                 return;
@@ -399,16 +391,17 @@
             if (window.initializingPlan) return;
             window.initializingPlan = true;
             try {
-                const plan = await app.apiFetch(`/api/plans/${planId}`);
+                const plan = await app.apiFetch(`/plans/${planId}`);
                 components.renderPlanHeader(planId, plan.plan_name, 'plan.html');
                 const examDate = new Date(plan.exam_date + 'T00:00:00');
-                document.getElementById('examDate').textContent = `Data da Prova: ${examDate.toLocaleDateString('pt-BR')}`;
+                // Comentado temporariamente - elemento examDate não existe
+                // document.getElementById('examDate').textContent = `Data da Prova: ${examDate.toLocaleDateString('pt-BR')}`;
                 
                 app.invalidatePlanCache(planId);
 
                 // CORREÇÃO: Carregar todas as métricas com dados frescos
                 await Promise.all([
-                    loadGamificationData(true), // Força refresh na inicialização
+                    loadGamificationData(true), // Fora refresh na inicializao
                     loadSchedulePreview(true),
                     loadPerformanceCheck(true),
                     loadGoalProgress(true),
@@ -418,13 +411,13 @@
                 
                 // CORREÇÃO: Função global para refresh completo das métricas
                 window.refreshAllMetrics = async () => {
-                    console.log('🔄 Atualizando todas as métricas...');
+
                     app.showSpinner();
                     try {
                         // Invalidar TODO o cache do plano
                         app.invalidatePlanCache(planId);
                         
-                        // Recarregar todas as métricas
+                        // Recarregar todas as mtricas
                         await Promise.all([
                             loadGamificationData(true),
                             loadSchedulePreview(true),
@@ -434,8 +427,8 @@
                             loadDetailedProgress(true)
                         ]);
                         
-                        app.showToast('📊 Métricas atualizadas com sucesso!', 'success');
-                        console.log('✅ Todas as métricas foram atualizadas!');
+                        app.showToast('✅ Métricas atualizadas com sucesso!', 'success');
+
                         
                         // CORREÇÃO: Atualizar indicador e timestamp da última atualização
                         window.lastMetricsUpdate = Date.now();
@@ -451,8 +444,8 @@
                             indicator.className = 'mt-2 text-xs text-green-600';
                         }
                     } catch (error) {
-                        console.error('❌ Erro ao atualizar métricas:', error);
-                        app.showToast('Erro ao atualizar métricas: ' + error.message, 'error');
+                        console.error('L Erro ao atualizar mtricas:', error);
+                        app.showToast('Erro ao atualizar mtricas: ' + error.message, 'error');
                     } finally {
                         app.hideSpinner();
                     }
@@ -469,7 +462,7 @@
                             const timeSinceUpdate = Date.now() - window.lastMetricsUpdate;
                             const indicator = document.getElementById('last-update-indicator');
                             
-                            // Se faz mais de 5 minutos que não atualiza, mostrar aviso
+                            // Se faz mais de 5 minutos que no atualiza, mostrar aviso
                             if (timeSinceUpdate > 5 * 60 * 1000 && indicator) {
                                 indicator.innerHTML = '⚠️ Dados podem estar desatualizados. Clique em "Atualizar Métricas"';
                                 indicator.className = 'mt-2 text-xs text-orange-600 font-medium';
@@ -480,38 +473,37 @@
                     // Auto-refresh a cada 10 minutos (mais conservador)
                     setInterval(() => {
                         if (!document.hidden && window.refreshAllMetrics) {
-                            console.log('🔄 Refresh automático das métricas (10 min)...');
+                            void('🔄 Refresh automático das métricas (10 min)...');
                             window.refreshAllMetrics();
                         }
                     }, 10 * 60 * 1000); // 10 minutos
                 };
                 
-                // Iniciar refresh automático
+                // Iniciar refresh automtico
                 window.setupMetricsAutoRefresh();
                 
                 // CORREÇÃO: Registrar listener para atualização automática das métricas
                 window.metricsListenerId = app.onMetricsUpdate((updatedPlanId, eventType) => {
-                    console.log(`📡 Evento de métricas recebido: ${eventType} para plano ${updatedPlanId}`);
+
                     
-                    // Verificar se é o plano atual
+                    // Verificar se  o plano atual
                     if (updatedPlanId === planId) {
-                        console.log('🔄 Atualizando métricas automaticamente...');
+
                         
                         // Delay pequeno para garantir que backend processou
                         setTimeout(() => {
                             if (window.refreshAllMetrics) {
                                 window.refreshAllMetrics();
-                                // Atualizar timestamp também
+                                // Atualizar timestamp tambm
                                 window.lastMetricsUpdate = Date.now();
                             }
                         }, 1500);
                     }
                 });
-                
-                console.log('📡 Listener de métricas registrado com ID:', window.metricsListenerId);
+
                 
             } catch (error) {
-                console.error('Erro na inicialização:', error);
+                console.error('Erro na inicializao:', error);
                 app.showToast('Erro ao carregar dados do plano: ' + error.message, 'error');
             } finally {
                 window.initializingPlan = false;
@@ -522,34 +514,30 @@
         // CORREÇÃO: Função de gamificação com forçamento de dados em tempo real
         async function loadGamificationData(forceRefresh = false) {
             try {
-                // Log otimizado - apenas quando necessário
+                // Log otimizado - apenas quando necessrio
                 if (forceRefresh) {
-                    console.log('🎮 Atualizando gamificação...');
+
                     app.invalidatePlanCache(planId, 'gamification');
                 } else if (!window._gamificationLoadCount) {
-                    console.log('🎮 Carregando gamificação inicial...');
+
                 }
                 
-                const gamificationData = await app.apiFetch('/api/gamification/profile');
+                const gamificationData = await app.getGamificationData(planId);
                 
-                // Controlar frequência de logs detalhados
+                // Controlar frequncia de logs detalhados
                 window._gamificationLoadCount = (window._gamificationLoadCount || 0) + 1;
                 if (window._gamificationLoadCount <= 2 || forceRefresh) {
-                    console.log('✅ Dados carregados:', { 
-                        nivel: gamificationData.concurseiroLevel,
-                        topicos: gamificationData.completedTopicsCount,
-                        conquistas: gamificationData.achievements?.length || 0
-                    });
+
                 }
                 
                 // CORREÇÃO: Validar dados antes de renderizar
                 if (!gamificationData) {
-                    console.warn('⚠️ Dados de gamificação vazios, usando fallback');
+                    console.warn(' Dados de gamificao vazios, usando fallback');
                     const fallbackData = {
                         studyStreak: 0,
                         totalStudyDays: 0,
                         experiencePoints: 0,
-                        concurseiroLevel: 'Aspirante a Servidor(a) 🌱',
+                        concurseiroLevel: 'Aspirante a Servidor(a) <1',
                         achievements: [],
                         completedTopicsCount: 0,
                         totalCompletedSessions: 0
@@ -561,18 +549,18 @@
                 
                 // CORREÇÃO: Função global para atualizar após conclusão de sessões
                 window.refreshGamificationData = async () => {
-                    console.log('🔄 Atualizando estatísticas...');
-                    await loadGamificationData(true); // Força refresh
+
+                    await loadGamificationData(true); // Fora refresh
                 };
                 
             } catch (error) {
-                console.error("❌ Erro ao carregar dados de gamificação:", error);
-                // Mostrar erro mas com opção de retry
+                console.error("L Erro ao carregar dados de gamificao:", error);
+                // Mostrar erro mas com opo de retry
                 const container = document.getElementById('gamification-dashboard');
                 if (container) {
                     container.innerHTML = `
                         <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
-                            <p class="text-red-600 text-center font-medium mb-2">⚠️ Erro ao carregar estatísticas</p>
+                            <p class="text-red-600 text-center font-medium mb-2"> Erro ao carregar estatsticas</p>
                             <button onclick="loadGamificationData(true)" class="mx-auto block px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg text-sm transition-colors">
                                 🔄 Tentar Novamente
                             </button>
@@ -597,7 +585,7 @@
                     <!-- Status Geral do Cronograma -->
                     <div class="bg-gradient-to-br from-gray-50 to-slate-100 border border-gray-200 p-6 rounded-xl shadow-sm mb-6">
                         <div class="flex items-center mb-4">
-                            <span class="text-3xl mr-3">📊</span>
+                            <span class="text-3xl mr-3">📅</span>
                             <div>
                                 <h3 class="text-xl font-bold text-gray-800">Status do seu Cronograma</h3>
                                 <p class="text-sm text-gray-600">${scheduleData.phases?.current || 'Analisando fase atual...'}</p>
@@ -606,20 +594,20 @@
                         
                         <div class="space-y-3">
                             <div class="flex items-start">
-                                <span class="text-lg mr-2 mt-0.5">⚠️</span>
+                                <span class="text-lg mr-2 mt-0.5">📊</span>
                                 <p class="text-gray-700 font-medium">${scheduleData.status?.coverageText || 'Analisando cobertura do cronograma...'}</p>
                             </div>
                             <div class="flex items-start">
-                                <span class="text-lg mr-2 mt-0.5">✅</span>
+                                <span class="text-lg mr-2 mt-0.5">📊</span>
                                 <p class="text-gray-700">${scheduleData.status?.progressText || 'Calculando seu progresso...'}</p>
                             </div>
                             <div class="flex items-start">
-                                <span class="text-lg mr-2 mt-0.5">⏳</span>
+                                <span class="text-lg mr-2 mt-0.5">📊</span>
                                 <p class="text-gray-700">${scheduleData.status?.remainingText || 'Verificando tópicos pendentes...'}</p>
                             </div>
                             ${scheduleData.unscheduledTopics > 0 ? `
                             <div class="flex items-start">
-                                <span class="text-lg mr-2 mt-0.5">❌</span>
+                                <span class="text-lg mr-2 mt-0.5">⚠️</span>
                                 <p class="text-gray-700">${scheduleData.status?.unscheduledText || ''}</p>
                             </div>
                             ` : ''}
@@ -627,12 +615,12 @@
                         
                         <div class="mt-4 p-4 bg-blue-100 rounded-lg">
                             <p class="text-sm text-blue-800">
-                                <strong>💡 Explicação:</strong> ${scheduleData.phases?.explanation || 'Analisando estratégia do cronograma...'}
+                                <strong>💡 Explicação:</strong> ${scheduleData.phases?.explanation || 'Analisando estratgia do cronograma...'}
                             </p>
                         </div>
                     </div>
 
-                    <!-- Métricas Detalhadas -->
+                    <!-- Mtricas Detalhadas -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 p-4 rounded-xl shadow-sm">
                             <div class="flex items-center mb-2">
@@ -648,7 +636,7 @@
                         
                         <div class="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 p-4 rounded-xl shadow-sm">
                             <div class="flex items-center mb-2">
-                                <span class="text-2xl mr-2">📅</span>
+                                <span class="text-2xl mr-2">⏳</span>
                                 <h3 class="font-semibold text-orange-800">Tópicos Pendentes</h3>
                             </div>
                             <div class="flex items-baseline space-x-2">
@@ -660,7 +648,7 @@
                         
                         <div class="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 p-4 rounded-xl shadow-sm">
                             <div class="flex items-center mb-2">
-                                <span class="text-2xl mr-2">🎯</span>
+                                <span class="text-2xl mr-2">🎲</span>
                                 <h3 class="font-semibold text-purple-800">Simulados</h3>
                             </div>
                             <div class="flex items-baseline space-x-2">
@@ -674,17 +662,17 @@
                     <!-- Detalhes das Revisões -->
                     <div class="bg-gradient-to-br from-gray-50 to-slate-50 border border-gray-200 p-4 rounded-xl shadow-sm">
                         <div class="flex items-center mb-3">
-                            <span class="text-2xl mr-2">🔄</span>
+                            <span class="text-2xl mr-2">⏳</span>
                             <h3 class="text-lg font-semibold text-gray-800">Sistema de Revisões</h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                             <div>
                                 <h4 class="font-semibold text-gray-700 mb-2 flex items-center">
-                                    <span class="mr-2">✅</span>Ciclos Programados
+                                    <span class="mr-2"></span>Ciclos Programados
                                 </h4>
-                                <p class="text-gray-600">• Revisão após 7 dias (consolidação)</p>
-                                <p class="text-gray-600">• Revisão após 14 dias (reforço)</p>
-                                <p class="text-gray-600">• Revisão após 28 dias (fixação)</p>
+                                <p class="text-gray-600">✓ Revisão após 7 dias (consolidação)</p>
+                                <p class="text-gray-600">✓ Revisão após 14 dias (reforço)</p>
+                                <p class="text-gray-600">✓ Revisão após 28 dias (fixação)</p>
                                 <p class="text-gray-600 mt-2"><strong>Média:</strong> ${scheduleData.revisionCycles || 0} ciclos por tópico estudado</p>
                                 <p class="text-gray-600 text-xs italic">* Cada tópico estudado recebe 3 revisões automáticas</p>
                             </div>
@@ -692,9 +680,9 @@
                                 <h4 class="font-semibold text-gray-700 mb-2 flex items-center">
                                     <span class="mr-2">📊</span>Estatísticas
                                 </h4>
-                                <p class="text-gray-600">• ${scheduleData.totalRevisions || 0} sessões de revisão programadas</p>
-                                <p class="text-gray-600">• ${scheduleData.totalStudySessions || 0} sessões de estudo inicial</p>
-                                <p class="text-gray-600">• ${scheduleData.revisionProgress || 0}% das revisões esperadas criadas</p>
+                                <p class="text-gray-600">→ ${scheduleData.totalRevisions || 0} sessões de revisão programadas</p>
+                                <p class="text-gray-600">→ ${scheduleData.totalStudySessions || 0} sessões de estudo inicial</p>
+                                <p class="text-gray-600">→ ${scheduleData.revisionProgress || 0}% das revisões esperadas criadas</p>
                                 <p class="text-gray-600 mt-2 text-xs italic">* Revisões são criadas automaticamente após estudar cada tópico</p>
                             </div>
                         </div>
@@ -702,12 +690,12 @@
                 `;
             } catch (error) {
                 console.error('Erro ao carregar preview do cronograma:', error);
-                // Se não conseguir buscar dados específicos, mostrar valores padrão informativos
+                // Se no conseguir buscar dados especficos, mostrar valores padro informativos
                 dashboard.innerHTML = `
                     <!-- Status Geral do Cronograma -->
                     <div class="bg-gradient-to-br from-gray-50 to-slate-100 border border-gray-200 p-6 rounded-xl shadow-sm mb-6">
                         <div class="flex items-center mb-4">
-                            <span class="text-3xl mr-3">📊</span>
+                            <span class="text-3xl mr-3">📅</span>
                             <div>
                                 <h3 class="text-xl font-bold text-gray-800">Status do seu Cronograma</h3>
                                 <p class="text-sm text-gray-600">Fase de Aprendizado: Estudando novos tópicos</p>
@@ -716,19 +704,19 @@
                         
                         <div class="space-y-3">
                             <div class="flex items-start">
-                                <span class="text-lg mr-2 mt-0.5">⚠️</span>
+                                <span class="text-lg mr-2 mt-0.5">📊</span>
                                 <p class="text-gray-700 font-medium">Cronograma cobre 85% do edital (priorização dos tópicos mais importantes)</p>
                             </div>
                             <div class="flex items-start">
-                                <span class="text-lg mr-2 mt-0.5">✅</span>
+                                <span class="text-lg mr-2 mt-0.5">📊</span>
                                 <p class="text-gray-700">Você já estudou 0 tópicos (0% concluído)</p>
                             </div>
                             <div class="flex items-start">
-                                <span class="text-lg mr-2 mt-0.5">⏳</span>
+                                <span class="text-lg mr-2 mt-0.5">📊</span>
                                 <p class="text-gray-700">Restam tópicos agendados para estudar</p>
                             </div>
                             <div class="flex items-start">
-                                <span class="text-lg mr-2 mt-0.5">❌</span>
+                                <span class="text-lg mr-2 mt-0.5">⚠️</span>
                                 <p class="text-gray-700">Alguns tópicos não foram incluídos no cronograma (falta de tempo/priorização)</p>
                             </div>
                         </div>
@@ -740,7 +728,7 @@
                         </div>
                     </div>
 
-                    <!-- Métricas Detalhadas -->
+                    <!-- Mtricas Detalhadas -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <div class="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 p-4 rounded-xl shadow-sm">
                             <div class="flex items-center mb-2">
@@ -756,7 +744,7 @@
                         
                         <div class="bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 p-4 rounded-xl shadow-sm">
                             <div class="flex items-center mb-2">
-                                <span class="text-2xl mr-2">📅</span>
+                                <span class="text-2xl mr-2">⏳</span>
                                 <h3 class="font-semibold text-orange-800">Tópicos Pendentes</h3>
                             </div>
                             <div class="flex items-baseline space-x-2">
@@ -768,7 +756,7 @@
                         
                         <div class="bg-gradient-to-br from-purple-50 to-violet-50 border border-purple-200 p-4 rounded-xl shadow-sm">
                             <div class="flex items-center mb-2">
-                                <span class="text-2xl mr-2">🎯</span>
+                                <span class="text-2xl mr-2">🎲</span>
                                 <h3 class="font-semibold text-purple-800">Simulados</h3>
                             </div>
                             <div class="flex items-baseline space-x-2">
@@ -782,25 +770,25 @@
                     <!-- Detalhes das Revisões -->
                     <div class="bg-gradient-to-br from-gray-50 to-slate-50 border border-gray-200 p-4 rounded-xl shadow-sm">
                         <div class="flex items-center mb-3">
-                            <span class="text-2xl mr-2">🔄</span>
+                            <span class="text-2xl mr-2">⏳</span>
                             <h3 class="text-lg font-semibold text-gray-800">Sistema de Revisões</h3>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
                             <div>
                                 <h4 class="font-semibold text-gray-700 mb-2 flex items-center">
-                                    <span class="mr-2">✅</span>Ciclos Programados
+                                    <span class="mr-2"></span>Ciclos Programados
                                 </h4>
-                                <p class="text-gray-600">• Revisão após 7 dias (consolidação)</p>
-                                <p class="text-gray-600">• Revisão após 14 dias (reforço)</p>
-                                <p class="text-gray-600">• Revisão após 28 dias (fixação)</p>
+                                <p class="text-gray-600">✓ Revisão após 7 dias (consolidação)</p>
+                                <p class="text-gray-600">✓ Revisão após 14 dias (reforço)</p>
+                                <p class="text-gray-600">✓ Revisão após 28 dias (fixação)</p>
                                 <p class="text-gray-600 mt-2"><strong>Média:</strong> 0 ciclos por tópico estudado</p>
                             </div>
                             <div>
                                 <h4 class="font-semibold text-gray-700 mb-2 flex items-center">
                                     <span class="mr-2">📊</span>Estatísticas
                                 </h4>
-                                <p class="text-gray-600">• 6 sessões de revisão programadas</p>
-                                <p class="text-gray-600">• 130 sessões de estudo inicial</p>
+                                <p class="text-gray-600">→ 6 sessões de revisão programadas</p>
+                                <p class="text-gray-600">→ 130 sessões de estudo inicial</p>
                                 <p class="text-gray-600 mt-2 text-xs italic">* Revisões são criadas automaticamente após estudar cada tópico</p>
                             </div>
                         </div>
@@ -826,17 +814,10 @@
                     return;
                 }
                 
-                // Verificar se há dados suficientes para mostrar projeção
+                // Verificar se h dados suficientes para mostrar projeo
                 const hasMinimumProgress = (data.completedTopics || 0) > 0 && (data.totalTopics || 0) > 0;
                 const progressPercentage = hasMinimumProgress ? ((data.completedTopics / data.totalTopics) * 100) : 0;
-                
-                console.log('🔍 Diagnóstico de Performance - Dados:', {
-                    completedTopics: data.completedTopics,
-                    totalTopics: data.totalTopics,
-                    hasMinimumProgress,
-                    progressPercentage,
-                    fullData: data
-                });
+
                 
                 let maintenanceNoticeHtml = '';
                 if (data.isMaintenanceMode) {
@@ -849,7 +830,7 @@
                 } else if (data.shouldRegenerateForSimulations) {
                     maintenanceNoticeHtml = `
                     <div class="bg-amber-50 border-l-4 border-amber-500 text-amber-800 p-4 rounded-lg mb-6 shadow-sm">
-                        <p class="font-bold flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>🎯 Simulados Disponíveis!</p>
+                        <p class="font-bold flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>🎆 Simulados Disponíveis!</p>
                         <p class="text-sm mt-1">Parabéns! Você concluiu todos os tópicos do edital. Agora você pode <strong>regenerar seu cronograma</strong> para incluir simulados direcionados e completos.</p>
                         <div class="mt-3">
                             <a href="plan_settings.html?id=${planId}" class="inline-flex items-center px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg transition-colors">
@@ -872,14 +853,14 @@
                     projectionContent = `
                         <div class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 p-4 rounded-lg">
                             <h3 class="font-semibold text-blue-800 flex items-center mb-3">
-                                <span class="text-lg mr-2">🚀</span>Vamos Começar sua Jornada!
+                                <span class="text-lg mr-2">🎆</span>Vamos Começar sua Jornada!
                             </h3>
                             <p class="text-blue-700 font-medium mb-2">Você ainda não começou a estudar os tópicos agendados.</p>
                             <p class="text-blue-600 text-sm mb-4">Complete algumas sessões de estudo para ver sua projeção de desempenho e recomendações personalizadas!</p>
                             
                             <div class="bg-white/50 rounded-lg p-3 mb-3">
                                 <h4 class="text-sm font-semibold text-blue-800 mb-2 flex items-center">
-                                    <span class="mr-2">📈</span>Próximos Passos
+                                    <span class="mr-2">👉</span>Próximos Passos
                                 </h4>
                                 <ul class="text-sm text-blue-700 space-y-1">
                                     <li class="flex items-center"><span class="text-green-500 mr-2">✓</span>Acesse "Ver Cronograma" para ver suas sessões</li>
@@ -929,7 +910,7 @@
                             <!-- Projeção Principal -->
                             <div class="bg-white/70 rounded-lg p-4 mb-4">
                                 <h4 class="font-semibold text-slate-700 flex items-center mb-2">
-                                    <span class="mr-2">📊</span>Projeção de Conclusão
+                                    <span class="mr-2">📈</span>Projeção de Conclusão
                                 </h4>
                                 <p class="font-bold text-lg ${statusColor} mb-2">${data.primaryMessage || 'Analisando seu progresso...'}</p>
                                 <p class="text-slate-600 text-sm">${data.secondaryMessage || 'Complete mais algumas sessões para análise detalhada.'}</p>
@@ -938,10 +919,10 @@
                             <!-- Motivação e Consistência -->
                             <div class="space-y-3">
                                 <div class="bg-editaliza-blue/5 border-l-4 border-editaliza-blue p-3 rounded">
-                                    <p class="text-sm font-semibold text-editaliza-blue italic">"${data.motivationalMessage || 'Continue firme! Cada sessão te aproxima da aprovação! 🎯'}"</p>
+                                    <p class="text-sm font-semibold text-editaliza-blue italic">"${data.motivationalMessage || 'Continue firme! Cada sesso te aproxima da aprovao! <'}"</p>
                                 </div>
                                 <div class="text-xs text-slate-600">
-                                    <span class="font-medium">💪 Consistência:</span> ${postponementText}
+                                    <span class="font-medium">🎯 Consistência:</span> ${postponementText}
                                 </div>
                             </div>
                         </div>
@@ -983,7 +964,7 @@
                         <div class="bg-gradient-to-r from-editaliza-green/10 to-editaliza-green/5 p-4 rounded-lg border border-editaliza-green/20">
                             <div class="flex justify-between items-center mb-2">
                                 <h4 class="font-semibold text-editaliza-green flex items-center">
-                                    <span class="mr-2">📅</span>Meta Diária
+                                    <span class="mr-2">🎯</span>Meta Diária
                                 </h4>
                                 <span class="text-sm font-bold text-editaliza-green">${data.dailyProgress} / ${data.dailyGoal || 'N/A'}</span>
                             </div>
@@ -992,7 +973,7 @@
                         <div class="bg-gradient-to-r from-editaliza-blue/10 to-editaliza-blue/5 p-4 rounded-lg border border-editaliza-blue/20">
                             <div class="flex justify-between items-center mb-2">
                                 <h4 class="font-semibold text-editaliza-blue flex items-center">
-                                    <span class="mr-2">📊</span>Meta Semanal
+                                    <span class="mr-2">📅</span>Meta Semanal
                                 </h4>
                                 <span class="text-sm font-bold text-editaliza-blue">${data.weeklyProgress} / ${data.weeklyGoal || 'N/A'}</span>
                             </div>
@@ -1031,7 +1012,7 @@
                     topicsBySubject[subjectName].forEach(t => {
                         const safeTopicDescription = app.sanitizeHtml(t.topic_description);
                         const colorClass = t.total_questions === 0 ? 'text-red-500' : 'text-yellow-600';
-                        html += `<li>${safeTopicDescription} <span class="font-bold ${colorClass}">(${t.total_questions} questões)</span></li>`;
+                        html += `<li>${safeTopicDescription} <span class="font-bold ${colorClass}">(${t.total_questions} questes)</span></li>`;
                     });
                     html += `</ul></div>`;
                 }
@@ -1051,13 +1032,12 @@
                 if (forceRefresh) {
                     app.invalidatePlanCache(planId, 'detailed_progress');
                 }
-                
-                console.log('🔍 Buscando detailed_progress para planId:', planId);
+
                 const data = await app.getActivePlanData(planId, 'detailed_progress', forceRefresh);
-                console.log('📊 Dados recebidos:', data);
+
                 
                 if (!data || typeof data.totalProgress === 'undefined') {
-                    throw new Error('Dados de progresso inválidos ou ausentes');
+                    throw new Error('Dados de progresso invlidos ou ausentes');
                 }
                 
                 const totalPercentage = parseFloat(data.totalProgress || 0).toFixed(1);
@@ -1065,7 +1045,7 @@
                     <div class="bg-gradient-to-r from-editaliza-green/10 to-editaliza-green/5 p-4 rounded-lg border border-editaliza-green/20 mb-2">
                         <div class="flex justify-between items-center mb-2">
                             <h3 class="font-semibold text-editaliza-green text-lg flex items-center">
-                                <span class="mr-2">🎯</span>Progresso Geral do Edital
+                                <span class="mr-2">📊</span>Progresso Geral do Edital
                             </h3>
                             <span class="text-xl font-bold text-editaliza-green">${totalPercentage}%</span>
                         </div>
@@ -1084,12 +1064,12 @@
                     const totalTimeNum = parseFloat(subject.totaltime || subject.totalTime || 0);
                     const subjectTimeDisplay = totalTimeNum > 0
                         ? formatTime(totalTimeNum).substring(0, 5) + 'h'
-                        : '–';
+                        : '';
 
                     const topicsHtml = subject.topics.length > 0 ? subject.topics.map(topic => {
                         // Exibir tempo de estudo do tópico
                         const timeStudiedNum = parseFloat(topic.timestudied || topic.timeStudied || 0);
-                        const timeDisplay = formatTime(timeStudiedNum, '–');
+                        const timeDisplay = formatTime(timeStudiedNum, '');
                         const timeClass = timeStudiedNum > 0 ? 'text-gray-500' : 'text-gray-400';
                         
                         return `
@@ -1130,7 +1110,7 @@
                 });
 
             } catch (error) {
-                console.error('❌ Erro ao carregar progresso detalhado:', error);
+                console.error('L Erro ao carregar progresso detalhado:', error);
                 console.error('Detalhes do erro:', error.message, error.stack);
                 if (progressDashboard) {
                     progressDashboard.innerHTML = `<p class="text-red-500 text-center">Não foi possível carregar o progresso. ${error.message}</p>`;
@@ -1144,16 +1124,48 @@
         // CORREÇÃO: Cleanup de listeners quando a página for fechada
         window.addEventListener('beforeunload', () => {
             if (window.metricsListenerId) {
-                console.log('🧹 Removendo listener de métricas...');
+
                 app.removeMetricsListener(window.metricsListenerId);
             }
         });
         
         document.addEventListener('DOMContentLoaded', initialize);
     </script>
+    <script>
+        // Botão manual de atualização de métricas
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('refresh-metrics-btn');
+            if (btn) {
+                btn.addEventListener('click', async () => {
+                    if (typeof window.refreshAllMetrics === 'function') {
+                        await window.refreshAllMetrics();
+                    } else {
+                        // Fallback: força recarga das principais seções
+                        try {
+                            window.app?.showSpinner?.();
+                            await Promise.all([
+                                loadGamificationData(true),
+                                loadSchedulePreview(true),
+                                loadPerformanceCheck(true),
+                                loadGoalProgress(true),
+                                loadQuestionRadar(true),
+                                loadDetailedProgress(true)
+                            ]);
+                            window.app?.showToast?.('Métricas atualizadas com sucesso!', 'success');
+                        } catch (e) {
+                            console.error('Erro ao atualizar métricas manualmente:', e);
+                            window.app?.showToast?.('Erro ao atualizar métricas: ' + e.message, 'error');
+                        } finally {
+                            window.app?.hideSpinner?.();
+                        }
+                    }
+                });
+            }
+        });
+    </script>
     
-    <!-- Script do rodapé modular -->
+    <!-- Script do rodap modular -->
     <script src="js/footer.js"></script>
-    <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
+    <!-- O rodap ser inserido automaticamente aqui pelo footer.js -->
 </body>
 </html>

@@ -464,10 +464,10 @@ docker-compose logs --tail=0 -f
             console.log(`\n${colors.green}✅ DEPLOY PREPARADO COM SUCESSO!${colors.reset}`);
             
             console.log(`\n${colors.cyan}🚀 PRÓXIMOS PASSOS:${colors.reset}`);
-            console.log(`   1. Configurar .env com valores reais`);
-            console.log(`   2. Fazer upload da imagem para registry`);
-            console.log(`   3. Configurar DigitalOcean App Platform`);
-            console.log(`   4. Deploy!`);
+            console.log("1. Configurar .env com valores reais");
+            console.log("2. Fazer upload da imagem para registry");
+            console.log("3. Configurar DigitalOcean App Platform");
+            console.log("4. Deploy!");
 
         } else {
             console.log(`\n${colors.red}❌ ERROS ENCONTRADOS:${colors.reset}`);

@@ -1455,6 +1455,6 @@ Retry-After: 900
 **🎯 Esta documentação cobre 100% dos endpoints da API Editaliza v2.0, incluindo todos os recursos de autenticação, planos de estudo, sessões, estatísticas e administração. Para suporte técnico, entre em contato através dos canais oficiais.**
 
 **📅 Última atualização:** 25/08/2025  
-**👨‍💻 Documentado por:** Claude + API Documentation Agent  
+**👨💻 Documentado por:** Claude + API Documentation Agent  
 **📊 Status:** ✅ Produção Ready  
 **🔄 Próxima revisão:** 01/09/2025

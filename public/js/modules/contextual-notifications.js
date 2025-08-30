@@ -34,7 +34,11 @@ const ContextualNotifications = {
 
     // Inicialização segura
     async init() {
-        if (this.initialized) return;
+        // Prevenir múltiplas inicializações
+        if (this.initialized || window.ContextualNotifications?.__inited) return;
+        this.initialized = true;
+        window.ContextualNotifications = window.ContextualNotifications || {};
+        window.ContextualNotifications.__inited = true;
         
         try {
             console.log('🔔 Inicializando Sistema de Notificações Contextuais...');
@@ -71,8 +75,9 @@ const ContextualNotifications = {
     // Carregamento seguro de dados do usuário
     async loadUserData() {
         try {
-            // Tentar carregar dados de gamificação existentes
-            if (window.app && window.app.getGamificationData && window.app.state?.activePlanId) {
+            // Só buscar dados de gamificação se estiver habilitado
+            if (window.APP_FEATURES?.GAMIFICATION === true && 
+                window.app && window.app.getGamificationData && window.app.state?.activePlanId) {
                 this.userData = await window.app.getGamificationData(window.app.state.activePlanId);
                 
                 if (this.userData) {

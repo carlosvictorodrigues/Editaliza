@@ -4,15 +4,15 @@
  */
 
 (function() {
-    console.log('🚨 EMERGENCY: Stopping infinite notifications...');
+    void('🚨 EMERGENCY: Stopping infinite notifications...');
     
     // 1. Stop all notification integrations
     if (window.NotificationIntegrations) {
         try {
             window.NotificationIntegrations.rollback();
-            console.log('✅ NotificationIntegrations stopped');
+            void('✅ NotificationIntegrations stopped');
         } catch (e) {
-            console.log('⚠️ Error stopping NotificationIntegrations:', e);
+            void('⚠️ Error stopping NotificationIntegrations:', e);
         }
     }
     
@@ -20,9 +20,9 @@
     if (window.ContextualNotifications) {
         try {
             window.ContextualNotifications.disable();
-            console.log('✅ ContextualNotifications disabled');
+            void('✅ ContextualNotifications disabled');
         } catch (e) {
-            console.log('⚠️ Error disabling ContextualNotifications:', e);
+            void('⚠️ Error disabling ContextualNotifications:', e);
         }
     }
     
@@ -34,9 +34,9 @@
                 container.parentNode.removeChild(container);
             }
         });
-        console.log('✅ All toast containers removed');
+        void('✅ All toast containers removed');
     } catch (e) {
-        console.log('⚠️ Error removing toast containers:', e);
+        void('⚠️ Error removing toast containers:', e);
     }
     
     // 4. Clear all timeouts and intervals
@@ -52,9 +52,9 @@
         while (intervalId--) {
             clearInterval(intervalId);
         }
-        console.log('✅ All timeouts and intervals cleared');
+        void('✅ All timeouts and intervals cleared');
     } catch (e) {
-        console.log('⚠️ Error clearing timeouts/intervals:', e);
+        void('⚠️ Error clearing timeouts/intervals:', e);
     }
     
     // 5. Remove all pomodoro event listeners
@@ -67,20 +67,20 @@
                 element.parentNode.replaceChild(clone, element);
             }
         });
-        console.log('✅ Event listeners cleared');
+        void('✅ Event listeners cleared');
     } catch (e) {
-        console.log('⚠️ Error clearing event listeners:', e);
+        void('⚠️ Error clearing event listeners:', e);
     }
     
     // 6. Set emergency flag in localStorage
     try {
         localStorage.setItem('editaliza_emergency_notifications_disabled', 'true');
         localStorage.setItem('editaliza_notifications_enabled', 'false');
-        console.log('✅ Emergency flags set in localStorage');
+        void('✅ Emergency flags set in localStorage');
     } catch (e) {
-        console.log('⚠️ Error setting emergency flags:', e);
+        void('⚠️ Error setting emergency flags:', e);
     }
     
-    console.log('🟢 EMERGENCY STOP COMPLETE - Infinite notifications should be stopped');
-    console.log('🔄 Refresh the page to restore normal notification system');
+    void('🟢 EMERGENCY STOP COMPLETE - Infinite notifications should be stopped');
+    void('🔄 Refresh the page to restore normal notification system');
 })();

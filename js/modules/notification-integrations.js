@@ -1,7 +1,7 @@
 /**
  * Notification Integrations - Sistema de Integração Segura
  * 
- * Este módulo conecta o sistema de notificações contextuais com os eventos
+ * Este módulo conecta o sistema de notificaçÃµes contextuais com os eventos
  * existentes da plataforma de forma não invasiva e segura.
  */
 
@@ -16,26 +16,26 @@ const NotificationIntegrations = {
         if (this.initialized) return;
 
         try {
-            console.log('🔗 Inicializando Integrações de Notificação...');
+            console.log('🎯”— Inicializando IntegraçÃµes de Notificação...');
 
-            // Aguardar carregamento das dependências
+            // Aguardar carregamento das dependÃªncias
             await this.waitForDependencies();
 
-            // Configurar integrações com eventos existentes
+            // Configurar integraçÃµes com eventos existentes
             this.setupSessionIntegrations();
             this.setupGamificationIntegrations();
             this.setupTimerIntegrations();
             this.setupUIIntegrations();
 
             this.initialized = true;
-            console.log('✅ Integrações de notificação inicializadas');
+            console.log('âœ… IntegraçÃµes de notificação inicializadas');
 
         } catch (error) {
-            console.error('❌ Erro na inicialização das integrações:', error);
+            console.error('âŒ Erro na inicialização das integraçÃµes:', error);
         }
     },
 
-    // Aguardar dependências estarem disponíveis
+    // Aguardar dependÃªncias estarem disponíveis
     async waitForDependencies() {
         const maxWait = 10000; // 10 segundos
         const checkInterval = 100; // 100ms
@@ -52,23 +52,23 @@ const NotificationIntegrations = {
             waited += checkInterval;
         }
 
-        throw new Error('Dependências não carregaram a tempo');
+        throw new Error('DependÃªncias não carregaram a tempo');
     },
 
     // Integração com eventos de sessão
     setupSessionIntegrations() {
-        // Observer para botões de conclusão de sessão
+        // Observer para botÃµes de conclusão de sessão
         this.observeSessionCompletions();
 
-        // Observer para início de sessões
+        // Observer para início de sessÃµes
         this.observeSessionStarts();
 
         // Monitor de tempo de estudo
-        this.monitorStudyTime();
+        this.monitorStudySessions();
     },
 
     observeSessionCompletions() {
-        // Observer para detectar quando sessões são marcadas como concluídas
+        // Observer para detectar quando sessÃµes são marcadas como concluídas
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.type === 'childList') {
@@ -121,13 +121,13 @@ const NotificationIntegrations = {
     },
 
     observeSessionStarts() {
-        // Monitor para início de cronômetros/sessões
+        // Monitor para início de cronÃ´metros/sessÃµes
         const timerObserver = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.type === 'childList' || mutation.type === 'attributes') {
                     const target = mutation.target;
                     
-                    // Verificar se um cronômetro foi iniciado
+                    // Verificar se um cronÃ´metro foi iniciado
                     if (target.classList?.contains('timer-running') ||
                         target.textContent?.includes('Pausar') ||
                         target.querySelector?.('.timer-running')) {
@@ -138,7 +138,7 @@ const NotificationIntegrations = {
             });
         });
 
-        // Observar área onde cronômetros aparecem
+        // Observar área onde cronÃ´metros aparecem
         const timerContainers = document.querySelectorAll('.timer-container, .session-timer, .pomodoro-timer');
         timerContainers.forEach(container => {
             timerObserver.observe(container, {
@@ -154,7 +154,7 @@ const NotificationIntegrations = {
 
     // Integração com sistema de gamificação
     setupGamificationIntegrations() {
-        // Interceptar atualizações de XP e conquistas
+        // Interceptar atualizaçÃµes de XP e conquistas
         this.interceptGamificationUpdates();
 
         // Monitor de streaks
@@ -230,7 +230,7 @@ const NotificationIntegrations = {
         this.intervals.push(streakInterval);
     },
 
-    // Integração com cronômetros
+    // Integração com cronÃ´metros
     setupTimerIntegrations() {
         this.monitorPomodoroCompletions();
         this.monitorStudySessions();
@@ -277,7 +277,7 @@ const NotificationIntegrations = {
                 this.handleSessionStart();
             } else if (!isStudying && sessionStartTime) {
                 const duration = Math.round((Date.now() - sessionStartTime) / 60000); // minutos
-                if (duration >= 5) { // Sessões de pelo menos 5 minutos
+                if (duration >= 5) { // SessÃµes de pelo menos 5 minutos
                     this.handleSessionEnd(duration);
                 }
                 sessionStartTime = null;
@@ -414,7 +414,7 @@ const NotificationIntegrations = {
     // === HANDLERS ===
 
     handleSessionStart() {
-        console.log('📚 Sessão de estudo iniciada');
+        console.log('🎯“š Sessão de estudo iniciada');
         
         // Disparar evento se necessário
         const event = new CustomEvent('sessionStarted', {
@@ -427,7 +427,7 @@ const NotificationIntegrations = {
     },
 
     handleSessionEnd(duration) {
-        console.log(`⏰ Sessão de estudo finalizada: ${duration} minutos`);
+        console.log(`â° Sessão de estudo finalizada: ${duration} minutos`);
         
         // Dados básicos da sessão
         const sessionData = {
@@ -441,7 +441,7 @@ const NotificationIntegrations = {
     },
 
     handlePageChange(from, to) {
-        console.log(`🔄 Navegação: ${from} → ${to}`);
+        console.log(`🎯”„ Navegação: ${from} â†’ ${to}`);
         
         // Triggers específicos baseados na página
         if (to.includes('cronograma')) {
@@ -519,7 +519,7 @@ const NotificationIntegrations = {
 
     extractSubject(text) {
         // Tentar extrair matéria do texto
-        const subjects = ['Direito Constitucional', 'Direito Administrativo', 'Português', 'Matemática'];
+        const subjects = ['Direito Constitucional', 'Direito Administrativo', 'PortuguÃªs', 'Matemática'];
         for (const subject of subjects) {
             if (text.includes(subject)) {
                 return subject;
@@ -587,9 +587,9 @@ const NotificationIntegrations = {
         };
     },
 
-    // Rollback completo - remove todas as integrações
+    // Rollback completo - remove todas as integraçÃµes
     rollback() {
-        console.log('🔄 Executando rollback das integrações...');
+        console.log('🎯”„ Executando rollback das integraçÃµes...');
 
         // Parar todos os observers
         this.observers.forEach(observer => {
@@ -619,7 +619,7 @@ const NotificationIntegrations = {
 
         this.initialized = false;
         
-        console.log('✅ Rollback das integrações concluído');
+        console.log('âœ… Rollback das integraçÃµes concluído');
     }
 };
 
@@ -642,4 +642,4 @@ if (document.readyState === 'loading') {
     waitForContextualNotifications();
 }
 
-console.log('🔗 Módulo NotificationIntegrations carregado');
+console.log('🎯”— Módulo NotificationIntegrations carregado');

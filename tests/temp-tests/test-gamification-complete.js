@@ -275,7 +275,7 @@ async function testarGamificacaoCompleta() {
         const updatedStats = await makeRequest('GET', `/sessions/statistics/${planId}`, null, token);
         const newStats = updatedStats.data || {};
         
-        console.log(`\n   📊 Mudanças nas Estatísticas:`);
+        console.log("\n   📊 Mudanças nas Estatísticas:");
         console.log(`      Sessões concluídas: ${stats.completed_sessions || 0} → ${newStats.completed_sessions || totalCompleted}`);
         console.log(`      Taxa de conclusão: ${stats.completion_rate || 0}% → ${newStats.completion_rate || 0}%`);
         console.log(`      Horas estudadas: ${stats.total_study_hours || 0} → ${newStats.total_study_hours || 0}`);

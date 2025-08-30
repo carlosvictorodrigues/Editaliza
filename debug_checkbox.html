@@ -38,28 +38,27 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM carregado');
+
             
             // Testar se o CSS está funcionando
             const checkbox = document.querySelector('.topic-checkbox');
             const topicItem = document.querySelector('.topic-item');
-            
-            console.log('Checkbox encontrado:', checkbox);
-            console.log('Topic item encontrado:', topicItem);
+
+
             
             if (checkbox) {
                 checkbox.addEventListener('change', function(e) {
-                    console.log('Checkbox mudou:', e.target.checked);
+
                     
                     const topicItemDiv = e.target.closest('.topic-item');
-                    console.log('Topic item div:', topicItemDiv);
+
                     
                     if (topicItemDiv) {
                         topicItemDiv.classList.toggle('show-date', e.target.checked);
-                        console.log('Classes após toggle:', topicItemDiv.className);
+
                         
                         const dateInput = topicItemDiv.querySelector('.historic-date-input');
-                        console.log('Date input display:', getComputedStyle(dateInput).display);
+                        void('Date input display:', getComputedStyle(dateInput).display);
                     }
                 });
             }

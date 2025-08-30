@@ -33,6 +33,7 @@ const cors = require('cors');
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 const { body, query, validationResult } = require('express-validator');
 const session = require('express-session');
 const pgSession = require('connect-pg-simple')(session);
@@ -134,6 +135,11 @@ try {
 
 const app = express();
 
+app.use((req, res, next) => {
+    console.log(`[REQUEST LOGGER] ${req.method} ${req.path}`);
+    next();
+});
+
 // CORREÇÃO OAUTH: Configurar trust proxy para funcionar atrás de Nginx
 // Isso é CRÍTICO para OAuth funcionar corretamente com proxy reverso
 app.set('trust proxy', 1);
@@ -149,11 +155,23 @@ app.use((req, res, next) => {
 
 // CORREÇÃO DE SEGURANÇA: Servir apenas arquivos públicos necessários
 // Anteriormente: app.use(express.static(__dirname)); // ❌ EXPUNHA TODO O PROJETO
-app.use(express.static(path.join(__dirname, 'public')));
+// Garantir charset UTF-8 para arquivos de texto
+function setUtf8Headers(res, filePath) {
+    const ext = filePath.slice(filePath.lastIndexOf('.')).toLowerCase();
+    if (ext === '.html') {
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    } else if (ext === '.js') {
+        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    } else if (ext === '.css') {
+        res.setHeader('Content-Type', 'text/css; charset=utf-8');
+    }
+}
+
+app.use(express.static(path.join(__dirname, 'public'), { setHeaders: setUtf8Headers }));
 
 // Servir arquivos específicos ainda no root (compatibilidade temporária)
-app.use('/css', express.static(path.join(__dirname, 'css')));
-app.use('/js', express.static(path.join(__dirname, 'js')));
+app.use('/css', express.static(path.join(__dirname, 'css'), { setHeaders: setUtf8Headers }));
+
 
 // CORREÇÃO: Servir avatares de forma segura - apenas imagens da pasta images/avatars
 app.use('/images', express.static(path.join(__dirname, 'images')));
@@ -192,7 +210,8 @@ app.use((req, res, next) => {
 });
 
 // Configurações de segurança - Helmet com CSP endurecida
-app.use(helmet({
+const __isProd = process.env.NODE_ENV === 'production';
+const __helmetOptions = {
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ['\'self\''],
@@ -205,20 +224,22 @@ app.use(helmet({
             formAction: ['\'self\'', 'https://accounts.google.com'],
             objectSrc: ['\'none\''], // Bloquear Flash/plugins
             baseUri: ['\'self\''], // Prevenir ataques base href
-            frameAncestors: ['\'none\''], // Clickjacking protection
-            upgradeInsecureRequests: [], // Forçar HTTPS
+            frameAncestors: ["'none'"] // Clickjacking protection
         },
-    },
-    hsts: {
-        maxAge: 31536000,
-        includeSubDomains: true,
-        preload: true
     },
     // Adicionar headers de segurança extras
     frameguard: { action: 'deny' },
     noSniff: true,
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
-}));
+};
+
+// Em produção, habilitar upgradeInsecureRequests e HSTS; em desenvolvimento, desabilitar
+if (__isProd) {
+    __helmetOptions.contentSecurityPolicy.directives.upgradeInsecureRequests = [];
+    __helmetOptions.hsts = { maxAge: 31536000, includeSubDomains: true, preload: true };
+}
+
+app.use(helmet(__helmetOptions));
 
 // Configuração CORS mais restritiva
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()) || ['http://localhost:3000'];
@@ -284,6 +305,7 @@ const sessionConfig = {
 };
 
 // Aplicar configuração de sessão
+app.use(cookieParser());
 app.use(session(sessionConfig));
 
 // Middleware para debug de sessão (temporário)
@@ -761,12 +783,21 @@ if (missingEnvVars.length > 0) {
 }
 
 // Funções utilitárias para interagir com o banco de dados usando Promises
-const dbGet = (sql, params = []) => new Promise((resolve, reject) => db.get(sql, params, (err, row) => err ? reject(err) : resolve(row)));
-const dbAll = (sql, params = []) => new Promise((resolve, reject) => db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows)));
+// CORREÇÃO: Usar métodos do PostgreSQL diretamente quando disponíveis
+const dbGet = db.get && typeof db.get === 'function' ? 
+    (sql, params = []) => db.get(sql, params) : 
+    (sql, params = []) => new Promise((resolve, reject) => db.get(sql, params, (err, row) => err ? reject(err) : resolve(row)));
+
+const dbAll = db.all && typeof db.all === 'function' ?
+    (sql, params = []) => db.all(sql, params) :
+    (sql, params = []) => new Promise((resolve, reject) => db.all(sql, params, (err, rows) => err ? reject(err) : resolve(rows)));
 
 // CORREÇÃO DE SEGURANÇA: Disponibilizar dbGet para middleware de admin
 global.dbGet = dbGet;
-const dbRun = (sql, params = []) => new Promise((resolve, reject) => db.run(sql, params, function(err) { err ? reject(err) : resolve(this); }));
+
+const dbRun = db.run && typeof db.run === 'function' ?
+    (sql, params = []) => db.run(sql, params) :
+    (sql, params = []) => new Promise((resolve, reject) => db.run(sql, params, function(err) { err ? reject(err) : resolve(this); }));
 
 // --- ROTAS DE AUTENTICAÇÃO E USUÁRIO ---
 
@@ -1067,7 +1098,7 @@ app.patch('/api/profile',
 // --- ROTAS DE TESTE E DEBUG ---
 app.get('/api/test-db', authenticateToken, async (req, res) => {
     try {
-        console.log(`[DEBUG TEST] Testando conexão do banco...`);
+        console.log("[DEBUG TEST] Testando conexão do banco...");
         
         // Teste 1: Query simples sem parâmetros
         const test1 = await dbAll('SELECT 1 as test');
@@ -1358,7 +1389,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Health check disponível em: http://localhost:${PORT}/health`);
-    console.log(`Sistema de backup automático ativado`);
+    console.log("Sistema de backup automático ativado");
 });
 
 // Graceful shutdown

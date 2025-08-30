@@ -476,7 +476,7 @@ curl https://app.editaliza.com.br/health
 
 **🎯 CONCLUSÃO:** Este é um sistema maduro e complexo em produção. Cada linha de código existe por um motivo. A migração deve ser CAUTELOSA, SISTEMÁTICA e REVERSÍVEL a qualquer momento.
 
-**👨‍💻 LEMBRE-SE:** Você está mexendo no coração de um sistema que serve usuários reais estudando para concursos. Um erro pode impactar sonhos e carreiras.
+**👨💻 LEMBRE-SE:** Você está mexendo no coração de um sistema que serve usuários reais estudando para concursos. Um erro pode impactar sonhos e carreiras.
 
 **🚀 PRÓXIMOS PASSOS:** Começar pela Fase 2 (Perfil), seguir o cronograma proposto, testar TUDO, e deixar a geração de cronogramas por último.
 

@@ -1,9 +1,8 @@
 // Minimal, ASCII-only login handler to survive encoding issues in inline script
-/* global URLSearchParams */
 (() => {
-  const log = (...args) => { try { console.info('[login-fallback]', ...args); } catch { /* ignore */ } };
-  const warn = (...args) => { try { console.warn('[login-fallback]', ...args); } catch { /* ignore */ } };
-  const errorLog = (...args) => { try { console.error('[login-fallback]', ...args); } catch { /* ignore */ } };
+  const log = function() { try { console.log.apply(console, ['[login-fallback]'].concat(Array.prototype.slice.call(arguments))); } catch (_) {} };
+  const warn = function() { try { console.warn.apply(console, ['[login-fallback]'].concat(Array.prototype.slice.call(arguments))); } catch (_) {} };
+  const errorLog = function() { try { console.error.apply(console, ['[login-fallback]'].concat(Array.prototype.slice.call(arguments))); } catch (_) {} };
 
   function cleanQueryIfCredentialsPresent() {
     try {
@@ -12,7 +11,7 @@
         window.history.replaceState({}, document.title, window.location.pathname);
         log('removed credentials from URL');
       }
-    } catch {
+    } catch (e) {
       // ignore
     }
   }
@@ -20,7 +19,7 @@
   async function doApiLogin(email, password) {
     // Prefer app.apiFetch when available
     if (window.app && typeof window.app.apiFetch === 'function') {
-      return await window.app.apiFetch('/api/auth/login', {
+      return await window.app.apiFetch('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
@@ -37,7 +36,7 @@
       try {
         const data = await resp.json();
         msg = data && (data.message || data.error) || msg;
-      } catch { /* ignore */ }
+      } catch (_) {}
       throw new Error(msg);
     }
     return await resp.json();
@@ -82,7 +81,7 @@
         try {
           const key = (window.app && window.app.config && window.app.config.tokenKey) || 'authToken';
           localStorage.setItem(key, data.token);
-        } catch { /* ignore */ }
+        } catch (_) {}
 
         window.location.href = data.redirectUrl || 'home.html';
       } catch (err) {
@@ -115,7 +114,7 @@
       // Secure session token retrieval flow
       if (params.get('auth_success') === '1') {
         try {
-          const resp = await (window.app && window.app.apiFetch ? window.app.apiFetch('/api/auth/session-token') : fetch('/api/auth/session-token'));
+          const resp = await ((window.app && window.app.apiFetch ? window.app.apiFetch('/auth/session-token') : fetch('/api/auth/session-token')));
           const data = typeof resp.json === 'function' ? await resp.json() : resp; // app.apiFetch returns data directly
           if (data && data.success && data.token) {
             const key = (window.app && window.app.config && window.app.config.tokenKey) || 'authToken';
@@ -162,8 +161,6 @@
           errMsg = 'Codigo de autenticacao nao recebido.';
         } else if (errType === 'oauth_callback_failed') {
           errMsg = 'Erro no processo de autenticacao. Tente novamente.';
-        } else if (errType === 'token_retrieval_failed') {
-          errMsg = 'Erro ao recuperar token de autenticacao. Tente novamente.';
         }
         const msg = document.getElementById('messageContainer');
         if (msg) {
@@ -174,14 +171,14 @@
         return false;
       }
       return false;
-    } catch {
+    } catch (e) {
       // ignore
       return false;
     }
   }
 
   async function init() {
-    try { cleanQueryIfCredentialsPresent(); } catch { /* ignore */ }
+    try { cleanQueryIfCredentialsPresent(); } catch (_) {}
     // If user already has token, redirect quickly
     try {
       const hasToken = !!(window.app && window.app.config && localStorage.getItem(window.app.config.tokenKey));
@@ -189,7 +186,7 @@
         window.location.href = 'home.html';
         return;
       }
-    } catch { /* ignore */ }
+    } catch (_) {}
 
     const handled = await handleAuthParams();
     if (!handled) attachHandler();
@@ -201,3 +198,5 @@
     init();
   }
 })();
+
+

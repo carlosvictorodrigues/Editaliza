@@ -12,19 +12,19 @@ const StudyChecklist = {
         { id: 'bathroom', icon: '🚻', text: 'Banheiro OK?', tip: 'Evite interrupções' },
         { id: 'phone', icon: '📱', text: 'Celular no silencioso?', tip: 'Foco total!' },
         { id: 'materials', icon: '📚', text: 'Material em mãos?', tip: 'Livros, caderno, caneta...' },
-        { id: 'snacks', icon: '🍎', text: 'Café ultra forte e lanche preparados?', tip: 'Energia para o cérebro' },
+        { id: 'snacks', icon: '☕', text: 'Café ultra forte e lanche preparados?', tip: 'Energia para o cérebro' },
         { id: 'comfort', icon: '🪑', text: 'Postura confortável?', tip: 'Cuide da sua coluna' },
-        { id: 'mindset', icon: '💪', text: 'Vontade de vencer ativada?', tip: 'Você consegue!' }
+        { id: 'mindset', icon: '🎯', text: 'Vontade de vencer ativada?', tip: 'Você consegue!' }
     ],
 
     motivationalQuotes: [
-        "A aprovação está mais perto do que você imagina! 🎯",
-        "Cada minuto de estudo é um passo em direção ao seu sonho! ✨",
-        "Hoje você está construindo o seu futuro! 🚀",
+        "A aprovação está mais perto do que você imagina! 🎉",
+        "Cada minuto de estudo é um passo em direção ao seu sonho! 🚀",
+        "Hoje você está construindo o seu futuro! 🏗️",
         "Disciplina é a ponte entre objetivos e conquistas! 🌉",
-        "O sucesso é a soma de pequenos esforços repetidos dia após dia! 💫",
+        "O sucesso é a soma de pequenos esforços repetidos dia após dia! 💪",
         "Você não chegou até aqui para desistir agora! 🔥",
-        "Foco no processo, o resultado é consequência! 📈",
+        "Foco no processo, o resultado é consequência! 🎯",
         "Grandes jornadas começam com pequenos passos! 👣"
     ],
 
@@ -36,13 +36,13 @@ const StudyChecklist = {
         const checklistAlreadyShown = this.checklistShownSessions.has(sessionObject.id);
         
         if (hasActiveTimer || checklistAlreadyShown) {
-            console.log(`⚡ Sessão ${sessionObject.id} - Pulando checklist (timer ativo: ${hasActiveTimer}, já mostrado: ${checklistAlreadyShown})`);
+            void(` Sesso ${sessionObject.id} - Pulando checklist (timer ativo: ${hasActiveTimer}, j mostrado: ${checklistAlreadyShown})`);
             // Skip checklist and go directly to timer
             this.startStudySession(false); // Don't start new timer if one is already active
             return;
         }
         
-        console.log(`📋 Mostrando checklist para sessão ${sessionObject.id} pela primeira vez`);
+        void(`= Mostrando checklist para sessão ${sessionObject.id} pela primeira vez`);
         
         const modal = document.getElementById('studySessionModal');
         const modalContainer = document.getElementById('studySessionModalContainer');
@@ -57,26 +57,26 @@ const StudyChecklist = {
         
         this.addAnimations();
         this.addChecklistListeners();
-        this.addModalClickListener(); // CORREÇÃO 1: Fechar modal ao clicar fora
+        this.addModalClickListener(); // CORREO 1: Fechar modal ao clicar fora
     },
 
-    startStudySession(shouldStartTimer = true) { // CORREÇÃO 2: Controla se deve iniciar o timer
+    startStudySession(shouldStartTimer = true) { // CORREO 2: Controla se deve iniciar o timer
         // Mark this session as having shown the checklist
         if (this.session && this.session.id) {
             this.checklistShownSessions.add(this.session.id);
-            console.log(`✅ Sessão ${this.session.id} marcada como checklist mostrado`);
+            void(` Sesso ${this.session.id} marcada como checklist mostrado`);
         }
         
         const modalContainer = document.getElementById('studySessionModalContainer');
         modalContainer.innerHTML = this.getTimerHtml();
         this.addTimerSessionListeners();
         
-        // CORREÇÃO: Verificar se já existe timer ativo antes de iniciar
+        // CORREO: Verificar se j existe timer ativo antes de iniciar
         const existingTimer = TimerSystem.getActiveTimer(this.session.id);
         
         if (existingTimer) {
-            // Timer já está rodando, apenas conectar
-            console.log('Reconectando ao timer ativo:', this.session.id);
+            // Timer j est rodando, apenas conectar
+            void('Reconectando ao timer ativo:', this.session.id);
             TimerSystem.updateButton(this.session.id, true);
         } else if (shouldStartTimer) {
             // Iniciar novo timer
@@ -88,8 +88,8 @@ const StudyChecklist = {
     },
 
     close() {
-        // CORREÇÃO: NÃO parar o timer automaticamente
-        // Timer continua rodando em background para permitir continuação
+        // CORREO: NO parar o timer automaticamente
+        // Timer continua rodando em background para permitir continuao
         // if (this.session) {
         //     TimerSystem.stop(this.session.id);
         // }
@@ -102,7 +102,7 @@ const StudyChecklist = {
         setTimeout(() => {
             modal.classList.add('hidden');
             modalContainer.innerHTML = '';
-            // NÃO limpar this.session para permitir reconexão
+            // NO limpar this.session para permitir reconexo
             // this.session = null;
         }, 300);
     },
@@ -110,18 +110,23 @@ const StudyChecklist = {
     getChecklistHtml() {
         return `
             <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-editaliza-black mb-2">Preparado para Estudar? 🎯</h2>
+                <h2 class="text-2xl font-bold text-editaliza-black mb-2">Preparado para Estudar? 📖</h2>
                 <p class="text-gray-600 text-sm">${this.getRandomQuote()}</p>
             </div>
             
             <div class="space-y-3 mb-6">
                 ${this.items.map(item => `
-                    <label class="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors group">
-                        <input type="checkbox" id="checklist-${item.id}" class="w-5 h-5 text-editaliza-blue rounded focus:ring-editaliza-blue checklist-item">
+                    <label class="checklist-row flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-all">
+                        <input type="checkbox" id="checklist-${item.id}" class="checklist-item w-5 h-5 text-editaliza-blue rounded focus:ring-editaliza-blue">
+                        <span class="checkmark-visual inline-flex items-center justify-center w-6 h-6 rounded-full border-2 border-gray-300 text-white transition-all">
+                            <svg class="checkmark-icon w-4 h-4 opacity-0 transform scale-50 transition-all" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 00-1.414-1.414L8 11.172 4.707 7.879A1 1 0 003.293 9.293l4 4a1 1 0 001.414 0l8-8z" clip-rule="evenodd" />
+                            </svg>
+                        </span>
                         <span class="text-2xl">${item.icon}</span>
                         <div class="flex-1">
-                            <span class="text-gray-700 font-medium">${item.text}</span>
-                            <p class="text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">${item.tip}</p>
+                            <span class="checklist-text text-gray-700 font-medium">${item.text}</span>
+                            <p class="checklist-tip text-xs text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">${item.tip}</p>
                         </div>
                     </label>
                 `).join('')}
@@ -149,7 +154,7 @@ const StudyChecklist = {
         return `
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold text-gray-800 flex items-center"><span class="text-3xl mr-3">${style.icon}</span>${safeSubjectName}</h2>
-                <button onclick="StudyChecklist.close()" class="text-gray-400 hover:text-gray-600 text-3xl font-light">×</button>
+                <button onclick="StudyChecklist.close()" class="text-gray-400 hover:text-gray-600 text-3xl font-light"></button>
             </div>
             <p class="mb-6 text-gray-600">${safeTopicDescription}</p>
             
@@ -167,7 +172,7 @@ const StudyChecklist = {
                 <div>
                     <label for="modal-status" class="flex items-center space-x-3 cursor-pointer">
                         <input type="checkbox" id="modal-status" class="w-5 h-5 text-editaliza-blue rounded focus:ring-editaliza-blue">
-                        <span class="text-sm font-medium text-gray-700">Marcar como concluído</span>
+                        <span class="text-sm font-medium text-gray-700">Marcar como concludo</span>
                     </label>
                 </div>
             </div>
@@ -182,18 +187,27 @@ const StudyChecklist = {
         const startBtn = document.getElementById('start-study-btn');
         const skipBtn = document.getElementById('skip-checklist-btn');
         
-        document.querySelectorAll('.checklist-item').forEach(cb => cb.addEventListener('change', () => {
+        document.querySelectorAll('.checklist-item').forEach(cb => cb.addEventListener('change', (e) => {
+            const input = e.target;
+            const row = input.closest('label.checklist-row');
+            if (row) {
+                if (input.checked) {
+                    row.classList.add('checked');
+                } else {
+                    row.classList.remove('checked');
+                }
+            }
             this.playCheckSound();
             const allChecked = this.items.every(item => document.getElementById(`checklist-${item.id}`).checked);
             startBtn.disabled = !allChecked;
         }));
         
-        startBtn.addEventListener('click', () => this.startStudySession(true)); // CORREÇÃO 2: Indica que deve iniciar timer
+        startBtn.addEventListener('click', () => this.startStudySession(true)); // CORREO 2: Indica que deve iniciar timer
         skipBtn.addEventListener('click', () => {
             // Mark session as checklist shown and close modal without starting study
             if (this.session && this.session.id) {
                 this.checklistShownSessions.add(this.session.id);
-                console.log(`⏭️ Sessão ${this.session.id} - Checklist pulado, fechando modal`);
+                void(` Sesso ${this.session.id} - Checklist pulado, fechando modal`);
             }
             this.close();
         });
@@ -202,24 +216,24 @@ const StudyChecklist = {
     addTimerSessionListeners() {
         const updateSessionData = app.debounce(async (field, value) => {
             try {
-                // CORREÇÃO 3: Usar endpoint correto e validar dados
+                // CORREO 3: Usar endpoint correto e validar dados
                 const endpoint = `/api/sessions/${this.session.id}`;
                 const payload = { [field]: value };
-                console.log('Salvando dados da sessão:', { sessionId: this.session.id, field, value });
+                void('Salvando dados da sessão:', { sessionId: this.session.id, field, value });
                 
                 await app.apiFetch(endpoint, {
                     method: 'PATCH',
                     body: JSON.stringify(payload)
                 });
                 this.session[field] = value;
-                console.log('Dados salvos com sucesso');
+                void('Dados salvos com sucesso');
             } catch (error) {
                 console.error('Erro ao salvar dados da sessão:', error);
                 app.showToast('Erro ao salvar dados da sessão: ' + error.message, 'error');
             }
         }, 1000);
         
-        // CORREÇÃO 4: Salvar tempo do timer periodicamente
+        // CORREO 4: Salvar tempo do timer periodicamente
         if (window.TimerSystem && this.session) {
             const sessionId = this.session.id;
             
@@ -229,7 +243,8 @@ const StudyChecklist = {
                     const timerData = TimerSystem.timers[sessionId];
                     const secondsElapsed = Math.floor(timerData.elapsed / 1000);
                     if (secondsElapsed > 10) { // Só salvar após 10 segundos
-                        updateSessionData('time_studied_seconds', secondsElapsed);
+                        // Persistir via endpoint dedicado de tempo
+                        TimerSystem.saveTimeToDatabase(sessionId, secondsElapsed);
                     }
                 }
             }, 30000); // A cada 30 segundos
@@ -238,7 +253,7 @@ const StudyChecklist = {
             window.addEventListener('beforeunload', () => clearInterval(saveTimer));
         }
 
-        // CORREÇÃO: Verificar se os elementos existem antes de adicionar event listeners
+        // CORREO: Verificar se os elementos existem antes de adicionar event listeners
         const questionsElement = document.getElementById('modal-questions-solved');
         const notesElement = document.getElementById('modal-notes');
         const statusElement = document.getElementById('modal-status');
@@ -258,28 +273,30 @@ const StudyChecklist = {
         if (statusElement) {
             statusElement.addEventListener('change', async (e) => {
                 if (e.target.checked) {
+                const newStatus = e.target.checked ? 'Concluido' : 'Pendente';
                     // Chamar markAsCompleted quando checkbox for marcado
                     await this.markAsCompleted();
                 } else {
                     // Se desmarcar, apenas atualizar status para Pendente
                     try {
                         const endpoint = `/api/sessions/${this.session.id}`;
-                        console.log('Atualizando status da sessão para Pendente:', this.session.id);
+                        void('Atualizando status da sessão para Pendente:', this.session.id);
                         
                         await app.apiFetch(endpoint, {
                             method: 'PATCH',
                             body: JSON.stringify({ 'status': 'Pendente' })
                         });
-                        console.log('Status atualizado para Pendente');
-                        app.showToast('Sessão marcada como pendente', 'info');
+                        void('Status atualizado para Pendente');
+                        app.showToast('Sesso marcada como pendente', 'info');
                     } catch (error) {
                         console.error('Erro ao atualizar status:', error);
                         app.showToast('Erro ao salvar status: ' + error.message, 'error');
-                    e.target.checked = !e.target.checked; // Reverter checkbox em caso de erro
-                    return;
+                        e.target.checked = !e.target.checked; // Reverter checkbox em caso de erro
+                        return;
+                    }
                 }
 
-                // ***** CORREÇÃO APLICADA AQUI *****
+                // ***** CORREO APLICADA AQUI *****
                 // Invalida o cache do plano para que a tela de Desempenho busque os novos dados.
                 app.invalidatePlanCache(this.session.study_plan_id);
                 
@@ -287,45 +304,45 @@ const StudyChecklist = {
                 app.triggerMetricsUpdate(this.session.study_plan_id, 'session_status_changed');
                 
                 // CORREÇÃO: Atualizar TODAS as métricas quando sessão é concluída
-                if (newStatus === 'Concluído') {
-                    console.log('✅ Sessão concluída - atualizando estatísticas...');
+                 if (newStatus.toLowerCase() === 'concluido') {
+                    void('✅ Sessão concluída - atualizando estatísticas...');
                     app.invalidatePlanCache(this.session.study_plan_id, 'gamification');
                     
-                    // CORREÇÃO: Atualizar TODAS as métricas se estivermos na tela plan.html
+                    // CORREO: Atualizar TODAS as mtricas se estivermos na tela plan.html
                     if (window.location.pathname.includes('plan.html')) {
                         try {
                             if (typeof window.refreshAllMetrics === 'function') {
-                                console.log('🔄 Atualizando todas as métricas após conclusão da sessão...');
+                                void('= Atualizando todas as mtricas aps concluso da sesso...');
                                 setTimeout(() => {
                                     window.refreshAllMetrics();
                                 }, 1000); // Delay para garantir que backend processou
                             } else if (typeof window.refreshGamificationData === 'function') {
-                                // Fallback para função antiga
+                                // Fallback para funo antiga
                                 setTimeout(() => {
                                     window.refreshGamificationData();
                                 }, 500);
                             }
                         } catch (error) {
-                            console.error('Erro ao atualizar métricas:', error);
+                            console.error('Erro ao atualizar mtricas:', error);
                         }
                     }
                 }
 
-                app.showToast(newStatus === 'Concluído' ? 'Sessão concluída! 🎉 As métricas serão atualizadas...' : 'Status da tarefa atualizado!', 'success');
+                 app.showToast(e.target.checked ? 'Sessão concluída! As métricas serão atualizadas...' : 'Status da tarefa atualizado!', 'success');
                 
-                // CORREÇÃO: Não atualizar painéis aqui, deixar para a função global fazer isso
-                // O refresh será feito pela função refreshAllMetrics() chamada acima
+                // CORREO: No atualizar painis aqui, deixar para a funo global fazer isso
+                // O refresh ser feito pela funo refreshAllMetrics() chamada acima
                 
                 if (e.target.checked) {
                     this.close();
-                    // Não precisa mais recarregar a página inteira, já atualizamos os painéis
+                    // No precisa mais recarregar a pgina inteira, j atualizamos os painis
                     if (!window.location.pathname.includes('plan.html')) {
                         location.reload(); 
                     }
                 }
             });
         } else {
-            console.warn('⚠️ Elemento modal-status não encontrado');
+            console.warn(' Elemento modal-status no encontrado');
         }
     },
 
@@ -362,11 +379,11 @@ const StudyChecklist = {
         return this.motivationalQuotes[Math.floor(Math.random() * this.motivationalQuotes.length)];
     },
 
-    // CORREÇÃO 1: Adicionar listener para fechar modal ao clicar fora
+    // CORREO 1: Adicionar listener para fechar modal ao clicar fora
     addModalClickListener() {
         const modal = document.getElementById('studySessionModal');
         modal.addEventListener('click', (event) => {
-            // Se clicou no overlay (fundo), mas não no container do modal
+            // Se clicou no overlay (fundo), mas no no container do modal
             if (event.target === modal) {
                 this.close();
             }
@@ -389,7 +406,7 @@ const StudyChecklist = {
                 // Stop the timer and mark session as completed
                 TimerSystem.stop(sessionId);
                 
-                // CORREÇÃO: Marcar timer como concluído para evitar botão "Continuar"
+                // CORREO: Marcar timer como concludo para evitar boto "Continuar"
                 if (TimerSystem.timers[sessionId]) {
                     TimerSystem.timers[sessionId].isCompleted = true;
                 }
@@ -397,7 +414,7 @@ const StudyChecklist = {
                 // Limpar do localStorage para evitar reaparecimento
                 TimerSystem.clearStoredTimer(sessionId);
                 
-                console.log(`⏱️ Timer parado e sessão marcada como concluída. Tempo capturado: ${studyTimeSeconds} segundos`);
+                void(`⏱️ Timer parado e sessão marcada como concluída. Tempo capturado: ${studyTimeSeconds} segundos`);
             }
             
             // Get notes and questions from modal
@@ -407,45 +424,36 @@ const StudyChecklist = {
             const notes = notesElement ? notesElement.value.trim() : '';
             const questionsSolved = questionsElement ? parseInt(questionsElement.value) || 0 : 0;
             
-            // Prepare update payload
-            const updateData = { 
-                status: 'Concluído'
-            };
-            
-            // Add study time if there was timer activity
-            if (studyTimeSeconds > 0) {
-                updateData.study_time_seconds = studyTimeSeconds;
-            }
-            
-            // Add notes if provided
-            if (notes) {
-                updateData.notes = notes;
-            }
-            
-            // Add questions solved if provided
-            if (questionsSolved > 0) {
-                updateData.questions_solved = questionsSolved;
-            }
-            
-            // Save to database
-            const endpoint = `/api/sessions/${sessionId}`;
+            // Save to database using dedicated completion endpoint
+            const endpoint = `/api/sessions/${sessionId}/complete`;
             await app.apiFetch(endpoint, {
-                method: 'PATCH',
-                body: JSON.stringify(updateData)
+                method: 'POST',
+                body: JSON.stringify({
+                    timeStudied: studyTimeSeconds,
+                    questionsSolved: questionsSolved,
+                    notes: notes
+                })
             });
             
             // Show appropriate success message
             const timeMessage = studyTimeSeconds > 0 ? ` (${TimerSystem.formatTime(studyTimeSeconds * 1000)} estudados)` : '';
             app.showToast(`✅ Sessão marcada como concluída${timeMessage}!`, 'success');
             
-            console.log(`✅ Sessão ${sessionId} finalizada:`, updateData);
+            void(` Sesso ${sessionId} finalizada:`, updateData);
             
-            // Update dashboard stats if available
+            // Update client cache/state
             if (window.updateDashboardStats) {
                 window.updateDashboardStats();
             }
+            if (window.todaySessionsData && Array.isArray(window.todaySessionsData)) {
+                const idx = window.todaySessionsData.findIndex(s => String(s.id) === String(sessionId));
+                if (idx !== -1) {
+                    window.todaySessionsData[idx].status = 'completed';
+                    window.todaySessionsData[idx].completed_at = new Date().toISOString();
+                }
+            }
             
-            // CORREÇÃO: Atualizar visual do card imediatamente
+            // CORREO: Atualizar visual do card imediatamente
             setTimeout(() => {
                 TimerSystem.updateCardVisuals(sessionId);
             }, 100);
@@ -460,13 +468,13 @@ const StudyChecklist = {
             
         } catch (error) {
             console.error('❌ Erro ao marcar sessão como concluída:', error);
-            app.showToast('Erro ao salvar dados da sessão. Tente novamente.', 'error');
+            app.showToast('Erro ao salvar dados da sesso. Tente novamente.', 'error');
         }
     },
     
     // LEGACY: Keep for backward compatibility but redirect to markAsCompleted
     async finishSessionWithTime() {
-        console.log('⚠️ finishSessionWithTime is deprecated, redirecting to markAsCompleted');
+        void(' finishSessionWithTime is deprecated, redirecting to markAsCompleted');
         return this.markAsCompleted();
     }
 };

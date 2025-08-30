@@ -746,7 +746,7 @@ async function generateReport() {
     console.log(colors.cyan('RELATÓRIO FINAL'));
     console.log(colors.cyan('═══════════════════════════════════════════'));
     
-    console.log(`\nResumo dos Testes:`);
+    console.log("\nResumo dos Testes:");
     console.log(`Total de testes executados: ${stats.total}`);
     console.log(colors.green(`✓ Testes aprovados: ${stats.passed}`));
     console.log(colors.yellow(`⚠ Avisos: ${stats.warnings}`));

@@ -57,6 +57,7 @@ desktop.ini
 .vscode/
 .idea/
 .claude/
+*.bak.beforeSanitize
 
 # Claude Code configuration
 .claude.json

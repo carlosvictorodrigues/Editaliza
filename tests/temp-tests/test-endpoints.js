@@ -152,7 +152,7 @@ async function runTests() {
         if (failed.length === 0) {
             console.log('🎯 Excelente! Todos os endpoints estão funcionando.');
             console.log('🌐 A interface deve carregar os dados corretamente.');
-            console.log(`🔗 Acesse: http://localhost:3000/test-interface-pos-correcoes.html`);
+            console.log("🔗 Acesse: http://localhost:3000/test-interface-pos-correcoes.html");
         } else {
             console.log('⚠️  Alguns endpoints ainda apresentam problemas.');
             console.log('🛠️  Verifique os logs do servidor para mais detalhes.');

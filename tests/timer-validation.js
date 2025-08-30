@@ -124,7 +124,7 @@ try {
     // Parar apenas um
     TimerSystem.stop(1);
     
-    console.log(`✅ Após parar timer 1:`);
+    console.log("✅ Após parar timer 1:");
     console.log(`   - Timer 1 ativo: ${TimerSystem.hasActiveTimer(1)}`);
     console.log(`   - Timer 2 ativo: ${TimerSystem.hasActiveTimer(2)}`);
     
@@ -209,8 +209,8 @@ try {
     const recoveredTimer = TimerSystem.timers['1'];
     if (recoveredTimer) {
         const expectedElapsed = 120000 + (now - (fiveMinutesAgo + 120000));
-        console.log(`✅ Timer recuperado após inatividade`);
-        console.log(`   - Elapsed original: 120000ms (2min)`);
+        console.log("✅ Timer recuperado após inatividade");
+        console.log("- Elapsed original: 120000ms (2min)");
         console.log(`   - Elapsed recalculado: ${recoveredTimer.elapsed}ms`);
         console.log(`   - Diferença esperada: ~${Math.round(expectedElapsed/1000)}s`);
         

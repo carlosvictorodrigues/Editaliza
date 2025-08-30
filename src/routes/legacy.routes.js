@@ -31,7 +31,7 @@ function getBrazilianDateString() {
 // ==========================================
 router.get('/test-db', authenticateToken, async (req, res) => {
     try {
-        console.log(`[DEBUG TEST] Testando conexão do banco...`);
+        console.log("[DEBUG TEST] Testando conexão do banco...");
         
         const test1 = await dbAll('SELECT 1 as test');
         console.log(`[DEBUG TEST] Teste 1 (SELECT 1):`, test1);

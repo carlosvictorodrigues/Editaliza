@@ -205,7 +205,7 @@ async function generateSchedule() {
                 'SELECT COUNT(*) FROM app.study_sessions WHERE study_plan_id = 25'
             );
             
-            console.log(`\n✅ CRONOGRAMA GERADO COM SUCESSO!`);
+            console.log("\n✅ CRONOGRAMA GERADO COM SUCESSO!");
             console.log(`📊 Total de sessões criadas: ${sessionCount.rows[0].count}`);
             
             // Verificar distribuição final

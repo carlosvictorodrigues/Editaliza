@@ -28,10 +28,10 @@ async function applyIndexes() {
             try {
                 console.log(`  ${index + 1}/${commands.length}: Executando...`);
                 await dbRun(command);
-                console.log(`  ✅ Sucesso`);
+                console.log("✅ Sucesso");
             } catch (error) {
                 if (error.message.includes('já existe') || error.message.includes('already exists')) {
-                    console.log(`  ℹ️  Já existe - ok`);
+                    console.log("ℹ️  Já existe - ok");
                 } else {
                     console.log(`  ⚠️  Aviso: ${error.message}`);
                 }

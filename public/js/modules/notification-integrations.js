@@ -16,7 +16,7 @@ const NotificationIntegrations = {
         if (this.initialized) return;
 
         try {
-            console.log('🔗 Inicializando Integrações de Notificação...');
+            void('🔗 Inicializando Integrações de Notificação...');
 
             // Aguardar carregamento das dependências
             await this.waitForDependencies();
@@ -28,7 +28,7 @@ const NotificationIntegrations = {
             this.setupUIIntegrations();
 
             this.initialized = true;
-            console.log('✅ Integrações de notificação inicializadas');
+            void('✅ Integrações de notificação inicializadas');
 
         } catch (error) {
             console.error('❌ Erro na inicialização das integrações:', error);
@@ -37,7 +37,7 @@ const NotificationIntegrations = {
 
     // Aguardar dependências estarem disponíveis
     async waitForDependencies() {
-        const maxWait = 10000; // 10 segundos
+        const maxWait = 20000; // 20 segundos em dev
         const checkInterval = 100; // 100ms
         let waited = 0;
 
@@ -52,7 +52,9 @@ const NotificationIntegrations = {
             waited += checkInterval;
         }
 
-        throw new Error('Dependências não carregaram a tempo');
+        // Em vez de lançar erro, apenas registrar aviso e seguir sem integrações
+        console.warn('NotificationIntegrations: dependências não carregaram a tempo; prosseguindo sem integrações.');
+        return false;
     },
 
     // Integração com eventos de sessão
@@ -64,7 +66,8 @@ const NotificationIntegrations = {
         this.observeSessionStarts();
 
         // Monitor de tempo de estudo
-        this.monitorStudyTime();
+        // Método correto: monitoramento contínuo de sessões de estudo
+        this.monitorStudySessions();
     },
 
     observeSessionCompletions() {
@@ -414,7 +417,7 @@ const NotificationIntegrations = {
     // === HANDLERS ===
 
     handleSessionStart() {
-        console.log('📚 Sessão de estudo iniciada');
+        void('📚 Sessão de estudo iniciada');
         
         // Disparar evento se necessário
         const event = new CustomEvent('sessionStarted', {
@@ -427,7 +430,7 @@ const NotificationIntegrations = {
     },
 
     handleSessionEnd(duration) {
-        console.log(`⏰ Sessão de estudo finalizada: ${duration} minutos`);
+        void(`⏰ Sessão de estudo finalizada: ${duration} minutos`);
         
         // Dados básicos da sessão
         const sessionData = {
@@ -441,7 +444,7 @@ const NotificationIntegrations = {
     },
 
     handlePageChange(from, to) {
-        console.log(`🔄 Navegação: ${from} → ${to}`);
+        void(`🔄 Navegação: ${from} → ${to}`);
         
         // Triggers específicos baseados na página
         if (to.includes('cronograma')) {
@@ -589,7 +592,7 @@ const NotificationIntegrations = {
 
     // Rollback completo - remove todas as integrações
     rollback() {
-        console.log('🔄 Executando rollback das integrações...');
+        void('🔄 Executando rollback das integrações...');
 
         // Parar todos os observers
         this.observers.forEach(observer => {
@@ -619,7 +622,7 @@ const NotificationIntegrations = {
 
         this.initialized = false;
         
-        console.log('✅ Rollback das integrações concluído');
+        void('✅ Rollback das integrações concluído');
     }
 };
 
@@ -642,4 +645,4 @@ if (document.readyState === 'loading') {
     waitForContextualNotifications();
 }
 
-console.log('🔗 Módulo NotificationIntegrations carregado');
+void('🔗 Módulo NotificationIntegrations carregado');

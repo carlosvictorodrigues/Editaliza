@@ -80,7 +80,7 @@ async function testServices() {
             const { createServices } = require('../src/services');
             services = createServices(repos, db);
             
-            console.log(`  Verificando services...`);
+            console.log("Verificando services...");
             console.log(`  - services.plan: ${services.plan ? '✅' : '❌'}`);
             console.log(`  - services.session: ${services.session ? '✅' : '❌'}`);
             console.log(`  - services.statistics: ${services.statistics ? '✅' : '❌'}`);
@@ -218,11 +218,11 @@ async function testServices() {
                 const testPlanId = 1;
                 
                 // Não vamos executar queries reais, apenas verificar se não há erro de sintaxe
-                console.log(`  ℹ️ Verificando sintaxe dos métodos...`);
+                console.log("ℹ️ Verificando sintaxe dos métodos...");
                 
                 // Verificar se os métodos podem ser chamados (sem executar queries)
                 if (typeof services.planService.checkOverdue === 'function') {
-                    console.log(`  ✅ checkOverdue pode ser chamado`);
+                    console.log("✅ checkOverdue pode ser chamado");
                 }
                 
                 console.log(`${colors.green}✅ Integração básica OK${colors.reset}\n`);

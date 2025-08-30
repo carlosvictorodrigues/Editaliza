@@ -1,0 +1,118 @@
+{
+  "home.html": {
+    "current_order": [
+      {"src": "js/app.js", "defer": false, "type": null},
+      {"src": "js/timer.js", "defer": false, "type": null},
+      {"src": "js/modules/gamification.js", "defer": false, "type": null},
+      {"src": "js/components.js", "defer": false, "type": null},
+      {"src": "js/checklist.js", "defer": true, "type": null},
+      {"src": "js/modules/study-goals-notifications.js", "defer": true, "type": null},
+      {"src": "js/modules/contextual-notifications.js", "defer": true, "type": null},
+      {"src": "js/modules/notification-integrations.js", "defer": true, "type": null},
+      {"src": "js/footer.js", "defer": false, "type": null},
+      {"src": "/js/api-interceptors.js", "defer": false, "type": null},
+      {"src": "/js/error-handler.js", "defer": false, "type": null}
+    ],
+    "dependencies": {
+      "app.js": [],
+      "timer.js": ["app.js"],
+      "gamification.js": [],
+      "components.js": ["app.js", "gamification.js"],
+      "checklist.js": ["app.js"],
+      "study-goals-notifications.js": ["app.js"],
+      "contextual-notifications.js": ["app.js"],
+      "notification-integrations.js": ["app.js"],
+      "footer.js": [],
+      "api-interceptors.js": ["app.js"],
+      "error-handler.js": ["app.js"]
+    },
+    "classification": "GLOBAL",
+    "proposed_order": [
+      {"src": "js/app.js", "defer": true, "type": null},
+      {"src": "js/gamification.js", "defer": true, "type": null},
+      {"src": "js/timer.js", "defer": true, "type": null},
+      {"src": "js/components.js", "defer": true, "type": null},
+      {"src": "js/api-interceptors.js", "defer": true, "type": null},
+      {"src": "js/error-handler.js", "defer": true, "type": null},
+      {"src": "js/checklist.js", "defer": true, "type": null},
+      {"src": "js/modules/study-goals-notifications.js", "defer": true, "type": null},
+      {"src": "js/modules/contextual-notifications.js", "defer": true, "type": null},
+      {"src": "js/modules/notification-integrations.js", "defer": true, "type": null},
+      {"src": "js/footer.js", "defer": true, "type": null}
+    ]
+  },
+  "plan.html": {
+    "current_order": [
+      {"src": "js/app.js", "defer": false, "type": "module"},
+      {"src": "js/components.js", "defer": false, "type": null},
+      {"src": "js/modules/gamification.js", "defer": false, "type": null},
+      {"src": "js/footer.js", "defer": false, "type": null}
+    ],
+    "dependencies": {
+      "app.js": [],
+      "components.js": ["app.js", "gamification.js"],
+      "gamification.js": [],
+      "footer.js": []
+    },
+    "classification": "MISTO",
+    "proposed_order": [
+      {"src": "js/app.js", "defer": true, "type": null},
+      {"src": "js/modules/gamification.js", "defer": true, "type": null},
+      {"src": "js/components.js", "defer": true, "type": null},
+      {"src": "js/footer.js", "defer": true, "type": null}
+    ]
+  },
+  "plan_settings.html": {
+    "current_order": [
+      {"src": "js/app.js", "defer": false, "type": null},
+      {"src": "js/components.js", "defer": false, "type": null},
+      {"src": "js/modules/contextual-notifications.js", "defer": false, "type": null},
+      {"src": "js/modules/notification-integrations.js", "defer": false, "type": null},
+      {"src": "js/footer.js", "defer": false, "type": null}
+    ],
+    "dependencies": {
+      "app.js": [],
+      "components.js": ["app.js"],
+      "contextual-notifications.js": ["app.js"],
+      "notification-integrations.js": ["app.js"],
+      "footer.js": []
+    },
+    "classification": "GLOBAL",
+    "proposed_order": [
+      {"src": "js/app.js", "defer": true, "type": null},
+      {"src": "js/components.js", "defer": true, "type": null},
+      {"src": "js/modules/contextual-notifications.js", "defer": true, "type": null},
+      {"src": "js/modules/notification-integrations.js", "defer": true, "type": null},
+      {"src": "js/footer.js", "defer": true, "type": null}
+    ]
+  },
+  "cronograma.html": {
+    "current_order": [
+      {"src": "https://cdn.tailwindcss.com", "defer": false, "type": null},
+      {"src": "js/app.js", "defer": false, "type": "module"},
+      {"src": "js/components.js", "defer": false, "type": null},
+      {"src": "js/ux-improvements.js", "defer": false, "type": null},
+      {"src": "js/footer.js", "defer": false, "type": null},
+      {"src": "/js/api-interceptors.js", "defer": false, "type": null},
+      {"src": "/js/error-handler.js", "defer": false, "type": null}
+    ],
+    "dependencies": {
+      "app.js": [],
+      "components.js": ["app.js"],
+      "ux-improvements.js": ["app.js"],
+      "footer.js": [],
+      "api-interceptors.js": ["app.js"],
+      "error-handler.js": ["app.js"]
+    },
+    "classification": "MISTO",
+    "proposed_order": [
+      {"src": "https://cdn.tailwindcss.com", "defer": false, "type": null},
+      {"src": "js/app.js", "defer": true, "type": null},
+      {"src": "js/components.js", "defer": true, "type": null},
+      {"src": "js/api-interceptors.js", "defer": true, "type": null},
+      {"src": "js/error-handler.js", "defer": true, "type": null},
+      {"src": "js/ux-improvements.js", "defer": true, "type": null},
+      {"src": "js/footer.js", "defer": true, "type": null}
+    ]
+  }
+}

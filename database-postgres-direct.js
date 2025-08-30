@@ -14,9 +14,11 @@ const pool = new Pool({
     password: process.env.DB_PASSWORD || '1a2b3c4d',
     host: process.env.DB_HOST || '127.0.0.1',
     port: process.env.DB_PORT || 5432,
-    max: 20, // máximo de conexões no pool
-    idleTimeoutMillis: 10000, // Reduzido para 10s para renovar conexões mais rápido
-    connectionTimeoutMillis: 2000,
+    max: parseInt(process.env.DB_POOL_MAX || '20', 10),
+    idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '10000', 10),
+    connectionTimeoutMillis: parseInt(process.env.DB_CONNECT_TIMEOUT || '10000', 10),
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 5000,
 });
 
 // Configurar search_path corretamente para CADA conexão
@@ -122,14 +124,26 @@ async function run(sql, params = []) {
             finalSQL = pgSQL + ' RETURNING id';
         }
         
-        const result = await pool.query(finalSQL, params);
+        console.log('[POSTGRES] Executando query:', finalSQL.substring(0, 100) + '...');
+        console.log('[POSTGRES] Com params:', params.length, 'parâmetros');
+        
+        // Adicionar timeout para evitar travamento
+        const queryPromise = pool.query(finalSQL, params);
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Query timeout após 3 segundos')), 3000)
+        );
+        
+        const result = await Promise.race([queryPromise, timeoutPromise]);
+        
+        console.log('[POSTGRES] Query executada com sucesso. Linhas afetadas:', result.rowCount);
         
         // Formatar resultado para compatibilidade
         return {
             lastID: result.rows[0]?.id || null,
             id: result.rows[0]?.id || null,
             changes: result.rowCount,
-            affectedRows: result.rowCount
+            affectedRows: result.rowCount,
+            rowCount: result.rowCount
         };
     } catch (error) {
         console.error('[POSTGRES] Erro em run:', error.message);
@@ -194,6 +208,11 @@ const dbGet = get;
 const dbAll = all;
 const dbRun = run;
 
+// API compatível com versões anteriores (SQLite-like)
+async function getAsync(sql, params = []) { return get(sql, params); }
+async function allAsync(sql, params = []) { return all(sql, params); }
+async function runAsync(sql, params = []) { return run(sql, params); }
+
 // Forçar renovação de todas as conexões no pool
 async function forcePoolRefresh() {
     try {
@@ -207,20 +226,33 @@ async function forcePoolRefresh() {
     }
 }
 
-// Testar conexão ao inicializar e forçar refresh
-testConnection().then(async success => {
-    if (success) {
-        console.log('✅ [POSTGRES-DIRECT] Conectado ao PostgreSQL');
-        console.log(`   Host: ${process.env.DB_HOST || '127.0.0.1'}:${process.env.DB_PORT || 5432}`);
-        console.log(`   Database: ${process.env.DB_NAME || 'editaliza_db'}`);
-        
-        // Forçar renovação do pool
-        await forcePoolRefresh();
-    } else {
-        console.error('❌ [POSTGRES-DIRECT] Falha na conexão com PostgreSQL');
-        process.exit(1); // Encerrar se não conseguir conectar
+// Tentativas de conexão com backoff para inicialização mais resiliente
+const MAX_RETRIES = parseInt(process.env.DB_CONNECT_RETRIES || '10', 10);
+const RETRY_DELAY_MS = parseInt(process.env.DB_CONNECT_RETRY_DELAY || '3000', 10);
+
+async function ensureInitialConnection() {
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        const ok = await testConnection();
+        if (ok) {
+            console.log('✅ [POSTGRES-DIRECT] Conectado ao PostgreSQL');
+            console.log(`   Host: ${process.env.DB_HOST || '127.0.0.1'}:${process.env.DB_PORT || 5432}`);
+            console.log(`   Database: ${process.env.DB_NAME || 'editaliza_db'}`);
+            await forcePoolRefresh();
+            return true;
+        }
+        if (attempt < MAX_RETRIES) {
+            console.error(`⏳ [POSTGRES] Tentativa ${attempt}/${MAX_RETRIES} falhou. Nova tentativa em ${RETRY_DELAY_MS}ms...`);
+            await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+        }
     }
-});
+    console.error('❌ [POSTGRES-DIRECT] Falha na conexão com PostgreSQL após múltiplas tentativas');
+    if (process.env.NODE_ENV === 'production') {
+        process.exit(1);
+    }
+    return false;
+}
+
+ensureInitialConnection();
 
 module.exports = {
     // Métodos principais
@@ -233,6 +265,10 @@ module.exports = {
     dbGet,
     dbAll,
     dbRun,
+    // Compat wrappers
+    getAsync,
+    allAsync,
+    runAsync,
     
     // Utilitários
     testConnection,

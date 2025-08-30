@@ -131,11 +131,11 @@ const processSessionCompletion = async (userId, sessionId) => {
                 (SELECT COUNT(DISTINCT topic_id) 
                  FROM study_sessions ss 
                  JOIN study_plans sp ON ss.study_plan_id = sp.id 
-                 WHERE sp.user_id = $1 AND ss.status = 'Concluído' AND ss.topic_id IS NOT NULL) as completed_topics,
+                 WHERE sp.user_id = $1 AND ss.status IN ('Concluído', 'Concluída', 'Concluida') AND ss.topic_id IS NOT NULL) as completed_topics,
                 (SELECT COUNT(*) 
                  FROM study_sessions ss 
                  JOIN study_plans sp ON ss.study_plan_id = sp.id 
-                 WHERE sp.user_id = $1 AND ss.status = 'Concluído') as completed_sessions`,
+                 WHERE sp.user_id = $1 AND ss.status IN ('Concluído', 'Concluída', 'Concluida')) as completed_sessions`,
             [userId]
         );
         
@@ -258,7 +258,7 @@ const getGamificationProfile = async (userId) => {
              FROM study_sessions ss
              JOIN study_plans sp ON ss.study_plan_id = sp.id
              WHERE sp.user_id = $1 
-               AND ss.status = 'Concluído' 
+               AND ss.status IN ('Concluído', 'Concluída', 'Concluida') 
                AND ss.topic_id IS NOT NULL`,
             [userId]
         );
@@ -328,7 +328,7 @@ async function calculateCurrentStreakWithClient(client, userId) {
         `SELECT DISTINCT session_date::date as session_date
          FROM study_sessions ss
          JOIN study_plans sp ON ss.study_plan_id = sp.id
-         WHERE sp.user_id = $1 AND ss.status = 'Concluído'
+         WHERE sp.user_id = $1 AND ss.status IN ('Concluído', 'Concluída', 'Concluida')
          ORDER BY session_date DESC
          LIMIT 30`,
         [userId]
@@ -372,7 +372,7 @@ async function countUniqueCompletedTopics(userId) {
             `SELECT COUNT(DISTINCT ss.topic_id) as count
              FROM study_sessions ss
              JOIN study_plans sp ON ss.study_plan_id = sp.id
-             WHERE sp.user_id = $1 AND ss.status = 'Concluído' AND ss.topic_id IS NOT NULL`,
+             WHERE sp.user_id = $1 AND ss.status IN ('Concluído', 'Concluída', 'Concluida') AND ss.topic_id IS NOT NULL`,
             [userId]
         );
         return parseInt(result.rows[0]?.count, 10) || 0;
@@ -454,9 +454,196 @@ async function checkAndGrantAchievements(userId, currentStats) {
     }
 }
 
+/**
+ * Get user statistics for gamification display
+ */
+const getUserStats = async (userId) => {
+    let client;
+    try {
+        client = await pool.connect();
+        
+        // Get gamification stats
+        const statsResult = await client.query(
+            'SELECT * FROM user_gamification_stats WHERE user_id = $1',
+            [userId]
+        );
+        
+        if (statsResult.rows.length === 0) {
+            return {
+                xp: 0,
+                level: 1,
+                current_streak: 0,
+                longest_streak: 0,
+                total_study_time: 0,
+                completed_sessions: 0,
+                completed_topics: 0
+            };
+        }
+        
+        const stats = statsResult.rows[0];
+        
+        // Get additional counters
+        const countsResult = await client.query(
+            `SELECT 
+                (SELECT COUNT(DISTINCT topic_id) 
+                 FROM study_sessions ss 
+                 JOIN study_plans sp ON ss.study_plan_id = sp.id 
+                 WHERE sp.user_id = $1 AND ss.status IN ('Concluído', 'Concluída', 'Concluida') AND ss.topic_id IS NOT NULL) as completed_topics,
+                (SELECT COUNT(*) 
+                 FROM study_sessions ss 
+                 JOIN study_plans sp ON ss.study_plan_id = sp.id 
+                 WHERE sp.user_id = $1 AND ss.status IN ('Concluído', 'Concluída', 'Concluida')) as completed_sessions,
+                (SELECT SUM(COALESCE(time_studied_seconds, 0)) 
+                 FROM study_sessions ss 
+                 JOIN study_plans sp ON ss.study_plan_id = sp.id 
+                 WHERE sp.user_id = $1 AND ss.status IN ('Concluído', 'Concluída', 'Concluida')) as total_study_time`,
+            [userId]
+        );
+        
+        const counts = countsResult.rows[0];
+        const levelInfo = calculateLevel(parseInt(counts.completed_topics, 10) || 0);
+        
+        return {
+            ...stats,
+            level_info: levelInfo,
+            completed_topics: parseInt(counts.completed_topics, 10) || 0,
+            completed_sessions: parseInt(counts.completed_sessions, 10) || 0,
+            total_study_time: parseInt(counts.total_study_time, 10) || 0
+        };
+        
+    } finally {
+        if (client) client.release();
+    }
+};
+
+/**
+ * Get user progress data
+ */
+const getUserProgress = async (userId) => {
+    let client;
+    try {
+        client = await pool.connect();
+        
+        // Get active plans for the user
+        const plansResult = await client.query(
+            'SELECT id, plan_name FROM study_plans WHERE user_id = $1',
+            [userId]
+        );
+        
+        if (plansResult.rows.length === 0) {
+            return {
+                plans: [],
+                overall_completion: 0,
+                total_sessions: 0,
+                completed_sessions: 0
+            };
+        }
+        
+        const plans = [];
+        let totalSessions = 0;
+        let completedSessions = 0;
+        
+        for (const plan of plansResult.rows) {
+            const sessionCountResult = await client.query(
+                `SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status IN ('Concluído', 'Concluída', 'Concluida') THEN 1 ELSE 0 END) as completed
+                 FROM study_sessions 
+                 WHERE study_plan_id = $1`,
+                [plan.id]
+            );
+            
+            const counts = sessionCountResult.rows[0];
+            const planTotal = parseInt(counts.total, 10) || 0;
+            const planCompleted = parseInt(counts.completed, 10) || 0;
+            
+            totalSessions += planTotal;
+            completedSessions += planCompleted;
+            
+            plans.push({
+                id: plan.id,
+                name: plan.plan_name,
+                total_sessions: planTotal,
+                completed_sessions: planCompleted,
+                completion_percentage: planTotal > 0 ? Math.round((planCompleted / planTotal) * 100) : 0
+            });
+        }
+        
+        return {
+            plans,
+            overall_completion: totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0,
+            total_sessions: totalSessions,
+            completed_sessions: completedSessions
+        };
+        
+    } finally {
+        if (client) client.release();
+    }
+};
+
+/**
+ * Get user achievements
+ */
+const getUserAchievements = async (userId) => {
+    let client;
+    try {
+        client = await pool.connect();
+        
+        const achievementsResult = await client.query(
+            'SELECT * FROM user_achievements WHERE user_id = $1 ORDER BY unlocked_at DESC',
+            [userId]
+        );
+        
+        return {
+            achievements: achievementsResult.rows,
+            total_count: achievementsResult.rows.length
+        };
+        
+    } finally {
+        if (client) client.release();
+    }
+};
+
+/**
+ * Get general statistics
+ */
+const getGeneralStatistics = async (userId) => {
+    let client;
+    try {
+        client = await pool.connect();
+        
+        // Get various statistics
+        const statsResult = await client.query(
+            `SELECT 
+                COUNT(DISTINCT sp.id) as total_plans,
+                COUNT(DISTINCT DATE(ss.session_date)) as unique_study_days,
+                AVG(CASE WHEN ss.status IN ('Concluído', 'Concluída', 'Concluida') THEN ss.time_studied_seconds ELSE NULL END) as avg_session_time
+             FROM study_plans sp
+             LEFT JOIN study_sessions ss ON sp.id = ss.study_plan_id
+             WHERE sp.user_id = $1`,
+            [userId]
+        );
+        
+        const result = statsResult.rows[0];
+        
+        return {
+            total_plans: parseInt(result.total_plans, 10) || 0,
+            unique_study_days: parseInt(result.unique_study_days, 10) || 0,
+            avg_session_time: parseInt(result.avg_session_time, 10) || 0
+        };
+        
+    } finally {
+        if (client) client.release();
+    }
+};
+
 module.exports = {
     processSessionCompletion,
     getGamificationProfile,
+    getUserStats,
+    getUserProgress,
+    getUserAchievements,
+    getGeneralStatistics,
     // Exportar também as definições para uso em outros lugares
     LEVELS,
     ACHIEVEMENTS,

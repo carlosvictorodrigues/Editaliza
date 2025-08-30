@@ -443,8 +443,8 @@ class SecurityAudit {
             'CRITICAL': 'color: red'
         };
         
-        console.log(`\n🔍 RELATÓRIO DE AUDITORIA DE SEGURANÇA`);
-        console.log(`=====================================`);
+        console.log("\n🔍 RELATÓRIO DE AUDITORIA DE SEGURANÇA");
+        console.log("=====================================");
         console.log(`%c${levelEmoji[level]} Nível de Segurança: ${level}`, levelColor[level]);
         console.log(`📊 Vulnerabilidades encontradas: ${count}`);
         

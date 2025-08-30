@@ -240,7 +240,7 @@ async function testGetSessions() {
         
         if (response.length > 0) {
             const firstSession = response[0];
-            console.log(`   Primeira sessão:`);
+            console.log("Primeira sessão:");
             console.log(`     - Data: ${firstSession.session_date}`);
             console.log(`     - Disciplina: ${firstSession.subject_name || 'N/A'}`);
             console.log(`     - Status: ${firstSession.status}`);

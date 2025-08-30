@@ -32,7 +32,7 @@ async function verifyEmailSystem() {
             const status = SendGridService.getStatus();
             sendGridAvailable = status.configured;
             
-            console.log(`✓ SendGrid Module: ✅ Carregado`);
+            console.log("✓ SendGrid Module: ✅ Carregado");
             console.log(`✓ SendGrid API: ${status.configured ? '✅ Configurado' : '⚠️ Não configurado'}`);
             console.log(`✓ Provider: ${status.provider}`);
             console.log(`✓ Method: ${status.method}`);
@@ -112,7 +112,7 @@ async function verifyEmailSystem() {
         
         console.log(`✓ Emails Reais: ${sendGridAvailable ? '✅ SendGrid ativo' : '⚠️ Apenas simulação'}`);
         console.log(`✓ URL Produção: ${process.env.APP_URL && !process.env.APP_URL.includes('localhost') ? '✅ Configurada' : '⚠️ Localhost'}`);
-        console.log(`✓ Fallback: ✅ Sempre disponível`);
+        console.log("✓ Fallback: ✅ Sempre disponível");
         
         console.log(`\n🎯 PRONTO PARA LANÇAMENTO: ${productionReady ? '✅ SIM' : '⚠️ Configuração pendente'}`);
         

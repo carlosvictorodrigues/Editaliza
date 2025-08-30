@@ -87,7 +87,7 @@ async function analyzeUser() {
             
             // Mostrar algumas sessões concluídas
             if (completedSessions.length > 0) {
-                console.log(`\n   📚 Últimas 3 sessões concluídas:`);
+                console.log("\n   📚 Últimas 3 sessões concluídas:");
                 completedSessions.slice(0, 3).forEach((session, index) => {
                     console.log(`   ${index + 1}. ${session.subject_name || 'N/A'} - ${session.topic_description || 'N/A'}`);
                     console.log(`      Data: ${session.session_date || 'N/A'}`);
@@ -110,7 +110,7 @@ async function analyzeUser() {
         console.log(`Total de tópicos concluídos: ${completedTopics.length}`);
         
         if (completedTopics.length > 0) {
-            console.log(`\n   📖 Últimos 5 tópicos concluídos:`);
+            console.log("\n   📖 Últimos 5 tópicos concluídos:");
             completedTopics.slice(0, 5).forEach((topic, index) => {
                 console.log(`   ${index + 1}. [${topic.subject_name}] ${topic.description}`);
                 console.log(`      Concluído em: ${topic.completion_date || 'N/A'}`);
@@ -134,7 +134,7 @@ async function analyzeUser() {
             const loggedMinutes = Math.floor((totalLoggedTime % 3600) / 60);
             console.log(`   ⏰ Tempo total registrado: ${loggedHours}h ${loggedMinutes}m`);
             
-            console.log(`\n   📝 Últimos 3 logs:`);
+            console.log("\n   📝 Últimos 3 logs:");
             timeLogs.slice(0, 3).forEach((log, index) => {
                 console.log(`   ${index + 1}. Sessão ${log.session_id}: ${Math.floor(log.duration_seconds / 60)} min`);
                 console.log(`      Data: ${log.created_at}`);

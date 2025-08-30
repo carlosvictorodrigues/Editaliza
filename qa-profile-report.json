@@ -1,0 +1,136 @@
+{
+  "page": "/profile.html",
+  "interactive_map": [
+    {
+      "selector": "#personalToggle",
+      "label": "Toggle Dados Pessoais",
+      "expected": "Expandir/retrair seção"
+    },
+    {
+      "selector": "#experienceToggle",
+      "label": "Toggle Experiência",
+      "expected": "Expandir/retrair seção"
+    },
+    {
+      "selector": "#goalsToggle",
+      "label": "Toggle Metas",
+      "expected": "Expandir/retrair seção"
+    },
+    {
+      "selector": "#saveBtn",
+      "label": "Salvar",
+      "expected": "Enviar PATCH /api/users/profile"
+    },
+    {
+      "selector": "#resetBtn",
+      "label": "Restaurar",
+      "expected": "Recarregar dados via GET /api/users/profile"
+    },
+    {
+      "selector": "input[name=\"firstTime\"][value=\"sim\"]",
+      "label": "Radio Primeira vez - Sim",
+      "expected": "Selecionar valor"
+    },
+    {
+      "selector": "input[name=\"firstTime\"][value=\"nao\"]",
+      "label": "Radio Primeira vez - Não",
+      "expected": "Selecionar valor"
+    },
+    {
+      "selector": "#concursosCount",
+      "label": "Select Quantos concursos",
+      "expected": "Abrir/selecionar"
+    },
+    {
+      "selector": "input[name=\"difficulties\"][value=\"organizacao\"]",
+      "label": "Checkbox Dificuldade Organização",
+      "expected": "Alternar"
+    },
+    {
+      "selector": "#areaInterest",
+      "label": "Select Área de Interesse",
+      "expected": "Abrir/selecionar"
+    },
+    {
+      "selector": "#levelDesired",
+      "label": "Select Nível Desejado",
+      "expected": "Abrir/selecionar"
+    },
+    {
+      "selector": "#timelineGoal",
+      "label": "Select Prazo",
+      "expected": "Abrir/selecionar"
+    },
+    {
+      "selector": "#studyHours",
+      "label": "Select Horas de Estudo",
+      "expected": "Abrir/selecionar"
+    }
+  ],
+  "actions_result": [
+    {
+      "selector": "#personalToggle",
+      "label": "Toggle Dados Pessoais",
+      "expected": "Expandir/retrair seção",
+      "observed": "Falhou ao clicar: locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#personalToggle').first()\u001b[22m\n",
+      "console": [],
+      "network": []
+    },
+    {
+      "selector": "#experienceToggle",
+      "label": "Toggle Experiência",
+      "expected": "Expandir/retrair seção",
+      "observed": "Falhou ao clicar: locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#experienceToggle').first()\u001b[22m\n",
+      "console": [],
+      "network": []
+    },
+    {
+      "selector": "#goalsToggle",
+      "label": "Toggle Metas",
+      "expected": "Expandir/retrair seção",
+      "observed": "Falhou ao clicar: locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#goalsToggle').first()\u001b[22m\n",
+      "console": [],
+      "network": []
+    },
+    {
+      "selector": "#saveBtn",
+      "label": "Salvar",
+      "expected": "Enviar PATCH /api/users/profile",
+      "observed": "Falhou ao clicar: locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#saveBtn').first()\u001b[22m\n",
+      "console": [],
+      "network": []
+    },
+    {
+      "selector": "#resetBtn",
+      "label": "Restaurar",
+      "expected": "Recarregar perfil via GET",
+      "observed": "Falhou ao clicar: locator.click: Timeout 5000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#resetBtn').first()\u001b[22m\n",
+      "console": [],
+      "network": []
+    }
+  ],
+  "issues": [
+    {
+      "id": "PG-CONSOLE-001",
+      "element": "N/A",
+      "symptom": "Console error",
+      "console": "Failed to load resource: net::ERR_INSUFFICIENT_RESOURCES",
+      "network": null,
+      "root_cause": "Erro/aviso em runtime",
+      "fix_plan": [],
+      "risk": "médio",
+      "test_after_fix": "Repetir ação e validar 2xx + sem erros."
+    },
+    {
+      "id": "PG-CONSOLE-002",
+      "element": "N/A",
+      "symptom": "Console error",
+      "console": "profileForm not found",
+      "network": null,
+      "root_cause": "Erro/aviso em runtime",
+      "fix_plan": [],
+      "risk": "médio",
+      "test_after_fix": "Repetir ação e validar 2xx + sem erros."
+    }
+  ]
+}

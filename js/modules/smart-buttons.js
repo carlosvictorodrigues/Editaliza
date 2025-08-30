@@ -4,15 +4,15 @@
  * @version 2.0 - Modularized for performance
  */
 
-export const SmartButtons = {
-    // CORREÇÃO: Gerar botão inteligente baseado no estado preciso do timer
+const SmartButtons = {
+    // CORREO: Gerar boto inteligente baseado no estado preciso do timer
     generateSmartButton(sessionId, defaultText = 'Iniciar Estudo', sessionData = null) {
         // Verificar diferentes estados do timer
         if (!window.TimerSystem) {
             return {
                 text: defaultText,
                 classes: 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700',
-                icon: '🚀'
+                icon: '▶️'
             };
         }
         
@@ -26,8 +26,8 @@ export const SmartButtons = {
             return {
                 text: `Continuar (${timeStr})`,
                 classes: 'animate-pulse bg-orange-500 hover:bg-orange-600 border-2 border-orange-300',
-                icon: '⏱️',
-                action: 'continue' // Indica que é uma continuação
+                icon: '⏵️',
+                action: 'continue' // Indica que  uma continuao
             };
         } else if (timer && timer.elapsed > 1000) {
             // Timer pausado com tempo acumulado
@@ -35,21 +35,21 @@ export const SmartButtons = {
             return {
                 text: `Continuar (${timeStr})`,
                 classes: 'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600',
-                icon: '⏸️',
-                action: 'continue' // Indica que é uma continuação
+                icon: '⏵️',
+                action: 'continue' // Indica que  uma continuao
             };
         } else {
             // Sem timer ou timer zerado
             return {
                 text: defaultText,
                 classes: 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700',
-                icon: '🚀',
-                action: 'start' // Indica que é um novo início
+                icon: '▶️',
+                action: 'start' // Indica que  um novo incio
             };
         }
     },
     
-    // Função para atualizar todos os botões de sessão quando timers mudam de estado
+    // Funo para atualizar todos os botes de sesso quando timers mudam de estado
     updateAllTimerButtons() {
         const timerButtons = document.querySelectorAll('.timer-aware-button');
         timerButtons.forEach(button => {
@@ -60,7 +60,7 @@ export const SmartButtons = {
         });
     },
     
-    // CORREÇÃO: Função para atualizar um botão específico com estado preciso
+    // CORREO: Funo para atualizar um boto especfico com estado preciso
     updateTimerButton(sessionId) {
         const buttons = document.querySelectorAll(`button[onclick*="window.openStudySession(${sessionId})"], .timer-aware-button[onclick*="window.openStudySession(${sessionId})"]`);
         if (buttons.length === 0) return;
@@ -69,26 +69,27 @@ export const SmartButtons = {
             const buttonText = button.querySelector('.button-text');
             const buttonIcon = button.querySelector('.button-icon');
             
-            // Gerar informações do botão baseado no estado atual
-            const currentText = buttonText ? buttonText.textContent.replace(/Continuar \([^)]+\)/, '').replace('Continuar', 'Iniciar').trim() : 'Iniciar Estudo';
-            const smartButton = this.generateSmartButton(sessionId, currentText || 'Iniciar Estudo');
+            // Só atualizar se há um timer ativo ou pausado com tempo
+            const hasActiveTimer = window.TimerSystem && TimerSystem.hasActiveTimer(sessionId);
+            const timer = window.TimerSystem && TimerSystem.timers[sessionId];
+            const hasPausedTimer = timer && timer.elapsed > 1000 && !timer.isRunning;
             
-            if (buttonText && buttonIcon) {
-                // Atualizar elementos internos
+            if (!hasActiveTimer && !hasPausedTimer) {
+                return; // Não atualizar se não há timer
+            }
+            
+            // Gerar informaes do boto baseado no estado atual
+            const currentText = buttonText ? buttonText.textContent.trim() : 'Iniciar Estudo';
+            const smartButton = this.generateSmartButton(sessionId, currentText);
+            
+            if (buttonText) {
+                // Atualizar apenas o texto interno, sem duplicar
                 buttonText.textContent = smartButton.text;
+            }
+            
+            if (buttonIcon) {
+                // Atualizar ícone se existir
                 buttonIcon.textContent = smartButton.icon;
-            } else {
-                // Atualizar conteúdo direto do botão (para botões simples)
-                const iconSpan = button.querySelector('svg') || button.querySelector('.icon');
-                if (iconSpan) {
-                    // Manter SVG/ícones existentes, atualizar apenas texto
-                    const textNode = Array.from(button.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-                    if (textNode) {
-                        textNode.textContent = ` ${smartButton.text}`;
-                    }
-                } else {
-                    button.innerHTML = `${smartButton.icon} ${smartButton.text}`;
-                }
             }
             
             // Limpar classes antigas de estilo
@@ -104,15 +105,15 @@ export const SmartButtons = {
             const classArray = smartButton.classes.split(' ').filter(c => c.trim());
             button.classList.add(...classArray);
             
-            console.log(`🔄 Botão da sessão ${sessionId} atualizado:`, smartButton.text);
+            void(`= Boto da sesso ${sessionId} atualizado:`, smartButton.text);
         });
     },
 
-    // Função para criar botão de ação padronizado
+    // Funo para criar boto de ao padronizado
     createActionButton(config = {}) {
         const {
-            text = 'Ação',
-            icon = '🚀',
+            text = 'Ao',
+            icon = '=',
             classes = 'btn-primary',
             onClick = () => {},
             size = 'md'
@@ -136,7 +137,7 @@ export const SmartButtons = {
         return button;
     },
 
-    // Sistema de botões de estado (loading, success, error)
+    // Sistema de botes de estado (loading, success, error)
     setButtonState(button, state = 'normal', text = null) {
         if (!button) return;
 
@@ -198,11 +199,11 @@ export const SmartButtons = {
     }
 };
 
-// Atualizar botões a cada 5 segundos quando o módulo for carregado
+// Atualizar botes a cada 5 segundos quando o mdulo for carregado
 let buttonUpdateInterval;
 
-export function startButtonUpdates() {
-    if (buttonUpdateInterval) return; // Evitar múltiplos intervalos
+function startButtonUpdates() {
+    if (buttonUpdateInterval) return; // Evitar mltiplos intervalos
     
     buttonUpdateInterval = setInterval(() => {
         if (window.TimerSystem && SmartButtons.updateAllTimerButtons) {
@@ -211,17 +212,19 @@ export function startButtonUpdates() {
     }, 5000);
 }
 
-export function stopButtonUpdates() {
+function stopButtonUpdates() {
     if (buttonUpdateInterval) {
         clearInterval(buttonUpdateInterval);
         buttonUpdateInterval = null;
     }
 }
 
-// Auto-start updates quando o módulo é carregado
+// Auto-start updates quando o mdulo  carregado
 document.addEventListener('DOMContentLoaded', () => {
     startButtonUpdates();
 });
 
 // Disponibilizar globalmente para compatibilidade
 window.SmartButtons = SmartButtons;
+window.startButtonUpdates = startButtonUpdates;
+window.stopButtonUpdates = stopButtonUpdates;

@@ -91,7 +91,26 @@ router.patch('/:planId/settings',
     validators.integer('session_duration_minutes', 10, 240),
     body('has_essay').isBoolean().withMessage('has_essay deve ser booleano'),
     body('reta_final_mode').isBoolean().withMessage('reta_final_mode deve ser booleano'),
-    validators.jsonField('study_hours_per_day'),
+    body('study_hours_per_day')
+        .custom((value) => {
+            // Validar que é um objeto com chaves 0-6 e valores numéricos
+            if (typeof value !== 'object' || value === null) {
+                throw new Error('study_hours_per_day deve ser um objeto');
+            }
+            
+            // Verificar que todas as 7 chaves (0-6) estão presentes
+            for (let i = 0; i <= 6; i++) {
+                if (value[i] === undefined) {
+                    throw new Error(`Falta configuração para o dia ${i} (0=Domingo, 1=Segunda, etc)`);
+                }
+                if (typeof value[i] !== 'number' || value[i] < 0 || value[i] > 24) {
+                    throw new Error(`Horas para o dia ${i} deve ser um número entre 0 e 24`);
+                }
+            }
+            
+            return true;
+        })
+        .withMessage('Configuração de horas inválida'),
     handleValidationErrors,
     plansController.updatePlanSettings
 );
@@ -268,6 +287,13 @@ router.post('/:planId/replan',
     plansController.executeReplan
 );
 
+router.get('/:planId/overdue_details', 
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getOverdueDetails
+);
+
 /**
  * 📊 ESTATÍSTICAS E ANÁLISES
  */
@@ -282,6 +308,13 @@ router.get('/:planId/statistics',
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getPlanStatistics
+);
+
+router.get('/:planId/progress', 
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getPlanProgress
 );
 
 /**
@@ -334,6 +367,78 @@ router.get('/:planId/share-progress',
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getShareProgress
+);
+
+/**
+ * @route GET /plans/:planId/schedule_preview
+ * @desc Preview do cronograma (compatibilidade com frontend)
+ * @access Private
+ */
+router.get('/:planId/schedule_preview', 
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getSchedulePreview
+);
+
+/**
+ * @route GET /plans/:planId/schedule-preview
+ * @desc Preview do cronograma (novo formato)
+ * @access Private
+ */
+router.get('/:planId/schedule-preview', 
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getSchedulePreview
+);
+
+/**
+ * @route GET /plans/:planId/realitycheck
+ * @desc Diagnóstico de performance e realidade do cronograma
+ * @access Private
+ */
+router.get('/:planId/realitycheck', 
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getRealityCheck
+);
+
+/**
+ * @route GET /plans/:planId/goal_progress
+ * @desc Progresso das metas diárias e semanais
+ * @access Private
+ */
+router.get('/:planId/goal_progress', 
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getGoalProgress
+);
+
+/**
+ * @route GET /plans/:planId/question_radar
+ * @desc Radar de questões - análise de pontos fracos
+ * @access Private
+ */
+router.get('/:planId/question_radar', 
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getQuestionRadar
+);
+
+/**
+ * @route GET /plans/:planId/detailed_progress
+ * @desc Progresso detalhado com breakdown de tempo
+ * @access Private
+ */
+router.get('/:planId/detailed_progress', 
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getDetailedProgress
 );
 
 /**

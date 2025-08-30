@@ -1,0 +1,106 @@
+
+{
+  "page": "/public/home.html",
+  "interactive_map": [
+    { "selector": "#main-nav-container a[href='home.html']", "label": "Logo/Painel Principal", "expected": "Navigate to home.html" },
+    { "selector": "#main-nav-container a[href='dashboard.html']", "label": "Meus Planos", "expected": "Navigate to dashboard.html" },
+    { "selector": "#main-nav-container a[href='notes.html']", "label": "Anotações", "expected": "Navigate to notes.html" },
+    { "selector": "#main-nav-container a[href^='plan.html']", "label": "Meu Desempenho", "expected": "Navigate to plan performance page" },
+    { "selector": "#main-nav-container a[href^='cronograma.html']", "label": "Cronograma de Estudos", "expected": "Navigate to plan schedule page" },
+    { "selector": "#main-nav-container a[href^='plan_settings.html']", "label": "Configurações", "expected": "Navigate to plan settings page" },
+    { "selector": "#main-nav-container a[href='metodologia.html']", "label": "Metodologia", "expected": "Navigate to metodologia.html" },
+    { "selector": "#main-nav-container a[href='faq.html']", "label": "FAQ", "expected": "Navigate to faq.html" },
+    { "selector": "#main-nav-container a[href='profile.html']", "label": "Perfil", "expected": "Navigate to profile.html" },
+    { "selector": "#logoutButton", "label": "Sair", "expected": "Log out the user" },
+    { "selector": "#planSelector", "label": "Plano ativo", "expected": "Reload data for the selected plan" },
+    { "selector": "#viewTransparencyBtn", "label": "Ver detalhes", "expected": "Navigate to cronograma.html" },
+    { "selector": "#replanButton", "label": "Replanejar Agora", "expected": "Call API to reschedule overdue tasks" },
+    { "selector": "#showReplanDetailsButton", "label": "Ver Detalhes", "expected": "Show replan details" },
+    { "selector": "button.timer-aware-button", "label": "Iniciar/Continuar Estudo", "expected": "Open study session modal" },
+    { "selector": "button[onclick^='markReviewAsCompleted']", "label": "Marcar como Concluída", "expected": "Mark review as complete" },
+    { "selector": ".postpone-option-btn", "label": "Adiar Tarefa", "expected": "Postpone the task" },
+    { "selector": "#cancelPostponeButton", "label": "Cancelar", "expected": "Close postpone modal" }
+  ],
+  "issues": [
+    {
+      "id": "HOME-001",
+      "element": "#overdue-alert-container",
+      "symptom": "O alerta de tarefas atrasadas não é renderizado na página, mesmo que a API retorne dados de tarefas atrasadas. Um erro 'gamification.renderOverdueAlert is not a function' pode aparecer no console.",
+      "console": "TypeError: gamification.renderOverdueAlert is not a function",
+      "network": {
+        "url": "/api/sessions/overdue-check/{planId}",
+        "status": "200 OK (mas o resultado não é renderizado)"
+      },
+      "root_cause": "A função `renderOverdueAlert` foi removida do módulo `public/js/modules/gamification.js`, mas ainda é chamada por `public/js/components.js`. A implementação da função existe em um arquivo de backup (`public/js/components - Copia.js`), indicando que foi perdida durante uma refatoração.",
+      "fix_plan": [
+        {
+          "file": "public/js/modules/gamification.js",
+          "line_hint": "End of file",
+          "change": "Adicionar a função `renderOverdueAlert` de volta ao módulo `gamification.js`, usando a implementação encontrada no backup e adaptando-a para o novo design mais rico que está no `home.html`."
+        }
+      ],
+      "risk": "Baixo",
+      "test_after_fix": "1. Simular uma resposta da API para tarefas atrasadas. 2. Verificar se o alerta de tarefas atrasadas é exibido corretamente. 3. Clicar no botão 'Replanejar Agora' e verificar se a chamada de API correta é disparada. 4. Clicar em 'Ver Detalhes' e verificar se a seção de detalhes é exibida.",
+      "status": "fixed"
+    },
+    {
+      "id": "HOME-002",
+      "element": "button.timer-aware-button",
+      "symptom": "Clicar em qualquer card de atividade (ex: 'Iniciar Estudo') não faz nada. O console mostra um erro 'ReferenceError: StudyChecklist is not defined' originado no arquivo app.js.",
+      "console": "ReferenceError: StudyChecklist is not defined (at app.js)",
+      "network": {},
+      "root_cause": "Existe uma dependência circular na ordem de carregamento dos scripts em home.html. O arquivo 'checklist.js' depende de funções do 'app.js', mas é carregado antes dele. Isso causa um erro fatal durante a execução de 'checklist.js', o que impede que o objeto 'StudyChecklist' seja criado e exposto globalmente (window.StudyChecklist). Consequentemente, quando 'app.js' é executado e o usuário clica no botão, a chamada para 'StudyChecklist.show()' falha.",
+      "fix_plan": [
+        {
+          "file": "public/home.html",
+          "line_hint": "Script tags section",
+          "change": "Inverter a ordem dos scripts para que 'app.js' seja carregado antes de 'checklist.js'. Isso garante que o objeto 'app' esteja definido e disponível quando 'checklist.js' precisar dele."
+        }
+      ],
+      "risk": "Baixo",
+      "test_after_fix": "1. Carregar a página home.html. 2. Clicar em um card de atividade. 3. Verificar se o modal de checklist de estudo aparece. 4. Verificar se não há erros de 'ReferenceError' no console.",
+      "status": "fixed"
+    },
+    {
+      "id": "HOME-003",
+      "element": "button[onclick^='markReviewAsCompleted']",
+      "symptom": "Clicar no botão 'Marcar como Concluída' em um card de revisão na página inicial não faz nada. O console mostra um erro 'ReferenceError: markReviewAsCompleted is not defined'.",
+      "console": "ReferenceError: markReviewAsCompleted is not defined",
+      "network": {},
+      "root_cause": "A função 'markReviewAsCompleted' é definida apenas no escopo do arquivo 'cronograma.html' e não está disponível globalmente ou no escopo de 'home.html'. O card de revisão, gerado por 'cards.js', chama essa função, que não existe na página inicial.",
+      "fix_plan": [
+        {
+          "file": "public/js/app.js",
+          "line_hint": "End of file, before app.init()",
+          "change": "Criar uma nova função global 'app.markSessionAsCompleted(sessionId)' que faz a chamada de API para marcar a sessão como concluída e depois recarrega os dados da página inicial."
+        },
+        {
+          "file": "public/js/modules/cards.js",
+          "line_hint": "createReviewCard function",
+          "change": "Alterar o 'onclick' do botão no card de revisão para chamar a nova função global: 'app.markSessionAsCompleted(session.id)'."
+        }
+      ],
+      "risk": "Baixo",
+      "test_after_fix": "1. Carregar a página home.html. 2. Clicar no botão 'Marcar como Concluída' em um card de revisão. 3. Verificar se a tarefa é marcada como concluída (o card deve mudar de aparência) e se a página é atualizada. 4. Verificar se não há erros no console.",
+      "status": "fixed"
+    },
+    {
+      "id": "HOME-004",
+      "element": "#retaFinalIndicator",
+      "symptom": "O indicador de 'Modo Reta Final' nunca é exibido, mesmo quando o plano de estudos está nesse modo. O console mostra um erro 'TypeError: components.renderRetaFinalIndicator is not a function'.",
+      "console": "TypeError: components.renderRetaFinalIndicator is not a function",
+      "network": {},
+      "root_cause": "A função 'renderRetaFinalIndicator' é chamada em 'home.html', mas não está definida em nenhum dos scripts carregados, incluindo 'components.js', onde deveria estar. A função foi provavelmente removida ou esquecida durante uma refatoração.",
+      "fix_plan": [
+        {
+          "file": "public/js/components.js",
+          "line_hint": "Inside the components object",
+          "change": "Adicionar a função 'renderRetaFinalIndicator' ao objeto 'components', que simplesmente remove ou adiciona a classe 'hidden' ao elemento '#retaFinalIndicator' com base no status do modo Reta Final."
+        }
+      ],
+      "risk": "Baixo",
+      "test_after_fix": "1. Mockar a resposta da API para /api/plans/{planId} para que retorne 'reta_final_mode: true'. 2. Carregar a página home.html. 3. Verificar se o indicador com o ID '#retaFinalIndicator' está visível.",
+      "status": "fixed"
+    }
+  ]
+}

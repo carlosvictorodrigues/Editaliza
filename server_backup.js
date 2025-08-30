@@ -1729,7 +1729,7 @@ app.post('/plans/:planId/generate',
 
             console.log(`[CRONOGRAMA] ✅ Removendo sessões antigas do plano ${planId}`);
             await dbRun('DELETE FROM study_sessions WHERE study_plan_id = ?', [planId]);
-            console.log(`[CRONOGRAMA] ✅ Sessões antigas removidas`);
+            console.log("[CRONOGRAMA] ✅ Sessões antigas removidas");
 
             const allTopicsQuery = `
                 SELECT 
@@ -1901,18 +1901,18 @@ app.post('/plans/:planId/generate',
                                 'INSERT INTO reta_final_exclusions (study_plan_id, topic_id, subject_name, topic_description, priority_combined) VALUES (?, ?, ?, ?, ?)',
                                 [planId, excludedTopic.id, excludedTopic.subject_name, excludedTopic.description, priorityCombined]
                             );
-                            console.log(`[CRONOGRAMA] ✅ Inserção em reta_final_exclusions concluída`);
+                            console.log("[CRONOGRAMA] ✅ Inserção em reta_final_exclusions concluída");
                         } else {
                             console.warn(`[CRONOGRAMA] ⚠️ Tópico com ID ${excludedTopic.id} não encontrado na tabela topics, pulando inserção na reta_final_exclusions`);
                         }
                         
-                        console.log(`[CRONOGRAMA] ✅ Inserindo em reta_final_excluded_topics`);
+                        console.log("[CRONOGRAMA] ✅ Inserindo em reta_final_excluded_topics");
                         // Salvar na nova tabela com mais detalhes (não depende de FOREIGN KEY para topic_id)
                         await dbRun(
                             'INSERT INTO reta_final_excluded_topics (study_plan_id, subject_name, topic_name, importance, priority_weight, reason) VALUES (?, ?, ?, ?, ?, ?)',
                             [planId, excludedTopic.subject_name, excludedTopic.description, excludedTopic.topic_priority, priorityCombined, reason]
                         );
-                        console.log(`[CRONOGRAMA] ✅ Inserção em reta_final_excluded_topics concluída`);
+                        console.log("[CRONOGRAMA] ✅ Inserção em reta_final_excluded_topics concluída");
                         
                     } catch (insertError) {
                         console.error(`[CRONOGRAMA] ❌ ERRO CRÍTICO na inserção do tópico ${excludedTopic.id}:`, insertError.message);
@@ -2050,7 +2050,7 @@ app.post('/plans/:planId/generate',
             const hasPendingNewTopics = pendingTopics.length > 0;
             
             if (!hasPendingNewTopics) {
-                console.log(`[CRONOGRAMA] Todas as matérias foram cobertas. Iniciando fase de simulados...`);
+                console.log("[CRONOGRAMA] Todas as matérias foram cobertas. Iniciando fase de simulados...");
                 
                 const subjectTopicsMap = new Map();
                 
@@ -2711,7 +2711,7 @@ app.post('/plans/:planId/replan',
             await dbRun('COMMIT');
             
             // Log detalhado para debugging
-            console.log(`[REPLAN] Resultado:`);
+            console.log("[REPLAN] Resultado:");
             console.log(`- Sessions reagendadas: ${result.rescheduledCount}/${overdueSessions.length}`);
             console.log(`- Sessions não reagendadas: ${result.failedSessions.length}`);
             result.reschedulingLog.forEach(log => console.log(`  - ${log}`));
@@ -4051,7 +4051,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Health check disponível em: http://localhost:${PORT}/health`);
-    console.log(`Sistema de backup automático ativado`);
+    console.log("Sistema de backup automático ativado");
 });
 
 // Graceful shutdown

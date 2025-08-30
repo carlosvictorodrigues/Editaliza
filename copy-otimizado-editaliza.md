@@ -32,7 +32,7 @@
 | MÉTODO | CUSTO/MÊS | TEMPO PLANEJANDO | MÉTODO CIENTÍFICO | PERSONALIZAÇÃO | EFICÁCIA |
 |--------|-----------|------------------|-------------------|----------------|----------|
 | **🚀 Editaliza** | R$ 19,90 | 0h (automatizado) | ✅ Curva de Ebbinghaus | ✅ Total por edital | ⭐⭐⭐⭐⭐ |
-| **👨‍🏫 Mentoria Tradicional** | R$ 800-2.000 | 2h/semana | ❌ Depende do mentor | ❌ Genérico | ⭐⭐⭐⭐⭐ |
+| **👨🏫 Mentoria Tradicional** | R$ 800-2.000 | 2h/semana | ❌ Depende do mentor | ❌ Genérico | ⭐⭐⭐⭐⭐ |
 | **📊 Planilha Excel** | R$ 0 | 15h/mês | ❌ Nenhum | ❌ Quebra sempre | ⭐⭐ |
 | **🎲 Sem Método** | R$ 0 | 20h/mês | ❌ Nenhum | ❌ Caótico | ⭐ |
 

@@ -7,7 +7,7 @@
 const UXImprovements = {
     
     // ==========================================
-    // 1. MELHORIA: FEEDBACK AVANÇADO DE REPLANEJAMENTO
+    // 1. MELHORIA: FEEDBACK AVAN!ADO DE REPLANEJAMENTO
     // ==========================================
     
     /**
@@ -21,7 +21,7 @@ const UXImprovements = {
         
         try {
             // Buscar preview do replanejamento
-            const preview = await app.apiFetch(`/api/plans/${planId}/replan_preview`);
+            const preview = await app.apiFetch(`/plans/${planId}/replan-preview`);
             
             modal.innerHTML = `
                 <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -70,7 +70,7 @@ const UXImprovements = {
                     
                     <!-- Timeline de Mudanças -->
                     <div class="mb-6">
-                        <h3 class="text-lg font-semibold mb-4">📅 Cronograma de Mudanças</h3>
+                        <h3 class="text-lg font-semibold mb-4">x& Cronograma de Mudanças</h3>
                         <div id="replan-timeline" class="space-y-3 max-h-60 overflow-y-auto">
                             ${this.renderReplanTimeline(preview.changes || [])}
                         </div>
@@ -274,7 +274,7 @@ const UXImprovements = {
                     try {
                         const [progress, overdue] = await Promise.all([
                             app.getActivePlanData(plan.id, 'progress'),
-                            app.apiFetch(`/api/plans/${plan.id}/overdue_check`)
+                            app.apiFetch(`/sessions/overdue-check/`)
                         ]);
                         return { ...plan, progress, overdue: overdue.count || 0 };
                     } catch (error) {
@@ -448,7 +448,7 @@ const UXImprovements = {
     },
     
     // ==========================================
-    // 3. MELHORIA: VALIDAÇÃO DE TÓPICOS
+    // 3. MELHORIA: VALIDA!ÒO DE TPICOS
     // ==========================================
     
     /**
@@ -482,20 +482,20 @@ const UXImprovements = {
             if (fieldName === 'topic_description') {
                 if (value.length < 3) {
                     isValid = false;
-                    message = '⚠️ Descrição muito curta (mínimo 3 caracteres)';
+                    message = 'a️ Descrição muito curta (mínimo 3 caracteres)';
                 } else if (value.length > 200) {
                     isValid = false;
-                    message = '⚠️ Descrição muito longa (máximo 200 caracteres)';
+                    message = 'a️ Descrição muito longa (máximo 200 caracteres)';
                 } else if (this.containsInappropriateContent(value)) {
                     isValid = false;
-                    message = '⚠️ Conteúdo inapropriado detectado';
+                    message = 'a️ Conteúdo inapropriado detectado';
                 }
             }
             
             if (fieldName === 'notes') {
                 if (value.length > 1000) {
                     isValid = false;
-                    message = '⚠️ Anotações muito longas (máximo 1000 caracteres)';
+                    message = 'a️ Anotações muito longas (máximo 1000 caracteres)';
                 }
             }
             
@@ -503,7 +503,7 @@ const UXImprovements = {
             if (fieldName === 'topic_description' && value.length >= 3) {
                 if (this.checkForDuplicateTopics(value, field)) {
                     isValid = false;
-                    message = '⚠️ Tópico similar já existe';
+                    message = 'a️ Tópico similar já existe';
                 }
             }
             
@@ -512,7 +512,7 @@ const UXImprovements = {
                 field.classList.remove('border-red-300', 'bg-red-50');
                 field.classList.add('border-green-300', 'bg-green-50');
                 validationIndicator.className = 'validation-indicator mt-1 text-xs text-green-600';
-                validationIndicator.innerHTML = '✅ Válido';
+                validationIndicator.innerHTML = 'S& Válido';
                 validationIndicator.classList.remove('hidden');
             } else {
                 field.classList.remove('border-green-300', 'bg-green-50');
@@ -610,7 +610,7 @@ const UXImprovements = {
      * Inicializar todas as melhorias
      */
     init: function() {
-        console.log('🚀 Inicializando melhorias de UX...');
+        void('xa Inicializando melhorias de UX...');
         
         // Aguardar DOM estar pronto
         if (document.readyState === 'loading') {
@@ -636,7 +636,7 @@ const UXImprovements = {
         // Interceptar função de replanejamento se existir
         this.interceptReplanFunction();
         
-        console.log('✅ Melhorias de UX inicializadas');
+        void('S& Melhorias de UX inicializadas');
     },
     
     interceptReplanFunction: function() {
@@ -655,7 +655,7 @@ const UXImprovements = {
                 if (!planId) return;
                 
                 // Obter dados de tarefas atrasadas
-                const overdueData = await app.apiFetch(`/api/plans/${planId}/overdue_check`);
+                const overdueData = await app.apiFetch(`/sessions/overdue-check/`);
                 
                 // Mostrar preview
                 const confirmed = await this.showReplanPreview(planId, overdueData);
@@ -665,7 +665,7 @@ const UXImprovements = {
                     const progressModal = this.showReplanProgress(planId);
                     
                     try {
-                        const response = await app.apiFetch(`/api/plans/${planId}/replan`, {
+                        const response = await app.apiFetch(`/plans/${planId}/replan`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' }
                         });
@@ -675,7 +675,7 @@ const UXImprovements = {
                             this.closeModal(progressModal);
                             
                             // Mostrar sucesso
-                            app.showToast('✅ Cronograma replanejado com sucesso! As tarefas foram redistribuídas.', 'success');
+                            app.showToast('S& Cronograma replanejado com sucesso! As tarefas foram redistribuídas.', 'success');
                             
                             setTimeout(() => {
                                 window.location.reload();
@@ -686,7 +686,7 @@ const UXImprovements = {
                     } catch (error) {
                         console.error('Erro no replanejamento:', error);
                         this.closeModal(progressModal);
-                        app.showToast('❌ Erro ao replanejar cronograma: ' + error.message, 'error');
+                        app.showToast('R Erro ao replanejar cronograma: ' + error.message, 'error');
                     }
                 }
             });

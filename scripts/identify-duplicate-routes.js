@@ -153,7 +153,7 @@ function analyzeRoutes() {
     const serverRoutes = extractRoutesFromServerJs();
     const modularRoutes = getAllModularRoutes();
     
-    console.log(`📊 ESTATÍSTICAS:`);
+    console.log("📊 ESTATÍSTICAS:");
     console.log(`   • Rotas em server.js: ${serverRoutes.length}`);
     console.log(`   • Rotas modularizadas: ${modularRoutes.length}`);
     console.log(`   • Rotas complexas não migradas: ${COMPLEX_ROUTES_NOT_MIGRATED.length}`);
