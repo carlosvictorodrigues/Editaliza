@@ -9,7 +9,11 @@ const Cards = {
     createCard(session) {
         if (!session) return '';
 
-        switch (session.session_type) {
+        // Compatibilidade com dados antigos
+        const sessionType = session.session_type;
+        
+        switch (sessionType) {
+            case 'Prática Dirigida': // Compatibilidade com dados antigos
             case 'Simulado Direcionado':
                 return this.createDirectedSimuladoCard(session);
             case 'Simulado Completo':

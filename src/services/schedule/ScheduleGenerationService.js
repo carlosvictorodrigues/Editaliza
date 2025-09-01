@@ -4,7 +4,7 @@ const PlanConfigValidator = require('../../validators/PlanConfigValidator');
 class ScheduleGenerationService {
 
     static async generate(config) {
-        console.log('[SCHEDULE_GEN] Iniciando geração com lógica de Prática Dirigida ponderada...', { planId: config.planId });
+        console.log('[SCHEDULE_GEN] Iniciando geração com lógica de Simulado Direcionado ponderado...', { planId: config.planId });
 
         const validation = PlanConfigValidator.validate(config);
         if (!validation.isValid) {
@@ -52,7 +52,7 @@ class ScheduleGenerationService {
             schedule = this.scheduleReviews(schedule, studyDays, planId);
 
             // 3. Preencher dias restantes com simulados
-            schedule = this.fillWithSimulados(schedule, allTopicsFromDB, studyDays, planId);
+            schedule = this.fillWithDirectedSimulados(schedule, allTopicsFromDB, studyDays, planId);
 
             const insertSql = 'INSERT INTO study_sessions (study_plan_id, topic_id, subject_name, topic_description, session_date, session_type, status) VALUES (?, ?, ?, ?, ?, ?, ?)';
             for (const session of schedule) {
@@ -480,13 +480,13 @@ class ScheduleGenerationService {
         return schedule;
     }
 
-    static fillWithSimulados(schedule, allTopics, studyDays, planId) {
+    static fillWithDirectedSimulados(schedule, allTopics, studyDays, planId) {
         const scheduledDates = new Set(schedule.map(s => s.date));
         const emptySlots = studyDays.filter(day => !scheduledDates.has(day.date.toISOString().split('T')[0]) && day.dayOfWeek !== 0); // Não preencher domingos
 
         if (emptySlots.length === 0 || allTopics.length === 0) return schedule;
 
-        console.log(`[SCHEDULE_GEN] Preenchendo ${emptySlots.length} dias restantes com Prática Dirigida ponderada.`);
+        console.log(`[SCHEDULE_GEN] Preenchendo ${emptySlots.length} dias restantes com Simulado Direcionado ponderado.`);
 
         // Agrupar todos os tópicos por disciplina e capturar os pesos
         const subjectData = {};
@@ -509,7 +509,7 @@ class ScheduleGenerationService {
         
         const totalWeight = subjects.reduce((sum, s) => sum + s.weight, 0);
 
-        console.log('[PRÁTICA_DIRIGIDA] Disciplinas e pesos para prática:', subjects.map(s => ({
+        console.log('[SIMULADO_DIRECIONADO] Disciplinas e pesos para simulados:', subjects.map(s => ({
             name: s.name,
             weight: s.weight,
             topics: s.topics.length
@@ -542,29 +542,34 @@ class ScheduleGenerationService {
                 .sort(() => 0.5 - Math.random())
                 .slice(0, Math.min(5, selectedSubject.topics.length));
 
-            const description = `Prática dirigida de ${selectedSubject.name} com foco nos seguintes tópicos:\n` +
+            const description = `Simulado direcionado de ${selectedSubject.name} com foco nos seguintes tópicos:\n` +
                               topicsForPractice.map(t => `- ${t}`).join('\n') +
-                              `\n\nResolva questões, faça resumos e revise conceitos-chave.`;
+                              `\n\nResolva questões específicas destes tópicos para consolidar o conhecimento.`;
 
             schedule.push({
                 date: slot.date.toISOString().split('T')[0],
                 topicId: null,
-                subjectName: `Prática: ${selectedSubject.name}`,
+                subjectName: `Simulado: ${selectedSubject.name}`,
                 topicDescription: description,
-                sessionType: 'Prática Dirigida'
+                sessionType: 'Simulado Direcionado',
+                meta: {
+                    focus: topicsForPractice,
+                    nQuestoes: 25,
+                    tempoSugerido: '30-40 min'
+                }
             });
         }
 
         // Log estatísticas finais
         const practiceCount = {};
         schedule.forEach(session => {
-            if (session.sessionType === 'Prática Dirigida') {
-                const subjectName = session.subjectName.replace('Prática: ', '');
+            if (session.sessionType === 'Simulado Direcionado' || session.sessionType === 'Prática Dirigida') {
+                const subjectName = session.subjectName.replace('Simulado: ', '').replace('Prática: ', '');
                 practiceCount[subjectName] = (practiceCount[subjectName] || 0) + 1;
             }
         });
 
-        console.log('[PRÁTICA_DIRIGIDA] Distribuição final de práticas:', practiceCount);
+        console.log('[SIMULADO_DIRECIONADO] Distribuição final de simulados direcionados:', practiceCount);
 
         return schedule;
     }
