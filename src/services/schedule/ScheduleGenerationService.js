@@ -142,7 +142,8 @@ class ScheduleGenerationService {
         
         // 4. DISTRIBUIR COM VALIDAÇÃO DE ESPAÇAMENTO
         console.log('[STEP 4] Distribuindo com validação de espaçamento...');
-        const distributedSchedule = this.distributeWithSpacingValidation(expandedQueue, sessionSlots);
+        const daysToExam = studyDays.length; // Aproximação de dias até a prova
+        const distributedSchedule = this.distributeWithSpacingValidation(expandedQueue, sessionSlots, daysToExam);
         
         // 5. LOGS FINAIS
         this.logFinalDistribution(distributedSchedule);
@@ -263,14 +264,15 @@ class ScheduleGenerationService {
     }
     
     /**
-     * Distribui tópicos com validação de espaçamento
+     * Distribui tópicos com validação de espaçamento e cap por disciplina
      */
-    static distributeWithSpacingValidation(expandedQueue, sessionSlots) {
+    static distributeWithSpacingValidation(expandedQueue, sessionSlots, daysToExam = 30) {
         console.log('[SPACING VALIDATION] Iniciando distribuição com validação...');
         
         const schedule = [];
         const topicLastAppearance = {}; // Rastrear última aparição por tópico original
-        const minimumSpacing = 2; // Mínimo de 2 dias úteis entre repetições
+        const subjectSessionCount = {}; // Contar sessões por disciplina
+        const maxSharePerSubject = 0.45; // Máximo 45% por disciplina
         
         // Calcular peso total para WRR
         const totalWeight = expandedQueue.reduce((sum, item) => sum + item.queueWeight, 0);
@@ -302,9 +304,17 @@ class ScheduleGenerationService {
                 
                 availableItems.forEach((item, index) => {
                     if (item.currentWeight > maxWeight) {
-                        maxWeight = item.currentWeight;
-                        candidateItem = item;
-                        candidateIndex = index;
+                        // Verificar cap por disciplina (45%)
+                        const subjectCount = subjectSessionCount[item.subject_name] || 0;
+                        const totalScheduled = schedule.length;
+                        const subjectShare = totalScheduled > 0 ? subjectCount / totalScheduled : 0;
+                        const underCap = subjectShare < maxSharePerSubject || totalScheduled < 5; // Permitir nos primeiros slots
+                        
+                        if (underCap) {
+                            maxWeight = item.currentWeight;
+                            candidateItem = item;
+                            candidateIndex = index;
+                        }
                     }
                 });
                 
@@ -313,6 +323,9 @@ class ScheduleGenerationService {
                 // Validar espaçamento mínimo
                 const topicKey = `${candidateItem.subject_name}_${candidateItem.topic_name}`;
                 const lastAppearance = topicLastAppearance[topicKey];
+                
+                // Determinar espaçamento mínimo baseado no contexto
+                const minimumSpacing = (daysToExam < 14 && candidateItem.weightCombined >= 0.9) ? 1 : 2;
                 
                 if (lastAppearance === undefined || (slotIndex - lastAppearance) >= minimumSpacing) {
                     // Espaçamento válido
@@ -339,8 +352,16 @@ class ScheduleGenerationService {
                     topicDescription: `${selectedItem.topic_name} (${selectedItem.iteration}ª vez)`,
                     sessionType: selectedItem.iteration === 1 ? 'Novo Tópico' : 'Reforço',
                     iteration: selectedItem.iteration,
-                    weight: selectedItem.normalizedWeight
+                    weight: selectedItem.weightCombined,
+                    meta: {
+                        recurrenceIteration: selectedItem.iteration,
+                        totalRecurrences: selectedItem.targetAppearances,
+                        weight: selectedItem.weightCombined
+                    }
                 });
+                
+                // Atualizar contador por disciplina
+                subjectSessionCount[selectedItem.subject_name] = (subjectSessionCount[selectedItem.subject_name] || 0) + 1;
                 
                 // Remover item da fila
                 availableItems.splice(selectedIndex, 1);
@@ -374,11 +395,21 @@ class ScheduleGenerationService {
                         topicDescription: `${fallbackItem.topic_name} (${fallbackItem.iteration}ª vez - degradado)`,
                         sessionType: fallbackItem.iteration === 1 ? 'Novo Tópico' : 'Reforço',
                         iteration: fallbackItem.iteration,
-                        weight: fallbackItem.normalizedWeight
+                        weight: fallbackItem.weightCombined,
+                        meta: {
+                            recurrenceIteration: fallbackItem.iteration,
+                            totalRecurrences: fallbackItem.targetAppearances,
+                            weight: fallbackItem.weightCombined,
+                            degraded: true
+                        }
                     });
                     
                     const topicKey = `${fallbackItem.subject_name}_${fallbackItem.topic_name}`;
                     topicLastAppearance[topicKey] = slotIndex;
+                    
+                    // Atualizar contador por disciplina
+                    subjectSessionCount[fallbackItem.subject_name] = (subjectSessionCount[fallbackItem.subject_name] || 0) + 1;
+                    
                     availableItems.splice(fallbackIndex, 1);
                 } else {
                     // Não há mais itens válidos
