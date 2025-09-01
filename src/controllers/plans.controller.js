@@ -29,10 +29,10 @@ function getBrazilianDateString() {
 const db = require('../../database-postgresql.js');
 const { createRepositories } = require('../repositories');
 const DatabaseAdapter = require('../adapters/database.adapter');
-const PlanService = require('../services/PlanService');
+const PlanService = require('../services/planService');
 
-// Inicializar repositories, adapter e services
-const repos = createRepositories(db);
+// Usar repositories globais já criados ou criar novos se não existir
+const repos = global.repos || createRepositories(db);
 const dbAdapter = new DatabaseAdapter(repos, db);
 const planService = new PlanService(repos, db);
 
@@ -544,89 +544,127 @@ const getSubjectsWithTopics = async (req, res) => {
 const getPlanStatistics = async (req, res) => {
     const planId = req.params.planId;
     
+    console.log('[DEBUG] dbGet function type:', typeof dbGet);
+    console.log('[DEBUG] dbGet is:', dbGet ? 'defined' : 'undefined');
+    
     try {
         // Verificar autorização
         const plan = await dbGet('SELECT * FROM study_plans WHERE id = $1 AND user_id = $2', [planId, req.user.id]);
         if (!plan) return res.status(404).json({ error: 'Plano não encontrado.' });
-
-        // Calcular total de dias até a prova
-        const totalDaysResult = await dbGet(`
+        
+        // DEBUG: Verificar se existe dados na tabela
+        console.log('\n[DEBUG STATISTICS] ========== INICIO DEBUG ==========');
+        console.log('[DEBUG STATISTICS] Plan ID:', planId);
+        console.log('[DEBUG STATISTICS] User ID:', req.user.id);
+        
+        // Teste simples: contar sessões
+        const countTest = await dbGet(`
+            SELECT COUNT(*) as total_sessions
+            FROM study_sessions 
+            WHERE study_plan_id = $1
+        `, [planId]);
+        console.log('[DEBUG STATISTICS] Total sessions for plan:', countTest);
+        
+        // Teste: verificar se time_studied_seconds existe e tem valores
+        const timeTest = await dbGet(`
             SELECT 
-                CASE 
-                    WHEN $1::timestamp IS NOT NULL THEN 
-                        (($2::date - $3::date)::INTEGER) + 1
-                    ELSE 0 
-                END as total_days
-        `, [plan.exam_date, plan.exam_date, getBrazilianDateString()]);
+                COUNT(*) as sessions_with_time,
+                SUM(time_studied_seconds) as total_time
+            FROM study_sessions 
+            WHERE study_plan_id = $1 
+            AND time_studied_seconds IS NOT NULL 
+            AND time_studied_seconds > 0
+        `, [planId]);
+        console.log('[DEBUG STATISTICS] Sessions with time data:', timeTest);
 
-        const totalDays = totalDaysResult ? Math.max(0, totalDaysResult.total_days || 0) : 0;
+        // Calcular total de dias de estudo (dias com sessões concluídas)
+        const totalStudyDaysResult = await dbGet(`
+            SELECT COUNT(DISTINCT session_date) as total_study_days
+            FROM study_sessions
+            WHERE study_plan_id = $1 AND (status = 'Concluído' OR time_studied_seconds > 0)
+        `, [planId]);
+        console.log('[DEBUG STATISTICS] Total study days result:', totalStudyDaysResult);
+        const totalDays = totalStudyDaysResult && totalStudyDaysResult.total_study_days ? 
+            parseInt(totalStudyDaysResult.total_study_days) : 0;
 
-        // Análise de sequência de estudos
+        // Análise de sequência de estudos (streak)
         let currentStreak = 0;
         let longestStreak = 0;
 
-        if (totalDays > 0) {
-            // Query otimizada para sequência de estudos
-            const streakQuery = `
-                SELECT 
-                    session_date,
-                    COUNT(CASE WHEN status = 'Concluído' THEN 1 END) as completed_count
-                FROM study_sessions 
-                WHERE study_plan_id = ? 
-                GROUP BY session_date 
+        try {
+            const streakData = await dbAll(`
+                SELECT DISTINCT session_date
+                FROM study_sessions
+                WHERE study_plan_id = $1 AND status = 'Concluído'
                 ORDER BY session_date DESC
-            `;
-            
-            try {
-                // const streakResult = await dbGet(streakQuery, [planId]); // unused
-                // Para simplificar, usar uma versão mais básica
-                const simplifiedStreak = await dbGet(`
-                    SELECT COUNT(DISTINCT session_date) as current_streak
-                    FROM study_sessions 
-                    WHERE study_plan_id = ? AND status = 'Concluído'
-                    AND session_date >= CURRENT_DATE - INTERVAL '7 days'
-                `, [planId]);
-                
-                currentStreak = simplifiedStreak ? (simplifiedStreak.current_streak || 0) : 0;
-                longestStreak = currentStreak; // Simplificação
-            } catch (streakError) {
-                console.warn('Erro ao calcular streak:', streakError.message);
+            `, [planId]);
+
+            if (streakData && streakData.length > 0) {
+                let today = new Date(getBrazilianDateString());
+                let current = 0;
+                let max = 0;
+
+                for (let i = 0; i < streakData.length; i++) {
+                    const sessionDate = new Date(streakData[i].session_date);
+                    
+                    // Check if it's today or yesterday for current streak
+                    if (i === 0 && (sessionDate.getTime() === today.getTime() || sessionDate.getTime() === new Date(today.setDate(today.getDate() - 1)).getTime())) {
+                        current++;
+                    } else if (i > 0) {
+                        const prevSessionDate = new Date(streakData[i-1].session_date);
+                        const diffTime = prevSessionDate.getTime() - sessionDate.getTime();
+                        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+                        if (diffDays === 1) { // Consecutive day
+                            current++;
+                        } else if (diffDays > 1) { // Gap, reset current streak
+                            current = 1;
+                        }
+                    }
+                    max = Math.max(max, current);
+                }
+                currentStreak = current;
+                longestStreak = max;
             }
+        } catch (streakError) {
+            console.error('Erro ao calcular streak:', streakError.message);
         }
 
-        // Horas totais de estudo planejadas - PostgreSQL compatible
-        const totalHoursResult = await dbGet(`
-            SELECT 
-                SUM(
-                    CASE 
-                        WHEN session_type = 'Novo Tópico' THEN $1
-                        WHEN session_type = 'Revisão' THEN $2 * 0.7
-                        ELSE $3
-                    END
-                ) / 60.0 as total_hours
-            FROM study_sessions 
-            WHERE study_plan_id = $4
-        `, [plan.session_duration_minutes, plan.session_duration_minutes, plan.session_duration_minutes, planId]);
+        // Horas totais de estudo (reais)
+        const totalHoursQuery = `
+            SELECT COALESCE(SUM(time_studied_seconds), 0) as total_seconds
+            FROM study_sessions
+            WHERE study_plan_id = $1 AND (status = 'Concluído' OR time_studied_seconds > 0)
+        `;
+        console.log('\n[DEBUG SQL] Total Hours Query:', totalHoursQuery);
+        console.log('[DEBUG SQL] Params:', [planId]);
+        
+        const totalHoursResult = await dbGet(totalHoursQuery, [planId]);
+        console.log('[DEBUG SQL] Result from DB:', totalHoursResult);
+        console.log('[DEBUG SQL] Result is null?', totalHoursResult === null);
+        console.log('[DEBUG SQL] Result is undefined?', totalHoursResult === undefined);
+        
+        const totalHours = totalHoursResult && totalHoursResult.total_seconds ? 
+            (parseFloat(totalHoursResult.total_seconds) / 3600.0) : 0;
+        console.log('[DEBUG SQL] Final totalHours value:', totalHours);
 
-        // Média de estudo por dia (baseada nas configurações) - PostgreSQL compatible
-        const avgStudyResult = await dbGet(`
-            SELECT AVG(daily_minutes) as avg_minutes
+        // Média de estudo por dia (reais)
+        const avgStudyQuery = `
+            SELECT COALESCE(AVG(total_seconds_per_day), 0) as avg_seconds_per_day
             FROM (
-                SELECT 
-                    ((study_hours_per_day->>'1')::numeric + 
-                     (study_hours_per_day->>'2')::numeric + 
-                     (study_hours_per_day->>'3')::numeric + 
-                     (study_hours_per_day->>'4')::numeric + 
-                     (study_hours_per_day->>'5')::numeric + 
-                     (study_hours_per_day->>'6')::numeric + 
-                     (study_hours_per_day->>'0')::numeric) * 60.0 / 7.0 as daily_minutes
-                FROM study_plans 
-                WHERE id = ?
-            )
-        `, [planId]);
+                SELECT session_date, SUM(time_studied_seconds) as total_seconds_per_day
+                FROM study_sessions
+                WHERE study_plan_id = $1 AND (status = 'Concluído' OR time_studied_seconds > 0)
+                GROUP BY session_date
+            ) as daily_study
+        `;
+        console.log('DEBUG: getPlanStatistics - avgStudyQuery:', avgStudyQuery, 'params:', [planId]); // ADDED LOG
+        const avgStudyResult = await dbGet(avgStudyQuery, [planId]);
+        const averageHoursPerDay = avgStudyResult ? (avgStudyResult.avg_seconds_per_day / 3600.0) : 0; // Convert seconds to hours
+        console.log('DEBUG: getPlanStatistics - avgStudyResult:', avgStudyResult);
 
         // Melhor dia da semana (simplificado) - PostgreSQL compatible
-        const bestDayResult = await dbGet(`
+        const bestDayQuery = `
             SELECT 
                 CASE EXTRACT(DOW FROM session_date)
                     WHEN 0 THEN 'Domingo'
@@ -639,21 +677,28 @@ const getPlanStatistics = async (req, res) => {
                 END as day_name,
                 COUNT(*) as session_count
             FROM study_sessions 
-            WHERE study_plan_id = $1 AND status = 'Concluído'
+            WHERE study_plan_id = $1 AND (status = 'Concluído' OR time_studied_seconds > 0)
             GROUP BY EXTRACT(DOW FROM session_date)
             ORDER BY session_count DESC
             LIMIT 1
-        `, [planId]);
+        `;
+        console.log('DEBUG: getPlanStatistics - bestDayQuery:', bestDayQuery, 'params:', [planId]); // ADDED LOG
+        const bestDayResult = await dbGet(bestDayQuery, [planId]);
+        console.log('DEBUG: getPlanStatistics - bestDayResult:', bestDayResult);
 
         const response = {
             totalDays: totalDays,
             currentStreak: currentStreak,
             longestStreak: longestStreak,
-            totalPlannedHours: Math.round((totalHoursResult?.total_hours || 0) * 10) / 10,
-            avgDailyStudyMinutes: Math.round(avgStudyResult?.avg_minutes || 0),
+            totalHours: Math.round(totalHours * 10) / 10, // Use new totalHours
+            averageHoursPerDay: Math.round(averageHoursPerDay * 10) / 10, // Use new averageHoursPerDay
             bestStudyDay: bestDayResult?.day_name || 'N/A',
             examDate: plan.exam_date
         };
+        
+        console.log('[DEBUG STATISTICS] ========== RESPONSE ==========');
+        console.log('[DEBUG STATISTICS] Final response:', response);
+        console.log('[DEBUG STATISTICS] ========== FIM DEBUG ==========\n');
 
         res.json(response);
     } catch (error) {
@@ -996,6 +1041,122 @@ const getGoalProgress = async (req, res) => {
         }
         
         res.status(500).json({ error: 'Erro ao buscar progresso de metas' });
+    }
+};
+
+/**
+ * GET /api/plans/:planId/study-time - Tempo dedicado por disciplina e assuntos
+ * NOVA FUNCIONALIDADE: Visualização de tempo de estudo distribuído
+ */
+const getStudyTimeDistribution = async (req, res) => {
+    try {
+        const planId = parseInt(req.params.planId, 10);
+        const userId = req.user.id;
+        
+        logger.info(`[STUDY_TIME] Buscando distribuição de tempo para plano ${planId}`);
+        
+        // Validar plano pertence ao usuário
+        const plan = await repos.plan.findById(planId);
+        if (!plan || plan.user_id !== userId) {
+            return res.status(404).json({ error: 'Plano não encontrado' });
+        }
+        
+        // Buscar sessões concluídas com tempo de estudo
+        const sessionsQuery = `
+            SELECT 
+                ss.subject_name,
+                t.topic_name,
+                ss.time_studied_seconds,
+                ss.session_date,
+                ss.questions_solved
+            FROM study_sessions ss
+            LEFT JOIN topics t ON ss.topic_id = t.id
+            WHERE ss.study_plan_id = $1 
+                AND ss.status IN ('Concluído', 'Concluída', 'Concluida')
+                AND ss.time_studied_seconds > 0
+            ORDER BY ss.subject_name, t.topic_name, ss.session_date DESC
+        `;
+        
+        const sessions = await dbAll(sessionsQuery, [planId]);
+        
+        if (!sessions || sessions.length === 0) {
+            return res.json({
+                totalStudyTimeSeconds: 0,
+                subjects: [],
+                message: 'Nenhuma sessão de estudo concluída encontrada'
+            });
+        }
+        
+        // Agrupar por disciplina e assunto
+        const subjectMap = new Map();
+        let totalTimeSeconds = 0;
+        
+        sessions.forEach(session => {
+            const subjectName = session.subject_name || 'Disciplina não especificada';
+            const topicName = session.topic_name || 'Tópico não especificado';
+            const timeSeconds = session.time_studied_seconds || 0;
+            
+            totalTimeSeconds += timeSeconds;
+            
+            if (!subjectMap.has(subjectName)) {
+                subjectMap.set(subjectName, {
+                    name: subjectName,
+                    totalTimeSeconds: 0,
+                    topics: new Map()
+                });
+            }
+            
+            const subject = subjectMap.get(subjectName);
+            subject.totalTimeSeconds += timeSeconds;
+            
+            if (!subject.topics.has(topicName)) {
+                subject.topics.set(topicName, {
+                    name: topicName,
+                    timeSeconds: 0
+                });
+            }
+            
+            subject.topics.get(topicName).timeSeconds += timeSeconds;
+        });
+        
+        // Converter para array e ordenar
+        const subjects = Array.from(subjectMap.values())
+            .map(subject => ({
+                name: subject.name,
+                totalTimeSeconds: subject.totalTimeSeconds,
+                topics: Array.from(subject.topics.values())
+                    .sort((a, b) => b.timeSeconds - a.timeSeconds) // Ordenar por tempo decrescente
+            }))
+            .sort((a, b) => b.totalTimeSeconds - a.totalTimeSeconds); // Ordenar por tempo decrescente
+        
+        // Calcular estatísticas adicionais
+        const stats = {
+            totalSubjects: subjects.length,
+            totalTopics: subjects.reduce((acc, s) => acc + s.topics.length, 0),
+            averageTimePerSubject: totalTimeSeconds > 0 ? Math.round(totalTimeSeconds / subjects.length) : 0,
+            mostStudiedSubject: subjects.length > 0 ? subjects[0].name : null,
+            leastStudiedSubject: subjects.length > 0 ? subjects[subjects.length - 1].name : null
+        };
+        
+        const result = {
+            totalStudyTimeSeconds: totalTimeSeconds,
+            subjects: subjects,
+            statistics: stats,
+            generatedAt: getBrazilianDateString()
+        };
+        
+        logger.info(`[STUDY_TIME] Distribuição calculada: ${totalTimeSeconds}s total, ${subjects.length} disciplinas`);
+        
+        res.json(result);
+        
+    } catch (error) {
+        logger.error('[STUDY_TIME] Erro ao buscar distribuição de tempo:', {
+            error: error.message,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        
+        res.status(500).json({ error: 'Erro ao buscar distribuição de tempo de estudo' });
     }
 };
 
@@ -1710,6 +1871,45 @@ const getDetailedProgress = async (req, res) => {
     }
 };
 
+// Função getDashboardData movida para baixo, antes do module.exports
+
+/**
+ * Get consolidated dashboard data
+ * Endpoint unificado para otimizar performance do dashboard
+ */
+const getDashboardData = async (req, res) => {
+    try {
+        const { planId } = req.params;
+        const userId = req.user?.id;
+        
+        if (!userId) {
+            return res.status(401).json({ error: 'Usuário não autenticado' });
+        }
+        
+        // Importar o DashboardServiceDirect para busca direta
+        const DashboardServiceDirect = require('../services/DashboardServiceDirect');
+        
+        // Buscar dados consolidados diretamente do banco
+        const dashboardData = await DashboardServiceDirect.getDashboardData(planId, userId);
+        
+        logger.info(`[DASHBOARD] Dados consolidados carregados para plano ${planId}`);
+        return res.json(dashboardData);
+        
+    } catch (error) {
+        logger.error('[DASHBOARD] Erro ao carregar dados consolidados:', {
+            error: error.message,
+            stack: error.stack,
+            planId: req.params.planId,
+            userId: req.user?.id
+        });
+        
+        return res.status(500).json({ 
+            error: 'Erro ao carregar dados do dashboard',
+            details: error.message 
+        });
+    }
+};
+
 module.exports = {
     // CRUD Básico
     getPlans,
@@ -1740,6 +1940,7 @@ module.exports = {
     // ENHANCED ENDPOINTS - FASE 5 WAVE 3
     getPlanProgress,
     getGoalProgress,
+    getStudyTimeDistribution,
     getRealityCheck,
     getSchedulePreview,
     getPerformance,
@@ -1762,5 +1963,9 @@ module.exports = {
     
     // MISSING ROUTES FIX - DELEGATED TO STATISTICS
     getQuestionRadar,
-    getDetailedProgress
+    getDetailedProgress,
+    
+    // CONSOLIDATED ENDPOINT FOR DASHBOARD
+    getDashboardData
 };
+// force restart Sun, Aug 31, 2025  6:37:22 PM

@@ -45,23 +45,14 @@ class DatabaseAdapter {
             });
 
             // Tentar usar repository específico baseado na query
-            const repositoryResult = this.tryUseRepository('GET', sql, params);
-            if (repositoryResult) {
+            const repositoryResult = await this.tryUseRepository('GET', sql, params);
+            if (repositoryResult !== null) {
                 this.stats.repositoryCalls++;
                 return repositoryResult;
             }
 
-            // Fallback para método legacy
-            return new Promise((resolve, reject) => {
-                this.db.get(sql, params, (err, row) => {
-                    if (err) {
-                        this.stats.errors++;
-                        reject(err);
-                    } else {
-                        resolve(row);
-                    }
-                });
-            });
+            // Fallback para PostgreSQL direto
+            return await this.db.get(sql, params);
 
         } catch (error) {
             this.stats.errors++;
@@ -83,23 +74,14 @@ class DatabaseAdapter {
             });
 
             // Tentar usar repository específico
-            const repositoryResult = this.tryUseRepository('ALL', sql, params);
-            if (repositoryResult) {
+            const repositoryResult = await this.tryUseRepository('ALL', sql, params);
+            if (repositoryResult !== null) {
                 this.stats.repositoryCalls++;
                 return repositoryResult;
             }
 
-            // Fallback para método legacy
-            return new Promise((resolve, reject) => {
-                this.db.all(sql, params, (err, rows) => {
-                    if (err) {
-                        this.stats.errors++;
-                        reject(err);
-                    } else {
-                        resolve(rows);
-                    }
-                });
-            });
+            // Fallback para PostgreSQL direto
+            return await this.db.all(sql, params);
 
         } catch (error) {
             this.stats.errors++;
@@ -121,25 +103,14 @@ class DatabaseAdapter {
             });
 
             // Tentar usar repository específico
-            const repositoryResult = this.tryUseRepository('RUN', sql, params);
-            if (repositoryResult) {
+            const repositoryResult = await this.tryUseRepository('RUN', sql, params);
+            if (repositoryResult !== null) {
                 this.stats.repositoryCalls++;
                 return repositoryResult;
             }
 
-            // Fallback para método legacy
-            return new Promise((resolve, reject) => {
-                console.log('[DB_ADAPTER] Executando db.run com params:', params);
-                this.db.run(sql, params, function(err) {
-                    if (err) {
-                        console.error('[DB_ADAPTER] Erro no callback:', err);
-                        reject(err);
-                    } else {
-                        console.log('[DB_ADAPTER] Callback success, this context:', this);
-                        resolve(this);
-                    }
-                });
-            });
+            // Fallback para PostgreSQL direto
+            return await this.db.run(sql, params);
 
         } catch (error) {
             this.stats.errors++;
@@ -223,35 +194,11 @@ class DatabaseAdapter {
             return this.repos.plan.findByIdAndUserId(params[0], params[1]);
         }
 
-        // INSERT INTO study_plans - use direct PostgreSQL execution
+        // INSERT INTO study_plans - use PostgreSQL run method
         if (method === 'RUN' && sql.includes('insert into study_plans')) {
-            console.log('[DB_ADAPTER] Handling INSERT study_plans with direct PostgreSQL');
-            let { sql: pgSql, params: pgParams } = this.convertSqlParams(sql, params);
-            
-            // CORREÇÃO: Garantir que tenha RETURNING id para obter o ID
-            if (!pgSql.toLowerCase().includes('returning')) {
-                pgSql = pgSql.replace(/;?$/, ' RETURNING id;');
-                console.log('[DB_ADAPTER] Adicionado RETURNING id à query');
-            }
-            
-            console.log('[DB_ADAPTER] Query final:', pgSql.substring(0, 100) + '...');
-            
-            // Execute directly with PostgreSQL pool
-            const result = await this.db.pool.query(pgSql, pgParams);
-            
-            let lastID = null;
-            if (result.rows && result.rows.length > 0 && result.rows[0].id !== undefined) {
-                lastID = parseInt(result.rows[0].id, 10) || result.rows[0].id;
-                console.log('[DB_ADAPTER] ID retornado:', lastID);
-            } else {
-                console.warn('[DB_ADAPTER] Nenhum ID retornado:', result.rows);
-            }
-            
-            return {
-                lastID: lastID,
-                changes: result.rowCount || 0,
-                id: lastID // Compatibilidade adicional
-            };
+            console.log('[DB_ADAPTER] Handling INSERT study_plans with PostgreSQL run');
+            // O método db.run já adiciona RETURNING id automaticamente
+            return this.db.run(sql, params);
         }
 
         return null;
@@ -357,10 +304,10 @@ class DatabaseAdapter {
             });
             
             // Executar diretamente no PostgreSQL
-            const result = await this.db.pool.query(sql, values);
+            const result = await this.db.run(sql, values);
             
-            if (result.rows && result.rows.length > 0) {
-                const id = result.rows[0].id;
+            if (result && result.lastID) {
+                const id = result.lastID;
                 logger.info(`[DB_ADAPTER] Inserted into ${table} with ID: ${id}`);
                 return id;
             }

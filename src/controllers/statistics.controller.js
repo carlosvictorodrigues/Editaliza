@@ -14,29 +14,18 @@ let repositories = null;
 
 try {
     const StatisticsService = require('../services/StatisticsService');
-    const { createRepositories } = require('../repositories');
     
-    // Create a database adapter for the repositories
-    const dbAdapter = {
-        async findOne(query, params) {
-            return await dbGet(query, params);
-        },
-        async findAll(query, params) {
-            return await dbAll(query, params);
-        },
-        async execute(query, params) {
-            const { dbRun } = require('../config/database');
-            return await dbRun(query, params);
-        }
-    };
-    
-    // Create repositories instance with database adapter
-    repositories = createRepositories(dbAdapter);
-    
-    // Initialize StatisticsService with repositories and database
-    statisticsService = new StatisticsService(repositories, { dbGet, dbAll });
-    
-    console.log('✅ StatisticsService integrated successfully in Wave 1');
+    // Use global repositories if available, otherwise skip initialization
+    if (global.repos) {
+        repositories = global.repos;
+        
+        // Initialize StatisticsService with repositories and database
+        statisticsService = new StatisticsService(repositories, { dbGet, dbAll });
+        
+        console.log('✅ StatisticsService integrated successfully in Wave 1');
+    } else {
+        console.log('⚠️ StatisticsService: Waiting for global repositories');
+    }
 } catch (error) {
     console.error('⚠️ StatisticsService integration failed, using fallback:', error.message);
     // Don't log full stack trace to avoid noise, just continue with fallback

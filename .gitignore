@@ -127,3 +127,17 @@ simple-*.js
 schedule_*.js
 schedule_*.json
 setup-local-db.js
+
+# Test and debug scripts
+check-*.js
+verify-*.js
+test-*.js
+create-test-*.js
+test-session-*.js
+test-user-*.js
+test-gamification.js
+test-study-*.js
+test-db-*.js
+test-query-*.js
+database-postgres-direct.js
+cookies.txt

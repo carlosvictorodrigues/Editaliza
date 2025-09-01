@@ -576,9 +576,16 @@ class PlanService {
         }
 
         // CORREÇÃO: Usar contagem unificada via sessões concluídas (método confiável)
+        // Agora usando user_id diretamente na tabela study_sessions
         const completedResult = await this.db.get(
-            'SELECT COUNT(DISTINCT topic_id) as count FROM study_sessions WHERE study_plan_id = $1 AND session_type = $2 AND status = $3 AND topic_id IS NOT NULL',
-            [planId, 'Novo Tópico', 'completed']
+            `SELECT COUNT(DISTINCT topic_id) as count 
+             FROM study_sessions
+             WHERE study_plan_id = $1 
+             AND user_id = $2
+             AND session_type = $3 
+             AND status = $4 
+             AND topic_id IS NOT NULL`,
+            [planId, userId, 'Novo Tópico', 'Concluído'] // Reverted to 'Concluído'
         );
         
         const topics = await this.repos.topic.findByPlanId(planId);
@@ -774,6 +781,81 @@ class PlanService {
 };
 
     /**
+     * Get plan by ID and user
+     */
+    async getPlan(planId, userId) {
+        return await this.repos.plan.findByIdAndUser(planId, userId);
+    }
+
+    /**
+     * Get schedule statistics for dashboard
+     */
+    async getScheduleStatistics(planId) {
+        try {
+            const sessions = await this.repos.session.findByPlanId(planId);
+            const topics = await this.repos.topic.findByPlanId(planId);
+            
+            const totalTopics = topics.length;
+            const scheduledTopics = sessions.filter(s => s.session_type === 'Novo Tópico').length;
+            const unscheduledTopics = Math.max(0, totalTopics - scheduledTopics);
+            
+            return {
+                total: totalTopics,
+                scheduled: scheduledTopics,
+                unscheduled: unscheduledTopics
+            };
+        } catch (error) {
+            console.error('Erro ao calcular estatísticas do cronograma:', error);
+            return {
+                total: 0,
+                scheduled: 0,
+                unscheduled: 0
+            };
+        }
+    }
+
+    /**
+     * Calculate plan progress for dashboard
+     */
+    async calculateProgress(planId) {
+        try {
+            const sessions = await this.repos.session.findByPlanId(planId);
+            
+            // Filtrar sessões por tipo
+            const studySessions = sessions.filter(s => s.session_type === 'Novo Tópico');
+            const revisionSessions = sessions.filter(s => 
+                s.session_type && s.session_type.includes('Revisão')
+            );
+            
+            // Contar tópicos únicos concluídos
+            const completedTopics = new Set(
+                studySessions
+                    .filter(s => s.status === 'completed' && s.topic_id !== null)
+                    .map(s => s.topic_id)
+            ).size;
+            
+            // Contar sessões
+            const totalSessions = sessions.length;
+            const completedSessions = sessions.filter(s => s.status === 'completed').length;
+            
+            return {
+                completedTopics,
+                totalSessions: studySessions.length,
+                revisionSessions: revisionSessions.length,
+                completedSessions
+            };
+        } catch (error) {
+            console.error('Erro ao calcular progresso:', error);
+            return {
+                completedTopics: 0,
+                totalSessions: 0,
+                revisionSessions: 0,
+                completedSessions: 0
+            };
+        }
+    }
+
+    /**
      * Get gamification data with complete level system
      */
     async getGamification(planId, userId) {
@@ -783,9 +865,15 @@ class PlanService {
         }
 
         // Get completed topics count - handle all completion status variations
+        // Agora usando user_id diretamente na tabela study_sessions
         const completedTopicsResult = await this.db.get(
-            'SELECT COUNT(DISTINCT topic_id) as count FROM study_sessions WHERE study_plan_id = $1 AND status IN ($2, $3, $4) AND topic_id IS NOT NULL',
-            [planId, 'Concluído', 'Concluída', 'Concluida']
+            `SELECT COUNT(DISTINCT topic_id) as count 
+             FROM study_sessions
+             WHERE study_plan_id = $1 
+             AND user_id = $2
+             AND status IN ($3, $4, $5) 
+             AND topic_id IS NOT NULL`,
+            [planId, userId, 'Concluído', 'Concluída', 'Concluida']
         );
         const completedTopicsCount = completedTopicsResult.count || 0;
 

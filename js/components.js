@@ -114,103 +114,78 @@ class ComponentsCore {
     }
 
     // Importar mdulo dinamicamente com fallback robusto
+    // Importar módulo dinamicamente de forma robusta e simplificada
     async importModule(moduleUrl, moduleName) {
-        try {
-            // Primeiro tentar pegar do window (para módulos já carregados globalmente)
-            const moduleKey = this.getModuleKey(moduleName);
-            const lowerKey = moduleName.toLowerCase();
-            
-            // Verificar se já existe no window
-            // IMPORTANTE: Para navigation, usar NavigationModule ao invés de Navigation (API nativa)
-            if (moduleName === 'navigation') {
-                if (window.NavigationModule) {
-                    console.log(`✅ Módulo navigation disponível em window.NavigationModule`);
-                    return window.NavigationModule;
-                }
-                if (window.EditalizeNavigation) {
-                    console.log(`✅ Módulo navigation disponível em window.EditalizeNavigation`);
-                    return window.EditalizeNavigation;
-                }
-            }
-            
-            if (window[moduleKey]) {
-                console.log(`✅ Módulo ${moduleName} já disponível em window.${moduleKey}`);
-                return window[moduleKey];
-            }
-            if (window[lowerKey]) {
-                console.log(`✅ Módulo ${moduleName} já disponível em window.${lowerKey}`);
-                return window[lowerKey];
-            }
-            
-            // Para gamification, usar diretamente o global
-            if (moduleName === 'gamification' && window.Gamification) {
-                console.log(`✅ Módulo gamification disponível como window.Gamification`);
-                return window.Gamification;
-            }
-            
-            // Tentar carregar o script diretamente (mais confiável que import() dinâmico)
+        return new Promise(async (resolve, reject) => {
             try {
-                await this.loadModuleFallback(moduleUrl, moduleName);
-                
-                // Verificar novamente após carregamento
-                if (window[moduleKey]) return window[moduleKey];
-                if (window[lowerKey]) return window[lowerKey];
-                if (moduleName === 'gamification' && window.Gamification) return window.Gamification;
-                
-                console.warn(`Módulo ${moduleName} carregado mas não encontrado no window`);
-            } catch (scriptError) {
-                console.warn(`Erro ao carregar script ${moduleName}:`, scriptError.message);
-                
-                // Última tentativa: import() dinâmico (pode falhar em alguns browsers)
-                try {
-                    const module = await import(moduleUrl);
-                    
-                    if (module[moduleKey]) {
-                        return module[moduleKey];
-                    } else if (module.default) {
-                        return module.default;
-                    } else {
-                        const exportKeys = Object.keys(module).filter(key => key !== 'default');
-                        if (exportKeys.length > 0) {
-                            return module[exportKeys[0]];
-                        }
-                    }
-                } catch (importError) {
-                    console.warn(`Import dinâmico falhou para ${moduleName}:`, importError.message);
-                }
-            }
-            
-            // Verificar uma última vez se o módulo foi anexado ao window
-            if (window[moduleKey]) return window[moduleKey];
-            if (window[lowerKey]) return window[lowerKey];
-            if (moduleName === 'gamification' && window.Gamification) return window.Gamification;
-            
-            console.warn(`Módulo ${moduleName} não encontrado, usando mock`);
-            return this.createModuleMock(moduleName);
-            
-        } catch (error) {
-            console.error(`Erro crítico ao carregar ${moduleName}:`, error);
-            return this.createModuleMock(moduleName);
-        }
-    }
-
-    // Fallback para navegadores sem suporte a ES6 modules
-    async loadModuleFallback(moduleUrl, moduleName) {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = moduleUrl;
-            script.onload = () => {
                 const moduleKey = this.getModuleKey(moduleName);
+
+                // Se o módulo já estiver no window, retorne-o
                 if (window[moduleKey]) {
-                    resolve(window[moduleKey]);
-                } else {
-                    reject(new Error(`Mdulo ${moduleKey} no encontrado aps carregamento`));
+                    console.log(`✅ Módulo ${moduleName} já disponível em window.${moduleKey}`);
+                    return resolve(window[moduleKey]);
                 }
-            };
-            script.onerror = () => reject(new Error(`Falha ao carregar script ${moduleUrl}`));
-            document.head.appendChild(script);
+                
+                // Para navigation, verificar variações
+                if (moduleName === 'navigation') {
+                    if (window.NavigationModule) {
+                        console.log(`✅ Módulo navigation disponível em window.NavigationModule`);
+                        return resolve(window.NavigationModule);
+                    }
+                    if (window.EditalizeNavigation) {
+                        console.log(`✅ Módulo navigation disponível em window.EditalizeNavigation`);
+                        return resolve(window.EditalizeNavigation);
+                    }
+                }
+                
+                // Para gamification, verificar variação
+                if (moduleName === 'gamification' && window.Gamification) {
+                    console.log(`✅ Módulo gamification disponível como window.Gamification`);
+                    return resolve(window.Gamification);
+                }
+
+                console.log(`📦 Carregando módulo ${moduleName} de ${moduleUrl}...`);
+                
+                // Se não, carregue o script
+                const script = document.createElement('script');
+                script.src = moduleUrl;
+                script.onload = () => {
+                    // Aguardar um pouco para o script se registrar
+                    setTimeout(() => {
+                        // Verificar todas as variações possíveis
+                        let loadedModule = window[moduleKey];
+                        
+                        if (!loadedModule && moduleName === 'navigation') {
+                            loadedModule = window.NavigationModule || window.EditalizeNavigation;
+                        }
+                        
+                        if (!loadedModule && moduleName === 'gamification') {
+                            loadedModule = window.Gamification;
+                        }
+                        
+                        if (loadedModule) {
+                            console.log(`✅ Módulo ${moduleName} carregado com sucesso`);
+                            resolve(loadedModule);
+                        } else {
+                            console.error(`❌ Módulo ${moduleKey} não encontrado após carregamento`);
+                            resolve(this.createModuleMock(moduleName));
+                        }
+                    }, 100);
+                };
+                script.onerror = () => {
+                    console.error(`❌ Falha ao carregar script ${moduleUrl}`);
+                    resolve(this.createModuleMock(moduleName)); // Resolve com mock em caso de erro
+                };
+                document.head.appendChild(script);
+
+            } catch (error) {
+                console.error(`Erro crítico ao carregar ${moduleName}:`, error);
+                resolve(this.createModuleMock(moduleName)); // Resolve com mock em caso de erro
+            }
         });
     }
+
+    // Função removida - não é mais necessária com o novo importModule simplificado
 
     // Criar mock bsico para mdulos que falharam
     createModuleMock(moduleName) {

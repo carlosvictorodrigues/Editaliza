@@ -760,6 +760,99 @@ class SessionService {
         
         return 'Continue assim! Cada dia de estudo fortalece seu hábito.';
     }
+
+    /**
+     * Get revision statistics for dashboard
+     */
+    async getRevisionStatistics(planId) {
+        try {
+            const sessions = await this.repos.session.findByPlanId(planId);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Filtrar sessões de revisão por tipo
+            const revision7 = sessions.filter(s => s.session_type === 'Revisão 7d');
+            const revision14 = sessions.filter(s => s.session_type === 'Revisão 14d');
+            const revision28 = sessions.filter(s => s.session_type === 'Revisão 28d');
+            
+            // Calcular estatísticas para cada ciclo
+            const calculate = (revisionSessions) => {
+                const total = revisionSessions.length;
+                const completed = revisionSessions.filter(s => s.status === 'completed').length;
+                const overdue = revisionSessions.filter(s => {
+                    const sessionDate = new Date(s.session_date);
+                    sessionDate.setHours(0, 0, 0, 0);
+                    return sessionDate < today && s.status === 'pending';
+                }).length;
+                
+                return { total, completed, overdue };
+            };
+            
+            return {
+                revision7: calculate(revision7),
+                revision14: calculate(revision14),
+                revision28: calculate(revision28)
+            };
+        } catch (error) {
+            console.error('Erro ao calcular estatísticas de revisão:', error);
+            return {
+                revision7: { total: 0, completed: 0, overdue: 0 },
+                revision14: { total: 0, completed: 0, overdue: 0 },
+                revision28: { total: 0, completed: 0, overdue: 0 }
+            };
+        }
+    }
+
+    /**
+     * Get study pace for last N days
+     */
+    async getStudyPace(planId) {
+        try {
+            const sessions = await this.repos.session.findByPlanId(planId);
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+            
+            // Filtrar apenas sessões de novo tópico concluídas
+            const studySessions = sessions.filter(s => 
+                s.session_type === 'Novo Tópico' && 
+                s.status === 'completed'
+            );
+            
+            // Calcular para diferentes janelas de tempo
+            const calculate = (daysBack) => {
+                const startDate = new Date(today);
+                startDate.setDate(startDate.getDate() - daysBack);
+                startDate.setHours(0, 0, 0, 0);
+                
+                const sessionsInWindow = studySessions.filter(s => {
+                    const sessionDate = new Date(s.session_date);
+                    return sessionDate >= startDate && sessionDate <= today;
+                });
+                
+                // Contar tópicos únicos concluídos
+                const uniqueTopics = new Set(
+                    sessionsInWindow
+                        .filter(s => s.topic_id !== null)
+                        .map(s => s.topic_id)
+                ).size;
+                
+                return daysBack > 0 ? uniqueTopics / daysBack : 0;
+            };
+            
+            return {
+                last7Days: calculate(7),
+                last14Days: calculate(14),
+                last30Days: calculate(30)
+            };
+        } catch (error) {
+            console.error('Erro ao calcular ritmo de estudo:', error);
+            return {
+                last7Days: 0,
+                last14Days: 0,
+                last30Days: 0
+            };
+        }
+    }
 }
 
 module.exports = SessionService;

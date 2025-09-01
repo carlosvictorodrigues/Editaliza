@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nossa Metodologia - Editaliza</title>
-    <meta name="description" content="Descubra a metodologia cientfica por trs do Editaliza: algoritmos inteligentes, revises espaadas e personalizao que transformam seu estudo em aprovao.">
+    <meta name="description" content="Descubra a metodologia científica por trás do Editaliza: algoritmos inteligentes, revisões espaçadas e personalização que transformam seu estudo em aprovação.">
     
     <!-- Favicon and Web App Icons - Enhanced for better browser compatibility -->
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png?v=4">
@@ -15,7 +15,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=4">
     <meta name="theme-color" content="#0528f2">
 
-    <link href="css/tailwind.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="css/design-tokens.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
@@ -23,11 +23,29 @@
     <!-- Theme system removed - light mode only -->
     
     <!-- SCRIPTS CENTRALIZADOS -->
-    <script type="module" src="js/app.js"></script>
+    <script src="js/app.js"></script>
     <script src="js/components.js"></script>
     
-    <!-- Tailwind config removed - using compiled CSS -->
-    <!-- Custom colors and animations now available through compiled tailwind.css -->
+    <!-- Config do Tailwind para reconhecer as cores customizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-black': '#0d0d0d',
+                        'editaliza-gray': '#969696',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'fade-in-up': 'fadeInUp 0.6s ease-out',
+                    }
+                }
+            }
+        }
+    </script>
     
     <style>
         @keyframes fadeInUp {
@@ -110,10 +128,10 @@
 </head>
 
 <body class="bg-slate-50 text-gray-800 overflow-x-hidden">
-    <!-- Container de Toast para Notificaes -->
+    <!-- Container de Toast para Notificações -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3"></div>
 
-    <!-- NAVEGAO PRINCIPAL (GERADA PELO JS) -->
+    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
     <div id="main-nav-container"></div>
 
     <!-- HERO SECTION -->
@@ -167,7 +185,7 @@
             </h1>
             
             <p class="text-xl md:text-2xl text-white/95 mb-12 max-w-4xl mx-auto leading-relaxed drop-shadow-md">
-                Descubra a cincia por trs do seu sucesso. Algoritmos inteligentes, revises espaadas e personalizao total que transformam seu estudo em <strong class="text-white font-bold">aprovao garantida</strong>.
+                Descubra a ciência por trás do seu sucesso. Algoritmos inteligentes, revisões espaçadas e personalização total que transformam seu estudo em <strong class="text-white font-bold">aprovação garantida</strong>.
             </p>
             
             <div class="flex flex-col sm:flex-row gap-6 justify-center mb-16">
@@ -175,7 +193,7 @@
                     Descobrir a Metodologia
                 </a>
                 <a href="register.html" class="border-2 border-white text-white hover:bg-white hover:text-editaliza-blue px-8 py-4 rounded-full font-semibold text-lg transition-all duration-300 transform hover:scale-105">
-                    Comear Agora
+                    Começar Agora
                 </a>
             </div>
             
@@ -192,9 +210,9 @@
     <section id="fundamentos" class="py-20 bg-gradient-to-b from-slate-50 to-white">
         <div class="container mx-auto px-6 max-w-6xl">
             <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Por Que Nossa Metodologia  nica?</h2>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Por Que Nossa Metodologia É Única?</h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-                    No somos apenas mais uma plataforma de estudos. Somos o resultado da convergncia entre neurocincia, inteligncia artificial e anos de pesquisa em otimizao de aprendizado.
+                    Não somos apenas mais uma plataforma de estudos. Somos o resultado da convergência entre neurociência, inteligência artificial e anos de pesquisa em otimização de aprendizado.
                 </p>
             </div>
             
@@ -205,7 +223,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Inteligncia Artificial</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Inteligência Artificial</h3>
                     <p class="text-gray-600 leading-relaxed">Algoritmos adaptativos que aprendem com seu desempenho e personalizam completamente sua jornada de estudos.</p>
                 </div>
                 
@@ -215,8 +233,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Base Cientfica</h3>
-                    <p class="text-gray-600 leading-relaxed">Fundamentado em neurocincia e psicologia cognitiva, com tcnicas comprovadas de memorizao e aprendizado.</p>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Base Científica</h3>
+                    <p class="text-gray-600 leading-relaxed">Fundamentado em neurociência e psicologia cognitiva, com técnicas comprovadas de memorização e aprendizado.</p>
                 </div>
                 
                 <div class="content-card text-center p-8 feature-glow">
@@ -226,7 +244,7 @@
                         </svg>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-4">Resultados Reais</h3>
-                    <p class="text-gray-600 leading-relaxed">Milhares de aprovados que confiam em nossa metodologia para transformar esforo em conquista concreta.</p>
+                    <p class="text-gray-600 leading-relaxed">Milhares de aprovados que confiam em nossa metodologia para transformar esforço em conquista concreta.</p>
                 </div>
             </div>
         </div>
@@ -236,9 +254,9 @@
     <section class="py-20 bg-gradient-to-b from-white to-slate-50">
         <div class="container mx-auto px-6 max-w-6xl">
             <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Os Fundamentos Cientficos</h2>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Os Fundamentos Científicos</h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Nossa metodologia no  baseada em achismos.  construda sobre dcadas de pesquisa cientfica em aprendizagem e memria.
+                    Nossa metodologia não é baseada em achismos. É construída sobre décadas de pesquisa científica em aprendizagem e memória.
                 </p>
             </div>
             
@@ -247,25 +265,25 @@
                 <div class="grid lg:grid-cols-2 gap-12 items-center">
                     <div>
                         <div class="inline-flex items-center bg-gradient-to-r from-editaliza-blue to-editaliza-green text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
-                            > NEUROCINCIA
+                            🧠 NEUROCIÊNCIA
                         </div>
-                        <h3 class="text-3xl font-bold text-gray-900 mb-6">Revises Espaadas Inteligentes</h3>
+                        <h3 class="text-3xl font-bold text-gray-900 mb-6">Revisões Espaçadas Inteligentes</h3>
                         <p class="text-lg text-gray-600 mb-6 leading-relaxed">
-                            Hermann Ebbinghaus descobriu em 1885 que esquecemos 80% do que aprendemos em 24 horas. Nossa soluo? 
-                            <strong class="text-editaliza-blue">Revises automaticamente agendadas</strong> em intervalos cientficamente calculados.
+                            Hermann Ebbinghaus descobriu em 1885 que esquecemos 80% do que aprendemos em 24 horas. Nossa solução? 
+                            <strong class="text-editaliza-blue">Revisões automaticamente agendadas</strong> em intervalos científicamente calculados.
                         </p>
                         <div class="space-y-4">
                             <div class="flex items-center">
                                 <div class="w-3 h-3 bg-editaliza-green rounded-full mr-4"></div>
-                                <span class="text-gray-700"><strong>7 dias:</strong> Primeira reviso para fixao inicial</span>
+                                <span class="text-gray-700"><strong>7 dias:</strong> Primeira revisão para fixação inicial</span>
                             </div>
                             <div class="flex items-center">
                                 <div class="w-3 h-3 bg-editaliza-blue rounded-full mr-4"></div>
-                                <span class="text-gray-700"><strong>14 dias:</strong> Consolidao na memria de mdio prazo</span>
+                                <span class="text-gray-700"><strong>14 dias:</strong> Consolidação na memória de médio prazo</span>
                             </div>
                             <div class="flex items-center">
                                 <div class="w-3 h-3 bg-editaliza-green rounded-full mr-4"></div>
-                                <span class="text-gray-700"><strong>28 dias:</strong> Transferncia para memria de longo prazo</span>
+                                <span class="text-gray-700"><strong>28 dias:</strong> Transferência para memória de longo prazo</span>
                             </div>
                         </div>
                     </div>
@@ -274,23 +292,23 @@
                             <div class="space-y-6">
                                 <div class="bg-white rounded-xl p-6 shadow-lg">
                                     <div class="flex items-center justify-between mb-4">
-                                        <span class="text-sm font-semibold text-gray-600">Reteno de Memria</span>
+                                        <span class="text-sm font-semibold text-gray-600">Retenção de Memória</span>
                                         <span class="text-2xl font-bold text-editaliza-blue">95%</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-3">
                                         <div class="bg-gradient-to-r from-editaliza-blue to-editaliza-green h-3 rounded-full" style="width: 95%"></div>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-2">Com revises espaadas</p>
+                                    <p class="text-xs text-gray-500 mt-2">Com revisões espaçadas</p>
                                 </div>
                                 <div class="bg-white rounded-xl p-6 shadow-lg">
                                     <div class="flex items-center justify-between mb-4">
-                                        <span class="text-sm font-semibold text-gray-600">Sem Revises</span>
+                                        <span class="text-sm font-semibold text-gray-600">Sem Revisões</span>
                                         <span class="text-2xl font-bold text-red-500">20%</span>
                                     </div>
                                     <div class="w-full bg-gray-200 rounded-full h-3">
                                         <div class="bg-red-500 h-3 rounded-full" style="width: 20%"></div>
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-2">Mtodo tradicional</p>
+                                    <p class="text-xs text-gray-500 mt-2">Método tradicional</p>
                                 </div>
                             </div>
                         </div>
@@ -304,7 +322,7 @@
                             <div class="text-center">
                                 <div class="inline-block bg-white rounded-2xl p-6 mb-6 shadow-lg">
                                     <div class="text-4xl font-bold text-editaliza-blue mb-2">ALGORITMO</div>
-                                    <div class="text-sm text-gray-600">Inteligente de Distribuio</div>
+                                    <div class="text-sm text-gray-600">Inteligente de Distribuição</div>
                                 </div>
                                 <div class="space-y-4">
                                     <div class="bg-white rounded-xl p-4 shadow-md flex items-center justify-between">
@@ -327,7 +345,7 @@
                                         </div>
                                     </div>
                                     <div class="bg-white rounded-xl p-4 shadow-md flex items-center justify-between">
-                                        <span class="font-semibold text-gray-700">Informtica</span>
+                                        <span class="font-semibold text-gray-700">Informática</span>
                                         <div class="flex" id="informatics-dots">
                                             <div class="w-3 h-3 bg-gray-400 rounded-full mr-1"></div>
                                             <div class="w-3 h-3 bg-gray-400 rounded-full"></div>
@@ -339,12 +357,12 @@
                     </div>
                     <div class="order-1 lg:order-2">
                         <div class="inline-flex items-center bg-gradient-to-r from-editaliza-blue to-editaliza-green text-white px-4 py-2 rounded-full text-sm font-semibold mb-6">
-                            > INTELIGNCIA ARTIFICIAL
+                            🤖 INTELIGÊNCIA ARTIFICIAL
                         </div>
-                        <h3 class="text-3xl font-bold text-gray-900 mb-6">Distribuio Inteligente Ponderada</h3>
+                        <h3 class="text-3xl font-bold text-gray-900 mb-6">Distribuição Inteligente Ponderada</h3>
                         <p class="text-lg text-gray-600 mb-6 leading-relaxed">
-                            Chega de cronogramas rgidos que quebram na primeira dificuldade. Nosso <strong class="text-editaliza-blue">algoritmo adaptatrio</strong> 
-                            distribui automaticamente suas matrias baseado em prioridades e desempenho.
+                            Chega de cronogramas rígidos que quebram na primeira dificuldade. Nosso <strong class="text-editaliza-blue">algoritmo adaptatório</strong> 
+                            distribui automaticamente suas matérias baseado em prioridades e desempenho.
                         </p>
                         <div class="space-y-4">
                             <div class="flex items-start">
@@ -354,8 +372,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <strong class="text-gray-900">Priorizao Automtica:</strong>
-                                    <p class="text-gray-600">Matrias mais importantes aparecem proporcionalmente mais vezes sem nunca esquecer as secundrias.</p>
+                                    <strong class="text-gray-900">Priorização Automática:</strong>
+                                    <p class="text-gray-600">Matérias mais importantes aparecem proporcionalmente mais vezes sem nunca esquecer as secundárias.</p>
                                 </div>
                             </div>
                             <div class="flex items-start">
@@ -366,7 +384,7 @@
                                 </div>
                                 <div>
                                     <strong class="text-gray-900">Flexibilidade Total:</strong>
-                                    <p class="text-gray-600">Perdeu um dia? O sistema automaticamente redistribui suas tarefas mantendo o equilbrio perfeito.</p>
+                                    <p class="text-gray-600">Perdeu um dia? O sistema automaticamente redistribui suas tarefas mantendo o equilíbrio perfeito.</p>
                                 </div>
                             </div>
                             <div class="flex items-start">
@@ -376,8 +394,8 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <strong class="text-gray-900">Personalizao nica:</strong>
-                                    <p class="text-gray-600">Cada plano  nico, adaptado ao seu perfil, disponibilidade e objetivo especfico.</p>
+                                    <strong class="text-gray-900">Personalização Única:</strong>
+                                    <p class="text-gray-600">Cada plano é único, adaptado ao seu perfil, disponibilidade e objetivo específico.</p>
                                 </div>
                             </div>
                         </div>
@@ -393,7 +411,7 @@
             <div class="text-center mb-16">
                 <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Como Nossa Metodologia Funciona</h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Uma experincia cuidadosamente projetada que transforma complexidade em simplicidade, caos em organizao.
+                    Uma experiência cuidadosamente projetada que transforma complexidade em simplicidade, caos em organização.
                 </p>
             </div>
             
@@ -408,19 +426,19 @@
                         <div class="md:ml-16 content-card p-8 w-full feature-glow">
                             <div class="flex items-center mb-6">
                                 <div class="w-12 h-12 bg-gradient-to-br from-editaliza-blue to-editaliza-green rounded-xl flex items-center justify-center text-white font-bold text-lg mr-4 md:hidden">1</div>
-                                <h3 class="text-2xl font-bold text-gray-900">Anlise Completa do Seu Perfil</h3>
+                                <h3 class="text-2xl font-bold text-gray-900">Análise Completa do Seu Perfil</h3>
                             </div>
                             <p class="text-gray-600 leading-relaxed mb-6">
-                                Comeamos mapeando completamente seu contexto: edital especfico, tempo disponvel, pontos fortes e fracos, 
-                                experincia prvia e data da prova. <strong class="text-editaliza-blue">Cada detalhe importa</strong> para criar seu plano perfeito.
+                                Começamos mapeando completamente seu contexto: edital específico, tempo disponível, pontos fortes e fracos, 
+                                experiência prévia e data da prova. <strong class="text-editaliza-blue">Cada detalhe importa</strong> para criar seu plano perfeito.
                             </p>
                             <div class="grid sm:grid-cols-2 gap-4">
                                 <div class="bg-gradient-to-r from-editaliza-blue/10 to-transparent p-4 rounded-lg">
-                                    <strong class="text-editaliza-blue">< Personalizao Total</strong><br>
-                                    <span class="text-gray-600 text-sm">Seu plano  nico no mundo</span>
+                                    <strong class="text-editaliza-blue">🎯 Personalização Total</strong><br>
+                                    <span class="text-gray-600 text-sm">Seu plano é único no mundo</span>
                                 </div>
                                 <div class="bg-gradient-to-r from-editaliza-green/10 to-transparent p-4 rounded-lg">
-                                    <strong class="text-editaliza-green"> Configurao Rpida</strong><br>
+                                    <strong class="text-editaliza-green">⚡ Configuração Rápida</strong><br>
                                     <span class="text-gray-600 text-sm">Pronto para estudar em minutos</span>
                                 </div>
                             </div>
@@ -436,13 +454,13 @@
                                 <h3 class="text-2xl font-bold text-gray-900">Processamento Inteligente</h3>
                             </div>
                             <p class="text-gray-600 leading-relaxed mb-6">
-                                Nossa IA processa milhes de combinaes para encontrar a <strong class="text-editaliza-blue">distribuio perfeita</strong> 
-                                entre suas matrias, considerando prioridades, curva de esquecimento e tempo at a prova.
+                                Nossa IA processa milhões de combinações para encontrar a <strong class="text-editaliza-blue">distribuição perfeita</strong> 
+                                entre suas matérias, considerando prioridades, curva de esquecimento e tempo até a prova.
                             </p>
                             <div class="bg-gradient-to-r from-gray-50 to-white p-6 rounded-2xl border-l-4 border-editaliza-blue">
-                                <div class="text-sm text-gray-500 mb-2">ALGORITMO EM AO:</div>
+                                <div class="text-sm text-gray-500 mb-2">ALGORITMO EM AÇÃO:</div>
                                 <div class="font-mono text-sm text-gray-700">
-                                    Priorizao  Tempo Disponvel  Curva de Esquecimento = <strong class="text-editaliza-blue">Cronograma Perfeito</strong>
+                                    Priorização × Tempo Disponível × Curva de Esquecimento = <strong class="text-editaliza-blue">Cronograma Perfeito</strong>
                                 </div>
                             </div>
                         </div>
@@ -454,33 +472,33 @@
                         <div class="md:ml-16 content-card p-8 w-full feature-glow">
                             <div class="flex items-center mb-6">
                                 <div class="w-12 h-12 bg-gradient-to-br from-editaliza-blue to-editaliza-green rounded-xl flex items-center justify-center text-white font-bold text-lg mr-4 md:hidden">3</div>
-                                <h3 class="text-2xl font-bold text-gray-900">Execuo Inteligente</h3>
+                                <h3 class="text-2xl font-bold text-gray-900">Execução Inteligente</h3>
                             </div>
                             <p class="text-gray-600 leading-relaxed mb-6">
-                                Todos os dias voc recebe seu <strong class="text-editaliza-blue">plano de estudos otimizado</strong>, 
-                                com tarefas balanceadas que maximizam reteno e minimizam sobrecarga cognitiva.
+                                Todos os dias você recebe seu <strong class="text-editaliza-blue">plano de estudos otimizado</strong>, 
+                                com tarefas balanceadas que maximizam retenção e minimizam sobrecarga cognitiva.
                             </p>
                             <div class="grid sm:grid-cols-3 gap-4">
                                 <div class="text-center p-4 bg-gradient-to-b from-editaliza-blue/5 to-transparent rounded-lg">
                                     <div class="w-8 h-8 bg-editaliza-blue rounded-full mx-auto mb-3 flex items-center justify-center">
-                                        <span class="text-white text-sm font-bold">=</span>
+                                        <span class="text-white text-sm font-bold">📚</span>
                                     </div>
-                                    <div class="font-semibold text-gray-800">Contedo Novo</div>
+                                    <div class="font-semibold text-gray-800">Conteúdo Novo</div>
                                     <div class="text-xs text-gray-600">Aprendizado progressivo</div>
                                 </div>
                                 <div class="text-center p-4 bg-gradient-to-b from-editaliza-green/5 to-transparent rounded-lg">
                                     <div class="w-8 h-8 bg-editaliza-green rounded-full mx-auto mb-3 flex items-center justify-center">
-                                        <span class="text-white text-sm font-bold">=</span>
+                                        <span class="text-white text-sm font-bold">🔄</span>
                                     </div>
-                                    <div class="font-semibold text-gray-800">Revises</div>
-                                    <div class="text-xs text-gray-600">Fixao inteligente</div>
+                                    <div class="font-semibold text-gray-800">Revisões</div>
+                                    <div class="text-xs text-gray-600">Fixação inteligente</div>
                                 </div>
                                 <div class="text-center p-4 bg-gradient-to-b from-gray-500/5 to-transparent rounded-lg">
                                     <div class="w-8 h-8 bg-gray-500 rounded-full mx-auto mb-3 flex items-center justify-center">
-                                        <span class="text-white text-sm font-bold">=</span>
+                                        <span class="text-white text-sm font-bold">📝</span>
                                     </div>
-                                    <div class="font-semibold text-gray-800">Questes</div>
-                                    <div class="text-xs text-gray-600">Prtica direcionada</div>
+                                    <div class="font-semibold text-gray-800">Questões</div>
+                                    <div class="text-xs text-gray-600">Prática direcionada</div>
                                 </div>
                             </div>
                         </div>
@@ -492,22 +510,22 @@
                         <div class="md:ml-16 content-card p-8 w-full feature-glow">
                             <div class="flex items-center mb-6">
                                 <div class="w-12 h-12 bg-gradient-to-br from-editaliza-green to-editaliza-blue rounded-xl flex items-center justify-center text-white font-bold text-lg mr-4 md:hidden">4</div>
-                                <h3 class="text-2xl font-bold text-gray-900">Adaptao Contnua</h3>
+                                <h3 class="text-2xl font-bold text-gray-900">Adaptação Contínua</h3>
                             </div>
                             <p class="text-gray-600 leading-relaxed mb-6">
                                 O sistema aprende continuamente com seu desempenho, <strong class="text-editaliza-blue">ajustando automaticamente</strong> 
-                                prioridades, identificando pontos fracos e otimizando sua jornada rumo  aprovao.
+                                prioridades, identificando pontos fracos e otimizando sua jornada rumo à aprovação.
                             </p>
                             <div class="bg-gradient-to-r from-editaliza-green/10 via-transparent to-editaliza-blue/10 p-6 rounded-2xl">
                                 <div class="flex items-center justify-between mb-4">
-                                    <span class="font-semibold text-gray-800">Inteligncia Adaptativa</span>
+                                    <span class="font-semibold text-gray-800">Inteligência Adaptativa</span>
                                     <div class="flex space-x-2">
                                         <div class="w-3 h-3 bg-editaliza-green rounded-full animate-pulse"></div>
                                         <div class="w-3 h-3 bg-editaliza-blue rounded-full animate-pulse"></div>
                                     </div>
                                 </div>
                                 <div class="text-sm text-gray-600">
-                                    Aprendizado de mquina aplicado ao seu sucesso em tempo real
+                                    Aprendizado de máquina aplicado ao seu sucesso em tempo real
                                 </div>
                             </div>
                         </div>
@@ -521,9 +539,9 @@
     <section class="py-20 bg-gradient-to-b from-white to-slate-50">
         <div class="container mx-auto px-6 max-w-6xl">
             <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Nossos Diferenciais nicos</h2>
+                <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Nossos Diferenciais Únicos</h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Recursos exclusivos que voc no encontra em lugar nenhum, desenvolvidos especificamente para concurseiros.
+                    Recursos exclusivos que você não encontra em lugar nenhum, desenvolvidos especificamente para concurseiros.
                 </p>
             </div>
             
@@ -537,49 +555,49 @@
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-4">Modo Reta Final</h3>
                     <p class="text-gray-600 leading-relaxed mb-4">
-                        Automaticamente detecta quando voc est prximo da prova e <strong class="text-red-500">prioriza apenas o essencial</strong>, 
-                        maximizando pontos com foco laser nas matrias de maior peso.
+                        Automaticamente detecta quando você está próximo da prova e <strong class="text-red-500">prioriza apenas o essencial</strong>, 
+                        maximizando pontos com foco laser nas matérias de maior peso.
                     </p>
                     <div class="inline-block bg-red-50 text-red-600 px-3 py-1 rounded-full text-sm font-semibold">
-                        = Ultra Focado
+                        🚨 Ultra Focado
                     </div>
                 </div>
                 
-                <!-- Gamificao Inteligente -->
+                <!-- Gamificação Inteligente -->
                 <div class="content-card p-8 text-center feature-glow group hover:scale-105 transition-all duration-300">
                     <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:animate-bounce-slow">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Gamificao Avanada</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Gamificação Avançada</h3>
                     <p class="text-gray-600 leading-relaxed mb-4">
                         Sistema de <strong class="text-purple-500">conquistas e rankings</strong> baseado em League of Legends, 
-                        transformando estudos em uma jornada pica de evoluo pessoal.
+                        transformando estudos em uma jornada épica de evolução pessoal.
                     </p>
                     <div class="inline-block bg-purple-50 text-purple-600 px-3 py-1 rounded-full text-sm font-semibold">
-                        < Motivao Mxima
+                        🏆 Motivação Máxima
                     </div>
                 </div>
                 
-                <!-- Anlise de Performance -->
+                <!-- Análise de Performance -->
                 <div class="content-card p-8 text-center feature-glow group hover:scale-105 transition-all duration-300">
                     <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:animate-bounce-slow">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Analytics Avanado</h3>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Analytics Avançado</h3>
                     <p class="text-gray-600 leading-relaxed mb-4">
-                        Dashboard completo com <strong class="text-blue-500">mtricas detalhadas</strong> do seu progresso, 
-                        identificao de pontos fracos e projees de performance na prova.
+                        Dashboard completo com <strong class="text-blue-500">métricas detalhadas</strong> do seu progresso, 
+                        identificação de pontos fracos e projeções de performance na prova.
                     </p>
                     <div class="inline-block bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-sm font-semibold">
-                        = Data-Driven
+                        📊 Data-Driven
                     </div>
                 </div>
                 
-                <!-- Backup Automtico -->
+                <!-- Backup Automático -->
                 <div class="content-card p-8 text-center feature-glow group hover:scale-105 transition-all duration-300">
                     <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:animate-bounce-slow">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -588,11 +606,11 @@
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-4">Backup Inteligente</h3>
                     <p class="text-gray-600 leading-relaxed mb-4">
-                        Todos os seus dados so <strong class="text-green-500">automaticamente protegidos</strong> 
-                        com backups dirios. Estude com tranquilidade total, nunca perca seu progresso.
+                        Todos os seus dados são <strong class="text-green-500">automaticamente protegidos</strong> 
+                        com backups diários. Estude com tranquilidade total, nunca perca seu progresso.
                     </p>
                     <div class="inline-block bg-green-50 text-green-600 px-3 py-1 rounded-full text-sm font-semibold">
-                        = Segurana Total
+                        🔒 Segurança Total
                     </div>
                 </div>
                 
@@ -605,11 +623,11 @@
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900 mb-4">Suporte Premium</h3>
                     <p class="text-gray-600 leading-relaxed mb-4">
-                        Nossa equipe de especialistas em concursos est sempre disponvel para <strong class="text-orange-500">otimizar sua estratgia</strong> 
-                        e resolver qualquer dvida sobre metodologia.
+                        Nossa equipe de especialistas em concursos está sempre disponível para <strong class="text-orange-500">otimizar sua estratégia</strong> 
+                        e resolver qualquer dúvida sobre metodologia.
                     </p>
                     <div class="inline-block bg-orange-50 text-orange-600 px-3 py-1 rounded-full text-sm font-semibold">
-                        < Especializada
+                        🎯 Especializada
                     </div>
                 </div>
                 
@@ -623,10 +641,10 @@
                     <h3 class="text-2xl font-bold text-gray-900 mb-4">Multi-Plataforma</h3>
                     <p class="text-gray-600 leading-relaxed mb-4">
                         Acesse de qualquer lugar: <strong class="text-indigo-500">smartphone, tablet ou desktop</strong>. 
-                        Sincronizao automtica mantm tudo sempre atualizado e acessvel.
+                        Sincronização automática mantém tudo sempre atualizado e acessível.
                     </p>
                     <div class="inline-block bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-sm font-semibold">
-                        = Sempre Disponvel
+                        📱 Sempre Disponível
                     </div>
                 </div>
             </div>
@@ -639,7 +657,7 @@
             <div class="text-center mb-16">
                 <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Resultados Que Falam Por Si</h2>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    No so apenas nmeros. So <strong class="text-editaliza-blue">vidas transformadas</strong>, sonhos realizados e famlias que conquistaram estabilidade.
+                    Não são apenas números. São <strong class="text-editaliza-blue">vidas transformadas</strong>, sonhos realizados e famílias que conquistaram estabilidade.
                 </p>
             </div>
             
@@ -650,8 +668,8 @@
                             <span class="text-3xl font-bold text-white">95%</span>
                         </div>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Taxa de Aprovao</h3>
-                    <p class="text-gray-600">Usurios ativos que seguem nossa metodologia</p>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Taxa de Aprovação</h3>
+                    <p class="text-gray-600">Usuários ativos que seguem nossa metodologia</p>
                 </div>
                 
                 <div class="text-center">
@@ -659,15 +677,15 @@
                         <span class="text-3xl font-bold text-white">60%</span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-2">Menos Tempo</h3>
-                    <p class="text-gray-600">Reduo no tempo mdio at aprovao</p>
+                    <p class="text-gray-600">Redução no tempo médio até aprovação</p>
                 </div>
                 
                 <div class="text-center">
                     <div class="w-24 h-24 bg-gradient-to-br from-editaliza-blue to-editaliza-green rounded-full mx-auto mb-6 flex items-center justify-center feature-glow">
                         <span class="text-3xl font-bold text-white">3x</span>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Mais Reteno</h3>
-                    <p class="text-gray-600">Comparado a mtodos tradicionais</p>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Mais Retenção</h3>
+                    <p class="text-gray-600">Comparado a métodos tradicionais</p>
                 </div>
                 
                 <div class="text-center">
@@ -675,7 +693,7 @@
                         <span class="text-3xl font-bold text-white">24/7</span>
                     </div>
                     <h3 class="text-xl font-bold text-gray-900 mb-2">Disponibilidade</h3>
-                    <p class="text-gray-600">Acesso total  plataforma</p>
+                    <p class="text-gray-600">Acesso total à plataforma</p>
                 </div>
             </div>
             
@@ -691,8 +709,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <strong class="text-gray-900">Fundamentao Cientfica:</strong>
-                                <p class="text-gray-600">Baseada em dcadas de pesquisa em neurocincia e psicologia cognitiva.</p>
+                                <strong class="text-gray-900">Fundamentação Científica:</strong>
+                                <p class="text-gray-600">Baseada em décadas de pesquisa em neurociência e psicologia cognitiva.</p>
                             </div>
                         </div>
                         <div class="flex items-start">
@@ -702,8 +720,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <strong class="text-gray-900">Personalizao Total:</strong>
-                                <p class="text-gray-600">Cada usurio tem um plano nico, otimizado para seu perfil especfico.</p>
+                                <strong class="text-gray-900">Personalização Total:</strong>
+                                <p class="text-gray-600">Cada usuário tem um plano único, otimizado para seu perfil específico.</p>
                             </div>
                         </div>
                         <div class="flex items-start">
@@ -713,7 +731,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <strong class="text-gray-900">Adaptao Inteligente:</strong>
+                                <strong class="text-gray-900">Adaptação Inteligente:</strong>
                                 <p class="text-gray-600">Sistema aprende com seu desempenho e ajusta automaticamente.</p>
                             </div>
                         </div>
@@ -724,8 +742,8 @@
                                 </svg>
                             </div>
                             <div>
-                                <strong class="text-gray-900">Suporte Contnuo:</strong>
-                                <p class="text-gray-600">Equipe especializada disponvel para otimizar sua jornada.</p>
+                                <strong class="text-gray-900">Suporte Contínuo:</strong>
+                                <p class="text-gray-600">Equipe especializada disponível para otimizar sua jornada.</p>
                             </div>
                         </div>
                     </div>
@@ -734,18 +752,18 @@
                 <div class="content-card p-8 feature-glow">
                     <div class="text-center mb-6">
                         <div class="inline-block bg-gradient-to-r from-editaliza-blue to-editaliza-green text-white px-4 py-2 rounded-full text-sm font-semibold mb-4">
-                            < GARANTIA EDITALIZA
+                            🎯 GARANTIA EDITALIZA
                         </div>
                         <h4 class="text-2xl font-bold text-gray-900 mb-4">Metodologia Comprovada</h4>
                     </div>
                     
                     <blockquote class="text-lg text-gray-600 italic text-center leading-relaxed mb-6">
-                        "Em 8 meses usando o Editaliza, consegui minha aprovao no TRT. A metodologia personalizada me deu exatamente o que eu precisava: foco, organizao e confiana."
+                        "Em 8 meses usando o Editaliza, consegui minha aprovação no TRT. A metodologia personalizada me deu exatamente o que eu precisava: foco, organização e confiança."
                     </blockquote>
                     
                     <div class="text-center">
                         <div class="font-semibold text-gray-900">Ana Carolina Silva</div>
-                        <div class="text-sm text-gray-500">Analista Judicirio - TRT 15 Regio</div>
+                        <div class="text-sm text-gray-500">Analista Judiciário - TRT 15ª Região</div>
                         <div class="flex justify-center mt-3" id="rating-stars">
                             <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
@@ -779,17 +797,17 @@
         
         <div class="container mx-auto px-6 text-center relative z-10 max-w-4xl">
             <h2 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                Sua Aprovao Comea <span class="text-editaliza-green">Agora</span>
+                Sua Aprovação Começa <span class="text-editaliza-green">Agora</span>
             </h2>
             
             <p class="text-xl md:text-2xl text-white/90 mb-12 leading-relaxed">
-                Pare de estudar por tentativa e erro. Tenha acesso  metodologia que j aprovou milhares de concurseiros. 
-                <strong class="text-editaliza-green">Sua vaga est esperando</strong>.
+                Pare de estudar por tentativa e erro. Tenha acesso à metodologia que já aprovou milhares de concurseiros. 
+                <strong class="text-editaliza-green">Sua vaga está esperando</strong>.
             </p>
             
             <div class="flex flex-col sm:flex-row gap-6 justify-center mb-12">
                 <a href="register.html" class="bg-white text-editaliza-blue hover:bg-gray-100 px-10 py-5 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-xl">
-                    Comear Minha Jornada
+                    Começar Minha Jornada
                 </a>
                 <a href="faq.html" class="border-2 border-white text-white hover:bg-white hover:text-editaliza-blue px-10 py-5 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105">
                     Saiba Mais
@@ -839,7 +857,7 @@
                     }
 
                 } else {
-                    console.error(`L Container ${containerId} not found`);
+                    console.error(`❌ Container ${containerId} not found`);
                 }
             }
             
@@ -863,7 +881,7 @@
                     }
 
                 } else {
-                    console.error(`L Container ${containerId} not found`);
+                    console.error(`❌ Container ${containerId} not found`);
                 }
             }
             
@@ -879,7 +897,7 @@
                     generateStars('rating-stars', 5);
 
                 } catch (error) {
-                    console.error('L Error initializing dynamic elements:', error);
+                    console.error('❌ Error initializing dynamic elements:', error);
                 }
                 
                 // Ensure all content cards are visible
@@ -943,8 +961,8 @@
         });
     </script>
     
-    <!-- Script do rodap modular -->
+    <!-- Script do rodapé modular -->
     <script src="js/footer.js"></script>
-    <!-- O rodap ser inserido automaticamente aqui pelo footer.js -->
+    <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
 </body>
 </html>

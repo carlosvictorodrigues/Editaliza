@@ -610,6 +610,74 @@ class StatisticsRepository extends BaseRepository {
             generated_at: new Date().toISOString()
         };
     }
+
+    /**
+     * Get daily progress for questions
+     */
+    async getDailyProgress(planId, date) {
+        const query = `
+            SELECT 
+                COALESCE(SUM(questions_solved), 0) as total
+            FROM study_sessions
+            WHERE study_plan_id = $1 
+            AND session_date = $2::date
+        `;
+        const result = await this.findOne(query, [planId, date]);
+        return result ? result.total : 0;
+    }
+
+    /**
+     * Get weekly progress for questions
+     */
+    async getWeeklyProgress(planId, startDate, endDate) {
+        const query = `
+            SELECT 
+                COALESCE(SUM(questions_solved), 0) as total
+            FROM study_sessions
+            WHERE study_plan_id = $1 
+            AND session_date >= $2::date
+            AND session_date <= $3::date
+        `;
+        const result = await this.findOne(query, [planId, startDate, endDate]);
+        return result ? result.total : 0;
+    }
+
+    /**
+     * Get subject progress details
+     */
+    async getSubjectProgressDetails(planId) {
+        const query = `
+            SELECT 
+                s.id,
+                s.subject_name,
+                s.weight,
+                COUNT(DISTINCT t.id) as total_topics,
+                COUNT(DISTINCT CASE WHEN ss.status IN ('Concluído', 'Concluída', 'completed') THEN t.id END) as completed_topics
+            FROM subjects s
+            LEFT JOIN topics t ON s.id = t.subject_id
+            LEFT JOIN study_sessions ss ON t.id = ss.topic_id AND ss.study_plan_id = $1
+            WHERE s.study_plan_id = $1
+            GROUP BY s.id, s.subject_name, s.weight
+            ORDER BY s.weight DESC, s.subject_name
+        `;
+        return this.findAll(query, [planId]);
+    }
+
+    /**
+     * Conta tópicos concluídos de um plano
+     */
+    async getCompletedTopicsCount(planId, userId) {
+        const query = `
+            SELECT COUNT(DISTINCT topic_id) as count
+            FROM study_sessions
+            WHERE study_plan_id = $1
+            AND user_id = $2
+            AND status IN ('Concluído', 'Concluída', 'Concluida', 'completed')
+            AND topic_id IS NOT NULL
+        `;
+        const result = await this.findOne(query, [planId, userId]);
+        return result ? parseInt(result.count) : 0;
+    }
 }
 
 module.exports = StatisticsRepository;

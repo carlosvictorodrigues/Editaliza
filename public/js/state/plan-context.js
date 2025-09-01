@@ -1,3 +1,4 @@
+/* global app */
 /**
  * @file js/state/plan-context.js
  * @description Pipeline determinístico para gestão de contexto de planos

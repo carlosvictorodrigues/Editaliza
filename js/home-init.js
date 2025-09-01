@@ -342,7 +342,7 @@ class HomeInitializer {
             const stats = await app.apiFetch(`/plans/${planId}/statistics`);
             
             // Atualizar elementos de estatística
-            this._updateStatsElement('totalStudyDaysText', stats.totalStudyDays?.toString() || '0');
+            this._updateStatsElement('totalStudyDaysText', stats.totalDays?.toString() || '0');
             this._updateStatsElement('currentStreakText', stats.currentStreak?.toString() || '0');
             
             // Total de horas formatado
@@ -384,7 +384,9 @@ class HomeInitializer {
         const completed = todaySessions.filter(session => 
             session.completed_at || 
             session.status === 'Concluído' || 
-            (session.study_time && session.study_time > 0)
+            session.status === 'completed' || 
+            (session.study_time && session.study_time > 0) ||
+            (session.time_studied_seconds && session.time_studied_seconds > 0)
         ).length;
         
         const progressElement = document.getElementById('todayProgressText');

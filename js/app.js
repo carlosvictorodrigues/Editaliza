@@ -766,7 +766,7 @@ const app = {
             if (window.todaySessionsData && Array.isArray(window.todaySessionsData)) {
                 const idx = window.todaySessionsData.findIndex(s => String(s.id) === String(sessionId));
                 if (idx !== -1) {
-                    window.todaySessionsData[idx].status = 'completed';
+                    window.todaySessionsData[idx].status = 'Concluído'; // Reverted to 'Concluído'
                     window.todaySessionsData[idx].completed_at = new Date().toISOString();
                 }
             }

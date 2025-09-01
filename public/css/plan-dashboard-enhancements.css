@@ -1,0 +1,377 @@
+/**
+ * @file css/plan-dashboard-enhancements.css
+ * @description Refinamentos visuais avançados para o dashboard de planos
+ * @version 2.0 - Visual Enhancements & UX Improvements
+ */
+
+/* ===============================================
+ * MICRO-INTERACTIONS GLOBAIS REFINADAS
+ * =============================================== */
+
+/* Hover states melhorados */
+.stats-card:hover {
+    transform: translateY(-6px) scale(1.03) rotate(-0.5deg) !important;
+}
+
+.timeline-card:hover {
+    transform: translateY(-4px) scale(1.01) !important;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.15) !important;
+}
+
+/* Button hover states */
+button:not(.loading):hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* ===============================================
+ * ACCESSIBILITY ENHANCEMENTS
+ * =============================================== */
+
+/* Focus states melhorados */
+*:focus-visible {
+    outline: 3px solid rgba(5,40,242,0.3);
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
+/* Selection highlight */
+::selection {
+    background: rgba(5,40,242,0.2);
+    color: inherit;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.05);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(5,40,242,0.3);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(5,40,242,0.5);
+}
+
+/* ===============================================
+ * ADVANCED VISUAL EFFECTS
+ * =============================================== */
+
+/* Particle effects para gamification hero */
+.gamification-hero .particle-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0.6;
+}
+
+.gamification-hero .particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 50%;
+    animation: particle-float 12s linear infinite;
+}
+
+.gamification-hero .particle:nth-child(2n) {
+    animation-delay: -3s;
+    width: 2px;
+    height: 2px;
+}
+
+.gamification-hero .particle:nth-child(3n) {
+    animation-delay: -6s;
+    background: rgba(255,255,255,0.6);
+}
+
+@keyframes particle-float {
+    0% {
+        transform: translateY(100%) translateX(-10px);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-20%) translateX(50px);
+        opacity: 0;
+    }
+}
+
+/* ===============================================
+ * ENHANCED LOADING STATES
+ * =============================================== */
+
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-skeleton 1.5s infinite;
+    border-radius: 8px;
+}
+
+@keyframes loading-skeleton {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Pulse effect para elementos importantes */
+.highlight-attention {
+    animation: attention-pulse 2s infinite ease-in-out;
+}
+
+@keyframes attention-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(5,40,242,0.4);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(5,40,242,0);
+        transform: scale(1.01);
+    }
+}
+
+/* ===============================================
+ * TYPOGRAPHY ENHANCEMENTS
+ * =============================================== */
+
+/* Improved number formatting */
+.metric-number {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    letter-spacing: -0.02em;
+}
+
+/* Enhanced text shadows for depth */
+.text-depth {
+    text-shadow: 
+        0 1px 0 rgba(255,255,255,0.4),
+        0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* ===============================================
+ * RESPONSIVE ENHANCEMENTS
+ * =============================================== */
+
+/* Touch targets optimization */
+@media (hover: none) and (pointer: coarse) {
+    .achievement-badge,
+    .flame-container,
+    .stats-card {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* Increase padding for better touch experience */
+    .stats-card {
+        padding: 1.5rem;
+    }
+    
+    /* Remove hover effects on touch devices */
+    .stats-card:hover,
+    .timeline-card:hover,
+    .achievement-badge:hover {
+        transform: none;
+    }
+}
+
+/* ===============================================
+ * MOTION PREFERENCES
+ * =============================================== */
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .gamification-hero::before,
+    .gamification-hero::after {
+        animation: none !important;
+    }
+}
+
+/* ===============================================
+ * HIGH CONTRAST SUPPORT
+ * =============================================== */
+
+@media (prefers-contrast: high) {
+    .stats-card,
+    .performance-section,
+    .schedule-section,
+    .progress-section,
+    .goals-section,
+    .radar-section {
+        border: 2px solid currentColor !important;
+        background: white !important;
+    }
+    
+    .gamification-hero {
+        border: 3px solid white !important;
+    }
+    
+    /* Ensure text contrast */
+    .hero-title,
+    .streak-number,
+    .badge-title {
+        color: white !important;
+        text-shadow: 2px 2px 0 black !important;
+    }
+}
+
+/* ===============================================
+ * SKIP TO CONTENT ACCESSIBILITY
+ * =============================================== */
+
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: var(--primary);
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    z-index: 1000;
+    transition: top 0.3s;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.skip-link:focus {
+    top: 6px;
+}
+
+/* ===============================================
+ * PRINT STYLES
+ * =============================================== */
+
+@media print {
+    .gamification-hero,
+    .stats-card,
+    .performance-section,
+    .schedule-section,
+    .progress-section {
+        background: white !important;
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        page-break-inside: avoid;
+    }
+    
+    /* Hide decorative elements */
+    .particle-container,
+    .flame-container,
+    .achievement-badge::before,
+    .stats-card::after {
+        display: none !important;
+    }
+    
+    /* Ensure text is readable */
+    * {
+        color: black !important;
+        text-shadow: none !important;
+    }
+    
+    /* Optimize spacing for print */
+    .dashboard-container {
+        max-width: none !important;
+        padding: 0 !important;
+    }
+    
+    .gamification-hero,
+    .performance-section,
+    .schedule-section,
+    .progress-section {
+        margin-bottom: 1rem !important;
+        padding: 1rem !important;
+    }
+}
+
+/* ===============================================
+ * DARK MODE PREPARATION
+ * =============================================== */
+
+/* Variables will be updated when dark mode is implemented */
+@media (prefers-color-scheme: dark) {
+    /* Dark mode styles will be added in future version */
+    /* Currently maintaining light mode only as per project requirements */
+}
+
+/* ===============================================
+ * PERFORMANCE OPTIMIZATIONS
+ * =============================================== */
+
+/* GPU acceleration for smooth animations */
+.stats-card,
+.achievement-badge,
+.flame-container,
+.gamification-hero {
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+/* Contain layout shifts */
+.loading-state,
+.loading-gamification {
+    contain: layout style paint;
+}
+
+/* Optimize repaints */
+.progress-bar,
+.xp-progress-fill {
+    contain: layout;
+    will-change: width;
+}
+
+/* ===============================================
+ * BROWSER SPECIFIC FIXES
+ * =============================================== */
+
+/* Safari specific fixes */
+@supports (-webkit-appearance: none) {
+    .stats-card,
+    .gamification-hero {
+        -webkit-backdrop-filter: blur(20px);
+    }
+}
+
+/* Firefox specific fixes */
+@-moz-document url-prefix() {
+    .stats-card::after,
+    .achievement-badge::before {
+        /* Fallback for Firefox backdrop-filter support */
+        opacity: 0.8;
+    }
+}
+
+/* Edge specific fixes */
+@supports (-ms-ime-align: auto) {
+    .progress-bar,
+    .xp-progress-fill {
+        /* Ensure smooth progress animations in Edge */
+        transition: width 0.8s ease-out;
+    }
+}

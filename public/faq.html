@@ -13,17 +13,30 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg?v=4">
     <meta name="theme-color" content="#0528f2">
 
-    <link href="css/tailwind.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="css/design-tokens.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/footer.css" rel="stylesheet">
     <!-- Theme system removed - light mode only -->
     <!-- SCRIPTS CENTRALIZADOS -->
-    <script type="module" src="js/app.js"></script>
+    <script src="js/app.js"></script>
     <script src="js/components.js"></script>
-    <!-- Tailwind config removed - using compiled CSS -->
-    <!-- Custom colors now available through compiled tailwind.css -->
+    <!-- Config do Tailwind para reconhecer as cores customizadas -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'editaliza-blue': '#0528f2',
+                        'editaliza-green': '#1ad937',
+                        'editaliza-black': '#0d0d0d',
+                        'editaliza-gray': '#969696',
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         .accordion-content {
             max-height: 0;
@@ -51,19 +64,19 @@
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800">
-    <!-- Container de Toast para Notificaes -->
+    <!-- Container de Toast para Notificações -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 space-y-3"></div>
 
-    <!-- NAVEGAO PRINCIPAL (GERADA PELO JS) -->
+    <!-- NAVEGAÇÃO PRINCIPAL (GERADA PELO JS) -->
     <div id="main-nav-container"></div>
 
     <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl">
         <header class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-editaliza-blue mb-4">= Central de Ajuda Renovada</h1>
-            <p class="text-lg text-editaliza-gray">Tudo que voc precisa saber para dominar a plataforma e ser aprovado</p>
+            <h1 class="text-4xl font-bold text-editaliza-blue mb-4">🚀 Central de Ajuda Renovada</h1>
+            <p class="text-lg text-editaliza-gray">Tudo que você precisa saber para dominar a plataforma e ser aprovado</p>
             <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-8 rounded">
-                <p class="font-semibold"> FAQ Totalmente Reformulado!</p>
-                <p>Agora com 8 categorias, 40+ perguntas prticas e respostas detalhadas com exemplos reais.</p>
+                <p class="font-semibold">✅ FAQ Totalmente Reformulado!</p>
+                <p>Agora com 8 categorias, 40+ perguntas práticas e respostas detalhadas com exemplos reais.</p>
             </div>
         </header>
 
@@ -72,81 +85,81 @@
             <!-- Categoria 1: Sobre a Plataforma e Metodologia -->
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                    <span class="text-2xl mr-3"><</span>Sobre a Plataforma e Metodologia
+                    <span class="text-2xl mr-3">🎯</span>Sobre a Plataforma e Metodologia
                 </h2>
                 <div class="space-y-4">
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">O que torna o Editaliza diferente de outros mtodos de estudo?</h3>
+                            <h3 class="font-semibold text-gray-800">O que torna o Editaliza diferente de outros métodos de estudo?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">O Editaliza combina trs pilares cientficos comprovados: <strong>Reviso Espaada</strong>, <strong>Priorizao Inteligente</strong> e <strong>Gamificao Motivacional</strong>. Nosso algoritmo calcula automaticamente quando voc deve revisar cada tpico, baseado na curva do esquecimento de Ebbinghaus.</p>
+                                <p class="mb-4">O Editaliza combina três pilares científicos comprovados: <strong>Revisão Espaçada</strong>, <strong>Priorização Inteligente</strong> e <strong>Gamificação Motivacional</strong>. Nosso algoritmo calcula automaticamente quando você deve revisar cada tópico, baseado na curva do esquecimento de Ebbinghaus.</p>
                                 
                                 <div class="highlight-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">Nossos diferenciais nicos:</p>
+                                    <p class="font-semibold mb-2">Nossos diferenciais únicos:</p>
                                     <ul class="list-disc list-inside space-y-1">
                                         <li>Cronograma que se adapta automaticamente ao seu ritmo</li>
-                                        <li>Sistema de priorizao em 5 nveis para cada disciplina</li>
-                                        <li>Replanejamento automtico quando voc perde dias de estudo</li>
-                                        <li>Mltiplos planos simultneos para diferentes concursos</li>
-                                        <li>Modo "Reta Final" com intensificao progressiva</li>
+                                        <li>Sistema de priorização em 5 níveis para cada disciplina</li>
+                                        <li>Replanejamento automático quando você perde dias de estudo</li>
+                                        <li>Múltiplos planos simultâneos para diferentes concursos</li>
+                                        <li>Modo "Reta Final" com intensificação progressiva</li>
                                     </ul>
                                 </div>
                                 
-                                <p>Enquanto outros mtodos exigem que voc gerencie manualmente suas revises, o Editaliza faz tudo automaticamente, garantindo que voc estude o tpico certo, no momento certo, com a frequncia certa.</p>
+                                <p>Enquanto outros métodos exigem que você gerencie manualmente suas revisões, o Editaliza faz tudo automaticamente, garantindo que você estude o tópico certo, no momento certo, com a frequência certa.</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Como funciona a reviso espaada automtica?</h3>
+                            <h3 class="font-semibold text-gray-800">Como funciona a revisão espaçada automática?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Nosso sistema programa automaticamente at 5 ciclos de reviso para cada tpico estudado, com intervalos crescentes baseados em pesquisas de neurocincia:</p>
+                                <p class="mb-4">Nosso sistema programa automaticamente até 5 ciclos de revisão para cada tópico estudado, com intervalos crescentes baseados em pesquisas de neurociência:</p>
                                 
                                 <table class="w-full border-collapse mb-4">
                                     <thead>
                                         <tr class="bg-blue-50">
-                                            <th class="border p-2 text-left">Reviso</th>
+                                            <th class="border p-2 text-left">Revisão</th>
                                             <th class="border p-2 text-left">Quando ocorre</th>
                                             <th class="border p-2 text-left">Objetivo</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td class="border p-2">1 Reviso</td>
-                                            <td class="border p-2">1-2 dias aps estudo</td>
-                                            <td class="border p-2">Consolidao inicial</td>
+                                            <td class="border p-2">1ª Revisão</td>
+                                            <td class="border p-2">1-2 dias após estudo</td>
+                                            <td class="border p-2">Consolidação inicial</td>
                                         </tr>
                                         <tr class="bg-gray-50">
-                                            <td class="border p-2">2 Reviso</td>
-                                            <td class="border p-2">7 dias aps</td>
-                                            <td class="border p-2">Reforo de curto prazo</td>
+                                            <td class="border p-2">2ª Revisão</td>
+                                            <td class="border p-2">7 dias após</td>
+                                            <td class="border p-2">Reforço de curto prazo</td>
                                         </tr>
                                         <tr>
-                                            <td class="border p-2">3 Reviso</td>
-                                            <td class="border p-2">15 dias aps</td>
-                                            <td class="border p-2">Memria de mdio prazo</td>
+                                            <td class="border p-2">3ª Revisão</td>
+                                            <td class="border p-2">15 dias após</td>
+                                            <td class="border p-2">Memória de médio prazo</td>
                                         </tr>
                                         <tr class="bg-gray-50">
-                                            <td class="border p-2">4 Reviso</td>
-                                            <td class="border p-2">30 dias aps</td>
-                                            <td class="border p-2">Consolidao profunda</td>
+                                            <td class="border p-2">4ª Revisão</td>
+                                            <td class="border p-2">30 dias após</td>
+                                            <td class="border p-2">Consolidação profunda</td>
                                         </tr>
                                         <tr>
-                                            <td class="border p-2">5 Reviso</td>
-                                            <td class="border p-2">60 dias aps</td>
-                                            <td class="border p-2">Memria de longo prazo</td>
+                                            <td class="border p-2">5ª Revisão</td>
+                                            <td class="border p-2">60 dias após</td>
+                                            <td class="border p-2">Memória de longo prazo</td>
                                         </tr>
                                     </tbody>
                                 </table>
                                 
-                                <p>Esses intervalos so ajustados automaticamente com base na proximidade da prova e suas configuraes de prioridade.</p>
+                                <p>Esses intervalos são ajustados automaticamente com base na proximidade da prova e suas configurações de prioridade.</p>
                             </div>
                         </div>
                     </div>
@@ -158,43 +171,43 @@
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Sim! O Editaliza  completamente adaptvel a qualquer concurso, desde municipais at federais. A flexibilidade est no corao do sistema:</p>
+                                <p class="mb-4">Sim! O Editaliza é completamente adaptável a qualquer concurso, desde municipais até federais. A flexibilidade está no coração do sistema:</p>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div class="success-box p-4 rounded-lg">
-                                        <p class="font-semibold mb-2">Concursos de Nvel Mdio</p>
-                                        <p class="text-sm">Configure menos disciplinas, foque em Portugus e Matemtica com prioridade mxima</p>
+                                        <p class="font-semibold mb-2">Concursos de Nível Médio</p>
+                                        <p class="text-sm">Configure menos disciplinas, foque em Português e Matemática com prioridade máxima</p>
                                     </div>
                                     <div class="success-box p-4 rounded-lg">
-                                        <p class="font-semibold mb-2">Concursos Jurdicos</p>
-                                        <p class="text-sm">Adicione todas as disciplinas especficas, use prioridades para focar nas mais pesadas</p>
+                                        <p class="font-semibold mb-2">Concursos Jurídicos</p>
+                                        <p class="text-sm">Adicione todas as disciplinas específicas, use prioridades para focar nas mais pesadas</p>
                                     </div>
                                     <div class="success-box p-4 rounded-lg">
-                                        <p class="font-semibold mb-2">rea Fiscal</p>
-                                        <p class="text-sm">Equilibre exatas e jurdicas usando o sistema de priorizao</p>
+                                        <p class="font-semibold mb-2">Área Fiscal</p>
+                                        <p class="text-sm">Equilibre exatas e jurídicas usando o sistema de priorização</p>
                                     </div>
                                     <div class="success-box p-4 rounded-lg">
-                                        <p class="font-semibold mb-2">Polcias</p>
-                                        <p class="text-sm">Combine disciplinas tericas com preparao para TAF usando dias especficos</p>
+                                        <p class="font-semibold mb-2">Polícias</p>
+                                        <p class="text-sm">Combine disciplinas teóricas com preparação para TAF usando dias específicos</p>
                                     </div>
                                 </div>
                                 
-                                <p>Voc tem controle total sobre disciplinas, tpicos, horas de estudo e prioridades. O sistema se adapta ao SEU concurso.</p>
+                                <p>Você tem controle total sobre disciplinas, tópicos, horas de estudo e prioridades. O sistema se adapta ao SEU concurso.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Categoria 2: Primeiros Passos e Configurao -->
+            <!-- Categoria 2: Primeiros Passos e Configuração -->
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                    <span class="text-2xl mr-3">=</span>Primeiros Passos e Configurao
+                    <span class="text-2xl mr-3">🚀</span>Primeiros Passos e Configuração
                 </h2>
                 <div class="space-y-4">
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Qual o passo a passo completo para comear?</h3>
+                            <h3 class="font-semibold text-gray-800">Qual o passo a passo completo para começar?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
@@ -206,7 +219,7 @@
                                         <span class="bg-editaliza-blue text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">1</span>
                                         <div>
                                             <p class="font-semibold">Criar o Plano</p>
-                                            <p class="text-sm text-gray-600">Acesse "Gerenciar Planos" e clique em "Novo Plano". D um nome (ex: "TRF 2024") e defina a data da prova.</p>
+                                            <p class="text-sm text-gray-600">Acesse "Gerenciar Planos" e clique em "Novo Plano". Dê um nome (ex: "TRF 2024") e defina a data da prova.</p>
                                         </div>
                                     </div>
                                     
@@ -221,8 +234,8 @@
                                     <div class="flex items-start">
                                         <span class="bg-editaliza-blue text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">3</span>
                                         <div>
-                                            <p class="font-semibold">Inserir Tpicos</p>
-                                            <p class="text-sm text-gray-600">Para cada disciplina, adicione os tpicos do edital. Seja especfico mas no exagere (ex: "Concordncia Nominal" em vez de subdividir em 10 regras).</p>
+                                            <p class="font-semibold">Inserir Tópicos</p>
+                                            <p class="text-sm text-gray-600">Para cada disciplina, adicione os tópicos do edital. Seja específico mas não exagere (ex: "Concordância Nominal" em vez de subdividir em 10 regras).</p>
                                         </div>
                                     </div>
                                     
@@ -230,7 +243,7 @@
                                         <span class="bg-editaliza-blue text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">4</span>
                                         <div>
                                             <p class="font-semibold">Definir Disponibilidade</p>
-                                            <p class="text-sm text-gray-600">Configure quantas horas pode estudar em cada dia da semana. Seja realista!  melhor 2h garantidas que 5h improvveis.</p>
+                                            <p class="text-sm text-gray-600">Configure quantas horas pode estudar em cada dia da semana. Seja realista! É melhor 2h garantidas que 5h improváveis.</p>
                                         </div>
                                     </div>
                                     
@@ -238,13 +251,13 @@
                                         <span class="bg-editaliza-blue text-white rounded-full w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">5</span>
                                         <div>
                                             <p class="font-semibold">Gerar Cronograma</p>
-                                            <p class="text-sm text-gray-600">Clique em "Gerar Cronograma". O sistema criar um plano personalizado com todos os tpicos distribudos at a data da prova.</p>
+                                            <p class="text-sm text-gray-600">Clique em "Gerar Cronograma". O sistema criará um plano personalizado com todos os tópicos distribuídos até a data da prova.</p>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div class="warning-box p-4 rounded-lg mt-4">
-                                    <p class="text-sm"><strong>Dica Pro:</strong> Comece com 70% da sua capacidade real de estudo.  melhor aumentar depois do que se frustrar no incio.</p>
+                                    <p class="text-sm"><strong>Dica Pro:</strong> Comece com 70% da sua capacidade real de estudo. É melhor aumentar depois do que se frustrar no início.</p>
                                 </div>
                             </div>
                         </div>
@@ -257,53 +270,53 @@
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">O sistema de prioridades (1-5)  sua ferramenta mais poderosa. Veja como usar estrategicamente:</p>
+                                <p class="mb-4">O sistema de prioridades (1-5) é sua ferramenta mais poderosa. Veja como usar estrategicamente:</p>
                                 
                                 <table class="w-full border-collapse mb-4">
                                     <thead>
                                         <tr class="bg-blue-50">
                                             <th class="border p-2 text-left">Prioridade</th>
-                                            <th class="border p-2 text-left">Frequncia</th>
+                                            <th class="border p-2 text-left">Frequência</th>
                                             <th class="border p-2 text-left">Quando usar</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td class="border p-2"><strong>5 - Mxima</strong></td>
+                                            <td class="border p-2"><strong>5 - Máxima</strong></td>
                                             <td class="border p-2">5x mais que P1</td>
                                             <td class="border p-2">Disciplinas com maior peso ou sua maior dificuldade</td>
                                         </tr>
                                         <tr class="bg-gray-50">
                                             <td class="border p-2"><strong>4 - Alta</strong></td>
                                             <td class="border p-2">4x mais que P1</td>
-                                            <td class="border p-2">Disciplinas importantes com peso mdio-alto</td>
+                                            <td class="border p-2">Disciplinas importantes com peso médio-alto</td>
                                         </tr>
                                         <tr>
-                                            <td class="border p-2"><strong>3 - Mdia</strong></td>
+                                            <td class="border p-2"><strong>3 - Média</strong></td>
                                             <td class="border p-2">3x mais que P1</td>
-                                            <td class="border p-2">Disciplinas regulares ou que voc tem facilidade</td>
+                                            <td class="border p-2">Disciplinas regulares ou que você tem facilidade</td>
                                         </tr>
                                         <tr class="bg-gray-50">
                                             <td class="border p-2"><strong>2 - Baixa</strong></td>
                                             <td class="border p-2">2x mais que P1</td>
-                                            <td class="border p-2">Disciplinas com pouco peso ou que voc domina</td>
+                                            <td class="border p-2">Disciplinas com pouco peso ou que você domina</td>
                                         </tr>
                                         <tr>
-                                            <td class="border p-2"><strong>1 - Mnima</strong></td>
-                                            <td class="border p-2">Frequncia base</td>
-                                            <td class="border p-2">Disciplinas complementares ou de manuteno</td>
+                                            <td class="border p-2"><strong>1 - Mínima</strong></td>
+                                            <td class="border p-2">Frequência base</td>
+                                            <td class="border p-2">Disciplinas complementares ou de manutenção</td>
                                         </tr>
                                     </tbody>
                                 </table>
                                 
                                 <div class="highlight-box p-4 rounded-lg">
-                                    <p class="font-semibold mb-2">Exemplo prtico para Analista TRF:</p>
+                                    <p class="font-semibold mb-2">Exemplo prático para Analista TRF:</p>
                                     <ul class="list-disc list-inside space-y-1 text-sm">
-                                        <li>Direito Administrativo (peso 30%)  Prioridade 5</li>
-                                        <li>Direito Constitucional (peso 25%)  Prioridade 5</li>
-                                        <li>Portugus (peso 20%)  Prioridade 4</li>
-                                        <li>Direito Processual (peso 15%)  Prioridade 3</li>
-                                        <li>Informtica (peso 10%)  Prioridade 2</li>
+                                        <li>Direito Administrativo (peso 30%) → Prioridade 5</li>
+                                        <li>Direito Constitucional (peso 25%) → Prioridade 5</li>
+                                        <li>Português (peso 20%) → Prioridade 4</li>
+                                        <li>Direito Processual (peso 15%) → Prioridade 3</li>
+                                        <li>Informática (peso 10%) → Prioridade 2</li>
                                     </ul>
                                 </div>
                             </div>
@@ -312,29 +325,29 @@
                 </div>
             </div>
 
-            <!-- Categoria 3: Planejamento e Organizao -->
+            <!-- Categoria 3: Planejamento e Organização -->
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                    <span class="text-2xl mr-3">=</span>Planejamento e Organizao
+                    <span class="text-2xl mr-3">📅</span>Planejamento e Organização
                 </h2>
                 <div class="space-y-4">
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Tenho apenas 3-6 meses para estudar.  possvel ser aprovado?</h3>
+                            <h3 class="font-semibold text-gray-800">Tenho apenas 3-6 meses para estudar. É possível ser aprovado?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Sim,  possvel! Mas exige estratgia e foco total. O Editaliza otimiza estudos de curto prazo assim:</p>
+                                <p class="mb-4">Sim, é possível! Mas exige estratégia e foco total. O Editaliza otimiza estudos de curto prazo assim:</p>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div class="highlight-box p-4 rounded-lg">
                                         <p class="font-semibold mb-2">3 Meses (90 dias)</p>
                                         <ul class="list-disc list-inside space-y-1 text-sm">
-                                            <li>Foque apenas no essencial (corte 30% dos tpicos menos relevantes)</li>
-                                            <li>Prioridade mxima (5) em 2-3 disciplinas principais</li>
-                                            <li>Mnimo 4h/dia de estudo lquido</li>
-                                            <li>Ative o Modo Reta Final desde o incio</li>
+                                            <li>Foque apenas no essencial (corte 30% dos tópicos menos relevantes)</li>
+                                            <li>Prioridade máxima (5) em 2-3 disciplinas principais</li>
+                                            <li>Mínimo 4h/dia de estudo líquido</li>
+                                            <li>Ative o Modo Reta Final desde o início</li>
                                         </ul>
                                     </div>
                                     <div class="highlight-box p-4 rounded-lg">
@@ -342,17 +355,17 @@
                                         <ul class="list-disc list-inside space-y-1 text-sm">
                                             <li>Tempo para cobrir 80-90% do edital</li>
                                             <li>Distribua prioridades de forma equilibrada</li>
-                                            <li>3h/dia j traz bons resultados</li>
-                                            <li>Ative Reta Final nos ltimos 30 dias</li>
+                                            <li>3h/dia já traz bons resultados</li>
+                                            <li>Ative Reta Final nos últimos 30 dias</li>
                                         </ul>
                                     </div>
                                 </div>
                                 
                                 <div class="warning-box p-4 rounded-lg">
-                                    <p class="text-sm"><strong>Realidade:</strong> Com 3 meses, voc precisa de base prvia ou dedicao integral. Com 6 meses, mesmo comeando do zero, a aprovao  vivel com disciplina.</p>
+                                    <p class="text-sm"><strong>Realidade:</strong> Com 3 meses, você precisa de base prévia ou dedicação integral. Com 6 meses, mesmo começando do zero, a aprovação é viável com disciplina.</p>
                                 </div>
                                 
-                                <p class="mt-4">O sistema ajustar automaticamente a velocidade de introduo de novos tpicos e reduzir ciclos de reviso para caber no prazo.</p>
+                                <p class="mt-4">O sistema ajustará automaticamente a velocidade de introdução de novos tópicos e reduzirá ciclos de revisão para caber no prazo.</p>
                             </div>
                         </div>
                     </div>
@@ -364,18 +377,18 @@
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">A maioria dos aprovados trabalha! O segredo est na consistncia, no na quantidade. Configure seu plano assim:</p>
+                                <p class="mb-4">A maioria dos aprovados trabalha! O segredo está na consistência, não na quantidade. Configure seu plano assim:</p>
                                 
                                 <div class="success-box p-4 rounded-lg mb-4">
                                     <p class="font-semibold mb-2">Rotina Sugerida para quem trabalha:</p>
                                     <table class="w-full text-sm mt-2">
                                         <tr>
                                             <td class="py-1"><strong>5h30-7h00</strong></td>
-                                            <td class="py-1">1,5h de estudo (manh produtiva)</td>
+                                            <td class="py-1">1,5h de estudo (manhã produtiva)</td>
                                         </tr>
                                         <tr>
                                             <td class="py-1"><strong>12h-13h</strong></td>
-                                            <td class="py-1">30min de reviso (almoo)</td>
+                                            <td class="py-1">30min de revisão (almoço)</td>
                                         </tr>
                                         <tr>
                                             <td class="py-1"><strong>19h-21h</strong></td>
@@ -391,12 +404,12 @@
                                 <p class="mb-4">Configure no Editaliza:</p>
                                 <ul class="list-disc list-inside space-y-2 mb-4">
                                     <li><strong>Segunda a Sexta:</strong> 3-4 horas</li>
-                                    <li><strong>Sbado:</strong> 6-8 horas (compensar a semana)</li>
-                                    <li><strong>Domingo:</strong> 4-6 horas (com descanso  tarde)</li>
+                                    <li><strong>Sábado:</strong> 6-8 horas (compensar a semana)</li>
+                                    <li><strong>Domingo:</strong> 4-6 horas (com descanso à tarde)</li>
                                 </ul>
                                 
                                 <div class="highlight-box p-4 rounded-lg">
-                                    <p class="text-sm"><strong>Dica de Ouro:</strong> Use o recurso "Reforar" para tpicos estudados com sono ou cansao. O sistema reagendar automaticamente uma reviso extra quando voc estiver mais descansado.</p>
+                                    <p class="text-sm"><strong>Dica de Ouro:</strong> Use o recurso "Reforçar" para tópicos estudados com sono ou cansaço. O sistema reagendará automaticamente uma revisão extra quando você estiver mais descansado.</p>
                                 </div>
                             </div>
                         </div>
@@ -404,36 +417,36 @@
 
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Posso estudar para mltiplos concursos simultaneamente?</h3>
+                            <h3 class="font-semibold text-gray-800">Posso estudar para múltiplos concursos simultaneamente?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Sim! O Editaliza foi projetado para isso. Voc pode criar planos ilimitados e alternar entre eles. Estratgias recomendadas:</p>
+                                <p class="mb-4">Sim! O Editaliza foi projetado para isso. Você pode criar planos ilimitados e alternar entre eles. Estratégias recomendadas:</p>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div class="highlight-box p-4 rounded-lg">
                                         <p class="font-semibold mb-2">Concursos Similares (Ex: TRFs)</p>
                                         <ul class="list-disc list-inside space-y-1 text-sm">
                                             <li>Crie um plano "Base Comum"</li>
-                                            <li>Adicione planos especficos para peculiaridades</li>
+                                            <li>Adicione planos específicos para peculiaridades</li>
                                             <li>80% do estudo no plano base</li>
-                                            <li>20% nos especficos</li>
+                                            <li>20% nos específicos</li>
                                         </ul>
                                     </div>
                                     <div class="highlight-box p-4 rounded-lg">
                                         <p class="font-semibold mb-2">Concursos Diferentes</p>
                                         <ul class="list-disc list-inside space-y-1 text-sm">
-                                            <li>Mximo 2-3 concursos muito diferentes</li>
-                                            <li>Alterne dias ou perodos</li>
-                                            <li>Priorize o mais prximo</li>
-                                            <li>Use o seletor rpido no Painel</li>
+                                            <li>Máximo 2-3 concursos muito diferentes</li>
+                                            <li>Alterne dias ou períodos</li>
+                                            <li>Priorize o mais próximo</li>
+                                            <li>Use o seletor rápido no Painel</li>
                                         </ul>
                                     </div>
                                 </div>
                                 
                                 <div class="warning-box p-4 rounded-lg">
-                                    <p class="text-sm"><strong>Cuidado:</strong> Mais de 3 concursos muito diferentes dilui demais o foco. Melhor estratgia: escolha concursos com 60%+ de contedo em comum.</p>
+                                    <p class="text-sm"><strong>Cuidado:</strong> Mais de 3 concursos muito diferentes dilui demais o foco. Melhor estratégia: escolha concursos com 60%+ de conteúdo em comum.</p>
                                 </div>
                             </div>
                         </div>
@@ -441,75 +454,75 @@
                 </div>
             </div>
 
-            <!-- Categoria 4: Uso Dirio e Rotina -->
+            <!-- Categoria 4: Uso Diário e Rotina -->
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                    <span class="text-2xl mr-3"></span>Uso Dirio e Rotina de Estudos
+                    <span class="text-2xl mr-3">✅</span>Uso Diário e Rotina de Estudos
                 </h2>
                 <div class="space-y-4">
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Qual a diferena entre "Concluir", "Reforar" e "Adiar"?</h3>
+                            <h3 class="font-semibold text-gray-800">Qual a diferença entre "Concluir", "Reforçar" e "Adiar"?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Cada ao tem um impacto especfico no seu cronograma:</p>
+                                <p class="mb-4">Cada ação tem um impacto específico no seu cronograma:</p>
                                 
                                 <div class="space-y-3">
                                     <div class="success-box p-4 rounded-lg">
-                                        <p class="font-semibold mb-1"> Concluir</p>
-                                        <p class="text-sm">Voc estudou o tpico satisfatoriamente. O sistema:</p>
+                                        <p class="font-semibold mb-1">✅ Concluir</p>
+                                        <p class="text-sm">Você estudou o tópico satisfatoriamente. O sistema:</p>
                                         <ul class="list-disc list-inside text-sm mt-1">
                                             <li>Marca como completo e adiciona pontos</li>
-                                            <li>Agenda revises automticas (1, 7, 15, 30, 60 dias)</li>
-                                            <li>Libera o prximo tpico da fila</li>
+                                            <li>Agenda revisões automáticas (1, 7, 15, 30, 60 dias)</li>
+                                            <li>Libera o próximo tópico da fila</li>
                                         </ul>
                                     </div>
                                     
                                     <div class="warning-box p-4 rounded-lg">
-                                        <p class="font-semibold mb-1">= Reforar</p>
-                                        <p class="text-sm">Voc estudou mas precisa revisar mais cedo. O sistema:</p>
+                                        <p class="font-semibold mb-1">🔄 Reforçar</p>
+                                        <p class="text-sm">Você estudou mas precisa revisar mais cedo. O sistema:</p>
                                         <ul class="list-disc list-inside text-sm mt-1">
                                             <li>Marca como completo (ganha pontos)</li>
-                                            <li>Adiciona uma sesso extra em 2-3 dias</li>
-                                            <li>Mantm as revises normais programadas</li>
+                                            <li>Adiciona uma sessão extra em 2-3 dias</li>
+                                            <li>Mantém as revisões normais programadas</li>
                                         </ul>
                                     </div>
                                     
                                     <div class="bg-gray-100 p-4 rounded-lg">
-                                        <p class="font-semibold mb-1"> Adiar</p>
-                                        <p class="text-sm">Voc no conseguiu estudar hoje. O sistema:</p>
+                                        <p class="font-semibold mb-1">⏭️ Adiar</p>
+                                        <p class="text-sm">Você não conseguiu estudar hoje. O sistema:</p>
                                         <ul class="list-disc list-inside text-sm mt-1">
-                                            <li>Move a tarefa para o prximo dia disponvel</li>
-                                            <li>No penaliza pontos</li>
-                                            <li>Pode gerar acmulo (use Replanejar se necessrio)</li>
+                                            <li>Move a tarefa para o próximo dia disponível</li>
+                                            <li>Não penaliza pontos</li>
+                                            <li>Pode gerar acúmulo (use Replanejar se necessário)</li>
                                         </ul>
                                     </div>
                                 </div>
                                 
-                                <p class="mt-4 text-sm"><strong>Dica:</strong> Use "Reforar" para tpicos complexos que voc entendeu parcialmente.  melhor que adiar!</p>
+                                <p class="mt-4 text-sm"><strong>Dica:</strong> Use "Reforçar" para tópicos complexos que você entendeu parcialmente. É melhor que adiar!</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Perdi vrios dias de estudo. Como recuperar sem me sobrecarregar?</h3>
+                            <h3 class="font-semibold text-gray-800">Perdi vários dias de estudo. Como recuperar sem me sobrecarregar?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">No entre em pnico! O Editaliza tem ferramentas especficas para isso:</p>
+                                <p class="mb-4">Não entre em pânico! O Editaliza tem ferramentas específicas para isso:</p>
                                 
                                 <div class="highlight-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">=' Replanejamento Automtico</p>
-                                    <p class="text-sm mb-2">No Painel Principal, quando h tarefas atrasadas, aparece o boto "Replanejar Automaticamente". Ele:</p>
+                                    <p class="font-semibold mb-2">🔧 Replanejamento Automático</p>
+                                    <p class="text-sm mb-2">No Painel Principal, quando há tarefas atrasadas, aparece o botão "Replanejar Automaticamente". Ele:</p>
                                     <ul class="list-disc list-inside text-sm space-y-1">
-                                        <li>Redistribui tarefas atrasadas nos prximos dias disponveis</li>
-                                        <li>Respeita sua capacidade diria configurada</li>
-                                        <li>Prioriza tpicos novos sobre revises quando necessrio</li>
-                                        <li>Mantm o equilbrio entre disciplinas</li>
+                                        <li>Redistribui tarefas atrasadas nos próximos dias disponíveis</li>
+                                        <li>Respeita sua capacidade diária configurada</li>
+                                        <li>Prioriza tópicos novos sobre revisões quando necessário</li>
+                                        <li>Mantém o equilíbrio entre disciplinas</li>
                                     </ul>
                                 </div>
                                 
@@ -524,15 +537,15 @@
                                     </div>
                                     <div class="bg-orange-50 p-4 rounded-lg">
                                         <p class="font-semibold text-sm mb-1">Atraso de 2+ semanas</p>
-                                        <p class="text-xs">Considere pular algumas revises menos crticas.</p>
+                                        <p class="text-xs">Considere pular algumas revisões menos críticas.</p>
                                     </div>
                                     <div class="bg-red-50 p-4 rounded-lg">
-                                        <p class="font-semibold text-sm mb-1">Atraso de 1+ ms</p>
+                                        <p class="font-semibold text-sm mb-1">Atraso de 1+ mês</p>
                                         <p class="text-xs">Reavalie data da prova ou foque no essencial.</p>
                                     </div>
                                 </div>
                                 
-                                <p class="text-sm"><strong>Importante:</strong> No tente recuperar tudo de uma vez. O burnout  pior que o atraso!</p>
+                                <p class="text-sm"><strong>Importante:</strong> Não tente recuperar tudo de uma vez. O burnout é pior que o atraso!</p>
                             </div>
                         </div>
                     </div>
@@ -544,20 +557,20 @@
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">O Editaliza fornece mtricas claras no Painel Principal. Monitore estes indicadores:</p>
+                                <p class="mb-4">O Editaliza fornece métricas claras no Painel Principal. Monitore estes indicadores:</p>
                                 
                                 <table class="w-full border-collapse mb-4">
                                     <thead>
                                         <tr class="bg-blue-50">
-                                            <th class="border p-2 text-left">Mtrica</th>
+                                            <th class="border p-2 text-left">Métrica</th>
                                             <th class="border p-2 text-left">Bom Ritmo</th>
-                                            <th class="border p-2 text-left">Ateno</th>
-                                            <th class="border p-2 text-left">Crtico</th>
+                                            <th class="border p-2 text-left">Atenção</th>
+                                            <th class="border p-2 text-left">Crítico</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td class="border p-2">Taxa de Concluso</td>
+                                            <td class="border p-2">Taxa de Conclusão</td>
                                             <td class="border p-2 text-green-600">90%+</td>
                                             <td class="border p-2 text-yellow-600">70-89%</td>
                                             <td class="border p-2 text-red-600">&lt;70%</td>
@@ -569,13 +582,13 @@
                                             <td class="border p-2 text-red-600">-20%+</td>
                                         </tr>
                                         <tr>
-                                            <td class="border p-2">Tpicos/Semana</td>
+                                            <td class="border p-2">Tópicos/Semana</td>
                                             <td class="border p-2 text-green-600">Conforme plano</td>
                                             <td class="border p-2 text-yellow-600">-20%</td>
                                             <td class="border p-2 text-red-600">-30%+</td>
                                         </tr>
                                         <tr class="bg-gray-50">
-                                            <td class="border p-2">Sequncia (streak)</td>
+                                            <td class="border p-2">Sequência (streak)</td>
                                             <td class="border p-2 text-green-600">5+ dias</td>
                                             <td class="border p-2 text-yellow-600">3-4 dias</td>
                                             <td class="border p-2 text-red-600">&lt;3 dias</td>
@@ -586,11 +599,11 @@
                                 <div class="success-box p-4 rounded-lg">
                                     <p class="font-semibold mb-2">Checklist Semanal de Sucesso:</p>
                                     <ul class="list-disc list-inside text-sm space-y-1">
-                                        <li> Completei 85%+ das tarefas programadas</li>
-                                        <li> Fiz todas as revises agendadas</li>
-                                        <li> Usei "Reforar" nos tpicos difceis</li>
-                                        <li> Mantive sequncia de pelo menos 5 dias</li>
-                                        <li> Progresso total acompanha o calendrio</li>
+                                        <li>✅ Completei 85%+ das tarefas programadas</li>
+                                        <li>✅ Fiz todas as revisões agendadas</li>
+                                        <li>✅ Usei "Reforçar" nos tópicos difíceis</li>
+                                        <li>✅ Mantive sequência de pelo menos 5 dias</li>
+                                        <li>✅ Progresso total acompanha o calendário</li>
                                     </ul>
                                 </div>
                             </div>
@@ -599,34 +612,34 @@
                 </div>
             </div>
 
-            <!-- Categoria 5: Recursos Avanados -->
+            <!-- Categoria 5: Recursos Avançados -->
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                    <span class="text-2xl mr-3"><</span>Recursos Avanados e Gamificao
+                    <span class="text-2xl mr-3">🏆</span>Recursos Avançados e Gamificação
                 </h2>
                 <div class="space-y-4">
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Como funciona o sistema de pontos e nveis?</h3>
+                            <h3 class="font-semibold text-gray-800">Como funciona o sistema de pontos e níveis?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">A gamificao mantm voc motivado durante toda a jornada:</p>
+                                <p class="mb-4">A gamificação mantém você motivado durante toda a jornada:</p>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div class="highlight-box p-4 rounded-lg">
                                         <p class="font-semibold mb-2">Sistema de Pontos</p>
                                         <ul class="list-disc list-inside text-sm space-y-1">
-                                            <li><strong>+50 pts:</strong> Completar tpico novo</li>
-                                            <li><strong>+25 pts:</strong> Completar reviso</li>
-                                            <li><strong>+100 pts:</strong> Manter sequncia 7 dias</li>
+                                            <li><strong>+50 pts:</strong> Completar tópico novo</li>
+                                            <li><strong>+25 pts:</strong> Completar revisão</li>
+                                            <li><strong>+100 pts:</strong> Manter sequência 7 dias</li>
                                             <li><strong>+200 pts:</strong> Completar disciplina</li>
-                                            <li><strong>2x bnus:</strong> Modo Reta Final</li>
+                                            <li><strong>2x bônus:</strong> Modo Reta Final</li>
                                         </ul>
                                     </div>
                                     <div class="highlight-box p-4 rounded-lg">
-                                        <p class="font-semibold mb-2">Nveis e Ttulos</p>
+                                        <p class="font-semibold mb-2">Níveis e Títulos</p>
                                         <ul class="list-disc list-inside text-sm space-y-1">
                                             <li><strong>1-10:</strong> Iniciante</li>
                                             <li><strong>11-25:</strong> Estudante</li>
@@ -639,53 +652,53 @@
                                 </div>
                                 
                                 <div class="success-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">< Conquistas Especiais</p>
+                                    <p class="font-semibold mb-2">🏅 Conquistas Especiais</p>
                                     <div class="grid grid-cols-2 gap-2 text-sm">
-                                        <div>=% <strong>Em Chamas:</strong> 30 dias seguidos</div>
-                                        <div>= <strong>Poliglota:</strong> 5+ disciplinas ativas</div>
-                                        <div> <strong>Velocista:</strong> 10 tpicos em um dia</div>
-                                        <div>< <strong>Preciso:</strong> 95% concluso mensal</div>
-                                        <div>< <strong>Maratonista:</strong> 100h de estudo</div>
-                                        <div>=Q <strong>Imparvel:</strong> 60 dias seguidos</div>
+                                        <div>🔥 <strong>Em Chamas:</strong> 30 dias seguidos</div>
+                                        <div>📚 <strong>Poliglota:</strong> 5+ disciplinas ativas</div>
+                                        <div>⚡ <strong>Velocista:</strong> 10 tópicos em um dia</div>
+                                        <div>🎯 <strong>Precisão:</strong> 95% conclusão mensal</div>
+                                        <div>🌟 <strong>Maratonista:</strong> 100h de estudo</div>
+                                        <div>👑 <strong>Imparável:</strong> 60 dias seguidos</div>
                                     </div>
                                 </div>
                                 
-                                <p class="text-sm">Os pontos e nveis so por plano. Cada concurso  uma jornada nica!</p>
+                                <p class="text-sm">Os pontos e níveis são por plano. Cada concurso é uma jornada única!</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">O que  e quando ativar o "Modo Reta Final"?</h3>
+                            <h3 class="font-semibold text-gray-800">O que é e quando ativar o "Modo Reta Final"?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">O Modo Reta Final  um intensificador para as semanas finais antes da prova:</p>
+                                <p class="mb-4">O Modo Reta Final é um intensificador para as semanas finais antes da prova:</p>
                                 
                                 <div class="warning-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">= O que acontece ao ativar:</p>
+                                    <p class="font-semibold mb-2">🚀 O que acontece ao ativar:</p>
                                     <ul class="list-disc list-inside text-sm space-y-1">
-                                        <li>Revises se tornam mais frequentes (intervalos menores)</li>
-                                        <li>Foco maior em disciplinas prioritrias</li>
-                                        <li>Pontos em dobro para manter motivao alta</li>
-                                        <li>Interface muda para modo escuro/vermelho (urgncia visual)</li>
-                                        <li>Estatsticas mostram countdown e metas dirias</li>
+                                        <li>Revisões se tornam mais frequentes (intervalos menores)</li>
+                                        <li>Foco maior em disciplinas prioritárias</li>
+                                        <li>Pontos em dobro para manter motivação alta</li>
+                                        <li>Interface muda para modo escuro/vermelho (urgência visual)</li>
+                                        <li>Estatísticas mostram countdown e metas diárias</li>
                                     </ul>
                                 </div>
                                 
                                 <table class="w-full border-collapse mb-4">
                                     <thead>
                                         <tr class="bg-red-50">
-                                            <th class="border p-2 text-left">Tempo at a prova</th>
-                                            <th class="border p-2 text-left">Recomendao</th>
+                                            <th class="border p-2 text-left">Tempo até a prova</th>
+                                            <th class="border p-2 text-left">Recomendação</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
                                             <td class="border p-2">60+ dias</td>
-                                            <td class="border p-2">No ative (muito cedo, causa burnout)</td>
+                                            <td class="border p-2">Não ative (muito cedo, causa burnout)</td>
                                         </tr>
                                         <tr class="bg-gray-50">
                                             <td class="border p-2">30-60 dias</td>
@@ -697,13 +710,13 @@
                                         </tr>
                                         <tr class="bg-gray-50">
                                             <td class="border p-2">&lt;15 dias</td>
-                                            <td class="border p-2">Ative imediatamente se ainda no ativou</td>
+                                            <td class="border p-2">Ative imediatamente se ainda não ativou</td>
                                         </tr>
                                     </tbody>
                                 </table>
                                 
                                 <div class="highlight-box p-4 rounded-lg">
-                                    <p class="text-sm"><strong>Dica:</strong> No Modo Reta Final, o sistema para de introduzir tpicos novos se voc j cobriu 80%+ do contedo, focando apenas em revises e consolidao.</p>
+                                    <p class="text-sm"><strong>Dica:</strong> No Modo Reta Final, o sistema para de introduzir tópicos novos se você já cobriu 80%+ do conteúdo, focando apenas em revisões e consolidação.</p>
                                 </div>
                             </div>
                         </div>
@@ -711,7 +724,7 @@
 
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Como interpretar as estatsticas e grficos do dashboard?</h3>
+                            <h3 class="font-semibold text-gray-800">Como interpretar as estatísticas e gráficos do dashboard?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
@@ -720,40 +733,40 @@
                                 
                                 <div class="space-y-3">
                                     <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="font-semibold mb-1">= Grfico de Progresso</p>
+                                        <p class="font-semibold mb-1">📊 Gráfico de Progresso</p>
                                         <p class="text-sm mb-1">Mostra progresso real vs. ideal ao longo do tempo.</p>
-                                        <p class="text-xs text-gray-600">" Linha azul = seu progresso | Linha cinza = progresso ideal</p>
-                                        <p class="text-xs text-gray-600">" Se est abaixo da linha ideal, considere aumentar horas de estudo</p>
+                                        <p class="text-xs text-gray-600">• Linha azul = seu progresso | Linha cinza = progresso ideal</p>
+                                        <p class="text-xs text-gray-600">• Se está abaixo da linha ideal, considere aumentar horas de estudo</p>
                                     </div>
                                     
                                     <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="font-semibold mb-1"><U Pizza de Disciplinas</p>
-                                        <p class="text-sm mb-1">Visualiza distribuio do tempo entre matrias.</p>
-                                        <p class="text-xs text-gray-600">" Deve refletir suas prioridades configuradas</p>
-                                        <p class="text-xs text-gray-600">" Desequilbrios indicam necessidade de ajuste</p>
+                                        <p class="font-semibold mb-1">🍕 Pizza de Disciplinas</p>
+                                        <p class="text-sm mb-1">Visualiza distribuição do tempo entre matérias.</p>
+                                        <p class="text-xs text-gray-600">• Deve refletir suas prioridades configuradas</p>
+                                        <p class="text-xs text-gray-600">• Desequilíbrios indicam necessidade de ajuste</p>
                                     </div>
                                     
                                     <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="font-semibold mb-1">= Heatmap de Atividade</p>
-                                        <p class="text-sm mb-1">Tipo GitHub - mostra consistncia diria.</p>
-                                        <p class="text-xs text-gray-600">" Verde escuro = dia muito produtivo</p>
-                                        <p class="text-xs text-gray-600">" Branco = dia sem estudo (evite!)</p>
+                                        <p class="font-semibold mb-1">📈 Heatmap de Atividade</p>
+                                        <p class="text-sm mb-1">Tipo GitHub - mostra consistência diária.</p>
+                                        <p class="text-xs text-gray-600">• Verde escuro = dia muito produtivo</p>
+                                        <p class="text-xs text-gray-600">• Branco = dia sem estudo (evite!)</p>
                                     </div>
                                     
                                     <div class="bg-gray-50 p-4 rounded-lg">
-                                        <p class="font-semibold mb-1"> Mtricas de Tempo</p>
-                                        <p class="text-sm mb-1">Horas estudadas, mdia diria, tempo por tpico.</p>
-                                        <p class="text-xs text-gray-600">" Compare com suas metas configuradas</p>
-                                        <p class="text-xs text-gray-600">" Tempo/tpico ideal: 45-90 minutos</p>
+                                        <p class="font-semibold mb-1">⏱️ Métricas de Tempo</p>
+                                        <p class="text-sm mb-1">Horas estudadas, média diária, tempo por tópico.</p>
+                                        <p class="text-xs text-gray-600">• Compare com suas metas configuradas</p>
+                                        <p class="text-xs text-gray-600">• Tempo/tópico ideal: 45-90 minutos</p>
                                     </div>
                                 </div>
                                 
                                 <div class="success-box p-4 rounded-lg mt-4">
                                     <p class="text-sm"><strong>KPIs principais para monitorar semanalmente:</strong></p>
                                     <ul class="list-disc list-inside text-sm mt-1">
-                                        <li>Taxa de concluso semanal (meta: &gt;85%)</li>
+                                        <li>Taxa de conclusão semanal (meta: &gt;85%)</li>
                                         <li>Horas totais vs. planejadas (meta: &gt;90%)</li>
-                                        <li>Progresso geral vs. tempo decorrido (devem estar prximos)</li>
+                                        <li>Progresso geral vs. tempo decorrido (devem estar próximos)</li>
                                     </ul>
                                 </div>
                             </div>
@@ -762,10 +775,10 @@
                 </div>
             </div>
 
-            <!-- Categoria 6: Ansiedades e Desafios Psicolgicos -->
+            <!-- Categoria 6: Ansiedades e Desafios Psicológicos -->
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                    <span class="text-2xl mr-3">=</span>Ansiedades e Desafios Psicolgicos
+                    <span class="text-2xl mr-3">💭</span>Ansiedades e Desafios Psicológicos
                 </h2>
                 <div class="space-y-4">
                     <div class="content-card p-0 overflow-hidden">
@@ -775,72 +788,72 @@
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Essa  a ansiedade mais comum entre concurseiros. Vamos desmistificar:</p>
+                                <p class="mb-4">Essa é a ansiedade mais comum entre concurseiros. Vamos desmistificar:</p>
                                 
                                 <div class="highlight-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">= Verdades que voc precisa aceitar:</p>
+                                    <p class="font-semibold mb-2">📌 Verdades que você precisa aceitar:</p>
                                     <ul class="list-disc list-inside text-sm space-y-1">
-                                        <li>Ningum estuda 100% do edital perfeitamente</li>
-                                        <li>80% do contedo bem estudado > 100% mal estudado</li>
+                                        <li>Ninguém estuda 100% do edital perfeitamente</li>
+                                        <li>80% do conteúdo bem estudado > 100% mal estudado</li>
                                         <li>A prova cobra 20-30% do edital em profundidade</li>
-                                        <li>Reviso  mais importante que contedo novo</li>
-                                        <li>Aprovados acertam 70-80%, no 100%</li>
+                                        <li>Revisão é mais importante que conteúdo novo</li>
+                                        <li>Aprovados acertam 70-80%, não 100%</li>
                                     </ul>
                                 </div>
                                 
                                 <div class="success-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">> Estratgias prticas anti-ansiedade:</p>
+                                    <p class="font-semibold mb-2">🧘 Estratégias práticas anti-ansiedade:</p>
                                     <ol class="list-decimal list-inside text-sm space-y-1">
-                                        <li><strong>Foco no hoje:</strong> Cumpra as tarefas do dia, s isso</li>
-                                        <li><strong>Celebre pequenas vitrias:</strong> Cada tpico concludo importa</li>
-                                        <li><strong>Use as mtricas:</strong> Nmeros reais > sensao de inadequao</li>
-                                        <li><strong>Regra 80/20:</strong> 80% do resultado vem de 20% do esforo</li>
-                                        <li><strong>Compare com voc mesmo:</strong> Seu progresso ontem vs. hoje</li>
+                                        <li><strong>Foco no hoje:</strong> Cumpra as tarefas do dia, só isso</li>
+                                        <li><strong>Celebre pequenas vitórias:</strong> Cada tópico concluído importa</li>
+                                        <li><strong>Use as métricas:</strong> Números reais > sensação de inadequação</li>
+                                        <li><strong>Regra 80/20:</strong> 80% do resultado vem de 20% do esforço</li>
+                                        <li><strong>Compare com você mesmo:</strong> Seu progresso ontem vs. hoje</li>
                                     </ol>
                                 </div>
                                 
-                                <p class="text-sm"><strong>Lembre-se:</strong> O Editaliza j calculou tudo. Se voc seguir o plano, vai estar preparado. Confie no processo!</p>
+                                <p class="text-sm"><strong>Lembre-se:</strong> O Editaliza já calculou tudo. Se você seguir o plano, vai estar preparado. Confie no processo!</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">J falhei em concursos anteriores. Como no desistir desta vez?</h3>
+                            <h3 class="font-semibold text-gray-800">Já falhei em concursos anteriores. Como não desistir desta vez?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Reprovaes so parte da jornada de 90% dos aprovados. Veja como transformar isso em combustvel:</p>
+                                <p class="mb-4">Reprovações são parte da jornada de 90% dos aprovados. Veja como transformar isso em combustível:</p>
                                 
                                 <div class="warning-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">< O que fazer diferente desta vez:</p>
+                                    <p class="font-semibold mb-2">🎯 O que fazer diferente desta vez:</p>
                                     <ul class="list-disc list-inside text-sm space-y-2">
-                                        <li><strong>Diagnstico honesto:</strong> Por que no passou? Falta de estudo? Mtodo errado? Ansiedade na prova?</li>
-                                        <li><strong>Mtodo cientfico:</strong> Agora voc tem reviso espaada automtica</li>
-                                        <li><strong>Mtricas objetivas:</strong> Acompanhe nmeros, no sensaes</li>
-                                        <li><strong>Metas menores:</strong> Foque em semanas, no no resultado final</li>
-                                        <li><strong>Rede de apoio:</strong> Compartilhe progresso com algum</li>
+                                        <li><strong>Diagnóstico honesto:</strong> Por que não passou? Falta de estudo? Método errado? Ansiedade na prova?</li>
+                                        <li><strong>Método científico:</strong> Agora você tem revisão espaçada automática</li>
+                                        <li><strong>Métricas objetivas:</strong> Acompanhe números, não sensações</li>
+                                        <li><strong>Metas menores:</strong> Foque em semanas, não no resultado final</li>
+                                        <li><strong>Rede de apoio:</strong> Compartilhe progresso com alguém</li>
                                     </ul>
                                 </div>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div class="bg-green-50 p-4 rounded-lg">
                                         <p class="font-semibold text-sm mb-1">Mindset Vencedor</p>
-                                        <p class="text-xs">"Cada reprovao me ensinou o que NO fazer. Agora sei o caminho."</p>
+                                        <p class="text-xs">"Cada reprovação me ensinou o que NÃO fazer. Agora sei o caminho."</p>
                                     </div>
                                     <div class="bg-blue-50 p-4 rounded-lg">
                                         <p class="font-semibold text-sm mb-1">Fato Motivador</p>
-                                        <p class="text-xs">A mdia  3-4 tentativas at aprovao. Voc est no caminho!</p>
+                                        <p class="text-xs">A média é 3-4 tentativas até aprovação. Você está no caminho!</p>
                                     </div>
                                 </div>
                                 
                                 <div class="highlight-box p-4 rounded-lg">
-                                    <p class="font-semibold mb-2">Sistema Anti-Desistncia do Editaliza:</p>
+                                    <p class="font-semibold mb-2">Sistema Anti-Desistência do Editaliza:</p>
                                     <ul class="list-disc list-inside text-sm">
-                                        <li>Gamificao mantm dopamina alta diariamente</li>
-                                        <li>Conquistas celebram progresso, no s resultado</li>
-                                        <li>Grficos mostram evoluo real e tangvel</li>
+                                        <li>Gamificação mantém dopamina alta diariamente</li>
+                                        <li>Conquistas celebram progresso, não só resultado</li>
+                                        <li>Gráficos mostram evolução real e tangível</li>
                                         <li>Flexibilidade para dias ruins (replanejar)</li>
                                     </ul>
                                 </div>
@@ -855,15 +868,15 @@
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">A comparao  o ladro da alegria - e da aprovao! Vamos aos fatos:</p>
+                                <p class="mb-4">A comparação é o ladrão da alegria - e da aprovação! Vamos aos fatos:</p>
                                 
                                 <div class="warning-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2"> A verdade sobre "12h de estudo":</p>
+                                    <p class="font-semibold mb-2">⚠️ A verdade sobre "12h de estudo":</p>
                                     <ul class="list-disc list-inside text-sm space-y-1">
-                                        <li>12h brutas ` 12h lquidas (pausas, refeies, disperso)</li>
-                                        <li>Estudo lquido real: mximo 6-8h com qualidade</li>
-                                        <li>Aps 4h seguidas, absoro cai 70%</li>
-                                        <li>Redes sociais mostram exceo, no regra</li>
+                                        <li>12h brutas ≠ 12h líquidas (pausas, refeições, dispersão)</li>
+                                        <li>Estudo líquido real: máximo 6-8h com qualidade</li>
+                                        <li>Após 4h seguidas, absorção cai 70%</li>
+                                        <li>Redes sociais mostram exceção, não regra</li>
                                         <li>Muitos exageram para impressionar</li>
                                     </ul>
                                 </div>
@@ -882,13 +895,13 @@
                                             <td class="border p-2">2-3h</td>
                                             <td class="border p-2">Excelente</td>
                                             <td class="border p-2">Muito alta</td>
-                                            <td class="border p-2">Aprovao em 8-12 meses</td>
+                                            <td class="border p-2">Aprovação em 8-12 meses</td>
                                         </tr>
                                         <tr class="bg-green-50">
                                             <td class="border p-2"><strong>4-6h</strong></td>
-                                            <td class="border p-2"><strong>tima</strong></td>
+                                            <td class="border p-2"><strong>Ótima</strong></td>
                                             <td class="border p-2"><strong>Alta</strong></td>
-                                            <td class="border p-2"><strong>Aprovao em 6-8 meses</strong></td>
+                                            <td class="border p-2"><strong>Aprovação em 6-8 meses</strong></td>
                                         </tr>
                                         <tr>
                                             <td class="border p-2">8-10h</td>
@@ -898,16 +911,16 @@
                                         </tr>
                                         <tr class="bg-red-50">
                                             <td class="border p-2">12h+</td>
-                                            <td class="border p-2">Pssima</td>
-                                            <td class="border p-2">Impossvel</td>
+                                            <td class="border p-2">Péssima</td>
+                                            <td class="border p-2">Impossível</td>
                                             <td class="border p-2">Burnout garantido</td>
                                         </tr>
                                     </tbody>
                                 </table>
                                 
                                 <div class="success-box p-4 rounded-lg">
-                                    <p class="text-sm"><strong>Frmula do Sucesso:</strong> Consistncia > Intensidade. 
-                                    3h todo dia por 6 meses > 12h espordicas. O Editaliza foi desenhado para isso!</p>
+                                    <p class="text-sm"><strong>Fórmula do Sucesso:</strong> Consistência > Intensidade. 
+                                    3h todo dia por 6 meses > 12h esporádicas. O Editaliza foi desenhado para isso!</p>
                                 </div>
                             </div>
                         </div>
@@ -915,20 +928,20 @@
 
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Como manter a motivao quando o progresso parece lento?</h3>
+                            <h3 class="font-semibold text-gray-800">Como manter a motivação quando o progresso parece lento?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">A jornada do concurseiro  uma maratona, no um sprint. Estratgias comprovadas:</p>
+                                <p class="mb-4">A jornada do concurseiro é uma maratona, não um sprint. Estratégias comprovadas:</p>
                                 
                                 <div class="highlight-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">< Use a Gamificao a seu favor:</p>
+                                    <p class="font-semibold mb-2">🎮 Use a Gamificação a seu favor:</p>
                                     <ul class="list-disc list-inside text-sm space-y-1">
-                                        <li><strong>Micro-recompensas:</strong> Celebre cada tpico concludo</li>
-                                        <li><strong>Streaks:</strong> Proteja sua sequncia como um tesouro</li>
-                                        <li><strong>Nveis:</strong> Foque em subir 1 nvel por semana</li>
-                                        <li><strong>Conquistas:</strong> Mire em uma nova conquista por ms</li>
+                                        <li><strong>Micro-recompensas:</strong> Celebre cada tópico concluído</li>
+                                        <li><strong>Streaks:</strong> Proteja sua sequência como um tesouro</li>
+                                        <li><strong>Níveis:</strong> Foque em subir 1 nível por semana</li>
+                                        <li><strong>Conquistas:</strong> Mire em uma nova conquista por mês</li>
                                         <li><strong>Compete consigo:</strong> Bata seu recorde pessoal</li>
                                     </ul>
                                 </div>
@@ -936,7 +949,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
                                     <div class="bg-purple-50 p-3 rounded-lg text-center">
                                         <p class="font-semibold text-sm">Semanal</p>
-                                        <p class="text-xs">1 disciplina completa ou 20 tpicos</p>
+                                        <p class="text-xs">1 disciplina completa ou 20 tópicos</p>
                                     </div>
                                     <div class="bg-indigo-50 p-3 rounded-lg text-center">
                                         <p class="font-semibold text-sm">Mensal</p>
@@ -949,14 +962,14 @@
                                 </div>
                                 
                                 <div class="success-box p-4 rounded-lg">
-                                    <p class="font-semibold mb-2">= Truques psicolgicos que funcionam:</p>
+                                    <p class="font-semibold mb-2">💡 Truques psicológicos que funcionam:</p>
                                     <ol class="list-decimal list-inside text-sm space-y-1">
                                         <li>Foto do "eu futuro" aprovado como wallpaper</li>
-                                        <li>Playlist especfica que s ouve estudando</li>
-                                        <li>Ritual pr-estudo (caf, local, horrio)</li>
-                                        <li>Compartilhe prints do progresso com algum</li>
+                                        <li>Playlist específica que só ouve estudando</li>
+                                        <li>Ritual pré-estudo (café, local, horário)</li>
+                                        <li>Compartilhe prints do progresso com alguém</li>
                                         <li>Visualize a posse 5 min antes de dormir</li>
-                                        <li>Recompensa semanal no relacionada a estudo</li>
+                                        <li>Recompensa semanal não relacionada a estudo</li>
                                     </ol>
                                 </div>
                             </div>
@@ -965,52 +978,51 @@
                 </div>
             </div>
 
-            <!-- Categoria 7: Problemas Tcnicos e Solues -->
+            <!-- Categoria 7: Problemas Técnicos e Soluções -->
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                    <span class="text-2xl mr-3">='</span>Problemas Tcnicos e Solues
+                    <span class="text-2xl mr-3">🔧</span>Problemas Técnicos e Soluções
                 </h2>
                 <div class="space-y-4">
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Meu cronograma apareceu vazio aps gerar. O que fazer?</h3>
+                            <h3 class="font-semibold text-gray-800">Meu cronograma apareceu vazio após gerar. O que fazer?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Cronograma vazio geralmente tem soluo simples. Checklist de verificao:</p>
+                                <p class="mb-4">Cronograma vazio geralmente tem solução simples. Checklist de verificação:</p>
                                 
                                 <div class="warning-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">=
- Verificaes em ordem:</p>
+                                    <p class="font-semibold mb-2">🔍 Verificações em ordem:</p>
                                     <ol class="list-decimal list-inside text-sm space-y-2">
-                                        <li><strong>Disciplinas e Tpicos:</strong> Voc adicionou pelo menos 1 disciplina com tpicos?</li>
+                                        <li><strong>Disciplinas e Tópicos:</strong> Você adicionou pelo menos 1 disciplina com tópicos?</li>
                                         <li><strong>Horas de Estudo:</strong> Algum dia da semana tem horas &gt; 0?</li>
-                                        <li><strong>Data da Prova:</strong> A data est no futuro (no no passado)?</li>
-                                        <li><strong>Dias de Estudo:</strong> Voc marcou pelo menos um dia como disponvel?</li>
+                                        <li><strong>Data da Prova:</strong> A data está no futuro (não no passado)?</li>
+                                        <li><strong>Dias de Estudo:</strong> Você marcou pelo menos um dia como disponível?</li>
                                         <li><strong>Salvamento:</strong> Clicou em "Salvar" antes de "Gerar Cronograma"?</li>
                                     </ol>
                                 </div>
                                 
                                 <div class="highlight-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2"> Soluo passo a passo:</p>
+                                    <p class="font-semibold mb-2">✅ Solução passo a passo:</p>
                                     <ol class="list-decimal list-inside text-sm space-y-1">
-                                        <li>V em "Gerenciar Planos"  "Configurar"</li>
+                                        <li>Vá em "Gerenciar Planos" → "Configurar"</li>
                                         <li>Adicione pelo menos 1 disciplina</li>
-                                        <li>Para cada disciplina, adicione 3-5 tpicos</li>
+                                        <li>Para cada disciplina, adicione 3-5 tópicos</li>
                                         <li>Configure pelo menos 2h em alguns dias</li>
                                         <li>Salve e gere novamente</li>
                                     </ol>
                                 </div>
                                 
-                                <p class="text-sm">Se persistir aps essas verificaes, limpe o cache do navegador (Ctrl+Shift+Del) e tente novamente.</p>
+                                <p class="text-sm">Se persistir após essas verificações, limpe o cache do navegador (Ctrl+Shift+Del) e tente novamente.</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Perdi meu progresso/dados.  possvel recuperar?</h3>
+                            <h3 class="font-semibold text-gray-800">Perdi meu progresso/dados. É possível recuperar?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
@@ -1020,27 +1032,27 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div class="success-box p-4 rounded-lg">
                                         <p class="font-semibold mb-2">Salvamento Local</p>
-                                        <p class="text-sm">Dados ficam no navegador (localStorage). Perdidos se voc limpar dados do site.</p>
+                                        <p class="text-sm">Dados ficam no navegador (localStorage). Perdidos se você limpar dados do site.</p>
                                     </div>
                                     <div class="success-box p-4 rounded-lg">
                                         <p class="font-semibold mb-2">Salvamento na Conta</p>
-                                        <p class="text-sm">Se logado, dados sincronizam com servidor. Recuperveis fazendo login.</p>
+                                        <p class="text-sm">Se logado, dados sincronizam com servidor. Recuperáveis fazendo login.</p>
                                     </div>
                                 </div>
                                 
                                 <div class="highlight-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">= Como prevenir perda de dados:</p>
+                                    <p class="font-semibold mb-2">🛡️ Como prevenir perda de dados:</p>
                                     <ul class="list-disc list-inside text-sm space-y-1">
-                                        <li>Sempre use uma conta (no o modo annimo)</li>
-                                        <li>Faa login regularmente para sincronizar</li>
-                                        <li>Evite usar modo incgnito/privado</li>
-                                        <li>No limpe dados do navegador sem necessidade</li>
-                                        <li>Exporte seu plano mensalmente (funo em breve)</li>
+                                        <li>Sempre use uma conta (não o modo anônimo)</li>
+                                        <li>Faça login regularmente para sincronizar</li>
+                                        <li>Evite usar modo incógnito/privado</li>
+                                        <li>Não limpe dados do navegador sem necessidade</li>
+                                        <li>Exporte seu plano mensalmente (função em breve)</li>
                                     </ul>
                                 </div>
                                 
                                 <div class="warning-box p-4 rounded-lg">
-                                    <p class="text-sm"><strong>Se perdeu dados:</strong> Tente fazer login com sua conta. Se usava modo annimo e limpou o navegador, infelizmente no h recuperao. Mas veja o lado bom: recomear com o conhecimento que tem agora do sistema ser muito mais rpido!</p>
+                                    <p class="text-sm"><strong>Se perdeu dados:</strong> Tente fazer login com sua conta. Se usava modo anônimo e limpou o navegador, infelizmente não há recuperação. Mas veja o lado bom: recomeçar com o conhecimento que tem agora do sistema será muito mais rápido!</p>
                                 </div>
                             </div>
                         </div>
@@ -1053,7 +1065,7 @@
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">O Editaliza  otimizado para funcionar em qualquer dispositivo moderno:</p>
+                                <p class="mb-4">O Editaliza é otimizado para funcionar em qualquer dispositivo moderno:</p>
                                 
                                 <table class="w-full border-collapse mb-4">
                                     <thead>
@@ -1061,56 +1073,56 @@
                                             <th class="border p-2 text-left">Navegador</th>
                                             <th class="border p-2 text-left">Desktop</th>
                                             <th class="border p-2 text-left">Mobile</th>
-                                            <th class="border p-2 text-left">Recomendao</th>
+                                            <th class="border p-2 text-left">Recomendação</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
                                             <td class="border p-2">Chrome</td>
-                                            <td class="border p-2"> Perfeito</td>
-                                            <td class="border p-2"> timo</td>
-                                            <td class="border p-2">P Mais recomendado</td>
+                                            <td class="border p-2">✅ Perfeito</td>
+                                            <td class="border p-2">✅ Ótimo</td>
+                                            <td class="border p-2">⭐ Mais recomendado</td>
                                         </tr>
                                         <tr class="bg-gray-50">
                                             <td class="border p-2">Firefox</td>
-                                            <td class="border p-2"> Perfeito</td>
-                                            <td class="border p-2"> timo</td>
-                                            <td class="border p-2">Excelente opo</td>
+                                            <td class="border p-2">✅ Perfeito</td>
+                                            <td class="border p-2">✅ Ótimo</td>
+                                            <td class="border p-2">Excelente opção</td>
                                         </tr>
                                         <tr>
                                             <td class="border p-2">Safari</td>
-                                            <td class="border p-2"> timo</td>
-                                            <td class="border p-2"> timo</td>
+                                            <td class="border p-2">✅ Ótimo</td>
+                                            <td class="border p-2">✅ Ótimo</td>
                                             <td class="border p-2">Melhor para Apple</td>
                                         </tr>
                                         <tr class="bg-gray-50">
                                             <td class="border p-2">Edge</td>
-                                            <td class="border p-2"> timo</td>
-                                            <td class="border p-2"> Bom</td>
+                                            <td class="border p-2">✅ Ótimo</td>
+                                            <td class="border p-2">✅ Bom</td>
                                             <td class="border p-2">Funciona bem</td>
                                         </tr>
                                         <tr>
                                             <td class="border p-2">Opera</td>
-                                            <td class="border p-2"> Bom</td>
-                                            <td class="border p-2"> Regular</td>
+                                            <td class="border p-2">✅ Bom</td>
+                                            <td class="border p-2">⚠️ Regular</td>
                                             <td class="border p-2">Use se preferir</td>
                                         </tr>
                                     </tbody>
                                 </table>
                                 
                                 <div class="highlight-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">= Dicas para uso mobile:</p>
+                                    <p class="font-semibold mb-2">📱 Dicas para uso mobile:</p>
                                     <ul class="list-disc list-inside text-sm space-y-1">
                                         <li>Interface totalmente responsiva</li>
                                         <li>Gire para paisagem em tabelas grandes</li>
-                                        <li>Use "Adicionar  tela inicial" para acesso rpido</li>
-                                        <li>Funciona offline aps primeiro carregamento</li>
+                                        <li>Use "Adicionar à tela inicial" para acesso rápido</li>
+                                        <li>Funciona offline após primeiro carregamento</li>
                                         <li>Sincroniza entre dispositivos se logado</li>
                                     </ul>
                                 </div>
                                 
                                 <div class="success-box p-4 rounded-lg">
-                                    <p class="text-sm"><strong>Pro tip:</strong> Use o desktop para configurar planos (mais confortvel) e o mobile para marcar tarefas dirias e consultas rpidas.</p>
+                                    <p class="text-sm"><strong>Pro tip:</strong> Use o desktop para configurar planos (mais confortável) e o mobile para marcar tarefas diárias e consultas rápidas.</p>
                                 </div>
                             </div>
                         </div>
@@ -1118,37 +1130,37 @@
 
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">O sistema est lento ou travando. Como resolver?</h3>
+                            <h3 class="font-semibold text-gray-800">O sistema está lento ou travando. Como resolver?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Performance ruim geralmente tem soluo rpida:</p>
+                                <p class="mb-4">Performance ruim geralmente tem solução rápida:</p>
                                 
                                 <div class="warning-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">= Solues em ordem de eficcia:</p>
+                                    <p class="font-semibold mb-2">🚀 Soluções em ordem de eficácia:</p>
                                     <ol class="list-decimal list-inside text-sm space-y-2">
-                                        <li><strong>Limpe o cache:</strong> Ctrl+Shift+Del  Cache e cookies  ltima hora</li>
-                                        <li><strong>Atualize o navegador:</strong> Verses antigas causam problemas</li>
-                                        <li><strong>Feche abas extras:</strong> Cada aba consome memria</li>
-                                        <li><strong>Desative extenses:</strong> AdBlockers podem interferir</li>
+                                        <li><strong>Limpe o cache:</strong> Ctrl+Shift+Del → Cache e cookies → Última hora</li>
+                                        <li><strong>Atualize o navegador:</strong> Versões antigas causam problemas</li>
+                                        <li><strong>Feche abas extras:</strong> Cada aba consome memória</li>
+                                        <li><strong>Desative extensões:</strong> AdBlockers podem interferir</li>
                                         <li><strong>Reinicie o navegador:</strong> Resolve 90% dos travamentos</li>
-                                        <li><strong>Tente outro navegador:</strong> Para identificar se  problema local</li>
+                                        <li><strong>Tente outro navegador:</strong> Para identificar se é problema local</li>
                                     </ol>
                                 </div>
                                 
                                 <div class="highlight-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2"> Otimizaes para planos grandes (500+ tpicos):</p>
+                                    <p class="font-semibold mb-2">⚡ Otimizações para planos grandes (500+ tópicos):</p>
                                     <ul class="list-disc list-inside text-sm space-y-1">
-                                        <li>Divida em mltiplos planos menores por rea</li>
-                                        <li>Archive planos antigos no utilizados</li>
-                                        <li>Use modo de visualizao compacta</li>
+                                        <li>Divida em múltiplos planos menores por área</li>
+                                        <li>Archive planos antigos não utilizados</li>
+                                        <li>Use modo de visualização compacta</li>
                                         <li>Evite ter muitos planos abertos simultaneamente</li>
                                     </ul>
                                 </div>
                                 
                                 <div class="bg-gray-100 p-4 rounded-lg">
-                                    <p class="text-sm"><strong>Requisitos mnimos:</strong> Navegador atualizado, 4GB RAM, conexo estvel de 1 Mbps. O Editaliza  leve e roda bem at em computadores modestos.</p>
+                                    <p class="text-sm"><strong>Requisitos mínimos:</strong> Navegador atualizado, 4GB RAM, conexão estável de 1 Mbps. O Editaliza é leve e roda bem até em computadores modestos.</p>
                                 </div>
                             </div>
                         </div>
@@ -1156,69 +1168,69 @@
                 </div>
             </div>
 
-            <!-- Categoria 8: Estratgias Avanadas -->
+            <!-- Categoria 8: Estratégias Avançadas -->
             <div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                    <span class="text-2xl mr-3"><</span>Estratgias Avanadas e Dicas Pro
+                    <span class="text-2xl mr-3">🎓</span>Estratégias Avançadas e Dicas Pro
                 </h2>
                 <div class="space-y-4">
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Como integrar resoluo de questes ao meu cronograma?</h3>
+                            <h3 class="font-semibold text-gray-800">Como integrar resolução de questões ao meu cronograma?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Questes so fundamentais! Integre assim:</p>
+                                <p class="mb-4">Questões são fundamentais! Integre assim:</p>
                                 
                                 <div class="highlight-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">= Estratgia Hbrida Teoria + Questes:</p>
+                                    <p class="font-semibold mb-2">📝 Estratégia Híbrida Teoria + Questões:</p>
                                     <table class="w-full text-sm">
                                         <thead>
                                             <tr class="bg-blue-50">
                                                 <th class="border p-2 text-left">Fase</th>
-                                                <th class="border p-2 text-left">Proporo</th>
+                                                <th class="border p-2 text-left">Proporção</th>
                                                 <th class="border p-2 text-left">Como fazer</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
                                                 <td class="border p-2">Inicial (0-30%)</td>
-                                                <td class="border p-2">70% teoria / 30% questes</td>
-                                                <td class="border p-2">Questes para fixar cada tpico estudado</td>
+                                                <td class="border p-2">70% teoria / 30% questões</td>
+                                                <td class="border p-2">Questões para fixar cada tópico estudado</td>
                                             </tr>
                                             <tr class="bg-gray-50">
-                                                <td class="border p-2">Intermediria (30-70%)</td>
-                                                <td class="border p-2">50% teoria / 50% questes</td>
-                                                <td class="border p-2">Bateria de questes aps cada disciplina</td>
+                                                <td class="border p-2">Intermediária (30-70%)</td>
+                                                <td class="border p-2">50% teoria / 50% questões</td>
+                                                <td class="border p-2">Bateria de questões após cada disciplina</td>
                                             </tr>
                                             <tr>
-                                                <td class="border p-2">Avanada (70-90%)</td>
-                                                <td class="border p-2">30% teoria / 70% questes</td>
-                                                <td class="border p-2">Questes comentadas + simulados</td>
+                                                <td class="border p-2">Avançada (70-90%)</td>
+                                                <td class="border p-2">30% teoria / 70% questões</td>
+                                                <td class="border p-2">Questões comentadas + simulados</td>
                                             </tr>
                                             <tr class="bg-gray-50">
                                                 <td class="border p-2">Reta Final (90-100%)</td>
-                                                <td class="border p-2">10% teoria / 90% questes</td>
-                                                <td class="border p-2">S revisar erros + simulados dirios</td>
+                                                <td class="border p-2">10% teoria / 90% questões</td>
+                                                <td class="border p-2">Só revisar erros + simulados diários</td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
                                 
                                 <div class="success-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">= Implementao prtica no Editaliza:</p>
+                                    <p class="font-semibold mb-2">💡 Implementação prática no Editaliza:</p>
                                     <ol class="list-decimal list-inside text-sm space-y-1">
-                                        <li>Crie tpicos especficos: "Questes - [Nome do Assunto]"</li>
-                                        <li>Configure 30-40min para cada sesso de questes</li>
-                                        <li>Use "Reforar" em tpicos com &lt;70% de acertos</li>
-                                        <li>Adicione "Simulado Semanal" como tpico recorrente</li>
+                                        <li>Crie tópicos específicos: "Questões - [Nome do Assunto]"</li>
+                                        <li>Configure 30-40min para cada sessão de questões</li>
+                                        <li>Use "Reforçar" em tópicos com &lt;70% de acertos</li>
+                                        <li>Adicione "Simulado Semanal" como tópico recorrente</li>
                                         <li>Reserve domingos para simulados completos</li>
                                     </ol>
                                 </div>
                                 
                                 <div class="warning-box p-4 rounded-lg">
-                                    <p class="text-sm"><strong>Regra de Ouro:</strong> Nunca passe mais de 3 dias sem fazer questes. Mnimo: 20 questes/dia aps primeiro ms.</p>
+                                    <p class="text-sm"><strong>Regra de Ouro:</strong> Nunca passe mais de 3 dias sem fazer questões. Mínimo: 20 questões/dia após primeiro mês.</p>
                                 </div>
                             </div>
                         </div>
@@ -1231,15 +1243,15 @@
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Ajuste dinmico de prioridades  uma estratgia avanada poderosa:</p>
+                                <p class="mb-4">Ajuste dinâmico de prioridades é uma estratégia avançada poderosa:</p>
                                 
                                 <div class="highlight-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">= Timeline de Ajustes Estratgicos:</p>
+                                    <p class="font-semibold mb-2">📊 Timeline de Ajustes Estratégicos:</p>
                                     
                                     <div class="space-y-3">
                                         <div class="border-l-4 border-blue-500 pl-4">
                                             <p class="font-semibold text-sm">90+ dias antes</p>
-                                            <p class="text-xs">Prioridades conforme peso no edital. Foco em construir base slida.</p>
+                                            <p class="text-xs">Prioridades conforme peso no edital. Foco em construir base sólida.</p>
                                         </div>
                                         
                                         <div class="border-l-4 border-green-500 pl-4">
@@ -1249,101 +1261,101 @@
                                         
                                         <div class="border-l-4 border-yellow-500 pl-4">
                                             <p class="font-semibold text-sm">30-60 dias antes</p>
-                                            <p class="text-xs">Eleve disciplinas de maior peso para prioridade mxima (5).</p>
+                                            <p class="text-xs">Eleve disciplinas de maior peso para prioridade máxima (5).</p>
                                         </div>
                                         
                                         <div class="border-l-4 border-orange-500 pl-4">
                                             <p class="font-semibold text-sm">15-30 dias antes</p>
-                                            <p class="text-xs">Foque no que cai mais: anlise de provas anteriores.</p>
+                                            <p class="text-xs">Foque no que cai mais: análise de provas anteriores.</p>
                                         </div>
                                         
                                         <div class="border-l-4 border-red-500 pl-4">
                                             <p class="font-semibold text-sm">&lt;15 dias</p>
-                                            <p class="text-xs">Apenas disciplinas principais + reviso. Corte o acessrio.</p>
+                                            <p class="text-xs">Apenas disciplinas principais + revisão. Corte o acessório.</p>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div class="success-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">< Tcnica "Pareto Concurseiro":</p>
+                                    <p class="font-semibold mb-2">🎯 Técnica "Pareto Concurseiro":</p>
                                     <ul class="list-disc list-inside text-sm space-y-1">
-                                        <li>Identifique os 20% dos tpicos que representam 80% das questes</li>
-                                        <li>ltimos 30 dias: prioridade 5 apenas nesses tpicos</li>
-                                        <li>Demais tpicos: prioridade 2-3 para manuteno</li>
-                                        <li>Novos tpicos: congele 30 dias antes da prova</li>
+                                        <li>Identifique os 20% dos tópicos que representam 80% das questões</li>
+                                        <li>Últimos 30 dias: prioridade 5 apenas nesses tópicos</li>
+                                        <li>Demais tópicos: prioridade 2-3 para manutenção</li>
+                                        <li>Novos tópicos: congele 30 dias antes da prova</li>
                                     </ul>
                                 </div>
                                 
-                                <p class="text-sm mt-4"><strong>No Editaliza:</strong> V em Configuraes do Plano e ajuste prioridades a qualquer momento. Gere o cronograma novamente para aplicar mudanas.</p>
+                                <p class="text-sm mt-4"><strong>No Editaliza:</strong> Vá em Configurações do Plano e ajuste prioridades a qualquer momento. Gere o cronograma novamente para aplicar mudanças.</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Existe uma forma ideal de organizar os tpicos?</h3>
+                            <h3 class="font-semibold text-gray-800">Existe uma forma ideal de organizar os tópicos?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Sim! A granularidade dos tpicos impacta diretamente sua eficincia:</p>
+                                <p class="mb-4">Sim! A granularidade dos tópicos impacta diretamente sua eficiência:</p>
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                     <div class="bg-red-50 p-4 rounded-lg">
-                                        <p class="font-semibold text-sm mb-2">L Evite - Muito Genrico</p>
+                                        <p class="font-semibold text-sm mb-2">❌ Evite - Muito Genérico</p>
                                         <ul class="text-xs space-y-1">
-                                            <li>" "Direito Constitucional"</li>
-                                            <li>" "Matemtica"</li>
-                                            <li>" "Portugus"</li>
+                                            <li>• "Direito Constitucional"</li>
+                                            <li>• "Matemática"</li>
+                                            <li>• "Português"</li>
                                         </ul>
-                                        <p class="text-xs mt-2 text-red-600">Problema: Impossvel estudar em uma sesso</p>
+                                        <p class="text-xs mt-2 text-red-600">Problema: Impossível estudar em uma sessão</p>
                                     </div>
                                     <div class="bg-red-50 p-4 rounded-lg">
-                                        <p class="font-semibold text-sm mb-2">L Evite - Muito Especfico</p>
+                                        <p class="font-semibold text-sm mb-2">❌ Evite - Muito Específico</p>
                                         <ul class="text-xs space-y-1">
-                                            <li>" "Art. 5, inciso I da CF"</li>
-                                            <li>" "Regra de trs simples direta"</li>
-                                            <li>" "Uso da vrgula antes de 'mas'"</li>
+                                            <li>• "Art. 5º, inciso I da CF"</li>
+                                            <li>• "Regra de três simples direta"</li>
+                                            <li>• "Uso da vírgula antes de 'mas'"</li>
                                         </ul>
-                                        <p class="text-xs mt-2 text-red-600">Problema: Gera centenas de micro-tpicos</p>
+                                        <p class="text-xs mt-2 text-red-600">Problema: Gera centenas de micro-tópicos</p>
                                     </div>
                                 </div>
                                 
                                 <div class="success-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2"> Ideal - Granularidade Perfeita:</p>
+                                    <p class="font-semibold mb-2">✅ Ideal - Granularidade Perfeita:</p>
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
                                         <div>
                                             <p class="font-semibold text-xs mb-1">Direito Constitucional</p>
                                             <ul class="text-xs">
-                                                <li>" Direitos Fundamentais</li>
-                                                <li>" Organizao do Estado</li>
-                                                <li>" Poder Legislativo</li>
+                                                <li>• Direitos Fundamentais</li>
+                                                <li>• Organização do Estado</li>
+                                                <li>• Poder Legislativo</li>
                                             </ul>
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-xs mb-1">Matemtica</p>
+                                            <p class="font-semibold text-xs mb-1">Matemática</p>
                                             <ul class="text-xs">
-                                                <li>" Regra de Trs</li>
-                                                <li>" Porcentagem</li>
-                                                <li>" Juros Simples</li>
+                                                <li>• Regra de Três</li>
+                                                <li>• Porcentagem</li>
+                                                <li>• Juros Simples</li>
                                             </ul>
                                         </div>
                                         <div>
-                                            <p class="font-semibold text-xs mb-1">Portugus</p>
+                                            <p class="font-semibold text-xs mb-1">Português</p>
                                             <ul class="text-xs">
-                                                <li>" Concordncia Verbal</li>
-                                                <li>" Regncia Nominal</li>
-                                                <li>" Pontuao</li>
+                                                <li>• Concordância Verbal</li>
+                                                <li>• Regência Nominal</li>
+                                                <li>• Pontuação</li>
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div class="highlight-box p-4 rounded-lg">
-                                    <p class="font-semibold mb-2">= Regra Prtica:</p>
-                                    <p class="text-sm">Cada tpico deve ser estudvel em <strong>45-90 minutos</strong>. Se precisar mais, divida. Se levar menos de 30min, agrupe com outro similar.</p>
+                                    <p class="font-semibold mb-2">📏 Regra Prática:</p>
+                                    <p class="text-sm">Cada tópico deve ser estudável em <strong>45-90 minutos</strong>. Se precisar mais, divida. Se levar menos de 30min, agrupe com outro similar.</p>
                                     
-                                    <p class="text-sm mt-2"><strong>Meta ideal:</strong> 15-25 tpicos por disciplina principal, 5-10 para disciplinas menores.</p>
+                                    <p class="text-sm mt-2"><strong>Meta ideal:</strong> 15-25 tópicos por disciplina principal, 5-10 para disciplinas menores.</p>
                                 </div>
                             </div>
                         </div>
@@ -1351,67 +1363,67 @@
 
                     <div class="content-card p-0 overflow-hidden">
                         <div class="accordion-header p-6 cursor-pointer flex justify-between items-center">
-                            <h3 class="font-semibold text-gray-800">Como usar os dados e estatsticas para melhorar meu desempenho?</h3>
+                            <h3 class="font-semibold text-gray-800">Como usar os dados e estatísticas para melhorar meu desempenho?</h3>
                             <svg class="w-5 h-5 text-gray-500 transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
                         <div class="accordion-content text-gray-700">
                             <div class="px-6 pb-6">
-                                <p class="mb-4">Dados so poder! Use as mtricas para decises estratgicas:</p>
+                                <p class="mb-4">Dados são poder! Use as métricas para decisões estratégicas:</p>
                                 
                                 <div class="highlight-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">= Anlise Semanal Obrigatria:</p>
+                                    <p class="font-semibold mb-2">📈 Análise Semanal Obrigatória:</p>
                                     
                                     <table class="w-full text-sm">
                                         <thead>
                                             <tr class="bg-blue-50">
-                                                <th class="border p-2 text-left">Mtrica</th>
+                                                <th class="border p-2 text-left">Métrica</th>
                                                 <th class="border p-2 text-left">O que analisar</th>
-                                                <th class="border p-2 text-left">Ao se ruim</th>
+                                                <th class="border p-2 text-left">Ação se ruim</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td class="border p-2">Taxa Concluso</td>
-                                                <td class="border p-2">&lt;85%  problema</td>
+                                                <td class="border p-2">Taxa Conclusão</td>
+                                                <td class="border p-2">&lt;85% é problema</td>
                                                 <td class="border p-2">Reduza carga ou aumente horas</td>
                                             </tr>
                                             <tr class="bg-gray-50">
-                                                <td class="border p-2">Tempo/Tpico</td>
+                                                <td class="border p-2">Tempo/Tópico</td>
                                                 <td class="border p-2">&gt;2h indica dificuldade</td>
-                                                <td class="border p-2">Divida tpicos grandes</td>
+                                                <td class="border p-2">Divida tópicos grandes</td>
                                             </tr>
                                             <tr>
-                                                <td class="border p-2">Uso de Reforar</td>
-                                                <td class="border p-2">&gt;30%  excessivo</td>
+                                                <td class="border p-2">Uso de Reforçar</td>
+                                                <td class="border p-2">&gt;30% é excessivo</td>
                                                 <td class="border p-2">Estude com mais calma</td>
                                             </tr>
                                             <tr class="bg-gray-50">
                                                 <td class="border p-2">Disciplinas/Dia</td>
                                                 <td class="border p-2">&gt;4 dilui foco</td>
-                                                <td class="border p-2">Concentre em menos matrias</td>
+                                                <td class="border p-2">Concentre em menos matérias</td>
                                             </tr>
                                             <tr>
                                                 <td class="border p-2">Streak Breaks</td>
-                                                <td class="border p-2">&gt;2/ms preocupa</td>
-                                                <td class="border p-2">Reveja rotina e motivao</td>
+                                                <td class="border p-2">&gt;2/mês preocupa</td>
+                                                <td class="border p-2">Reveja rotina e motivação</td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </div>
                                 
                                 <div class="success-box p-4 rounded-lg mb-4">
-                                    <p class="font-semibold mb-2">=, Experimentos para Otimizar:</p>
+                                    <p class="font-semibold mb-2">🔬 Experimentos para Otimizar:</p>
                                     <ol class="list-decimal list-inside text-sm space-y-1">
-                                        <li><strong>Teste A/B de Horrios:</strong> Compare produtividade manh vs noite</li>
-                                        <li><strong>Sprint vs Maratona:</strong> 25min focados vs 90min contnuos</li>
-                                        <li><strong>Ordem de Disciplinas:</strong> Difceis primeiro vs ltimo</li>
-                                        <li><strong>Dias Temticos:</strong> Um dia por disciplina vs misturado</li>
+                                        <li><strong>Teste A/B de Horários:</strong> Compare produtividade manhã vs noite</li>
+                                        <li><strong>Sprint vs Maratona:</strong> 25min focados vs 90min contínuos</li>
+                                        <li><strong>Ordem de Disciplinas:</strong> Difíceis primeiro vs último</li>
+                                        <li><strong>Dias Temáticos:</strong> Um dia por disciplina vs misturado</li>
                                     </ol>
-                                    <p class="text-xs mt-2">Teste por 2 semanas, analise mtricas, mantenha o que funciona.</p>
+                                    <p class="text-xs mt-2">Teste por 2 semanas, analise métricas, mantenha o que funciona.</p>
                                 </div>
                                 
                                 <div class="warning-box p-4 rounded-lg">
-                                    <p class="text-sm"><strong>Dashboard Perfeito:</strong> Abra toda segunda-feira, analise a semana anterior, ajuste a prxima. 15 minutos que valem ouro!</p>
+                                    <p class="text-sm"><strong>Dashboard Perfeito:</strong> Abra toda segunda-feira, analise a semana anterior, ajuste a próxima. 15 minutos que valem ouro!</p>
                                 </div>
                             </div>
                         </div>
@@ -1450,7 +1462,7 @@
                         content.style.maxHeight = null;
                     } else {
                         header.classList.add('active');
-                        // Define a altura mxima com base no tamanho real do contedo
+                        // Define a altura máxima com base no tamanho real do conteúdo
                         content.style.maxHeight = content.scrollHeight + "px";
                     }
                 });
@@ -1458,8 +1470,8 @@
         });
     </script>
     
-    <!-- Script do rodap modular -->
+    <!-- Script do rodapé modular -->
     <script src="js/footer.js"></script>
-    <!-- O rodap ser inserido automaticamente aqui pelo footer.js -->
+    <!-- O rodapé será inserido automaticamente aqui pelo footer.js -->
 </body>
 </html><!-- Cache buster: Wed, Aug 13, 2025  9:40:51 PM -->

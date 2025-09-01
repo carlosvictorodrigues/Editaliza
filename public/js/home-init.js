@@ -109,17 +109,14 @@ class HomeInitializer {
         
         const planId = window.PlanContext.planId;
         
-        // Otimização: Carregar plano uma vez e passar como parâmetro
-        const plan = await app.apiFetch(`/plans/${planId}`);
-
         // Carregar em paralelo (não sequencial para performance)
         await Promise.all([
             this._loadUserProfile(),
-            this._loadMetrics(planId, plan), // Passar o plano para evitar nova chamada
+            this._loadMetrics(planId),
             this._renderTodaySchedule(),
             this._loadStatistics(planId),
             this._checkOverdueTasks(planId),
-            this._loadTransparencyData(planId, plan) // Passar o plano para evitar nova chamada
+            this._loadTransparencyData(planId)
         ]);
         
         this.metrics.phases.data = Date.now() - phaseStart;
@@ -303,10 +300,12 @@ class HomeInitializer {
         }
     }
     
-    async _loadMetrics(planId, plan) { // Otimização: Receber plano
+    async _loadMetrics(planId) {
         try {
-            // O plano já foi carregado, buscar apenas o progresso
-            const progress = await app.apiFetch(`/plans/${planId}/progress`);
+            const [plan, progress] = await Promise.all([
+                app.apiFetch(`/plans/${planId}`),
+                app.apiFetch(`/plans/${planId}/progress`)
+            ]);
             
             // Indicador Reta Final
             const isRetaFinalMode = plan.reta_final_mode === 1 || plan.reta_final_mode === true;
@@ -343,7 +342,7 @@ class HomeInitializer {
             const stats = await app.apiFetch(`/plans/${planId}/statistics`);
             
             // Atualizar elementos de estatística
-            this._updateStatsElement('totalStudyDaysText', stats.totalStudyDays?.toString() || '0');
+            this._updateStatsElement('totalStudyDaysText', stats.totalDays?.toString() || '0');
             this._updateStatsElement('currentStreakText', stats.currentStreak?.toString() || '0');
             
             // Total de horas formatado
@@ -385,7 +384,9 @@ class HomeInitializer {
         const completed = todaySessions.filter(session => 
             session.completed_at || 
             session.status === 'Concluído' || 
-            (session.study_time && session.study_time > 0)
+            session.status === 'completed' || 
+            (session.study_time && session.study_time > 0) ||
+            (session.time_studied_seconds && session.time_studied_seconds > 0)
         ).length;
         
         const progressElement = document.getElementById('todayProgressText');
@@ -405,8 +406,9 @@ class HomeInitializer {
         }
     }
     
-    async _loadTransparencyData(planId, plan) { // Otimização: Receber plano
+    async _loadTransparencyData(planId) {
         try {
+            const plan = await app.apiFetch(`/plans/${planId}`);
             if (plan.reta_final_mode) {
                 // Lógica para mostrar dados de transparência
                 console.log('📊 Modo Reta Final ativo');

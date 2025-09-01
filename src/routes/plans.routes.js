@@ -318,6 +318,18 @@ router.get('/:planId/progress',
 );
 
 /**
+ * @route GET /plans/:planId/study-time
+ * @desc Distribuição de tempo dedicado por disciplina e assuntos
+ * @access Private
+ */
+router.get('/:planId/study-time',
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getStudyTimeDistribution
+);
+
+/**
  * @route GET /plans/:planId/exclusions
  * @desc Tópicos excluídos (legado - mantido para compatibilidade)
  * @access Private
@@ -344,6 +356,18 @@ router.get('/:planId/excluded-topics',
 /**
  * 🎮 GAMIFICAÇÃO E COMPARTILHAMENTO
  */
+
+/**
+ * @route GET /plans/:planId/dashboard
+ * @description Endpoint consolidado - retorna todos os dados do dashboard em uma única chamada
+ * @access Private
+ */
+router.get('/:planId/dashboard',
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getDashboardData
+);
 
 /**
  * @route GET /plans/:planId/gamification
@@ -496,6 +520,19 @@ router.get('/:planId/schedule',
     validators.numericId('planId'),
     handleValidationErrors,
     plansController.getSchedule
+);
+
+/**
+ * @route GET /plans/:planId/dashboard
+ * @desc Get consolidated dashboard data (optimized endpoint)
+ * @access Private
+ * @note Endpoint unificado para melhor performance do dashboard
+ */
+router.get('/:planId/dashboard',
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    plansController.getDashboardData
 );
 
 /**

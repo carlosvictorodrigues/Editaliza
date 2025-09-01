@@ -103,6 +103,20 @@ class SessionRepository extends BaseRepository {
         const query = `DELETE FROM study_sessions WHERE study_plan_id = $1`;
         return this.delete(query, [planId]);
     }
+
+    /**
+     * Busca sessões concluídas por plano
+     */
+    async findCompletedByPlanId(planId) {
+        const query = `
+            SELECT * FROM study_sessions 
+            WHERE study_plan_id = $1 
+            AND status IN ('Concluído', 'Concluída', 'Concluida', 'completed')
+            ORDER BY session_date ASC
+        `;
+        return this.findAll(query, [planId]);
+    }
 }
 
 module.exports = SessionRepository;
+// trigger restart

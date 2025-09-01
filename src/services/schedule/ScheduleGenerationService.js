@@ -118,94 +118,328 @@ class ScheduleGenerationService {
     }
 
     static distributeTopics(topics, studyDays) {
-        console.log('\n\n[NEW ALGORITHM] Executing new distributeTopics function!\n\n');
+        console.log('\n\n[PROPORTIONAL RECURRENCE] Iniciando sistema de recorrência proporcional\n\n');
         const schedule = [];
+        
         if (topics.length === 0) {
+            console.log('[PROPORTIONAL RECURRENCE] Nenhum tópico para distribuir');
             return schedule;
         }
 
-        // 1. Agrupar tópicos por matéria e inicializar pesos
-        const subjects = {};
-        topics.forEach(topic => {
-            if (!subjects[topic.subject_name]) {
-                subjects[topic.subject_name] = {
-                    name: topic.subject_name,
-                    weight: topic.subject_priority,
-                    currentWeight: 0, // Inicia o peso corrente para o novo algoritmo
-                    topicQueue: []
-                };
-            }
-            subjects[topic.subject_name].topicQueue.push(topic);
+        // 1. CÁLCULO DE RECORRÊNCIA PROPORCIONAL
+        console.log('[STEP 1] Calculando recorrência proporcional...');
+        
+        // Calcular peso combinado e normalizar
+        const normalizedTopics = this.calculateProportionalRecurrence(topics, studyDays);
+        
+        // 2. ALGORITMO WRR MELHORADO - Expandir tópicos pela recorrência
+        console.log('[STEP 2] Expandindo tópicos com WRR melhorado...');
+        const expandedQueue = this.createExpandedQueue(normalizedTopics);
+        
+        // 3. CRIAR SLOTS DISPONÍVEIS
+        const sessionSlots = this.createSessionSlots(studyDays);
+        console.log(`[STEP 3] Total de slots disponíveis: ${sessionSlots.length}`);
+        
+        // 4. DISTRIBUIR COM VALIDAÇÃO DE ESPAÇAMENTO
+        console.log('[STEP 4] Distribuindo com validação de espaçamento...');
+        const distributedSchedule = this.distributeWithSpacingValidation(expandedQueue, sessionSlots);
+        
+        // 5. LOGS FINAIS
+        this.logFinalDistribution(distributedSchedule);
+        
+        return distributedSchedule;
+    }
+    
+    /**
+     * Calcula a recorrência proporcional baseada no peso combinado
+     */
+    static calculateProportionalRecurrence(topics, studyDays) {
+        console.log('[RECURRENCE CALC] Calculando pesos combinados e recorrência...');
+        
+        // Filtrar apenas dias úteis (segunda a sexta)
+        const workdays = studyDays.filter(day => day.dayOfWeek >= 1 && day.dayOfWeek <= 5);
+        const totalWorkdays = workdays.length;
+        
+        console.log(`[RECURRENCE CALC] Total de dias úteis disponíveis: ${totalWorkdays}`);
+        
+        const topicsWithRecurrence = topics.map(topic => {
+            // Peso combinado: (subject_priority * 0.7) + (topic_priority * 0.3)
+            const combinedWeight = (topic.subject_priority * 0.7) + (topic.topic_priority * 0.3);
+            
+            return {
+                ...topic,
+                combinedWeight
+            };
         });
-
-        console.log('[DEBUG] Matérias e seus pesos:', Object.values(subjects).map(s => ({
-            name: s.name,
-            weight: s.weight,
-            topics: s.topicQueue.length
-        })));
-
-        const subjectList = Object.values(subjects);
-        const totalWeight = subjectList.reduce((sum, s) => sum + s.weight, 0);
-
-        // 2. Criar todos os "espaços" de sessão disponíveis
-        const sessionSlots = [];
-        const weekdays = studyDays.filter(day => day.dayOfWeek >= 1 && day.dayOfWeek <= 5);
-        weekdays.forEach(day => {
-            for (let i = 0; i < day.sessions; i++) {
-                sessionSlots.push({ date: day.date.toISOString().split('T')[0] });
+        
+        // Normalizar pesos entre 0-1
+        const maxWeight = Math.max(...topicsWithRecurrence.map(t => t.combinedWeight));
+        const minWeight = Math.min(...topicsWithRecurrence.map(t => t.combinedWeight));
+        const weightRange = maxWeight - minWeight || 1; // Evitar divisão por zero
+        
+        const normalizedTopics = topicsWithRecurrence.map(topic => {
+            const normalizedWeight = (topic.combinedWeight - minWeight) / weightRange;
+            
+            // Calcular targetAppearances baseado no peso e dias disponíveis
+            // Peso alto = mais aparições, mas máximo de 1 aparição a cada 3 dias úteis
+            const maxPossibleAppearances = Math.floor(totalWorkdays / 3);
+            const targetAppearances = Math.max(1, Math.floor((normalizedWeight * maxPossibleAppearances) + 1));
+            
+            return {
+                ...topic,
+                normalizedWeight,
+                targetAppearances,
+                lastAppearanceIndex: -1 // Para controle de espaçamento
+            };
+        });
+        
+        // Log detalhado dos cálculos
+        console.log('[RECURRENCE CALC] Pesos e recorrências calculadas:');
+        normalizedTopics.forEach(topic => {
+            console.log(`  - ${topic.subject_name} > ${topic.topic_name}:`);
+            console.log(`    Combined Weight: ${topic.combinedWeight.toFixed(2)}`);
+            console.log(`    Normalized Weight: ${topic.normalizedWeight.toFixed(2)}`);
+            console.log(`    Target Appearances: ${topic.targetAppearances}`);
+        });
+        
+        return normalizedTopics;
+    }
+    
+    /**
+     * Cria fila expandida com múltiplas instâncias de cada tópico
+     */
+    static createExpandedQueue(normalizedTopics) {
+        console.log('[WRR EXPANSION] Expandindo fila com múltiplas instâncias...');
+        
+        const expandedQueue = [];
+        
+        normalizedTopics.forEach(topic => {
+            for (let i = 0; i < topic.targetAppearances; i++) {
+                expandedQueue.push({
+                    ...topic,
+                    iteration: i + 1,
+                    queueWeight: topic.normalizedWeight,
+                    currentWeight: 0
+                });
             }
         });
         
-        console.log('[DEBUG] Total de slots disponíveis:', sessionSlots.length);
-
-        // 3. Preencher os espaços usando o algoritmo Weighted Round-Robin (versão aprimorada)
-        for (const slot of sessionSlots) {
-            let bestSubject = null;
-
-            // Loop para encontrar uma matéria com tópicos disponíveis
-            while (bestSubject === null) {
-                // Adiciona o peso de cada matéria ao seu peso corrente
-                subjectList.forEach(s => {
-                    if (s.topicQueue.length > 0) {
-                        s.currentWeight += s.weight;
-                    }
+        console.log(`[WRR EXPANSION] Fila expandida criada: ${expandedQueue.length} instâncias`);
+        
+        // Log da distribuição por tópico
+        const distributionByTopic = {};
+        expandedQueue.forEach(item => {
+            const key = `${item.subject_name} > ${item.topic_name}`;
+            distributionByTopic[key] = (distributionByTopic[key] || 0) + 1;
+        });
+        
+        console.log('[WRR EXPANSION] Distribuição de instâncias por tópico:');
+        Object.entries(distributionByTopic).forEach(([topic, count]) => {
+            console.log(`  - ${topic}: ${count} instâncias`);
+        });
+        
+        return expandedQueue;
+    }
+    
+    /**
+     * Cria slots de sessão disponíveis
+     */
+    static createSessionSlots(studyDays) {
+        const sessionSlots = [];
+        const weekdays = studyDays.filter(day => day.dayOfWeek >= 1 && day.dayOfWeek <= 5);
+        
+        weekdays.forEach((day, dayIndex) => {
+            for (let sessionIndex = 0; sessionIndex < day.sessions; sessionIndex++) {
+                sessionSlots.push({ 
+                    date: day.date.toISOString().split('T')[0],
+                    dayIndex, // Para cálculo de espaçamento
+                    sessionIndex,
+                    globalIndex: sessionSlots.length
                 });
-
-                // Encontra a matéria com o maior peso corrente
-                let maxWeight = -Infinity;
-                let potentialBestSubject = null;
-                subjectList.forEach(s => {
-                    if (s.topicQueue.length > 0 && s.currentWeight > maxWeight) {
-                        maxWeight = s.currentWeight;
-                        potentialBestSubject = s;
-                    }
-                });
-                
-                bestSubject = potentialBestSubject;
-
-                if (bestSubject === null) {
-                    break; // Sai do loop principal se não houver mais tópicos em nenhuma matéria
-                }
-
-                // Deduz o peso total da matéria escolhida e agenda
-                bestSubject.currentWeight -= totalWeight;
-                
-                const topicToSchedule = bestSubject.topicQueue.shift();
-                
-                slot.topicId = topicToSchedule.id;
-                slot.subjectName = topicToSchedule.subject_name;
-                slot.topicDescription = topicToSchedule.topic_name;
-                slot.sessionType = 'Novo Tópico';
-                
-                schedule.push(slot);
             }
-
-            if (bestSubject === null) {
-                break; // Interrompe o loop de slots se não houver mais tópicos
+        });
+        
+        return sessionSlots;
+    }
+    
+    /**
+     * Distribui tópicos com validação de espaçamento
+     */
+    static distributeWithSpacingValidation(expandedQueue, sessionSlots) {
+        console.log('[SPACING VALIDATION] Iniciando distribuição com validação...');
+        
+        const schedule = [];
+        const topicLastAppearance = {}; // Rastrear última aparição por tópico original
+        const minimumSpacing = 2; // Mínimo de 2 dias úteis entre repetições
+        
+        // Calcular peso total para WRR
+        const totalWeight = expandedQueue.reduce((sum, item) => sum + item.queueWeight, 0);
+        
+        // Copiar fila para manipulação
+        const availableItems = [...expandedQueue];
+        
+        for (let slotIndex = 0; slotIndex < sessionSlots.length && availableItems.length > 0; slotIndex++) {
+            const currentSlot = sessionSlots[slotIndex];
+            let selectedItem = null;
+            let selectedIndex = -1;
+            
+            // Algoritmo WRR com validação de espaçamento
+            let attempts = 0;
+            const maxAttempts = availableItems.length * 2; // Evitar loop infinito
+            
+            while (selectedItem === null && attempts < maxAttempts) {
+                attempts++;
+                
+                // Atualizar pesos correntes
+                availableItems.forEach(item => {
+                    item.currentWeight += item.queueWeight;
+                });
+                
+                // Encontrar item com maior peso corrente
+                let maxWeight = -Infinity;
+                let candidateItem = null;
+                let candidateIndex = -1;
+                
+                availableItems.forEach((item, index) => {
+                    if (item.currentWeight > maxWeight) {
+                        maxWeight = item.currentWeight;
+                        candidateItem = item;
+                        candidateIndex = index;
+                    }
+                });
+                
+                if (!candidateItem) break;
+                
+                // Validar espaçamento mínimo
+                const topicKey = `${candidateItem.subject_name}_${candidateItem.topic_name}`;
+                const lastAppearance = topicLastAppearance[topicKey];
+                
+                if (lastAppearance === undefined || (slotIndex - lastAppearance) >= minimumSpacing) {
+                    // Espaçamento válido
+                    selectedItem = candidateItem;
+                    selectedIndex = candidateIndex;
+                    
+                    // Atualizar última aparição
+                    topicLastAppearance[topicKey] = slotIndex;
+                    
+                    // Deduzir peso total
+                    selectedItem.currentWeight -= totalWeight;
+                } else {
+                    // Espaçamento inválido - penalizar temporariamente
+                    candidateItem.currentWeight -= totalWeight;
+                }
+            }
+            
+            if (selectedItem) {
+                // Agendar o item selecionado
+                schedule.push({
+                    date: currentSlot.date,
+                    topicId: selectedItem.id,
+                    subjectName: selectedItem.subject_name,
+                    topicDescription: `${selectedItem.topic_name} (${selectedItem.iteration}ª vez)`,
+                    sessionType: selectedItem.iteration === 1 ? 'Novo Tópico' : 'Reforço',
+                    iteration: selectedItem.iteration,
+                    weight: selectedItem.normalizedWeight
+                });
+                
+                // Remover item da fila
+                availableItems.splice(selectedIndex, 1);
+            } else {
+                // Não conseguiu encontrar item válido - degradar tópicos leves
+                console.log(`[SPACING VALIDATION] Slot ${slotIndex}: Degradando tópicos leves por falta de espaçamento`);
+                
+                // Encontrar tópico com menor peso que não viola espaçamento
+                let fallbackItem = null;
+                let fallbackIndex = -1;
+                let minWeight = Infinity;
+                
+                availableItems.forEach((item, index) => {
+                    if (item.queueWeight < minWeight) {
+                        const topicKey = `${item.subject_name}_${item.topic_name}`;
+                        const lastAppearance = topicLastAppearance[topicKey];
+                        
+                        if (lastAppearance === undefined || (slotIndex - lastAppearance) >= minimumSpacing) {
+                            minWeight = item.queueWeight;
+                            fallbackItem = item;
+                            fallbackIndex = index;
+                        }
+                    }
+                });
+                
+                if (fallbackItem) {
+                    schedule.push({
+                        date: currentSlot.date,
+                        topicId: fallbackItem.id,
+                        subjectName: fallbackItem.subject_name,
+                        topicDescription: `${fallbackItem.topic_name} (${fallbackItem.iteration}ª vez - degradado)`,
+                        sessionType: fallbackItem.iteration === 1 ? 'Novo Tópico' : 'Reforço',
+                        iteration: fallbackItem.iteration,
+                        weight: fallbackItem.normalizedWeight
+                    });
+                    
+                    const topicKey = `${fallbackItem.subject_name}_${fallbackItem.topic_name}`;
+                    topicLastAppearance[topicKey] = slotIndex;
+                    availableItems.splice(fallbackIndex, 1);
+                } else {
+                    // Não há mais itens válidos
+                    break;
+                }
             }
         }
-
+        
+        console.log(`[SPACING VALIDATION] Distribuição concluída: ${schedule.length} sessões agendadas`);
         return schedule;
+    }
+    
+    /**
+     * Log da distribuição final
+     */
+    static logFinalDistribution(schedule) {
+        console.log('\n[FINAL DISTRIBUTION] Relatório da distribuição proporcional:');
+        
+        // Estatísticas por tópico
+        const topicStats = {};
+        const subjectStats = {};
+        
+        schedule.forEach(session => {
+            const topicKey = `${session.subjectName} > ${session.topicDescription.split(' (')[0]}`;
+            const subjectKey = session.subjectName;
+            
+            if (!topicStats[topicKey]) {
+                topicStats[topicKey] = { 
+                    count: 0, 
+                    iterations: [], 
+                    weight: session.weight || 0
+                };
+            }
+            if (!subjectStats[subjectKey]) {
+                subjectStats[subjectKey] = 0;
+            }
+            
+            topicStats[topicKey].count++;
+            topicStats[topicKey].iterations.push(session.iteration || 1);
+            subjectStats[subjectKey]++;
+        });
+        
+        console.log('\n📊 Estatísticas por matéria:');
+        Object.entries(subjectStats)
+            .sort(([,a], [,b]) => b - a)
+            .forEach(([subject, count]) => {
+                console.log(`  ${subject}: ${count} sessões`);
+            });
+        
+        console.log('\n📋 Estatísticas por tópico (Top 10):');
+        Object.entries(topicStats)
+            .sort(([,a], [,b]) => b.count - a.count)
+            .slice(0, 10)
+            .forEach(([topic, stats]) => {
+                console.log(`  ${topic}:`);
+                console.log(`    - Aparições: ${stats.count}`);
+                console.log(`    - Iterações: [${stats.iterations.join(', ')}]`);
+                console.log(`    - Peso: ${stats.weight.toFixed(3)}`);
+            });
+        
+        console.log('\n✅ Sistema de recorrência proporcional concluído!\n');
     }
 
     static scheduleReviews(schedule, studyDays) {

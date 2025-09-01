@@ -303,7 +303,7 @@ class SessionsController {
 
             await dbRun(sql, values);
 
-            if (status === 'Concluído') {
+            if (status === 'completed') { // Changed from 'Concluído' to 'completed'
                 // Processar gamificação imediatamente para garantir que funcione
                 console.log(`[GAMIFICATION] Iniciando processamento para sessão ${sessionId}, usuário ${userId}`);
                 try {
@@ -1105,7 +1105,7 @@ class SessionsController {
             // Basic completion
             await dbRun(
                 'UPDATE study_sessions SET status = ?, time_studied_seconds = ?, questions_solved = ? WHERE id = ?',
-                ['Concluído', completionData.timeStudied || 0, completionData.questionsSolved || 0, sessionId]
+                ['completed', completionData.timeStudied || 0, completionData.questionsSolved || 0, sessionId] // Changed 'Concluído' to 'completed'
             );
 
             res.json({

@@ -242,7 +242,7 @@
                 selectedPlanId = (savedPlanId && planExists) ? savedPlanId : availablePlans[0].id;
                 localStorage.setItem(app.config.planKey, selectedPlanId);
 
-                // Populár seletor de planos
+                // Popular seletor de planos
                 const planSelector = document.getElementById('planSelector');
                 planSelector.innerHTML = availablePlans.map(p => 
                     `<option value="${p.id}" ${p.id == selectedPlanId ? 'selected' : ''}>${app.sanitizeHtml(p.plan_name)}</option>`

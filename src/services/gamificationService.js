@@ -33,25 +33,66 @@ const LEVELS = [
 
 const ACHIEVEMENTS = {
     TOPICS: [
+        // CONQUISTAS INICIAIS - Vitórias rápidas para motivar
         { id: 'topics_1', threshold: 1, title: '🎯 Primeira Lapada no Edital', description: 'O primeiro soco na cara da procrastinação!' },
-        { id: 'topics_5', threshold: 5, title: '📚 Maratonista do PDF', description: 'Sua vista já começou a reclamar.' },
-        { id: 'topics_10', threshold: 10, title: '✨ Destruidor de Questões', description: 'Já discute gabarito com confiança.' },
-        { id: 'topics_25', threshold: 25, title: '👑 Dono do Material', description: 'Sabe até a cor da caneta que o professor usou no slide.' },
-        { id: 'topics_50', threshold: 50, title: '🌟 Meio Monstro', description: 'Você está virando uma lenda local no grupo de estudos.' },
-        { id: 'topics_100', threshold: 100, title: '🏛️ Centurião do Conhecimento', description: 'Bancas já estão te bloqueando no Instagram.' },
+        { id: 'topics_2', threshold: 2, title: '🔥 Tá Pegando o Jeito', description: 'Dois tópicos! O começo da sua jornada épica!' },
+        { id: 'topics_3', threshold: 3, title: '🚀 Decolando', description: 'Três tópicos! Houston, não temos mais procrastinação!' },
+        { id: 'topics_5', threshold: 5, title: '📚 Maratonista do PDF', description: 'Cinco tópicos! Sua vista já começou a reclamar.' },
+        { id: 'topics_7', threshold: 7, title: '⚡ Ritmo de Cruzeiro', description: 'Uma semana de tópicos! Tá voando baixo!' },
+        { id: 'topics_10', threshold: 10, title: '✨ Destruidor de Questões', description: 'Dezena completa! Já discute gabarito com confiança.' },
+        
+        // CONQUISTAS INTERMEDIÁRIAS - Progressão gradual
+        { id: 'topics_15', threshold: 15, title: '🎓 Estudante Aplicado', description: 'Quinze tópicos! Seus amigos já pedem dicas.' },
+        { id: 'topics_20', threshold: 20, title: '📖 Devorador de Conteúdo', description: 'Vinte tópicos! O café já é seu melhor amigo.' },
+        { id: 'topics_25', threshold: 25, title: '👑 Dono do Material', description: 'Sabe até a cor da caneta do professor!' },
+        { id: 'topics_30', threshold: 30, title: '💡 Iluminado', description: 'Trinta tópicos! Você virou referência no grupo.' },
+        { id: 'topics_40', threshold: 40, title: '🏃 Maratonista', description: 'Quarenta tópicos! Nada mais te para!' },
+        { id: 'topics_50', threshold: 50, title: '🌟 Meio Monstro', description: 'Cinquenta! Você é lenda no grupo de estudos.' },
+        
+        // CONQUISTAS AVANÇADAS - Grandes marcos
+        { id: 'topics_75', threshold: 75, title: '🦾 Máquina de Guerra', description: 'Setenta e cinco! As bancas tremem!' },
+        { id: 'topics_100', threshold: 100, title: '🏛️ Centurião do Conhecimento', description: 'Cem tópicos! Bancas te bloqueiam no Instagram.' },
+        { id: 'topics_150', threshold: 150, title: '🔮 Oráculo dos Concursos', description: 'Você prevê questões da prova!' },
         { id: 'topics_200', threshold: 200, title: '💪 Chuck Norris dos Editais', description: 'Os editais temem você!' },
-        { id: 'topics_500', threshold: 500, title: '🧠 Cérebro Jurídico Supremo', description: 'Conquista épica para os mais dedicados.' }
+        { id: 'topics_300', threshold: 300, title: '🌌 Transcendente', description: 'Trezentos! Você existe em outra dimensão.' },
+        { id: 'topics_500', threshold: 500, title: '🧠 Cérebro Jurídico Supremo', description: 'Conquista épica para os imortais!' },
+        { id: 'topics_1000', threshold: 1000, title: '🏛️ Vai Escolher Onde Tomar Posse', description: 'Mil tópicos! Não é se vai passar, é onde.' }
     ],
+    
     STREAK: [
-        { id: 'streak_3', threshold: 3, title: '📺 Resistente ao Netflix', description: '3 dias seguidos! Resistiu à série nova!' },
-        { id: 'streak_7', threshold: 7, title: '🛋️ Imune ao Sofá', description: '7 dias! O sofá esqueceu sua forma!' },
-        { id: 'streak_14', threshold: 14, title: '😤 Inimigo do Descanso', description: '14 dias! Descanso? Não conheço!' },
-        { id: 'streak_30', threshold: 30, title: '🤖 Máquina de Aprovar', description: '1 mês sem parar! Você é uma máquina!' }
+        // STREAKS INICIAIS - Celebrar consistência desde cedo
+        { id: 'streak_1', threshold: 1, title: '🌱 Semente Plantada', description: 'Primeiro dia! Toda jornada começa com um passo!' },
+        { id: 'streak_2', threshold: 2, title: '🔗 Criando o Hábito', description: 'Dois dias seguidos! Consistência chegando!' },
+        { id: 'streak_3', threshold: 3, title: '📺 Resistente ao Netflix', description: 'Três dias! Resistiu à série nova!' },
+        { id: 'streak_5', threshold: 5, title: '🎯 Semana de Trabalho', description: 'Cinco dias! Melhor que muito CLT!' },
+        { id: 'streak_7', threshold: 7, title: '🛋️ Imune ao Sofá', description: 'Uma semana! O sofá esqueceu sua forma!' },
+        { id: 'streak_10', threshold: 10, title: '💪 Força de Vontade', description: 'Dez dias! Você é imparável!' },
+        { id: 'streak_14', threshold: 14, title: '😤 Inimigo do Descanso', description: 'Duas semanas! Descanso? Não conheço!' },
+        { id: 'streak_21', threshold: 21, title: '🧠 Hábito Formado', description: 'Três semanas! Dizem que agora é automático!' },
+        { id: 'streak_30', threshold: 30, title: '🤖 Máquina de Aprovar', description: 'Um mês! Você é uma máquina!' },
+        { id: 'streak_60', threshold: 60, title: '🌟 Lendário', description: 'Dois meses! Você é inspiração!' },
+        { id: 'streak_100', threshold: 100, title: '👑 Imortal', description: 'Cem dias! Você transcendeu!' }
     ],
+    
     SESSIONS: [
-        { id: 'sessions_20', threshold: 20, title: '💊 Viciado(a) em Questões', description: 'Questões são sua droga legal!' },
+        // SESSÕES INICIAIS - Recompensas frequentes no começo
+        { id: 'sessions_1', threshold: 1, title: '🎬 Primeira Sessão', description: 'Começou! O primeiro de muitos!' },
+        { id: 'sessions_3', threshold: 3, title: '🎪 Circo Pegando Fogo', description: 'Três sessões! Tá esquentando!' },
+        { id: 'sessions_5', threshold: 5, title: '✋ High Five', description: 'Cinco sessões! Toca aqui!' },
+        { id: 'sessions_7', threshold: 7, title: '🍀 Número da Sorte', description: 'Sete sessões! Sorte é treino!' },
+        { id: 'sessions_10', threshold: 10, title: '🎯 Dezena Cravada', description: 'Dez sessões! Tá ficando sério!' },
+        { id: 'sessions_15', threshold: 15, title: '🏃 Pegando Ritmo', description: 'Quinze sessões! Agora vai!' },
+        { id: 'sessions_20', threshold: 20, title: '💊 Viciado(a) em Questões', description: 'Vinte! Questões são sua droga legal!' },
+        { id: 'sessions_25', threshold: 25, title: '📚 Rato de Biblioteca', description: 'Já mora na biblioteca!' },
+        { id: 'sessions_30', threshold: 30, title: '🔥 Em Chamas', description: 'Trinta sessões! Tá pegando fogo!' },
+        { id: 'sessions_40', threshold: 40, title: '💺 Cadeira Cativa', description: 'Sua cadeira já tem seu formato!' },
         { id: 'sessions_50', threshold: 50, title: '🪑 Lombar Suprema', description: 'Já fez mais fisioterapia que simulados.' },
-        { id: 'sessions_100', threshold: 100, title: '👑 Rei/Rainha do Resumo', description: '100 sessões! Domina a arte do estudo.' }
+        { id: 'sessions_75', threshold: 75, title: '📖 PhD em Resumos', description: 'Seus resumos viram material de curso!' },
+        { id: 'sessions_100', threshold: 100, title: '👑 Rei/Rainha do Resumo', description: 'Cem sessões! Domina a arte do estudo.' },
+        { id: 'sessions_150', threshold: 150, title: '🛏️ Travesseiro Vade Mecum', description: 'Dorme abraçado com os livros!' },
+        { id: 'sessions_200', threshold: 200, title: '🏖️ O que é Férias?', description: 'Férias? Nunca ouvi falar.' },
+        { id: 'sessions_300', threshold: 300, title: '🎉 Destruidor de Finais de Semana', description: 'Churrasco? Só depois da posse!' },
+        { id: 'sessions_500', threshold: 500, title: '🌟 Lenda Viva', description: 'Quinhentas sessões! Você é história!' }
     ]
 };
 
@@ -395,12 +436,27 @@ async function calculateCurrentStreak(userId) {
 
 function calculateLevel(completedTopicsCount) {
     let currentLevel = LEVELS[0];
+    let currentIndex = 0;
+    
+    // Encontrar o nível atual
     for (let i = LEVELS.length - 1; i >= 0; i--) {
         if (completedTopicsCount >= LEVELS[i].threshold) {
             currentLevel = { ...LEVELS[i], level: i + 1 };
+            currentIndex = i;
             break;
         }
     }
+    
+    // Adicionar informações do próximo nível
+    const nextLevel = LEVELS[currentIndex + 1];
+    if (nextLevel) {
+        currentLevel.next_level_info = {
+            title: nextLevel.title,
+            threshold: nextLevel.threshold,
+            topics_needed: nextLevel.threshold - completedTopicsCount
+        };
+    }
+    
     return currentLevel;
 }
 
@@ -637,6 +693,77 @@ const getGeneralStatistics = async (userId) => {
     }
 };
 
+/**
+ * Gera lista de conquistas baseada nas métricas do usuário
+ * Usado para compatibilidade com rotas antigas
+ */
+function generateAchievementsFromMetrics(completedTopics, completedSessions, streak) {
+    const achievements = [];
+    const now = new Date().toISOString();
+    
+    // Conquistas por tópicos
+    ACHIEVEMENTS.TOPICS.forEach(ach => {
+        if (completedTopics >= ach.threshold) {
+            achievements.push({
+                title: ach.title,
+                description: ach.description,
+                achieved_date: now
+            });
+        }
+    });
+    
+    // Conquistas por streak
+    ACHIEVEMENTS.STREAK.forEach(ach => {
+        if (streak >= ach.threshold) {
+            achievements.push({
+                title: ach.title,
+                description: ach.description,
+                achieved_date: now
+            });
+        }
+    });
+    
+    // Conquistas por sessões
+    ACHIEVEMENTS.SESSIONS.forEach(ach => {
+        if (completedSessions >= ach.threshold) {
+            achievements.push({
+                title: ach.title,
+                description: ach.description,
+                achieved_date: now
+            });
+        }
+    });
+    
+    return achievements;
+}
+
+/**
+ * Calcula nível do usuário no formato esperado pelo controller
+ * Retorna objeto com currentLevel, nextLevel e topicsToNextLevel
+ */
+function calculateUserLevelForController(completedTopicsCount) {
+    const levelData = calculateLevel(completedTopicsCount);
+    
+    // Encontrar próximo nível baseado no threshold atual
+    let nextLevelObj = null;
+    for (let i = 0; i < LEVELS.length; i++) {
+        if (LEVELS[i].threshold > completedTopicsCount) {
+            nextLevelObj = LEVELS[i];
+            break;
+        }
+    }
+    
+    return {
+        currentLevel: levelData.title,
+        nextLevel: nextLevelObj ? {
+            title: nextLevelObj.title,
+            threshold: nextLevelObj.threshold,
+            xpNeeded: nextLevelObj.threshold * 50 // Simular XP needed
+        } : null,
+        topicsToNextLevel: nextLevelObj ? nextLevelObj.threshold - completedTopicsCount : 0
+    };
+}
+
 module.exports = {
     processSessionCompletion,
     getGamificationProfile,
@@ -644,6 +771,11 @@ module.exports = {
     getUserProgress,
     getUserAchievements,
     getGeneralStatistics,
+    // Funções helper para controller
+    generateAchievementsFromMetrics,
+    calculateUserLevelForController,
+    calculateCurrentStreak,
+    calculateLevel,
     // Exportar também as definições para uso em outros lugares
     LEVELS,
     ACHIEVEMENTS,
