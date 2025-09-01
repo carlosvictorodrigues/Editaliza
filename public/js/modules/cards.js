@@ -11,6 +11,7 @@ const Cards = {
 
         switch (session.session_type) {
             case 'Simulado Direcionado':
+                return this.createDirectedSimuladoCard(session);
             case 'Simulado Completo':
                 return this.createSimuladCard(session);
             case 'Redação':
@@ -140,6 +141,106 @@ const Cards = {
             </div>`;
     },
 
+    // Novo card especfico para Simulado Direcionado
+    createDirectedSimuladoCard(session) {
+        const isCompleted = session.status === 'Concluído';
+        const cardBg = isCompleted ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-br from-amber-50 via-amber-50 to-orange-50';
+        
+        // Extrair meta informaes
+        const meta = session.meta || {};
+        const focus = meta.focus || [];
+        const nQuestoes = meta.nQuestoes || 25;
+        const tempoSugerido = meta.tempoSugerido || '30-40 min';
+        const linkGabarito = meta.linkGabarito || null;
+        
+        return `
+            <div class="md:col-span-2 lg:col-span-3 xl:col-span-4 study-card flex flex-col justify-between h-full p-8 rounded-3xl shadow-xl border-l-4 border-amber-500 ${cardBg} group">
+                <!-- Header Section -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-20 h-20 bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-300">
+                                <span class="text-4xl">🎯</span>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex items-center space-x-3 mb-2">
+                                    <h3 class="font-bold text-2xl text-gray-800 group-hover:text-gray-900 transition-colors">
+                                        ${this.sanitizeHtml(session.subject_name || 'Simulado Direcionado')}
+                                    </h3>
+                                    <span class="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
+                                        SIMULADO DIRECIONADO
+                                    </span>
+                                </div>
+                                <p class="text-base font-semibold text-gray-600 mb-1">Teste Específico de Conteúdo</p>
+                                <p class="text-sm text-gray-500">Questões focadas em tópicos selecionados</p>
+                            </div>
+                        </div>
+                        <div class="hidden md:flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full animate-pulse"></div>
+                            <div class="w-2 h-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full animate-pulse" style="animation-delay: 0.5s;"></div>
+                            <div class="w-1 h-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full animate-pulse" style="animation-delay: 1s;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Content Section -->
+                    <div class="bg-white/80 p-6 rounded-2xl border-2 border-amber-200">
+                        ${focus.length > 0 ? `
+                            <div class="mb-4">
+                                <p class="text-sm font-semibold text-gray-700 mb-2">🎯 Foco em:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    ${focus.map(f => `<span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-lg text-xs font-medium">${f}</span>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg">📋</span>
+                                <span class="text-sm text-gray-600">${nQuestoes} questões</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-lg">⏰</span>
+                                <span class="text-sm text-gray-600">${tempoSugerido}</span>
+                            </div>
+                        </div>
+                        ${linkGabarito ? `
+                            <div class="mt-4 pt-4 border-t border-amber-200">
+                                <a href="${linkGabarito}" class="text-amber-600 hover:text-amber-700 text-sm font-medium flex items-center space-x-1">
+                                    <span>📄</span>
+                                    <span>Ver gabarito</span>
+                                </a>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                
+                <!-- Action Section -->
+                <div class="mt-auto pt-6 border-t border-amber-200">
+                    ${isCompleted ? `
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center font-bold py-5 bg-gradient-to-r from-green-500 to-emerald-600 border-2 border-green-700 rounded-2xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg">
+                           <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover/btn:bg-green-200 transition-colors">
+                               <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
+                                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                               </svg>
+                           </div>
+                           <span class="text-xl">Simulado Concluído!</span>
+                           <span class="ml-4 text-3xl animate-bounce group-hover/btn:scale-110 transition-transform">🎯</span>
+                        </button>
+                    ` : `
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center space-x-4">
+                            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center group-hover/btn:bg-white/30 transition-colors">
+                                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
+                                </svg>
+                            </div>
+                            <span class="text-xl">Iniciar Simulado</span>
+                            <span class="text-2xl group-hover/btn:animate-bounce">🎯</span>
+                        </button>
+                    `}
+                </div>
+            </div>
+        `;
+    },
+    
     // Card de simulado (direcionado ou completo)
     createSimuladCard(session) {
         const isCompleted = session.status === 'Concluído';
@@ -315,7 +416,7 @@ const Cards = {
         `;
     },
 
-    // Card de reviso
+    // Card de reviso com labels R7/R14/R28
     createReviewCard(session) {
         const style = this.getSubjectStyle(session.subject_name);
         const isCompleted = session.status === 'Concluído';
@@ -326,6 +427,10 @@ const Cards = {
         const mainTitle = parts.shift(); // "Revisão dos seguintes tópicos:"
 
         const topicsHtml = this.generateReviewTopics(parts);
+        
+        // Determinar label da revisão (R7/R14/R28)
+        const reviewLabel = this.getReviewLabel(session);
+        const reviewChip = reviewLabel ? this.createReviewChip(reviewLabel) : '';
 
         return `
             <div id="session-card-${session.id}" class="md:col-span-2 lg:col-span-3 xl:col-span-4 study-card flex flex-col h-full p-8 rounded-3xl shadow-xl border-l-4 ${style.color} ${cardBg} transform transition-all duration-300 hover:shadow-2xl group border-2 border-yellow-300">
@@ -345,6 +450,7 @@ const Cards = {
                                         <span class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
                                             REVISÃO
                                         </span>
+                                        ${reviewChip}
                                     </div>
                                     <p class="text-base font-semibold text-gray-600">Consolidação de Conhecimento</p>
                                     <p class="text-sm text-gray-500">Reforço dos tópicos estudados</p>
@@ -419,6 +525,30 @@ const Cards = {
         `;
     },
 
+    // Helper para criar chip de revisão
+    createReviewChip(label) {
+        const colors = {
+            'R7': 'bg-green-100 text-green-800 border-green-300',
+            'R14': 'bg-amber-100 text-amber-800 border-amber-300',
+            'R28': 'bg-red-100 text-red-800 border-red-300'
+        };
+        const color = colors[label] || 'bg-gray-100 text-gray-800 border-gray-300';
+        return `<span class="${color} border px-2 py-1 rounded-full text-xs font-bold ml-2">${label}</span>`;
+    },
+    
+    // Helper para determinar label da revisão
+    getReviewLabel(session) {
+        // Primeiro tenta pegar da meta
+        if (session.meta?.reviewLabel) {
+            return session.meta.reviewLabel;
+        }
+        // Fallback: inferir do tipo de sessão
+        if (session.session_type?.includes('7D')) return 'R7';
+        if (session.session_type?.includes('14D')) return 'R14';
+        if (session.session_type?.includes('28D')) return 'R28';
+        return null;
+    },
+    
     // Utilitrios auxiliares
     sanitizeHtml(str) {
         if (!str) return '';
