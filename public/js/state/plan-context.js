@@ -51,14 +51,17 @@ class PlanContextManager {
             
             this.state.planId = planId;
             
-            // Etapa 2: Carregar dados do plano
-            this.state.planData = await this._loadPlanData(planId);
+            // Etapa 2: Carregar dados do plano e sessões em paralelo
+            const [planData, allScheduleData] = await Promise.all([
+                this._loadPlanData(planId),
+                app.apiFetch(`/sessions/by-date/${planId}`)
+            ]);
+
+            this.state.planData = planData;
             
-            // Etapa 3: Carregar sessões de hoje
-            this.state.sessions.today = await this._loadTodaySessions(planId);
-            
-            // Etapa 4: Carregar todas as sessões (para estatísticas)
-            this.state.sessions.all = await this._loadAllSessions(planId);
+            // Etapa 3: Processar sessões
+            this.state.sessions.today = this._processTodaySessions(allScheduleData);
+            this.state.sessions.all = this._processAllSessions(allScheduleData);
             
             this.state.initialized = true;
             this.state.loading = false;
@@ -116,9 +119,8 @@ class PlanContextManager {
         return planData;
     }
     
-    async _loadTodaySessions(planId) {
+    _processTodaySessions(allScheduleData) {
         const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
-        const allScheduleData = await app.apiFetch(`/sessions/by-date/${planId}`);
         const todaysSessions = allScheduleData[today] || [];
         
         console.log('📅 Sessões de hoje:', {
@@ -129,7 +131,7 @@ class PlanContextManager {
         return todaysSessions;
     }
     
-    async _loadAllSessions(planId) {
+    _processAllSessions(allScheduleData) {
         const today = new Date();
         const pastDate = new Date(today);
         pastDate.setDate(today.getDate() - 30);
@@ -139,12 +141,10 @@ class PlanContextManager {
         const startDate = pastDate.toISOString().split('T')[0];
         const endDate = futureDate.toISOString().split('T')[0];
         
-        const fullScheduleData = await app.apiFetch(`/sessions/by-date/${planId}`);
-        
         let allSessions = [];
-        for (const date in fullScheduleData) {
+        for (const date in allScheduleData) {
             if (date >= startDate && date <= endDate) {
-                allSessions = allSessions.concat(fullScheduleData[date]);
+                allSessions = allSessions.concat(allScheduleData[date]);
             }
         }
         
@@ -165,8 +165,9 @@ class PlanContextManager {
         
         try {
             console.log('🔄 Atualizando sessões...');
-            this.state.sessions.today = await this._loadTodaySessions(this.state.planId);
-            this.state.sessions.all = await this._loadAllSessions(this.state.planId);
+            const allScheduleData = await app.apiFetch(`/sessions/by-date/${this.state.planId}`);
+            this.state.sessions.today = this._processTodaySessions(allScheduleData);
+            this.state.sessions.all = this._processAllSessions(allScheduleData);
             this._notifyListeners();
         } catch (error) {
             console.error('❌ Erro ao atualizar sessões:', error);

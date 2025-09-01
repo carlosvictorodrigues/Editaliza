@@ -28,7 +28,7 @@ class ComponentsCore {
 
     // Inicialização dos módulos essenciais
     async initializeCore() {
-        void('🚀 Inicializando ComponentsCore...');
+        console.log('🚀 Inicializando ComponentsCore...');
         
         // Carregar UI Core imediatamente (essencial)
         await this.loadModule('ui-core');
@@ -37,13 +37,13 @@ class ComponentsCore {
         try {
             await this.loadModule('contextual-notifications');
             await this.loadModule('notification-integrations');
-            void('✅ Sistema de Notificações Inteligentes carregado');
+            console.log('✅ Sistema de Notificações Inteligentes carregado');
         } catch (error) {
             console.warn('⚠️ Erro ao carregar sistema de notificações:', error);
             // Não quebra a aplicação se as notificações falharem
         }
         
-        void('✅ ComponentsCore inicializado com sucesso');
+        console.log('✅ ComponentsCore inicializado com sucesso');
     }
 
     // Sistema de lazy loading de módulos
@@ -61,7 +61,7 @@ class ComponentsCore {
             throw new Error(`Módulo '${moduleName}' não encontrado`);
         }
 
-        void(`📦 Carregando módulo: ${moduleName}...`);
+        console.log(`📦 Carregando módulo: ${moduleName}...`);
 
         const loadPromise = this.importModule(moduleUrl, moduleName);
         this.loadingModules.set(moduleName, loadPromise);
@@ -71,7 +71,7 @@ class ComponentsCore {
             this.loadedModules.add(moduleName);
             this.loadingModules.delete(moduleName);
             
-            void(`✅ Módulo ${moduleName} carregado com sucesso`);
+            console.log(`✅ Módulo ${moduleName} carregado com sucesso`);
             return moduleInstance;
         } catch (error) {
             this.loadingModules.delete(moduleName);
@@ -226,7 +226,7 @@ class ComponentsCore {
     async preloadModule(moduleName) {
         try {
             await this.loadModule(moduleName);
-            void(`🔄 Módulo ${moduleName} pré-carregado`);
+            console.log(`🔄 Módulo ${moduleName} pré-carregado`);
         } catch (error) {
             console.warn(`⚠️ Falha ao pré-carregar ${moduleName}:`, error);
         }
@@ -260,7 +260,7 @@ class ComponentsCore {
     clearModuleCache() {
         this.loadedModules.clear();
         this.loadingModules.clear();
-        void('🗑️ Cache de módulos limpo');
+        console.log('🗑️ Cache de módulos limpo');
     }
 
     // Informações de debug
@@ -325,7 +325,7 @@ const components = {
 
 // Inicializar quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', async () => {
-    void('📱 Inicializando sistema de componentes...');
+    console.log('📱 Inicializando sistema de componentes...');
     
     // Renderizar UI global imediatamente
     await componentsCore.renderGlobalUI();
@@ -333,11 +333,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Preload inteligente
     await componentsCore.intelligentPreload();
     
-    void('🎉 Sistema de componentes inicializado!');
+    console.log('🎉 Sistema de componentes inicializado!');
     
     // Debug info
     if (window.location.hostname === 'localhost') {
-        void('🔍 Debug info:', componentsCore.getDebugInfo());
+        console.log('🔍 Debug info:', componentsCore.getDebugInfo());
     }
 });
 

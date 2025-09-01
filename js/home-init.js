@@ -383,7 +383,7 @@ class HomeInitializer {
         const total = todaySessions.length;
         const completed = todaySessions.filter(session => 
             session.completed_at || 
-            session.status === 'completed' || 
+            session.status === 'Concluído' || 
             (session.study_time && session.study_time > 0)
         ).length;
         

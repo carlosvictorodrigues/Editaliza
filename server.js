@@ -155,22 +155,21 @@ app.use((req, res, next) => {
 
 // CORREÇÃO DE SEGURANÇA: Servir apenas arquivos públicos necessários
 // Anteriormente: app.use(express.static(__dirname)); // ❌ EXPUNHA TODO O PROJETO
-// Garantir charset UTF-8 para arquivos de texto
-function setUtf8Headers(res, filePath) {
-    const ext = filePath.slice(filePath.lastIndexOf('.')).toLowerCase();
-    if (ext === '.html') {
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    } else if (ext === '.js') {
-        res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-    } else if (ext === '.css') {
-        res.setHeader('Content-Type', 'text/css; charset=utf-8');
-    }
-}
-
-app.use(express.static(path.join(__dirname, 'public'), { setHeaders: setUtf8Headers }));
+app.use(express.static('public', {
+  setHeaders: (res, path) => {
+    if (path.endsWith('.js'))  res.setHeader('Content-Type','application/javascript; charset=utf-8');
+    if (path.endsWith('.css')) res.setHeader('Content-Type','text/css; charset=utf-8');
+  }
+}));
 
 // Servir arquivos específicos ainda no root (compatibilidade temporária)
-app.use('/css', express.static(path.join(__dirname, 'css'), { setHeaders: setUtf8Headers }));
+app.use('/css', express.static(path.join(__dirname, 'css'), { 
+  setHeaders: (res, path) => {
+    if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css; charset=utf-8');
+    }
+  }
+}));
 
 
 // CORREÇÃO: Servir avatares de forma segura - apenas imagens da pasta images/avatars

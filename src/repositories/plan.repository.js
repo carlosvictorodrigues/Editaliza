@@ -22,6 +22,13 @@ class PlanRepository extends BaseRepository {
      * CORRIGIDO: Usando apenas campos que existem
      */
     async findByUserId(userId) {
+        // VALIDAÇÃO DE SEGURANÇA
+        const userIdInt = parseInt(userId, 10);
+        if (isNaN(userIdInt) || userIdInt <= 0) {
+            console.error(`[PLAN_REPO] ERRO CRÍTICO: userId inválido: ${userId}`);
+            throw new Error('ID de usuário inválido');
+        }
+        
         const query = `
             SELECT 
                 id, user_id, plan_name, exam_date, 
@@ -32,7 +39,17 @@ class PlanRepository extends BaseRepository {
             WHERE user_id = $1 
             ORDER BY id DESC
         `;
-        return this.findAll(query, [userId]);
+        
+        console.log(`[PLAN_REPO] Executando findByUserId para usuário ${userIdInt}`);
+        console.log(`[PLAN_REPO] Query: ${query}`);
+        console.log(`[PLAN_REPO] Parâmetros: [${userIdInt}]`);
+        
+        // A cláusula "WHERE user_id = $1" no SQL garante que apenas os planos
+        // do usuário correto serão retornados. A validação extra em JS é redundante.
+        const results = await this.findAll(query, [userIdInt]);
+        
+        console.log(`[PLAN_REPO] Resultados encontrados: ${results.length} planos`);
+        return results;
     }
 
     /**

@@ -32,13 +32,24 @@ const ContextualNotifications = {
         debug: true
     },
 
+    // Determina se o contexto atual requer gamificação (evita chamadas na home)
+    isGamificationContext() {
+        try {
+            const page = (window.location.pathname.split('/').pop() || '').toLowerCase();
+            if (page === 'home.html' || page === '') return false;
+
+            const pagesWithGamification = new Set(['plan.html', 'cronograma.html', 'dashboard.html']);
+            if (pagesWithGamification.has(page)) return true;
+
+            return !!document.querySelector('#gamification-dashboard, .achievement-card, .xp-counter');
+        } catch (e) {
+            return false;
+        }
+    },
+
     // Inicialização segura
     async init() {
-        // Prevenir múltiplas inicializações
-        if (this.initialized || window.ContextualNotifications?.__inited) return;
-        this.initialized = true;
-        window.ContextualNotifications = window.ContextualNotifications || {};
-        window.ContextualNotifications.__inited = true;
+        if (this.initialized) return;
         
         try {
             console.log('🔔 Inicializando Sistema de Notificações Contextuais...');
@@ -75,9 +86,8 @@ const ContextualNotifications = {
     // Carregamento seguro de dados do usuário
     async loadUserData() {
         try {
-            // Só buscar dados de gamificação se estiver habilitado
-            if (window.APP_FEATURES?.GAMIFICATION === true && 
-                window.app && window.app.getGamificationData && window.app.state?.activePlanId) {
+            // Tentar carregar dados de gamificação existentes
+            if (this.isGamificationContext && this.isGamificationContext() && window.app && window.app.getGamificationData && window.app.state?.activePlanId) {
                 this.userData = await window.app.getGamificationData(window.app.state.activePlanId);
                 
                 if (this.userData) {
@@ -351,7 +361,7 @@ const ContextualNotifications = {
                 'Como um Phoenix renascendo das cinzas... só que das cinzas da procrastinação! 🔥',
                 'Voltou! Agora é hora de transformar o Netflix em \'Studyflix\'! 🍿➡️📖',
                 'Quem é vivo sempre aparece… menos quem passou no concurso ainda. Bora mudar isso! 👀',
-                'Você sumiu tanto que já pensei em abrir um B.O. Bem-vindo de volta, desaparecido(a)! 🕵️‍♂️',
+                'Você sumiu tanto que já pensei em abrir um B.O. Bem-vindo de volta, desaparecido(a)! 🕵️♂️',
                 'Faz tanto tempo que a lei mudou desde sua última sessão… cuidado! ⚖️😂',
                 'Se o edital fosse namoro, já teria terminado por abandono afetivo. Bora reatar! 💔➡️❤️'
             ];
@@ -586,10 +596,10 @@ const ContextualNotifications = {
             ],
             'Exercícios': [
                 `Exercícios de ${subject} finalizados! Você está mais ativo mentalmente que personal trainer! 💪🧠`,
-                `${subject} exercitado! Seu cérebro acabou de fazer uma sessão na 'academia mental'! 🏋️‍♂️`,
+                `${subject} exercitado! Seu cérebro acabou de fazer uma sessão na 'academia mental'! 🏋️♂️`,
                 `Exercícios concluídos! ${subject} foi à academia e voltou sarado! 💪`,
                 `${subject} malhado! Você está bombando os músculos cerebrais! 🧠💪`,
-                `Exercícios finalizados! ${subject} fez cardio e musculação mental! 🏃‍♂️🏋️‍♀️`
+                `Exercícios finalizados! ${subject} fez cardio e musculação mental! 🏃♂️🏋️♀️`
             ]
         };
 
@@ -604,8 +614,8 @@ const ContextualNotifications = {
         // Contexto humorado de duração
         if (duration > 90) {
             const longDurationMessages = [
-                ` Uau! ${Math.round(duration)} minutos! Você tem mais resistência que maratonista! 🏃‍♂️`,
-                ` ${Math.round(duration)} minutos de foco! Monge tibetano ficaria com inveja! 🧘‍♂️`,
+                ` Uau! ${Math.round(duration)} minutos! Você tem mais resistência que maratonista! 🏃♂️`,
+                ` ${Math.round(duration)} minutos de foco! Monge tibetano ficaria com inveja! 🧘♂️`,
                 ` ${Math.round(duration)} minutos! Você quebrou o recorde de concentração da casa! 🏆`,
                 ` ${Math.round(duration)} minutos straight! Você é o(a) 'The Rock' dos estudos! 💪`,
                 ` ${Math.round(duration)} minutos! Sua concentração é mais sólida que concreto! 🏗️`

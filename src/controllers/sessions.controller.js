@@ -164,6 +164,40 @@ class SessionsController {
     }
 
     /**
+     * Get a single session by its ID
+     * GET /api/sessions/:sessionId
+     */
+    static async getSessionById(req, res) {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { sessionId } = req.params;
+        const userId = req.user.id;
+
+        try {
+            // Verify session ownership by joining with study_plans
+            const session = await dbGet(`
+                SELECT ss.* 
+                FROM study_sessions ss
+                JOIN study_plans sp ON ss.study_plan_id = sp.id
+                WHERE ss.id = ? AND sp.user_id = ?
+            `, [sessionId, userId]);
+
+            if (!session) {
+                return res.status(404).json({ error: 'Sessão de estudo não encontrada ou não pertence ao usuário.' });
+            }
+
+            res.json(session);
+
+        } catch (error) {
+            console.error('Erro ao buscar dados da sessão:', error);
+            res.status(500).json({ error: 'Erro interno ao buscar dados da sessão.' });
+        }
+    }
+
+    /**
      * Check overdue sessions count
      * GET /api/sessions/overdue-check/:planId
      */
@@ -216,7 +250,7 @@ class SessionsController {
         }
 
         const { sessionId } = req.params;
-        const { status, notes, questions_solved } = req.body;
+        const { status, notes, questions_solved, session_date } = req.body;
         const userId = req.user.id;
 
         console.log('[updateSessionStatus] Dados extraídos - sessionId:', sessionId, 'userId:', userId, 'status:', status);
@@ -249,6 +283,10 @@ class SessionsController {
             if (questions_solved !== undefined) {
                 updates.push('questions_solved = ?');
                 values.push(questions_solved);
+            }
+            if (session_date !== undefined) {
+                updates.push('session_date = ?');
+                values.push(session_date);
             }
 
             if (updates.length === 0) {

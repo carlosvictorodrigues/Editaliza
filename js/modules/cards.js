@@ -13,11 +13,11 @@ const Cards = {
             case 'Simulado Direcionado':
             case 'Simulado Completo':
                 return this.createSimuladCard(session);
-            case 'Redao':
+            case 'Redação':
                 return this.createEssayCard(session);
-            case 'Reviso 7D':
-            case 'Reviso 14D':  
-            case 'Reviso 28D':
+            case 'Revisão 7D':
+            case 'Revisão 14D':  
+            case 'Revisão 28D':
                 return this.createReviewCard(session);
             default:
                 return this.createSessionCard(session);
@@ -27,7 +27,7 @@ const Cards = {
     // Card de sesso de estudo padro
     createSessionCard(session) {
         const style = this.getSubjectStyle(session.subject_name);
-        const isCompleted = session.status === 'Concludo';
+        const isCompleted = session.status === 'Concluído';
         const cardBg = isCompleted ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-br from-white to-slate-50';
         const sessionTypeConfig = {
             'Novo Tópico': { bg: 'bg-gradient-to-r from-blue-100 to-blue-200', text: 'text-blue-800', icon: '\u270D\uFE0F', border: 'border-blue-300', showBadge: false },
@@ -37,7 +37,7 @@ const Cards = {
             'Revisão 28D': { bg: 'bg-gradient-to-r from-pink-100 to-pink-200', text: 'text-pink-800', icon: '\uD83D\uDD01', border: 'border-pink-300', showBadge: true, badgeText: '28D' },
             'Simulado Direcionado': { bg: 'bg-gradient-to-r from-purple-100 to-indigo-200', text: 'text-purple-800', icon: '\uD83C\uDFAF', border: 'border-purple-400', showBadge: false },
             'Simulado Completo': { bg: 'bg-gradient-to-r from-slate-100 to-gray-200', text: 'text-slate-800', icon: '\uD83E\uDDE9', border: 'border-slate-400', showBadge: false },
-            'Redacao': { bg: 'bg-gradient-to-r from-rose-100 to-rose-200', text: 'text-rose-800', icon: '\u270E', border: 'border-rose-300', showBadge: false }
+            'Redação': { bg: 'bg-gradient-to-r from-rose-100 to-rose-200', text: 'text-rose-800', icon: '✍️', border: 'border-rose-300', showBadge: false }
         };
         
         const typeConfig = sessionTypeConfig[session.session_type] || { bg: 'bg-gray-100', text: 'text-gray-700', icon: '📚', showBadge: false };
@@ -95,7 +95,7 @@ const Cards = {
                 <!-- Action Section -->
                 <div class="mt-auto" data-session-id="${session.id}">
                     ${isCompleted ? `
-                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-4 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02]">
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center font-bold py-4 bg-gradient-to-r from-green-500 to-emerald-600 border-2 border-green-700 rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-[1.02]">
                             <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover/btn:bg-green-200 transition-colors">
                                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
@@ -142,7 +142,7 @@ const Cards = {
 
     // Card de simulado (direcionado ou completo)
     createSimuladCard(session) {
-        const isCompleted = session.status === 'Concludo';
+        const isCompleted = session.status === 'Concluído';
         const isDirected = session.session_type === 'Simulado Direcionado';
 
         // Estilos diferenciados para cada tipo de simulado
@@ -150,19 +150,19 @@ const Cards = {
             { 
                 color: 'border-purple-500', 
                 bg: isCompleted ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50', 
-                icon: '<', 
+                icon: '🎯', 
                 gradient: 'from-purple-600 via-indigo-600 to-blue-600',
                 badge: 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg',
-                title: 'Simulado Direcionado - Teste Especfico',
-                subtitle: 'Questes focadas em tpicos j estudados'
+                title: 'Simulado Direcionado - Teste Específico',
+                subtitle: 'Questões focadas em tópicos já estudados'
             } : 
             { 
                 color: 'border-slate-600', 
                 bg: isCompleted ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50', 
-                icon: '<', 
+                icon: '🎯', 
                 gradient: 'from-slate-600 via-gray-600 to-zinc-600',
                 badge: 'bg-gradient-to-r from-slate-600 to-gray-600 text-white shadow-lg',
-                title: 'Simulado Completo - Avaliao Geral',
+                title: 'Simulado Completo - Avaliação Geral',
                 subtitle: 'Teste abrangente de todo o conhecimento'
             };
         
@@ -207,14 +207,14 @@ const Cards = {
                 <!-- Action Section -->
                 <div class="mt-auto pt-6 border-t border-gray-200">
                      ${isCompleted ? `
-                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg">
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center font-bold py-5 bg-gradient-to-r from-green-500 to-emerald-600 border-2 border-green-700 rounded-2xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg">
                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover/btn:bg-green-200 transition-colors">
                                <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                </svg>
                            </div>
-                           <span class="text-xl">Simulado Concludo!</span>
-                           <span class="ml-4 text-3xl animate-bounce group-hover/btn:scale-110 transition-transform"><</span>
+                           <span class="text-xl">Simulado Concluído!</span>
+                           <span class="ml-4 text-3xl animate-bounce group-hover/btn:scale-110 transition-transform">🎯</span>
                         </button>
                     ` : `
                         <button onclick='window.openStudySession(${session.id})' data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.getSmartButtonClasses(session.id, `bg-gradient-to-r ${style.gradient}`)} hover:shadow-2xl text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4">
@@ -234,7 +234,7 @@ const Cards = {
     // Card de redao
     createEssayCard(session) {
         const style = this.getSubjectStyle(session.subject_name);
-        const isCompleted = session.status === 'Concludo';
+        const isCompleted = session.status === 'Concluído';
         const cardBg = isCompleted ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200' : 'bg-gradient-to-br from-rose-50 to-pink-50';
 
         const safeSubjectName = this.sanitizeHtml(session.subject_name);
@@ -280,7 +280,7 @@ const Cards = {
                                 <span>Argumentação</span>
                             </div>
                             <div class="flex items-center space-x-1">
-                                <span class="text-rose-500">(</span>
+                                <span class="text-rose-500">🎨</span>
                                 <span>Criatividade</span>
                             </div>
                         </div>
@@ -290,14 +290,14 @@ const Cards = {
                 <!-- Action Section -->
                 <div class="mt-auto pt-6 border-t ${isCompleted ? 'border-green-200' : 'border-rose-200'}">
                     ${isCompleted ? `
-                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg">
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center font-bold py-5 bg-gradient-to-r from-green-500 to-emerald-600 border-2 border-green-700 rounded-2xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg">
                             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover/btn:bg-green-200 transition-colors">
                                 <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
-                            <span class="text-xl">Redao Concluda!</span>
-                            <span class="ml-4 text-3xl animate-bounce group-hover/btn:scale-110 transition-transform"><</span>
+                            <span class="text-xl">Redação Concluída!</span>
+                            <span class="ml-4 text-3xl animate-bounce group-hover/btn:scale-110 transition-transform">🎯</span>
                         </button>
                     ` : `
                          <button onclick='window.openStudySession(${session.id})' data-session='${sessionJsonString}' class="timer-aware-button group/btn w-full ${this.getSmartButtonClasses(session.id, 'bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700')} hover:shadow-2xl text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-4">
@@ -318,12 +318,12 @@ const Cards = {
     // Card de reviso
     createReviewCard(session) {
         const style = this.getSubjectStyle(session.subject_name);
-        const isCompleted = session.status === 'Concludo';
+        const isCompleted = session.status === 'Concluído';
         const cardBg = isCompleted ? 'bg-gradient-to-br from-green-50 to-emerald-50' : 'bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50';
 
         const description = this.sanitizeHtml(session.topic_description);
         const parts = description.split('\n\n');
-        const mainTitle = parts.shift(); // "Reviso dos seguintes tpicos:"
+        const mainTitle = parts.shift(); // "Revisão dos seguintes tópicos:"
 
         const topicsHtml = this.generateReviewTopics(parts);
 
@@ -335,7 +335,7 @@ const Cards = {
                         <div class="flex-1">
                             <div class="flex items-center space-x-4 mb-4">
                                 <div class="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                                    <span class="text-3xl">=</span>
+                                    <span class="text-3xl">🔄</span>
                                 </div>
                                 <div class="flex-1">
                                     <div class="flex items-center space-x-3 mb-2">
@@ -343,11 +343,11 @@ const Cards = {
                                             ${this.sanitizeHtml(session.subject_name)}
                                         </h3>
                                         <span class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
-                                            REVISO
+                                            REVISÃO
                                         </span>
                                     </div>
-                                    <p class="text-base font-semibold text-gray-600">Consolidao de Conhecimento</p>
-                                    <p class="text-sm text-gray-500">Reforo dos tpicos estudados</p>
+                                    <p class="text-base font-semibold text-gray-600">Consolidação de Conhecimento</p>
+                                    <p class="text-sm text-gray-500">Reforço dos tópicos estudados</p>
                                 </div>
                             </div>
                         </div>
@@ -362,7 +362,7 @@ const Cards = {
                     <!-- Contedo principal -->
                     <div class="bg-white/80 p-6 rounded-2xl border-2 border-yellow-200 mb-6">
                         <p class="text-lg font-semibold text-gray-800 mb-6 flex items-center">
-                            <span class="text-2xl mr-3"><</span>
+                            <span class="text-2xl mr-3">📋</span>
                             ${mainTitle}
                         </p>
                         <div class="prose prose-sm max-w-none">${topicsHtml}</div>
@@ -372,12 +372,12 @@ const Cards = {
                 <!-- Ao -->
                 <div class="mt-auto pt-6 border-t-2 ${isCompleted ? 'border-green-200' : 'border-yellow-200'}" data-session-id="${session.id}">
                     ${isCompleted ? `
-                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center text-green-600 font-bold py-5 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-2xl hover:from-green-100 hover:to-emerald-100 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg">
+                        <button onclick='window.openStudySession(${session.id})' class="group/btn w-full cursor-pointer flex items-center justify-center font-bold py-5 bg-gradient-to-r from-green-500 to-emerald-600 border-2 border-green-700 rounded-2xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-[1.02] hover:shadow-lg">
                             <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4 group-hover/btn:bg-green-200 transition-colors">
                                 <svg class="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                             </div>
-                            <span class="text-xl">Reviso Concluda!</span>
-                            <span class="ml-4 text-3xl animate-bounce group-hover/btn:scale-110 transition-transform"><</span>
+                            <span class="text-xl">Revisão Concluída!</span>
+                            <span class="ml-4 text-3xl animate-bounce group-hover/btn:scale-110 transition-transform">🎯</span>
                         </button>
                     ` : `
                         <!-- Main Review Button -->
@@ -387,8 +387,8 @@ const Cards = {
                                     <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
-                            <span class="text-xl">Marcar como Concluda</span>
-                            <span class="text-2xl group-hover/btn:animate-bounce">=</span>
+                            <span class="text-xl">Marcar como Concluída</span>
+                            <span class="text-2xl group-hover/btn:animate-bounce">🔄</span>
                         </button>
                         
                         <!-- Review Action Buttons Row -->
@@ -486,7 +486,7 @@ const Cards = {
 
         let html = `<p class="mb-6 text-xl font-bold text-gray-800">${mainTitle}</p>`;
         
-        // Processar lista de tpicos organizados por disciplinas
+        // Processar lista de tópicos organizados por disciplinas
         const topicsList = parts[1];
         if (topicsList && topicsList.includes('"')) {
             html += this.processDirectedSimuladoTopics(topicsList, isDirected);
@@ -515,14 +515,14 @@ const Cards = {
             } else if (trimmedLine.startsWith('"') && currentDiscipline) {
                 disciplineGroups[currentDiscipline].push(trimmedLine.replace('"', '').trim());
             } else if (trimmedLine.startsWith('"') && !currentDiscipline) {
-                if (!disciplineGroups['Tpicos Gerais']) {
-                    disciplineGroups['Tpicos Gerais'] = [];
+                if (!disciplineGroups['Tópicos Gerais']) {
+                    disciplineGroups['Tópicos Gerais'] = [];
                 }
-                disciplineGroups['Tpicos Gerais'].push(trimmedLine.replace('"', '').trim());
+                disciplineGroups['Tópicos Gerais'].push(trimmedLine.replace('"', '').trim());
             }
         });
 
-        const disciplineIcons = { 'Direito Constitucional': '\u2696\uFE0F','Direito Administrativo': '\uD83C\uDFDB\uFE0F','Direito Civil': '\uD83D\uDCD7','Direito Penal': '\uD83D\uDE94','Matemática': '\u003E','Português': '\uD83D\uDCD8','Informática': '\uD83D\uDDA5\uFE0F','default': '\u2022' };
+        const disciplineIcons = { 'Direito Constitucional': '\u2696\uFE0F','Direito Administrativo': '\uD83C\uDFDB\uFE0F','Direito Civil': '\uD83D\uDCD7','Direito Penal': '\uD83D\uDE94','Matemática': '\uD83D\uDCCA','Português': '\uD83D\uDCD8','Informática': '\uD83D\uDDA5\uFE0F','default': '\u2022' };
 
         const hasValidGroups = Object.keys(disciplineGroups).length > 0 && 
             Object.values(disciplineGroups).some(topics => topics.length > 0);
@@ -563,13 +563,13 @@ const Cards = {
                                     <span>${discipline}</span>
                                 </div>
                                 <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-medium">
-                                    ${topicCount} ${topicCount === 1 ? 'tpico' : 'tpicos'}
+                                    ${topicCount} ${topicCount === 1 ? 'tópico' : 'tópicos'}
                                 </span>
                             </h4>
                             <ul class="space-y-2">
                                 ${topics.map(topic => `
                                     <li class="flex items-start space-x-3 py-2 px-3 bg-white/60 rounded-lg hover:bg-white/80 transition-colors">
-                                        <span class="text-purple-500 font-bold mt-1">"</span>
+                                        <span class="text-purple-500 font-bold mt-1">•</span>
                                         <span class="text-gray-700 leading-relaxed">${topic}</span>
                                     </li>
                                 `).join('')}
@@ -582,7 +582,7 @@ const Cards = {
     },
 
     generateReviewTopics(parts) {
-        const disciplineIcons = { 'Direito Constitucional': '\u2696\uFE0F','Direito Administrativo': '\uD83C\uDFDB\uFE0F','Direito Civil': '\uD83D\uDCD7','Direito Penal': '\uD83D\uDE94','Matemática': '\u003E','Português': '\uD83D\uDCD8','Informática': '\uD83D\uDDA5\uFE0F','default': '\u2022' };
+        const disciplineIcons = { 'Direito Constitucional': '\u2696\uFE0F','Direito Administrativo': '\uD83C\uDFDB\uFE0F','Direito Civil': '\uD83D\uDCD7','Direito Penal': '\uD83D\uDE94','Matemática': '\uD83D\uDCCA','Português': '\uD83D\uDCD8','Informática': '\uD83D\uDDA5\uFE0F','default': '\u2022' };
 
         return parts.map(part => {
             const lines = part.split('\n');
@@ -590,8 +590,8 @@ const Cards = {
             const icon = disciplineIcons[subjectName] || disciplineIcons.default;
             const topicList = lines.map(line => `
                 <li class="flex items-start space-x-3 py-2 px-3 bg-white/60 rounded-lg hover:bg-white/80 transition-colors">
-                    <span class="text-yellow-600 font-bold mt-1">"</span>
-                    <span class="text-gray-700">${line.replace(/" /g, '').trim()}</span>
+                    <span class="text-yellow-600 font-bold mt-1">•</span>
+                    <span class="text-gray-700">${line.replace(/^["\-•]\s*/, '').trim()}</span>
                 </li>
             `).join('');
             
@@ -601,7 +601,7 @@ const Cards = {
                         <span class="text-2xl mr-3">${icon}</span>
                         ${subjectName}
                         <span class="ml-2 bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">
-                            ${lines.length} ${lines.length === 1 ? 'tpico' : 'tpicos'}
+                            ${lines.length} ${lines.length === 1 ? 'tópico' : 'tópicos'}
                         </span>
                     </h4>
                     <ul class="space-y-2">${topicList}</ul>

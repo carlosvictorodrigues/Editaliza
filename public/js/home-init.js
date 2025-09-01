@@ -109,14 +109,17 @@ class HomeInitializer {
         
         const planId = window.PlanContext.planId;
         
+        // Otimização: Carregar plano uma vez e passar como parâmetro
+        const plan = await app.apiFetch(`/plans/${planId}`);
+
         // Carregar em paralelo (não sequencial para performance)
         await Promise.all([
             this._loadUserProfile(),
-            this._loadMetrics(planId),
+            this._loadMetrics(planId, plan), // Passar o plano para evitar nova chamada
             this._renderTodaySchedule(),
             this._loadStatistics(planId),
             this._checkOverdueTasks(planId),
-            this._loadTransparencyData(planId)
+            this._loadTransparencyData(planId, plan) // Passar o plano para evitar nova chamada
         ]);
         
         this.metrics.phases.data = Date.now() - phaseStart;
@@ -300,12 +303,10 @@ class HomeInitializer {
         }
     }
     
-    async _loadMetrics(planId) {
+    async _loadMetrics(planId, plan) { // Otimização: Receber plano
         try {
-            const [plan, progress] = await Promise.all([
-                app.apiFetch(`/plans/${planId}`),
-                app.apiFetch(`/plans/${planId}/progress`)
-            ]);
+            // O plano já foi carregado, buscar apenas o progresso
+            const progress = await app.apiFetch(`/plans/${planId}/progress`);
             
             // Indicador Reta Final
             const isRetaFinalMode = plan.reta_final_mode === 1 || plan.reta_final_mode === true;
@@ -383,7 +384,7 @@ class HomeInitializer {
         const total = todaySessions.length;
         const completed = todaySessions.filter(session => 
             session.completed_at || 
-            session.status === 'completed' || 
+            session.status === 'Concluído' || 
             (session.study_time && session.study_time > 0)
         ).length;
         
@@ -404,9 +405,8 @@ class HomeInitializer {
         }
     }
     
-    async _loadTransparencyData(planId) {
+    async _loadTransparencyData(planId, plan) { // Otimização: Receber plano
         try {
-            const plan = await app.apiFetch(`/plans/${planId}`);
             if (plan.reta_final_mode) {
                 // Lógica para mostrar dados de transparência
                 console.log('📊 Modo Reta Final ativo');

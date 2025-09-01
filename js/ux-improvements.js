@@ -21,7 +21,7 @@ const UXImprovements = {
         
         try {
             // Buscar preview do replanejamento
-            const preview = await app.apiFetch(`/api/plans/${planId}/replan_preview`);
+            const preview = await app.apiFetch(`/plans/${planId}/replan_preview`);
             
             modal.innerHTML = `
                 <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -274,7 +274,7 @@ const UXImprovements = {
                     try {
                         const [progress, overdue] = await Promise.all([
                             app.getActivePlanData(plan.id, 'progress'),
-                            app.apiFetch(`/api/plans/${plan.id}/overdue_check`)
+                            app.apiFetch(`/plans/${plan.id}/overdue_check`)
                         ]);
                         return { ...plan, progress, overdue: overdue.count || 0 };
                     } catch (error) {
@@ -655,7 +655,7 @@ const UXImprovements = {
                 if (!planId) return;
                 
                 // Obter dados de tarefas atrasadas
-                const overdueData = await app.apiFetch(`/api/plans/${planId}/overdue_check`);
+                const overdueData = await app.apiFetch(`/plans/${planId}/overdue_check`);
                 
                 // Mostrar preview
                 const confirmed = await this.showReplanPreview(planId, overdueData);
@@ -665,7 +665,7 @@ const UXImprovements = {
                     const progressModal = this.showReplanProgress(planId);
                     
                     try {
-                        const response = await app.apiFetch(`/api/plans/${planId}/replan`, {
+                        const response = await app.apiFetch(`/plans/${planId}/replan`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' }
                         });

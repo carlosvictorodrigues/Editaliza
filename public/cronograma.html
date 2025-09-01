@@ -428,8 +428,14 @@
                 const dateClass = isToday ? 'text-editaliza-blue' : 'text-editaliza-black';
                 const formattedDate = date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
                 const daySessions = fullSchedule[dateStr] || [];
-                const sessionsHtml = daySessions.map(session => renderIndividualCard(session)).join('');
-                                // Adicionar badge do Modo Reta Final no cabeçalho da primeira data se ativo
+                
+                // Renderizar todos os cards de forma assíncrona
+                const sessionCards = await Promise.all(
+                    daySessions.map(session => renderIndividualCard(session))
+                );
+                const sessionsHtml = sessionCards.join('');
+                
+                // Adicionar badge do Modo Reta Final no cabeçalho da primeira data se ativo
                 const transparencySection = document.getElementById('transparencySection');
                 const headerBadge = (dates.indexOf(dateStr) === 0 && transparencySection && transparencySection.style.display !== 'none') ? createRetaFinalBadge() : '';
                 allDaysHtml += `<div class="mb-10"><h3 class="text-2xl font-bold ${dateClass} flex items-center">${formattedDate}${headerBadge}</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-4">${sessionsHtml}</div></div>`;
@@ -438,22 +444,27 @@
             container.innerHTML = allDaysHtml;
         }
         
-        function renderIndividualCard(session) {
+        async function renderIndividualCard(session) {
             // Delega a renderização para o components.js
-            switch (session.session_type) {
-                case 'Novo Tópico':
-                case 'Reforço Extra':
-                    return components.createSessionCard(session);
-                case 'Revisão Consolidada':
-                    return components.createReviewCard(session);
-                case 'Simulado Direcionado':
-                case 'Simulado Completo':
-                    return components.createSimuladCard(session);
-                case 'Redação':
-                    return components.createEssayCard(session);
-                default:
-                    console.warn(`Tipo de sessão desconhecido: ${session.session_type}. Usando card padrão.`);
-                    return components.createSessionCard(session);
+            try {
+                switch (session.session_type) {
+                    case 'Novo Tópico':
+                    case 'Reforço Extra':
+                        return await components.createSessionCard(session);
+                    case 'Revisão Consolidada':
+                        return await components.createReviewCard(session);
+                    case 'Simulado Direcionado':
+                    case 'Simulado Completo':
+                        return await components.createSimuladCard(session);
+                    case 'Redação':
+                        return await components.createEssayCard(session);
+                    default:
+                        console.warn(`Tipo de sessão desconhecido: ${session.session_type}. Usando card padrão.`);
+                        return await components.createSessionCard(session);
+                }
+            } catch (error) {
+                console.error('Erro ao renderizar card:', error);
+                return '<div class="p-4 bg-red-50 rounded border border-red-200">Erro ao carregar card</div>';
             }
         }
 

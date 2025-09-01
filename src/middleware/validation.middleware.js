@@ -376,6 +376,25 @@ const validators = {
         return validator;
     },
     
+    // Validador para tempo de estudo em segundos
+    studyTime: body('timeStudiedSeconds')
+        .optional()
+        .isInt({ min: 0, max: 86400 })
+        .withMessage('Tempo deve ser entre 0 e 86400 segundos (24 horas)')
+        .toInt()
+        // Também aceitar incrementSeconds como alternativa
+        .custom((value, { req }) => {
+            if (req.body.incrementSeconds !== undefined && !req.body.timeStudiedSeconds) {
+                const increment = parseInt(req.body.incrementSeconds, 10);
+                if (!isNaN(increment) && increment >= 0 && increment <= 86400) {
+                    req.body.timeStudiedSeconds = increment;
+                    return true;
+                }
+                throw new Error('incrementSeconds deve ser um número entre 0 e 86400');
+            }
+            return true;
+        }),
+    
     textParam: (fieldName, options = {}) => {
         const { minLength = 0, maxLength = 255, optional = false, location = 'query' } = options;
         

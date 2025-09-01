@@ -150,7 +150,7 @@ async function saveTime(increment) {
         
         console.log(`[TIMER] Salvando ${increment}s para sessão ${sessionId} com key ${idempotencyKey}`);
         
-        const response = await window.app.apiFetch(`/api/sessions/${sessionId}/time`, {
+        const response = await window.app.apiFetch(`/sessions/${sessionId}/time`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

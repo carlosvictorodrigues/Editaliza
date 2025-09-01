@@ -65,14 +65,36 @@ const dbRun = (sql, params) => {
  */
 const getPlans = async (req, res) => {
     try {
-        logger.info(`[PLANS] Usuário ID: ${req.user.id}`);
+        // VALIDAÇÃO CRÍTICA DE SEGURANÇA
+        if (!req.user || !req.user.id) {
+            logger.error('[PLANS] ERRO CRÍTICO: req.user ou req.user.id não definido');
+            return res.status(401).json({ error: 'Usuário não autenticado' });
+        }
         
-        // NOVA ABORDAGEM: Usar repository diretamente
-        const rows = await repos.plan.findByUserId(req.user.id);
-        logger.info(`[PLANS] Encontrados ${rows.length} planos via REPOSITORY`);
+        const userId = parseInt(req.user.id, 10);
+        if (isNaN(userId) || userId <= 0) {
+            logger.error(`[PLANS] ERRO CRÍTICO: user_id inválido: ${req.user.id}`);
+            return res.status(400).json({ error: 'ID de usuário inválido' });
+        }
+        
+        logger.info(`[PLANS] Buscando planos para usuário ID: ${userId}`);
+        
+        // NOVA ABORDAGEM: Usar repository diretamente com validação adicional
+        const rows = await repos.plan.findByUserId(userId);
+        
+        // VALIDAÇÃO ADICIONAL DE SEGURANÇA: Verificar que todos os planos pertencem ao usuário
+        const validPlans = rows.filter(plan => {
+            if (plan.user_id !== userId) {
+                logger.error(`[PLANS] ALERTA DE SEGURANÇA: Plano ${plan.id} pertence ao usuário ${plan.user_id}, mas foi retornado para usuário ${userId}`);
+                return false;
+            }
+            return true;
+        });
+        
+        logger.info(`[PLANS] Encontrados ${validPlans.length} planos válidos para usuário ${userId}`);
         
         // Processar dados de forma mais robusta - JSON parsing crítico
-        const plans = rows.map(plan => {
+        const plans = validPlans.map(plan => {
             let studyHours = {};
             if (plan.study_hours_per_day) {
                 try {
@@ -89,7 +111,7 @@ const getPlans = async (req, res) => {
             };
         });
         
-        logger.info(`[PLANS] Enviando ${plans.length} planos`);
+        logger.info(`[PLANS] Enviando ${plans.length} planos para usuário ${userId}`);
         
         // Log estatísticas do adapter para monitoramento
         if (process.env.NODE_ENV !== 'production') {
@@ -99,7 +121,7 @@ const getPlans = async (req, res) => {
         res.json(plans);
         
     } catch (error) {
-        console.error('[PLANS] Erro:', error.message);
+        console.error('[PLANS] Erro ao buscar planos:', error);
         return res.status(500).json({ error: 'Erro interno do servidor' });
     }
 };
@@ -168,17 +190,42 @@ const createPlan = async (req, res) => {
  */
 const getPlan = async (req, res) => {
     try {
-        logger.info(`Buscando plano: ${req.params.planId} para usuário: ${req.user.id}`);
-        
-        // NOVA ABORDAGEM: Usar repository diretamente
-        const row = await repos.plan.findByIdAndUserId(req.params.planId, req.user.id);
-        
-        if (!row) {
-            logger.warn('Plano não encontrado ou não autorizado');
-            return res.status(404).json({ 'error': 'Plano não encontrado ou não autorizado.' });
+        // VALIDAÇÃO CRÍTICA DE SEGURANÇA
+        if (!req.user || !req.user.id) {
+            logger.error('[PLANS] ERRO CRÍTICO: req.user ou req.user.id não definido');
+            return res.status(401).json({ error: 'Usuário não autenticado' });
         }
         
-        logger.info('Plano encontrado via REPOSITORY:', { id: row.id, plan_name: row.plan_name });
+        const userId = parseInt(req.user.id, 10);
+        const planId = parseInt(req.params.planId, 10);
+        
+        if (isNaN(userId) || userId <= 0) {
+            logger.error(`[PLANS] ERRO CRÍTICO: user_id inválido: ${req.user.id}`);
+            return res.status(400).json({ error: 'ID de usuário inválido' });
+        }
+        
+        if (isNaN(planId) || planId <= 0) {
+            logger.error(`[PLANS] ERRO CRÍTICO: plan_id inválido: ${req.params.planId}`);
+            return res.status(400).json({ error: 'ID de plano inválido' });
+        }
+        
+        logger.info(`[PLANS] Buscando plano ${planId} para usuário ${userId}`);
+        
+        // NOVA ABORDAGEM: Usar repository diretamente com validação rigorosa
+        const row = await repos.plan.findByIdAndUserId(planId, userId);
+        
+        if (!row) {
+            logger.warn(`[PLANS] Plano ${planId} não encontrado ou não pertence ao usuário ${userId}`);
+            return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+        }
+        
+        // VALIDAÇÃO ADICIONAL DE SEGURANÇA
+        if (row.user_id !== userId) {
+            logger.error(`[PLANS] ALERTA DE SEGURANÇA: Plano ${row.id} pertence ao usuário ${row.user_id}, mas foi acessado pelo usuário ${userId}`);
+            return res.status(403).json({ error: 'Acesso negado' });
+        }
+        
+        logger.info(`[PLANS] Plano ${row.id} encontrado e validado para usuário ${userId}`);
         
         // CORREÃ‡ÃƒO: study_hours_per_day já é um objeto no PostgreSQL
         if (row.study_hours_per_day && typeof row.study_hours_per_day === 'string') {
@@ -198,7 +245,7 @@ const getPlan = async (req, res) => {
             planId: req.params.planId,
             userId: req.user?.id
         });
-        return res.status(500).json({ 'error': 'Erro ao buscar plano: ' + error.message });
+        return res.status(500).json({ error: 'Erro ao buscar plano' });
     }
 };
 
@@ -207,8 +254,24 @@ const getPlan = async (req, res) => {
  * FASE 4.1 - PARCIALMENTE MIGRADO (ainda usando adapter para transações)
  */
 const deletePlan = async (req, res) => {
-    const planId = req.params.planId;
-    const userId = req.user.id;
+    // VALIDAÇÃO CRÍTICA DE SEGURANÇA
+    if (!req.user || !req.user.id) {
+        logger.error('[PLANS] ERRO CRÍTICO: req.user ou req.user.id não definido');
+        return res.status(401).json({ error: 'Usuário não autenticado' });
+    }
+    
+    const userId = parseInt(req.user.id, 10);
+    const planId = parseInt(req.params.planId, 10);
+    
+    if (isNaN(userId) || userId <= 0) {
+        logger.error(`[PLANS] ERRO CRÍTICO: user_id inválido: ${req.user.id}`);
+        return res.status(400).json({ error: 'ID de usuário inválido' });
+    }
+    
+    if (isNaN(planId) || planId <= 0) {
+        logger.error(`[PLANS] ERRO CRÍTICO: plan_id inválido: ${req.params.planId}`);
+        return res.status(400).json({ error: 'ID de plano inválido' });
+    }
     
     try {
         // NOVA ABORDAGEM: Verificar existência com repository

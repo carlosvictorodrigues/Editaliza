@@ -12,7 +12,11 @@ const router = express.Router();
 const validators = {
     numericId: (paramName) => validationValidators.numericId(paramName),
     sessionStatus: body('status').isIn(['Pendente', 'Concluído']).withMessage('Status deve ser "Pendente" ou "Concluído"'),
-    studyTime: body('seconds').isInt({ min: 0, max: 86400 }).withMessage('Tempo deve ser entre 0 e 86400 segundos (24 horas)'),
+    studyTime: [
+        body('seconds').optional().isInt({ min: 1, max: 600 }).withMessage('Tempo deve ser entre 1 e 600 segundos'),
+        body('incrementSeconds').optional().isInt({ min: 1, max: 600 }).withMessage('Incremento deve ser entre 1 e 600 segundos'),
+        body('timeStudiedSeconds').optional().isInt({ min: 0, max: 86400 }).withMessage('Tempo estudado deve ser entre 0 e 86400 segundos')
+    ],
     postponeDays: body('days').custom((value) => {
         return value === 'next' || (Number.isInteger(Number(value)) && Number(value) > 0 && Number(value) <= 30);
     }).withMessage('Número de dias deve ser "next" ou entre 1 e 30 dias'),
@@ -86,6 +90,18 @@ router.patch('/batch-update-status',
     validators.batchSessions,
     handleValidationErrors,
     SessionsController.batchUpdateStatus
+);
+
+/**
+ * @route GET /api/sessions/:sessionId
+ * @desc Get single session details
+ * @access Private
+ */
+router.get('/:sessionId',
+    authenticateToken(),
+    validators.numericId('sessionId'),
+    handleValidationErrors,
+    SessionsController.getSessionById
 );
 
 /**

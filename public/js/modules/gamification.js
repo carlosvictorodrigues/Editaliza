@@ -6,9 +6,6 @@
 const Gamification = {
 
     renderGamificationDashboard(data, containerId) {
-        // Verificar feature flag antes de fazer qualquer coisa
-        if (window.APP_FEATURES?.GAMIFICATION !== true) return null;
-        
         const container = document.getElementById(containerId);
         if (!container || !data) {
             console.error('Container de gamificação ou dados não encontrados.');
@@ -89,9 +86,6 @@ const Gamification = {
     },
 
     renderAchievements(achievements) {
-        // Verificar feature flag antes de fazer qualquer coisa
-        if (window.APP_FEATURES?.GAMIFICATION !== true) return '';
-        
         if (!achievements || achievements.length === 0) return '';
 
         const achievementCards = achievements.map(ach => {
@@ -160,8 +154,6 @@ const Gamification = {
     },
 
     renderOverdueAlert(overdueData, containerId = 'overdue-alert-container') {
-        // Verificar feature flag antes de fazer qualquer coisa
-        if (window.APP_FEATURES?.GAMIFICATION !== true) return;
         const container = document.getElementById(containerId);
         if (!container) return;
 

@@ -42,7 +42,7 @@ const StudyGoalsNotifications = {
         try {
             // Tentar buscar do plano ativo
             if (window.app && window.app.state?.activePlanId) {
-                const plan = await window.app.apiFetch(`/api/plans/${window.app.state.activePlanId}`);
+                const plan = await window.app.apiFetch(`/plans/${window.app.state.activePlanId}`);
                 if (plan && plan.daily_goal_minutes) {
                     this.dailyGoalMinutes = plan.daily_goal_minutes;
                 }

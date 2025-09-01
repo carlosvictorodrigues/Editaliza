@@ -758,7 +758,7 @@ const app = {
     // Marca sess�o como conclu�da e atualiza m�tricas/cards
     async markSessionAsCompleted(sessionId) {
         try {
-            await app.apiFetch(`/api/sessions/${sessionId}`, {
+            await app.apiFetch(`/sessions/${sessionId}`, {
                 method: 'PATCH',
                 body: JSON.stringify({ status: 'Concluido' })
             });
@@ -788,13 +788,13 @@ const app = {
     }
 };
 
-// CORRE!�O MISS�O 2: Fun��o global inteligente para abrir sess�es de estudo
-// Resolve problema do checklist reabrindo ao pausar cron�metro
+// CORREÇÃO MISSÃO 2: Função global inteligente para abrir sessões de estudo
+// Resolve problema do checklist reabrindo ao pausar cronômetro
 async function openStudySession(sessionId) {
     try {
-        void(`x} Iniciando sess�o ${sessionId}...`);
+        console.log(`🎯 Iniciando sessão ${sessionId}...`);
         
-        // CORRE!�O 1: Verificar se h� um timer ativo/pausado para essa sess�o
+        // CORREÇÃO 1: Verificar se há um timer ativo/pausado para essa sessão
         const hasActiveTimer = window.TimerSystem && TimerSystem.hasActiveTimer(sessionId);
         const hasElapsedTime = window.TimerSystem && TimerSystem.getTimerElapsed(sessionId) > 1000; // Mais de 1 segundo
         
@@ -808,7 +808,7 @@ async function openStudySession(sessionId) {
         if (hasElapsedTime) {
             void(`?? Timer pausado com tempo encontrado para sess�o ${sessionId} - perguntando ao usu�rio`);
             
-            // Mostrar modal de confirma��o se h� tempo estudado mas timer pausado
+            // Mostrar modal de confirmação se há tempo estudado mas timer pausado
             const shouldContinue = await showContinueStudyModal(sessionId);
             
             if (shouldContinue) {
@@ -816,7 +816,7 @@ async function openStudySession(sessionId) {
                 const session = await fetchSessionData(sessionId);
                 if (session) {
                     TimerSystem.continueTimer(sessionId);
-                    // Definir sess�o ANTES de montar a UI do timer
+                    // Definir sessão ANTES de montar a UI do timer
                     StudyChecklist.session = session;
                     StudyChecklist.startStudySession(false);
                     app.showToast('Continuando estudos! Timer retomado.', 'success');
@@ -828,12 +828,12 @@ async function openStudySession(sessionId) {
             }
         }
         
-        // CORRE!�O 2: Buscar dados da sess�o do servidor (n�o do localStorage)
+        // CORREÇÃO 2: Buscar dados da sessão do servidor (não do localStorage)
         const session = await fetchSessionData(sessionId);
 
         if (!session) {
-            console.error('R Sess�o n�o encontrada:', sessionId);
-            app.showToast('Erro: Sess�o n�o encontrada. Recarregue a p�gina.', 'error');
+            console.error('❌ Sessão não encontrada:', sessionId);
+            app.showToast('Erro: Sessão não encontrada. Recarregue a página.', 'error');
             return;
         }
 
@@ -975,11 +975,11 @@ async function openStudySession(sessionId) {
 // Fun��o auxiliar para buscar dados da sess�o
 async function fetchSessionData(sessionId) {
     try {
-        // Primeiro tentar buscar de dados j� carregados na p�gina atual
+        // Primeiro tentar buscar de dados já carregados na página atual
         if (window.todaySessionsData) {
             const localSession = window.todaySessionsData.find(s => s.id == sessionId);
             if (localSession) {
-                void('x Sess�o encontrada em dados locais');
+                console.log('✅ Sessão encontrada em dados locais');
                 return localSession;
             }
         }
@@ -987,30 +987,30 @@ async function fetchSessionData(sessionId) {
         if (window.sessionsData) {
             const localSession = window.sessionsData.find(s => s.id == sessionId);
             if (localSession) {
-                void('x Sess�o encontrada em dados do cronograma');
+                console.log('✅ Sessão encontrada em dados do cronograma');
                 return localSession;
             }
         }
 
-        // Procurar no cronograma completo se dispon�vel
+        // Procurar no cronograma completo se disponível
         if (window.fullSchedule) {
             for (const dateStr in window.fullSchedule) {
                 const sessions = window.fullSchedule[dateStr];
                 const fullSession = sessions.find(s => s.id == sessionId);
                 if (fullSession) {
-                    void('xa Sess�o encontrada no fullSchedule');
+                    console.log('✅ Sessão encontrada no fullSchedule');
                     return fullSession;
                 }
             }
         }
 
-        // Se n�o encontrou localmente, buscar no servidor
-        void('xR Buscando sess�o no servidor...');
+        // Se não encontrou localmente, buscar no servidor
+        console.log('🔍 Buscando sessão no servidor...');
         const response = await app.apiFetch(`/sessions/${sessionId}`);
         return response;
         
     } catch (error) {
-        console.error('R Erro ao buscar dados da sess�o:', error);
+        console.error('❌ Erro ao buscar dados da sessão:', error);
         return null;
     }
 }
@@ -1088,7 +1088,7 @@ async function postponeSession(sessionId, reason = 'user_request') {
         // Buscar dados da sess�o para valida��o
         const session = await fetchSessionData(sessionId);
         if (!session) {
-            app.showToast('Sess�o n�o encontrada!', 'error');
+            app.showToast('Sessão não encontrada!', 'error');
             return;
         }
 
@@ -1164,7 +1164,7 @@ async function reinforceSession(sessionId) {
         // Buscar dados da sess�o para valida��o
         const session = await fetchSessionData(sessionId);
         if (!session) {
-            app.showToast('Sess�o n�o encontrada!', 'error');
+            app.showToast('Sessão não encontrada!', 'error');
             return;
         }
 
