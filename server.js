@@ -1397,6 +1397,28 @@ app.post('/admin/email/reset-limits',
 );
 END OF LEGACY EMAIL ENDPOINTS */
 
+// ============================================================================
+// EMAIL SCHEDULER SERVICE
+// ============================================================================
+const EmailSchedulerService = require('./src/services/EmailSchedulerService');
+let emailScheduler = null;
+
+// Inicializar Email Scheduler apenas em produção
+if (process.env.NODE_ENV === 'production') {
+    try {
+        emailScheduler = new EmailSchedulerService(db, emailService);
+        emailScheduler.initialize().catch(err => {
+            console.error('⚠️ Erro ao inicializar Email Scheduler:', err);
+        });
+    } catch (error) {
+        console.error('⚠️ Email Scheduler não pôde ser iniciado:', error);
+    }
+}
+
+// Rotas de preferências de email
+const emailPreferencesRoutes = require('./src/routes/email-preferences.routes');
+app.use('/api/emails', emailPreferencesRoutes(db, emailScheduler));
+
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando na porta ${PORT}`);
@@ -1408,6 +1430,12 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 // Graceful shutdown
 process.on('SIGTERM', () => {
     console.log('SIGTERM recebido, fechando servidor graciosamente...');
+    
+    // Parar Email Scheduler se estiver rodando
+    if (emailScheduler) {
+        emailScheduler.stop();
+    }
+    
     server.close(() => {
         console.log('Servidor fechado.');
         process.exit(0);

@@ -94,19 +94,25 @@ class PlanRepository extends BaseRepository {
             user_id, plan_name, exam_date,
             daily_question_goal, weekly_question_goal, 
             session_duration_minutes, review_mode,
-            has_essay, reta_final_mode, study_hours_per_day
+            has_essay, reta_final_mode, study_hours_per_day,
+            email_daily_schedule, email_weekly_summary, email_study_reminders
         } = planData;
 
+        // Gerar token único para unsubscribe
+        const crypto = require('crypto');
+        const unsubscribe_token = crypto.randomBytes(32).toString('hex');
+        
         const query = `
             INSERT INTO study_plans (
                 user_id, plan_name, exam_date,
                 daily_question_goal, weekly_question_goal,
                 session_duration_minutes, review_mode,
                 has_essay, reta_final_mode, study_hours_per_day,
-                created_at
+                email_daily_schedule, email_weekly_summary, email_study_reminders,
+                unsubscribe_token, created_at
             ) VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-                CURRENT_TIMESTAMP
+                $11, $12, $13, $14, CURRENT_TIMESTAMP
             ) RETURNING id
         `;
 
@@ -120,7 +126,11 @@ class PlanRepository extends BaseRepository {
             review_mode || 'completo',
             has_essay || false,
             reta_final_mode || false,
-            study_hours_per_day ? JSON.stringify(study_hours_per_day) : '{"0": 0, "1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 0}'
+            study_hours_per_day ? JSON.stringify(study_hours_per_day) : '{"0": 0, "1": 4, "2": 4, "3": 4, "4": 4, "5": 4, "6": 0}',
+            email_daily_schedule !== undefined ? email_daily_schedule : true,
+            email_weekly_summary !== undefined ? email_weekly_summary : true,
+            email_study_reminders !== undefined ? email_study_reminders : true,
+            unsubscribe_token
         ];
 
         const result = await this.create(query, params);

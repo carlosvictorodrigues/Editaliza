@@ -288,6 +288,43 @@
                         </div>
                     </div>
                     
+                    <!-- Preferências de Email -->
+                    <div class="border-t pt-5">
+                        <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <span class="mr-2">📧</span> Notificações por Email
+                        </h3>
+                        
+                        <div class="space-y-3">
+                            <label class="flex items-start cursor-pointer">
+                                <input type="checkbox" id="email_daily_schedule" class="mt-1 mr-3 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue" checked>
+                                <div>
+                                    <div class="font-medium text-sm text-gray-700">Cronograma Diário</div>
+                                    <div class="text-xs text-gray-500">Receba seu plano de estudos do dia todas as manhãs às 6h</div>
+                                </div>
+                            </label>
+                            
+                            <label class="flex items-start cursor-pointer">
+                                <input type="checkbox" id="email_weekly_summary" class="mt-1 mr-3 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue" checked>
+                                <div>
+                                    <div class="font-medium text-sm text-gray-700">Resumo Semanal</div>
+                                    <div class="text-xs text-gray-500">Acompanhe seu progresso com relatórios semanais</div>
+                                </div>
+                            </label>
+                            
+                            <label class="flex items-start cursor-pointer">
+                                <input type="checkbox" id="email_study_reminders" class="mt-1 mr-3 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue" checked>
+                                <div>
+                                    <div class="font-medium text-sm text-gray-700">Lembretes de Estudo</div>
+                                    <div class="text-xs text-gray-500">Notificações para não perder sessões importantes</div>
+                                </div>
+                            </label>
+                        </div>
+                        
+                        <p class="text-xs text-gray-500 mt-3 pl-6">
+                            🔒 Você pode alterar essas preferências a qualquer momento nas configurações do plano
+                        </p>
+                    </div>
+                    
                     <button type="submit" id="createPlanButton" class="btn-primary group">
                         <span class="flex items-center justify-center">
                             Criar Meu Plano!
@@ -512,6 +549,11 @@
                 const button = document.getElementById('createPlanButton');
                 const plan_name = document.getElementById('plan_name').value;
                 const exam_date = document.getElementById('exam_date').value;
+                
+                // Capturar preferências de email
+                const email_daily_schedule = document.getElementById('email_daily_schedule').checked;
+                const email_weekly_summary = document.getElementById('email_weekly_summary').checked;
+                const email_study_reminders = document.getElementById('email_study_reminders').checked;
 
                 button.disabled = true;
                 button.innerHTML = '<span class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Criando seu plano...</span>';
@@ -520,7 +562,13 @@
                 try {
                     const data = await app.apiFetch('/api/plans', {
                         method: 'POST',
-                        body: JSON.stringify({ plan_name, exam_date })
+                        body: JSON.stringify({ 
+                            plan_name, 
+                            exam_date,
+                            email_daily_schedule,
+                            email_weekly_summary,
+                            email_study_reminders
+                        })
                     });
                     
                     // Feedback de sucesso antes da transição
