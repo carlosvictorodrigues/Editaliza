@@ -6,6 +6,7 @@ const SubscriptionModel = require('../../subscription/models/subscription');
 const cacktoConfig = require('../config/cackto.config');
 const CacheService = require('../../subscription/services/cache');
 const { dbGet, dbAll, dbRun } = require('../../utils/database');
+const userProvisioningService = require('../../services/userProvisioningService');
 
 class CacktoWebhookProcessor {
     constructor() {
@@ -141,58 +142,51 @@ class CacktoWebhookProcessor {
      * Handler para pagamento aprovado
      */
     async handlePaymentApproved(data, payload, processingId) {
-        const { customer, plan, amount } = data;
-
-        // Buscar ou criar usuário
-        const user = await this.findOrCreateUser(customer);
+        const { customer, plan, amount, product } = data;
 
         // Mapear plano CACKTO para plano interno
-        const internalPlan = this.mapCacktoPlanToInternal(plan || data.product);
-
-        if (!internalPlan) {
-            throw new AppError(
-                'Plano não reconhecido',
-                ERROR_TYPES.BAD_REQUEST,
-                { cacktoProduct: plan || data.product, processingId }
-            );
+        const productCode = product?.code || plan || data.product;
+        let planType = 'mensal'; // default
+        
+        // Determinar tipo de plano baseado no código do produto
+        if (productCode) {
+            if (productCode.toLowerCase().includes('semestral')) {
+                planType = 'semestral';
+            } else if (productCode.toLowerCase().includes('anual')) {
+                planType = 'anual';
+            }
         }
 
-        // Criar ou atualizar assinatura
-        const subscription = await SubscriptionModel.createOrUpdate({
-            userId: user.id,
-            cacktoTransactionId: data.id,
-            plan: internalPlan.code,
-            status: 'active',
-            expiresAt: this.calculateExpirationDate(internalPlan.billingCycle),
-            amount: amount,
-            currency: data.currency || 'BRL',
-            metadata: {
-                cacktoData: data,
-                processingId,
-                createdAt: new Date().toISOString()
-            }
+        // Criar usuário e enviar credenciais
+        const provisioningResult = await userProvisioningService.createUserFromPayment({
+            customer_email: customer.email,
+            customer_name: customer.name || customer.full_name,
+            plan_type: planType,
+            transaction_id: data.id,
+            amount: amount
         });
 
         // Registrar evento de auditoria
         await AuditModel.logEvent({
-            entityType: 'SUBSCRIPTION',
-            entityId: subscription.id,
-            action: 'ACTIVATED_VIA_CACKTO',
-            userId: user.id,
+            entityType: 'USER_PROVISIONING',
+            entityId: provisioningResult.userId,
+            action: provisioningResult.renewed ? 'PLAN_RENEWED' : 'USER_CREATED',
+            userId: provisioningResult.userId,
             details: {
                 cacktoTransactionId: data.id,
-                plan: internalPlan.code,
+                plan: planType,
                 amount: amount,
-                processingId
+                processingId,
+                email: customer.email
             },
             severity: 'INFO'
         });
 
         return {
-            summary: 'subscription_activated',
-            subscriptionId: subscription.id,
-            userId: user.id,
-            plan: internalPlan.code
+            summary: 'payment_approved_user_provisioned',
+            userId: provisioningResult.userId,
+            plan: planType,
+            renewed: provisioningResult.renewed || false
         };
     }
 

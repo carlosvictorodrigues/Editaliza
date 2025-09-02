@@ -1,12 +1,12 @@
 /**
- * Serviço de Email usando Gmail SMTP com Templates Padronizados
- * Configurado para usar suporte@editaliza.com.br
+ * Serviço de Email com Templates Padronizados
+ * Utiliza Gmail SMTP e templates visuais do Editaliza
  */
 
 const nodemailer = require('nodemailer');
 const emailTemplates = require('../templates/emailTemplates');
 
-class EmailService {
+class EmailServiceWithTemplates {
     constructor() {
         this.transporter = null;
         this.fromEmail = 'suporte@editaliza.com.br';
@@ -15,6 +15,9 @@ class EmailService {
         this.initializeTransporter();
     }
     
+    /**
+     * Inicializa o transporter do Gmail
+     */
     initializeTransporter() {
         const config = {
             service: 'gmail',
@@ -31,13 +34,16 @@ class EmailService {
         
         try {
             this.transporter = nodemailer.createTransport(config);
-            console.log('✅ Gmail SMTP configurado com sucesso');
+            console.log('✅ Gmail SMTP configurado com templates padronizados');
             console.log('📧 Usando:', config.auth.user);
         } catch (error) {
             console.error('❌ Erro ao configurar Gmail:', error.message);
         }
     }
     
+    /**
+     * Envia email genérico
+     */
     async sendEmail(options) {
         if (!this.transporter) {
             console.log('⚠️ Email simulado (SMTP não configurado)');
@@ -56,14 +62,13 @@ class EmailService {
             };
             
             console.log('📤 Enviando email via Gmail...');
-            console.log('   De:', mailOptions.from);
             console.log('   Para:', mailOptions.to);
+            console.log('   Assunto:', mailOptions.subject);
             
             const info = await this.transporter.sendMail(mailOptions);
             
             console.log('✅ Email enviado com sucesso!');
             console.log('   Message ID:', info.messageId);
-            console.log('   Response:', info.response);
             
             return {
                 success: true,
@@ -75,9 +80,7 @@ class EmailService {
             console.error('❌ Erro ao enviar email:', error.message);
             
             if (error.code === 'EAUTH') {
-                console.log('💡 Possível solução:');
-                console.log('   1. Verifique se a senha de app está correta');
-                console.log('   2. Gere nova senha em: https://myaccount.google.com/apppasswords');
+                console.log('💡 Verifique a senha de app do Gmail');
             }
             
             return {
@@ -87,13 +90,16 @@ class EmailService {
         }
     }
     
-    // Método compatível com SendGrid API
-    async send(msg) {
+    /**
+     * Email de Boas-vindas
+     */
+    async sendWelcomeEmail(email, userName) {
+        const html = this.templates.welcomeEmail(userName);
+        
         return this.sendEmail({
-            to: msg.to,
-            subject: msg.subject,
-            text: msg.text,
-            html: msg.html
+            to: email,
+            subject: '🎉 Bem-vindo ao Editaliza!',
+            html
         });
     }
     
@@ -107,19 +113,6 @@ class EmailService {
         return this.sendEmail({
             to: email,
             subject: '🔐 Recuperação de Senha - Editaliza',
-            html
-        });
-    }
-    
-    /**
-     * Email de Boas-vindas
-     */
-    async sendWelcomeEmail(email, userName) {
-        const html = this.templates.welcomeEmail(userName);
-        
-        return this.sendEmail({
-            to: email,
-            subject: '🎉 Bem-vindo ao Editaliza!',
             html
         });
     }
@@ -240,6 +233,43 @@ class EmailService {
     }
     
     /**
+     * Email de Notificação Genérica
+     */
+    async sendNotificationEmail(email, userName, notification) {
+        const content = `
+            <h1 style="margin: 0 0 10px 0; color: #333; font-size: 26px; font-weight: 700;">
+                ${notification.title}
+            </h1>
+            
+            <p style="margin: 0 0 20px 0; color: #666; font-size: 14px; line-height: 1.6;">
+                Olá <strong>${userName}</strong>,
+            </p>
+            
+            <div style="color: #666; font-size: 14px; line-height: 1.8;">
+                ${notification.message}
+            </div>
+            
+            ${notification.actionUrl ? 
+                this.templates.actionButton(
+                    notification.actionText || 'Ver Mais',
+                    notification.actionUrl
+                ) : ''
+            }
+        `;
+        
+        const html = this.templates.baseTemplate(content, {
+            preheader: notification.preheader || notification.title,
+            showSocialLinks: false
+        });
+        
+        return this.sendEmail({
+            to: email,
+            subject: notification.subject || notification.title,
+            html
+        });
+    }
+    
+    /**
      * Extrai texto do HTML para versão texto do email
      */
     extractTextFromHtml(html) {
@@ -252,6 +282,72 @@ class EmailService {
             .replace(/\s+/g, ' ')
             .trim();
     }
+    
+    /**
+     * Método para testar todos os templates
+     */
+    async testAllTemplates(testEmail = 'carlosvictorodrigues@gmail.com') {
+        console.log('🧪 Testando todos os templates de email...\n');
+        
+        const testData = {
+            userName: 'Carlos Victor',
+            email: testEmail
+        };
+        
+        // 1. Boas-vindas
+        console.log('1️⃣ Enviando email de boas-vindas...');
+        await this.sendWelcomeEmail(testData.email, testData.userName);
+        
+        // 2. Recuperação de senha
+        console.log('2️⃣ Enviando email de recuperação de senha...');
+        await this.sendPasswordRecoveryEmail(
+            testData.email,
+            testData.userName,
+            'test-token-123',
+            'https://app.editaliza.com.br'
+        );
+        
+        // 3. Cronograma diário
+        console.log('3️⃣ Enviando email de cronograma diário...');
+        await this.sendDailyScheduleEmail(testData.email, testData.userName, {
+            topics: [
+                { subject: 'Direito Constitucional', name: 'Direitos Fundamentais', duration: 45 },
+                { subject: 'Português', name: 'Concordância Verbal', duration: 30 }
+            ],
+            streak: 7,
+            todayGoal: 3
+        });
+        
+        // 4. Resumo semanal
+        console.log('4️⃣ Enviando email de resumo semanal...');
+        await this.sendWeeklyReportEmail(testData.email, testData.userName, {
+            startDate: '01/09',
+            endDate: '07/09',
+            totalHours: 24.5,
+            topicsCompleted: 18,
+            bestDay: { name: 'Quarta-feira', hours: 5.5 },
+            improvement: 'Você estudou 20% mais que a semana passada!'
+        });
+        
+        // 5. Lembrete de estudo
+        console.log('5️⃣ Enviando email de lembrete de estudo...');
+        await this.sendStudyReminderEmail(testData.email, testData.userName, {
+            subject: 'Matemática',
+            topic: 'Probabilidade e Estatística',
+            duration: 60
+        });
+        
+        // 6. Conquista
+        console.log('6️⃣ Enviando email de conquista...');
+        await this.sendAchievementEmail(testData.email, testData.userName, {
+            title: 'Primeira Semana Completa!',
+            description: 'Você completou 7 dias consecutivos de estudo. Continue assim!',
+            icon: '🔥'
+        });
+        
+        console.log('\n✅ Todos os templates foram enviados!');
+        console.log(`📧 Verifique a caixa de entrada: ${testEmail}`);
+    }
 }
 
-module.exports = new EmailService();
+module.exports = new EmailServiceWithTemplates();

@@ -272,19 +272,12 @@ const refreshToken = async (req, res) => {
     });
 };
 
-const requestPasswordReset = async (req, res) => {
-    res.status(501).json({
-        success: false,
-        error: 'Funcionalidade não implementada'
-    });
-};
+// Importar do controller especializado
+const passwordResetController = require('./passwordResetController');
 
-const resetPassword = async (req, res) => {
-    res.status(501).json({
-        success: false,
-        error: 'Funcionalidade não implementada'
-    });
-};
+// Delegar para o controller especializado
+const requestPasswordReset = passwordResetController.requestPasswordReset;
+const resetPassword = passwordResetController.resetPassword;
 
 module.exports = {
     register,

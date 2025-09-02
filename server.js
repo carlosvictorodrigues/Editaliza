@@ -52,18 +52,8 @@ const passport = require('./src/config/passport');
 const emailService = require('./src/services/emailService');
 const { emailRateLimitService, createPasswordRecoveryRateLimit } = require('./src/services/emailRateLimitService');
 
-// CACKTO INTEGRATION DISABLED - Causing database errors
-// TODO: Re-enable after proper database migration
-/*
-// Importar integração CACKTO
-const { 
-    CacktoRoutes,
-    initialize: initializeCackto,
-    checkCacktoSubscription,
-    requirePremiumFeature,
-    addSubscriptionInfo
-} = require('./src/cackto-integration');
-*/
+// Importar rotas CACKTO para webhooks
+const CacktoRoutes = require('./src/routes/cackto.routes');
 
 // Importar middleware de segurança
 const {
@@ -567,14 +557,8 @@ app.use('*', (req, res, next) => {
 });
 
 // Rotas de webhook CACKTO (ANTES do rate limiting para APIs)
+// Webhook routes don't need authentication - they use signature validation
 app.use('/api/webhooks', CacktoRoutes);
-
-// Middleware para rotas que precisam de assinatura ativa
-const requireActiveSubscription = checkCacktoSubscription({
-    redirectToPlans: false,
-    strict: true
-});
-*/
 
 // TEMPORARY FALLBACK - Simple subscription check without Cackto
 const requireActiveSubscription = (req, res, next) => {
