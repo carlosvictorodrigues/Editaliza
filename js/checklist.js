@@ -124,12 +124,14 @@ const StudyChecklist = {
             }
 
             // Fechar modal e recarregar se necessário
+            // Aguardar 3 segundos para dar tempo de ler a notificação
             setTimeout(() => {
                 this.close();
                 if (!window.location.pathname.includes('plan.html')) {
-                    location.reload();
+                    // Esperar mais 500ms após fechar o modal para suavizar a transição
+                    setTimeout(() => location.reload(), 500);
                 }
-            }, 1500);
+            }, 3000);
             
         } catch (error) {
             console.error('Erro ao concluir sessão:', error);
@@ -466,8 +468,9 @@ const StudyChecklist = {
             this.close();
             
             // Reload page if not on plan.html
+            // Aguardar 3.5 segundos para dar tempo de ler a notificação
             if (!window.location.pathname.includes('plan.html')) {
-                setTimeout(() => location.reload(), 1000);
+                setTimeout(() => location.reload(), 3500);
             }
             
         } catch (error) {

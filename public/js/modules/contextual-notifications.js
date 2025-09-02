@@ -26,7 +26,7 @@ const ContextualNotifications = {
         maxNotificationsPerDay: 6,
         notificationCooldown: 300000, // 5 minutos
         // CRITICAL FIX: Reduce cooldown to prevent infinite loops
-        globalNotificationCooldown: 10000, // 10 seconds global cooldown
+        globalNotificationCooldown: 3000, // 3 seconds global cooldown (reduzido para não bloquear notificações importantes)
         procrastinationThreshold: 3,
         streakMilestones: [3, 7, 14, 21, 30],
         debug: true
@@ -843,6 +843,12 @@ const ContextualNotifications = {
     
     // CRITICAL FIX: Add notification cooldown checks
     canShowNotification(type) {
+        // Notificações prioritárias sempre podem ser mostradas
+        const priorityTypes = ['session_complete', 'error', 'success', 'achievement'];
+        if (priorityTypes.includes(type)) {
+            return true; // Bypass cooldown para notificações importantes
+        }
+        
         const now = Date.now();
         const cooldown = this.config.globalNotificationCooldown;
         
