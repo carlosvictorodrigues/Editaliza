@@ -445,7 +445,7 @@ const app = {
             }, { once: true });
         }, 4000);
         
-        console.log('? Toast forãado exibido:', message);
+        console.log('🔔 Toast forçado exibido:', message);
     },
 
     showSpinner() {
@@ -771,7 +771,7 @@ const app = {
                 }
             }
 
-            app.showToast('Sessão marcada como concluãda!', 'success');
+            app.showToast('Sessão marcada como concluída!', 'success');
             if (app.state?.activePlanId) {
                 app.triggerMetricsUpdate(app.state.activePlanId, 'session_completed');
             }
@@ -801,7 +801,7 @@ async function openStudySession(sessionId) {
         if (hasActiveTimer) {
             void(`? Timer ativo encontrado para sessão ${sessionId} - continuando sem abrir checklist`);
             TimerSystem.continueTimer(sessionId);
-            app.showToast('?? Timer retomado! Continue estudando.', 'success');
+            app.showToast('⏱️ Timer retomado! Continue estudando.', 'success');
             return;
         }
         
@@ -821,7 +821,7 @@ async function openStudySession(sessionId) {
                     StudyChecklist.startStudySession(false);
                     app.showToast('Continuando estudos! Timer retomado.', 'success');
                 } else {
-                    console.error('R Não foi possãvel carregar dados da sessão');
+                    console.error('❌ Não foi possível carregar dados da sessão');
                     app.showToast('Erro ao carregar sessão. Tente novamente.', 'error');
                 }
                 return;
@@ -936,9 +936,9 @@ async function openStudySession(sessionId) {
         void('S& Sessão carregada:', session.subject_name);
 
         // CORRE!ãO: Verificar se sessão jã foi concluãda
-        if (session.status === 'Concluãdo') {
-            void('a? Sessão jã foi concluãda');
-            app.showToast('S& Esta sessão jã foi concluãda!', 'info');
+        if (session.status === 'Concluído') {
+            console.log('ℹ️ Sessão já foi concluída');
+            app.showToast('ℹ️ Esta sessão já foi concluída!', 'info');
             
             // Atualizar visual do card para mostrar como concluãda
             if (window.TimerSystem) {
@@ -957,8 +957,8 @@ async function openStudySession(sessionId) {
         if (window.StudyChecklist && window.StudyChecklist.show) {
             window.StudyChecklist.show(session);
         } else {
-            console.error('StudyChecklist não estã disponãvel');
-            app.showToast('Erro ao carregar mãdulo de checklist. Recarregue a pãgina.', 'error');
+            console.error('StudyChecklist não está disponível');
+            app.showToast('Erro ao carregar módulo de checklist. Recarregue a página.', 'error');
             return;
         }
 
@@ -1079,32 +1079,32 @@ function showContinueStudyModal(sessionId) {
 }
 
 /**
- * Adiar uma sessão de estudo para o prãximo dia disponãvel
+ * Adiar uma sessão de estudo para o próximo dia disponível
  * @param {number} sessionId - ID da sessão
  * @param {string} reason - Motivo do adiamento (opcional)
  */
 async function postponeSession(sessionId, reason = 'user_request') {
     try {
-        // Buscar dados da sessão para validaãão
+        // Buscar dados da sessão para validação
         const session = await fetchSessionData(sessionId);
         if (!session) {
             app.showToast('Sessão não encontrada!', 'error');
             return;
         }
 
-        if (session.status === 'Concluãdo') {
-            app.showToast('Não ã possãvel adiar uma sessão jã concluãda!', 'info');
+        if (session.status === 'Concluído') {
+            app.showToast('Não é possível adiar uma sessão já concluída!', 'info');
             return;
         }
 
         // Mostrar loading no botão
         const postponeBtn = document.querySelector(`[data-session-id="${sessionId}"] .postpone-btn`);
         if (postponeBtn) {
-            postponeBtn.innerHTML = '<span class="animate-spin">?</span> Adiando...';
+            postponeBtn.innerHTML = '<span class="animate-spin">🔄</span> Adiando...';
             postponeBtn.disabled = true;
         }
 
-        // Fazer requisiãão para adiar
+        // Fazer requisição para adiar
         const response = await app.apiFetch(`/sessions/${sessionId}/postpone`, {
             method: 'PATCH',
             headers: {
@@ -1116,8 +1116,9 @@ async function postponeSession(sessionId, reason = 'user_request') {
             })
         });
 
-        if (response.success) {
-            app.showToast('?? Sessão adiada com sucesso!', 'success');
+        // A API retorna diretamente o objeto, não precisa verificar .success
+        if (response && response.message) {
+            app.showToast('✅ Sessão adiada com sucesso!', 'success');
             
             // Atualizar dados locais
             if (window.todaySessionsData) {
@@ -1144,7 +1145,7 @@ async function postponeSession(sessionId, reason = 'user_request') {
 
     } catch (error) {
         console.error('Erro ao adiar sessão:', error);
-        app.showToast('? Erro ao adiar sessão. Tente novamente.', 'error');
+        app.showToast('❌ Erro ao adiar sessão. Tente novamente.', 'error');
         
         // Restaurar botão
         const postponeBtn = document.querySelector(`[data-session-id="${sessionId}"] .postpone-btn`);
@@ -1161,7 +1162,7 @@ async function postponeSession(sessionId, reason = 'user_request') {
  */
 async function reinforceSession(sessionId) {
     try {
-        // Buscar dados da sessão para validaãão
+        // Buscar dados da sessão para validação
         const session = await fetchSessionData(sessionId);
         if (!session) {
             app.showToast('Sessão não encontrada!', 'error');
@@ -1184,7 +1185,7 @@ async function reinforceSession(sessionId) {
         });
 
         if (response.success) {
-            app.showToast('?? Sessão de reforão criada! Aparecerã em 3 dias.', 'success');
+            app.showToast('🔄 Sessão de reforço criada! Aparecerá em 3 dias.', 'success');
             
             // Recarregar cronograma para mostrar nova sessão
             if (typeof window.renderScheduleDOM === 'function') {
@@ -1195,8 +1196,8 @@ async function reinforceSession(sessionId) {
         }
 
     } catch (error) {
-        console.error('Erro ao criar sessão de reforão:', error);
-        app.showToast('? Erro ao criar reforão. Tente novamente.', 'error');
+        console.error('Erro ao criar sessão de reforço:', error);
+        app.showToast('❌ Erro ao criar reforço. Tente novamente.', 'error');
         
         // Restaurar botão
         const reinforceBtn = document.querySelector(`[data-session-id="${sessionId}"] .reinforce-btn`);
@@ -1207,7 +1208,7 @@ async function reinforceSession(sessionId) {
     }
 }
 
-// CORRE!ãO: Expor funãães globalmente
+// CORREÇÃO: Expor funções globalmente
 window.app = app;
 window.openStudySession = openStudySession;
 window.fetchSessionData = fetchSessionData;
@@ -1222,7 +1223,7 @@ if (document.readyState === 'loading') {
     app.init();
 }
 
-// Safe override: reabrir modal do timer quando jã houver timer ativo
+// Safe override: reabrir modal do timer quando já houver timer ativo
 if (typeof window.openStudySession === 'function') {
     const __originalOpenStudySession = window.openStudySession;
     window.openStudySession = async function(sessionId) {

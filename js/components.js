@@ -418,7 +418,7 @@ class ComponentsCore {
             return uiCore.showToast(message, type);
         } catch (error) {
             // Fallback
-            alert(`${type === 'error' ? 'L' : '\u0005'} ${message}`);
+            alert(`${type === 'error' ? '❌' : '✅'} ${message}`);
         }
     }
 
