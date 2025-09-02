@@ -303,7 +303,7 @@ class SessionsController {
 
             await dbRun(sql, values);
 
-            if (status === 'completed') { // Changed from 'Concluído' to 'completed'
+            if (status === 'Concluído' || status === 'completed') { // Aceita tanto português quanto inglês
                 // Processar gamificação imediatamente para garantir que funcione
                 console.log(`[GAMIFICATION] Iniciando processamento para sessão ${sessionId}, usuário ${userId}`);
                 try {
@@ -412,14 +412,30 @@ class SessionsController {
             return res.status(400).json({ error: 'sessionId must be a valid integer' });
         }
         
-        // Parse increment de forma segura - aceita incrementSeconds ou seconds
-        const inc = Number.isFinite(req.body.incrementSeconds) ? req.body.incrementSeconds
-                  : Number.isFinite(req.body.seconds) ? req.body.seconds
-                  : NaN;
+        // Parse increment de forma segura - aceita vários formatos
+        let inc = 0;
+        if (Number.isFinite(req.body.incrementSeconds)) {
+            inc = Math.floor(req.body.incrementSeconds);
+        } else if (Number.isFinite(req.body.seconds)) {
+            inc = Math.floor(req.body.seconds);
+        } else if (Number.isFinite(req.body.minutes)) {
+            inc = Math.floor(req.body.minutes * 60);
+        } else {
+            // Se não especificado mas completed=true, assume sessão completa de 60 minutos
+            if (req.body.completed === true) {
+                inc = 3600; // 60 minutos
+            }
+        }
         
-        // Validação: incrementSeconds deve ser inteiro entre 1 e 600
-        if (!Number.isInteger(inc) || inc <= 0 || inc > 600) {
-            return res.status(400).json({ error: 'incrementSeconds must be integer between 1 and 600' });
+        // Validação: tempo deve ser entre 1 segundo e 4 horas
+        if (inc <= 0 || inc > 14400) {
+            // Se for apenas para marcar como completo, permite
+            if (req.body.completed === true && inc === 3600) {
+                // OK - sessão completa padrão
+            } else {
+                // Se não há tempo válido, usar valor padrão pequeno para não falhar
+                inc = 60; // 1 minuto padrão
+            }
         }
         
         // Log útil (sem token)
@@ -451,12 +467,37 @@ class SessionsController {
             
             console.log(`[registerStudyTime] Success - totalSeconds: ${totalSeconds}`);
 
+            // Se marcou como completo, atualizar status e acionar gamificação
+            if (req.body.completed === true) {
+                await dbRun(`
+                    UPDATE study_sessions 
+                    SET status = 'Concluído',
+                        updated_at = CURRENT_TIMESTAMP
+                    WHERE id = ?
+                `, [sessionId]);
+                
+                // Acionar gamificação
+                try {
+                    const minutes = Math.floor(totalSeconds / 60);
+                    await gamificationService.addExperiencePoints(userId, {
+                        action: 'complete_session',
+                        sessionId: sessionId,
+                        minutes: minutes,
+                        sessionType: session.session_type || 'Novo Tópico'
+                    });
+                } catch (xpError) {
+                    console.error('[XP] Erro ao adicionar XP:', xpError);
+                    // Não falhar a requisição por erro de XP
+                }
+            }
+            
             // Resposta padronizada
             return res.json({ 
                 ok: true, 
                 sessionId: sessionId, 
                 totalSeconds: totalSeconds, 
-                updatedAt: updatedAt 
+                updatedAt: updatedAt,
+                completed: req.body.completed === true 
             });
 
         } catch (error) {

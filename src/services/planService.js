@@ -378,7 +378,10 @@ class PlanService {
             s.status === 'pending' && s.session_date < today
         );
         
-        const completedSessions = sessions.filter(s => s.status === 'completed');
+        const completedSessions = sessions.filter(s => 
+            s.status === 'completed' || s.status === 'Concluído' || 
+            s.status === 'Concluída' || s.status === 'Concluida'
+        );
         const completedTopics = new Set(
             completedSessions
                 .filter(s => s.session_type === 'Novo Tópico' && s.topic_id)
@@ -488,7 +491,8 @@ class PlanService {
         // Contar tópicos realmente estudados através das sessões concluídas
         const completedTopicSessions = studySessions.filter(s => 
             s.session_type === 'Novo Tópico' && 
-            s.status === 'completed' && 
+            (s.status === 'completed' || s.status === 'Concluído' || 
+             s.status === 'Concluída' || s.status === 'Concluida') && 
             s.topic_id !== null
         );
         
@@ -698,7 +702,8 @@ class PlanService {
         const newTopicSessions = sessions.filter(s => s.session_type === 'Novo Tópico');
         const completedTopics = new Set(
             newTopicSessions
-                .filter(s => s.status === 'completed' && s.topic_id !== null)
+                .filter(s => (s.status === 'completed' || s.status === 'Concluído' || 
+                             s.status === 'Concluída' || s.status === 'Concluida') && s.topic_id !== null)
                 .map(r => r.topic_id)
         );
         const topicsCompletedCount = completedTopics.size;
@@ -709,7 +714,9 @@ class PlanService {
         const isMaintenanceMode = totalTopics > 0 && futureNewTopics.length === 0;
 
         // Calculate study pace
-        const completedNewTopicSessions = sessions.filter(s => s.session_type === 'Novo Tópico' && s.status === 'completed');
+        const completedNewTopicSessions = sessions.filter(s => s.session_type === 'Novo Tópico' && 
+            (s.status === 'completed' || s.status === 'Concluído' || 
+             s.status === 'Concluída' || s.status === 'Concluida'));
         const firstSessionDate = completedNewTopicSessions.length > 0 ? 
             new Date(Math.min(...completedNewTopicSessions.map(s => new Date(s.session_date)))) : today;
 
@@ -814,46 +821,7 @@ class PlanService {
         }
     }
 
-    /**
-     * Calculate plan progress for dashboard
-     */
-    async calculateProgress(planId) {
-        try {
-            const sessions = await this.repos.session.findByPlanId(planId);
-            
-            // Filtrar sessões por tipo
-            const studySessions = sessions.filter(s => s.session_type === 'Novo Tópico');
-            const revisionSessions = sessions.filter(s => 
-                s.session_type && s.session_type.includes('Revisão')
-            );
-            
-            // Contar tópicos únicos concluídos
-            const completedTopics = new Set(
-                studySessions
-                    .filter(s => s.status === 'completed' && s.topic_id !== null)
-                    .map(s => s.topic_id)
-            ).size;
-            
-            // Contar sessões
-            const totalSessions = sessions.length;
-            const completedSessions = sessions.filter(s => s.status === 'completed').length;
-            
-            return {
-                completedTopics,
-                totalSessions: studySessions.length,
-                revisionSessions: revisionSessions.length,
-                completedSessions
-            };
-        } catch (error) {
-            console.error('Erro ao calcular progresso:', error);
-            return {
-                completedTopics: 0,
-                totalSessions: 0,
-                revisionSessions: 0,
-                completedSessions: 0
-            };
-        }
-    }
+    
 
     /**
      * Get gamification data with complete level system
@@ -1168,7 +1136,7 @@ class PlanService {
             FROM study_sessions ss
             LEFT JOIN study_time_logs stl ON stl.session_id = ss.id
             WHERE ss.study_plan_id = $1 
-                AND (ss.status = 'completed' OR ss.time_studied_seconds > 0)
+                AND (ss.status IN ('completed', 'Concluído', 'Concluída', 'Concluida') OR ss.time_studied_seconds > 0)
             GROUP BY ss.id, ss.time_studied_seconds
         ) AS session_times
     `, [planId]);
@@ -1206,6 +1174,7 @@ class PlanService {
         totalStudyDays: uniqueStudyDays,
         totalStudyTime: totalStudyTime, // TEMPO TOTAL AGREGADO DE AMBAS AS TABELAS
         experiencePoints: experiencePoints,
+        xp: experiencePoints, // Adicionar campo 'xp' para compatibilidade com frontend
         concurseiroLevel: currentLevel.title,
         nextLevel: nextLevel ? nextLevel.title : null,
         topicsToNextLevel: topicsToNextLevel,
@@ -1224,7 +1193,26 @@ class PlanService {
         totalXP: experiencePoints,
         level: Math.ceil(uniqueStudyDays / 7) || 1,
         levelName: currentLevel.title,
-        achievementsCount: achievements.length
+        achievementsCount: achievements.length,
+        
+        // Adicionar informações de nível para o frontend
+        level_info: {
+            title: currentLevel.title,
+            level: currentLevel.level,
+            color: currentLevel.color || '#3B82F6',
+            phrase: currentLevel.phrase || 'Continue estudando!',
+            icon: currentLevel.icon || '🌟',
+            emoji: currentLevel.emoji || '🌟',
+            threshold: currentLevel.threshold,
+            next_level_info: nextLevel ? {
+                title: nextLevel.title,
+                threshold: nextLevel.threshold
+            } : null
+        },
+        
+        // Adicionar streak atual para compatibilidade
+        current_streak: currentStreak,
+        longest_streak: currentStreak // Por enquanto, usar o mesmo valor
     };
 };
 
@@ -1236,7 +1224,8 @@ class PlanService {
         
         const uniqueDates = new Set();
         sessions.forEach(session => {
-            if (session.status === 'completed' && session.session_date) {
+            if ((session.status === 'completed' || session.status === 'Concluído' || 
+                 session.status === 'Concluída' || session.status === 'Concluida') && session.session_date) {
                 // Extract only date (YYYY-MM-DD) from session_date
                 // Skip sessions without date
                 if (!session.session_date) {
@@ -1272,7 +1261,8 @@ class PlanService {
         
         // Get completed sessions sorted by date (most recent first)
         const completedSessions = sessions
-            .filter(s => s.status === 'completed' && s.session_date)
+            .filter(s => (s.status === 'completed' || s.status === 'Concluído' || 
+                         s.status === 'Concluída' || s.status === 'Concluida') && s.session_date)
             .sort((a, b) => new Date(b.session_date) - new Date(a.session_date));
             
         if (completedSessions.length === 0) return 0;
@@ -1356,7 +1346,10 @@ class PlanService {
 
         // Get comprehensive user statistics
         const topics = await this.repos.topic.findByPlanId(planId);
-        const completedTopics = topics.filter(t => t.status === 'completed').length;
+        const completedTopics = topics.filter(t => 
+            t.status === 'completed' || t.status === 'Concluído' || 
+            t.status === 'Concluída' || t.status === 'Concluida'
+        ).length;
         const totalTopics = topics.length;
         
         return {
@@ -1448,8 +1441,8 @@ class PlanService {
             SELECT 
                 COUNT(DISTINCT DATE(session_date)) as study_days,
                 COUNT(*) as total_sessions,
-                COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_sessions,
-                AVG(CASE WHEN status = 'completed' THEN time_studied_seconds END) as avg_study_time
+                COUNT(CASE WHEN status IN ('completed', 'Concluído', 'Concluída', 'Concluida') THEN 1 END) as completed_sessions,
+                AVG(CASE WHEN status IN ('completed', 'Concluído', 'Concluída', 'Concluida') THEN time_studied_seconds END) as avg_study_time
             FROM study_sessions
             WHERE study_plan_id = $1
         `, [planId]);

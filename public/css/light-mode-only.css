@@ -1,5 +1,5 @@
 /* ================================================
-   EDITALIZA - FORAR LIGHT MODE APENAS (FORA BRUTA)
+   EDITALIZA - FORÇAR LIGHT MODE APENAS (FORÇA BRUTA)
    ================================================ */
 
 /* REMOVER COMPLETAMENTE QUALQUER DATA-THEME */
@@ -38,7 +38,7 @@ button[onclick*="theme"],
     pointer-events: none !important;
 }
 
-/* SESSES DE ESTUDO - TTULOS SEMPRE PRETOS */
+/* SESSÕES DE ESTUDO - TÍTULOS SEMPRE PRETOS */
 .study-session-title,
 .session-title,
 .study-card h3,
@@ -52,7 +52,7 @@ button[onclick*="theme"],
     font-weight: 700 !important;
 }
 
-/* BOTES DE SESSO - TEXTO SEMPRE BRANCO */
+/* BOTÕES DE SESSÃO - TEXTO SEMPRE BRANCO */
 .btn-study-start,
 .btn-study-reinforce,
 .btn-study-postpone,
@@ -69,7 +69,7 @@ button[onclick*="verDetalhes"],
     font-weight: 600 !important;
 }
 
-/* BOTES DE SESSO ATRASADA - TEXTO BRANCO */
+/* BOTÕES DE SESSÃO ATRASADA - TEXTO BRANCO */
 .btn-replanejar-agora,
 .btn-ver-detalhes-atraso,
 .btn-danger {
@@ -78,14 +78,14 @@ button[onclick*="verDetalhes"],
     font-weight: 600 !important;
 }
 
-/* BOTES SECUNDRIOS - TEXTO BRANCO */
+/* BOTÕES SECUNDÁRIOS - TEXTO BRANCO */
 .btn-secondary {
     color: #FFFFFF !important;
     background-color: #334155 !important;
     font-weight: 600 !important;
 }
 
-/* RODAP - FUNDO BRANCO DO CARD DO LOGO */
+/* RODAPÉ - FUNDO BRANCO DO CARD DO LOGO */
 .footer-logo,
 .editaliza-footer-refatorado .footer-logo,
 body .editaliza-footer-refatorado .footer-logo,
@@ -98,7 +98,7 @@ html body .editaliza-footer-refatorado .footer-logo {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
 }
 
-/* RODAP - TTULOS BRANCOS */
+/* RODAPÉ - TÍTULOS BRANCOS */
 .footer-nav-title,
 .editaliza-footer-refatorado .footer-nav-title,
 body .editaliza-footer-refatorado .footer-nav-title,
@@ -108,7 +108,7 @@ html body .editaliza-footer-refatorado .footer-nav-title {
     text-transform: uppercase !important;
 }
 
-/* RODAP - LINKS MANTIDOS COMO ESTO */
+/* RODAPÉ - LINKS MANTIDOS COMO ESTÃO */
 .footer-nav-link,
 .editaliza-footer-refatorado .footer-nav-link,
 body .editaliza-footer-refatorado .footer-nav-link,
@@ -119,7 +119,7 @@ html body .editaliza-footer-refatorado .footer-nav-link {
     text-decoration: none !important;
 }
 
-/* GARANTIR CORES PADRO */
+/* GARANTIR CORES PADRÃO */
 .text-white {
     color: #FFFFFF !important;
 }
@@ -136,7 +136,7 @@ html body .editaliza-footer-refatorado .footer-nav-link {
     background-color: #000000 !important;
 }
 
-/* FORAR LIGHT MODE EM ELEMENTOS ESPECFICOS */
+/* FORÇAR LIGHT MODE EM ELEMENTOS ESPECÍFICOS */
 .modal,
 .card,
 .panel,

@@ -12,8 +12,11 @@ const Gamification = {
             return;
         }
 
+        console.log('🎮 [Gamification Module] Dados recebidos:', data);
+        
         // Processar dados vindos do backend - podem ter nomes diferentes
         const xp = data.xp || data.experiencePoints || 0;
+        console.log('🎮 [Gamification Module] XP processado:', xp);
         const achievements = data.achievements || [];
         const completedTopics = data.completed_topics_count || data.completedTopicsCount || 0;
         const current_streak = data.current_streak || data.studyStreak || 0;

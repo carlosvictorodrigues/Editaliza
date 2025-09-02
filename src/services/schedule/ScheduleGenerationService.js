@@ -54,9 +54,30 @@ class ScheduleGenerationService {
             // 3. Preencher dias restantes com simulados
             schedule = this.fillWithDirectedSimulados(schedule, allTopicsFromDB, studyDays, planId);
 
-            const insertSql = 'INSERT INTO study_sessions (study_plan_id, topic_id, subject_name, topic_description, session_date, session_type, status) VALUES (?, ?, ?, ?, ?, ?, ?)';
+            const insertSql = 'INSERT INTO study_sessions (study_plan_id, topic_id, subject_name, topic_description, session_date, session_type, status, meta) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
             for (const session of schedule) {
-                await dbRun(insertSql, [planId, session.topicId, session.subjectName, session.topicDescription, session.date, session.sessionType, 'Pendente']);
+                // Adicionar metadados completos
+                const meta = {
+                    topic_id: session.topicId,
+                    topic_name: session.topicName || session.topicDescription,
+                    subject_id: session.subjectId,
+                    subject_name: session.subjectName,
+                    iteration: session.iteration || 1,
+                    weight: session.weight || 0,
+                    plannedMinutes: 60,
+                    reviewLabel: session.reviewLabel || null
+                };
+                
+                await dbRun(insertSql, [
+                    planId, 
+                    session.topicId, 
+                    session.subjectName, 
+                    session.topicDescription, 
+                    session.date, 
+                    session.sessionType, 
+                    'Pendente',
+                    JSON.stringify(meta)
+                ]);
             }
 
             await dbRun('COMMIT');
@@ -159,36 +180,40 @@ class ScheduleGenerationService {
         
         // Filtrar apenas dias úteis (segunda a sexta)
         const workdays = studyDays.filter(day => day.dayOfWeek >= 1 && day.dayOfWeek <= 5);
-        const totalWorkdays = workdays.length;
         
-        console.log(`[RECURRENCE CALC] Total de dias úteis disponíveis: ${totalWorkdays}`);
+        // Calcular total de SLOTS (não dias)
+        const totalSlots = workdays.reduce((sum, day) => sum + (day.sessions || 3), 0);
+        console.log(`[RECURRENCE CALC] Total de slots de estudo disponíveis: ${totalSlots}`);
+        console.log(`[RECURRENCE CALC] Total de dias úteis: ${workdays.length}`);
+        
+        // Funções auxiliares para cálculo preciso
+        const norm = (v) => [0, 0.2, 0.4, 0.6, 0.8, 1.0][Math.max(0, Math.min(5, Math.floor(v)))];
+        const scale = (w) => 0.5 + 1.5 * w; // Mapeia [0,1] -> [0.5, 2.0]
+        const clamp = (x, min, max) => Math.max(min, Math.min(max, x));
+        
+        // Base de recorrência: slots divididos pelos tópicos
+        const base = Math.ceil(totalSlots / topics.length);
+        const cap = Math.ceil(workdays.length / 7); // Máximo 1x por semana
+        
+        console.log(`[RECURRENCE CALC] Base de recorrência: ${base}, Cap semanal: ${cap}`);
         
         const topicsWithRecurrence = topics.map(topic => {
-            // Peso combinado: (subject_priority * 0.7) + (topic_priority * 0.3)
-            const combinedWeight = (topic.subject_priority * 0.7) + (topic.topic_priority * 0.3);
+            // Peso combinado usando normalização precisa
+            const subjectWeight = norm(topic.subject_priority || 3);
+            const topicWeight = norm(topic.topic_priority || 3);
+            const combinedWeight = (subjectWeight * 0.7) + (topicWeight * 0.3);
+            
+            // Calcular aparições alvo
+            const targetAppearances = clamp(
+                Math.round(base * scale(combinedWeight)),
+                1,  // Mínimo 1 aparição
+                cap // Cap semanal
+            );
             
             return {
                 ...topic,
-                combinedWeight
-            };
-        });
-        
-        // Normalizar pesos entre 0-1
-        const maxWeight = Math.max(...topicsWithRecurrence.map(t => t.combinedWeight));
-        const minWeight = Math.min(...topicsWithRecurrence.map(t => t.combinedWeight));
-        const weightRange = maxWeight - minWeight || 1; // Evitar divisão por zero
-        
-        const normalizedTopics = topicsWithRecurrence.map(topic => {
-            const normalizedWeight = (topic.combinedWeight - minWeight) / weightRange;
-            
-            // Calcular targetAppearances baseado no peso e dias disponíveis
-            // Peso alto = mais aparições, mas máximo de 1 aparição a cada 3 dias úteis
-            const maxPossibleAppearances = Math.floor(totalWorkdays / 3);
-            const targetAppearances = Math.max(1, Math.floor((normalizedWeight * maxPossibleAppearances) + 1));
-            
-            return {
-                ...topic,
-                normalizedWeight,
+                combinedWeight,
+                normalizedWeight: combinedWeight,
                 targetAppearances,
                 lastAppearanceIndex: -1 // Para controle de espaçamento
             };
@@ -196,14 +221,14 @@ class ScheduleGenerationService {
         
         // Log detalhado dos cálculos
         console.log('[RECURRENCE CALC] Pesos e recorrências calculadas:');
-        normalizedTopics.forEach(topic => {
+        topicsWithRecurrence.forEach(topic => {
             console.log(`  - ${topic.subject_name} > ${topic.topic_name}:`);
             console.log(`    Combined Weight: ${topic.combinedWeight.toFixed(2)}`);
             console.log(`    Normalized Weight: ${topic.normalizedWeight.toFixed(2)}`);
             console.log(`    Target Appearances: ${topic.targetAppearances}`);
         });
         
-        return normalizedTopics;
+        return topicsWithRecurrence;
     }
     
     /**
@@ -348,16 +373,13 @@ class ScheduleGenerationService {
                 schedule.push({
                     date: currentSlot.date,
                     topicId: selectedItem.id,
+                    topicName: selectedItem.topic_name,
+                    subjectId: selectedItem.subject_id,
                     subjectName: selectedItem.subject_name,
                     topicDescription: `${selectedItem.topic_name} (${selectedItem.iteration}ª vez)`,
                     sessionType: selectedItem.iteration === 1 ? 'Novo Tópico' : 'Reforço',
                     iteration: selectedItem.iteration,
-                    weight: selectedItem.weightCombined,
-                    meta: {
-                        recurrenceIteration: selectedItem.iteration,
-                        totalRecurrences: selectedItem.targetAppearances,
-                        weight: selectedItem.weightCombined
-                    }
+                    weight: selectedItem.normalizedWeight || selectedItem.weightCombined || 0
                 });
                 
                 // Atualizar contador por disciplina
@@ -391,17 +413,13 @@ class ScheduleGenerationService {
                     schedule.push({
                         date: currentSlot.date,
                         topicId: fallbackItem.id,
+                        topicName: fallbackItem.topic_name,
+                        subjectId: fallbackItem.subject_id,
                         subjectName: fallbackItem.subject_name,
                         topicDescription: `${fallbackItem.topic_name} (${fallbackItem.iteration}ª vez - degradado)`,
                         sessionType: fallbackItem.iteration === 1 ? 'Novo Tópico' : 'Reforço',
                         iteration: fallbackItem.iteration,
-                        weight: fallbackItem.weightCombined,
-                        meta: {
-                            recurrenceIteration: fallbackItem.iteration,
-                            totalRecurrences: fallbackItem.targetAppearances,
-                            weight: fallbackItem.weightCombined,
-                            degraded: true
-                        }
+                        weight: fallbackItem.normalizedWeight || fallbackItem.weightCombined || 0
                     });
                     
                     const topicKey = `${fallbackItem.subject_name}_${fallbackItem.topic_name}`;
@@ -504,6 +522,7 @@ class ScheduleGenerationService {
                 date: dateStr,
                 topicId: null,
                 subjectName: 'Revisão Semanal',
+                reviewLabel: topicsForDay[0]?.reviewType || 'R7',
                 topicDescription: description,
                 sessionType: 'Revisão Consolidada'
             });

@@ -1388,6 +1388,17 @@ button[onclick*="openPostponeModal"] span {
     color: #FFFFFF !important;
 }
 
+/* Checklist Modal - visual checkmarks */
+.checklist-row { position: relative; border: 1px solid transparent; }
+.checklist-item { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
+.checklist-row .checkmark-visual { background: #fff; }
+.checklist-item:focus-visible + .checkmark-visual { box-shadow: 0 0 0 3px rgba(59,130,246,0.35); border-color: #3B82F6 !important; }
+.checklist-row.checked { background: #F0FDF4 !important; border-color: #BBF7D0 !important; }
+.checklist-row.checked .checkmark-visual { background: #16A34A !important; border-color: #16A34A !important; color: #FFFFFF !important; box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
+.checklist-row.checked .checkmark-icon { opacity: 1 !important; transform: scale(1) !important; }
+.checklist-row.checked .checklist-text { text-decoration: line-through; color: #4B5563; }
+.checklist-row:hover { border-color: #E5E7EB; }
+
 /* Overrides: ensure gray action buttons use dark text */
 .study-card button.reinforce-btn[onclick*="reinforceSession"],
 .study-card button.reinforce-btn[onclick*="reinforceSession"] *,
@@ -1823,13 +1834,3 @@ footer {
 .border-slate-700 { border-color: #334155; }
 .border-gray-400 { border-color: #9CA3AF; }
 .border-gray-500 { border-color: #6B7280; }
-/* Checklist Modal - visual checkmarks */
-.checklist-row { position: relative; border: 1px solid transparent; }
-.checklist-item { position: absolute; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
-.checklist-row .checkmark-visual { background: #fff; }
-.checklist-item:focus-visible + .checkmark-visual { box-shadow: 0 0 0 3px rgba(59,130,246,0.35); border-color: #3B82F6 !important; }
-.checklist-row.checked { background: #F0FDF4 !important; border-color: #BBF7D0 !important; }
-.checklist-row.checked .checkmark-visual { background: #16A34A !important; border-color: #16A34A !important; color: #FFFFFF !important; box-shadow: 0 0 0 3px rgba(22,163,74,0.15); }
-.checklist-row.checked .checkmark-icon { opacity: 1 !important; transform: scale(1) !important; }
-.checklist-row.checked .checklist-text { text-decoration: line-through; color: #4B5563; }
-.checklist-row:hover { border-color: #E5E7EB; }

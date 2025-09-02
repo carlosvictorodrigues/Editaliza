@@ -45,11 +45,11 @@ html body .editaliza-footer-refatorado {
     box-shadow: none !important;
     text-shadow: none !important;
     
-    /* Transies */
+    /* Transições */
     transition: none !important;
     animation: none !important;
     
-    /* Transformaes */
+    /* Transformações */
     transform: none !important;
     
     /* Overflow */
@@ -58,7 +58,7 @@ html body .editaliza-footer-refatorado {
     /* Cursor */
     cursor: default !important;
     
-    /* Seleo */
+    /* Seleção */
     user-select: text !important;
     -webkit-user-select: text !important;
     -moz-user-select: text !important;
@@ -122,7 +122,7 @@ html body .editaliza-footer-refatorado .footer-main-grid {
     padding: 0 !important;
 }
 
-/* SEO DA MARCA - ALTA ESPECIFICIDADE */
+/* SEÇÃO DA MARCA - ALTA ESPECIFICIDADE */
 body .editaliza-footer-refatorado .footer-brand,
 html body .editaliza-footer-refatorado .footer-brand {
     display: flex !important;
@@ -164,7 +164,7 @@ html body .editaliza-footer-refatorado .footer-logo-icon {
     padding: 0 !important;
 }
 
-/* DESCRIO - LIGHT THEME */
+/* DESCRIÇÃO - LIGHT THEME */
 body .editaliza-footer-refatorado .footer-description,
 html body .editaliza-footer-refatorado .footer-description {
     color: rgba(255, 255, 255, 0.85) !important;
@@ -242,7 +242,7 @@ html body .editaliza-footer-refatorado .social-link svg {
     fill: #FFFFFF !important;
 }
 
-/* SEES DE NAVEGAO - LIGHT THEME */
+/* SEÇÕES DE NAVEGAÇÃO - LIGHT THEME */
 body .editaliza-footer-refatorado .footer-nav-section,
 html body .editaliza-footer-refatorado .footer-nav-section {
     display: flex !important;
@@ -388,7 +388,7 @@ html body .editaliza-footer-refatorado .footer-legal-link:focus {
 /* DARK MODE - Legal links hover - Consistente */
 [data-theme="dark"] body .editaliza-footer-refatorado .footer-legal-link,
 [data-theme="dark"] html body .editaliza-footer-refatorado .footer-legal-link {
-    color: #9CA3AF !important; /* Cinza mdio */
+    color: #9CA3AF !important; /* Cinza médio */
     background: transparent !important;
 }
 [data-theme="dark"] body .editaliza-footer-refatorado .footer-legal-link:hover,
@@ -485,10 +485,10 @@ html body .editaliza-footer-refatorado .footer-legal-link:focus {
 }
 
 /* ========================================
-   OVERRIDE FINAL - PRIORIDADE MXIMA
+   OVERRIDE FINAL - PRIORIDADE MÁXIMA
    ======================================== */
 
-/* Fora visibilidade em qualquer contexto */
+/* Força visibilidade em qualquer contexto */
 .editaliza-footer-refatorado,
 .editaliza-footer-refatorado *,
 .editaliza-footer,
@@ -516,7 +516,7 @@ html body .editaliza-footer-refatorado .footer-legal-link:focus {
     opacity: 1 !important;
 }
 
-/* Garante que o footer esteja sempre visvel */
+/* Garante que o footer esteja sempre visível */
 .editaliza-footer-refatorado:not([style*="display: none"]):not([style*="visibility: hidden"]):not([style*="opacity: 0"]),
 .editaliza-footer:not([style*="display: none"]):not([style*="visibility: hidden"]):not([style*="opacity: 0"]) {
     display: block !important;

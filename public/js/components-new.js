@@ -8,24 +8,24 @@
  * NEW: 14KB initial + lazy loading = 81.6% reduction!
  * 
  * TECHNICAL IMPROVEMENTS:
- *  Lazy loading of specialized modules
- *  Intelligent preloading based on page context  
- *  Maintained 100% API compatibility
- *  Better error handling and resilience
- *  Cache optimization
+ * ✅ Lazy loading of specialized modules
+ * ✅ Intelligent preloading based on page context  
+ * ✅ Maintained 100% API compatibility
+ * ✅ Better error handling and resilience
+ * ✅ Cache optimization
  */
 
 // ============================================================================
 // MODULAR COMPONENTS SYSTEM - ENTRY POINT
 // ============================================================================
 
-// Sistema de orquestrao principal dos componentes
+// Sistema de orquestração principal dos componentes
 class ComponentsCore {
     constructor() {
         this.loadedModules = new Set();
         this.loadingModules = new Map();
         
-        // Mdulos disponveis para lazy loading
+        // Módulos disponíveis para lazy loading
         this.moduleMap = {
             'navigation': './js/modules/navigation.js',
             'cards': './js/modules/cards.js', 
@@ -38,22 +38,22 @@ class ComponentsCore {
         this.initializeCore();
     }
 
-    // Inicializao dos mdulos essenciais
+    // Inicialização dos módulos essenciais
     async initializeCore() {
-        void('= ComponentsCore v2.0 inicializado - 81.6% mais rpido!');
+        console.log('🚀 ComponentsCore v2.0 inicializado - 81.6% mais rápido!');
         
-        // Carregar UI Core imediatamente (essencial para funcionamento bsico)
+        // Carregar UI Core imediatamente (essencial para funcionamento básico)
         try {
             await this.loadModule('ui-core');
         } catch (error) {
-            console.error('L Falha crtica no UI Core, usando fallback:', error);
+            console.error('❌ Falha crítica no UI Core, usando fallback:', error);
             this.initializeFallbackUI();
         }
     }
 
-    // Fallback UI para casos de falha no carregamento de mdulos
+    // Fallback UI para casos de falha no carregamento de módulos
     initializeFallbackUI() {
-        // UI bsica sem dependncias externas
+        // UI básica sem dependências externas
         if (!document.getElementById('toast-container')) {
             const uiContainer = document.createElement('div');
             uiContainer.innerHTML = `
@@ -66,7 +66,7 @@ class ComponentsCore {
         }
     }
 
-    // Sistema de lazy loading de mdulos
+    // Sistema de lazy loading de módulos
     async loadModule(moduleName) {
         if (this.loadedModules.has(moduleName)) {
             return this.getModuleInstance(moduleName);
@@ -78,10 +78,10 @@ class ComponentsCore {
 
         const moduleUrl = this.moduleMap[moduleName];
         if (!moduleUrl) {
-            throw new Error(`Mdulo '${moduleName}' no encontrado`);
+            throw new Error(`Módulo '${moduleName}' não encontrado`);
         }
 
-        void(`= Carregando mdulo: ${moduleName}...`);
+        console.log(`📦 Carregando módulo: ${moduleName}...`);
 
         const loadPromise = this.importModule(moduleUrl, moduleName);
         this.loadingModules.set(moduleName, loadPromise);
@@ -91,18 +91,18 @@ class ComponentsCore {
             this.loadedModules.add(moduleName);
             this.loadingModules.delete(moduleName);
             
-            void(` Mdulo ${moduleName} carregado`);
+            console.log(`✅ Módulo ${moduleName} carregado`);
             return moduleInstance;
         } catch (error) {
             this.loadingModules.delete(moduleName);
-            console.error(`L Erro ao carregar ${moduleName}:`, error);
+            console.error(`❌ Erro ao carregar ${moduleName}:`, error);
             
-            // Retornar um mock bsico para manter funcionalidade
+            // Retornar um mock básico para manter funcionalidade
             return this.createModuleMock(moduleName);
         }
     }
 
-    // Importar mdulo dinamicamente (ES6 modules)
+    // Importar módulo dinamicamente (ES6 modules)
     async importModule(moduleUrl, moduleName) {
         try {
             const module = await import(moduleUrl);
@@ -116,7 +116,7 @@ class ComponentsCore {
                     return module[exportKeys[0]];
                 }
                 
-                throw new Error(`Mdulo ${moduleName} no possui exportao adequada`);
+                throw new Error(`Módulo ${moduleName} não possui exportação adequada`);
             }
         } catch (error) {
             console.warn(`Falha ES6 import, tentando fallback para ${moduleName}:`, error);
@@ -128,13 +128,14 @@ class ComponentsCore {
     async loadModuleFallback(moduleUrl, moduleName) {
         return new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = moduleUrl.replace('./js/modules/', './js/modules/legacy-');
+            // Avoid duplicating legacy- if already present
+            script.src = moduleUrl.includes('/legacy-') ? moduleUrl : moduleUrl.replace('./js/modules/', './js/modules/legacy-');
             script.onload = () => {
                 const moduleKey = this.getModuleKey(moduleName);
                 if (window[moduleKey]) {
                     resolve(window[moduleKey]);
                 } else {
-                    reject(new Error(`Mdulo ${moduleKey} no encontrado aps carregamento`));
+                    reject(new Error(`Módulo ${moduleKey} não encontrado após carregamento`));
                 }
             };
             script.onerror = () => reject(new Error(`Falha ao carregar script ${moduleUrl}`));
@@ -142,23 +143,23 @@ class ComponentsCore {
         });
     }
 
-    // Criar mock bsico para mdulos que falharam
+    // Criar mock básico para módulos que falharam
     createModuleMock(moduleName) {
         const mocks = {
             'navigation': {
-                renderMainNavigation: () => console.warn('Navigation module no carregado'),
+                renderMainNavigation: () => console.warn('Navigation module não carregado'),
                 loadUserAvatar: () => Promise.resolve(null),
                 clearUserAvatarCache: () => {},
                 updateNavigationAvatar: () => Promise.resolve()
             },
             'cards': {
-                createSessionCard: () => '<div class="p-4 bg-gray-100 rounded">Card no disponvel</div>',
-                createSimuladCard: () => '<div class="p-4 bg-gray-100 rounded">Card no disponvel</div>',
-                createEssayCard: () => '<div class="p-4 bg-gray-100 rounded">Card no disponvel</div>',
-                createReviewCard: () => '<div class="p-4 bg-gray-100 rounded">Card no disponvel</div>'
+                createSessionCard: () => '<div class="p-4 bg-gray-100 rounded">Card não disponível</div>',
+                createSimuladCard: () => '<div class="p-4 bg-gray-100 rounded">Card não disponível</div>',
+                createEssayCard: () => '<div class="p-4 bg-gray-100 rounded">Card não disponível</div>',
+                createReviewCard: () => '<div class="p-4 bg-gray-100 rounded">Card não disponível</div>'
             },
             'smart-buttons': {
-                generateSmartButton: () => ({ text: 'Iniciar', classes: 'btn-primary', icon: '=' }),
+                generateSmartButton: () => ({ text: 'Iniciar', classes: 'btn-primary', icon: '🚀' }),
                 updateAllTimerButtons: () => {},
                 updateTimerButton: () => {}
             },
@@ -177,7 +178,7 @@ class ComponentsCore {
         return mocks[moduleName] || {};
     }
 
-    // Obter chave do mdulo
+    // Obter chave do módulo
     getModuleKey(moduleName) {
         const keyMap = {
             'navigation': 'Navigation',
@@ -189,17 +190,17 @@ class ComponentsCore {
         return keyMap[moduleName] || moduleName;
     }
 
-    // Obter instncia do mdulo carregado
+    // Obter instância do módulo carregado
     getModuleInstance(moduleName) {
         const moduleKey = this.getModuleKey(moduleName);
         return window[moduleKey] || null;
     }
 
     // ========================================================================
-    // API PBLICA - 100% COMPATVEL COM VERSO ANTERIOR
+    // API PÚBLICA - 100% COMPATÍVEL COM VERSÃO ANTERIOR
     // ========================================================================
 
-    // Navegao
+    // Navegação
     async renderMainNavigation(activePage) {
         const navigation = await this.loadModule('navigation');
         return navigation.renderMainNavigation(activePage);
@@ -248,7 +249,7 @@ class ComponentsCore {
         return cards.createReviewCard(session);
     }
 
-    // Gamificao
+    // Gamificação
     async renderGamificationDashboard(gamificationData, containerId) {
         const gamification = await this.loadModule('gamification');
         return gamification.renderGamificationDashboard(gamificationData, containerId);
@@ -291,7 +292,7 @@ class ComponentsCore {
             return uiCore.showToast(message, type);
         } catch (error) {
             // Fallback
-            alert(`${type === 'error' ? 'L' : ''} ${message}`);
+            alert(`${type === 'error' ? '❌' : '✅'} ${message}`);
         }
     }
 
@@ -305,7 +306,7 @@ class ComponentsCore {
         return uiCore.hideSpinner();
     }
 
-    // Preload inteligente baseado na pgina atual
+    // Preload inteligente baseado na página atual
     async intelligentPreload() {
         const currentPage = window.location.pathname.split('/').pop() || 'home.html';
         
@@ -325,53 +326,53 @@ class ComponentsCore {
                 if (!this.loadedModules.has(moduleName)) {
                     try {
                         await this.loadModule(moduleName);
-                        void(`= Preload: ${moduleName} `);
+                        console.log(`🔄 Preload: ${moduleName} ✅`);
                     } catch (error) {
-                        console.warn(` Preload falhou: ${moduleName}`, error);
+                        console.warn(`⚠️ Preload falhou: ${moduleName}`, error);
                     }
                 }
             }
-        }, 200); // Delay para no interferir na inicializao
+        }, 200); // Delay para não interferir na inicialização
     }
 }
 
 // ============================================================================
-// INSTNCIA GLOBAL E API COMPATVEL
+// INSTÂNCIA GLOBAL E API COMPATÍVEL
 // ============================================================================
 
-// Instncia global
+// Instância global
 const componentsCore = new ComponentsCore();
 
-// API compatvel com verso anterior
+// API compatível com versão anterior
 const components = {
     // Cache de avatar
     userAvatarCache: null,
     userAvatarCacheTime: null,
     userAvatarCacheTimeout: 2 * 60 * 1000,
 
-    // Mtodos de navegao
+    // Métodos de navegação
     renderMainNavigation: (activePage) => componentsCore.renderMainNavigation(activePage),
     renderPlanHeader: (planId, planName, activePage) => componentsCore.renderPlanHeader(planId, planName, activePage),
     updateNavigationAvatar: () => componentsCore.updateNavigationAvatar(),
     loadUserAvatar: () => componentsCore.loadUserAvatar(),
     clearUserAvatarCache: () => componentsCore.clearUserAvatarCache(),
 
-    // Mtodos de cards
+    // Métodos de cards
     createSessionCard: (session) => componentsCore.createSessionCard(session),
     createSimuladCard: (session) => componentsCore.createSimuladCard(session),
     createEssayCard: (session) => componentsCore.createEssayCard(session),
     createReviewCard: (session) => componentsCore.createReviewCard(session),
 
-    // Mtodos de gamificao  
+    // Métodos de gamificação  
     renderGamificationDashboard: (data, containerId) => componentsCore.renderGamificationDashboard(data, containerId),
     renderOverdueAlert: (count, containerId) => componentsCore.renderOverdueAlert(count, containerId),
 
-    // Mtodos de smart buttons
+    // Métodos de smart buttons
     generateSmartButton: (sessionId, defaultText, sessionData) => componentsCore.generateSmartButton(sessionId, defaultText, sessionData),
     updateAllTimerButtons: () => componentsCore.updateAllTimerButtons(),
     updateTimerButton: (sessionId) => componentsCore.updateTimerButton(sessionId),
 
-    // Mtodos de UI
+    // Métodos de UI
     renderGlobalUI: () => componentsCore.renderGlobalUI(),
     showToast: (message, type) => componentsCore.showToast(message, type),
     showSpinner: () => componentsCore.showSpinner(),
@@ -379,12 +380,12 @@ const components = {
 };
 
 // ============================================================================
-// INICIALIZAO E EXPOSIO GLOBAL
+// INICIALIZAÇÃO E EXPOSIÇÃO GLOBAL
 // ============================================================================
 
 // Inicializar quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', async () => {
-    void('= Modular Components v2.0 - Performance Revolution!');
+    console.log('🚀 Modular Components v2.0 - Performance Revolution!');
     
     // Renderizar UI global
     await componentsCore.renderGlobalUI();
@@ -392,15 +393,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Preload inteligente
     await componentsCore.intelligentPreload();
     
-    void('< Sistema 81.6% mais rpido inicializado!');
+    console.log('🎉 Sistema 81.6% mais rápido inicializado!');
     
     // Info de debug em ambiente de desenvolvimento
     if (window.location.hostname === 'localhost') {
-        void('= Mdulos carregados:', Array.from(componentsCore.loadedModules));
+        console.log('📊 Módulos carregados:', Array.from(componentsCore.loadedModules));
     }
 });
 
-// Manter atualizao automtica de botes inteligentes
+// Manter atualização automática de botões inteligentes
 setInterval(async () => {
     if (window.TimerSystem && componentsCore.loadedModules.has('smart-buttons')) {
         const smartButtons = componentsCore.getModuleInstance('smart-buttons');
@@ -412,5 +413,5 @@ setInterval(async () => {
 window.components = components;
 window.componentsCore = componentsCore;
 
-// Compatibilidade adicional para casos especficos
+// Compatibilidade adicional para casos específicos
 window.ComponentsCore = ComponentsCore;

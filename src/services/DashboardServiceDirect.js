@@ -142,7 +142,27 @@ class DashboardServiceDirect {
                 subtext = `Você precisa estudar ${requiredPace.toFixed(1)} tópicos/dia para concluir a tempo.`;
             }
             
-            // 9. Montar resposta final
+            // 9. Buscar dados de gamificação
+            const gamificationQuery = `
+                SELECT 
+                    COUNT(DISTINCT CASE WHEN ss.status IN ('Concluído', 'Concluída', 'Concluida', 'completed') AND ss.topic_id IS NOT NULL THEN ss.topic_id END) as completed_topics_count,
+                    COUNT(DISTINCT DATE(ss.session_date)) as unique_study_days,
+                    COUNT(CASE WHEN ss.status IN ('Concluído', 'Concluída', 'Concluida', 'completed') THEN 1 END) as total_completed_sessions
+                FROM study_sessions ss
+                WHERE ss.user_id = $1
+            `;
+            const gamificationResult = await db.get(gamificationQuery, [userId]);
+            
+            const completedTopicsForXP = parseInt(gamificationResult?.completed_topics_count || 0);
+            const uniqueStudyDays = parseInt(gamificationResult?.unique_study_days || 0);
+            const totalCompletedSessions = parseInt(gamificationResult?.total_completed_sessions || 0);
+            
+            // Calcular XP
+            const experiencePoints = (completedTopicsForXP * 10) + (uniqueStudyDays * 5);
+            
+            console.log('[DASHBOARD] Gamificação - XP:', experiencePoints, 'Tópicos:', completedTopicsForXP, 'Dias:', uniqueStudyDays);
+            
+            // 10. Montar resposta final
             const response = {
                 planId: parseInt(planId),
                 asOf: new Date().toISOString(),
@@ -197,6 +217,36 @@ class DashboardServiceDirect {
                     statusColor: statusColor,
                     headline: headline,
                     subtext: subtext
+                },
+                // Dados de gamificação
+                gamification: {
+                    xp: experiencePoints,
+                    experiencePoints: experiencePoints,
+                    totalXP: experiencePoints,
+                    completedTopicsCount: completedTopicsForXP,
+                    completed_topics_count: completedTopicsForXP, // Adicionar formato alternativo
+                    totalStudyDays: uniqueStudyDays,
+                    totalCompletedSessions: totalCompletedSessions,
+                    studyStreak: uniqueStudyDays, // Simplificado por enquanto
+                    current_streak: uniqueStudyDays, // Formato alternativo
+                    currentStreak: uniqueStudyDays,
+                    achievements: [], // Será preenchido depois se necessário
+                    level: Math.ceil(uniqueStudyDays / 7) || 1,
+                    concurseiroLevel: completedTopicsForXP < 10 ? 'Pagador de Inscrição 💸' : 'Sobrevivente do Primeiro PDF 📄',
+                    // Adicionar informações de nível estruturadas
+                    level_info: {
+                        title: completedTopicsForXP < 10 ? 'Pagador de Inscrição 💸' : 'Sobrevivente do Primeiro PDF 📄',
+                        level: 1,
+                        color: '#3B82F6',
+                        phrase: 'A jornada dos mil editais começa com o primeiro boleto!',
+                        icon: '💸',
+                        emoji: '🌟',
+                        next_level_info: {
+                            title: 'Sobrevivente do Primeiro PDF 📄',
+                            threshold: 11
+                        }
+                    },
+                    nextLevel: 'Sobrevivente do Primeiro PDF 📄'
                 },
                 // Dados extras úteis
                 plan: {

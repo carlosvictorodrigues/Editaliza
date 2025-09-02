@@ -131,4 +131,34 @@ router.get('/gamification/profile',
     getGamificationProfile
 );
 
+/**
+ * GET /api/gamification/plan/:planId
+ * 
+ * Rota alternativa para gamificação por plano
+ * Criada para compatibilidade com testes
+ */
+router.get('/gamification/plan/:planId',
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    getPlanGamification
+);
+
+/**
+ * GET /api/gamification/leaderboard
+ * 
+ * Rota para leaderboard/ranking
+ * Retorna lista vazia por enquanto (placeholder)
+ */
+router.get('/gamification/leaderboard',
+    authenticateToken(),
+    (req, res) => {
+        res.json({
+            items: [],
+            userPosition: null,
+            totalUsers: 0
+        });
+    }
+);
+
 module.exports = router;

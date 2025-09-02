@@ -1,0 +1,141 @@
+{
+  "timestamp": 1756763552095,
+  "etapas": [
+    {
+      "nome": "Registro",
+      "sucesso": true,
+      "timestamp": "2025-09-01T21:52:32.326Z",
+      "userId": 167,
+      "email": "teste.completo.1756763552095@editaliza.com"
+    },
+    {
+      "nome": "Login",
+      "sucesso": true,
+      "timestamp": "2025-09-01T21:52:32.404Z"
+    },
+    {
+      "nome": "Criar Plano",
+      "sucesso": true,
+      "timestamp": "2025-09-01T21:52:32.411Z",
+      "planId": 157,
+      "planName": "TJPE - Analista Judiciário 2025"
+    },
+    {
+      "nome": "Adicionar Disciplinas e Tópicos",
+      "sucesso": true,
+      "timestamp": "2025-09-01T21:52:42.026Z",
+      "disciplinasAdicionadas": 9,
+      "topicosAdicionados": 145
+    },
+    {
+      "nome": "Gerar Cronograma",
+      "sucesso": true,
+      "timestamp": "2025-09-01T21:52:42.373Z"
+    },
+    {
+      "nome": "Verificar Algoritmo WRR",
+      "sucesso": false,
+      "timestamp": "2025-09-01T21:52:42.384Z",
+      "distribuicaoEstudo": {
+        "Direito Administrativo": 55,
+        "Direito Constitucional": 70,
+        "Direito Civil": 19,
+        "Língua Portuguesa": 20,
+        "Direito Processual Civil": 32,
+        "Legislação Específica TJPE": 9,
+        "Raciocínio Lógico": 9,
+        "Direito Penal": 13,
+        "Direito Processual Penal": 9
+      },
+      "recurringTopics": 0,
+      "spacingViolations": 0,
+      "disciplineViolations": 0
+    },
+    {
+      "nome": "Estatísticas das Sessões",
+      "sucesso": true,
+      "timestamp": "2025-09-01T21:52:50.347Z",
+      "sessoesConcluidas": 3,
+      "sessoesCompletadasDiff": 3,
+      "horasEstudadasDiff": 0,
+      "estatisticasAtualizadas": true
+    },
+    {
+      "nome": "Marcar Sessões Concluídas",
+      "sucesso": true,
+      "timestamp": "2025-09-01T21:52:50.354Z",
+      "sessoesConcluidas": 3
+    },
+    {
+      "nome": "Gamificação",
+      "sucesso": false,
+      "timestamp": "2025-09-01T21:52:52.378Z",
+      "xpBefore": {
+        "success": true,
+        "data": {
+          "xp": 0,
+          "level": 1,
+          "current_streak": 0,
+          "longest_streak": 0,
+          "level_info": {
+            "threshold": 0,
+            "title": "Aspirante a Servidor(a) 🌱",
+            "humorous_title": "Pagador de Inscrição 💸",
+            "color": "#8B8B8B",
+            "phrase": "A jornada dos mil editais começa com o primeiro boleto!"
+          },
+          "achievements": []
+        },
+        "status": 200
+      },
+      "xpAfter": 0,
+      "xpGanho": 0,
+      "levelBefore": 1,
+      "levelAfter": 1,
+      "streakBefore": 0,
+      "streakAfter": 0,
+      "achievementsBefore": 0,
+      "achievementsAfter": 0,
+      "sessoesConcluidas": 3,
+      "gamificacaoAtualizada": false
+    },
+    {
+      "nome": "Sessões Home",
+      "sucesso": true,
+      "timestamp": "2025-09-01T21:52:52.395Z",
+      "totalDates": 70,
+      "todaySessions": 4
+    },
+    {
+      "nome": "Dashboard",
+      "sucesso": true,
+      "timestamp": "2025-09-01T21:52:52.405Z",
+      "aviso": "Endpoint não implementado"
+    },
+    {
+      "nome": "Gamificação - XP",
+      "sucesso": false,
+      "timestamp": "2025-09-01T21:52:54.445Z",
+      "erro": "XP não atualizado"
+    },
+    {
+      "nome": "Gamificação - Streak",
+      "sucesso": true,
+      "timestamp": "2025-09-01T21:52:54.445Z",
+      "finalStreak": 0
+    },
+    {
+      "nome": "Gamificação - Leaderboard",
+      "sucesso": true,
+      "timestamp": "2025-09-01T21:52:54.447Z",
+      "aviso": "Não implementado"
+    }
+  ],
+  "erros": [
+    {
+      "etapa": "Gamificação - XP",
+      "erro": "XP não atualizado"
+    }
+  ],
+  "sucesso": false
+}

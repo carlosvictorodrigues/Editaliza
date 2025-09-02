@@ -419,12 +419,10 @@
             };
 
             if (config.debugMode) {
-                // Normalizar o erro para evitar "Error: Object"
-                const normalizedError = this.normalizeError(error);
                 console.group('🔴 Error Handler');
-                console.error('Error:', normalizedError.message, normalizedError.url || '', normalizedError.status || '');
-                if (normalizedError.stack) {
-                    console.error('Stack:', normalizedError.stack);
+                console.error('Error:', logEntry);
+                if (error.stack) {
+                    console.error('Stack:', error.stack);
                 }
                 console.groupEnd();
             }

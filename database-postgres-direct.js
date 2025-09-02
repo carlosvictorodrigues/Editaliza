@@ -43,6 +43,8 @@ pool.on('error', (err) => {
  */
 async function get(sql, params = []) {
     try {
+        console.log('[POSTGRES GET] Called with SQL length:', sql ? sql.length : 0);
+        
         // Converter placeholders ? para $n do PostgreSQL
         const pgSQL = convertToPostgreSQL(sql);
         
@@ -82,6 +84,16 @@ async function get(sql, params = []) {
         // --- END DEBUG BLOCK ---
         
         const result = await pool.query(pgSQL, params);
+        
+        // DEBUG: Log resultado completo
+        if (sql.includes('study_sessions') || sql.includes('COUNT')) {
+            console.log('\n[DEBUG GET] ==================');
+            console.log('[DEBUG GET] Result object:', result ? 'exists' : 'null');
+            console.log('[DEBUG GET] Result.rows:', result?.rows ? `array with ${result.rows.length} items` : 'undefined');
+            console.log('[DEBUG GET] First row:', result?.rows?.[0]);
+            console.log('[DEBUG GET] ==================\n');
+        }
+        
         return result.rows[0] || null;
     } catch (error) {
         console.error('[POSTGRES] Erro em get:', error.message);

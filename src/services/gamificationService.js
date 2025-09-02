@@ -105,6 +105,7 @@ const ACHIEVEMENTS = {
  * CORRIGIDO: Usa client dedicado para toda a transação
  */
 const processSessionCompletion = async (userId, sessionId) => {
+    console.log(`[GAMIFICATION] Iniciando processamento - userId: ${userId}, sessionId: ${sessionId}`);
     const startTime = Date.now();
     let client;
     
@@ -276,20 +277,41 @@ const getGamificationProfile = async (userId) => {
         queryTimings.stats = Date.now() - startStats;
         console.log(`[GAMI SERVICE] getGamificationProfile: Query user_gamification_stats concluída em ${queryTimings.stats}ms`);
         
-        if (statsResult.rows.length === 0) {
-            console.log('[GAMI SERVICE] getGamificationProfile: user_gamification_stats não encontrado, retornando padrão.');
-            console.log('[GAMI SERVICE] Timings:', queryTimings);
-            return { 
-                xp: 0, 
-                level: 1, 
-                current_streak: 0, 
-                longest_streak: 0, 
-                level_info: LEVELS[0], 
-                achievements: [] 
-            };
-        }
+        // Se não há stats, calcular XP baseado em sessões concluídas
+        let stats = null;
+        let calculatedXp = 0;
         
-        const stats = statsResult.rows[0];
+        if (statsResult.rows.length === 0) {
+            console.log('[GAMI SERVICE] getGamificationProfile: user_gamification_stats não encontrado, calculando XP...');
+            
+            // Calcular XP baseado em tópicos completados e dias de estudo
+            const xpQuery = await client.query(`
+                SELECT 
+                    COUNT(DISTINCT CASE WHEN ss.status IN ('Concluído', 'Concluída', 'Concluida', 'completed') AND ss.topic_id IS NOT NULL THEN ss.topic_id END) as completed_topics_count,
+                    COUNT(DISTINCT DATE(ss.session_date)) as unique_study_days
+                FROM study_sessions ss
+                JOIN study_plans sp ON ss.study_plan_id = sp.id
+                WHERE sp.user_id = $1
+            `, [userId]);
+            
+            const xpData = xpQuery.rows[0];
+            const completedTopicsXp = parseInt(xpData.completed_topics_count || 0);
+            const uniqueStudyDays = parseInt(xpData.unique_study_days || 0);
+            
+            // Fórmula: 10 XP por tópico + 5 XP por dia de estudo
+            calculatedXp = (completedTopicsXp * 10) + (uniqueStudyDays * 5);
+            
+            console.log(`[GAMI SERVICE] XP calculado: tópicos=${completedTopicsXp} * 10 + dias=${uniqueStudyDays} * 5 = ${calculatedXp}`);
+            
+            stats = {
+                xp: calculatedXp,
+                level: 1,
+                current_streak: 0,
+                longest_streak: 0
+            };
+        } else {
+            stats = statsResult.rows[0];
+        }
         
         // Contar tópicos completados - query otimizada
         console.log('[GAMI SERVICE] getGamificationProfile: Executando query completed topics...');

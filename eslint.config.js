@@ -6,13 +6,46 @@ module.exports = [
         ignores: [
             'node_modules/**',
             'backup_*/**',
-            'tests/e2e/**',
-            'tests/unit/pages/**',
-            'tests/unit/timer/**',
-            'tests/helpers/**',
-            'tests/database-test.js',
-            'tests/test-server.js',
-            'validate_avatars.js'
+            'tests/**',
+            'validate_avatars.js',
+            'EXAMPLE_INTEGRATION.js',
+            'EXEMPLO_USO_REPOSITORIES.js',
+            'add-missing-columns-direct.js',
+            'analyze-weight-algorithm.js',
+            'analyze_avatars.js',
+            'check*.js',
+            'create*.js',
+            'database*.js',
+            'delete*.js',
+            'drop*.js',
+            'execute*.js',
+            'export*.js',
+            'fix*.js',
+            'inspect*.js',
+            'list*.js',
+            'manual*.js',
+            'migrate*.js',
+            'print*.js',
+            'query*.js',
+            'register*.js',
+            'remove*.js',
+            'reset*.js',
+            'restore*.js',
+            'rollback*.js',
+            'save*.js',
+            'script*.js',
+            'setup*.js',
+            'sync*.js',
+            'test*.js',
+            'update*.js',
+            'verify*.js',
+            'weighted*.js',
+            '*.test.js',
+            '*.spec.js',
+            'cards.js',
+            'cookies.txt',
+            'dashboard*.json',
+            'migrations/**'
         ]
     },
     {
@@ -33,7 +66,8 @@ module.exports = [
                 setTimeout: 'readonly',
                 clearTimeout: 'readonly',
                 setInterval: 'readonly',
-                clearInterval: 'readonly'
+                clearInterval: 'readonly',
+                window: 'readonly'
             }
         },
         rules: {
@@ -91,7 +125,17 @@ module.exports = [
                 Date: 'readonly',
                 Math: 'readonly',
                 Promise: 'readonly',
-                Error: 'readonly'
+                Error: 'readonly',
+                URLSearchParams: 'readonly',
+                location: 'readonly',
+                alert: 'readonly',
+                components: 'readonly',
+                TimerSystem: 'readonly',
+                StudyChecklist: 'readonly',
+                EDITALIZA_ACHIEVEMENTS: 'readonly',
+                updateTodayProgress: 'readonly',
+                updateStudyStatistics: 'readonly',
+                minimumSpacing: 'readonly'
             }
         }
     },

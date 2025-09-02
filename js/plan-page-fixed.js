@@ -74,6 +74,7 @@
             renderSchedule();
             renderProgress();
             renderSubjectAnalysis();
+            renderStudyTimeDistribution();
             renderGoalProgress();
             renderQuestionRadar();
             
@@ -83,25 +84,82 @@
         }
     }
     
-    // Renderizar gamificação simplificada
-    function renderGamification() {
+    // Renderizar gamificação REAL do backend
+    async function renderGamification() {
         const container = document.getElementById('gamification-dashboard');
-        console.log('🎮 Renderizando gamificação, container:', container);
+        console.log('🎮 Renderizando gamificação...');
         
         if (!container) {
             console.error('❌ Container gamification-dashboard não encontrado!');
             return;
         }
         
-        // Limpar TUDO dentro do container
-        while (container.firstChild) {
-            container.removeChild(container.firstChild);
-        }
-        
-        if (!dashboardData) {
-            container.innerHTML = '<p class="text-center text-gray-500">Carregando dados...</p>';
+        // Verificar se já temos dados de gamificação do dashboard
+        if (window.dashboardData && window.dashboardData.gamification) {
+            console.log('✅ Usando dados de gamificação do dashboard:', window.dashboardData.gamification);
+            
+            // Usar o módulo de gamificação real com os dados do dashboard
+            if (window.Gamification && window.Gamification.renderGamificationDashboard) {
+                window.Gamification.renderGamificationDashboard(window.dashboardData.gamification, 'gamification-dashboard');
+            } else {
+                console.error('❌ Módulo Gamification não encontrado!');
+            }
             return;
         }
+        
+        // Fallback: buscar dados se não tiver no dashboard
+        // Mostrar loading
+        container.innerHTML = '<p class="text-center text-gray-500 animate-pulse">Carregando sistema de gamificação...</p>';
+        
+        try {
+            // Buscar dados do endpoint correto de gamificação do plano
+            const token = localStorage.getItem('editaliza_token');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            // Chamar endpoint específico do plano ao invés do profile genérico
+            const response = await fetch(`/api/plans/${planId}/gamification`, {
+                method: 'GET',
+                headers: headers,
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const gamificationData = await response.json();
+                console.log('✅ Dados de gamificação do plano recebidos:', gamificationData);
+                
+                // Usar o módulo de gamificação real
+                if (window.Gamification && window.Gamification.renderGamificationDashboard) {
+                    window.Gamification.renderGamificationDashboard(gamificationData, 'gamification-dashboard');
+                    
+                    // Atualizar streak no header
+                    const streakDisplay = document.getElementById('streak-display');
+                    if (streakDisplay) {
+                        streakDisplay.textContent = gamificationData.current_streak || '0';
+                    }
+                } else {
+                    console.warn('Módulo Gamification não carregado, usando fallback');
+                    renderGamificationFallback();
+                }
+            } else {
+                console.error('Erro ao buscar gamificação:', response.status);
+                renderGamificationFallback();
+            }
+        } catch (error) {
+            console.error('Erro ao conectar com backend de gamificação:', error);
+            renderGamificationFallback();
+        }
+    }
+    
+    // Fallback caso não consiga carregar dados reais
+    function renderGamificationFallback() {
+        const container = document.getElementById('gamification-dashboard');
+        if (!container || !dashboardData) return
         
         const { pace, projection, uiHints, progress } = dashboardData;
         
@@ -411,24 +469,26 @@
                 <!-- Gráfico de Pizza e Estatísticas -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                     <!-- Gráfico de Pizza -->
-                    <div class="flex flex-col items-center">
-                        <div class="relative">
-                            <div class="w-32 h-32 rounded-full" style="${pieChart}"></div>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <div class="text-center bg-white rounded-full w-24 h-24 flex flex-col items-center justify-center">
-                                    <span class="text-2xl font-bold text-gray-800">${completedPct.toFixed(0)}%</span>
-                                    <span class="text-xs text-gray-500">Completo</span>
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="relative mb-4" style="width: 144px; height: 144px;">
+                            <!-- Donut externo -->
+                            <div class="w-36 h-36 rounded-full shadow-inner" style="${pieChart}"></div>
+                            <!-- Centro branco para criar efeito donut -->
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div class="bg-white rounded-full w-28 h-28 flex items-center justify-center">
+                                    <!-- Apenas o percentual no centro, sem texto adicional -->
+                                    <span class="text-4xl font-bold text-gray-800" style="line-height: 1; -webkit-font-smoothing: antialiased;">${completedPct.toFixed(0)}%</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="flex gap-4 mt-3 text-xs">
-                            <div class="flex items-center gap-1">
-                                <div class="w-3 h-3 bg-green-500 rounded"></div>
-                                <span>Concluído (${completedTopics})</span>
+                        <div class="flex flex-col sm:flex-row gap-4 text-sm">
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-green-500 rounded shadow-sm"></div>
+                                <span class="text-gray-700">Concluído <span class="font-bold">(${completedTopics})</span></span>
                             </div>
-                            <div class="flex items-center gap-1">
-                                <div class="w-3 h-3 bg-gray-300 rounded"></div>
-                                <span>Pendente (${pendingTopics})</span>
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 bg-gray-300 rounded shadow-sm"></div>
+                                <span class="text-gray-700">Pendente <span class="font-bold">(${pendingTopics})</span></span>
                             </div>
                         </div>
                     </div>
@@ -500,17 +560,78 @@
     
     
     // Renderizar análise por disciplina
-    function renderSubjectAnalysis() {
+    async function renderSubjectAnalysis() {
         const container = document.getElementById('detailedProgressAccordion');
         if (!container || !dashboardData) return;
         
-        // Por enquanto mostrar uma mensagem simples
-        container.innerHTML = `
-            <div class="p-4 text-center text-gray-500">
-                <p>Análise detalhada por disciplina em breve</p>
-                <p class="text-sm mt-2">Total de tópicos: ${dashboardData.schedule?.totalTopics || 0}</p>
-            </div>
-        `;
+        // Buscar dados de tempo de estudo por disciplina
+        try {
+            const token = localStorage.getItem('editaliza_token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            
+            const response = await fetch(`/api/plans/${planId}/study-time`, {
+                method: 'GET',
+                headers: headers,
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.subjects && data.subjects.length > 0) {
+                    // Renderizar dados reais
+                    const subjectsHtml = data.subjects.map(subject => `
+                        <div class="border rounded-lg p-4 mb-3 hover:bg-gray-50 transition-colors">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="font-semibold text-gray-800">${subject.name}</h4>
+                                <span class="text-sm font-medium text-blue-600">
+                                    ${Math.floor(subject.totalTimeSeconds / 3600)}h ${Math.floor((subject.totalTimeSeconds % 3600) / 60)}min
+                                </span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: ${(subject.totalTimeSeconds / data.totalStudyTimeSeconds * 100).toFixed(1)}%"></div>
+                            </div>
+                            ${subject.topics && subject.topics.length > 0 ? `
+                                <div class="mt-2 space-y-1">
+                                    ${subject.topics.slice(0, 3).map(topic => `
+                                        <div class="text-xs text-gray-600 pl-4">
+                                            • ${topic.name}: ${Math.floor(topic.timeSeconds / 60)} min
+                                        </div>
+                                    `).join('')}
+                                    ${subject.topics.length > 3 ? `
+                                        <div class="text-xs text-gray-500 pl-4">... e mais ${subject.topics.length - 3} tópicos</div>
+                                    ` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('');
+                    
+                    container.innerHTML = `
+                        <div class="space-y-2">
+                            <div class="text-sm text-gray-600 mb-3">
+                                Total estudado: <span class="font-bold">${Math.floor(data.totalStudyTimeSeconds / 3600)}h ${Math.floor((data.totalStudyTimeSeconds % 3600) / 60)}min</span>
+                            </div>
+                            ${subjectsHtml}
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center py-8 text-gray-500">
+                            <p class="text-lg mb-2">📚 Ainda sem dados de estudo</p>
+                            <p class="text-sm">Complete algumas sessões para ver a análise detalhada</p>
+                        </div>
+                    `;
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao buscar análise por disciplina:', error);
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500">
+                    <p>Erro ao carregar análise por disciplina</p>
+                </div>
+            `;
+        }
     }
     
     // Renderizar metas de progresso
@@ -588,6 +709,82 @@
     document.getElementById('refresh-metrics-btn')?.addEventListener('click', () => {
         location.reload();
     });
+    
+    // Renderizar distribuição de tempo de estudo
+    async function renderStudyTimeDistribution() {
+        const container = document.getElementById('studyTimeDashboard');
+        if (!container || !planId) return;
+        
+        try {
+            const token = localStorage.getItem('editaliza_token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            
+            const response = await fetch(`/api/plans/${planId}/study-time`, {
+                method: 'GET',
+                headers: headers,
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                if (data.subjects && data.subjects.length > 0) {
+                    const totalHours = Math.floor(data.totalStudyTimeSeconds / 3600);
+                    const totalMinutes = Math.floor((data.totalStudyTimeSeconds % 3600) / 60);
+                    
+                    // Criar visualização gráfica
+                    const subjectsChart = data.subjects.map(subject => {
+                        const percentage = (subject.totalTimeSeconds / data.totalStudyTimeSeconds * 100).toFixed(1);
+                        const hours = Math.floor(subject.totalTimeSeconds / 3600);
+                        const minutes = Math.floor((subject.totalTimeSeconds % 3600) / 60);
+                        
+                        return `
+                            <div class="mb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm font-medium text-gray-700">${subject.name}</span>
+                                    <span class="text-sm text-gray-600">${hours}h ${minutes}min (${percentage}%)</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full transition-all duration-500" 
+                                         style="width: ${percentage}%"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    container.innerHTML = `
+                        <div class="bg-white rounded-lg p-6">
+                            <div class="mb-4 text-center">
+                                <p class="text-2xl font-bold text-gray-800">${totalHours}h ${totalMinutes}min</p>
+                                <p class="text-sm text-gray-600">Tempo total dedicado</p>
+                            </div>
+                            <div class="space-y-3">
+                                ${subjectsChart}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="bg-gray-50 rounded-lg p-8 text-center">
+                            <span class="text-4xl mb-4 block">⏱️</span>
+                            <p class="text-gray-600 font-medium">Nenhum tempo de estudo registrado ainda</p>
+                            <p class="text-sm text-gray-500 mt-2">Complete sessões para ver a distribuição do seu tempo</p>
+                        </div>
+                    `;
+                }
+            } else {
+                throw new Error('Erro ao buscar dados');
+            }
+        } catch (error) {
+            console.error('Erro ao buscar tempo de estudo:', error);
+            container.innerHTML = `
+                <div class="bg-red-50 rounded-lg p-6 text-center">
+                    <p class="text-red-600">Erro ao carregar dados de tempo de estudo</p>
+                </div>
+            `;
+        }
+    }
     
     // Inicializar quando o DOM estiver pronto
     if (document.readyState === 'loading') {

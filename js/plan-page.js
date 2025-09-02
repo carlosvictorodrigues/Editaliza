@@ -1,7 +1,7 @@
 /**
  * @file js/plan-page.js
  * @description JavaScript dedicado para a página plan.html - otimizado e consolidado
- * @version 2.1 - Adicionada visualização de tempo dedicado
+ * @version 2.0
  */
 
 (function() {
@@ -21,144 +21,6 @@
         const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
         const s = Math.floor(seconds % 60).toString().padStart(2, '0');
         return `${h}:${m}:${s}`;
-    }
-    
-    // ==========================================
-    // 🏆 SISTEMA DE ACHIEVEMENTS/BADGES
-    // ==========================================
-    
-    function renderAchievementBadge(achievement) {
-        const { id, unlocked, rarity, title, description, icon, requirement, color } = achievement;
-        
-        const rarityClasses = {
-            'common': 'rarity-common',
-            'uncommon': 'rarity-uncommon', 
-            'rare': 'rarity-rare',
-            'epic': 'rarity-epic',
-            'legendary': 'rarity-legendary'
-        };
-        
-        const rarityLabels = {
-            'common': 'Comum',
-            'uncommon': 'Incomum',
-            'rare': 'Raro',
-            'epic': 'Épico', 
-            'legendary': 'Lendário'
-        };
-        
-        const colorClasses = {
-            'blue': 'badge-blue',
-            'green': 'badge-green',
-            'purple': 'badge-purple',
-            'yellow': 'badge-yellow',
-            'orange': 'badge-orange',
-            'red': 'badge-red'
-        };
-        
-        return `
-            <div class="achievement-badge ${unlocked ? 'unlocked' : 'locked'} ${rarityClasses[rarity]} ${colorClasses[color]}" 
-                 data-achievement="${id}" 
-                 data-tooltip="${unlocked ? description : 'Bloqueado: ' + requirement}">
-                
-                <!-- Badge Container com efeitos -->
-                <div class="badge-container group">
-                    <!-- Glow Effect (só quando desbloqueado) -->
-                    ${unlocked ? `<div class="badge-glow ${rarity}-glow"></div>` : ''}
-                    
-                    <!-- Badge Principal -->
-                    <div class="badge-main">
-                        <div class="badge-inner">
-                            <!-- Ícone com animação -->
-                            <div class="badge-icon ${unlocked ? 'unlocked-icon' : 'locked-icon'}">
-                                <span class="icon-emoji ${unlocked ? 'animate-bounce-subtle' : ''}">${unlocked ? icon : '🔒'}</span>
-                                ${unlocked && rarity !== 'common' ? '<div class="sparkle-effect"></div>' : ''}
-                            </div>
-                            
-                            <!-- Rarity indicator -->
-                            <div class="rarity-indicator ${rarity}">
-                                <div class="rarity-gems">
-                                    ${Array.from({length: getRarityLevel(rarity)}, (_, i) => 
-                                        `<div class="gem ${unlocked ? 'gem-active' : 'gem-inactive'}"></div>`
-                                    ).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Hover Info Card -->
-                    <div class="badge-tooltip">
-                        <div class="tooltip-header">
-                            <h4 class="tooltip-title ${unlocked ? 'text-gray-800' : 'text-gray-500'}">${title}</h4>
-                            <span class="tooltip-rarity ${rarity}">${rarityLabels[rarity]}</span>
-                        </div>
-                        <p class="tooltip-description ${unlocked ? 'text-gray-600' : 'text-gray-400'}">
-                            ${unlocked ? description : requirement}
-                        </p>
-                        ${!unlocked ? `
-                            <div class="tooltip-progress">
-                                <div class="text-xs text-gray-400 mb-1">Progresso:</div>
-                                <div class="progress-mini">
-                                    <div class="progress-mini-fill" style="width: ${getAchievementProgress(id)}%"></div>
-                                </div>
-                            </div>
-                        ` : ''}
-                    </div>
-                </div>
-                
-                <!-- Label do badge -->
-                <div class="badge-label">
-                    <div class="badge-title ${unlocked ? 'unlocked-text' : 'locked-text'}">${title}</div>
-                    ${unlocked ? `<div class="badge-date">Desbloqueado</div>` : ''}
-                </div>
-            </div>
-        `;
-    }
-    
-    function getAchievementCount(progress) {
-        let count = 1; // Sempre tem "Jornada Iniciada"
-        if (progress?.sessions?.sessionsCompleted >= 1) count++;
-        if (progress?.completedTopics >= 5) count++;
-        if (progress?.completedTopics >= 10) count++;
-        if (progress?.completedTopics >= 25) count++;
-        return count;
-    }
-    
-    function getRarityCount(progress) {
-        if (progress?.completedTopics >= 25) return 'Épico';
-        if (progress?.completedTopics >= 10) return 'Raro';
-        if (progress?.completedTopics >= 5) return 'Incomum';
-        return 'Comum';
-    }
-    
-    function getStreakDays() {
-        // TODO: Implementar streak real quando disponível
-        return Math.floor(Math.random() * 7) + 1;
-    }
-    
-    function getNextAchievementText(progress) {
-        if (!progress?.sessions?.sessionsCompleted) return '1ª sessão';
-        if (progress?.completedTopics < 5) return '5 tópicos';
-        if (progress?.completedTopics < 10) return '10 tópicos';
-        if (progress?.completedTopics < 25) return '25 tópicos';
-        return 'Máximo atingido!';
-    }
-    
-    function getNextAchievementProgress(progress) {
-        if (!progress?.sessions?.sessionsCompleted) return 0;
-        if (progress?.completedTopics < 5) return (progress.completedTopics / 5) * 100;
-        if (progress?.completedTopics < 10) return ((progress.completedTopics - 5) / 5) * 100;
-        if (progress?.completedTopics < 25) return ((progress.completedTopics - 10) / 15) * 100;
-        return 100;
-    }
-    
-    function getRarityLevel(rarity) {
-        const levels = { 'common': 1, 'uncommon': 2, 'rare': 3, 'epic': 4, 'legendary': 5 };
-        return levels[rarity] || 1;
-    }
-    
-    function getAchievementProgress(achievementId) {
-        // TODO: Implementar progresso real baseado no tipo de achievement
-        return Math.floor(Math.random() * 80) + 10;
     }
     
     // Função para renderizar componente com retry
@@ -299,6 +161,22 @@
             }
         }
         
+        // Renderizar visualização de tempo dedicado
+        if (dashboardData.statistics?.studyTime) {
+            const studyTimeContainer = document.getElementById('studyTimeDashboard');
+            if (studyTimeContainer) {
+                try {
+                    renderStudyTimeVisualization(dashboardData.statistics.studyTime, studyTimeContainer);
+                    console.log('✅ Visualização de tempo dedicado renderizada');
+                } catch (error) {
+                    console.error('Erro ao renderizar visualização de tempo:', error);
+                }
+            }
+        } else {
+            // Carregar dados de tempo dedicado via API específica
+            await loadStudyTimeData();
+        }
+        
         // Renderizar metas se existir
         if (dashboardData.gamification?.dailyMissions) {
             const goalsContainer = document.getElementById('goalProgressDashboard');
@@ -338,6 +216,12 @@
             loadQuestionRadar(),
             loadSchedulePreview()
         ]);
+        
+        // Carregar visualização de tempo se não foi carregada pelos dados consolidados
+        const studyTimeContainer = document.getElementById('studyTimeDashboard');
+        if (studyTimeContainer && studyTimeContainer.innerHTML.includes('Carregando análise de tempo')) {
+            await loadStudyTimeData();
+        }
     }
     
     // Mostrar erro em componente específico
@@ -368,7 +252,8 @@
                 'performanceDashboard': loadPerformanceCheck,
                 'goalProgressDashboard': loadGoalProgress,
                 'questionRadarDashboard': loadQuestionRadar,
-                'detailedProgressAccordion': loadDetailedProgress
+                'detailedProgressAccordion': loadDetailedProgress,
+                'studyTimeDashboard': loadStudyTimeData
             };
             
             const loader = loaders[componentId];
@@ -383,25 +268,31 @@
     // Funções de renderização dos componentes
     function renderGamification(data, container) {
         console.log('🎮 Renderizando gamificação com dados:', data);
+        console.log('📊 XP recebido:', data?.xp, 'ExperiencePoints:', data?.experiencePoints, 'TotalXP:', data?.totalXP);
+        console.log('📊 Level Info:', data?.level_info);
+        console.log('📊 Current Streak:', data?.current_streak, 'Study Streak:', data?.studyStreak);
         
         // Atualizar contador de streak no header
         const streakDisplay = document.getElementById('streak-display');
         if (streakDisplay) {
-            streakDisplay.textContent = data.studyStreak || 0;
+            streakDisplay.textContent = data.studyStreak || data.current_streak || 0;
         }
         
         // Tentar usar o módulo Gamification diretamente
         if (window.Gamification?.renderGamificationDashboard) {
+            console.log('✅ Usando window.Gamification.renderGamificationDashboard');
             window.Gamification.renderGamificationDashboard(data, container.id);
         } else if (window.components?.renderGamificationDashboard) {
+            console.log('✅ Usando window.components.renderGamificationDashboard');
             window.components.renderGamificationDashboard(data, container.id);
         } else {
+            console.log('✅ Usando renderModernGamification');
             // Renderização moderna com badges e progress rings
             renderModernGamification(data, container);
         }
     }
     
-    // Nova função para renderizar gamificação moderna com badges
+    // Nova função para renderizar gamificação moderna
     function renderModernGamification(data, container) {
         const level = data.level || 1;
         const currentXP = data.currentXP || 0;
@@ -409,147 +300,72 @@
         const totalXP = data.totalXP || 0;
         const studyStreak = data.studyStreak || 0;
         const achievements = data.achievements || [];
-        const progress = data.progress || {};
         
         const xpProgressPercentage = Math.min(100, (currentXP / nextLevelXP) * 100);
         
         container.innerHTML = `
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">📊 Diagnóstico do Seu Progresso</h2>
-                
-                <!-- Status Principal com Interpretação -->
-                <div class="bg-green-100 text-green-800 border-green-200 rounded-lg p-4 border mb-4">
-                    <h3 class="font-bold text-lg">Você está no ritmo certo!</h3>
-                    <p class="text-sm mt-1">Continue assim para alcançar seus objetivos</p>
-                    <p class="text-xs mt-2 opacity-75">✅ Ritmo adequado para terminar a tempo</p>
-                </div>
-                
-                <!-- Métricas Interpretadas -->
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-4">
-                    <!-- O que você planejou -->
-                    <div class="bg-blue-50 rounded-lg p-3">
-                        <p class="text-xs text-gray-600 mb-1">📋 O que planejou</p>
-                        <p class="text-lg font-bold text-blue-700">${progress?.totalTopics || 0} tópicos</p>
-                        <p class="text-xs text-gray-500">Total do edital</p>
-                    </div>
-                    
-                    <!-- Onde você está -->
-                    <div class="bg-green-50 rounded-lg p-3">
-                        <p class="text-xs text-gray-600 mb-1">📍 Onde está</p>
-                        <p class="text-lg font-bold text-green-700">${progress?.completedTopics || 0} concluídos</p>
-                        <p class="text-xs text-gray-500">${((progress?.completedTopics || 0) / (progress?.totalTopics || 1) * 100).toFixed(1)}% do plano</p>
-                    </div>
-                    
-                    <!-- O que falta -->
-                    <div class="bg-orange-50 rounded-lg p-3">
-                        <p class="text-xs text-gray-600 mb-1">🎯 O que falta</p>
-                        <p class="text-lg font-bold text-orange-700">${(progress?.totalTopics || 0) - (progress?.completedTopics || 0)} tópicos</p>
-                        <p class="text-xs text-gray-500">em ${data?.daysRemaining || 0} dias</p>
-                    </div>
-                </div>
-                
-                <!-- 🏆 SISTEMA DE BADGES GAMIFICADO -->
-                <div class="mt-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                            <span class="achievement-glow-pulse">🏆</span>
-                            Suas Conquistas
-                        </h3>
-                        <div class="flex items-center gap-2 text-xs">
-                            <div class="flex items-center gap-1 bg-gradient-to-r from-amber-100 to-orange-100 px-2 py-1 rounded-full border border-amber-200">
-                                <span class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></span>
-                                <span class="text-amber-700 font-medium">${getAchievementCount(progress)} / 5 Desbloqueadas</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Progress Bar até próxima conquista -->
-                    <div class="mb-4">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs font-medium text-gray-600">Próxima conquista</span>
-                            <span class="text-xs text-gray-500">${getNextAchievementText(progress)}</span>
-                        </div>
-                        <div class="achievement-progress-bar">
-                            <div class="achievement-progress-fill" style="width: ${getNextAchievementProgress(progress)}%"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Grid de Badges/Troféus -->
-                    <div class="achievements-grid">
-                        ${renderAchievementBadge({
-                            id: 'starter',
-                            unlocked: true,
-                            rarity: 'common',
-                            title: 'Jornada Iniciada',
-                            description: '"Todo expert já foi iniciante"',
-                            icon: '🎯',
-                            requirement: 'Criar seu primeiro plano',
-                            color: 'blue'
-                        })}
-                        
-                        ${renderAchievementBadge({
-                            id: 'first-session',
-                            unlocked: progress?.sessions?.sessionsCompleted >= 1,
-                            rarity: 'common',
-                            title: 'Primeira Lapada',
-                            description: '"O primeiro passo foi dado!"',
-                            icon: '✅',
-                            requirement: '1 sessão concluída',
-                            color: 'green'
-                        })}
-                        
-                        ${renderAchievementBadge({
-                            id: 'momentum',
-                            unlocked: progress?.completedTopics >= 5,
-                            rarity: 'uncommon',
-                            title: 'Momentum',
-                            description: '"5 tópicos dominados!"',
-                            icon: '💪',
-                            requirement: '5 tópicos concluídos',
-                            color: 'purple'
-                        })}
-                        
-                        ${renderAchievementBadge({
-                            id: 'dezena',
-                            unlocked: progress?.completedTopics >= 10,
-                            rarity: 'rare',
-                            title: 'Dezena Conquistada',
-                            description: '"10 tópicos no bolso!"',
-                            icon: '⭐',
-                            requirement: '10 tópicos concluídos',
-                            color: 'yellow'
-                        })}
-                        
-                        ${renderAchievementBadge({
-                            id: 'quarteto-ferro',
-                            unlocked: progress?.completedTopics >= 25,
-                            rarity: 'epic',
-                            title: 'Quarteto de Ferro',
-                            description: '"25% do caminho percorrido!"',
-                            icon: '🔥',
-                            requirement: '25 tópicos concluídos',
-                            color: 'orange'
-                        })}
-                    </div>
-                    
-                    <!-- Estatísticas de Conquistas -->
-                    <div class="mt-4 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 rounded-xl p-3 border border-indigo-100">
-                        <div class="grid grid-cols-3 divide-x divide-indigo-200">
-                            <div class="text-center px-2">
-                                <div class="text-lg font-bold text-indigo-700">${getAchievementCount(progress)}</div>
-                                <div class="text-xs text-indigo-600">Desbloqueadas</div>
-                            </div>
-                            <div class="text-center px-2">
-                                <div class="text-lg font-bold text-purple-700">${getRarityCount(progress)}</div>
-                                <div class="text-xs text-purple-600">Raridade Máxima</div>
-                            </div>
-                            <div class="text-center px-2">
-                                <div class="text-lg font-bold text-pink-700">${getStreakDays()}</div>
-                                <div class="text-xs text-pink-600">Dias de Streak</div>
-                            </div>
+            <!-- Grid Principal de Stats -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                <!-- Level Progress Ring -->
+                <div class="text-center">
+                    <div class="progress-ring">
+                        <svg>
+                            <circle class="progress-ring-background" cx="60" cy="60" r="52"></circle>
+                            <circle class="progress-ring-progress" cx="60" cy="60" r="52" 
+                                    stroke-dasharray="${2 * Math.PI * 52}" 
+                                    stroke-dashoffset="${2 * Math.PI * 52 * (1 - xpProgressPercentage / 100)}"
+                                    style="stroke: var(--level-purple);"></circle>
+                        </svg>
+                        <div class="progress-ring-text">
+                            <span class="progress-ring-percentage" style="color: var(--level-purple);">Lv ${level}</span>
+                            <span class="progress-ring-label">Nível</span>
                         </div>
                     </div>
                 </div>
+                
+                <!-- XP Total -->
+                <div class="text-center">
+                    <div class="stat-card primary">
+                        <div class="stat-value">${totalXP.toLocaleString()}</div>
+                        <div class="stat-label">🌟 XP Total</div>
+                    </div>
+                </div>
+                
+                <!-- Sequência de Estudos -->
+                <div class="text-center">
+                    <div class="stat-card warning">
+                        <div class="stat-value">${studyStreak}</div>
+                        <div class="stat-label">🔥 Dias Seguidos</div>
+                    </div>
+                </div>
+                
+                <!-- Conquistas -->
+                <div class="text-center">
+                    <div class="stat-card success">
+                        <div class="stat-value">${achievements.length}</div>
+                        <div class="stat-label">🏆 Conquistas</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Level Progress Bar Avançada -->
+            <div class="level-progress-container">
+                <div class="level-info">
+                    <div class="current-level">Nível ${level}</div>
+                    <div class="next-level">Próximo: Nível ${level + 1}</div>
+                </div>
+                <div class="xp-progress-bar">
+                    <div class="xp-progress-fill" style="width: ${xpProgressPercentage}%"></div>
+                </div>
+                <div class="xp-info">
+                    <div class="xp-current">${currentXP} XP</div>
+                    <div class="xp-needed">${nextLevelXP - currentXP} XP restantes</div>
+                </div>
+            </div>
+            
+            <!-- Badges de Conquistas -->
+            <div class="badges-container">
+                ${renderAchievementBadges(achievements)}
             </div>
         `;
     }
@@ -784,7 +600,7 @@
                 <div class="stat-card primary highlight-pulse">
                     <div class="stat-value">${completionRate}%</div>
                     <div class="stat-label">📈 Taxa de Conclusão</div>
-                    <div class="performance-indicator ${performanceClass}">
+                    <div class="performance-indicator ${performformanceClass}">
                         ${getPerformanceText(completionRate)}
                     </div>
                 </div>
@@ -1001,6 +817,297 @@
         if (container) {
             container.innerHTML = '<p class="text-gray-500">Carregando cronograma...</p>';
         }
+    }
+    
+    /**
+     * Carrega dados de tempo dedicado via API
+     */
+    async function loadStudyTimeData() {
+        const container = document.getElementById('studyTimeDashboard');
+        if (!container) return;
+        
+        try {
+            console.log('📊 Carregando dados de tempo dedicado via API...');
+            
+            // Buscar dados reais via API
+            const response = await window.app?.apiFetch?.(`/plans/${planId}/study-time`);
+            
+            if (response && (response.totalStudyTimeSeconds >= 0)) {
+                renderStudyTimeVisualization(response, container);
+                console.log('✅ Dados de tempo carregados via API:', response);
+            } else {
+                // Fallback para dados mock se API falhar
+                console.warn('⚠️ API retornou dados vazios, usando fallback mock');
+                const mockTimeData = await generateMockStudyTimeData();
+                renderStudyTimeVisualization(mockTimeData, container);
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar dados de tempo:', error);
+            
+            // Tentar fallback com dados mock
+            try {
+                const mockTimeData = await generateMockStudyTimeData();
+                renderStudyTimeVisualization(mockTimeData, container);
+                
+                // Mostrar aviso de que são dados de demonstração
+                const demoNotice = document.createElement('div');
+                demoNotice.className = 'demo-notice';
+                demoNotice.innerHTML = `
+                    <div style="background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; margin-bottom: 16px;">
+                        ⚠️ <strong>Dados de Demonstração:</strong> Complete algumas sessões de estudo para ver seus dados reais aqui.
+                    </div>
+                `;
+                container.insertBefore(demoNotice, container.firstChild);
+            } catch (fallbackError) {
+                container.innerHTML = `
+                    <div class="no-data-state">
+                        <div class="no-data-icon">⚠️</div>
+                        <div class="no-data-title">Erro ao Carregar Dados</div>
+                        <div class="no-data-description">Não foi possível carregar os dados de tempo de estudo.</div>
+                    </div>
+                `;
+            }
+        }
+    }
+    
+    /**
+     * Gera dados mock para demonstração (será substituído por dados reais da API)
+     */
+    async function generateMockStudyTimeData() {
+        // Simula dados reais baseados na estrutura esperada
+        return {
+            totalStudyTimeSeconds: 10800, // 3 horas total
+            subjects: [
+                {
+                    name: 'Direito Civil',
+                    totalTimeSeconds: 5400, // 1.5 horas
+                    topics: [
+                        { name: 'Obrigações', timeSeconds: 3000 }, // 50 min
+                        { name: 'Fontes do Direito Civil', timeSeconds: 2400 } // 40 min
+                    ]
+                },
+                {
+                    name: 'Direito Penal',
+                    totalTimeSeconds: 3600, // 1 hora
+                    topics: [
+                        { name: 'Crimes contra a Pessoa', timeSeconds: 2100 }, // 35 min
+                        { name: 'Legitima Defesa', timeSeconds: 1500 } // 25 min
+                    ]
+                },
+                {
+                    name: 'Direito Constitucional',
+                    totalTimeSeconds: 1800, // 30 min
+                    topics: [
+                        { name: 'Princípios Fundamentais', timeSeconds: 1800 } // 30 min
+                    ]
+                }
+            ]
+        };
+    }
+    
+    /**
+     * Renderiza a visualização de tempo dedicado
+     */
+    function renderStudyTimeVisualization(timeData, container) {
+        if (!timeData || !timeData.subjects || timeData.subjects.length === 0) {
+            container.innerHTML = `
+                <div class="no-data-state">
+                    <div class="no-data-icon">📈</div>
+                    <div class="no-data-title">Nenhum Tempo Registrado</div>
+                    <div class="no-data-description">
+                        Comece a estudar e complete sessões para ver como seu tempo é distribuído entre as disciplinas!
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Preparar dados para visualização
+        const chartData = prepareChartData(timeData);
+        
+        container.innerHTML = `
+            <div class="time-chart-container">
+                <div class="sunburst-chart" id="sunburst-chart-${planId}">
+                    <canvas id="time-chart-canvas-${planId}" class="chart-svg"></canvas>
+                    <div class="chart-center-text">
+                        <div class="chart-center-value">${formatTimeHours(timeData.totalStudyTimeSeconds)}</div>
+                        <div class="chart-center-label">Tempo Total</div>
+                    </div>
+                    <div class="chart-tooltip" id="chart-tooltip-${planId}"></div>
+                </div>
+            </div>
+            
+            <div class="time-legend">
+                <div class="total-time-card">
+                    <div class="total-time-value">${formatTimeHours(timeData.totalStudyTimeSeconds)}</div>
+                    <div class="total-time-label">Tempo Total de Estudo</div>
+                </div>
+                
+                <h4>📈 Distribuição por Disciplina</h4>
+                <div class="legend-items">
+                    ${renderLegendItems(chartData)}
+                </div>
+                
+                <div class="time-breakdown">
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Média por disciplina:</span>
+                        <span class="breakdown-value">${calculateAverageTime(timeData)}</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Disciplinas ativas:</span>
+                        <span class="breakdown-value">${timeData.subjects.length}</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Total de tópicos:</span>
+                        <span class="breakdown-value">${timeData.subjects.reduce((acc, s) => acc + s.topics.length, 0)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Renderizar o gráfico
+        requestAnimationFrame(() => {
+            renderChart(chartData, `time-chart-canvas-${planId}`, `chart-tooltip-${planId}`);
+        });
+    }
+    
+    /**
+     * Prepara dados para o gráfico
+     */
+    function prepareChartData(timeData) {
+        const colors = [
+            '#0528f2', '#3b82f6', '#06b6d4', '#10b981', 
+            '#84cc16', '#f59e0b', '#ef4444', '#8b5cf6'
+        ];
+        
+        let colorIndex = 0;
+        
+        return timeData.subjects.map(subject => {
+            const percentage = (subject.totalTimeSeconds / timeData.totalStudyTimeSeconds) * 100;
+            const color = colors[colorIndex % colors.length];
+            colorIndex++;
+            
+            return {
+                name: subject.name,
+                timeSeconds: subject.totalTimeSeconds,
+                percentage: percentage,
+                color: color,
+                topics: subject.topics.map(topic => ({
+                    name: topic.name,
+                    timeSeconds: topic.timeSeconds,
+                    percentage: (topic.timeSeconds / subject.totalTimeSeconds) * 100
+                }))
+            };
+        });
+    }
+    
+    /**
+     * Renderiza os itens da legenda
+     */
+    function renderLegendItems(chartData) {
+        return chartData.map(item => `
+            <div class="legend-item" data-subject="${item.name}">
+                <div class="legend-color" style="background-color: ${item.color}"></div>
+                <div class="legend-name">${item.name}</div>
+                <div class="legend-time">${formatTimeHours(item.timeSeconds)}</div>
+                <div class="legend-percentage">(${item.percentage.toFixed(0)}%)</div>
+            </div>
+        `).join('');
+    }
+    
+    /**
+     * Calcula tempo médio por disciplina
+     */
+    function calculateAverageTime(timeData) {
+        const averageSeconds = timeData.totalStudyTimeSeconds / timeData.subjects.length;
+        return formatTimeHours(averageSeconds);
+    }
+    
+    /**
+     * Renderiza gráfico usando Canvas API (simples e rápido)
+     */
+    function renderChart(chartData, canvasId, tooltipId) {
+        const canvas = document.getElementById(canvasId);
+        const tooltip = document.getElementById(tooltipId);
+        
+        if (!canvas) return;
+        
+        const ctx = canvas.getContext('2d');
+        const size = Math.min(canvas.parentElement.clientWidth, 380);
+        
+        canvas.width = size;
+        canvas.height = size;
+        
+        const centerX = size / 2;
+        const centerY = size / 2;
+        const radius = size / 2 - 20;
+        
+        let currentAngle = -Math.PI / 2; // Começar do topo
+        
+        chartData.forEach((item, index) => {
+            const sliceAngle = (item.percentage / 100) * 2 * Math.PI;
+            
+            // Desenhar segmento
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+            ctx.closePath();
+            
+            ctx.fillStyle = item.color;
+            ctx.fill();
+            
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            currentAngle += sliceAngle;
+        });
+        
+        // Adicionar interatividade
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            const angle = Math.atan2(mouseY - centerY, mouseX - centerX);
+            const distance = Math.sqrt((mouseX - centerX) ** 2 + (mouseY - centerY) ** 2);
+            
+            if (distance <= radius) {
+                // Calcular qual segmento está sendo hover
+                let testAngle = -Math.PI / 2;
+                let hoveredItem = null;
+                
+                for (const item of chartData) {
+                    const sliceAngle = (item.percentage / 100) * 2 * Math.PI;
+                    
+                    if (angle >= testAngle && angle <= testAngle + sliceAngle) {
+                        hoveredItem = item;
+                        break;
+                    }
+                    
+                    testAngle += sliceAngle;
+                }
+                
+                if (hoveredItem) {
+                    tooltip.innerHTML = `
+                        <strong>${hoveredItem.name}</strong><br>
+                        Tempo: ${formatTimeHours(hoveredItem.timeSeconds)}<br>
+                        ${hoveredItem.percentage.toFixed(1)}% do total
+                    `;
+                    tooltip.style.opacity = '1';
+                    tooltip.style.left = (e.clientX + 10) + 'px';
+                    tooltip.style.top = (e.clientY - 10) + 'px';
+                } else {
+                    tooltip.style.opacity = '0';
+                }
+            } else {
+                tooltip.style.opacity = '0';
+            }
+        });
+        
+        canvas.addEventListener('mouseleave', () => {
+            tooltip.style.opacity = '0';
+        });
     }
     
     // Cleanup ao sair da página

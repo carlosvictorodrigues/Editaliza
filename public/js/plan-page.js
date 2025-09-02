@@ -268,19 +268,25 @@
     // Funções de renderização dos componentes
     function renderGamification(data, container) {
         console.log('🎮 Renderizando gamificação com dados:', data);
+        console.log('📊 XP recebido:', data?.xp, 'ExperiencePoints:', data?.experiencePoints, 'TotalXP:', data?.totalXP);
+        console.log('📊 Level Info:', data?.level_info);
+        console.log('📊 Current Streak:', data?.current_streak, 'Study Streak:', data?.studyStreak);
         
         // Atualizar contador de streak no header
         const streakDisplay = document.getElementById('streak-display');
         if (streakDisplay) {
-            streakDisplay.textContent = data.studyStreak || 0;
+            streakDisplay.textContent = data.studyStreak || data.current_streak || 0;
         }
         
         // Tentar usar o módulo Gamification diretamente
         if (window.Gamification?.renderGamificationDashboard) {
+            console.log('✅ Usando window.Gamification.renderGamificationDashboard');
             window.Gamification.renderGamificationDashboard(data, container.id);
         } else if (window.components?.renderGamificationDashboard) {
+            console.log('✅ Usando window.components.renderGamificationDashboard');
             window.components.renderGamificationDashboard(data, container.id);
         } else {
+            console.log('✅ Usando renderModernGamification');
             // Renderização moderna com badges e progress rings
             renderModernGamification(data, container);
         }

@@ -87,18 +87,32 @@
     // Renderizar gamificação REAL do backend
     async function renderGamification() {
         const container = document.getElementById('gamification-dashboard');
-        console.log('🎮 Buscando gamificação REAL do backend...');
+        console.log('🎮 Renderizando gamificação...');
         
         if (!container) {
             console.error('❌ Container gamification-dashboard não encontrado!');
             return;
         }
         
+        // Verificar se já temos dados de gamificação do dashboard
+        if (window.dashboardData && window.dashboardData.gamification) {
+            console.log('✅ Usando dados de gamificação do dashboard:', window.dashboardData.gamification);
+            
+            // Usar o módulo de gamificação real com os dados do dashboard
+            if (window.Gamification && window.Gamification.renderGamificationDashboard) {
+                window.Gamification.renderGamificationDashboard(window.dashboardData.gamification, 'gamification-dashboard');
+            } else {
+                console.error('❌ Módulo Gamification não encontrado!');
+            }
+            return;
+        }
+        
+        // Fallback: buscar dados se não tiver no dashboard
         // Mostrar loading
         container.innerHTML = '<p class="text-center text-gray-500 animate-pulse">Carregando sistema de gamificação...</p>';
         
         try {
-            // Buscar dados REAIS do backend
+            // Buscar dados do endpoint correto de gamificação do plano
             const token = localStorage.getItem('editaliza_token');
             const headers = {
                 'Content-Type': 'application/json'
@@ -108,8 +122,8 @@
                 headers['Authorization'] = `Bearer ${token}`;
             }
             
-            // Chamar endpoint real de gamificação
-            const response = await fetch('/api/gamification/profile', {
+            // Chamar endpoint específico do plano ao invés do profile genérico
+            const response = await fetch(`/api/plans/${planId}/gamification`, {
                 method: 'GET',
                 headers: headers,
                 credentials: 'include'
@@ -117,7 +131,7 @@
             
             if (response.ok) {
                 const gamificationData = await response.json();
-                console.log('✅ Dados REAIS de gamificação recebidos:', gamificationData);
+                console.log('✅ Dados de gamificação do plano recebidos:', gamificationData);
                 
                 // Usar o módulo de gamificação real
                 if (window.Gamification && window.Gamification.renderGamificationDashboard) {
@@ -456,12 +470,14 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                     <!-- Gráfico de Pizza -->
                     <div class="flex flex-col items-center justify-center">
-                        <div class="relative mb-4">
+                        <div class="relative mb-4" style="width: 144px; height: 144px;">
+                            <!-- Donut externo -->
                             <div class="w-36 h-36 rounded-full shadow-inner" style="${pieChart}"></div>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <div class="text-center bg-white rounded-full w-28 h-28 flex flex-col items-center justify-center shadow-lg">
-                                    <span class="text-3xl font-bold text-gray-800">${completedPct.toFixed(0)}%</span>
-                                    <span class="text-sm text-gray-500 font-medium">Completo</span>
+                            <!-- Centro branco para criar efeito donut -->
+                            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div class="bg-white rounded-full w-28 h-28 flex items-center justify-center">
+                                    <!-- Apenas o percentual no centro, sem texto adicional -->
+                                    <span class="text-4xl font-bold text-gray-800" style="line-height: 1; -webkit-font-smoothing: antialiased;">${completedPct.toFixed(0)}%</span>
                                 </div>
                             </div>
                         </div>

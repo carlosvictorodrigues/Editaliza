@@ -204,9 +204,9 @@
                     </svg>
                 </div>
                 <h1 class="text-4xl md:text-5xl font-bold motivation-text mb-3">Meu Perfil</h1>
-                <p class="text-gray-600 text-lg mb-2">Complete seu perfil para uma experincia personalizada de estudos</p>
+                <p class="text-gray-600 text-lg mb-2">Complete seu perfil para uma experiência personalizada de estudos</p>
                 <p class="text-sm text-blue-600 bg-blue-50 rounded-lg p-3 max-w-2xl mx-auto">
-                    = <strong>Por que essas informaes so importantes?</strong><br>
+                    💡 <strong>Por que essas informações são importantes?</strong><br>
                     Cada dado que voc compartilha nos ajuda a criar um plano de estudos nico para voc, sugerir contedos relevantes e acompanhar seu progresso rumo  aprovao!
                 </p>
                 <div class="mt-4">
@@ -355,7 +355,7 @@
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label for="phone" class="block text-sm font-semibold text-gray-700 mb-1">Telefone</label>
-                                        <p class="text-xs text-gray-500 mb-2">= Para contato em emergncias e informaes urgentes sobre editais</p>
+                                        <p class="text-xs text-gray-500 mb-2">📞 Para contato em emergências e informações urgentes sobre editais</p>
                                         <input type="tel" id="phone" name="phone" class="form-input" placeholder="(11) 99999-9999">
                                     </div>
                                     <div>
@@ -386,7 +386,7 @@
                                     </svg>
                                 </div>
                                 <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-purple-800">Como sua experincia nos orienta</h3>
+                                    <h3 class="text-sm font-medium text-purple-800">Como sua experiência nos orienta</h3>
                                     <div class="mt-2 text-sm text-purple-700">
                                         <p>= <strong>Primeira vez:</strong> Oferecemos guias especiais para iniciantes e dicas fundamentais</p>
                                         <p>= <strong>J tentou antes:</strong> Focamos em estratgias avanadas e superao de obstculos especficos</p>
@@ -414,7 +414,7 @@
 
                             <div>
                                 <label for="concursosCount" class="block text-sm font-semibold text-gray-700 mb-1">Quantos concursos j prestou?</label>
-                                <p class="text-xs text-gray-500 mb-2">= Ajustamos as estratgias baseadas na sua experincia prtica</p>
+                                <p class="text-xs text-gray-500 mb-2">🎯 Ajustamos as estratégias baseadas na sua experiência prática</p>
                                 <select id="concursosCount" name="concursosCount" class="form-input">
                                     <option value="">Selecione</option>
                                     <option value="0">Nenhum ainda</option>
@@ -499,8 +499,8 @@
                                     <option value="saude">rea da Sade</option>
                                     <option value="educacao">rea da Educao</option>
                                     <option value="engenharia">Engenharia</option>
-                                    <option value="ti">Tecnologia da Informao</option>
-                                    <option value="bancaria">rea Bancria</option>
+                                    <option value="ti">Tecnologia da Informação</option>
+                                    <option value="bancaria">Área Bancária</option>
                                     <option value="legislativo">Poder Legislativo</option>
                                     <option value="judiciario">Poder Judicirio</option>
                                     <option value="outros">Outras reas</option>
@@ -563,7 +563,7 @@
                                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                                 </svg>
                                 <p class="text-sm text-green-700">
-                                    <strong>Pronto para comear?</strong> Salve suas informaes e transforme seus dados em um plano de estudos personalizado!
+                                    <strong>Pronto para começar?</strong> Salve suas informações e transforme seus dados em um plano de estudos personalizado!
                                 </p>
                             </div>
                         </div>
@@ -1170,7 +1170,7 @@
                     await app.onUserAvatarUpdated();
                 }
                 
-                app.showToast('Perfil atualizado com sucesso! Suas informaes ajudaro a personalizar sua experincia.', 'success');
+                app.showToast('Perfil atualizado com sucesso! Suas informações ajudarão a personalizar sua experiência.', 'success');
                 saveBtn.disabled = true;
                 
                 // Atualizar barra de progresso aps salvar
@@ -1208,7 +1208,7 @@
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
-                    Salvar Todas as Informaes
+                    Salvar Todas as Informações
                 `;
             }
         }
@@ -1291,7 +1291,7 @@
                 const incompleteFields = checkProfileCompleteness();
                 if (incompleteFields.length > 0) {
                     app.showToast(
-                        `Complete seu perfil para uma experincia personalizada! ${incompleteFields.length} campos restantes.`,
+                        `Complete seu perfil para uma experiência personalizada! ${incompleteFields.length} campos restantes.`,
                         'info',
                         5000
                     );

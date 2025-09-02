@@ -502,6 +502,148 @@ async function testarPlataformaCompleta() {
     sessions = sessionsResult.data.sessions || sessionsResult.data || [];
     console.log(`✅ ${sessions.length} sessões encontradas`);
     
+    // ========== NOVA ANÁLISE: RECORRÊNCIA PROPORCIONAL ==========
+    console.log('\n   🔄 ANÁLISE DE RECORRÊNCIA (Tópicos que aparecem múltiplas vezes):');
+    
+    const topicFrequency = {};
+    const topicDates = {}; // Para rastrear datas de cada tópico
+    
+    sessions.forEach(session => {
+        // Filtrar apenas sessões de estudo (não simulados ou revisões)
+        if (session.topic_name && 
+            session.session_type !== 'Simulado Direcionado' && 
+            session.session_type !== 'Simulado Completo' &&
+            !session.session_type?.includes('Revisão')) {
+            
+            const topicKey = `${session.subject_name} > ${session.topic_name}`;
+            topicFrequency[topicKey] = (topicFrequency[topicKey] || 0) + 1;
+            
+            // Rastrear datas para análise de espaçamento
+            if (!topicDates[topicKey]) {
+                topicDates[topicKey] = [];
+            }
+            topicDates[topicKey].push(new Date(session.session_date));
+        }
+    });
+    
+    // Identificar tópicos recorrentes
+    const recurringTopics = Object.entries(topicFrequency)
+        .filter(([_, count]) => count > 1)
+        .sort((a, b) => b[1] - a[1]);
+    
+    if (recurringTopics.length > 0) {
+        console.log(`   ✅ ${recurringTopics.length} tópicos com recorrência detectados`);
+        console.log('\n   Top 10 tópicos mais recorrentes:');
+        recurringTopics.slice(0, 10).forEach(([topic, count]) => {
+            console.log(`      - ${topic}: ${count}x`);
+        });
+        
+        // Calcular média de recorrência
+        const avgRecurrence = recurringTopics.reduce((sum, [_, count]) => sum + count, 0) / recurringTopics.length;
+        console.log(`\n   📊 Média de recorrência: ${avgRecurrence.toFixed(1)}x por tópico recorrente`);
+    } else {
+        console.log('   ❌ PROBLEMA: Nenhum tópico com recorrência detectado!');
+        console.log('   ⚠️  O algoritmo de recorrência proporcional pode não estar funcionando');
+    }
+    
+    // ========== ANÁLISE DE ESPAÇAMENTO MÍNIMO ==========
+    console.log('\n   📏 ANÁLISE DE ESPAÇAMENTO ENTRE REPETIÇÕES:');
+    
+    let spacingViolations = [];
+    let totalSpacings = 0;
+    let sumSpacings = 0;
+    
+    recurringTopics.slice(0, 5).forEach(([topicKey, _]) => {
+        const dates = topicDates[topicKey].sort((a, b) => a - b);
+        
+        if (dates.length > 1) {
+            console.log(`\n      ${topicKey}:`);
+            for (let i = 1; i < dates.length; i++) {
+                const daysBetween = Math.floor((dates[i] - dates[i-1]) / (1000 * 60 * 60 * 24));
+                
+                // Considerar apenas dias úteis
+                const startDate = dates[i-1];
+                const endDate = dates[i];
+                let workdaysBetween = 0;
+                
+                for (let d = new Date(startDate); d < endDate; d.setDate(d.getDate() + 1)) {
+                    const dayOfWeek = d.getDay();
+                    if (dayOfWeek >= 1 && dayOfWeek <= 5) { // Segunda a Sexta
+                        workdaysBetween++;
+                    }
+                }
+                
+                console.log(`         Intervalo ${i}: ${daysBetween} dias corridos (${workdaysBetween} dias úteis)`);
+                
+                totalSpacings++;
+                sumSpacings += workdaysBetween;
+                
+                // Verificar violação do espaçamento mínimo de 2 dias úteis
+                if (workdaysBetween < 2) {
+                    spacingViolations.push({
+                        topic: topicKey,
+                        interval: workdaysBetween,
+                        dates: [dates[i-1].toISOString().split('T')[0], dates[i].toISOString().split('T')[0]]
+                    });
+                }
+            }
+        }
+    });
+    
+    if (totalSpacings > 0) {
+        const avgSpacing = sumSpacings / totalSpacings;
+        console.log(`\n   📊 Espaçamento médio: ${avgSpacing.toFixed(1)} dias úteis`);
+    }
+    
+    if (spacingViolations.length > 0) {
+        console.log('\n   ⚠️  VIOLAÇÕES de espaçamento mínimo (< 2 dias úteis):');
+        spacingViolations.forEach(v => {
+            console.log(`      - ${v.topic}: apenas ${v.interval} dia(s) útil(eis)`);
+            console.log(`        Entre: ${v.dates[0]} e ${v.dates[1]}`);
+        });
+    } else if (recurringTopics.length > 0) {
+        console.log('\n   ✅ Todos os tópicos respeitam o espaçamento mínimo de 2 dias úteis');
+    }
+    
+    // ========== ANÁLISE DE CAP POR DISCIPLINA (45%) ==========
+    console.log('\n   📦 ANÁLISE DE CAP POR DISCIPLINA INDIVIDUAL (máx 45%):');
+    
+    const disciplineDistribution = {};
+    sessions.forEach(session => {
+        if (session.subject_name && 
+            session.session_type !== 'Simulado Direcionado' && 
+            session.session_type !== 'Simulado Completo') {
+            
+            const subject = session.subject_name;
+            disciplineDistribution[subject] = (disciplineDistribution[subject] || 0) + 1;
+        }
+    });
+    
+    const totalRelevantSessions = Object.values(disciplineDistribution).reduce((a, b) => a + b, 0);
+    const disciplineViolations = [];
+    
+    Object.entries(disciplineDistribution)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([subject, count]) => {
+            const percentage = (count / totalRelevantSessions) * 100;
+            const bar = '█'.repeat(Math.floor(percentage / 2));
+            console.log(`      ${subject.padEnd(30)} ${count.toString().padStart(3)} (${percentage.toFixed(1).padStart(5)}%) ${bar}`);
+            
+            if (percentage > 45) {
+                disciplineViolations.push({ subject, percentage });
+            }
+        });
+    
+    if (disciplineViolations.length > 0) {
+        console.log('\n   ⚠️  VIOLAÇÕES do cap de 45%:');
+        disciplineViolations.forEach(v => {
+            console.log(`      - ${v.subject}: ${v.percentage.toFixed(1)}% (excede em ${(v.percentage - 45).toFixed(1)}%)`);
+        });
+    } else {
+        console.log('\n   ✅ Todas as disciplinas respeitam o cap de 45%');
+    }
+    
+    // Agora fazer a análise original
     // Filtrar sessões que não são de estudo principal para a análise de peso
     const materiasDeEstudo = disciplinas.map(d => d.nome);
     const sessoesDeEstudo = sessions.filter(s => materiasDeEstudo.includes(s.subject_name || s.subject));
@@ -550,9 +692,37 @@ async function testarPlataformaCompleta() {
 
     console.log(`      Ordem de Frequência (Direito >= Português >= RL): ${ordemCorreta ? '✅' : '❌'}`);
     console.log(`      Distribuição Proporcional: ${distribuicaoCorreta ? '✅' : '❌'}`);
+    console.log(`      Recorrência Detectada: ${recurringTopics.length > 0 ? '✅' : '❌'}`);
+    console.log(`      Espaçamento Respeitado: ${spacingViolations.length === 0 && recurringTopics.length > 0 ? '✅' : '❌'}`);
+    console.log(`      Cap 45% por Disciplina: ${disciplineViolations.length === 0 ? '✅' : '❌'}`);
+    
+    const wrr100Correto = algoritmoCorreto && 
+                          recurringTopics.length > 0 && 
+                          spacingViolations.length === 0 && 
+                          disciplineViolations.length === 0;
 
-    console.log(`\n      Diagnóstico do Algoritmo: ${algoritmoCorreto ? '✅ PARECE CORRETO' : '❌ PARECE INCORRETO'}`);
-    registrarEtapa('Verificar Algoritmo', algoritmoCorreto, { distribuicaoEstudo });
+    console.log(`\n      Diagnóstico do Algoritmo WRR: ${wrr100Correto ? '✅ 100% CORRETO!' : '⚠️  PARCIALMENTE CORRETO'}`);
+    
+    // Relatório detalhado de problemas
+    if (!wrr100Correto) {
+        console.log('\n      🔍 PROBLEMAS DETECTADOS:');
+        if (recurringTopics.length === 0) {
+            console.log('         ❌ Recorrência proporcional não implementada');
+        }
+        if (spacingViolations.length > 0) {
+            console.log(`         ❌ ${spacingViolations.length} violações de espaçamento mínimo`);
+        }
+        if (disciplineViolations.length > 0) {
+            console.log(`         ❌ ${disciplineViolations.length} disciplina(s) excedem cap de 45%`);
+        }
+    }
+    
+    registrarEtapa('Verificar Algoritmo WRR', wrr100Correto, { 
+        distribuicaoEstudo,
+        recurringTopics: recurringTopics.length,
+        spacingViolations: spacingViolations.length,
+        disciplineViolations: disciplineViolations.length
+    });
     
     // ========== 7. MARCAR SESSÕES COMO CONCLUÍDAS E VERIFICAR ESTATÍSTICAS ========== 
     console.log('\n✅ ETAPA 7: MARCAÇÃO DE SESSÕES COMO CONCLUÍDAS E ESTATÍSTICAS');
