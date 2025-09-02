@@ -53,7 +53,14 @@ const emailService = require('./src/services/emailService');
 const { emailRateLimitService, createPasswordRecoveryRateLimit } = require('./src/services/emailRateLimitService');
 
 // Importar rotas CACKTO para webhooks
-const CacktoRoutes = require('./src/routes/cackto.routes');
+let CacktoRoutes;
+try {
+    CacktoRoutes = require('./src/routes/cackto.routes');
+    console.log('✅ CacktoRoutes module loaded successfully');
+} catch (error) {
+    console.error('❌ Failed to load CacktoRoutes:', error.message);
+    CacktoRoutes = express.Router(); // Fallback empty router
+}
 
 // Importar middleware de segurança
 const {
