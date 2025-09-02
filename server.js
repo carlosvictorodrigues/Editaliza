@@ -532,15 +532,11 @@ app.use('/reset-password', strictRateLimit);
 
 
 // ==========================================
-// INTEGRAÇÃO CACKTO - TEMPORARIAMENTE DESABILITADA
+// INTEGRAÇÃO CACKTO - HABILITADA
 // ==========================================
 
-/* 
-// CACKTO INTEGRATION TEMPORARILY DISABLED
-// Reason: Missing database tables and columns causing 500 errors
-// Tables needed: integration_metrics, cackto_cache  
-// Column needed: subscriptions.cackto_transaction_id (currently has kiwify_transaction_id)
-// TODO: Run migration script and re-enable
+// CACKTO INTEGRATION ENABLED
+// Note: Webhook routes must be mounted for payment processing
 
 // ========================================
 // WEBHOOK ROUTES - MUST BE MOUNTED FIRST
@@ -571,6 +567,8 @@ console.log('✅ Direct fallback route mounted at /api/webhooks/cackto');
 console.log('🚀 SERVER.JS: Starting CACKTO async initialization');
 
 // Inicializar integração CACKTO com tratamento de erro completo
+// TODO: Importar e chamar initializeCackto quando o módulo estiver disponível
+/*
 (async () => {
     try {
         console.log('📦 Initializing CACKTO integration...');
@@ -588,6 +586,7 @@ console.log('🚀 SERVER.JS: Starting CACKTO async initialization');
         // As rotas de webhook já foram montadas, então continuamos funcionando
     }
 })();
+*/
 
 console.log('🚀 SERVER.JS: Continuando com configuração do servidor...');
 
@@ -615,11 +614,9 @@ const requireActiveSubscription = (req, res, next) => {
 };
 
 // Middleware para funcionalidades premium específicas - DISABLED WITH CACKTO
-/*
-const requirePDFDownload = requirePremiumFeature('pdf_download');
-const requireAdvancedSearch = requirePremiumFeature('advanced_search');
-const requireOfflineAccess = requirePremiumFeature('offline_access');
-*/
+// const requirePDFDownload = requirePremiumFeature('pdf_download');
+// const requireAdvancedSearch = requirePremiumFeature('advanced_search');
+// const requireOfflineAccess = requirePremiumFeature('offline_access');
 
 // TEMPORARY FALLBACK - Allow all features until Cackto is properly configured
 const requirePDFDownload = (req, res, next) => next();
