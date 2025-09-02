@@ -86,6 +86,64 @@ const StudyChecklist = {
         // Display será atualizado automaticamente pelo timer
     },
 
+    async markAsComplete() {
+        try {
+            // Desabilitar botão durante processamento
+            const completeBtn = document.getElementById('modal-complete-btn');
+            if (completeBtn) {
+                completeBtn.disabled = true;
+                completeBtn.innerHTML = '<span class="animate-spin">🔄</span> Concluindo...';
+            }
+
+            // Chamar markAsCompleted existente
+            await this.markAsCompleted();
+
+            // Invalidar cache e atualizar métricas
+            app.invalidatePlanCache(this.session.study_plan_id);
+            app.triggerMetricsUpdate(this.session.study_plan_id, 'session_status_changed');
+            
+            console.log('✅ Sessão concluída - atualizando estatísticas...');
+            app.invalidatePlanCache(this.session.study_plan_id, 'gamification');
+            
+            // Atualizar métricas se estivermos na tela plan.html
+            if (window.location.pathname.includes('plan.html')) {
+                try {
+                    if (typeof window.refreshAllMetrics === 'function') {
+                        console.log('✅ Atualizando todas as métricas após conclusão da sessão...');
+                        setTimeout(() => {
+                            window.refreshAllMetrics();
+                        }, 1000);
+                    } else if (typeof window.refreshGamificationData === 'function') {
+                        setTimeout(() => {
+                            window.refreshGamificationData();
+                        }, 500);
+                    }
+                } catch (error) {
+                    console.error('Erro ao atualizar métricas:', error);
+                }
+            }
+
+            // Fechar modal e recarregar se necessário
+            setTimeout(() => {
+                this.close();
+                if (!window.location.pathname.includes('plan.html')) {
+                    location.reload();
+                }
+            }, 1500);
+            
+        } catch (error) {
+            console.error('Erro ao concluir sessão:', error);
+            app.showToast('Erro ao concluir sessão', 'error');
+            
+            // Reabilitar botão em caso de erro
+            const completeBtn = document.getElementById('modal-complete-btn');
+            if (completeBtn) {
+                completeBtn.disabled = false;
+                completeBtn.innerHTML = '<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>Marcar como Concluído';
+            }
+        }
+    },
+
     close() {
         // CORREO: NO parar o timer automaticamente
         // Timer continua rodando em background para permitir continuao
@@ -170,11 +228,13 @@ const StudyChecklist = {
                 </div>
             </div>
 
-            <div class="mt-6 pt-6 border-t flex items-center justify-between">
-                <label for="modal-status" class="flex items-center space-x-3 cursor-pointer">
-                    <input type="checkbox" id="modal-status" class="w-5 h-5 text-editaliza-blue rounded focus:ring-editaliza-blue">
-                    <span class="text-sm font-medium text-gray-700">Marcar como concluído</span>
-                </label>
+            <div class="mt-6 pt-6 border-t flex items-center justify-end space-x-3">
+                <button id="modal-complete-btn" onclick="StudyChecklist.markAsComplete()" class="btn-success py-3 px-6 text-sm font-medium flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    Marcar como Concluído
+                </button>
                 <button onclick="StudyChecklist.close()" class="btn-secondary py-3 px-6 text-sm font-medium">Fechar</button>
             </div>
         `;
@@ -267,81 +327,8 @@ const StudyChecklist = {
             console.warn('⚠️ Elemento modal-notes não encontrado');
         }
 
-        if (statusElement) {
-            statusElement.addEventListener('change', async (e) => {
-                const newStatus = e.target.checked ? 'Concluído' : 'Pendente';
-                
-                if (e.target.checked) {
-                    // Chamar markAsCompleted quando checkbox for marcado
-                    await this.markAsCompleted();
-                } else {
-                    // Se desmarcar, apenas atualizar status para Pendente
-                    try {
-                        const endpoint = `/api/sessions/${this.session.id}`;
-                        console.log('Atualizando status da sessão para Pendente:', this.session.id);
-                        
-                        await app.apiFetch(endpoint, {
-                            method: 'PATCH',
-                            body: JSON.stringify({ 'status': 'Pendente' })
-                        });
-                        console.log('Status atualizado para Pendente');
-                        app.showToast('Sessão marcada como pendente', 'info');
-                    } catch (error) {
-                        console.error('Erro ao atualizar status:', error);
-                        app.showToast('Erro ao salvar status: ' + error.message, 'error');
-                        e.target.checked = !e.target.checked; // Reverter checkbox em caso de erro
-                        return;
-                    }
-                }
-
-                // ***** CORREO APLICADA AQUI *****
-                // Invalida o cache do plano para que a tela de Desempenho busque os novos dados.
-                app.invalidatePlanCache(this.session.study_plan_id);
-                
-                // CORREÇÃO: Disparar evento de atualização de métricas
-                app.triggerMetricsUpdate(this.session.study_plan_id, 'session_status_changed');
-                
-                // CORREÇÃO: Atualizar TODAS as métricas quando sessão é concluída
-                 if (newStatus.toLowerCase() === 'concluido') {
-                    console.log('✅ Sessão concluída - atualizando estatísticas...');
-                    app.invalidatePlanCache(this.session.study_plan_id, 'gamification');
-                    
-                    // CORREO: Atualizar TODAS as mtricas se estivermos na tela plan.html
-                    if (window.location.pathname.includes('plan.html')) {
-                        try {
-                            if (typeof window.refreshAllMetrics === 'function') {
-                                console.log('✅ Atualizando todas as métricas após conclusão da sessão...');
-                                setTimeout(() => {
-                                    window.refreshAllMetrics();
-                                }, 1000); // Delay para garantir que backend processou
-                            } else if (typeof window.refreshGamificationData === 'function') {
-                                // Fallback para funo antiga
-                                setTimeout(() => {
-                                    window.refreshGamificationData();
-                                }, 500);
-                            }
-                        } catch (error) {
-                            console.error('Erro ao atualizar mtricas:', error);
-                        }
-                    }
-                }
-
-                 app.showToast(e.target.checked ? 'Sessão concluída! As métricas serão atualizadas...' : 'Status da tarefa atualizado!', 'success');
-                
-                // CORREO: No atualizar painis aqui, deixar para a funo global fazer isso
-                // O refresh ser feito pela funo refreshAllMetrics() chamada acima
-                
-                if (e.target.checked) {
-                    this.close();
-                    // No precisa mais recarregar a pgina inteira, j atualizamos os painis
-                    if (!window.location.pathname.includes('plan.html')) {
-                        location.reload(); 
-                    }
-                }
-            });
-        } else {
-            console.warn(' Elemento modal-status no encontrado');
-        }
+        // Remove old status element listener since we're using a button now
+        // Button click is handled by markAsComplete() function
     },
 
     addAnimations() {
