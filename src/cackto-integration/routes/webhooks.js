@@ -4,7 +4,7 @@ const CacktoWebhookValidator = require('../webhooks/validator');
 const CacktoWebhookProcessor = require('../webhooks/processor');
 const AuditModel = require('../../subscription/models/audit');
 const { asyncHandler } = require('../../utils/error-handler');
-const { dbGet, dbAll, dbRun } = require('../../utils/database');
+// const { dbGet, dbAll, dbRun } = require('../../utils/database'); // Será usado depois
 
 const router = express.Router();
 const webhookValidator = new CacktoWebhookValidator();
@@ -31,45 +31,60 @@ router.post('/cackto', asyncHandler(async (req, res) => {
         // 1. Validar webhook
         const validatedWebhook = await webhookValidator.validateWebhook(req);
         
-        // 2. Processar webhook
-        const result = await webhookProcessor.processWebhook(validatedWebhook, req);
-        
-        // 3. Responder com sucesso
+        // 2. Responder imediatamente ao CACKTO (importante para timeout)
         res.status(200).json({
             success: true,
-            processingId: result.processingId,
-            processingTime: Date.now() - startTime,
-            message: 'Webhook CACKTO processado com sucesso'
+            message: 'Webhook recebido e sendo processado'
         });
         
-    } catch (error) {
-        // Log do erro para monitoramento
-        await AuditModel.logEvent({
-            entityType: 'CACKTO_WEBHOOK_ERROR',
-            entityId: req.body?.id || 'unknown',
-            action: 'WEBHOOK_PROCESSING_FAILED',
-            userId: null,
-            details: {
-                error: error.message,
-                type: error.type,
-                processingTime: Date.now() - startTime,
-                body: req.body,
-                headers: {
-                    'user-agent': req.headers['user-agent'],
-                    'content-type': req.headers['content-type']
+        // 3. Processar webhook de forma assíncrona (sem await)
+        // Isso evita timeout do CACKTO e permite processamento em background
+        webhookProcessor.processWebhook(validatedWebhook, req)
+            .then(result => {
+                console.info('[CACKTO] Webhook processado com sucesso:', {
+                    processingId: result.processingId,
+                    processingTime: Date.now() - startTime
+                });
+            })
+            .catch(async error => {
+                console.error('[CACKTO] Erro ao processar webhook:', error);
+                
+                // Log do erro para monitoramento
+                try {
+                    await AuditModel.logEvent({
+                        entityType: 'CACKTO_WEBHOOK_ERROR',
+                        entityId: req.body?.id || 'unknown',
+                        action: 'WEBHOOK_PROCESSING_FAILED',
+                        userId: null,
+                        details: {
+                            error: error.message,
+                            type: error.type,
+                            processingTime: Date.now() - startTime,
+                            body: req.body,
+                            headers: {
+                                'user-agent': req.headers['user-agent'],
+                                'content-type': req.headers['content-type']
+                            }
+                        },
+                        ipAddress: req.ip,
+                        userAgent: req.headers['user-agent'],
+                        severity: 'ERROR'
+                    });
+                } catch (logError) {
+                    console.error('[CACKTO] Erro ao registrar log de erro:', logError);
                 }
-            },
-            ipAddress: req.ip,
-            userAgent: req.headers['user-agent'],
-            severity: 'ERROR'
-        });
+            });
+        
+    } catch (error) {
+        // Erro na validação - retornar erro imediatamente
+        console.error('[CACKTO] Erro na validação do webhook:', error);
         
         // Retornar erro apropriado
         const statusCode = error.statusCode || 500;
         res.status(statusCode).json({
             success: false,
             error: error.message,
-            type: error.type || 'CACKTO_WEBHOOK_ERROR',
+            type: error.type || 'CACKTO_WEBHOOK_VALIDATION_ERROR',
             processingTime: Date.now() - startTime
         });
     }
@@ -113,29 +128,29 @@ router.get('/cackto/health', asyncHandler(async (req, res) => {
 router.get('/cackto/stats', asyncHandler(async (req, res) => {
     // TODO: Adicionar middleware de autenticação de admin
     
-    const { dbGet, dbAll, dbRun } = require('../../utils/database');
+    const { dbGet, dbAll } = require('../../utils/database');
     const timeframe = req.query.timeframe || '24h';
     
     let timeCondition;
     switch (timeframe) {
         case '1h':
-            timeCondition = "created_at > datetime('now', '-1 hour')";
+            timeCondition = 'created_at > datetime(\'now\', \'-1 hour\')';
             break;
         case '24h':
-            timeCondition = "created_at > datetime('now', '-1 day')";
+            timeCondition = 'created_at > datetime(\'now\', \'-1 day\')';
             break;
         case '7d':
-            timeCondition = "created_at > datetime('now', '-7 days')";
+            timeCondition = 'created_at > datetime(\'now\', \'-7 days\')';
             break;
         case '30d':
-            timeCondition = "created_at > datetime('now', '-30 days')";
+            timeCondition = 'created_at > datetime(\'now\', \'-30 days\')';
             break;
         default:
-            timeCondition = "created_at > datetime('now', '-1 day')";
+            timeCondition = 'created_at > datetime(\'now\', \'-1 day\')';
     }
     
     const [webhookStats, errorStats, subscriptionStats] = await Promise.all([
-        db.all(`
+        dbAll(`
             SELECT 
                 event_type,
                 status,
@@ -153,7 +168,7 @@ router.get('/cackto/stats', asyncHandler(async (req, res) => {
             GROUP BY event_type, status
             ORDER BY event_type, status
         `),
-        db.all(`
+        dbAll(`
             SELECT 
                 action,
                 COUNT(*) as count
@@ -164,7 +179,7 @@ router.get('/cackto/stats', asyncHandler(async (req, res) => {
             GROUP BY action
             ORDER BY count DESC
         `),
-        db.get(`
+        dbGet(`
             SELECT 
                 COUNT(*) as total_subscriptions,
                 COUNT(CASE WHEN status = 'active' THEN 1 END) as active_subscriptions,
@@ -303,7 +318,7 @@ router.get('/cackto/events/:eventId', asyncHandler(async (req, res) => {
     // TODO: Adicionar middleware de autenticação de admin
     
     const { eventId } = req.params;
-    const { dbGet, dbAll, dbRun } = require('../../utils/database');
+    const { dbGet } = require('../../utils/database');
     
     const event = await dbGet(`
         SELECT 
@@ -333,7 +348,7 @@ router.get('/cackto/events/:eventId', asyncHandler(async (req, res) => {
         try {
             event.payload = JSON.parse(event.raw_payload);
             delete event.raw_payload; // Remover raw para economizar espaço na resposta
-        } catch (e) {
+        } catch (_e) {
             // Manter raw_payload se não conseguir fazer parse
         }
     }
@@ -353,7 +368,7 @@ router.post('/cackto/retry/:webhookId', asyncHandler(async (req, res) => {
     // TODO: Adicionar middleware de autenticação de admin
     
     const { webhookId } = req.params;
-    const { dbGet, dbAll, dbRun } = require('../../utils/database');
+    const { dbGet } = require('../../utils/database');
     
     // Buscar webhook para reprocessamento
     const webhook = await dbGet(`
