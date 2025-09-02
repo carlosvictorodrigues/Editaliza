@@ -24,11 +24,62 @@ let state = {
     totalSeconds: 0,         // total de segundos salvos no servidor
     displayInterval: null,   // interval para atualizar display
     startTime: null,         // timestamp de início do timer
-    pausedElapsed: 0        // tempo acumulado antes de pausar
+    pausedElapsed: 0,       // tempo acumulado antes de pausar
+    lastPomodoroAt: 0        // timestamp do último alerta de pomodoro
 };
 
 // Toast control - evita spam
 let lastTimerToastAt = 0;
+
+// AudioContext para alertas sonoros
+let audioContext = null;
+
+/**
+ * Inicializa AudioContext (precisa ser após interação do usuário)
+ */
+function initAudioContext() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioContext;
+}
+
+/**
+ * Toca alerta sonoro de pomodoro (25 minutos)
+ */
+function playPomodoroAlert() {
+    try {
+        const ctx = initAudioContext();
+        const masterGain = ctx.createGain();
+        masterGain.connect(ctx.destination);
+        masterGain.gain.setValueAtTime(0.4, ctx.currentTime);
+
+        function playTone(frequency, startTime, duration, volume = 0.22) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(frequency, startTime);
+            osc.connect(gain);
+            gain.connect(masterGain);
+
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(volume, startTime + 0.18);
+            gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+            osc.start(startTime);
+            osc.stop(startTime + duration);
+        }
+
+        const now = ctx.currentTime;
+        playTone(587.33, now, 1.4, 0.22);    // Ré
+        playTone(493.88, now + 0.35, 1.6, 0.18); // Si
+        
+        console.log('[TIMER] Alerta de pomodoro tocado');
+    } catch (e) {
+        console.error('[TIMER] Erro ao tocar alerta de pomodoro:', e);
+    }
+}
 
 /**
  * Mostra toast uma vez por minuto no máximo
@@ -66,6 +117,16 @@ function formatTime(seconds) {
 }
 
 /**
+ * Calcula progresso do pomodoro atual (0-100%)
+ */
+function getPomodoroProgress() {
+    const totalElapsed = getElapsedSeconds();
+    const pomodoroInterval = 1500; // 25 minutos
+    const currentPomodoroTime = totalElapsed % pomodoroInterval;
+    return Math.min(100, (currentPomodoroTime / pomodoroInterval) * 100);
+}
+
+/**
  * Calcula tempo total decorrido
  */
 function getElapsedSeconds() {
@@ -90,6 +151,36 @@ function updateDisplay() {
     displays.forEach(display => {
         display.textContent = formatTime(totalElapsed);
     });
+    
+    // Atualizar indicador de pomodoro
+    const pomodoroProgress = getPomodoroProgress();
+    const pomodoroIndicators = document.querySelectorAll(`.pomodoro-progress[data-session="${state.sessionId}"]`);
+    
+    pomodoroIndicators.forEach(indicator => {
+        // Atualizar barra de progresso se existir
+        const progressBar = indicator.querySelector('.pomodoro-bar');
+        if (progressBar) {
+            progressBar.style.width = `${pomodoroProgress}%`;
+        }
+        
+        // Atualizar texto de progresso
+        const progressText = indicator.querySelector('.pomodoro-text');
+        if (progressText) {
+            const minutesLeft = Math.ceil((1500 - (totalElapsed % 1500)) / 60);
+            progressText.textContent = minutesLeft === 25 ? 'Iniciando pomodoro...' : `${minutesLeft} min para próximo pomodoro`;
+        }
+    });
+    
+    // Adicionar classe visual quando próximo de completar pomodoro (2 minutos)
+    if (pomodoroProgress > 86) { // ~22 minutos
+        document.querySelectorAll(`.timer-container[data-session="${state.sessionId}"]`).forEach(container => {
+            container.classList.add('pomodoro-ending');
+        });
+    } else {
+        document.querySelectorAll(`.timer-container[data-session="${state.sessionId}"]`).forEach(container => {
+            container.classList.remove('pomodoro-ending');
+        });
+    }
     
     // Atualizar botão do card também
     updateCardVisuals();
@@ -213,6 +304,32 @@ async function onTick() {
     // Incrementar acumulador
     state.accumulated++;
     
+    // Verificar se completou 25 minutos (1500 segundos) de pomodoro
+    const totalElapsed = getElapsedSeconds();
+    const pomodoroInterval = 1500; // 25 minutos em segundos
+    
+    // Checar se passou múltiplo de 25 minutos e não tocou ainda
+    const currentPomodoro = Math.floor(totalElapsed / pomodoroInterval);
+    const lastPomodoro = Math.floor(state.lastPomodoroAt / pomodoroInterval);
+    
+    if (currentPomodoro > lastPomodoro && totalElapsed >= pomodoroInterval) {
+        state.lastPomodoroAt = totalElapsed;
+        
+        // Tocar alerta sonoro
+        playPomodoroAlert();
+        
+        // Mostrar notificação visual
+        const pomodoroCount = currentPomodoro;
+        const message = pomodoroCount === 1 
+            ? '🍅 Pomodoro completo! 25 minutos de foco. Hora de uma pausa!'
+            : `🍅 ${pomodoroCount}º Pomodoro completo! ${formatTime(totalElapsed)} de estudo. Continue assim!`;
+        
+        if (window.app && window.app.showToast) {
+            window.app.showToast(message, 'success');
+        }
+        console.log(`[TIMER] Pomodoro ${pomodoroCount} completado`);
+    }
+    
     // Atualizar display
     updateDisplay();
     
@@ -262,8 +379,12 @@ function startTimer(sessionId) {
         totalSeconds: 0,
         displayInterval: null,
         startTime: Date.now(),
-        pausedElapsed: 0
+        pausedElapsed: 0,
+        lastPomodoroAt: 0
     };
+    
+    // Inicializar AudioContext na primeira interação
+    initAudioContext();
     
     // Iniciar intervals
     state.intervalId = setInterval(onTick, 1000);

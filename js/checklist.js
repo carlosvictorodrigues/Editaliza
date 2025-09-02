@@ -269,7 +269,7 @@ const StudyChecklist = {
 
         if (statusElement) {
             statusElement.addEventListener('change', async (e) => {
-                const newStatus = e.target.checked ? 'Concluido' : 'Pendente';
+                const newStatus = e.target.checked ? 'Concluído' : 'Pendente';
                 
                 if (e.target.checked) {
                     // Chamar markAsCompleted quando checkbox for marcado
@@ -449,17 +449,29 @@ const StudyChecklist = {
             if (window.todaySessionsData && Array.isArray(window.todaySessionsData)) {
                 const idx = window.todaySessionsData.findIndex(s => String(s.id) === String(sessionId));
                 if (idx !== -1) {
-                    window.todaySessionsData[idx].status = 'completed';
+                    window.todaySessionsData[idx].status = 'Concluído';
                     window.todaySessionsData[idx].completed_at = new Date().toISOString();
                 }
             }
             
             // CORREO: Atualizar visual do card imediatamente
             setTimeout(() => {
-                // Atualizar visual do card manualmente
-                const card = document.querySelector(`[data-session-id="${sessionId}"]`);
+                // Atualizar visual do card - buscar pelo ID do card
+                const card = document.getElementById(`session-card-${sessionId}`);
                 if (card) {
                     card.classList.add('completed');
+                    // Desabilitar botão de iniciar
+                    const startBtn = card.querySelector('.start-study-btn');
+                    if (startBtn) {
+                        startBtn.disabled = true;
+                        startBtn.textContent = 'Concluído';
+                        startBtn.classList.add('btn-completed');
+                    }
+                    // Também desabilitar botão de adiar
+                    const postponeBtn = card.querySelector('.postpone-btn');
+                    if (postponeBtn) {
+                        postponeBtn.style.display = 'none';
+                    }
                 }
             }, 100);
             

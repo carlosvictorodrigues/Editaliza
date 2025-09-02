@@ -1837,3 +1837,64 @@ footer {
 .border-slate-700 { border-color: #334155; }
 .border-gray-400 { border-color: #9CA3AF; }
 .border-gray-500 { border-color: #6B7280; }
+
+/* Estilo para botão de sessão concluída */
+.btn-completed {
+    background-color: #10B981 !important;
+    color: white !important;
+    cursor: not-allowed !important;
+    opacity: 0.8;
+}
+
+.btn-completed:hover {
+    background-color: #10B981 !important;
+    transform: none !important;
+}
+
+/* Card de sessão concluída */
+.card.completed {
+    opacity: 0.7;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+}
+
+/* Indicador de progresso do Pomodoro */
+.pomodoro-progress {
+    margin-top: 10px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+.pomodoro-bar-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 5px 0;
+}
+
+.pomodoro-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #10B981 0%, #059669 100%);
+    transition: width 0.5s ease;
+    border-radius: 3px;
+}
+
+.pomodoro-text {
+    font-size: 12px;
+    color: #6B7280;
+    text-align: center;
+    margin-top: 4px;
+}
+
+/* Animação quando próximo de completar pomodoro */
+.pomodoro-ending .pomodoro-bar {
+    background: linear-gradient(90deg, #F59E0B 0%, #D97706 100%);
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}

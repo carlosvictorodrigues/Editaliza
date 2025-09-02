@@ -1145,8 +1145,8 @@ class SessionsController {
 
             // Basic completion
             await dbRun(
-                'UPDATE study_sessions SET status = ?, time_studied_seconds = ?, questions_solved = ? WHERE id = ?',
-                ['completed', completionData.timeStudied || 0, completionData.questionsSolved || 0, sessionId] // Changed 'Concluído' to 'completed'
+                'UPDATE study_sessions SET status = ?, time_studied_seconds = ?, questions_solved = ?, completed_at = NOW() WHERE id = ?',
+                ['Concluído', completionData.timeStudied || 0, completionData.questionsSolved || 0, sessionId]
             );
 
             res.json({

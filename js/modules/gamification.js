@@ -218,7 +218,7 @@ const Gamification = {
                                 <span class="text-5xl">🔥</span>
                             </div>
                             <div>
-                                <p class="font-bold text-2xl">Atenção, Potencial Aprovado!</p>
+                                <p class="font-bold text-2xl">Atenção, Futuro Servidor!</p>
                                 <p class="text-lg opacity-90">Você tem <strong class="font-extrabold">${count}</strong> tarefa(s) atrasada(s).</p>
                                 <p class="text-sm opacity-80 mt-1">Não deixe a peteca cair. Replaneje agora para manter o ritmo!</p>
                             </div>

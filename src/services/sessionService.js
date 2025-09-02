@@ -141,7 +141,7 @@ class SessionService {
             throw new Error('Sessão não encontrada');
         }
 
-        if (session.status === 'completed') {
+        if (session.status === 'Concluído') {
             throw new Error('Não é possível excluir sessões já concluídas');
         }
 
@@ -166,7 +166,7 @@ class SessionService {
             throw new Error('Sessão não encontrada');
         }
 
-        if (session.status === 'completed') {
+        if (session.status === 'Concluído') {
             throw new Error('Sessão já foi concluída');
         }
 
@@ -175,7 +175,7 @@ class SessionService {
 
         // Mark session as completed
         const updateData = {
-            status: 'completed',
+            status: 'Concluído',
             time_studied_seconds: completionData.timeStudied,
             questions_solved: completionData.questionsSolved || 0,
             notes: completionData.notes || '',
@@ -344,7 +344,7 @@ class SessionService {
             throw new Error('Sessão não encontrada');
         }
 
-        if (session.status === 'completed') {
+        if (session.status === 'Concluído') {
             throw new Error('Não é possível adiar sessões já concluídas');
         }
 
@@ -659,7 +659,7 @@ class SessionService {
             throw new Error('Sessão não encontrada');
         }
 
-        if (session.status !== 'completed') {
+        if (session.status !== 'Concluído') {
             throw new Error('Sessão deve estar concluída para ser reforçada');
         }
 
@@ -778,7 +778,7 @@ class SessionService {
             // Calcular estatísticas para cada ciclo
             const calculate = (revisionSessions) => {
                 const total = revisionSessions.length;
-                const completed = revisionSessions.filter(s => s.status === 'completed').length;
+                const completed = revisionSessions.filter(s => s.status === 'Concluído').length;
                 const overdue = revisionSessions.filter(s => {
                     const sessionDate = new Date(s.session_date);
                     sessionDate.setHours(0, 0, 0, 0);
@@ -815,7 +815,7 @@ class SessionService {
             // Filtrar apenas sessões de novo tópico concluídas
             const studySessions = sessions.filter(s => 
                 s.session_type === 'Novo Tópico' && 
-                s.status === 'completed'
+                s.status === 'Concluído'
             );
             
             // Calcular para diferentes janelas de tempo
