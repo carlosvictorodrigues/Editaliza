@@ -1,5 +1,8 @@
 // server.js - Versão com correções de segurança
 
+// Carregar variáveis de ambiente ANTES de qualquer outro código
+require('dotenv').config();
+
 // CONFIGURAÇÃO DE FUSO HORÁRIO BRASILEIRO
 process.env.TZ = 'America/Sao_Paulo';
 
@@ -44,7 +47,6 @@ const path = require('path');
 const fs = require('fs');
 // Import modular Passport configuration
 const passport = require('./src/config/passport');
-require('dotenv').config();
 
 // Import email services
 const emailService = require('./src/services/emailService');
@@ -223,7 +225,7 @@ const __helmetOptions = {
             formAction: ['\'self\'', 'https://accounts.google.com'],
             objectSrc: ['\'none\''], // Bloquear Flash/plugins
             baseUri: ['\'self\''], // Prevenir ataques base href
-            frameAncestors: ["'none'"] // Clickjacking protection
+            frameAncestors: ['\'none\''] // Clickjacking protection
         },
     },
     // Adicionar headers de segurança extras
@@ -1424,7 +1426,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Health check disponível em: http://localhost:${PORT}/health`);
-    console.log("Sistema de backup automático ativado");
+    console.log('Sistema de backup automático ativado');
 });
 
 // Graceful shutdown
