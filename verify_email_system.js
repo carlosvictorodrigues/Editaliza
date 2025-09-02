@@ -1,3 +1,4 @@
+require('dotenv').config({ path: './.env' });
 /**
  * Script de Verificação do Sistema de Emails
  * Para ser executado no servidor após deploy
@@ -45,7 +46,7 @@ async function verifyEmailSystem() {
         console.log('\n📬 3. TESTANDO EMAIL SERVICE...');
         console.log('─'.repeat(50));
         
-        const testEmail = 'admin@editaliza.com.br';
+        const testEmail = 'carlosvictorodrigues@gmail.com';
         const testUser = 'Administrador';
         const testToken = 'test-token-verification-' + Date.now();
         

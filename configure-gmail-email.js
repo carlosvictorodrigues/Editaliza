@@ -1,4 +1,16 @@
 /**
+ * Configurar Gmail como provedor principal de email
+ * Resolve o problema de emails não sendo entregues
+ */
+
+const fs = require('fs');
+const path = require('path');
+
+console.log('📧 CONFIGURANDO GMAIL COMO PROVEDOR PRINCIPAL\n');
+console.log('═'.repeat(60));
+
+// Criar novo serviço de email usando Gmail/Nodemailer
+const emailServiceCode = `/**
  * Serviço de Email usando Gmail SMTP
  * Configurado para usar suporte@editaliza.com.br
  */
@@ -46,7 +58,7 @@ class EmailService {
         
         try {
             const mailOptions = {
-                from: `"${this.fromName}" <${this.fromEmail}>`,
+                from: \`"\${this.fromName}" <\${this.fromEmail}>\`,
                 to: options.to,
                 subject: options.subject,
                 text: options.text,
@@ -97,9 +109,9 @@ class EmailService {
     
     // Método para recuperação de senha
     async sendPasswordRecoveryEmail(email, userName, resetToken, appUrl) {
-        const resetLink = `${appUrl}/reset-password.html?token=${resetToken}`;
+        const resetLink = \`\${appUrl}/reset-password.html?token=\${resetToken}\`;
         
-        const html = `
+        const html = \`
             <!DOCTYPE html>
             <html>
             <head>
@@ -115,7 +127,7 @@ class EmailService {
                         </div>
                         
                         <div style="padding: 30px;">
-                            <h2 style="color: #333; margin-bottom: 20px;">Olá ${userName}!</h2>
+                            <h2 style="color: #333; margin-bottom: 20px;">Olá \${userName}!</h2>
                             
                             <p style="color: #666; line-height: 1.6;">
                                 Recebemos uma solicitação para redefinir sua senha.
@@ -126,7 +138,7 @@ class EmailService {
                             </p>
                             
                             <div style="text-align: center; margin: 30px 0;">
-                                <a href="${resetLink}" style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+                                <a href="\${resetLink}" style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
                                     Redefinir Senha
                                 </a>
                             </div>
@@ -149,7 +161,7 @@ class EmailService {
                 </div>
             </body>
             </html>
-        `;
+        \`;
         
         return this.sendEmail({
             to: email,
@@ -160,7 +172,7 @@ class EmailService {
     
     // Método para email de boas-vindas
     async sendWelcomeEmail(email, userName) {
-        const html = `
+        const html = \`
             <!DOCTYPE html>
             <html>
             <head>
@@ -175,7 +187,7 @@ class EmailService {
                         </div>
                         
                         <div style="padding: 40px;">
-                            <h2 style="color: #333; margin-bottom: 20px;">Olá ${userName}! 👋</h2>
+                            <h2 style="color: #333; margin-bottom: 20px;">Olá \${userName}! 👋</h2>
                             
                             <p style="color: #666; line-height: 1.8; font-size: 16px;">
                                 Sua conta foi criada com sucesso! Estamos muito felizes em ter você conosco.
@@ -215,7 +227,7 @@ class EmailService {
                 </div>
             </body>
             </html>
-        `;
+        \`;
         
         return this.sendEmail({
             to: email,
@@ -226,7 +238,7 @@ class EmailService {
     
     // Método para email de cronograma diário
     async sendDailyScheduleEmail(email, userName, schedule) {
-        const html = `
+        const html = \`
             <!DOCTYPE html>
             <html>
             <head>
@@ -238,13 +250,13 @@ class EmailService {
                     <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
                         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
                             <h1 style="color: white; margin: 0;">📅 Seu Cronograma de Hoje</h1>
-                            <p style="color: white; margin-top: 10px;">${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                            <p style="color: white; margin-top: 10px;">\${new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
                         </div>
                         
                         <div style="padding: 30px;">
-                            <h2 style="color: #333; margin-bottom: 20px;">Bom dia, ${userName}! ☀️</h2>
+                            <h2 style="color: #333; margin-bottom: 20px;">Bom dia, \${userName}! ☀️</h2>
                             
-                            ${schedule}
+                            \${schedule}
                             
                             <div style="text-align: center; margin: 30px 0;">
                                 <a href="https://app.editaliza.com.br" style="display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
@@ -263,7 +275,7 @@ class EmailService {
                 </div>
             </body>
             </html>
-        `;
+        \`;
         
         return this.sendEmail({
             to: email,
@@ -274,3 +286,37 @@ class EmailService {
 }
 
 module.exports = new EmailService();
+`;
+
+// Salvar arquivo
+const emailServicePath = path.join(__dirname, 'src', 'services', 'emailService.js');
+
+// Fazer backup do arquivo atual
+if (fs.existsSync(emailServicePath)) {
+    const backupPath = emailServicePath + '.backup-' + Date.now();
+    fs.copyFileSync(emailServicePath, backupPath);
+    console.log('✅ Backup criado:', path.basename(backupPath));
+}
+
+// Escrever novo serviço
+fs.writeFileSync(emailServicePath, emailServiceCode);
+console.log('✅ EmailService atualizado para usar Gmail\n');
+
+console.log('📋 CONFIGURAÇÃO APLICADA:');
+console.log('─'.repeat(40));
+console.log('Provedor: Gmail SMTP');
+console.log('Email: suporte@editaliza.com.br');
+console.log('Método: SMTP direto (não usa SendGrid)');
+console.log('Porta: 587 (TLS)');
+console.log('');
+
+console.log('🔄 PRÓXIMOS PASSOS:');
+console.log('─'.repeat(40));
+console.log('1. Fazer commit das mudanças');
+console.log('2. Push para o GitHub');
+console.log('3. Deploy no servidor');
+console.log('4. Testar envio de email');
+console.log('');
+
+console.log('✅ Configuração concluída!');
+console.log('═'.repeat(60));

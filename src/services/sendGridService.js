@@ -42,7 +42,7 @@ class SendGridService {
                 console.log('═'.repeat(80));
                 console.log(`📧 DESTINATÁRIO: ${email}`);
                 console.log(`👤 NOME: ${userName || 'Usuário'}`);
-                console.log("🔗 LINK DE RECUPERAÇÃO:");
+                console.log('🔗 LINK DE RECUPERAÇÃO:');
                 console.log(`   ${resetLink}`);
                 console.log(`⏰ EXPIRA EM: ${expirationTime}`);
                 console.log('═'.repeat(80));
@@ -56,7 +56,7 @@ class SendGridService {
             const msg = {
                 to: email,
                 from: {
-                    email: 'contato@editaliza.com.br',
+                    email: 'suporte@editaliza.com.br',
                     name: 'Editaliza'
                 },
                 subject: '🔐 Recuperação de Senha - Editaliza',
@@ -164,7 +164,7 @@ class SendGridService {
             const msg = {
                 to: email,
                 from: {
-                    email: 'contato@editaliza.com.br',
+                    email: 'suporte@editaliza.com.br',
                     name: 'Editaliza'
                 },
                 subject: '✅ Teste SendGrid - Editaliza',
