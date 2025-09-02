@@ -168,15 +168,13 @@ const StudyChecklist = {
                     <label for="modal-notes" class="text-sm font-medium text-gray-700">Anotações</label>
                     <textarea id="modal-notes" class="form-input py-2" rows="4" placeholder="Suas anotações...">${safeNotes}</textarea>
                 </div>
-                <div>
-                    <label for="modal-status" class="flex items-center space-x-3 cursor-pointer">
-                        <input type="checkbox" id="modal-status" class="w-5 h-5 text-editaliza-blue rounded focus:ring-editaliza-blue">
-                        <span class="text-sm font-medium text-gray-700">Marcar como concludo</span>
-                    </label>
-                </div>
             </div>
 
-            <div class="mt-6 pt-6 border-t flex items-center justify-end">
+            <div class="mt-6 pt-6 border-t flex items-center justify-between">
+                <label for="modal-status" class="flex items-center space-x-3 cursor-pointer">
+                    <input type="checkbox" id="modal-status" class="w-5 h-5 text-editaliza-blue rounded focus:ring-editaliza-blue">
+                    <span class="text-sm font-medium text-gray-700">Marcar como concluído</span>
+                </label>
                 <button onclick="StudyChecklist.close()" class="btn-secondary py-3 px-6 text-sm font-medium">Fechar</button>
             </div>
         `;
@@ -427,7 +425,7 @@ const StudyChecklist = {
             const timeToSend = Math.max(studyTimeSeconds, 60);
             
             // Save to database using dedicated completion endpoint
-            const endpoint = `/sessions/${sessionId}/complete`;
+            const endpoint = `/api/sessions/${sessionId}/complete`;
             await app.apiFetch(endpoint, {
                 method: 'POST',
                 body: JSON.stringify({
