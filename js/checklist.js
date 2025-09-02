@@ -269,8 +269,9 @@ const StudyChecklist = {
 
         if (statusElement) {
             statusElement.addEventListener('change', async (e) => {
-                if (e.target.checked) {
                 const newStatus = e.target.checked ? 'Concluido' : 'Pendente';
+                
+                if (e.target.checked) {
                     // Chamar markAsCompleted quando checkbox for marcado
                     await this.markAsCompleted();
                 } else {
@@ -284,7 +285,7 @@ const StudyChecklist = {
                             body: JSON.stringify({ 'status': 'Pendente' })
                         });
                         console.log('Status atualizado para Pendente');
-                        app.showToast('Sesso marcada como pendente', 'info');
+                        app.showToast('Sessão marcada como pendente', 'info');
                     } catch (error) {
                         console.error('Erro ao atualizar status:', error);
                         app.showToast('Erro ao salvar status: ' + error.message, 'error');
@@ -425,7 +426,7 @@ const StudyChecklist = {
             const timeToSend = Math.max(studyTimeSeconds, 60);
             
             // Save to database using dedicated completion endpoint
-            const endpoint = `/api/sessions/${sessionId}/complete`;
+            const endpoint = `/sessions/${sessionId}/complete`;
             await app.apiFetch(endpoint, {
                 method: 'POST',
                 body: JSON.stringify({
