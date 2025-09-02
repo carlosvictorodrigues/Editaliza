@@ -147,9 +147,8 @@ const config = {
 
 // Validação de configuração obrigatória
 function validateConfig() {
+    // Apenas o WEBHOOK_SECRET é obrigatório para receber webhooks
     const required = [
-        'CACKTO_API_KEY',
-        'CACKTO_SECRET_KEY',
         'CACKTO_WEBHOOK_SECRET'
     ];
 
@@ -157,6 +156,11 @@ function validateConfig() {
     
     if (missing.length > 0) {
         throw new Error(`Configuração CACKTO incompleta. Faltam: ${missing.join(', ')}`);
+    }
+    
+    // Avisar se API_KEY e SECRET_KEY não estão configurados (opcional)
+    if (!process.env.CACKTO_API_KEY || !process.env.CACKTO_SECRET_KEY) {
+        console.warn('⚠️ CACKTO_API_KEY e CACKTO_SECRET_KEY não configurados - funcionalidades de API limitadas');
     }
 
     // Validar produtos se estiver em produção
