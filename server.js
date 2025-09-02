@@ -82,6 +82,14 @@ const {
     securityLog
 } = require('./src/utils/security');
 
+// LOG DE DEBUG - Verificar se o servidor está iniciando corretamente
+console.log('=====================================');
+console.log('🚀 SERVER.JS STARTING - TOP OF FILE');
+console.log('   Process PID:', process.pid);
+console.log('   Node Version:', process.version);
+console.log('   Current Dir:', __dirname);
+console.log('=====================================');
+
 // Importar sistema de error handling
 const {
     AppError,
@@ -133,6 +141,7 @@ try {
 }
 
 const app = express();
+console.log('✅ Express app created successfully');
 
 app.use((req, res, next) => {
     console.log(`[REQUEST LOGGER] ${req.method} ${req.path}`);
