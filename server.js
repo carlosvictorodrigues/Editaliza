@@ -542,21 +542,7 @@ app.use('/reset-password', strictRateLimit);
 
 // Adicionar informações de assinatura a todas as rotas autenticadas
 // TEMPORÁRIO: Comentando middleware problemático que causa timeout
-// app.use(authenticateToken, addSubscriptionInfo());
-
-// WORKAROUND: Aplicar apenas autenticação sem subscription info
-app.use('*', (req, res, next) => {
-    // Pular autenticação para rotas públicas
-    const publicPaths = ['/health', '/login.html', '/register.html', '/auth', '/api/webhooks'];
-    if (publicPaths.some(path => req.path.includes(path)) || req.method === 'OPTIONS') {
-        return next();
-    }
-    
-    // Aplicar autenticação apenas para outras rotas
-    authenticateToken(req, res, next);
-});
-
-// Rotas de webhook CACKTO (ANTES do rate limiting para APIs)
+// Rotas de webhook CACKTO (ANTES de qualquer middleware de autenticação)
 // Webhook routes don't need authentication - they use signature validation
 console.log('🔧 Mounting CacktoRoutes at /api/webhooks');
 console.log('   CacktoRoutes type:', typeof CacktoRoutes);
@@ -568,6 +554,20 @@ console.log('✅ CacktoRoutes mounted successfully');
 app.post('/api/webhooks/cackto', (req, res) => {
     console.log('🎯 Direct webhook route hit!');
     res.status(200).json({ message: 'Direct route working', body: req.body });
+});
+
+// app.use(authenticateToken, addSubscriptionInfo());
+
+// WORKAROUND: Aplicar apenas autenticação sem subscription info
+app.use('*', (req, res, next) => {
+    // Pular autenticação para rotas públicas
+    const publicPaths = ['/health', '/login.html', '/register.html', '/auth', '/api/webhooks'];
+    if (publicPaths.some(path => req.originalUrl.includes(path)) || req.method === 'OPTIONS') {
+        return next();
+    }
+    
+    // Aplicar autenticação apenas para outras rotas
+    authenticateToken(req, res, next);
 });
 
 // TEMPORARY FALLBACK - Simple subscription check without Cackto
