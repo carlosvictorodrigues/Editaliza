@@ -533,6 +533,8 @@ app.use('/reset-password', strictRateLimit);
 // Column needed: subscriptions.cackto_transaction_id (currently has kiwify_transaction_id)
 // TODO: Run migration script and re-enable
 
+console.log('🚀 SERVER.JS: About to initialize CACKTO integration');
+
 // Inicializar integração CACKTO
 (async () => {
     try {
@@ -546,6 +548,8 @@ app.use('/reset-password', strictRateLimit);
         console.error('❌ Erro ao inicializar CACKTO:', error.message);
     }
 })();
+
+console.log('🚀 SERVER.JS: CACKTO async block finished, now mounting webhook routes');
 
 // Adicionar informações de assinatura a todas as rotas autenticadas
 // TEMPORÁRIO: Comentando middleware problemático que causa timeout
