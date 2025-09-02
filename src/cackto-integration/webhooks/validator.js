@@ -222,8 +222,9 @@ class CacktoWebhookValidator {
     async validatePayloadStructure(payload, validationId) {
         if (!payload || typeof payload !== 'object') {
             throw new AppError(
-                'Payload inválido do webhook CACKTO',
                 ERROR_TYPES.BAD_REQUEST,
+                'Payload inválido do webhook CACKTO',
+                400,
                 { validationId }
             );
         }
@@ -233,8 +234,9 @@ class CacktoWebhookValidator {
         
         if (missingFields.length > 0) {
             throw new AppError(
-                'Campos obrigatórios ausentes no webhook CACKTO',
                 ERROR_TYPES.BAD_REQUEST,
+                'Campos obrigatórios ausentes no webhook CACKTO',
+                400,
                 { missingFields, validationId }
             );
         }
@@ -244,8 +246,9 @@ class CacktoWebhookValidator {
         
         if (!supportedEvents.includes(payload.event)) {
             throw new AppError(
-                'Tipo de evento CACKTO não suportado',
                 ERROR_TYPES.BAD_REQUEST,
+                'Tipo de evento CACKTO não suportado',
+                400,
                 {
                     eventType: payload.event,
                     supportedEvents,
@@ -273,8 +276,9 @@ class CacktoWebhookValidator {
 
         if (!data || typeof data !== 'object') {
             throw new AppError(
-                'Dados do evento ausentes ou inválidos',
                 ERROR_TYPES.BAD_REQUEST,
+                'Dados do evento ausentes ou inválidos',
+                400,
                 { event, validationId }
             );
         }
@@ -304,9 +308,10 @@ class CacktoWebhookValidator {
                 
             default:
                 throw new AppError(
-                    'Tipo de evento não reconhecido',
-                    ERROR_TYPES.BAD_REQUEST,
-                    { event, validationId }
+                ERROR_TYPES.BAD_REQUEST,
+                'Tipo de evento não reconhecido',
+                400,
+                { event, validationId }
                 );
         }
     }
@@ -320,8 +325,9 @@ class CacktoWebhookValidator {
         
         if (missingFields.length > 0) {
             throw new AppError(
-                'Campos obrigatórios ausentes no evento de pagamento',
                 ERROR_TYPES.BAD_REQUEST,
+                'Campos obrigatórios ausentes no evento de pagamento',
+                400,
                 { missingFields, validationId }
             );
         }
@@ -329,8 +335,9 @@ class CacktoWebhookValidator {
         // Validar customer
         if (!data.customer.email) {
             throw new AppError(
-                'Email do cliente é obrigatório',
                 ERROR_TYPES.BAD_REQUEST,
+                'Email do cliente é obrigatório',
+                400,
                 { validationId }
             );
         }
@@ -345,8 +352,9 @@ class CacktoWebhookValidator {
         
         if (missingFields.length > 0) {
             throw new AppError(
-                'Campos obrigatórios ausentes no evento de assinatura',
                 ERROR_TYPES.BAD_REQUEST,
+                'Campos obrigatórios ausentes no evento de assinatura',
+                400,
                 { missingFields, validationId }
             );
         }
@@ -354,8 +362,9 @@ class CacktoWebhookValidator {
         // Validar customer
         if (!data.customer.email) {
             throw new AppError(
-                'Email do cliente é obrigatório',
                 ERROR_TYPES.BAD_REQUEST,
+                'Email do cliente é obrigatório',
+                400,
                 { validationId }
             );
         }
@@ -363,8 +372,9 @@ class CacktoWebhookValidator {
         // Validar plan
         if (!data.plan.id) {
             throw new AppError(
-                'ID do plano é obrigatório',
                 ERROR_TYPES.BAD_REQUEST,
+                'ID do plano é obrigatório',
+                400,
                 { validationId }
             );
         }
@@ -379,8 +389,9 @@ class CacktoWebhookValidator {
         
         if (missingFields.length > 0) {
             throw new AppError(
-                'Campos obrigatórios ausentes no evento de chargeback',
                 ERROR_TYPES.BAD_REQUEST,
+                'Campos obrigatórios ausentes no evento de chargeback',
+                400,
                 { missingFields, validationId }
             );
         }
@@ -402,9 +413,10 @@ class CacktoWebhookValidator {
             
             if (existingWebhook) {
                 throw new AppError(
-                    'Webhook CACKTO já processado (idempotência)',
-                    ERROR_TYPES.CONFLICT,
-                    {
+                ERROR_TYPES.CONFLICT,
+                'Webhook CACKTO já processado (idempotência)',
+                409,
+                {
                         webhookId,
                         existingId: existingWebhook.id,
                         validationId
@@ -415,8 +427,9 @@ class CacktoWebhookValidator {
             if (error instanceof AppError) throw error;
             
             throw new AppError(
-                'Erro ao verificar idempotência',
                 ERROR_TYPES.DATABASE_ERROR,
+                'Erro ao verificar idempotência',
+                500,
                 { webhookId, validationId, originalError: error.message }
             );
         }
