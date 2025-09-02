@@ -839,10 +839,28 @@ class SessionService {
                 return daysBack > 0 ? uniqueTopics / daysBack : 0;
             };
             
+            // Calcular tópicos de hoje
+            const todayStart = new Date();
+            todayStart.setHours(0, 0, 0, 0);
+            const todayEnd = new Date();
+            todayEnd.setHours(23, 59, 59, 999);
+            
+            const todaySessions = studySessions.filter(s => {
+                const sessionDate = new Date(s.session_date);
+                return sessionDate >= todayStart && sessionDate <= todayEnd;
+            });
+            
+            const todayTopics = new Set(
+                todaySessions
+                    .filter(s => s.topic_id !== null)
+                    .map(s => s.topic_id)
+            ).size;
+            
             return {
                 last7Days: calculate(7),
                 last14Days: calculate(14),
-                last30Days: calculate(30)
+                last30Days: calculate(30),
+                todayTopics: todayTopics
             };
         } catch (error) {
             console.error('Erro ao calcular ritmo de estudo:', error);

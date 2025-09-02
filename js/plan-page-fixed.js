@@ -9,6 +9,45 @@
     const planId = urlParams.get('id');
     let dashboardData = null;
     
+    // Função para recarregar o dashboard
+    async function refreshDashboard() {
+        if (!planId) return;
+        
+        try {
+            console.log('🔄 Recarregando dashboard do plano', planId);
+            
+            // Buscar dados atualizados do endpoint
+            const token = localStorage.getItem('editaliza_token');
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            
+            const response = await fetch(`/api/plans/${planId}/dashboard`, {
+                method: 'GET',
+                headers: headers,
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                dashboardData = await response.json();
+                console.log('✅ Dashboard recarregado:', dashboardData);
+                
+                // Re-renderizar todos os componentes
+                renderHeader();
+                renderScheduleInfo();
+                renderProgress();
+                renderSubjectAnalysis();
+                renderGoalProgress();
+                
+                // Mostrar notificação de atualização
+                if (window.app && window.app.showToast) {
+                    window.app.showToast('🔄 Dashboard atualizado!', 'success');
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao recarregar dashboard:', error);
+        }
+    }
+    
     // Função principal de inicialização
     async function initialize() {
         if (!planId) {
@@ -432,7 +471,33 @@
                         ` : `
                             <p class="text-red-600 font-semibold">⚠️ Ritmo insuficiente! Precisa acelerar para ${dashboardData.pace?.requiredTopicsPerDay?.toFixed(1)} tópicos/dia</p>
                         `}
-                        <p class="mt-1">Data da prova: ${exam?.date ? new Date(exam.date).toLocaleDateString('pt-BR') : 'N/A'}</p>
+                        
+                        <!-- Comparação de Ritmo -->
+                        <div class="mt-2 pt-2 border-t border-gray-200">
+                            <p class="font-medium mb-1">🎯 Seu Ritmo:</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <span class="text-gray-500">Hoje:</span>
+                                    <span class="font-bold ${dashboardData.pace?.todayTopics >= dashboardData.pace?.requiredTopicsPerDay ? 'text-green-600' : 'text-orange-600'}">
+                                        ${dashboardData.pace?.todayTopics || 0} tópicos
+                                    </span>
+                                </div>
+                                <div>
+                                    <span class="text-gray-500">Média 7 dias:</span>
+                                    <span class="font-bold ${dashboardData.pace?.currentTopicsPerDay >= dashboardData.pace?.requiredTopicsPerDay ? 'text-green-600' : 'text-orange-600'}">
+                                        ${dashboardData.pace?.currentTopicsPerDay?.toFixed(1) || '0.0'}/dia
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mt-1">
+                                <span class="text-gray-500">Ideal:</span>
+                                <span class="font-bold text-blue-600">
+                                    ${dashboardData.pace?.requiredTopicsPerDay?.toFixed(1) || '0.0'} tópicos/dia
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <p class="mt-2 pt-2 border-t border-gray-200">Data da prova: ${exam?.date ? new Date(exam.date).toLocaleDateString('pt-BR') : 'N/A'}</p>
                         <p>Dias restantes: ${exam?.daysRemaining || 0}</p>
                     </div>
                 </div>
@@ -796,6 +861,7 @@
     // Exportar para uso global
     window.PlanPageFixed = {
         initialize,
+        refreshDashboard,
         getDashboardData: () => dashboardData
     };
 })();

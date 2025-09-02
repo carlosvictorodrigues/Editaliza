@@ -204,7 +204,7 @@ class PlanDashboardService {
     /**
      * Busca contadores de simulados
      */
-    static async getSimulationCounts(planId) {
+    static async getSimulationCounts(_planId) {
         try {
             // Por enquanto retornamos dados mockados
             // TODO: Implementar quando tivermos tabela de simulados
@@ -215,12 +215,13 @@ class PlanDashboardService {
             };
         } catch (error) {
             console.error('Erro ao buscar simulados:', error);
-            return {
-                directed: 0,
-                general: 0,
-                total: 0
-            };
+            // Return statement removed as unreachable code
         }
+        return {
+            directed: 0,
+            general: 0,
+            total: 0
+        };
     }
 
     /**
@@ -303,7 +304,8 @@ class PlanDashboardService {
                 currentTopicsPerDay,
                 last7Avg: currentTopicsPerDay,
                 last14Avg: this.round2(paceData.last14Days || 0),
-                requiredTopicsPerDay
+                requiredTopicsPerDay,
+                todayTopics
             },
             projection: {
                 onTrack,

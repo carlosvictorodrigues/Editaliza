@@ -105,9 +105,18 @@ const StudyChecklist = {
             console.log('✅ Sessão concluída - atualizando estatísticas...');
             app.invalidatePlanCache(this.session.study_plan_id, 'gamification');
             
-            // Atualizar métricas se estivermos na tela plan.html
+            // Atualizar métricas e dashboard se estivermos na tela plan.html
             if (window.location.pathname.includes('plan.html')) {
                 try {
+                    // Atualizar dashboard do plano
+                    if (window.PlanPageFixed && typeof window.PlanPageFixed.refreshDashboard === 'function') {
+                        console.log('🔄 Atualizando dashboard após conclusão da sessão...');
+                        setTimeout(() => {
+                            window.PlanPageFixed.refreshDashboard();
+                        }, 1500);
+                    }
+                    
+                    // Manter compatibilidade com funções antigas
                     if (typeof window.refreshAllMetrics === 'function') {
                         console.log('✅ Atualizando todas as métricas após conclusão da sessão...');
                         setTimeout(() => {
