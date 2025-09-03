@@ -211,6 +211,15 @@ const app = {
             if (response.status === 401 || response.status === 403) {
                 this.logout();
                 throw new Error('Sua sessão expirou. Por favor, faça o login novamente.');
+            } else if (response.status === 402) { // Handle 402 Payment Required
+                // Display toast notification with the error message from the backend
+                                const userFriendlyMessage = data.error || 'Assinatura ativa requerida.';
+                console.log('[DEBUG] Message for toast:', userFriendlyMessage); // Add this line
+                app.showToast(userFriendlyMessage, 'error');
+                // Prevent further processing as a general error, but don't logout
+                const errorToThrow = new Error('SUBSCRIPTION_REQUIRED_ERROR');
+                errorToThrow.userFriendlyMessage = userFriendlyMessage; // Attach the user-friendly message
+                throw errorToThrow;
             }
 
             if (!response.ok) {

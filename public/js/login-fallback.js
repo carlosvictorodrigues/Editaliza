@@ -83,14 +83,16 @@
           localStorage.setItem(key, data.token);
         } catch (_) {}
 
+        // Só redireciona se o login foi bem-sucedido
         window.location.href = data.redirectUrl || 'home.html';
+        
       } catch (err) {
         errorLog('login error:', err);
         if (window.notifications && typeof window.notifications.error === 'function') {
-          window.notifications.error((err && err.message) || 'Erro ao fazer login. Tente novamente.');
+          window.notifications.error((err && err.userFriendlyMessage) || 'Erro ao fazer login. Tente novamente.');
         }
         if (messageContainer) {
-          messageContainer.textContent = (err && err.message) || 'Erro ao fazer login';
+          messageContainer.textContent = (err && err.userFriendlyMessage) || (err && err.message) || 'Erro ao fazer login';
           messageContainer.classList.add('text-red-600');
           messageContainer.style.padding = '10px';
           messageContainer.style.backgroundColor = '#fee2e2';

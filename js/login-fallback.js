@@ -83,7 +83,9 @@
           localStorage.setItem(key, data.token);
         } catch (_) {}
 
+        // Só redireciona se o login foi bem-sucedido
         window.location.href = data.redirectUrl || 'home.html';
+        
       } catch (err) {
         errorLog('login error:', err);
         if (window.notifications && typeof window.notifications.error === 'function') {

@@ -664,7 +664,11 @@
                 
             } catch (error) {
                 console.error('Erro no fallback:', error);
-                throw error;
+                if (error.message === 'SUBSCRIPTION_REQUIRED_ERROR') {
+                    showSubscriptionRequiredError(error);
+                } else {
+                    throw error; // Re-throw other errors to be caught by showCriticalError
+                }
             }
         }
         
@@ -693,7 +697,6 @@
             }
         }
         
-        // Log de métricas
         function logInitMetrics() {
             const totalTime = Date.now() - initMetrics.startTime;
             console.log('📊 Métricas de inicialização:', {
@@ -702,6 +705,30 @@
                 erros: initMetrics.errors.length,
                 timestamp: new Date().toISOString()
             });
+        }
+
+        function showSubscriptionRequiredError(error) {
+            const mainContainer = document.querySelector('main');
+            if (mainContainer) {
+                mainContainer.innerHTML = `
+                    <div class="h-screen flex flex-col items-center justify-center">
+                        <div class="text-center">
+                            <div class="text-6xl mb-4">🔒</div>
+                            <h1 class="text-2xl font-bold mb-4 text-gray-900">Assinatura Necessária</h1>
+                            <p class="text-gray-600 mb-2">Para acessar este conteúdo, você precisa de uma assinatura ativa.</p>
+                            <p class="text-red-600 mb-8 font-mono text-sm">${error.message}</p>
+                            <div class="space-x-4">
+                                <a href="/plan.html" class="btn-primary">
+                                    ✨ Ver Planos de Assinatura
+                                </a>
+                                <button onclick="location.href='login.html'" class="btn-secondary">
+                                    ↩️ Voltar para o Login
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
             // Funções de compatibilidade com código antigo

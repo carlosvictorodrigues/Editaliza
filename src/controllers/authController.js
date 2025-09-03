@@ -109,6 +109,15 @@ const login = async (req, res) => {
             });
         }
         
+        // Tratar erro de plano inativo
+        // Tratar erro de plano inativo ou expirado
+        if (error.message.includes('plano expirou') || error.message.includes('plano ativo') || error.message.includes('assinatura')) {
+            return res.status(402).json({
+                success: false,
+                error: error.message
+            });
+        }
+        
         res.status(500).json({
             success: false,
             error: 'Erro ao fazer login'

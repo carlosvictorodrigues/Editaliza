@@ -480,16 +480,37 @@ class HomeInitializer {
     }
     
     // Fallback para erros
-    _showErrorFallback(error) {
+        _showErrorFallback(error) {
         const mainContainer = document.querySelector('main');
         if (mainContainer) {
-            mainContainer.innerHTML = `
-                <div class="h-screen flex flex-col items-center justify-center">
-                    <h1 class="text-2xl font-bold mb-4">Erro ao carregar painel</h1>
-                    <p class="text-gray-600 mb-8">${error.message}</p>
-                    <button onclick="location.reload()" class="btn-primary">Tentar Novamente</button>
-                </div>
-            `;
+            if (error.message === 'SUBSCRIPTION_REQUIRED_ERROR') {
+                mainContainer.innerHTML = `
+                    <div class="h-screen flex flex-col items-center justify-center">
+                        <div class="text-center">
+                            <div class="text-6xl mb-4">🔒</div>
+                            <h1 class="text-2xl font-bold mb-4 text-gray-900">Assinatura Necessária</h1>
+                            <p class="text-gray-600 mb-2">Para acessar este conteúdo, você precisa de uma assinatura ativa.</p>
+                            <p class="text-red-600 mb-8 font-mono text-sm">${error.message}</p>
+                            <div class="space-x-4">
+                                <a href="/plan.html" class="btn-primary">
+                                    ✨ Ver Planos de Assinatura
+                                </a>
+                                <button onclick="location.href='login.html'" class="btn-secondary">
+                                    ↩️ Voltar para o Login
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                mainContainer.innerHTML = `
+                    <div class="h-screen flex flex-col items-center justify-center">
+                        <h1 class="text-2xl font-bold mb-4">Erro ao carregar painel</h1>
+                        <p class="text-gray-600 mb-8">${error.message}</p>
+                        <button onclick="location.reload()" class="btn-primary">Tentar Novamente</button>
+                    </div>
+                `;
+            }
         }
     }
     

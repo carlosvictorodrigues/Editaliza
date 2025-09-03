@@ -245,25 +245,21 @@ async function handleInactiveSubscription(req, res, subscriptionStatus, options)
     });
 
     // Determinar resposta baseada no tipo de requisição
-    if (req.accepts('html') && redirectToPlans) {
-        // Requisição HTML - redirecionar para página de planos
-        return res.redirect('/plans?reason=subscription_required');
-    } else {
-        // Requisição JSON/API - retornar erro estruturado
-        const response = {
-            error: 'Assinatura ativa requerida',
-            code: 'SUBSCRIPTION_REQUIRED',
-            subscriptionStatus: subscriptionStatus.status,
-            hasExpiredSubscription: !!subscriptionStatus.subscription
-        };
+    // A resposta será sempre JSON para que o front-end possa tratar
+    const response = {
+        error: 'Assinatura ativa requerida',
+        code: 'SUBSCRIPTION_REQUIRED',
+        subscriptionStatus: subscriptionStatus.status,
+        hasExpiredSubscription: !!subscriptionStatus.subscription,
+        redirectTo: redirectToPlans ? '/plans?reason=subscription_required' : undefined
+    };
 
-        if (subscriptionStatus.subscription) {
-            response.expiredAt = subscriptionStatus.subscription.expiresAt;
-            response.plan = subscriptionStatus.subscription.plan;
-        }
-
-        return res.status(402).json(response); // 402 Payment Required
+    if (subscriptionStatus.subscription) {
+        response.expiredAt = subscriptionStatus.subscription.expiresAt;
+        response.plan = subscriptionStatus.subscription.plan;
     }
+
+    return res.status(402).json(response); // 402 Payment Required
 }
 
 /**
