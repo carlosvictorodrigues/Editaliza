@@ -119,38 +119,25 @@ const login = async (credentials, req) => {
         throw new Error('Senha incorreta. Tente novamente ou use "Esqueci minha senha".');
     }
     
-    // Check subscription status
+    // Check subscription status - BLOCK if expired
     if (user.plan_expiry) {
         const now = new Date();
         const expiry = new Date(user.plan_expiry);
         
         if (expiry < now) {
-            // Plan expired
-            securityLog('login_attempt_expired_plan', { email: sanitizedEmail, userId: user.id, expiry: user.plan_expiry }, user.id, req);
+            // Plan expired - BLOCK ACCESS COMPLETELY
+            securityLog('login_blocked_expired_plan', { email: sanitizedEmail, userId: user.id, expiry: user.plan_expiry }, user.id, req);
             
             // Update plan status if needed
             if (user.plan_status === 'active') {
                 await authRepository.updatePlanStatus(user.id, 'expired');
             }
             
-            // Still allow login but with expired status
-            await authRepository.recordLoginAttempt(sanitizedEmail, true, req.ip, req.headers['user-agent']);
+            // Record failed attempt due to expired plan
+            await authRepository.recordLoginAttempt(sanitizedEmail, false, req.ip, req.headers['user-agent']);
             
-            const token = generateJWT(user);
-            
-            return {
-                message: 'Login realizado. Atenção: Seu plano expirou!',
-                token,
-                user: {
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    auth_provider: user.auth_provider,
-                    plan_status: 'expired',
-                    plan_expired: true
-                },
-                subscription_expired: true
-            };
+            // BLOCK LOGIN - Throw error
+            throw new Error('Seu plano expirou. Por favor, renove sua assinatura para continuar acessando a plataforma. Acesse: https://editaliza.com.br/');
         }
         
         // Check if expiring soon (less than 7 days)
@@ -162,6 +149,11 @@ const login = async (credentials, req) => {
                 daysRemaining: daysUntilExpiry 
             }, user.id, req);
         }
+    } else {
+        // User has no plan at all - BLOCK ACCESS
+        securityLog('login_blocked_no_plan', { email: sanitizedEmail, userId: user.id }, user.id, req);
+        await authRepository.recordLoginAttempt(sanitizedEmail, false, req.ip, req.headers['user-agent']);
+        throw new Error('Você não possui um plano ativo. Por favor, assine um plano para acessar a plataforma. Acesse: https://editaliza.com.br/');
     }
     
     // Success - record attempt and generate token
