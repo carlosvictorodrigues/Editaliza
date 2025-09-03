@@ -155,32 +155,15 @@ const StudyChecklist = {
             }
         }
     },
-
-    close() {
-        // CORREO: NO parar o timer automaticamente
-        // Timer continua rodando em background para permitir continuao
-        // if (this.session) {
-        //     TimerSystem.stop(this.session.id);
-        // }
-        
-        const modal = document.getElementById('studySessionModal');
-        const modalContainer = document.getElementById('studySessionModalContainer');
-        
-        modal.classList.add('opacity-0');
-        modalContainer.classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            modalContainer.innerHTML = '';
-            // NO limpar this.session para permitir reconexo
-            // this.session = null;
-        }, 300);
-    },
     
     getChecklistHtml() {
         return `
-            <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-editaliza-black mb-2">Preparado para Estudar? 📖</h2>
-                <p class="text-gray-600 text-sm">${this.getRandomQuote()}</p>
+            <div class="flex justify-between items-start mb-4">
+                <div class="text-center flex-1">
+                    <h2 class="text-2xl font-bold text-editaliza-black mb-2">Preparado para Estudar? 📖</h2>
+                    <p class="text-gray-600 text-sm">${this.getRandomQuote()}</p>
+                </div>
+                <button onclick="StudyChecklist.close()" class="text-gray-400 hover:text-gray-600 text-3xl font-light -mt-2 -mr-2">×</button>
             </div>
             
             <div class="space-y-3 mb-6">
@@ -376,12 +359,18 @@ const StudyChecklist = {
         return this.motivationalQuotes[Math.floor(Math.random() * this.motivationalQuotes.length)];
     },
 
-    // CORREO 1: Adicionar listener para fechar modal ao clicar fora
+    // CORREÇÃO 1: Adicionar listener para fechar modal ao clicar fora
     addModalClickListener() {
         const modal = document.getElementById('studySessionModal');
         modal.addEventListener('click', (event) => {
-            // Se clicou no overlay (fundo), mas no no container do modal
+            // Se clicou no overlay (fundo), mas não no container do modal
             if (event.target === modal) {
+                // Verificar se há timer ativo antes de fechar
+                if (this.session && TimerSystem.hasActiveTimer(this.session.id)) {
+                    // Timer está rodando - pausar e perguntar se quer continuar depois
+                    TimerSystem.stop(this.session.id);
+                    console.log(`⏸️ Timer pausado ao fechar modal para sessão ${this.session.id}`);
+                }
                 this.close();
             }
         });
@@ -493,6 +482,49 @@ const StudyChecklist = {
     async finishSessionWithTime() {
         console.info('⚠️ finishSessionWithTime is deprecated, redirecting to markAsCompleted');
         return this.markAsCompleted();
+    },
+    
+    // CORREÇÃO: Método para fechar modal com preservação do estado do timer
+    close() {
+        const modal = document.getElementById('studySessionModal');
+        const modalContainer = document.getElementById('studySessionModalContainer');
+        
+        // Verificar estado do timer antes de fechar
+        if (this.session && this.session.id) {
+            const hasTimer = TimerSystem.timers[this.session.id];
+            const isRunning = TimerSystem.hasActiveTimer(this.session.id);
+            
+            if (isRunning) {
+                // Se timer está rodando, pausar mas manter o estado
+                TimerSystem.stop(this.session.id);
+                app.showToast('⏸️ Sessão pausada. Clique em "Continuar" para retomar.', 'info');
+            } else if (hasTimer && hasTimer.elapsed > 0) {
+                // Se timer tem tempo mas está pausado, apenas informar
+                const timeStr = TimerSystem.formatTime(hasTimer.elapsed);
+                app.showToast(`⏱️ Sessão pausada em ${timeStr}. Clique para continuar.`, 'info');
+            }
+        }
+        
+        // Animar fechamento do modal
+        modal.classList.add('opacity-0');
+        modalContainer.classList.add('scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            // Limpar conteúdo do modal
+            modalContainer.innerHTML = '';
+        }, 200);
+    },
+    
+    // CORREÇÃO: Adicionar listener para botão de fechar (X)
+    addCloseButtonListener() {
+        // Adicionar listener para todos os botões de fechar
+        document.addEventListener('click', (event) => {
+            if (event.target.matches('[data-close-modal]') || 
+                event.target.closest('[data-close-modal]')) {
+                this.close();
+            }
+        });
     }
 };
 
