@@ -532,34 +532,38 @@ app.use('/reset-password', strictRateLimit);
 
 
 // ==========================================
-// INTEGRAÇÃO CACKTO - HABILITADA
+// INTEGRAÇÃO CACKTO - CONFIGURAÇÃO CRÍTICA
 // ==========================================
 
-// CACKTO INTEGRATION ENABLED
-// Note: Webhook routes must be mounted for payment processing
+// 1. RAW BODY PARSER - APENAS PARA WEBHOOKS CACKTO
+// IMPORTANTE: Deve vir ANTES de outros parsers para esta rota
+app.use('/api/webhooks/cackto', express.raw({ 
+    type: '*/*',  // Aceita qualquer content-type
+    limit: '1mb'
+}));
+console.log('✅ Raw body parser configurado para /api/webhooks/cackto');
 
-// ========================================
-// WEBHOOK ROUTES - MUST BE MOUNTED FIRST
-// ========================================
+// 2. TRUST PROXY - Necessário para obter IP real atrás do Nginx
+app.set('trust proxy', true);
+console.log('✅ Trust proxy configurado para funcionar com Nginx');
+
+// 3. MONTAR ROTAS DO WEBHOOK
 console.log('🚀 SERVER.JS: Mounting webhook routes BEFORE async operations');
-console.log('🔧 Mounting CacktoRoutes at /api/webhooks');
-console.log('   CacktoRoutes type:', typeof CacktoRoutes);
-console.log('   CacktoRoutes loaded:', CacktoRoutes ? 'YES' : 'NO');
 
-// Mount webhook routes BEFORE any async operations
-app.use('/api/webhooks', CacktoRoutes);
-console.log('✅ CacktoRoutes mounted at /api/webhooks');
+// Usar o novo handler simplificado
+const CacktoWebhookSimple = require('./src/cackto-integration/routes/webhooks-simple');
+app.use('/api/webhooks', CacktoWebhookSimple);
+console.log('✅ CACKTO webhook routes mounted at /api/webhooks');
 
-// Debug route to test webhook path (direct route as fallback)
-app.post('/api/webhooks/cackto', (req, res) => {
-    console.log('🎯 Direct webhook route hit!');
-    res.status(200).json({ 
-        message: 'Direct route working (fallback)', 
-        body: req.body,
+// 4. PING DE TESTE
+app.get('/api/webhooks/cackto/__ping', (req, res) => {
+    res.json({ 
+        ok: true,
+        message: 'CACKTO webhook endpoint ativo',
         timestamp: new Date().toISOString()
     });
 });
-console.log('✅ Direct fallback route mounted at /api/webhooks/cackto');
+console.log('✅ Ping endpoint mounted at /api/webhooks/cackto/__ping');
 
 // ========================================
 // CACKTO INTEGRATION (ASYNC)
