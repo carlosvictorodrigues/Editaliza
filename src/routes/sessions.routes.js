@@ -11,7 +11,12 @@ const router = express.Router();
 // VALIDATION RULES
 const validators = {
     numericId: (paramName) => validationValidators.numericId(paramName),
-    sessionStatus: body('status').isIn(['Pendente', 'Concluído']).withMessage('Status deve ser "Pendente" ou "Concluído"'),
+    sessionStatus: body('status').optional().isIn(['Pendente', 'Concluído']).withMessage('Status deve ser "Pendente" ou "Concluído"'),
+    sessionData: [
+        body('status').optional().isIn(['Pendente', 'Concluído']).withMessage('Status deve ser "Pendente" ou "Concluído"'),
+        body('questions_solved').optional().isInt({ min: 0, max: 9999 }).withMessage('Questões resolvidas deve ser um número entre 0 e 9999'),
+        body('notes').optional().isString().isLength({ max: 5000 }).withMessage('Anotações não podem exceder 5000 caracteres')
+    ],
     studyTime: [
         body('seconds').optional().isInt({ min: 1, max: 600 }).withMessage('Tempo deve ser entre 1 e 600 segundos'),
         body('incrementSeconds').optional().isInt({ min: 1, max: 600 }).withMessage('Incremento deve ser entre 1 e 600 segundos'),
@@ -125,8 +130,8 @@ router.patch('/:sessionId',
     debugTap('2-AFTER-AUTH'),
     validators.numericId('sessionId'),
     debugTap('3-AFTER-NUMERIC-ID'),
-    validators.sessionStatus,
-    debugTap('4-AFTER-SESSION-STATUS'),
+    validators.sessionData,
+    debugTap('4-AFTER-SESSION-DATA'),
     handleValidationErrors,
     debugTap('5-AFTER-VALIDATION-ERRORS'),
     SessionsController.updateSessionStatus
