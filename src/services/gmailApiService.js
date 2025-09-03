@@ -45,20 +45,30 @@ class GmailApiService {
             return { success: false, error: errorMessage, provider: 'None' };
         }
 
+        // Função para codificar o subject em formato MIME (RFC 2047)
+        const encodeSubject = (subject) => {
+            // Se contém caracteres não-ASCII, codifica em UTF-8
+            // eslint-disable-next-line no-control-regex
+            if (!/^[\x00-\x7F]*$/.test(subject)) {
+                return `=?UTF-8?B?${Buffer.from(subject, 'utf-8').toString('base64')}?=`;
+            }
+            return subject;
+        };
+
         // Monta o corpo do email no formato RFC 2822
         const emailLines = [
             `From: "Editaliza" <${this.fromEmail}>`,
             `To: ${options.to}`,
             'Content-Type: text/html; charset=utf-8',
             'MIME-Version: 1.0',
-            `Subject: ${options.subject}`,
+            `Subject: ${encodeSubject(options.subject)}`,
             '',
             options.html
         ];
         const email = emailLines.join('\r\n');
         
         // Codifica o email em base64url, como exigido pela API do Gmail
-        const base64EncodedEmail = Buffer.from(email).toString('base64').replace(/\+/g, '-').replace(/\//g, '_');
+        const base64EncodedEmail = Buffer.from(email, 'utf-8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_');
 
         try {
             const res = await this.gmail.users.messages.send({
