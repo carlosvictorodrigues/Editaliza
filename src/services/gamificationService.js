@@ -20,15 +20,19 @@ const XP_REWARDS = {
     SIMULADO_BONUS: 20
 };
 
+// Níveis baseados em SESSÕES completadas (não tópicos)
+// Distribuído para ~300 sessões por edital
 const LEVELS = [
     { threshold: 0, title: 'Aspirante a Servidor(a) 🌱', humorous_title: 'Pagador de Inscrição 💸', color: '#8B8B8B', phrase: 'A jornada dos mil editais começa com o primeiro boleto!' },
-    { threshold: 11, title: 'Sobrevivente do Primeiro PDF 📄', humorous_title: 'Pagador(a) de Inscrição 💸', color: '#A0A0A0', phrase: '700 páginas? É só o aquecimento!' },
-    { threshold: 31, title: 'Caçador de Questões 🎯', humorous_title: 'Acima da Nota de Corte (nos simulados) 😉', color: '#4A90E2', phrase: 'Questões anuladas são suas melhores amigas agora!' },
-    { threshold: 51, title: 'Estrategista de Chute 🎲', humorous_title: 'Mestre dos Grupos de WhatsApp 📲', color: '#6B46C1', phrase: 'Entre A e C, sempre vai na B... ou não!' },
-    { threshold: 101, title: 'Fiscal de Gabarito 🔍', humorous_title: 'Gabaritador(a) da FGV 🎯', color: '#10B981', phrase: 'Súmula vinculante é seu segundo nome!' },
-    { threshold: 201, title: 'Terror do Cespe/Cebraspe 👹', humorous_title: 'Sensei dos Simulados 🥋', color: '#F59E0B', phrase: 'Simulado no domingo de manhã? Rotina!' },
-    { threshold: 351, title: 'Veterano(a) de 7 Bancas Diferentes 😎', humorous_title: 'Quase Servidor(a) 🎓', color: '#DC2626', phrase: 'A posse está logo ali... ou no próximo concurso!' },
-    { threshold: 501, title: 'Lenda Viva dos Concursos 👑', humorous_title: 'Assinante Vitalício do Diário Oficial ✨', color: '#FFD700', phrase: 'Editais tremem quando você abre o navegador!' }
+    { threshold: 5, title: 'Sobrevivente do Primeiro PDF 📄', humorous_title: 'Pagador(a) de Inscrição 💸', color: '#A0A0A0', phrase: '700 páginas? É só o aquecimento!' },
+    { threshold: 15, title: 'Caçador de Questões 🎯', humorous_title: 'Acima da Nota de Corte (nos simulados) 😉', color: '#4A90E2', phrase: 'Questões anuladas são suas melhores amigas agora!' },
+    { threshold: 30, title: 'Estrategista de Chute 🎲', humorous_title: 'Mestre dos Grupos de WhatsApp 📲', color: '#6B46C1', phrase: 'Entre A e C, sempre vai na B... ou não!' },
+    { threshold: 50, title: 'Fiscal de Gabarito 🔍', humorous_title: 'Gabaritador(a) da FGV 🎯', color: '#10B981', phrase: 'Súmula vinculante é seu segundo nome!' },
+    { threshold: 80, title: 'Terror do Cespe/Cebraspe 👹', humorous_title: 'Sensei dos Simulados 🥋', color: '#F59E0B', phrase: 'Simulado no domingo de manhã? Rotina!' },
+    { threshold: 120, title: 'Quase Nomeado 🏷️', humorous_title: 'Quase Nomeado 🏷️', color: '#9333EA', phrase: 'Já escolheu a roupa do primeiro dia!' },
+    { threshold: 170, title: 'Veterano(a) de 7 Bancas Diferentes 😎', humorous_title: 'Quase Servidor(a) 🎓', color: '#DC2626', phrase: 'A posse está logo ali... ou no próximo concurso!' },
+    { threshold: 230, title: 'Patrimônio Público 👑', humorous_title: 'Patrimônio Público 👑', color: '#FFD700', phrase: 'Vaga imaginária com seu nome!' },
+    { threshold: 300, title: 'Lenda Viva dos Concursos 👑', humorous_title: 'Quase Nomeado (com lombar em frangalhos) 🦴', color: '#FFD700', phrase: 'A lombar já foi pro saco, mas o PDF tá em dia!' }
 ];
 
 const ACHIEVEMENTS = {
@@ -114,8 +118,8 @@ const processSessionCompletion = async (userId, sessionId) => {
         client = await pool.connect();
         
         // Configurar timeouts para evitar travamentos
-        await client.query("SET LOCAL lock_timeout = '3s'");
-        await client.query("SET LOCAL statement_timeout = '8s'");
+        await client.query('SET LOCAL lock_timeout = \'3s\'');
+        await client.query('SET LOCAL statement_timeout = \'8s\'');
         
         // Iniciar transação
         await client.query('BEGIN');
@@ -146,7 +150,7 @@ const processSessionCompletion = async (userId, sessionId) => {
             [userId]
         );
         
-        let stats = statsResult.rows[0];
+        const stats = statsResult.rows[0];
 
         // 1. Cálculo de XP (mantendo toda a lógica original)
         let xpGained = XP_REWARDS.SESSION_COMPLETED;
@@ -189,8 +193,8 @@ const processSessionCompletion = async (userId, sessionId) => {
         const newStreak = await calculateCurrentStreakWithClient(client, userId);
         const longestStreak = Math.max(stats.longest_streak || 0, newStreak);
         
-        // Calcular nível
-        const newLevelData = calculateLevel(completedTopics);
+        // Calcular nível baseado em SESSÕES
+        const newLevelData = calculateLevel(completedSessionsCount);
 
         // 4. Salvar Estatísticas (UPDATE atômico)
         await client.query(
@@ -262,8 +266,8 @@ const getGamificationProfile = async (userId) => {
         
         // Configurar timeouts por segurança
         const startTimeouts = Date.now();
-        await client.query("SET LOCAL statement_timeout = 5000"); // 5s max
-        await client.query("SET LOCAL lock_timeout = 1000"); // 1s para locks
+        await client.query('SET LOCAL statement_timeout = 5000'); // 5s max
+        await client.query('SET LOCAL lock_timeout = 1000'); // 1s para locks
         queryTimings.timeouts = Date.now() - startTimeouts;
         console.log(`[GAMI SERVICE] getGamificationProfile: Timeouts configurados em ${queryTimings.timeouts}ms`);
         
@@ -329,7 +333,18 @@ const getGamificationProfile = async (userId) => {
         console.log(`[GAMI SERVICE] getGamificationProfile: Query completed topics concluída em ${queryTimings.topics}ms`);
         
         const completedTopics = parseInt(topicsResult.rows[0].count, 10) || 0;
-        const levelInfo = calculateLevel(completedTopics);
+        
+        // Contar sessões completadas para cálculo de nível
+        const sessionsResult = await client.query(
+            `SELECT COUNT(*) as count
+             FROM study_sessions ss
+             JOIN study_plans sp ON ss.study_plan_id = sp.id
+             WHERE sp.user_id = $1 
+               AND ss.status IN ('Concluído', 'Concluída', 'Concluida')`,
+            [userId]
+        );
+        const completedSessions = parseInt(sessionsResult.rows[0].count, 10) || 0;
+        const levelInfo = calculateLevel(completedSessions);
         
         // Buscar conquistas - sem lock, sem transação
         console.log('[GAMI SERVICE] getGamificationProfile: Executando query achievements...');
@@ -400,7 +415,7 @@ async function calculateCurrentStreakWithClient(client, userId) {
     if (result.rows.length === 0) return 0;
 
     let streak = 0;
-    const today = new Date(new Date().toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+    const today = new Date(new Date().toLocaleString('en-US', {timeZone: 'America/Sao_Paulo'}));
     today.setHours(0, 0, 0, 0);
 
     const lastStudyDate = new Date(result.rows[0].session_date);
@@ -456,13 +471,13 @@ async function calculateCurrentStreak(userId) {
     }
 }
 
-function calculateLevel(completedTopicsCount) {
+function calculateLevel(completedSessionsCount) {
     let currentLevel = LEVELS[0];
     let currentIndex = 0;
     
-    // Encontrar o nível atual
+    // Encontrar o nível atual baseado em SESSÕES
     for (let i = LEVELS.length - 1; i >= 0; i--) {
-        if (completedTopicsCount >= LEVELS[i].threshold) {
+        if (completedSessionsCount >= LEVELS[i].threshold) {
             currentLevel = { ...LEVELS[i], level: i + 1 };
             currentIndex = i;
             break;
@@ -475,7 +490,7 @@ function calculateLevel(completedTopicsCount) {
         currentLevel.next_level_info = {
             title: nextLevel.title,
             threshold: nextLevel.threshold,
-            topics_needed: nextLevel.threshold - completedTopicsCount
+            sessions_needed: nextLevel.threshold - completedSessionsCount
         };
     }
     
@@ -579,7 +594,7 @@ const getUserStats = async (userId) => {
         );
         
         const counts = countsResult.rows[0];
-        const levelInfo = calculateLevel(parseInt(counts.completed_topics, 10) || 0);
+        const levelInfo = calculateLevel(parseInt(counts.completed_sessions, 10) || 0);
         
         return {
             ...stats,
@@ -761,15 +776,15 @@ function generateAchievementsFromMetrics(completedTopics, completedSessions, str
 
 /**
  * Calcula nível do usuário no formato esperado pelo controller
- * Retorna objeto com currentLevel, nextLevel e topicsToNextLevel
+ * Agora baseado em SESSÕES completadas, não tópicos
  */
-function calculateUserLevelForController(completedTopicsCount) {
-    const levelData = calculateLevel(completedTopicsCount);
+function calculateUserLevelForController(completedSessionsCount) {
+    const levelData = calculateLevel(completedSessionsCount);
     
     // Encontrar próximo nível baseado no threshold atual
     let nextLevelObj = null;
     for (let i = 0; i < LEVELS.length; i++) {
-        if (LEVELS[i].threshold > completedTopicsCount) {
+        if (LEVELS[i].threshold > completedSessionsCount) {
             nextLevelObj = LEVELS[i];
             break;
         }
@@ -782,7 +797,7 @@ function calculateUserLevelForController(completedTopicsCount) {
             threshold: nextLevelObj.threshold,
             xpNeeded: nextLevelObj.threshold * 50 // Simular XP needed
         } : null,
-        topicsToNextLevel: nextLevelObj ? nextLevelObj.threshold - completedTopicsCount : 0
+        sessionsToNextLevel: nextLevelObj ? nextLevelObj.threshold - completedSessionsCount : 0
     };
 }
 

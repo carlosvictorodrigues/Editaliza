@@ -63,8 +63,17 @@ async function getPlanGamification(req, res) {
             queryResult: completedTopicsResult
         });
 
-        // 2. CALCULAR NÍVEL E PROGRESSÃO (usando serviço centralizado)
-        const levelData = calculateUserLevelForController(completedTopicsCount);
+        // 2. CONTAR SESSÕES CONCLUÍDAS PARA CALCULAR NÍVEL
+        const completedSessionsResult = await dbGet(`
+            SELECT COUNT(*) as count
+            FROM study_sessions
+            WHERE study_plan_id = $1
+            AND status IN ('Concluído', 'Concluída', 'Concluida')
+        `, [planId]);
+        const completedSessionsCount = parseInt(completedSessionsResult?.count || 0);
+        
+        // 2. CALCULAR NÍVEL E PROGRESSÃO (agora baseado em SESSÕES)
+        const levelData = calculateUserLevelForController(completedSessionsCount);
 
         // 3. CALCULAR STREAK DE ESTUDOS (usando serviço centralizado)
         const studyStreak = await calculateCurrentStreak(userId);
@@ -126,7 +135,8 @@ async function getPlanGamification(req, res) {
             completedTopicsCount,
             concurseiroLevel: levelData.currentLevel,
             nextLevel: levelData.nextLevel,
-            topicsToNextLevel: levelData.topicsToNextLevel,
+            topicsToNextLevel: levelData.topicsToNextLevel || levelData.sessionsToNextLevel,  // Mantém compatibilidade
+            sessionsToNextLevel: levelData.sessionsToNextLevel,
             studyStreak,
             completedTodayCount: todayTasksResult.completed || 0,
             totalTodayCount: todayTasksResult.total || 0,
