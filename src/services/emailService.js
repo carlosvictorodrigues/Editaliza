@@ -143,21 +143,60 @@ class EmailService {
         } catch (error) {
             console.error('❌ Erro ao enviar email via SMTP:', error.message);
             
-            // Se falhar por timeout ou conexão, tentar Gmail API
+            // Se falhar por timeout ou conexão, tentar SendGrid API
             if (error.message.includes('Timeout') || error.message.includes('ETIMEDOUT') || error.message.includes('ECONNECTION')) {
-                console.log('🔄 SMTP bloqueado, tentando Gmail API Service...');
+                console.log('🔄 SMTP bloqueado, tentando SendGrid API...');
                 
                 try {
-                    // Usar Gmail API como fallback
-                    const gmailApiService = require('./gmailApiService');
-                    const result = await gmailApiService.sendEmail(options);
+                    // Usar SendGrid API como fallback (funciona via HTTPS)
+                    const sendgridService = require('./sendgridService');
                     
-                    if (result.success) {
-                        console.log('✅ Email enviado via Gmail API!');
-                        return result;
+                    // SendGrid precisa ser inicializado com API key
+                    if (!sendgridService.isConfigured && process.env.SENDGRID_API_KEY) {
+                        sendgridService.initialize();
+                    }
+                    
+                    if (sendgridService.isConfigured) {
+                        const msg = {
+                            to: options.to,
+                            from: {
+                                email: this.fromEmail,
+                                name: this.fromName
+                            },
+                            subject: options.subject,
+                            text: options.text || this.extractTextFromHtml(options.html),
+                            html: options.html
+                        };
+                        
+                        const sgMail = require('@sendgrid/mail');
+                        sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+                        
+                        const [response] = await sgMail.send(msg);
+                        
+                        console.log('✅ Email enviado via SendGrid API!');
+                        console.log('   Status:', response.statusCode);
+                        console.log('   Message ID:', response.headers['x-message-id']);
+                        
+                        return {
+                            success: true,
+                            messageId: response.headers['x-message-id'],
+                            provider: 'SendGrid API'
+                        };
+                    } else {
+                        console.log('⚠️ SendGrid não configurado, tentando Gmail API...');
+                        const gmailApiService = require('./gmailApiService');
+                        const result = await gmailApiService.sendEmail(options);
+                        
+                        if (result.success) {
+                            console.log('✅ Email enviado via Gmail API!');
+                            return result;
+                        }
                     }
                 } catch (apiError) {
-                    console.error('❌ Gmail API também falhou:', apiError.message);
+                    console.error('❌ Erro no fallback de API:', apiError.message);
+                    if (apiError.response) {
+                        console.error('   Response:', apiError.response.body);
+                    }
                 }
             }
             
