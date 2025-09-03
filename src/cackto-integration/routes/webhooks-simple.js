@@ -129,12 +129,12 @@ router.post('/cackto', async (req, res) => {
         // Status normalizado
         const status = String(data?.status || '').toLowerCase();
         
-        // PRODUTO - aceita ambos formatos: product.id ou product_id
-        const productId = data?.product?.id ||      // Formato objeto
-                         data?.product_id ||         // Formato string direto
-                         data?.offer?.product_id ||  // Outros eventos
-                         data?.offer?.product?.id ||
-                         null;
+        // IMPORTANTE: CACKTO usa offer.id como identificador principal!
+        const offerId = data?.offer?.id;                    // PRINCIPAL
+        const productId = data?.product?.id;                // Fallback 1
+        const shortId = data?.product?.short_id;            // Fallback 2
+        const productIdDirect = data?.product_id;           // Formato antigo
+        const price = Number(data?.offer?.price || data?.baseAmount || data?.amount || 0);
 
         // Nome do cliente
         const customerName = data?.customer?.name || 
@@ -142,48 +142,96 @@ router.post('/cackto', async (req, res) => {
                            data?.customer_name ||
                            'Cliente CACKTO';
 
-        if (!productId) {
-            console.warn('[CACKTO] Produto ausente no payload:', JSON.stringify(data));
-            return;
-        }
+        // Não precisa mais validar productId pois agora usamos offer.id
 
         if (!email) {
             console.warn('[CACKTO] Email ausente no payload:', JSON.stringify(data));
             return;
         }
 
-        // 5. MAPEAMENTO DE PRODUTOS
-        const productMap = {
-            [process.env.CACKTO_PRODUCT_MENSAL]: { 
+        // 5. MAPEAMENTO DE PLANOS - OFFER.ID é PRINCIPAL!
+        // Mapear por OFFER ID (principal)
+        const offerMap = {
+            [process.env.CACKTO_OFFER_MENSAL]: { 
                 plan_type: 'mensal', 
                 months: 1 
             },
-            [process.env.CACKTO_PRODUCT_SEMESTRAL]: { 
+            [process.env.CACKTO_OFFER_MENSAL_ALT]: { 
+                plan_type: 'mensal', 
+                months: 1 
+            },
+            [process.env.CACKTO_OFFER_SEMESTRAL]: { 
                 plan_type: 'semestral', 
                 months: 6 
             },
-            [process.env.CACKTO_PRODUCT_ANUAL]: { 
+            [process.env.CACKTO_OFFER_ANUAL]: { 
                 plan_type: 'anual', 
                 months: 12 
             }
         };
 
-        let plan = productMap[productId];
+        let plan = offerMap[offerId];
+        
+        // Fallback 1: Tentar por product.id
+        if (!plan && productId) {
+            const productMap = {
+                [process.env.CACKTO_PRODUCT_MENSAL]: { plan_type: 'mensal', months: 1 },
+                [process.env.CACKTO_PRODUCT_SEMESTRAL]: { plan_type: 'semestral', months: 6 },
+                [process.env.CACKTO_PRODUCT_ANUAL]: { plan_type: 'anual', months: 12 }
+            };
+            plan = productMap[productId];
+        }
+        
+        // Fallback 2: Tentar por short_id
+        if (!plan && shortId) {
+            const shortMap = {
+                [process.env.CACKTO_PRODUCT_SHORT_MENSAL]: { plan_type: 'mensal', months: 1 },
+                [process.env.CACKTO_PRODUCT_SHORT_SEMESTRAL]: { plan_type: 'semestral', months: 6 },
+                [process.env.CACKTO_PRODUCT_SHORT_ANUAL]: { plan_type: 'anual', months: 12 }
+            };
+            plan = shortMap[shortId];
+        }
+        
+        // Fallback 3: Formato antigo (product_id direto)
+        if (!plan && productIdDirect) {
+            const oldMap = {
+                [process.env.CACKTO_PRODUCT_MENSAL]: { plan_type: 'mensal', months: 1 },
+                [process.env.CACKTO_PRODUCT_SEMESTRAL]: { plan_type: 'semestral', months: 6 },
+                [process.env.CACKTO_PRODUCT_ANUAL]: { plan_type: 'anual', months: 12 }
+            };
+            plan = oldMap[productIdDirect];
+        }
         
         if (!plan) {
-            console.warn('[CACKTO] Produto não mapeado:', productId);
-            console.info('[CACKTO] Produtos configurados:', Object.keys(productMap));
+            console.warn('[CACKTO] Offer/Produto não mapeado:', {
+                offerId,
+                productId,
+                shortId,
+                productIdDirect,
+                price,
+                event,
+                status
+            });
             
-            // Em desenvolvimento, usar plano padrão
+            // Em desenvolvimento, usar plano padrão baseado no preço
             if (process.env.NODE_ENV === 'development') {
-                console.info('[CACKTO] Usando plano mensal como padrão (dev)');
-                plan = { plan_type: 'mensal', months: 1 };
+                if (price >= 200) {
+                    console.info('[CACKTO] Preço alto, assumindo anual (dev)');
+                    plan = { plan_type: 'anual', months: 12 };
+                } else if (price >= 100) {
+                    console.info('[CACKTO] Preço médio, assumindo semestral (dev)');
+                    plan = { plan_type: 'semestral', months: 6 };
+                } else {
+                    console.info('[CACKTO] Preço baixo, assumindo mensal (dev)');
+                    plan = { plan_type: 'mensal', months: 1 };
+                }
             } else {
                 return;
             }
         }
 
         // 6. EVENTOS QUE ATIVAM PROVISIONAMENTO
+        // IMPORTANTE: boleto_gerado e waiting_payment NÃO ativam!
         const activatingEvents = [
             'payment.approved',
             'payment_approved',
@@ -201,9 +249,23 @@ router.post('/cackto', async (req, res) => {
             'paid',
             'approved',
             'active',
-            'completed',
-            'waiting_payment' // CACKTO pode mandar isso em teste
+            'completed'
+            // REMOVIDO: 'waiting_payment' - isso é só boleto emitido!
         ];
+        
+        // Eventos que NÃO devem ativar (explícito)
+        const nonActivatingEvents = [
+            'boleto_gerado',
+            'boleto_generated',
+            'invoice_created',
+            'payment_waiting'
+        ];
+        
+        // Se for evento de não-ativação, ignorar
+        if (nonActivatingEvents.includes(event)) {
+            console.info('[CACKTO] Evento sem ativação (OK):', { event, status, offerId });
+            return;
+        }
 
         const shouldProvision = activatingEvents.includes(event) || 
                               activatingStatuses.includes(status);
@@ -228,8 +290,10 @@ router.post('/cackto', async (req, res) => {
             customer_name: customerName,
             plan_type: plan.plan_type,
             transaction_id: txId,
-            amount: data?.amount || 0,
-            cackto_product_id: productId
+            amount: price,
+            cackto_offer_id: offerId,
+            cackto_product_id: productId,
+            cackto_short_id: shortId
         });
 
         // 8. LOG DE AUDITORIA
@@ -240,10 +304,13 @@ router.post('/cackto', async (req, res) => {
             userId: provisioningResult?.userId,
             details: {
                 event,
+                offerId,
                 productId,
+                shortId,
                 planType: plan.plan_type,
                 email,
                 status,
+                price,
                 renewed: provisioningResult?.renewed || false
             },
             severity: 'INFO'
