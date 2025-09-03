@@ -836,13 +836,14 @@ async function openStudySession(sessionId) {
             const shouldContinue = await showContinueStudyModal(sessionId);
             
             if (shouldContinue) {
-                // Continuar timer e reabrir modal do cronãmetro
+                // Continuar timer e reabrir modal do cronômetro
                 const session = await fetchSessionData(sessionId);
                 if (session) {
                     TimerSystem.continueTimer(sessionId);
                     // Definir sessão ANTES de montar a UI do timer
                     StudyChecklist.session = session;
-                    StudyChecklist.startStudySession(false);
+                    // CORREÇÃO: Passar true para abrir o modal do timer
+                    StudyChecklist.startStudySession(true);
                     app.showToast('Continuando estudos! Timer retomado.', 'success');
                 } else {
                     console.error('❌ Não foi possível carregar dados da sessão');

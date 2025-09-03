@@ -188,9 +188,18 @@ function showPomodoroBreakModal(pomodoroCount, totalElapsed) {
                 }, 300000); // 5 minutos
             }
         } else {
-            // Continuar estudando
+            // Continuar estudando - manter modal do timer aberto
             if (window.app && window.app.showToast) {
                 window.app.showToast('🍅💪 Plantando o próximo tomate! Colheita em 25 minutos!', 'success');
+            }
+            
+            // Garantir que o modal do timer permaneça visível
+            const timerModal = document.getElementById('studySessionModal');
+            if (timerModal && !timerModal.classList.contains('active')) {
+                // Reabrir o modal se ele foi fechado
+                if (window.StudyChecklist && window.StudyChecklist.session) {
+                    window.StudyChecklist.startStudySession(true);
+                }
             }
         }
     };
