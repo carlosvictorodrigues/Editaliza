@@ -149,7 +149,7 @@ class EmailService {
                 
                 try {
                     // Usar SendGrid API como fallback (funciona via HTTPS)
-                    const sendgridService = require('./sendgridService');
+                    const sendgridService = require('./sendGridService');
                     
                     // SendGrid precisa ser inicializado com API key
                     if (!sendgridService.isConfigured && process.env.SENDGRID_API_KEY) {
