@@ -342,7 +342,8 @@ const app = {
         return data;
     },
     
-    async getGamificationData(planId) {
+    // Versão simples - mantida para compatibilidade
+    async getGamificationDataSimple(planId) {
         if (!planId) throw new Error('ID do plano ã necessãrio para buscar dados de gamificaãão.');
         return await this.apiFetch(`/plans/${planId}/gamification`);
     },
@@ -377,8 +378,28 @@ const app = {
         if (!toastContainer) return;
         
         const toast = document.createElement('div');
-        const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-        const icon = type === 'success' ? '?' : '?';
+        let bgColor, icon;
+        switch(type) {
+            case 'success':
+                bgColor = 'bg-green-500';
+                icon = '✓';
+                break;
+            case 'error':
+                bgColor = 'bg-red-500';
+                icon = '✕';
+                break;
+            case 'info':
+                bgColor = 'bg-blue-500';
+                icon = 'i';
+                break;
+            case 'warning':
+                bgColor = 'bg-yellow-500';
+                icon = '!';
+                break;
+            default:
+                bgColor = 'bg-gray-500';
+                icon = '•';
+        }
         
         // Sanitizar mensagem
         const safeMessage = this.sanitizeHtml(message);
@@ -585,22 +606,25 @@ const app = {
     // Funãão para validar dados de entrada
     validateInput(value, type, options = {}) {
         switch (type) {
-            case 'email':
+            case 'email': {
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 return emailRegex.test(value);
+            }
                 
             case 'password':
                 return value.length >= options.minLength || 6;
                 
-            case 'date':
+            case 'date': {
                 const date = new Date(value);
                 return !isNaN(date.getTime()) && date > new Date();
+            }
                 
-            case 'number':
+            case 'number': {
                 const num = Number(value);
                 return !isNaN(num) && 
                        (options.min === undefined || num >= options.min) && 
                        (options.max === undefined || num <= options.max);
+            }
                        
             case 'text':
                 return value.length >= (options.minLength || 0) && 
@@ -801,7 +825,7 @@ async function openStudySession(sessionId) {
         if (hasActiveTimer) {
             void(`? Timer ativo encontrado para sessão ${sessionId} - continuando sem abrir checklist`);
             TimerSystem.continueTimer(sessionId);
-            app.showToast('⏱️ Timer retomado! Continue estudando.', 'success');
+            app.showToast('Timer retomado! Continue estudando.', 'success');
             return;
         }
         
@@ -938,7 +962,7 @@ async function openStudySession(sessionId) {
         // CORRE!ãO: Verificar se sessão jã foi concluãda
         if (session.status === 'Concluído') {
             console.log('ℹ️ Sessão já foi concluída');
-            app.showToast('ℹ️ Esta sessão já foi concluída!', 'info');
+            app.showToast('Esta sessão já foi concluída!', 'info');
             
             // Atualizar visual do card para mostrar como concluãda
             if (window.TimerSystem) {

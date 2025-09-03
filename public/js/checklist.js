@@ -437,7 +437,7 @@ const StudyChecklist = {
             
             // Show appropriate success message
             const timeMessage = studyTimeSeconds > 0 ? ` (${TimerSystem.formatTime(studyTimeSeconds * 1000)} estudados)` : '';
-            app.showToast(`✅ Sessão marcada como concluída${timeMessage}!`, 'success');
+            app.showToast(`Sessão marcada como concluída${timeMessage}!`, 'success');
             
             console.info(`✅ Sessão ${sessionId} finalizada com sucesso`);
             
