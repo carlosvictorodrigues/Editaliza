@@ -111,6 +111,79 @@ router.post('/send-test-email', async (req, res) => {
 });
 
 /**
+ * POST /api/test/send-schedule-email
+ * Envia email de cronograma de estudos
+ */
+router.post('/send-schedule-email', async (req, res) => {
+    try {
+        const { email = 'carlosvictorodrigues@gmail.com' } = req.body;
+        
+        console.log(`📧 Enviando email de cronograma para: ${email}`);
+        
+        // Dados de exemplo do cronograma
+        const scheduleData = {
+            topics: [
+                {
+                    subject: 'Português',
+                    name: 'Concordância Verbal e Nominal',
+                    duration: 45
+                },
+                {
+                    subject: 'Matemática',
+                    name: 'Razão e Proporção',
+                    duration: 60
+                },
+                {
+                    subject: 'Direito Constitucional',
+                    name: 'Direitos e Garantias Fundamentais',
+                    duration: 90
+                },
+                {
+                    subject: 'Informática',
+                    name: 'Excel - Fórmulas e Funções',
+                    duration: 30
+                }
+            ],
+            streak: 7,
+            todayGoal: 4,
+            completedToday: 1,
+            totalMinutes: 225
+        };
+        
+        // Calcular estatísticas
+        const totalHours = Math.floor(scheduleData.totalMinutes / 60);
+        const remainingMinutes = scheduleData.totalMinutes % 60;
+        
+        await emailService.sendDailyScheduleEmail(
+            email,
+            'Carlos Victor',
+            scheduleData
+        );
+        
+        console.log(`✅ Email de cronograma enviado para: ${email}`);
+        
+        res.json({
+            success: true,
+            message: `Email de cronograma enviado para ${email}`,
+            details: {
+                destinatario: email,
+                topicosHoje: scheduleData.topics.length,
+                tempoTotal: `${totalHours}h${remainingMinutes > 0 ? remainingMinutes + 'min' : ''}`,
+                sequenciaDias: scheduleData.streak
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Erro ao enviar email de cronograma:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message,
+            details: error.stack
+        });
+    }
+});
+
+/**
  * GET /api/test/email-config
  * Verifica configuração de email
  */
@@ -120,10 +193,14 @@ router.get('/email-config', (req, res) => {
         host: process.env.EMAIL_HOST || 'não configurado',
         port: process.env.EMAIL_PORT || 'não configurado',
         user: process.env.EMAIL_USER || 'não configurado',
+        sendgrid_configured: !!process.env.SENDGRID_API_KEY,
         templates_available: [
             'welcome',
             'passwordRecovery',
             'dailySchedule',
+            'weeklyReport',
+            'studyReminder',
+            'achievement',
             'baseTemplate'
         ]
     };
