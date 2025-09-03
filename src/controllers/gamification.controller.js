@@ -133,6 +133,7 @@ async function getPlanGamification(req, res) {
         // RESPOSTA FINAL
         res.json({
             completedTopicsCount,
+            completedSessionsCount, // Adicionar contagem de sessões
             concurseiroLevel: levelData.currentLevel,
             nextLevel: levelData.nextLevel,
             topicsToNextLevel: levelData.topicsToNextLevel || levelData.sessionsToNextLevel,  // Mantém compatibilidade
@@ -144,7 +145,7 @@ async function getPlanGamification(req, res) {
             achievements,
             totalStudyDays,
             totalStudyTime,
-            totalCompletedSessions
+            totalCompletedSessions: completedSessionsCount // Usar a contagem correta de sessões
         });
         
     } catch (error) {

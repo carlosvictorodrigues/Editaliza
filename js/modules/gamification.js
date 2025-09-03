@@ -19,9 +19,11 @@ const Gamification = {
         console.log('🎮 [Gamification Module] XP processado:', xp);
         const achievements = data.achievements || [];
         const completedTopics = data.completed_topics_count || data.completedTopicsCount || 0;
-        const completedSessions = data.totalCompletedSessions || data.completed_sessions || completedTopics; // Usar sessões se disponível
+        const completedSessions = data.totalCompletedSessions || data.completedSessionsCount || data.completed_sessions || 0; // Usar sessões se disponível
         const current_streak = data.current_streak || data.studyStreak || 0;
         const longest_streak = data.longest_streak || 0;
+        
+        console.log('🎮 [Gamification Module] Sessões completadas:', completedSessions);
         
         // Processar informações de nível
         let level_info = data.level_info || {};
