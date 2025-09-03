@@ -1924,3 +1924,34 @@ footer {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.7; }
 }
+
+/* Estilos para as bolinhas de Pomodoro */
+.pomodoro-dots {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.pomodoro-dots > div {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #EF4444;
+    box-shadow: 0 1px 3px rgba(239, 68, 68, 0.3);
+}
+
+/* Animação das bolinhas */
+@keyframes animate-pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.1);
+    }
+}
+
+.animate-pulse {
+    animation: animate-pulse 2s ease-in-out infinite;
+}

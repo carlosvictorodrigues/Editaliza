@@ -141,6 +141,7 @@ function getElapsedSeconds() {
     return state.pausedElapsed;
 }
 
+
 /**
  * Atualiza display do timer
  */
@@ -152,22 +153,54 @@ function updateDisplay() {
         display.textContent = formatTime(totalElapsed);
     });
     
-    // Atualizar indicador de pomodoro
+    // Atualizar progresso da SESSÃO (não do pomodoro)
+    const timerStatusElements = document.querySelectorAll(`.timer-status[data-session="${state.sessionId}"]`);
+    timerStatusElements.forEach(statusEl => {
+        const sessionDuration = parseInt(statusEl.dataset.duration) || 50; // Duração em minutos
+        const elapsedMinutes = Math.floor(totalElapsed / 60);
+        statusEl.textContent = `${elapsedMinutes} / ${sessionDuration} min`;
+        
+        // Atualizar barra de progresso da sessão
+        const progressBar = statusEl.closest('.timer-container')?.querySelector(`.timer-progress[data-session="${state.sessionId}"]`);
+        if (progressBar) {
+            const progressPercent = Math.min(100, (elapsedMinutes / sessionDuration) * 100);
+            progressBar.style.width = `${progressPercent}%`;
+        }
+    });
+    
+    // Atualizar indicador de POMODORO
     const pomodoroProgress = getPomodoroProgress();
     const pomodoroIndicators = document.querySelectorAll(`.pomodoro-progress[data-session="${state.sessionId}"]`);
     
     pomodoroIndicators.forEach(indicator => {
-        // Atualizar barra de progresso se existir
+        // Atualizar barra de progresso do pomodoro
         const progressBar = indicator.querySelector('.pomodoro-bar');
         if (progressBar) {
             progressBar.style.width = `${pomodoroProgress}%`;
         }
         
-        // Atualizar texto de progresso
+        // Atualizar texto de progresso do pomodoro
         const progressText = indicator.querySelector('.pomodoro-text');
         if (progressText) {
             const minutesLeft = Math.ceil((1500 - (totalElapsed % 1500)) / 60);
             progressText.textContent = minutesLeft === 25 ? 'Iniciando pomodoro...' : `${minutesLeft} min para próximo pomodoro`;
+        }
+    });
+    
+    // Atualizar bolinhas de Pomodoro
+    const pomodoroDotsContainers = document.querySelectorAll(`.pomodoro-dots[data-session="${state.sessionId}"]`);
+    pomodoroDotsContainers.forEach(container => {
+        const completedPomodoros = Math.floor(totalElapsed / 1500);
+        const currentDots = container.children.length;
+        
+        // Adicionar bolinhas se necessário
+        if (completedPomodoros > currentDots) {
+            for (let i = currentDots; i < completedPomodoros; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'w-3 h-3 rounded-full bg-red-500 animate-pulse shadow-sm';
+                dot.style.animationDelay = `${i * 0.1}s`;
+                container.appendChild(dot);
+            }
         }
     });
     
@@ -669,7 +702,7 @@ const TimerSystem = {
     
     // Métodos de UI
     createTimerUI(sessionId) {
-        const sessionDuration = 50; // Duração padrão
+        const sessionDuration = 50; // Duração padrão em minutos
         return `
             <div class="timer-container mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
                 <div class="flex items-center justify-between">
@@ -682,11 +715,32 @@ const TimerSystem = {
                         </button>
                     </div>
                 </div>
+                
+                <!-- Pomodoros com bolinhas animadas -->
+                <div class="mt-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-gray-700">Pomodoros</span>
+                        <div class="pomodoro-dots flex space-x-2" data-session="${sessionId}">
+                            <!-- As bolinhas serão adicionadas dinamicamente -->
+                        </div>
+                    </div>
+                    <div class="pomodoro-progress" data-session="${sessionId}">
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="pomodoro-bar bg-red-500 h-2 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                        </div>
+                        <div class="pomodoro-text text-xs text-gray-600 mt-1">25 min para próximo pomodoro</div>
+                    </div>
+                </div>
+                
+                <!-- Progresso da Sessão -->
                 <div class="mt-3">
                     <div class="flex justify-between text-sm font-medium text-gray-600 mb-1">
-                        <span>Progresso da Sessão</span><span class="timer-status" data-session="${sessionId}">0 / ${sessionDuration} min</span>
+                        <span>Progresso da Sessão</span>
+                        <span class="timer-status" data-session="${sessionId}" data-duration="${sessionDuration}">0 / ${sessionDuration} min</span>
                     </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2"><div class="timer-progress bg-editaliza-green h-2 rounded-full transition-all" data-session="${sessionId}" style="width: 0%"></div></div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="timer-progress bg-editaliza-green h-2 rounded-full transition-all duration-1000" data-session="${sessionId}" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>`;
     },
