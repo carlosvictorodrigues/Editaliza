@@ -17,6 +17,9 @@ const adminFastRoutes = require('./admin-fast.routes');
 const legacyRoutes = require('./legacy.routes');
 const healthRoutes = require('./health.routes');
 
+// Rota de teste de email (temporária)
+const testEmailRoutes = require('./test-email.routes');
+
 /**
  * Configurar todas as rotas modulares
  * @param {Express} app - Instância do Express
@@ -46,6 +49,9 @@ function configureRoutes(app) {
     
     // Health checks e métricas
     app.use('/', healthRoutes);
+    
+    // Rotas de teste (desenvolvimento)
+    app.use('/api/test', testEmailRoutes);
 
     // ==========================================
     // ROTA PADRÃO
