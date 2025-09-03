@@ -141,8 +141,25 @@ class EmailService {
                 provider: 'Gmail SMTP'
             };
         } catch (error) {
-            console.error('❌ Erro ao enviar email:', error.message);
-            console.error('   Stack:', error.stack);
+            console.error('❌ Erro ao enviar email via SMTP:', error.message);
+            
+            // Se falhar por timeout ou conexão, tentar Gmail API
+            if (error.message.includes('Timeout') || error.message.includes('ETIMEDOUT') || error.message.includes('ECONNECTION')) {
+                console.log('🔄 SMTP bloqueado, tentando Gmail API Service...');
+                
+                try {
+                    // Usar Gmail API como fallback
+                    const gmailApiService = require('./gmailApiService');
+                    const result = await gmailApiService.sendEmail(options);
+                    
+                    if (result.success) {
+                        console.log('✅ Email enviado via Gmail API!');
+                        return result;
+                    }
+                } catch (apiError) {
+                    console.error('❌ Gmail API também falhou:', apiError.message);
+                }
+            }
             
             if (error.code === 'EAUTH') {
                 console.log('💡 Possível solução:');
