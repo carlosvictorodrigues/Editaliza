@@ -68,9 +68,22 @@ const StudyChecklist = {
             console.info(`Sessão ${this.session.id} marcada como checklist mostrado`);
         }
         
+        // Garantir que o modal esteja visível
+        const modal = document.getElementById('studySessionModal');
         const modalContainer = document.getElementById('studySessionModalContainer');
+        
+        // Atualizar conteúdo do modal
         modalContainer.innerHTML = this.getTimerHtml();
         this.addTimerSessionListeners();
+        
+        // Mostrar o modal se estiver oculto
+        if (modal.classList.contains('hidden')) {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContainer.classList.remove('scale-95');
+            }, 10);
+        }
         
         // CORREÇÃO: Verificar se já existe timer ativo antes de iniciar
         const hasActiveTimer = TimerSystem.hasActiveTimer(this.session.id);

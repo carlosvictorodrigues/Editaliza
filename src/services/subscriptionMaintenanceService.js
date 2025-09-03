@@ -8,7 +8,7 @@
  * - Gerar relatórios de status
  */
 
-const { dbRun, dbAll } = require('../config/database');
+const { dbRun, dbAll } = require('../config/database.wrapper');
 const emailService = require('./emailService');
 const cron = require('node-cron');
 
@@ -82,7 +82,7 @@ class SubscriptionMaintenanceService {
                 AND plan_status = 'active'
             `);
 
-            const count = result.changes || 0;
+            const count = result?.rowCount || 0;
 
             if (count > 0) {
                 console.log(`[SUBSCRIPTION MAINTENANCE] ${count} planos marcados como expirados`);
