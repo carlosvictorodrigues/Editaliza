@@ -340,7 +340,7 @@
             });
         }
 
-        // CORREÇÃO: Carregar anotações do localStorage filtradas por plano
+        // CORREÇÃO: Carregar anotações do localStorage filtradas por plano e das sessões
         async function loadNotes() {
             try {
                 const savedNotes = localStorage.getItem('editaliza_notes');
@@ -348,6 +348,43 @@
                 
                 // CORREÇÃO: Filtrar notas do plano selecionado
                 currentNotes = selectedPlanId ? allNotes.filter(note => note.planId === selectedPlanId) : allNotes;
+                
+                // Buscar anotações das sessões de estudo do banco de dados
+                if (selectedPlanId) {
+                    try {
+                        const sessionNotes = await app.apiFetch(`/sessions/notes/${selectedPlanId}`);
+                        
+                        // Converter anotações das sessões para o formato da página notes
+                        const convertedNotes = sessionNotes
+                            .filter(session => session.notes && session.notes.trim() !== '')
+                            .map(session => ({
+                                id: `session-${session.id}`,
+                                planId: selectedPlanId,
+                                title: `📚 ${session.topic_description || 'Anotações da Sessão'}`,
+                                subject: session.subject_name || 'Geral',
+                                content: session.notes,
+                                createdAt: session.session_date,
+                                updatedAt: session.updated_at,
+                                isFromSession: true,
+                                sessionId: session.id,
+                                questionsSolved: session.questions_solved
+                            }));
+                        
+                        // Adicionar anotações das sessões às anotações locais (evitando duplicatas)
+                        const existingSessionIds = currentNotes
+                            .filter(n => n.isFromSession)
+                            .map(n => n.id);
+                        
+                        const newSessionNotes = convertedNotes.filter(
+                            n => !existingSessionIds.includes(n.id)
+                        );
+                        
+                        currentNotes = [...currentNotes, ...newSessionNotes];
+                    } catch (error) {
+                        console.error('Erro ao buscar anotações das sessões:', error);
+                        // Continuar sem as anotações das sessões
+                    }
+                }
                 
                 // Se não há anotações para este plano, criar uma de exemplo
                 if (currentNotes.length === 0 && selectedPlanId) {
@@ -553,12 +590,25 @@
             const truncatedContent = note.content.length > 200 
                 ? note.content.substring(0, 200) + '...' 
                 : note.content;
+            
+            // Identificar se é uma anotação de sessão
+            const isSessionNote = note.isFromSession === true;
+            const borderColor = isSessionNote ? 'border-green-500' : 'border-editaliza-blue';
+            
+            // Badge para anotações de sessão
+            const sessionBadge = isSessionNote 
+                ? `<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 mb-2">
+                     ⏱️ Anotação de Sessão ${note.questionsSolved ? `• ${note.questionsSolved} questões` : ''}
+                   </span>` 
+                : '';
 
             return `
-                <div class="note-card bg-white p-6 rounded-xl shadow-lg border-l-4 border-editaliza-blue hover:shadow-xl fade-in">
+                <div class="note-card bg-white p-6 rounded-xl shadow-lg border-l-4 ${borderColor} hover:shadow-xl fade-in">
+                    ${sessionBadge}
                     <div class="flex justify-between items-start mb-3">
                         <h3 class="text-lg font-semibold text-gray-800 line-clamp-2">${app.sanitizeHtml(note.title)}</h3>
                         <div class="flex space-x-1 ml-2">
+                            ${!isSessionNote ? `
                             <button onclick="editNote(${note.id})" class="text-gray-400 hover:text-editaliza-blue transition-colors p-1" title="Editar">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -569,6 +619,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
                             </button>
+                            ` : ''}
                         </div>
                     </div>
                     
@@ -720,7 +771,17 @@
         window.clearFilters = clearFilters;
 
         // Inicializar quando DOM estiver carregado
-        document.addEventListener('DOMContentLoaded', initialize);
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Ensure componentsCore is available and navigation module is loaded
+            if (typeof componentsCore !== 'undefined' && componentsCore.loadModule) {
+                await componentsCore.loadModule('navigation');
+                // Now that navigation module is loaded, render the main navigation
+                if (typeof components !== 'undefined' && components.renderMainNavigation) {
+                    components.renderMainNavigation('notes.html');
+                }
+            }
+            initialize(); // Call the original initialize function
+        });
     </script>
     
     <!-- Script do rodapé modular -->
