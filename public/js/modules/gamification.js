@@ -19,6 +19,7 @@ const Gamification = {
         console.log('🎮 [Gamification Module] XP processado:', xp);
         const achievements = data.achievements || [];
         const completedTopics = data.completed_topics_count || data.completedTopicsCount || 0;
+        const completedSessions = data.totalCompletedSessions || data.completed_sessions || completedTopics; // Usar sessões se disponível
         const current_streak = data.current_streak || data.studyStreak || 0;
         const longest_streak = data.longest_streak || 0;
         
@@ -38,7 +39,9 @@ const Gamification = {
         // Verificar se nextLevelInfo existe, senão usar valores padrão
         const nextLevel = level_info?.next_level_info || level_info?.nextLevelInfo || 
                          data.nextLevel || null;
-        const progressPercent = nextLevel && nextLevel.threshold ? Math.min(100, (completedTopics / nextLevel.threshold) * 100) : 100;
+        // Usar sessões para calcular o progresso
+        const sessionsToNextLevel = data.sessionsToNextLevel || data.topicsToNextLevel || 0;
+        const progressPercent = nextLevel && nextLevel.threshold ? Math.min(100, (completedSessions / nextLevel.threshold) * 100) : 100;
 
         container.innerHTML = `
             <div class="mb-8">
@@ -82,7 +85,7 @@ const Gamification = {
                     <div class="mt-6 bg-gray-50 rounded-lg p-4">
                         <div class="flex justify-between text-sm font-medium mb-2">
                             <span class="text-gray-600">Próximo nível: <span class="text-gray-800 font-bold">${nextLevel.title || 'Próximo Nível'}</span></span>
-                            <span class="text-blue-600">${completedTopics} / ${nextLevel.threshold || 100} Tópicos</span>
+                            <span class="text-blue-600">${completedSessions} / ${nextLevel.threshold || 100} Sessões</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                             <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full transition-all duration-500 relative" style="width: ${progressPercent}%">
