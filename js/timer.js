@@ -206,22 +206,30 @@ function showPomodoroBreakModal(pomodoroCount, totalElapsed) {
  * Mostra notificação de fim da pausa
  */
 function showBreakEndNotification() {
-    // Tocar alerta sonoro suave
+    // Tocar alerta sonoro elegante de retomada
     try {
         const ctx = initAudioContext();
+        const masterGain = ctx.createGain();
+        masterGain.connect(ctx.destination);
+        masterGain.gain.setValueAtTime(0.35, ctx.currentTime);
+
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
-        
+
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, ctx.currentTime); // Lá
+        osc.frequency.setValueAtTime(493.88, ctx.currentTime); // Si médio
+
         osc.connect(gain);
-        gain.connect(ctx.destination);
-        
-        gain.gain.setValueAtTime(0.2, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-        
+        gain.connect(masterGain);
+
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.22, ctx.currentTime + 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.8);
+
         osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.5);
+        osc.stop(ctx.currentTime + 1.8);
+        
+        console.log('[TIMER] Ding de retomada elegante tocado');
     } catch (e) {
         console.error('[TIMER] Erro ao tocar notificação de fim de pausa:', e);
     }
