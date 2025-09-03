@@ -119,6 +119,51 @@ const login = async (credentials, req) => {
         throw new Error('Senha incorreta. Tente novamente ou use "Esqueci minha senha".');
     }
     
+    // Check subscription status
+    if (user.plan_expiry) {
+        const now = new Date();
+        const expiry = new Date(user.plan_expiry);
+        
+        if (expiry < now) {
+            // Plan expired
+            securityLog('login_attempt_expired_plan', { email: sanitizedEmail, userId: user.id, expiry: user.plan_expiry }, user.id, req);
+            
+            // Update plan status if needed
+            if (user.plan_status === 'active') {
+                await authRepository.updatePlanStatus(user.id, 'expired');
+            }
+            
+            // Still allow login but with expired status
+            await authRepository.recordLoginAttempt(sanitizedEmail, true, req.ip, req.headers['user-agent']);
+            
+            const token = generateJWT(user);
+            
+            return {
+                message: 'Login realizado. Atenção: Seu plano expirou!',
+                token,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    auth_provider: user.auth_provider,
+                    plan_status: 'expired',
+                    plan_expired: true
+                },
+                subscription_expired: true
+            };
+        }
+        
+        // Check if expiring soon (less than 7 days)
+        const daysUntilExpiry = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
+        if (daysUntilExpiry <= 7) {
+            securityLog('login_success_expiring_soon', { 
+                email: sanitizedEmail, 
+                userId: user.id, 
+                daysRemaining: daysUntilExpiry 
+            }, user.id, req);
+        }
+    }
+    
     // Success - record attempt and generate token
     await authRepository.recordLoginAttempt(sanitizedEmail, true, req.ip, req.headers['user-agent']);
     securityLog('user_login_success', { email: sanitizedEmail, userId: user.id }, user.id, req);
@@ -132,7 +177,9 @@ const login = async (credentials, req) => {
             id: user.id,
             email: user.email,
             name: user.name,
-            auth_provider: user.auth_provider
+            auth_provider: user.auth_provider,
+            plan_status: user.plan_status,
+            plan_type: user.plan_type
         }
     };
 };

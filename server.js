@@ -1454,12 +1454,22 @@ if (process.env.NODE_ENV === 'production') {
 const emailPreferencesRoutes = require('./src/routes/email-preferences.routes');
 app.use('/api/emails', emailPreferencesRoutes(db, emailScheduler));
 
+// Rotas de gerenciamento de assinaturas
+const subscriptionRoutes = require('./src/routes/subscription.routes');
+app.use('/api/subscription', subscriptionRoutes);
+
+// Iniciar serviço de manutenção de assinaturas
+const subscriptionMaintenanceService = require('./src/services/subscriptionMaintenanceService');
+subscriptionMaintenanceService.startDailyMaintenance();
+console.log('📅 Serviço de manutenção de assinaturas iniciado');
+
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
     console.log(`Health check disponível em: http://localhost:${PORT}/health`);
     console.log('Sistema de backup automático ativado');
+    console.log('Sistema de verificação de validade de planos ativo');
 });
 
 // Graceful shutdown

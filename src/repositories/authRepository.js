@@ -298,6 +298,18 @@ const clearResetToken = async (userId) => {
 };
 
 /**
+ * Update plan status
+ */
+const updatePlanStatus = async (userId, status) => {
+    const db = await getDB();
+    const sql = db.isPostgreSQL 
+        ? 'UPDATE users SET plan_status = $1, updated_at = NOW() WHERE id = $2'
+        : 'UPDATE users SET plan_status = ?, updated_at = datetime(\'now\') WHERE id = ?';
+    
+    await executeQuery('run', sql, [status, userId], 'updatePlanStatus');
+};
+
+/**
  * Get user profile data (safe fields only)
  */
 const getUserProfile = async (userId) => {
@@ -415,6 +427,7 @@ module.exports = {
     updatePassword,
     setResetToken,
     clearResetToken,
+    updatePlanStatus,
     getUserProfile,
     updateUserProfile,
     recordLoginAttempt,
