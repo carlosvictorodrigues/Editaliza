@@ -25,7 +25,9 @@ let state = {
     displayInterval: null,   // interval para atualizar display
     startTime: null,         // timestamp de início do timer
     pausedElapsed: 0,       // tempo acumulado antes de pausar
-    lastPomodoroAt: 0        // timestamp do último alerta de pomodoro
+    lastPomodoroAt: 0,        // timestamp do último alerta de pomodoro
+    onBreak: false,
+    breakStartTime: 0
 };
 
 // Toast control - evita spam
@@ -71,7 +73,7 @@ const pomodoroBreakMessages = [
     {
         title: '🍅🌟 Pomodoro Premium Completado!',
         message: 'Qualidade italiana de concentração! Hora do intervalo! 🇮🇹',
-        tips: ['Faça rotações com a cabeça', "Beba um copo d'água", 'Olhe pela janela']
+        tips: ['Faça rotações com a cabeça', 'Beba um copo d\'água', 'Olhe pela janela']
     },
     {
         title: '🍅💪 Pomodoro Power Concluído!',
@@ -116,7 +118,7 @@ function showPomodoroBreakModal(pomodoroCount, totalElapsed) {
     
     // Criar modal de pausa
     const modalHtml = `
-        <div id="pomodoroBreakModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fadeIn">
+        <div id="pomodoroBreakModal" class="fixed inset-0 z-[10000] flex items-center justify-center bg-black bg-opacity-50 animate-fadeIn">
             <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 transform transition-all animate-slideUp">
                 <div class="text-center">
                     <div class="text-6xl mb-4 animate-pulse">🍅</div>
@@ -865,6 +867,15 @@ const TimerSystem = {
     toggle(sessionId) {
         toggleTimer(sessionId);
         this.timers[sessionId] = { isRunning: state.running, elapsed: getElapsedSeconds() * 1000 };
+    },
+
+    /**
+     * @deprecated Use toggle(sessionId)
+     */
+    continueTimer(sessionId) {
+        // Alias for toggle to handle legacy calls from openStudySession
+        console.warn('[TIMER] `continueTimer` is deprecated. Use `toggle` instead.');
+        this.toggle(sessionId);
     },
     
     // Métodos de compatibilidade
