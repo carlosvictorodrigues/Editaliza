@@ -31,6 +31,63 @@ let state = {
 // Toast control - evita spam
 let lastTimerToastAt = 0;
 
+// Mensagens motivacionais para pausas de Pomodoro
+const pomodoroBreakMessages = [
+    { 
+        title: '🍅 Tomate Completo! Pomodoro Finalizado!',
+        message: 'Hora de esticar as pernas e oxigenar o cérebro! 🦵',
+        tips: ['Levante e caminhe um pouco', 'Beba água', 'Olhe para longe por 20 segundos']
+    },
+    {
+        title: '🍅 Pomodoro Colhido com Sucesso!',
+        message: 'Você cultivou 25 minutos de puro foco! Hora da pausa merecida! 🌱',
+        tips: ['Faça alguns alongamentos', 'Respire fundo 5 vezes', 'Coma uma fruta ou lanche saudável']
+    },
+    {
+        title: '🍅🍅 Mais um Tomate na Cesta!',
+        message: 'Sua horta de produtividade está crescendo! Descanse um pouco! 🌿',
+        tips: ['Alongue pescoço e ombros', 'Feche os olhos por 1 minuto', 'Escute sua música favorita']
+    },
+    {
+        title: '🍅 Pomodoro Maduro e Pronto!',
+        message: 'Como um tomate no ponto, você completou mais um ciclo! 🎯',
+        tips: ['Saia da cadeira por 5 minutos', 'Faça 10 polichinelos', 'Converse com alguém brevemente']
+    },
+    {
+        title: '🍅✨ Tomate Dourado Conquistado!',
+        message: 'Esse Pomodoro foi especial! Aproveite sua pausa vitoriosa! 🏆',
+        tips: ['Lave o rosto com água fria', 'Faça rotações com os pulsos', 'Respire ar fresco na janela']
+    },
+    {
+        title: '🍅 Colheita de Pomodoro Bem-Sucedida!',
+        message: 'Mais um tomate para sua salada de conhecimento! 🥗',
+        tips: ['Alongue as pernas', 'Massageie as têmporas', 'Tome um café ou chá']
+    },
+    {
+        title: '🍅🔥 Pomodoro Picante Finalizado!',
+        message: 'Esse foi intenso! Hora de refrescar a mente! 🌬️',
+        tips: ['Faça exercícios de respiração', 'Estique os braços acima da cabeça', 'Dê uma volta rápida']
+    },
+    {
+        title: '🍅🌟 Pomodoro Premium Completado!',
+        message: 'Qualidade italiana de concentração! Hora do intervalo! 🇮🇹',
+        tips: ['Faça rotações com a cabeça', "Beba um copo d'água", 'Olhe pela janela']
+    },
+    {
+        title: '🍅💪 Pomodoro Power Concluído!',
+        message: 'Você espremeu todo o suco desses 25 minutos! 🥤',
+        tips: ['Levante e espreguice', 'Hidrate-se bem', 'Faça um lanche leve']
+    },
+    {
+        title: '🍅🎉 Festival do Tomate: Mais um Pomodoro!',
+        message: 'La Tomatina mental! Você arrasou nesses 25 minutos! 🎊',
+        tips: ['Dance um pouco', 'Lave as mãos e o rosto', 'Respire ar puro']
+    }
+];
+
+// Armazena índice da última mensagem para não repetir
+let lastBreakMessageIndex = -1;
+
 // AudioContext para alertas sonoros
 let audioContext = null;
 
@@ -42,6 +99,137 @@ function initAudioContext() {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
     return audioContext;
+}
+
+/**
+ * Mostra modal de pausa do Pomodoro com mensagens motivacionais
+ */
+function showPomodoroBreakModal(pomodoroCount, totalElapsed) {
+    // Selecionar mensagem aleatória, evitando repetir a última
+    let messageIndex;
+    do {
+        messageIndex = Math.floor(Math.random() * pomodoroBreakMessages.length);
+    } while (messageIndex === lastBreakMessageIndex && pomodoroBreakMessages.length > 1);
+    
+    lastBreakMessageIndex = messageIndex;
+    const breakInfo = pomodoroBreakMessages[messageIndex];
+    
+    // Criar modal de pausa
+    const modalHtml = `
+        <div id="pomodoroBreakModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fadeIn">
+            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 transform transition-all animate-slideUp">
+                <div class="text-center">
+                    <div class="text-6xl mb-4 animate-pulse">🍅</div>
+                    <h3 class="text-2xl font-bold mb-2 text-gray-800">${breakInfo.title}</h3>
+                    <p class="text-gray-600 mb-4">${breakInfo.message}</p>
+                    
+                    <div class="bg-red-50 rounded-lg p-4 mb-4 border border-red-200">
+                        <p class="text-sm font-semibold text-red-800 mb-2">🍅 Receita para Recarregar:</p>
+                        <ul class="text-left text-sm text-red-700 space-y-1">
+                            ${breakInfo.tips.map(tip => `<li>🌱 ${tip}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div class="flex justify-center items-center space-x-4 mb-4">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-red-500">${'🍅'.repeat(Math.min(pomodoroCount, 5))}</div>
+                            <div class="text-xs text-gray-600">${pomodoroCount} ${pomodoroCount === 1 ? 'Tomate' : 'Tomates'}</div>
+                        </div>
+                        <div class="w-px h-12 bg-gray-300"></div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-editaliza-green">${formatTime(totalElapsed)}</div>
+                            <div class="text-xs text-gray-600">Tempo de Cultivo</div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button onclick="window.closePomodoroBreak(true)" 
+                            class="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
+                            🥤 Pausa do Tomate (5 min)
+                        </button>
+                        <button onclick="window.closePomodoroBreak(false)" 
+                            class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+                            🍅 Plantar Próximo Pomodoro
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Adicionar o modal ao body
+    const modalDiv = document.createElement('div');
+    modalDiv.innerHTML = modalHtml;
+    document.body.appendChild(modalDiv);
+    
+    // Função para fechar o modal
+    window.closePomodoroBreak = function(takingBreak) {
+        const modal = document.getElementById('pomodoroBreakModal');
+        if (modal) {
+            modal.classList.add('animate-fadeOut');
+            setTimeout(() => modal.remove(), 300);
+        }
+        
+        if (takingBreak) {
+            // Pausar o timer para a pausa
+            if (state.running) {
+                pauseTimer();
+                if (window.app && window.app.showToast) {
+                    window.app.showToast('🍅⏸️ Tomate em pausa! Descanse por 5 minutos e volte revigorado!', 'info');
+                }
+                
+                // Configurar lembrete para voltar após 5 minutos
+                setTimeout(() => {
+                    if (!state.running && state.sessionId) {
+                        showBreakEndNotification();
+                    }
+                }, 300000); // 5 minutos
+            }
+        } else {
+            // Continuar estudando
+            if (window.app && window.app.showToast) {
+                window.app.showToast('🍅💪 Plantando o próximo tomate! Colheita em 25 minutos!', 'success');
+            }
+        }
+    };
+    
+    // Auto-fechar após 30 segundos se não houver interação
+    setTimeout(() => {
+        const modal = document.getElementById('pomodoroBreakModal');
+        if (modal) {
+            window.closePomodoroBreak(false);
+        }
+    }, 30000);
+}
+
+/**
+ * Mostra notificação de fim da pausa
+ */
+function showBreakEndNotification() {
+    // Tocar alerta sonoro suave
+    try {
+        const ctx = initAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime); // Lá
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        gain.gain.setValueAtTime(0.2, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.5);
+    } catch (e) {
+        console.error('[TIMER] Erro ao tocar notificação de fim de pausa:', e);
+    }
+    
+    // Mostrar notificação
+    if (window.app && window.app.showToast) {
+        window.app.showToast('🍅⏰ Pausa do tomate finalizada! Hora de cultivar o próximo Pomodoro!', 'warning');
+    }
 }
 
 /**
@@ -351,16 +539,10 @@ async function onTick() {
         // Tocar alerta sonoro
         playPomodoroAlert();
         
-        // Mostrar notificação visual
-        const pomodoroCount = currentPomodoro;
-        const message = pomodoroCount === 1 
-            ? '🍅 Pomodoro completo! 25 minutos de foco. Hora de uma pausa!'
-            : `🍅 ${pomodoroCount}º Pomodoro completo! ${formatTime(totalElapsed)} de estudo. Continue assim!`;
+        // Mostrar modal de pausa com mensagem motivacional
+        showPomodoroBreakModal(currentPomodoro, totalElapsed);
         
-        if (window.app && window.app.showToast) {
-            window.app.showToast(message, 'success');
-        }
-        console.log(`[TIMER] Pomodoro ${pomodoroCount} completado`);
+        console.log(`[TIMER] Pomodoro ${currentPomodoro} completado`);
     }
     
     // Atualizar display

@@ -1955,3 +1955,45 @@ footer {
 .animate-pulse {
     animation: animate-pulse 2s ease-in-out infinite;
 }
+
+/* Animações para o modal de pausa do Pomodoro */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.animate-fadeOut {
+    animation: fadeOut 0.3s ease-in-out;
+}
+
+.animate-slideUp {
+    animation: slideUp 0.4s ease-out;
+}
