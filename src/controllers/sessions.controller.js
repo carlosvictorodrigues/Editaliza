@@ -1160,6 +1160,51 @@ class SessionsController {
             res.status(500).json({ error: 'Erro ao concluir a sessão' });
         }
     }
+
+    /**
+     * Get all sessions with notes for a specific plan
+     * GET /api/sessions/notes/:planId
+     */
+    static async getSessionsWithNotes(req, res) {
+        const { planId } = req.params;
+        const userId = req.user.id;
+
+        try {
+            // Verificar se o plano pertence ao usuário
+            const plan = await dbGet(
+                'SELECT id FROM study_plans WHERE id = ? AND user_id = ?',
+                [planId, userId]
+            );
+
+            if (!plan) {
+                return res.status(404).json({ error: 'Plano não encontrado ou não autorizado.' });
+            }
+
+            // Buscar todas as sessões com anotações não vazias
+            const sessions = await dbAll(`
+                SELECT 
+                    ss.id,
+                    ss.subject_name,
+                    ss.topic_description,
+                    ss.notes,
+                    ss.questions_solved,
+                    ss.session_date,
+                    ss.status,
+                    ss.updated_at
+                FROM study_sessions ss
+                WHERE ss.study_plan_id = ? 
+                    AND ss.notes IS NOT NULL 
+                    AND ss.notes != ''
+                ORDER BY ss.updated_at DESC, ss.session_date DESC
+            `, [planId]);
+
+            res.json(sessions || []);
+
+        } catch (error) {
+            console.error('[getSessionsWithNotes] Erro:', error);
+            res.status(500).json({ error: 'Erro ao buscar anotações das sessões.' });
+        }
+    }
 }
 
 module.exports = SessionsController;

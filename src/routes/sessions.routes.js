@@ -238,6 +238,18 @@ router.post('/:sessionId/complete',
     SessionsController.completeSession
 );
 
+/**
+ * @route GET /api/sessions/notes/:planId
+ * @desc Get all sessions with notes for a specific plan
+ * @access Private
+ */
+router.get('/notes/:planId',
+    authenticateToken(),
+    validators.numericId('planId'),
+    handleValidationErrors,
+    SessionsController.getSessionsWithNotes
+);
+
 module.exports = router;
 
 /**
