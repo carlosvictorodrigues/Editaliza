@@ -21,7 +21,13 @@ class EmailService {
             auth: {
                 user: process.env.EMAIL_USER || 'suporte@editaliza.com.br',
                 pass: process.env.EMAIL_PASS
-            }
+            },
+            // Adicionar debug e timeout
+            debug: true,
+            logger: true,
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000
         };
         
         if (!config.auth.pass) {
@@ -31,14 +37,32 @@ class EmailService {
         
         try {
             this.transporter = nodemailer.createTransport(config);
+            
+            // Adicionar listeners para debug
+            this.transporter.on('error', (err) => {
+                console.error('❌ Erro no transporter:', err);
+            });
+            
+            this.transporter.on('idle', () => {
+                console.log('📧 Transporter está idle');
+            });
+            
             console.log('✅ Gmail SMTP configurado com sucesso');
             console.log('📧 Usando:', config.auth.user);
+            console.log('🔧 Debug habilitado com timeouts de 10s');
         } catch (error) {
             console.error('❌ Erro ao configurar Gmail:', error.message);
         }
     }
     
     async sendEmail(options) {
+        console.log('📧 sendEmail chamado com opções:', {
+            to: options.to,
+            subject: options.subject,
+            hasHtml: !!options.html,
+            hasText: !!options.text
+        });
+        
         if (!this.transporter) {
             console.log('⚠️ Email simulado (SMTP não configurado)');
             console.log('Para:', options.to);
@@ -55,11 +79,18 @@ class EmailService {
                 html: options.html
             };
             
-            console.log('📤 Enviando email via Gmail...');
+            console.log('📤 Iniciando envio de email via Gmail...');
             console.log('   De:', mailOptions.from);
             console.log('   Para:', mailOptions.to);
+            console.log('   Timestamp:', new Date().toISOString());
             
-            const info = await this.transporter.sendMail(mailOptions);
+            // Adicionar timeout para sendMail
+            const sendPromise = this.transporter.sendMail(mailOptions);
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Timeout ao enviar email (10s)')), 10000);
+            });
+            
+            const info = await Promise.race([sendPromise, timeoutPromise]);
             
             console.log('✅ Email enviado com sucesso!');
             console.log('   Message ID:', info.messageId);
@@ -73,6 +104,7 @@ class EmailService {
             };
         } catch (error) {
             console.error('❌ Erro ao enviar email:', error.message);
+            console.error('   Stack:', error.stack);
             
             if (error.code === 'EAUTH') {
                 console.log('💡 Possível solução:');

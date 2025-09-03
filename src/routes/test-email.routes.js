@@ -20,10 +20,19 @@ router.post('/send-welcome-email', async (req, res) => {
             expiryDate: new Date(Date.now() + (365 * 24 * 60 * 60 * 1000))
         };
 
-        console.log(`📧 Enviando email de teste para: ${email}`);
+        console.log(`📧 Iniciando envio de email de teste para: ${email}`);
         
-        // Usar o método sendWelcomeEmail do userProvisioningService
-        await userProvisioningService.sendWelcomeEmail(testData);
+        // Adicionar timeout para evitar travamento
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Timeout ao enviar email')), 10000);
+        });
+        
+        const emailPromise = userProvisioningService.sendWelcomeEmail(testData);
+        
+        // Executar com timeout
+        await Promise.race([emailPromise, timeoutPromise]);
+        
+        console.log(`✅ Email enviado com sucesso para: ${email}`);
         
         res.json({
             success: true,
@@ -40,7 +49,8 @@ router.post('/send-welcome-email', async (req, res) => {
         console.error('❌ Erro ao enviar email de teste:', error);
         res.status(500).json({
             success: false,
-            error: error.message
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 });
