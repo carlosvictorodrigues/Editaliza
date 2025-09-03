@@ -16,13 +16,32 @@ class EmailService {
     }
     
     initializeTransporter() {
-        const config = {
+        // Primeiro tenta porta 465 (SSL direto) que às vezes não é bloqueada
+        const configSSL = {
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true, // SSL direto
+            auth: {
+                user: process.env.EMAIL_USER || 'suporte@editaliza.com.br',
+                pass: process.env.EMAIL_PASS
+            },
+            debug: true,
+            logger: true,
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 10000,
+            tls: {
+                rejectUnauthorized: false // Temporário para teste
+            }
+        };
+        
+        // Configuração alternativa com porta 587 (STARTTLS)
+        const configTLS = {
             service: 'gmail',
             auth: {
                 user: process.env.EMAIL_USER || 'suporte@editaliza.com.br',
                 pass: process.env.EMAIL_PASS
             },
-            // Adicionar debug e timeout
             debug: true,
             logger: true,
             connectionTimeout: 10000,
@@ -30,28 +49,47 @@ class EmailService {
             socketTimeout: 10000
         };
         
-        if (!config.auth.pass) {
+        if (!configSSL.auth.pass) {
             console.warn('⚠️ EMAIL_PASS não configurado - emails serão simulados');
             return;
         }
         
         try {
-            this.transporter = nodemailer.createTransport(config);
+            console.log('🔧 Tentando conexão SSL na porta 465...');
+            this.transporter = nodemailer.createTransport(configSSL);
             
             // Adicionar listeners para debug
             this.transporter.on('error', (err) => {
-                console.error('❌ Erro no transporter:', err);
+                console.error('❌ Erro no transporter SSL:', err.message);
+                
+                // Tentar fallback para porta 587
+                console.log('🔧 Tentando fallback para porta 587...');
+                try {
+                    this.transporter = nodemailer.createTransport(configTLS);
+                    console.log('✅ Gmail SMTP configurado com porta 587');
+                } catch (tlsError) {
+                    console.error('❌ Ambas as portas falharam:', tlsError.message);
+                }
             });
             
             this.transporter.on('idle', () => {
                 console.log('📧 Transporter está idle');
             });
             
-            console.log('✅ Gmail SMTP configurado com sucesso');
-            console.log('📧 Usando:', config.auth.user);
+            console.log('✅ Gmail SMTP configurado (tentando porta 465 SSL)');
+            console.log('📧 Usando:', configSSL.auth.user);
             console.log('🔧 Debug habilitado com timeouts de 10s');
         } catch (error) {
             console.error('❌ Erro ao configurar Gmail:', error.message);
+            
+            // Tentar porta 587 como fallback
+            try {
+                console.log('🔧 Tentando porta 587 como fallback...');
+                this.transporter = nodemailer.createTransport(configTLS);
+                console.log('✅ Gmail SMTP configurado com porta 587');
+            } catch (fallbackError) {
+                console.error('❌ Fallback também falhou:', fallbackError.message);
+            }
         }
     }
     
