@@ -144,7 +144,7 @@ const createPlan = async (req, res) => {
     const defaultHours = { '0': 0, '1': 4, '2': 4, '3': 4, '4': 4, '5': 4, '6': 4 };
     
     try {
-        // Usar repository diretamente para INSERT com RETURNING
+        // Primeiro definir planData com os dados do plano
         const planData = {
             user_id: req.user.id,
             plan_name,
@@ -154,11 +154,11 @@ const createPlan = async (req, res) => {
             weekly_question_goal: 300,
             session_duration_minutes: 50,
             review_mode: 'completo',
-            postponement_count: 0,
-            has_essay: false
+            has_essay: false,
+            reta_final_mode: false
         };
         
-        // Se houver preferências de email, salvar em tabela separada
+        // Depois, se houver preferências de email, salvar em tabela separada
         if (email_daily_schedule !== undefined || email_weekly_summary !== undefined || email_study_reminders !== undefined) {
             try {
                 const emailPrefs = {
