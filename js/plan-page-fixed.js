@@ -467,9 +467,9 @@
                     <p class="text-sm font-semibold text-gray-700 mb-1">📊 Projeção:</p>
                     <div class="text-xs text-gray-600">
                         ${projection?.onTrack ? `
-                            <p class="text-green-600 font-semibold">✅ No ritmo certo! Mantenha ${dashboardData.pace?.requiredTopicsPerDay?.toFixed(1)} tópicos/dia</p>
+                            <p class="text-green-600 font-semibold">✅ No ritmo certo! Continue mantendo suas sessões diárias!</p>
                         ` : `
-                            <p class="text-red-600 font-semibold">⚠️ Ritmo insuficiente! Precisa acelerar para ${dashboardData.pace?.requiredTopicsPerDay?.toFixed(1)} tópicos/dia</p>
+                            <p class="text-red-600 font-semibold">⚠️ Ritmo insuficiente! Precisa completar mais sessões diárias!</p>
                         `}
                         
                         <!-- Comparação de Ritmo -->
@@ -478,21 +478,21 @@
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
                                     <span class="text-gray-500">Hoje:</span>
-                                    <span class="font-bold ${dashboardData.pace?.todayTopics >= dashboardData.pace?.requiredTopicsPerDay ? 'text-green-600' : 'text-orange-600'}">
-                                        ${dashboardData.pace?.todayTopics || 0} tópicos
+                                    <span class="font-bold ${dashboardData.pace?.todayTopics >= 3 ? 'text-green-600' : 'text-orange-600'}">
+                                        ${dashboardData.pace?.todayTopics || 0} sessões
                                     </span>
                                 </div>
                                 <div>
                                     <span class="text-gray-500">Média 7 dias:</span>
-                                    <span class="font-bold ${dashboardData.pace?.currentTopicsPerDay >= dashboardData.pace?.requiredTopicsPerDay ? 'text-green-600' : 'text-orange-600'}">
-                                        ${dashboardData.pace?.currentTopicsPerDay?.toFixed(1) || '0.0'}/dia
+                                    <span class="font-bold ${dashboardData.pace?.currentTopicsPerDay >= 2.5 ? 'text-green-600' : 'text-orange-600'}">
+                                        ${dashboardData.pace?.currentTopicsPerDay?.toFixed(1) || '0.0'} sessões/dia
                                     </span>
                                 </div>
                             </div>
                             <div class="mt-1">
                                 <span class="text-gray-500">Ideal:</span>
                                 <span class="font-bold text-blue-600">
-                                    ${dashboardData.pace?.requiredTopicsPerDay?.toFixed(1) || '0.0'} tópicos/dia
+                                    3 sessões/dia
                                 </span>
                             </div>
                         </div>

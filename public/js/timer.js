@@ -25,10 +25,15 @@ let state = {
     displayInterval: null,   // interval para atualizar display
     startTime: null,         // timestamp de início do timer
     pausedElapsed: 0,       // tempo acumulado antes de pausar
-    lastPomodoroAt: 0,        // timestamp do último alerta de pomodoro
-    onBreak: false,
-    breakStartTime: 0
+    lastPomodoroAt: 0        // timestamp do último alerta de pomodoro
 };
+
+// Variáveis para controlar o estado do break visual
+let isInBreak = false;
+let breakNotificationInterval = null;
+let lastBreakTime = 0;
+let usePomodoroMode = true; // Habilitar modo Pomodoro por padrão
+let elapsedSeconds = 0; // Segundos decorridos do timer
 
 // Toast control - evita spam
 let lastTimerToastAt = 0;
@@ -73,7 +78,7 @@ const pomodoroBreakMessages = [
     {
         title: '🍅🌟 Pomodoro Premium Completado!',
         message: 'Qualidade italiana de concentração! Hora do intervalo! 🇮🇹',
-        tips: ['Faça rotações com a cabeça', 'Beba um copo d\'água', 'Olhe pela janela']
+        tips: ['Faça rotações com a cabeça', "Beba um copo d'água", 'Olhe pela janela']
     },
     {
         title: '🍅💪 Pomodoro Power Concluído!',
@@ -104,113 +109,317 @@ function initAudioContext() {
 }
 
 /**
- * Mostra modal de pausa do Pomodoro com mensagens motivacionais
+ * Sistema de break visual do Pomodoro (sem modal)
+ * Muda cor do timer e toca som, mas NÃO para o cronômetro
  */
 function showPomodoroBreakModal(pomodoroCount, totalElapsed) {
-    // Selecionar mensagem aleatória, evitando repetir a última
-    let messageIndex;
-    do {
-        messageIndex = Math.floor(Math.random() * pomodoroBreakMessages.length);
-    } while (messageIndex === lastBreakMessageIndex && pomodoroBreakMessages.length > 1);
+    if (!usePomodoroMode) return;
     
-    lastBreakMessageIndex = messageIndex;
-    const breakInfo = pomodoroBreakMessages[messageIndex];
+    const currentSeconds = getElapsedSeconds();
     
-    // Criar modal de pausa
-    const modalHtml = `
-        <div id="pomodoroBreakModal" class="fixed inset-0 z-[10000] flex items-center justify-center bg-black bg-opacity-50 animate-fadeIn">
-            <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 transform transition-all animate-slideUp">
-                <div class="text-center">
-                    <div class="text-6xl mb-4 animate-pulse">🍅</div>
-                    <h3 class="text-2xl font-bold mb-2 text-gray-800">${breakInfo.title}</h3>
-                    <p class="text-gray-600 mb-4">${breakInfo.message}</p>
-                    
-                    <div class="bg-red-50 rounded-lg p-4 mb-4 border border-red-200">
-                        <p class="text-sm font-semibold text-red-800 mb-2">🍅 Receita para Recarregar:</p>
-                        <ul class="text-left text-sm text-red-700 space-y-1">
-                            ${breakInfo.tips.map(tip => `<li>🌱 ${tip}</li>`).join('')}
-                        </ul>
-                    </div>
-                    
-                    <div class="flex justify-center items-center space-x-4 mb-4">
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-red-500">${'🍅'.repeat(Math.min(pomodoroCount, 5))}</div>
-                            <div class="text-xs text-gray-600">${pomodoroCount} ${pomodoroCount === 1 ? 'Tomate' : 'Tomates'}</div>
-                        </div>
-                        <div class="w-px h-12 bg-gray-300"></div>
-                        <div class="text-center">
-                            <div class="text-3xl font-bold text-editaliza-green">${formatTime(totalElapsed)}</div>
-                            <div class="text-xs text-gray-600">Tempo de Cultivo</div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex space-x-3">
-                        <button onclick="window.closePomodoroBreak(true)" 
-                            class="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
-                            🥤 Pausa do Tomate (5 min)
-                        </button>
-                        <button onclick="window.closePomodoroBreak(false)" 
-                            class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
-                            🍅 Plantar Próximo Pomodoro
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    // Se já estamos em break, não fazer nada
+    if (isInBreak) return;
+    
+    // Marcar que estamos em break
+    isInBreak = true;
+    lastBreakTime = currentSeconds;
+    
+    // Tocar som de início do break
+    playBreakSound();
+    
+    // Mudar visual do timer para indicar break
+    applyBreakVisualStyle();
+    
+    // Mostrar notificação inicial do break
+    showBreakNotification(
+        '🧘 Hora do Break!',
+        'Respire fundo e relaxe por 5 minutos. O timer continua rodando.',
+        'info'
+    );
+    
+    // Iniciar notificações periódicas durante o break
+    startBreakNotifications();
+    
+    // Agendar fim do break após 5 minutos
+    setTimeout(() => {
+        endBreak();
+    }, 5 * 60 * 1000); // 5 minutos
+}
+
+/**
+ * Aplica estilo visual para indicar que está em break
+ */
+function applyBreakVisualStyle() {
+    const timerContainer = document.querySelector('.timer-display');
+    const timerElement = document.getElementById('timer');
+    
+    if (timerContainer) {
+        timerContainer.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        timerContainer.style.boxShadow = '0 15px 35px rgba(102, 126, 234, 0.3)';
+    }
+    
+    if (timerElement) {
+        timerElement.style.color = '#ffd700';
+        timerElement.style.textShadow = '0 0 20px rgba(255, 215, 0, 0.5)';
+    }
+    
+    // Adicionar indicador de break
+    const breakIndicator = document.createElement('div');
+    breakIndicator.id = 'break-indicator';
+    breakIndicator.innerHTML = '☕ MODO BREAK ATIVO ☕';
+    breakIndicator.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 30px;
+        font-weight: bold;
+        z-index: 10000;
+        animation: pulse 2s infinite;
+        box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
     `;
+    document.body.appendChild(breakIndicator);
+}
+
+/**
+ * Remove estilo visual do break
+ */
+function removeBreakVisualStyle() {
+    const timerContainer = document.querySelector('.timer-display');
+    const timerElement = document.getElementById('timer');
     
-    // Adicionar o modal ao body
-    const modalDiv = document.createElement('div');
-    modalDiv.innerHTML = modalHtml;
-    document.body.appendChild(modalDiv);
+    if (timerContainer) {
+        timerContainer.style.background = '';
+        timerContainer.style.boxShadow = '';
+    }
     
-    // Função para fechar o modal
-    window.closePomodoroBreak = function(takingBreak) {
-        const modal = document.getElementById('pomodoroBreakModal');
-        if (modal) {
-            modal.classList.add('animate-fadeOut');
-            setTimeout(() => modal.remove(), 300);
+    if (timerElement) {
+        timerElement.style.color = '';
+        timerElement.style.textShadow = '';
+    }
+    
+    // Remover indicador de break
+    const breakIndicator = document.getElementById('break-indicator');
+    if (breakIndicator) {
+        breakIndicator.remove();
+    }
+}
+
+/**
+ * Inicia notificações periódicas durante o break
+ */
+function startBreakNotifications() {
+    const breakTips = [
+        { icon: '💧', title: 'Hidratação', message: 'Beba um copo de água!' },
+        { icon: '🏃', title: 'Movimento', message: 'Levante e faça um alongamento rápido!' },
+        { icon: '👁️', title: 'Descanso Visual', message: 'Olhe para longe da tela por 20 segundos' },
+        { icon: '🌬️', title: 'Respiração', message: 'Faça 3 respirações profundas' },
+        { icon: '🎯', title: 'Foco', message: 'Prepare-se mentalmente para o próximo ciclo' }
+    ];
+    
+    let tipIndex = 0;
+    
+    // Mostrar uma dica a cada minuto durante o break
+    breakNotificationInterval = setInterval(() => {
+        if (!isInBreak) {
+            clearInterval(breakNotificationInterval);
+            return;
         }
         
-        if (takingBreak) {
-            // Pausar o timer para a pausa
-            if (state.running) {
-                pauseTimer();
-                if (window.app && window.app.showToast) {
-                    window.app.showToast('🍅⏸️ Tomate em pausa! Descanse por 5 minutos e volte revigorado!', 'info');
-                }
-                
-                // Configurar lembrete para voltar após 5 minutos
-                setTimeout(() => {
-                    if (!state.running && state.sessionId) {
-                        showBreakEndNotification();
-                    }
-                }, 300000); // 5 minutos
-            }
-        } else {
-            // Continuar estudando - manter modal do timer aberto
-            if (window.app && window.app.showToast) {
-                window.app.showToast('🍅💪 Plantando o próximo tomate! Colheita em 25 minutos!', 'success');
-            }
-            
-            // Garantir que o modal do timer permaneça visível
-            const timerModal = document.getElementById('studySessionModal');
-            if (timerModal && !timerModal.classList.contains('active')) {
-                // Reabrir o modal se ele foi fechado
-                if (window.StudyChecklist && window.StudyChecklist.session) {
-                    window.StudyChecklist.startStudySession(true);
-                }
-            }
+        if (tipIndex < breakTips.length) {
+            const tip = breakTips[tipIndex];
+            showBreakNotification(
+                `${tip.icon} ${tip.title}`,
+                tip.message,
+                'info'
+            );
+            tipIndex++;
         }
+    }, 60000); // A cada 1 minuto
+}
+
+/**
+ * Finaliza o período de break
+ */
+function endBreak() {
+    if (!isInBreak) return;
+    
+    isInBreak = false;
+    
+    // Tocar som de fim do break
+    playBreakSound(true);
+    
+    // Remover estilo visual do break
+    removeBreakVisualStyle();
+    
+    // Parar notificações do break
+    if (breakNotificationInterval) {
+        clearInterval(breakNotificationInterval);
+        breakNotificationInterval = null;
+    }
+    
+    // Mostrar notificação de retorno ao foco
+    showBreakNotification(
+        '🎯 Break Finalizado!',
+        'Hora de voltar ao foco! Próximo break em 25 minutos.',
+        'success'
+    );
+    
+    // Verificar se completou uma sessão
+    checkSessionCompletion();
+}
+
+/**
+ * Verifica se completou uma sessão de estudo
+ */
+function checkSessionCompletion() {
+    const currentMinutes = Math.floor(getElapsedSeconds() / 60);
+    const sessionDuration = getSessionDuration();
+    
+    // Se completou o tempo da sessão
+    if (currentMinutes >= sessionDuration && currentMinutes % sessionDuration === 0) {
+        showSessionCompletionNotification();
+        updateProgress();
+    }
+}
+
+/**
+ * Obtém a duração da sessão do plano atual
+ */
+function getSessionDuration() {
+    const defaultDuration = 50; // 50 minutos padrão
+    
+    try {
+        const currentPlan = JSON.parse(localStorage.getItem('currentStudyPlan'));
+        if (currentPlan && currentPlan.sessionDuration) {
+            return parseInt(currentPlan.sessionDuration);
+        }
+    } catch (e) {
+        console.log('Usando duração padrão da sessão');
+    }
+    
+    return defaultDuration;
+}
+
+/**
+ * Mostra notificação de conclusão de sessão
+ */
+function showSessionCompletionNotification() {
+    const motivationalMessages = [
+        '🏆 Parabéns! Você completou uma sessão inteira!',
+        '🌟 Incrível! Mais uma sessão concluída com sucesso!',
+        '💪 Você está arrasando! Continue assim!',
+        '🎯 Meta atingida! Sua dedicação está valendo a pena!',
+        '🚀 Excelente trabalho! Você está no caminho certo!'
+    ];
+    
+    const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+    
+    // Notificação especial de conclusão
+    showBreakNotification(
+        '🎊 Sessão Completa!',
+        randomMessage,
+        'success'
+    );
+    
+    // Tocar som especial de conquista
+    playAchievementSound();
+    
+    // Atualizar gamificação
+    if (window.updateGamificationProgress) {
+        window.updateGamificationProgress('session_completed');
+    }
+}
+
+/**
+ * Mostra notificação estilizada para breaks
+ */
+function showBreakNotification(title, message, type = 'info') {
+    // Criar container de notificação
+    const notification = document.createElement('div');
+    notification.className = 'break-notification';
+    
+    const colors = {
+        info: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        success: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
+        warning: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
     };
     
-    // Auto-fechar após 30 segundos se não houver interação
+    notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        max-width: 350px;
+        background: ${colors[type]};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        z-index: 9999;
+        animation: slideIn 0.5s ease-out;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    `;
+    
+    notification.innerHTML = `
+        <div style="font-weight: bold; font-size: 16px; margin-bottom: 5px;">${title}</div>
+        <div style="font-size: 14px; opacity: 0.95;">${message}</div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remover após 5 segundos
     setTimeout(() => {
-        const modal = document.getElementById('pomodoroBreakModal');
-        if (modal) {
-            window.closePomodoroBreak(false);
+        notification.style.animation = 'slideOut 0.5s ease-out';
+        setTimeout(() => notification.remove(), 500);
+    }, 5000);
+}
+
+/**
+ * Toca som de break
+ */
+function playBreakSound(isEnd = false) {
+    try {
+        const audio = new Audio();
+        if (isEnd) {
+            // Som de fim do break (mais energético)
+            audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBDGH0fPTgjMGHm7A7+OZURE=';
+        } else {
+            // Som de início do break (mais suave)
+            audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYmNjYmFgYWJjY2JhYGFiY2NiYWBhYmNjYmFgYWJjY2JhYGFiY2NiYWBhYmNjYmFgYWJjY2JhYGFiY2NiYWBhYmNjYmFgYWJjY2JhYGFiY2NiYWBhYmNjYmFgYWJjY2JhYGF=';
         }
-    }, 30000);
+        audio.volume = 0.5;
+        audio.play().catch(e => console.log('Som de break não pôde ser reproduzido'));
+    } catch (e) {
+        console.log('Erro ao tocar som:', e);
+    }
+}
+
+/**
+ * Toca som de conquista
+ */
+function playAchievementSound() {
+    try {
+        const audio = new Audio();
+        audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAAABAAEAEAfAAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fZJivrJBhNjVgodDbq2EcBj+a2/LDciUFLYHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFQpGn+DyvmwhBDGH0fPTgjMGHm7A7+OZURE=';
+        audio.volume = 0.6;
+        audio.play().catch(e => console.log('Som de conquista não pôde ser reproduzido'));
+    } catch (e) {
+        console.log('Erro ao tocar som de conquista:', e);
+    }
+}
+
+/**
+ * Obtém segundos decorridos do timer
+ */
+function getElapsedSeconds() {
+    if (state.running && state.startTime) {
+        const now = Date.now();
+        const elapsed = Math.floor((now - state.startTime) / 1000);
+        return state.pausedElapsed + elapsed;
+    }
+    return state.pausedElapsed || 0;
 }
 
 /**
@@ -354,6 +563,7 @@ function getElapsedSeconds() {
  */
 function updateDisplay() {
     const totalElapsed = getElapsedSeconds();
+    elapsedSeconds = totalElapsed; // Sincronizar variável global
     const displays = document.querySelectorAll(`.timer-display[data-session="${state.sessionId}"]`);
     
     displays.forEach(display => {
@@ -877,15 +1087,6 @@ const TimerSystem = {
         toggleTimer(sessionId);
         this.timers[sessionId] = { isRunning: state.running, elapsed: getElapsedSeconds() * 1000 };
     },
-
-    /**
-     * @deprecated Use toggle(sessionId)
-     */
-    continueTimer(sessionId) {
-        // Alias for toggle to handle legacy calls from openStudySession
-        console.warn('[TIMER] `continueTimer` is deprecated. Use `toggle` instead.');
-        this.toggle(sessionId);
-    },
     
     // Métodos de compatibilidade
     hasActiveTimer(sessionId) {
@@ -966,5 +1167,54 @@ const TimerSystem = {
 
 // Expor globalmente
 window.TimerSystem = TimerSystem;
+
+// CSS de animações para as notificações de break
+const animationStyles = `
+<style>
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+</style>
+`;
+
+// Adicionar estilos ao documento quando carregado
+document.addEventListener('DOMContentLoaded', () => {
+    if (!document.getElementById('break-animation-styles')) {
+        const styleElement = document.createElement('div');
+        styleElement.id = 'break-animation-styles';
+        styleElement.innerHTML = animationStyles;
+        document.head.appendChild(styleElement.firstElementChild);
+    }
+});
 
 console.log('[TIMER] Sistema de timer v2.0 carregado com sucesso');

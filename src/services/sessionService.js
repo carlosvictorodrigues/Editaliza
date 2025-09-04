@@ -804,7 +804,7 @@ class SessionService {
     }
 
     /**
-     * Get study pace for last N days
+     * Get study pace for last N days (counting SESSIONS, not topics)
      */
     async getStudyPace(planId) {
         try {
@@ -812,9 +812,8 @@ class SessionService {
             const today = new Date();
             today.setHours(23, 59, 59, 999);
             
-            // Filtrar apenas sessões de novo tópico concluídas
+            // Filtrar TODAS as sessões concluídas (não apenas novo tópico)
             const studySessions = sessions.filter(s => 
-                s.session_type === 'Novo Tópico' && 
                 s.status === 'Concluído'
             );
             
@@ -829,17 +828,13 @@ class SessionService {
                     return sessionDate >= startDate && sessionDate <= today;
                 });
                 
-                // Contar tópicos únicos concluídos
-                const uniqueTopics = new Set(
-                    sessionsInWindow
-                        .filter(s => s.topic_id !== null)
-                        .map(s => s.topic_id)
-                ).size;
+                // Contar SESSÕES concluídas (não tópicos únicos)
+                const sessionCount = sessionsInWindow.length;
                 
-                return daysBack > 0 ? uniqueTopics / daysBack : 0;
+                return daysBack > 0 ? sessionCount / daysBack : 0;
             };
             
-            // Calcular tópicos de hoje
+            // Calcular SESSÕES de hoje
             const todayStart = new Date();
             todayStart.setHours(0, 0, 0, 0);
             const todayEnd = new Date();
@@ -850,24 +845,24 @@ class SessionService {
                 return sessionDate >= todayStart && sessionDate <= todayEnd;
             });
             
-            const todayTopics = new Set(
-                todaySessions
-                    .filter(s => s.topic_id !== null)
-                    .map(s => s.topic_id)
-            ).size;
+            // Contar número de SESSÕES completadas hoje
+            const todaySessionCount = todaySessions.length;
             
             return {
                 last7Days: calculate(7),
                 last14Days: calculate(14),
                 last30Days: calculate(30),
-                todayTopics: todayTopics
+                todaySessions: todaySessionCount, // Mudando nome para ser mais claro
+                todayTopics: todaySessionCount // Mantendo para compatibilidade temporária
             };
         } catch (error) {
             console.error('Erro ao calcular ritmo de estudo:', error);
             return {
                 last7Days: 0,
                 last14Days: 0,
-                last30Days: 0
+                last30Days: 0,
+                todaySessions: 0,
+                todayTopics: 0
             };
         }
     }
