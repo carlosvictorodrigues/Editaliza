@@ -187,6 +187,29 @@
                 transform: none;
             }
         }
+        
+        /* Garantir que checkboxes e radios apareçam */
+        input[type="checkbox"] {
+            appearance: auto !important;
+            -webkit-appearance: checkbox !important;
+            -moz-appearance: checkbox !important;
+            opacity: 1 !important;
+            width: 18px !important;
+            height: 18px !important;
+            cursor: pointer;
+        }
+        
+        input[type="checkbox"]:checked {
+            accent-color: #2563eb !important;
+        }
+        
+        input[type="radio"] {
+            appearance: auto !important;
+            -webkit-appearance: radio !important;
+            -moz-appearance: radio !important;
+            opacity: 1 !important;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body class="min-h-screen text-gray-800 relative overflow-x-hidden">
@@ -430,27 +453,27 @@
                                 <p class="text-xs text-gray-500 mb-3">🎯 Identificamos seus desafios para oferecer soluções e conteúdo específico</p>
                                 <div class="space-y-2">
                                     <label class="flex items-center">
-                                        <input type="checkbox" name="difficulties" value="organizacao" class="mr-3 text-blue-600">
+                                        <input type="checkbox" name="difficulties" value="organizacao" class="mr-3 w-4 h-4 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 accent-blue-600">
                                         <span>Organização dos estudos</span>
                                     </label>
                                     <label class="flex items-center">
-                                        <input type="checkbox" name="difficulties" value="motivacao" class="mr-3 text-blue-600">
+                                        <input type="checkbox" name="difficulties" value="motivacao" class="mr-3 w-4 h-4 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 accent-blue-600">
                                         <span>Manter a motivação</span>
                                     </label>
                                     <label class="flex items-center">
-                                        <input type="checkbox" name="difficulties" value="tempo" class="mr-3 text-blue-600">
+                                        <input type="checkbox" name="difficulties" value="tempo" class="mr-3 w-4 h-4 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 accent-blue-600">
                                         <span>Falta de tempo</span>
                                     </label>
                                     <label class="flex items-center">
-                                        <input type="checkbox" name="difficulties" value="disciplina" class="mr-3 text-blue-600">
+                                        <input type="checkbox" name="difficulties" value="disciplina" class="mr-3 w-4 h-4 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 accent-blue-600">
                                         <span>Disciplina nos estudos</span>
                                     </label>
                                     <label class="flex items-center">
-                                        <input type="checkbox" name="difficulties" value="materias" class="mr-3 text-blue-600">
+                                        <input type="checkbox" name="difficulties" value="materias" class="mr-3 w-4 h-4 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 accent-blue-600">
                                         <span>Dificuldade em matérias específicas</span>
                                     </label>
                                     <label class="flex items-center">
-                                        <input type="checkbox" name="difficulties" value="ansiedade" class="mr-3 text-blue-600">
+                                        <input type="checkbox" name="difficulties" value="ansiedade" class="mr-3 w-4 h-4 rounded border-2 border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 accent-blue-600">
                                         <span>Ansiedade na prova</span>
                                     </label>
                                 </div>

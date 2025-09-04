@@ -218,7 +218,17 @@ const updateProfile = async (req, res) => {
         }
         if (concursos_count !== undefined) {
             updates.push('concursos_count = ?');
-            values.push(concursos_count);
+            // Converter para número se for string com intervalo
+            let countValue = concursos_count;
+            if (typeof concursos_count === 'string') {
+                if (concursos_count === '0') countValue = 0;
+                else if (concursos_count === '1-5') countValue = 3;
+                else if (concursos_count === '6-10') countValue = 8;
+                else if (concursos_count === '11-20') countValue = 15;
+                else if (concursos_count === '20+') countValue = 25;
+                else countValue = parseInt(concursos_count) || 0;
+            }
+            values.push(countValue);
         }
         if (difficulties !== undefined) {
             updates.push('difficulties = ?');
@@ -241,7 +251,17 @@ const updateProfile = async (req, res) => {
         }
         if (study_hours !== undefined) {
             updates.push('study_hours = ?');
-            values.push(study_hours);
+            // Converter para número se for string com intervalo
+            let hoursValue = study_hours;
+            if (typeof study_hours === 'string') {
+                if (study_hours === '1-2') hoursValue = 2;
+                else if (study_hours === '3-4') hoursValue = 4;
+                else if (study_hours === '5-6') hoursValue = 6;
+                else if (study_hours === '7-8') hoursValue = 8;
+                else if (study_hours === '8+') hoursValue = 10;
+                else hoursValue = parseInt(study_hours) || 0;
+            }
+            values.push(hoursValue);
         }
         if (motivation_text !== undefined) {
             updates.push('motivation_text = ?');
