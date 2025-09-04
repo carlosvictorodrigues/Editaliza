@@ -290,6 +290,73 @@
                 transform: translateY(0);
             }
         }
+        
+        /* FIX: Forçar aparência dos checkboxes de email com !important */
+        input[type="checkbox"]#email_daily_schedule,
+        input[type="checkbox"]#email_weekly_summary,
+        input[type="checkbox"]#email_study_reminders {
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            appearance: none !important;
+            width: 20px !important;
+            height: 20px !important;
+            border: 2px solid #d1d5db !important; /* gray-300 */
+            border-radius: 0.25rem !important;
+            background-color: white !important;
+            cursor: pointer !important;
+            position: relative !important;
+            flex-shrink: 0 !important;
+            transition: all 0.2s ease !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+        
+        /* Checkbox checked state */
+        input[type="checkbox"]#email_daily_schedule:checked,
+        input[type="checkbox"]#email_weekly_summary:checked,
+        input[type="checkbox"]#email_study_reminders:checked {
+            background-color: #3b82f6 !important; /* blue-500 */
+            border-color: #3b82f6 !important;
+        }
+        
+        /* Checkmark usando SVG inline */
+        input[type="checkbox"]#email_daily_schedule:checked::before,
+        input[type="checkbox"]#email_weekly_summary:checked::before,
+        input[type="checkbox"]#email_study_reminders:checked::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 2px !important;
+            left: 5px !important;
+            width: 6px !important;
+            height: 10px !important;
+            border: solid white !important;
+            border-width: 0 2px 2px 0 !important;
+            transform: rotate(45deg) !important;
+        }
+        
+        /* Hover state */
+        input[type="checkbox"]#email_daily_schedule:hover:not(:checked),
+        input[type="checkbox"]#email_weekly_summary:hover:not(:checked),
+        input[type="checkbox"]#email_study_reminders:hover:not(:checked) {
+            border-color: #93c5fd !important; /* blue-300 */
+            background-color: #f0f9ff !important; /* blue-50 */
+        }
+        
+        /* Focus state */
+        input[type="checkbox"]#email_daily_schedule:focus,
+        input[type="checkbox"]#email_weekly_summary:focus,
+        input[type="checkbox"]#email_study_reminders:focus {
+            outline: none !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+        }
+        
+        /* Disabled state (caso precise no futuro) */
+        input[type="checkbox"]#email_daily_schedule:disabled,
+        input[type="checkbox"]#email_weekly_summary:disabled,
+        input[type="checkbox"]#email_study_reminders:disabled {
+            opacity: 0.5 !important;
+            cursor: not-allowed !important;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-gray-800">

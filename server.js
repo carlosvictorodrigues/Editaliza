@@ -1454,6 +1454,10 @@ if (process.env.NODE_ENV === 'production') {
 const emailPreferencesRoutes = require('./src/routes/email-preferences.routes');
 app.use('/api/emails', emailPreferencesRoutes(db, emailScheduler));
 
+// Rotas de preferências do usuário  
+const preferencesRoutes = require('./src/routes/preferences.routes');
+app.use('/api/user/preferences', preferencesRoutes);
+
 // Rotas de gerenciamento de assinaturas
 const subscriptionRoutes = require('./src/routes/subscription.routes');
 app.use('/api/subscription', subscriptionRoutes);
@@ -1497,3 +1501,4 @@ process.on('SIGINT', () => {
 // TIMEZONE SERVIDOR CORRIGIDO - Wed, Aug 13, 2025 10:13:36 PM
 // TIMEZONE BRASILEIRO FINAL CORRIGIDO - Wed, Aug 13, 2025 10:15:49 PM
 
+// trigger restart
