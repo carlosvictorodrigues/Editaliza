@@ -1,8 +1,8 @@
 // Minimal, ASCII-only login handler to survive encoding issues in inline script
 (() => {
-  const log = function() { try { console.log.apply(console, ['[login-fallback]'].concat(Array.prototype.slice.call(arguments))); } catch (_) {} };
-  const warn = function() { try { console.warn.apply(console, ['[login-fallback]'].concat(Array.prototype.slice.call(arguments))); } catch (_) {} };
-  const errorLog = function() { try { console.error.apply(console, ['[login-fallback]'].concat(Array.prototype.slice.call(arguments))); } catch (_) {} };
+  const log = function() { try { console.info.apply(console, ['[login-fallback]'].concat(Array.prototype.slice.call(arguments))); } catch (_err) { /* ignore */ } };
+  const warn = function() { try { console.warn.apply(console, ['[login-fallback]'].concat(Array.prototype.slice.call(arguments))); } catch (_err) { /* ignore */ } };
+  const errorLog = function() { try { console.error.apply(console, ['[login-fallback]'].concat(Array.prototype.slice.call(arguments))); } catch (_err) { /* ignore */ } };
 
   function cleanQueryIfCredentialsPresent() {
     try {
@@ -11,7 +11,7 @@
         window.history.replaceState({}, document.title, window.location.pathname);
         log('removed credentials from URL');
       }
-    } catch (e) {
+    } catch (_err) {
       // ignore
     }
   }
@@ -19,10 +19,19 @@
   async function doApiLogin(email, password) {
     // Prefer app.apiFetch when available
     if (window.app && typeof window.app.apiFetch === 'function') {
-      return await window.app.apiFetch('/auth/login', {
+      const response = await window.app.apiFetch('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
+      if (!response.ok) {
+        let msg = 'Login failed';
+        try {
+          const data = await response.json();
+          msg = data && (data.message || data.error) || msg;
+        } catch (_err) { /* ignore */ }
+        throw new Error(msg);
+      }
+      return await response.json();
     }
     // Fallback to native fetch
     const resp = await fetch('/api/auth/login', {
@@ -36,7 +45,7 @@
       try {
         const data = await resp.json();
         msg = data && (data.message || data.error) || msg;
-      } catch (_) {}
+      } catch (_err) { /* ignore */ }
       throw new Error(msg);
     }
     return await resp.json();
@@ -79,9 +88,11 @@
         const data = await doApiLogin(email, password);
 
         try {
-          const key = (window.app && window.app.config && window.app.config.tokenKey) || 'authToken';
+          // Usar a chave correta do token: editaliza_token
+          const key = 'editaliza_token';
           localStorage.setItem(key, data.token);
-        } catch (_) {}
+          log('Token salvo com chave:', key);
+        } catch (_err) { /* ignore */ }
 
         // Só redireciona se o login foi bem-sucedido
         window.location.href = data.redirectUrl || 'home.html';
@@ -119,7 +130,7 @@
           const resp = await ((window.app && window.app.apiFetch ? window.app.apiFetch('/auth/session-token') : fetch('/api/auth/session-token')));
           const data = typeof resp.json === 'function' ? await resp.json() : resp; // app.apiFetch returns data directly
           if (data && data.success && data.token) {
-            const key = (window.app && window.app.config && window.app.config.tokenKey) || 'authToken';
+            const key = 'editaliza_token';
             localStorage.setItem(key, data.token);
             window.history.replaceState({}, document.title, window.location.pathname);
             window.location.href = 'home.html';
@@ -138,7 +149,7 @@
         const token = params.get('token');
         const refresh = params.get('refresh');
         if (token) {
-          const key = (window.app && window.app.config && window.app.config.tokenKey) || 'authToken';
+          const key = 'editaliza_token';
           localStorage.setItem(key, decodeURIComponent(token));
           if (refresh) localStorage.setItem('refreshToken', decodeURIComponent(refresh));
           const msg = document.getElementById('messageContainer');
@@ -173,7 +184,7 @@
         return false;
       }
       return false;
-    } catch (e) {
+    } catch (_err) {
       // ignore
       return false;
     }
@@ -183,8 +194,11 @@
     try { cleanQueryIfCredentialsPresent(); } catch (_) {}
     // If user already has token, redirect quickly
     try {
-      const hasToken = !!(window.app && window.app.config && localStorage.getItem(window.app.config.tokenKey));
+      // Verificar se já tem token com a chave correta
+      const tokenKey = 'editaliza_token';
+      const hasToken = !!localStorage.getItem(tokenKey);
       if (hasToken) {
+        log('Token encontrado, redirecionando para home');
         window.location.href = 'home.html';
         return;
       }

@@ -145,7 +145,7 @@
             state.isRefreshingToken = true;
             metrics.tokenRefreshes++;
 
-            state.refreshTokenPromise = new Promise(async (resolve, reject) => {
+            state.refreshTokenPromise = new Promise((resolve, reject) => {
                 try {
                     // DESABILITADO: Refresh token não implementado
                     // Redirecionar direto para login em vez de tentar refresh
@@ -153,7 +153,6 @@
                     
                     // Limpar token inválido
                     localStorage.removeItem('editaliza_token');
-                    localStorage.removeItem('authToken');
                     
                     // Evitar loop - só redirecionar se não estiver já no login
                     if (!window.location.pathname.includes('/login.html')) {
@@ -168,7 +167,7 @@
                     console.error('❌ Erro ao renovar token:', error);
                     
                     // Limpar token inválido
-                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('editaliza_token');
                     
                     // Redirecionar para login
                     if (window.location.pathname !== '/login.html') {
@@ -314,7 +313,7 @@
             // Função de requisição encapsulada para retry
             const makeRequest = async () => {
                 // Adicionar token se existir (usar a chave correta)
-                const token = localStorage.getItem('editaliza_token') || localStorage.getItem('authToken');
+                const token = localStorage.getItem('editaliza_token');
                 if (token) {
                     options.headers = {
                         ...options.headers,
@@ -329,7 +328,7 @@
                     await TokenManager.refreshToken();
                     
                     // Atualizar token na requisição
-                    const newToken = localStorage.getItem('authToken');
+                    const newToken = localStorage.getItem('editaliza_token');
                     if (newToken) {
                         options.headers['Authorization'] = `Bearer ${newToken}`;
                     }
