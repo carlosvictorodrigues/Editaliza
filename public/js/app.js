@@ -55,7 +55,7 @@ const app = {
             this.setupTokenRefresh();
         }
 
-        // x INICIALIZAR SISTEMA DE NOTIFICA!"ES INTELIGENTES
+        // 🔔 INICIALIZAR SISTEMA DE NOTIFICAÇÕES INTELIGENTES
         await this.initializeNotificationSystem();
     },
 
@@ -366,10 +366,10 @@ const app = {
         
         if (this.state.activePlanData[planId]) {
             if (dataType) {
-                void(`x? Invalidando cache de ${dataType} para plano ${planId}`);
+                void(`🗑️ Invalidando cache de ${dataType} para plano ${planId}`);
                 delete this.state.activePlanData[planId][dataType];
             } else {
-                void(`x? Invalidando todo o cache do plano ${planId}`);
+                void(`🗑️ Invalidando todo o cache do plano ${planId}`);
                 delete this.state.activePlanData[planId];
             }
         } else {
@@ -447,8 +447,8 @@ const app = {
         }
         
         const toast = document.createElement('div');
-        const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-yellow-500';
-        const icon = type === 'success' ? '?' : type === 'error' ? '?' : '??';
+        const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : type === 'info' ? 'bg-blue-500' : 'bg-yellow-500';
+        const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : type === 'info' ? 'ℹ️' : '⚠️';
         
         // Sanitizar mensagem
         const safeMessage = this.sanitizeHtml(message);
@@ -465,7 +465,7 @@ const app = {
             toast.classList.remove('translate-x-full', 'opacity-0');
         });
         
-        // Remover apãs 4 segundos (um pouco mais para toasts importantes)
+        // Remover após 4 segundos (um pouco mais para toasts importantes)
         setTimeout(() => {
             toast.classList.add('translate-x-full', 'opacity-0');
             toast.addEventListener('transitionend', () => {
@@ -501,77 +501,77 @@ const app = {
     },
     
         getSubjectStyle(name) {
-        if (!name) return { color: 'border-gray-400', icon: '\uD83D\uDCDA' }; // ??
+        if (!name) return { color: 'border-gray-400', icon: '\uD83D\uDCDA' }; // 📚
 
         // Sistema expandido de cores por disciplina para melhor identidade visual
         const predefined = {
             // Disciplinas Jurãdicas - Mantendo cores existentes e expandindo
-            'Constitucional': { color: 'border-green-500', icon: '\u2696\uFE0F' }, // ??
-            'Administrativo': { color: 'border-red-500', icon: '\uD83C\uDFDB\uFE0F' }, // ???
-            'Portuguãs': { color: 'border-orange-500', icon: '\uD83D\uDCD8' }, // ??
-            'Civil': { color: 'border-blue-500', icon: '\uD83D\uDCD7' }, // ??
-            'Raciocãnio Lãgico': { color: 'border-cyan-500', icon: '\uD83E\uDDE0' }, // ??
-            'Raciocãnio': { color: 'border-cyan-500', icon: '\uD83E\uDDE0' }, // ??
-            'Lãgico': { color: 'border-cyan-500', icon: '\uD83E\uDDE0' }, // ??
-            'Matemãtica': { color: 'border-cyan-500', icon: '\uD83D\uDCCA' }, // ??
-            'Processual Civil': { color: 'border-sky-500', icon: '\uD83D\uDCD8' }, // ??
-            'Penal': { color: 'border-rose-500', icon: '\uD83D\uDE94' }, // ??
-            'Processual Penal': { color: 'border-pink-500', icon: '\uD83D\uDC69\u200D\u2696\uFE0F' }, // ?????
-            'Legislaãão': { color: 'border-purple-500', icon: '\uD83D\uDCDC' }, // ??
-            'Tributãrio': { color: 'border-yellow-600', icon: '\uD83D\uDCB0' }, // ??
-            'Trabalhista': { color: 'border-amber-500', icon: '\uD83D\uDC54' }, // ??
-            'Empresarial': { color: 'border-indigo-500', icon: '\uD83C\uDFE2' }, // ??
+            'Constitucional': { color: 'border-green-500', icon: '\u2696\uFE0F' }, // ⚖️
+            'Administrativo': { color: 'border-red-500', icon: '\uD83C\uDFDB\uFE0F' }, // 🏛️
+            'Português': { color: 'border-orange-500', icon: '\uD83D\uDCD8' }, // 📘
+            'Civil': { color: 'border-blue-500', icon: '\uD83D\uDCD7' }, // 📗
+            'Raciocínio Lógico': { color: 'border-cyan-500', icon: '\uD83E\uDDE0' }, // 🧠
+            'Raciocínio': { color: 'border-cyan-500', icon: '\uD83E\uDDE0' }, // 🧠
+            'Lógico': { color: 'border-cyan-500', icon: '\uD83E\uDDE0' }, // 🧠
+            'Matemática': { color: 'border-cyan-500', icon: '\uD83D\uDCCA' }, // 📊
+            'Processual Civil': { color: 'border-sky-500', icon: '\uD83D\uDCD8' }, // 📘
+            'Penal': { color: 'border-rose-500', icon: '\uD83D\uDE94' }, // 🚔
+            'Processual Penal': { color: 'border-pink-500', icon: '\uD83D\uDC69\u200D\u2696\uFE0F' }, // 👩‍⚖️
+            'Legislação': { color: 'border-purple-500', icon: '\uD83D\uDCDC' }, // 📜
+            'Tributário': { color: 'border-yellow-600', icon: '\uD83D\uDCB0' }, // 💰
+            'Trabalhista': { color: 'border-amber-500', icon: '\uD83D\uDC54' }, // 👔
+            'Empresarial': { color: 'border-indigo-500', icon: '\uD83C\uDFE2' }, // 🏢
             
             // Tipos de Sessão - Mantendo existentes
-            'Revisão Consolidada': { color: 'border-yellow-400', icon: '\uD83D\uDD01' }, // ??
-            'Revisão Semanal': { color: 'border-yellow-400', icon: '\uD83D\uDD01' }, // ??
-            'Revisão Mensal': { color: 'border-amber-500', icon: '\uD83D\uDCC5' }, // ??
-            'Reforão Extra': { color: 'border-indigo-500', icon: '\uD83D\uDCAA' }, // ??
-            'Simulado Direcionado': { color: 'border-purple-500', icon: '\uD83C\uDFAF' }, // ??
-            'Simulado Completo': { color: 'border-slate-700', icon: '\uD83E\uDDE9' }, // ??
-            'Redaãão': { color: 'border-rose-500', icon: '\u270D\uFE0F' }, // ??
+            'Revisão Consolidada': { color: 'border-yellow-400', icon: '\uD83D\uDD01' }, // 🔁
+            'Revisão Semanal': { color: 'border-yellow-400', icon: '\uD83D\uDD01' }, // 🔁
+            'Revisão Mensal': { color: 'border-amber-500', icon: '\uD83D\uDCC5' }, // 📅
+            'Reforço Extra': { color: 'border-indigo-500', icon: '\uD83D\uDCAA' }, // 💪
+            'Simulado Direcionado': { color: 'border-purple-500', icon: '\uD83C\uDFAF' }, // 🎯
+            'Simulado Completo': { color: 'border-slate-700', icon: '\uD83E\uDDE9' }, // 🧩
+            'Redação': { color: 'border-rose-500', icon: '\u270D\uFE0F' }, // ✍️
             
             // Disciplinas Tãcnicas
-            'Informãtica': { color: 'border-purple-600', icon: '\uD83D\uDCBB' }, // ??
-            'Tecnologia': { color: 'border-purple-600', icon: '\u26A1' }, // ?
-            'Computaãão': { color: 'border-purple-600', icon: '\uD83D\uDDA5\uFE0F' }, // ???
-            'Sistemas': { color: 'border-purple-600', icon: '\uD83D\uDD27' }, // ??
-            'Redes': { color: 'border-purple-600', icon: '\uD83C\uDF10' }, // ??
-            'Seguranãa': { color: 'border-purple-600', icon: '\uD83D\uDD12' }, // ??
+            'Informática': { color: 'border-purple-600', icon: '\uD83D\uDCBB' }, // 💻
+            'Tecnologia': { color: 'border-purple-600', icon: '\u26A1' }, // ⚡
+            'Computação': { color: 'border-purple-600', icon: '\uD83D\uDDA5\uFE0F' }, // 🖥️
+            'Sistemas': { color: 'border-purple-600', icon: '\uD83D\uDD27' }, // 🔧
+            'Redes': { color: 'border-purple-600', icon: '\uD83C\uDF10' }, // 🌐
+            'Segurança': { color: 'border-purple-600', icon: '\uD83D\uDD12' }, // 🔒
             
             // Disciplinas de Gestão
-            'Administraãão': { color: 'border-orange-600', icon: '\uD83D\uDCCA' }, // ??
-            'Gestão': { color: 'border-orange-600', icon: '\uD83D\uDC68\u200D\uD83D\uDCBC' }, // ?????
-            'Economia': { color: 'border-orange-600', icon: '\uD83D\uDCB9' }, // ??
-            'Contabilidade': { color: 'border-orange-600', icon: '\uD83D\uDCC8' }, // ??
-            'Financeira': { color: 'border-orange-600', icon: '\uD83D\uDCB0' }, // ??
-            'Orãamento': { color: 'border-orange-600', icon: '\uD83D\uDCB5' }, // ??
+            'Administração': { color: 'border-orange-600', icon: '\uD83D\uDCCA' }, // 📊
+            'Gestão': { color: 'border-orange-600', icon: '\uD83D\uDC68\u200D\uD83D\uDCBC' }, // 👨‍💼
+            'Economia': { color: 'border-orange-600', icon: '\uD83D\uDCB9' }, // 💹
+            'Contabilidade': { color: 'border-orange-600', icon: '\uD83D\uDCC8' }, // 📈
+            'Financeira': { color: 'border-orange-600', icon: '\uD83D\uDCB0' }, // 💰
+            'Orçamento': { color: 'border-orange-600', icon: '\uD83D\uDCB5' }, // 💵
             
             // Disciplinas de Saãde
-            'Saãde': { color: 'border-teal-500', icon: '\uD83C\uDFE5' }, // ??
-            'Medicina': { color: 'border-teal-500', icon: '\u2695\uFE0F' }, // ??
-            'Enfermagem': { color: 'border-teal-500', icon: '\uD83D\uDC69\u200D\u2695\uFE0F' }, // ?????
-            'Farmãcia': { color: 'border-teal-500', icon: '\uD83D\uDC8A' }, // ??
-            'Psicologia': { color: 'border-teal-500', icon: '\uD83E\uDDE0' }, // ??
+            'Saúde': { color: 'border-teal-500', icon: '\uD83C\uDFE5' }, // 🏥
+            'Medicina': { color: 'border-teal-500', icon: '\u2695\uFE0F' }, // ⚕️
+            'Enfermagem': { color: 'border-teal-500', icon: '\uD83D\uDC69\u200D\u2695\uFE0F' }, // 👩‍⚕️
+            'Farmácia': { color: 'border-teal-500', icon: '\uD83D\uDC8A' }, // 💊
+            'Psicologia': { color: 'border-teal-500', icon: '\uD83E\uDDE0' }, // 🧠
             
             // Disciplinas de Educaãão
-            'Educaãão': { color: 'border-pink-600', icon: '\uD83C\uDF93' }, // ??
-            'Pedagogia': { color: 'border-pink-600', icon: '\uD83D\uDCDA' }, // ??
-            'Didãtica': { color: 'border-pink-600', icon: '\uD83D\uDC69\u200D\uD83C\uDFEB' }, // ?????
+            'Educação': { color: 'border-pink-600', icon: '\uD83C\uDF93' }, // 🎓
+            'Pedagogia': { color: 'border-pink-600', icon: '\uD83D\uDCDA' }, // 📚
+            'Didática': { color: 'border-pink-600', icon: '\uD83D\uDC69\u200D\uD83C\uDFEB' }, // 👩‍🏫
             
             // Disciplinas de Engenharia
-            'Engenharia': { color: 'border-yellow-500', icon: '\u2699\uFE0F' }, // ??
-            'Arquitetura': { color: 'border-yellow-500', icon: '\uD83C\uDFD7\uFE0F' }, // ???
-            'Urbanismo': { color: 'border-yellow-500', icon: '\uD83C\uDF06' }, // ??
+            'Engenharia': { color: 'border-yellow-500', icon: '\u2699\uFE0F' }, // ⚙️
+            'Arquitetura': { color: 'border-yellow-500', icon: '\uD83C\uDFD7\uFE0F' }, // 🏗️
+            'Urbanismo': { color: 'border-yellow-500', icon: '\uD83C\uDF06' }, // 🌆
             
             // Conhecimentos Gerais
-            'Histãria': { color: 'border-amber-600', icon: '\uD83C\uDFDB\uFE0F' }, // ???
-            'Geografia': { color: 'border-emerald-500', icon: '\uD83C\uDF0D' }, // ??
-            'Sociologia': { color: 'border-indigo-600', icon: '\uD83D\uDC65' }, // ??
-            'Filosofia': { color: 'border-violet-500', icon: '\uD83E\uDD14' }, // ??
-            'Atualidades': { color: 'border-cyan-600', icon: '\uD83D\uDCF0' }, // ??
-            'Conhecimentos Gerais': { color: 'border-slate-500', icon: '\uD83C\uDF10' }, // ??
-            'Realidade': { color: 'border-slate-500', icon: '\uD83C\uDFD9\uFE0F' } // ???
+            'História': { color: 'border-amber-600', icon: '\uD83C\uDFDB\uFE0F' }, // 🏛️
+            'Geografia': { color: 'border-emerald-500', icon: '\uD83C\uDF0D' }, // 🌍
+            'Sociologia': { color: 'border-indigo-600', icon: '\uD83D\uDC65' }, // 👥
+            'Filosofia': { color: 'border-violet-500', icon: '\uD83E\uDD14' }, // 🤔
+            'Atualidades': { color: 'border-cyan-600', icon: '\uD83D\uDCF0' }, // 📰
+            'Conhecimentos Gerais': { color: 'border-slate-500', icon: '\uD83C\uDF10' }, // 🌐
+            'Realidade': { color: 'border-slate-500', icon: '\uD83C\uDFD9\uFE0F' } // 🏙️
         };
 
         // Busca exata primeiro
@@ -589,16 +589,16 @@ const app = {
 
         // Cores de fallback mais vibrantes e diversificadas
         const fallbackColors = [
-            { color: 'border-blue-500', icon: '\uD83D\uDCDA' }, // ??
-            { color: 'border-green-500', icon: '\uD83D\uDCD7' }, // ??
-            { color: 'border-red-500', icon: '\uD83D\uDCD5' }, // ??
-            { color: 'border-purple-500', icon: '\uD83D\uDCD8' }, // ??
-            { color: 'border-orange-500', icon: '\uD83D\uDCD9' }, // ??
-            { color: 'border-teal-500', icon: '\uD83D\uDCC4' }, // ??
-            { color: 'border-pink-500', icon: '\uD83D\uDCD6' }, // ??
-            { color: 'border-cyan-500', icon: '\uD83D\uDCDC' }, // ??
-            { color: 'border-yellow-500', icon: '\uD83D\uDCC3' }, // ??
-            { color: 'border-indigo-500', icon: '\uD83D\uDCC1' }, // ??
+            { color: 'border-blue-500', icon: '\uD83D\uDCDA' }, // 📚
+            { color: 'border-green-500', icon: '\uD83D\uDCD7' }, // 📗
+            { color: 'border-red-500', icon: '\uD83D\uDCD5' }, // 📕
+            { color: 'border-purple-500', icon: '\uD83D\uDCD8' }, // 📘
+            { color: 'border-orange-500', icon: '\uD83D\uDCD9' }, // 📙
+            { color: 'border-teal-500', icon: '\uD83D\uDCC4' }, // 📄
+            { color: 'border-pink-500', icon: '\uD83D\uDCD6' }, // 📖
+            { color: 'border-cyan-500', icon: '\uD83D\uDCDC' }, // 📜
+            { color: 'border-yellow-500', icon: '\uD83D\uDCC3' }, // 📃
+            { color: 'border-indigo-500', icon: '\uD83D\uDCC1' }, // 📁
         ];
 
         // Hash consistente baseado no nome
@@ -711,7 +711,7 @@ const app = {
         try {
             // Log apenas se for forãado ou primeira chamada
             if (forceRefresh || !this._gamificationDataCache?.[planId]) {
-                void('x` Carregando dados de gamificaãão...', forceRefresh ? '(forãado)' : '');
+                void('🎮 Carregando dados de gamificação...', forceRefresh ? '(forçado)' : '');
             }
             
             // CORRE!ãO: Usar getActivePlanData para aproveitar o sistema de cache
@@ -832,14 +832,14 @@ async function openStudySession(sessionId) {
         const hasElapsedTime = window.TimerSystem && TimerSystem.getTimerElapsed(sessionId) > 1000; // Mais de 1 segundo
         
         if (hasActiveTimer) {
-            void(`? Timer ativo encontrado para sessão ${sessionId} - continuando sem abrir checklist`);
+            void(`⏱️ Timer ativo encontrado para sessão ${sessionId} - continuando sem abrir checklist`);
             TimerSystem.continueTimer(sessionId);
             app.showToast('Timer retomado! Continue estudando.', 'success');
             return;
         }
         
         if (hasElapsedTime) {
-            void(`?? Timer pausado com tempo encontrado para sessão ${sessionId} - perguntando ao usuãrio`);
+            void(`⏸️ Timer pausado com tempo encontrado para sessão ${sessionId} - perguntando ao usuário`);
             
             // Mostrar modal de confirmação se há tempo estudado mas timer pausado
             const shouldContinue = await showContinueStudyModal(sessionId);
@@ -894,7 +894,7 @@ async function openStudySession(sessionId) {
         }
         
         if (sessionDateStr && sessionDateStr !== todayStr) {
-            const confirmReschedule = confirm('Esta sessão estava marcada para outro dia. Deseja reagendã-la para hoje?');
+            const confirmReschedule = confirm('Esta sessão estava marcada para outro dia. Deseja reagendá-la para hoje?');
             if (!confirmReschedule) {
                 return;
             }
@@ -1184,7 +1184,7 @@ async function postponeSession(sessionId, reason = 'user_request') {
         // Restaurar botão
         const postponeBtn = document.querySelector(`[data-session-id="${sessionId}"] .postpone-btn`);
         if (postponeBtn) {
-            postponeBtn.innerHTML = '?? Adiar';
+            postponeBtn.innerHTML = '🕒 Adiar';
             postponeBtn.disabled = false;
         }
     }
@@ -1206,7 +1206,7 @@ async function reinforceSession(sessionId) {
         // Mostrar loading no botão
         const reinforceBtn = document.querySelector(`[data-session-id="${sessionId}"] .reinforce-btn`);
         if (reinforceBtn) {
-            reinforceBtn.innerHTML = '<span class="animate-spin">?</span> Criando...';
+            reinforceBtn.innerHTML = '<span class="animate-spin">🔄</span> Criando...';
             reinforceBtn.disabled = true;
         }
 
@@ -1236,7 +1236,7 @@ async function reinforceSession(sessionId) {
         // Restaurar botão
         const reinforceBtn = document.querySelector(`[data-session-id="${sessionId}"] .reinforce-btn`);
         if (reinforceBtn) {
-            reinforceBtn.innerHTML = '?? Reforãar';
+            reinforceBtn.innerHTML = '💪 Reforçar';
             reinforceBtn.disabled = false;
         }
     }
