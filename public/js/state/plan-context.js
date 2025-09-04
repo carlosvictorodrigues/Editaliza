@@ -47,7 +47,10 @@ class PlanContextManager {
             // Etapa 1: Resolver planId de forma determinística
             const planId = await this._resolvePlanId();
             if (!planId) {
-                throw new Error('Nenhum plano disponível');
+                // Redirecionar para criação de plano
+                console.log('📝 Nenhum plano encontrado, redirecionando para criação...');
+                window.location.href = '/criar-plano.html';
+                return null;
             }
             
             this.state.planId = planId;
@@ -121,7 +124,7 @@ class PlanContextManager {
     }
     
     _processTodaySessions(allScheduleData) {
-        const today = new Date().toLocaleDateString("en-CA", {timeZone: "America/Sao_Paulo"});
+        const today = new Date().toLocaleDateString('en-CA', {timeZone: 'America/Sao_Paulo'});
         const todaysSessions = allScheduleData[today] || [];
         
         console.log('📅 Sessões de hoje:', {

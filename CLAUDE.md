@@ -181,7 +181,7 @@ curl https://app.editaliza.com.br/health
 - Porta: `5432`
 - Banco: `editaliza_db`
 - Usuário: `editaliza_user`
-- Senha: `Editaliza@2025#Secure`
+- Senha: `Editaliza2025`
 
 ### ⚠️ Tabelas Necessárias:
 - users (com coluna `password_hash`)
