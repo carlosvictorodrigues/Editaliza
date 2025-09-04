@@ -885,15 +885,17 @@
             
             loadingSubjects = true;
             try {
+                console.log('[loadSubjects] Buscando disciplinas para plano:', planId);
                 const response = await app.apiFetch(`/plans/${planId}/subjects_with_topics`);
                 if (!response.ok) {
                     throw new Error('Erro ao carregar disciplinas');
                 }
                 const subjects = await response.json();
+                console.log('[loadSubjects] Disciplinas recebidas:', subjects);
                 const container = document.getElementById('subjectsContainer');
                 container.innerHTML = '';
 
-                if (subjects.length === 0) {
+                if (!subjects || subjects.length === 0) {
                     container.innerHTML = `<div class="text-center p-6 bg-yellow-50 border border-yellow-200 rounded-lg"><p class="text-yellow-800">Nenhuma disciplina cadastrada.</p></div>`;
                     return;
                 }
