@@ -62,6 +62,7 @@
         
         .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
         .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+        .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
         
         .dashboard-card::before {
             content: '';
@@ -82,6 +83,38 @@
             transform: translateY(-4px);
             box-shadow: 0 20px 40px -10px rgba(5, 40, 242, 0.15);
             border-color: rgba(5, 40, 242, 0.1);
+        }
+        
+        /* Hero section animations */
+        .hero-fade-in {
+            animation: heroFadeIn 1s ease-out;
+        }
+        
+        @keyframes heroFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Section headers */
+        .section-header {
+            animation: slideInLeft 0.8s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
         
         @keyframes cardFadeIn {
@@ -129,27 +162,40 @@
         .template-btn {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-        }
-        
-        .template-btn::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 3px;
-            height: 100%;
-            background: var(--editaliza-blue);
-            transform: scaleY(0);
-            transition: transform 0.3s ease;
-        }
-        
-        .template-btn:hover::before {
-            transform: scaleY(1);
+            border: 1px solid transparent;
         }
         
         .template-btn:hover {
-            transform: translateX(8px);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(5, 40, 242, 0.12);
+            border-color: rgba(5, 40, 242, 0.2);
+        }
+        
+        .template-btn:active {
+            transform: translateY(0);
             box-shadow: 0 4px 12px rgba(5, 40, 242, 0.1);
+        }
+        
+        /* Bounce animation */
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% {
+                transform: translate3d(0,0,0);
+            }
+            40%, 43% {
+                transform: translate3d(0,-8px,0);
+            }
+            70% {
+                transform: translate3d(0,-4px,0);
+            }
+            90% {
+                transform: translate3d(0,-2px,0);
+            }
+        }
+        
+        /* Quick tips card special styling */
+        .tips-card {
+            background: linear-gradient(135deg, #f8faff 0%, #f1f5ff 100%);
+            border: 1px solid #e0e7ff;
         }
         
         /* Lista de planos com animação */
@@ -194,8 +240,55 @@
         
         /* Motivational card com gradiente sutil */
         .motivational-card {
-            background: linear-gradient(135deg, rgba(5, 40, 242, 0.05), rgba(59, 130, 246, 0.02));
-            border-left: 4px solid var(--editaliza-blue);
+            background: linear-gradient(135deg, rgba(5, 40, 242, 0.08), rgba(59, 130, 246, 0.04));
+            border: 1px solid rgba(5, 40, 242, 0.1);
+            position: relative;
+        }
+        
+        .motivational-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--editaliza-blue), #3b82f6);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        /* Form improvements */
+        .form-input:focus {
+            outline: none;
+            ring: 2px;
+            ring-color: rgba(5, 40, 242, 0.2);
+            border-color: var(--editaliza-blue);
+            transform: translateY(-1px);
+        }
+        
+        /* Loading state improvements */
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Empty state styling */
+        .empty-state {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -221,142 +314,230 @@
         </div>
     </div>
 
-    <main class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
-        <header class="mb-8">
-            <h1 class="text-3xl font-bold text-editaliza-black">Meus Planos de Estudo</h1>
-            <p class="text-md text-editaliza-gray mt-1">Gerencie seus planos existentes ou crie um novo para começar.</p>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-            <!-- Coluna da Lista de Planos -->
-            <div class="dashboard-card h-fit">
-                <h2 class="text-2xl font-semibold mb-6 border-b pb-4 text-gray-700 flex items-center">
-                    <span class="text-2xl mr-3 icon-bounce">🗂️</span> Selecione um Plano
-                </h2>
-                <div id="planList" class="space-y-3">
-                    <p class="text-gray-500 text-center py-4">Carregando seus planos...</p>
-                </div>
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Hero Section -->
+        <section class="mb-12">
+            <div class="text-center max-w-3xl mx-auto">
+                <h1 class="text-4xl sm:text-5xl font-bold text-editaliza-black mb-4">
+                    Seus Planos de <span class="text-editaliza-blue">Estudo</span>
+                </h1>
+                <p class="text-lg text-editaliza-gray leading-relaxed">
+                    Organize seus estudos, acompanhe seu progresso e conquiste a aprovação com planejamento estratégico.
+                </p>
             </div>
+        </section>
 
-            <!-- Coluna de Criação de Novo Plano -->
-            <div class="dashboard-card h-fit">
-                <h2 class="text-2xl font-semibold mb-6 text-gray-700 flex items-center">
-                    <span class="text-2xl mr-3 icon-bounce">✨</span> Criar Novo Plano
-                </h2>
-                
-                <!-- Orientação Motivacional -->
-                <div class="motivational-card bg-blue-50 p-5 rounded-lg mb-6">
-                    <div class="flex items-start">
-                        <span class="text-2xl mr-3 icon-bounce">🎯</span>
-                        <div>
-                            <h3 class="font-semibold text-editaliza-blue mb-2">Seu primeiro passo rumo à aprovação!</h3>
-                            <p class="text-sm text-gray-700">Vamos criar um plano personalizado para você. Depois vou te ajudar passo a passo na configuração.</p>
-                        </div>
+        <!-- Layout Principal -->
+        <div class="space-y-12">
+            <!-- Seção: Meus Planos Ativos -->
+            <section>
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <span class="text-3xl mr-3 icon-bounce">📚</span>
+                        <span>Meus Planos Ativos</span>
+                    </h2>
+                    <div class="hidden sm:flex items-center text-sm text-gray-500">
+                        <span class="mr-2">💡</span>
+                        <span>Clique em um plano para configurar</span>
                     </div>
                 </div>
                 
-                <form id="newPlanForm" class="space-y-5">
-                    <div>
-                        <label for="plan_name" class="block text-sm font-medium text-gray-700 mb-2">
-                            Nome do Plano
-                            <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" id="plan_name" class="form-input" placeholder="Ex: Concurso TJCE 2025, ENEM 2025, OAB 1ª Fase" required>
-                        <p class="text-xs text-gray-500 mt-2 flex items-center">
-                            <span class="mr-1">💡</span>
-                            <span>Dica: Use o nome do concurso e o ano para facilitar a organização</span>
-                        </p>
-                    </div>
-                    
-                    <div>
-                        <label for="exam_date" class="block text-sm font-medium text-gray-700 mb-2">
-                            Data da Prova
-                            <span class="text-red-500">*</span>
-                        </label>
-                        <input type="date" id="exam_date" class="form-input" required>
-                        <p class="text-xs text-gray-500 mt-2 flex items-center">
-                            <span class="mr-1">📅</span>
-                            <span>Vou calcular automaticamente o tempo disponível para seus estudos</span>
-                        </p>
-                    </div>
-                    
-                    <!-- Preview do Tempo Disponível -->
-                    <div id="timePreview" class="hidden bg-green-50 border border-green-200 rounded-lg p-4">
-                        <div class="flex items-center text-green-700">
-                            <span class="mr-2 text-lg">⏰</span>
-                            <span id="timePreviewText" class="text-sm font-medium"></span>
+                <div class="dashboard-card bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                    <div id="planList" class="space-y-3">
+                            <div class="flex items-center justify-center py-12">
+                            <div class="loading-spinner rounded-full h-8 w-8 border-4 border-gray-200 border-t-editaliza-blue"></div>
+                            <span class="ml-3 text-gray-500 animate-pulse">Carregando seus planos...</span>
                         </div>
-                    </div>
-                    
-                    <!-- Preferências de Email -->
-                    <div class="border-t pt-5">
-                        <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                            <span class="mr-2">📧</span> Notificações por Email
-                        </h3>
-                        
-                        <div class="space-y-3">
-                            <label class="flex items-start cursor-pointer">
-                                <input type="checkbox" id="email_daily_schedule" class="mt-1 mr-3 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue" checked>
-                                <div>
-                                    <div class="font-medium text-sm text-gray-700">Cronograma Diário</div>
-                                    <div class="text-xs text-gray-500">Receba seu plano de estudos do dia todas as manhãs às 6h</div>
-                                </div>
-                            </label>
-                            
-                            <label class="flex items-start cursor-pointer">
-                                <input type="checkbox" id="email_weekly_summary" class="mt-1 mr-3 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue" checked>
-                                <div>
-                                    <div class="font-medium text-sm text-gray-700">Resumo Semanal</div>
-                                    <div class="text-xs text-gray-500">Acompanhe seu progresso com relatórios semanais</div>
-                                </div>
-                            </label>
-                            
-                            <label class="flex items-start cursor-pointer">
-                                <input type="checkbox" id="email_study_reminders" class="mt-1 mr-3 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue" checked>
-                                <div>
-                                    <div class="font-medium text-sm text-gray-700">Lembretes de Estudo</div>
-                                    <div class="text-xs text-gray-500">Notificações para não perder sessões importantes</div>
-                                </div>
-                            </label>
-                        </div>
-                        
-                        <p class="text-xs text-gray-500 mt-3 pl-6">
-                            🔒 Você pode alterar essas preferências a qualquer momento nas configurações do plano
-                        </p>
-                    </div>
-                    
-                    <button type="submit" id="createPlanButton" class="btn-primary group">
-                        <span class="flex items-center justify-center">
-                            Criar Meu Plano!
-                            <span class="ml-2 transform group-hover:translate-x-1 transition-transform">→</span>
-                        </span>
-                    </button>
-                </form>
-                
-                <!-- Templates Sugeridos -->
-                <div class="mt-6 pt-6 border-t border-gray-200">
-                    <h3 class="text-sm font-semibold text-gray-600 mb-4 flex items-center">
-                        <span class="mr-2 icon-bounce">🚀</span>
-                        <span>Templates Populares</span>
-                    </h3>
-                    <div class="space-y-3">
-                        <button type="button" class="template-btn w-full text-left p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors" data-name="Concurso Público Federal" data-months="6">
-                            <div class="font-medium text-sm text-gray-700 flex items-center">
-                                <span class="mr-2">⚖️</span>
-                                <span>Concurso Público Federal</span>
-                            </div>
-                            <div class="text-xs text-gray-500 mt-1 ml-6">Preparação completa de 6 meses</div>
-                        </button>
-                        <button type="button" class="template-btn w-full text-left p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors" data-name="OAB" data-months="3">
-                            <div class="font-medium text-sm text-gray-700 flex items-center">
-                                <span class="mr-2">🏛️</span>
-                                <span>Exame da OAB</span>
-                            </div>
-                            <div class="text-xs text-gray-500 mt-1 ml-6">Foco intensivo de 3 meses</div>
-                        </button>
                     </div>
                 </div>
-            </div>
+            </section>
+
+            <!-- Seção: Criar Novo Plano -->
+            <section>
+                <div class="flex items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                        <span class="text-3xl mr-3 icon-bounce">✨</span>
+                        <span>Criar Novo Plano</span>
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Card Principal: Formulário -->
+                    <div class="lg:col-span-2">
+                        <div class="dashboard-card bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                            <!-- Orientação Motivacional -->
+                            <div class="motivational-card bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl mb-8 border border-blue-100">
+                                <div class="flex items-start">
+                                    <span class="text-3xl mr-4 icon-bounce">🎯</span>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-editaliza-blue mb-2">Primeiro passo rumo à aprovação!</h3>
+                                        <p class="text-gray-700 leading-relaxed">Vamos criar um plano personalizado e estratégico para você. Depois te guio passo a passo na configuração completa.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <form id="newPlanForm" class="space-y-6">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div class="sm:col-span-2">
+                                        <label for="plan_name" class="block text-sm font-semibold text-gray-700 mb-3">
+                                            Nome do Plano
+                                            <span class="text-red-500 ml-1">*</span>
+                                        </label>
+                                        <input type="text" id="plan_name" 
+                                               class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-editaliza-blue focus:border-transparent transition-all" 
+                                               placeholder="Ex: Concurso TJCE 2025, ENEM 2025, OAB 1ª Fase" 
+                                               required>
+                                        <p class="text-xs text-gray-500 mt-2 flex items-center">
+                                            <span class="mr-1">💡</span>
+                                            <span>Use o nome do concurso e o ano para organização</span>
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="sm:col-span-1">
+                                        <label for="exam_date" class="block text-sm font-semibold text-gray-700 mb-3">
+                                            Data da Prova
+                                            <span class="text-red-500 ml-1">*</span>
+                                        </label>
+                                        <input type="date" id="exam_date" 
+                                               class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-editaliza-blue focus:border-transparent transition-all" 
+                                               required>
+                                        <p class="text-xs text-gray-500 mt-2 flex items-center">
+                                            <span class="mr-1">📅</span>
+                                            <span>Calculo automático do tempo</span>
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="sm:col-span-1">
+                                        <!-- Preview do Tempo Disponível -->
+                                        <div id="timePreview" class="hidden">
+                                            <label class="block text-sm font-semibold text-gray-700 mb-3">Tempo Disponível</label>
+                                            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                                <div class="flex items-center text-green-700">
+                                                    <span class="mr-2 text-lg">⏰</span>
+                                                    <span id="timePreviewText" class="text-sm font-medium"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Preferências de Email -->
+                                <div class="border-t pt-6">
+                                    <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                        <span class="mr-3">📧</span> Notificações por Email
+                                    </h3>
+                                    
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <label class="flex items-start cursor-pointer p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                            <input type="checkbox" id="email_daily_schedule" class="mt-1 mr-3 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue" checked>
+                                            <div>
+                                                <div class="font-medium text-sm text-gray-700">Cronograma Diário</div>
+                                                <div class="text-xs text-gray-500 mt-1">6h da manhã</div>
+                                            </div>
+                                        </label>
+                                        
+                                        <label class="flex items-start cursor-pointer p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                            <input type="checkbox" id="email_weekly_summary" class="mt-1 mr-3 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue" checked>
+                                            <div>
+                                                <div class="font-medium text-sm text-gray-700">Resumo Semanal</div>
+                                                <div class="text-xs text-gray-500 mt-1">Domingo</div>
+                                            </div>
+                                        </label>
+                                        
+                                        <label class="flex items-start cursor-pointer p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                            <input type="checkbox" id="email_study_reminders" class="mt-1 mr-3 rounded border-gray-300 text-editaliza-blue focus:ring-editaliza-blue" checked>
+                                            <div>
+                                                <div class="font-medium text-sm text-gray-700">Lembretes</div>
+                                                <div class="text-xs text-gray-500 mt-1">Personalizados</div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    
+                                    <p class="text-xs text-gray-500 mt-4 flex items-center">
+                                        <span class="mr-2">🔒</span>
+                                        <span>Você pode alterar essas preferências a qualquer momento</span>
+                                    </p>
+                                </div>
+                                
+                                <button type="submit" id="createPlanButton" 
+                                        class="btn-primary w-full py-4 text-lg font-semibold group">
+                                    <span class="flex items-center justify-center">
+                                        <span class="mr-3">✨</span>
+                                        Criar Meu Plano!
+                                        <span class="ml-3 transform group-hover:translate-x-1 transition-transform">→</span>
+                                    </span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar: Templates e Dicas -->
+                    <div class="space-y-6">
+                        <!-- Templates Populares -->
+                        <div class="dashboard-card bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+                                <span class="mr-3 icon-bounce">🚀</span>
+                                <span>Templates Rápidos</span>
+                            </h3>
+                            <div class="space-y-3">
+                                <button type="button" 
+                                        class="template-btn w-full text-left p-4 bg-gray-50 hover:bg-blue-50 rounded-lg transition-all border border-transparent hover:border-blue-200" 
+                                        data-name="Concurso Público Federal" 
+                                        data-months="6">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <span class="mr-3 text-lg">⚖️</span>
+                                            <div>
+                                                <div class="font-medium text-sm text-gray-700">Concurso Federal</div>
+                                                <div class="text-xs text-gray-500">6 meses</div>
+                                            </div>
+                                        </div>
+                                        <span class="text-gray-400 group-hover:text-blue-500 transition-colors">→</span>
+                                    </div>
+                                </button>
+                                
+                                <button type="button" 
+                                        class="template-btn w-full text-left p-4 bg-gray-50 hover:bg-blue-50 rounded-lg transition-all border border-transparent hover:border-blue-200" 
+                                        data-name="OAB" 
+                                        data-months="3">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <span class="mr-3 text-lg">🏛️</span>
+                                            <div>
+                                                <div class="font-medium text-sm text-gray-700">Exame da OAB</div>
+                                                <div class="text-xs text-gray-500">3 meses</div>
+                                            </div>
+                                        </div>
+                                        <span class="text-gray-400 group-hover:text-blue-500 transition-colors">→</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dicas Rápidas -->
+                        <div class="dashboard-card bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold text-indigo-800 mb-4 flex items-center">
+                                <span class="mr-3">💡</span>
+                                <span>Dicas para Sucesso</span>
+                            </h3>
+                            <ul class="space-y-3 text-sm text-indigo-700">
+                                <li class="flex items-start">
+                                    <span class="mr-2 mt-0.5 w-2 h-2 bg-indigo-400 rounded-full flex-shrink-0"></span>
+                                    <span>Seja específico no nome do plano</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="mr-2 mt-0.5 w-2 h-2 bg-indigo-400 rounded-full flex-shrink-0"></span>
+                                    <span>Configure a data da prova corretamente</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="mr-2 mt-0.5 w-2 h-2 bg-indigo-400 rounded-full flex-shrink-0"></span>
+                                    <span>Ative notificações para não perder prazos</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </main>
 
@@ -392,12 +573,23 @@
 
                 if (plans.length === 0) {
                     planList.innerHTML = `
-                        <div class="text-center p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-                            <div class="flex items-center justify-center mb-2">
-                                <span class="text-2xl icon-bounce">🌟</span>
+                        <div class="empty-state text-center py-16">
+                            <div class="mb-6">
+                                <div class="mx-auto w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mb-4">
+                                    <span class="text-4xl icon-bounce">🎆</span>
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-800 mb-2">Seu primeiro plano te espera!</h3>
+                                <p class="text-gray-600 max-w-md mx-auto">
+                                    Começe criando um plano personalizado para sua jornada rumo à aprovação. 
+                                    Vou te guiar em cada passo!
+                                </p>
                             </div>
-                            <p class="text-yellow-800 font-medium">Vamos começar?</p>
-                            <p class="text-yellow-700 text-sm mt-1">Crie o seu primeiro plano de estudos ao lado!</p>
+                            <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <span class="mr-2">⬇️</span>
+                                    <span>Use o formulário abaixo para começar</span>
+                                </div>
+                            </div>
                         </div>
                     `;
                     return;
@@ -405,8 +597,10 @@
 
                 plans.forEach((plan, index) => {
                     const planElement = document.createElement('div');
-                    planElement.className = 'plan-item flex justify-between items-center p-4 border rounded-lg hover:bg-slate-50 hover:shadow-sm transition-all duration-200';
+                    planElement.className = 'plan-item flex justify-between items-center p-6 border border-gray-200 rounded-xl hover:bg-slate-50 hover:shadow-md hover:border-blue-200 transition-all duration-300 group';
                     planElement.style.animationDelay = `${index * 0.1}s`;
+                    planElement.style.animation = 'fadeInUp 0.6s ease-out forwards';
+                    planElement.style.opacity = '0';
                     // Corrigir parsing de data para evitar Invalid Date
                     let examDate;
 
@@ -437,18 +631,29 @@
 
 
                     planElement.innerHTML = `
-                        <a href="plan_settings.html?id=${plan.id}" class="flex-grow group flex items-center">
-                            <span class="text-lg mr-3 icon-bounce">📚</span>
-                            <div>
-                                <h3 class="font-semibold text-lg text-editaliza-blue group-hover:text-blue-700 transition-colors">${plan.plan_name}</h3>
-                                <p class="text-sm text-editaliza-gray flex items-center">
-                                    <span class="mr-1">📅</span>
-                                    <span>Data da Prova: ${examDate.toLocaleDateString('pt-BR')}</span>
+                        <a href="plan_settings.html?id=${plan.id}" class="flex-grow flex items-center group-hover:translate-x-2 transition-transform">
+                            <div class="p-3 bg-blue-50 rounded-xl mr-4 group-hover:bg-blue-100 transition-colors">
+                                <span class="text-xl icon-bounce">📚</span>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-bold text-lg text-gray-900 group-hover:text-editaliza-blue transition-colors">
+                                    ${plan.plan_name}
+                                </h3>
+                                <p class="text-sm text-gray-600 flex items-center mt-1">
+                                    <span class="mr-2">📅</span>
+                                    <span>Prova em ${examDate.toLocaleDateString('pt-BR')}</span>
+                                    <span class="ml-3 text-xs bg-gray-100 px-2 py-1 rounded-full">
+                                        🎯 Ativo
+                                    </span>
                                 </p>
                             </div>
+                            <div class="text-gray-400 group-hover:text-editaliza-blue transition-colors ml-4">
+                                <span class="text-lg">→</span>
+                            </div>
                         </a>
-                        <button onclick="openDeleteModal(${plan.id}, '${plan.plan_name.replace(/'/g, "\'")}')" class="btn-danger-outline transition-all hover:scale-105">
-                            🗑️ Apagar
+                        <button onclick="openDeleteModal(${plan.id}, '${plan.plan_name.replace(/'/g, "\'")}')" 
+                                class="ml-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200">
+                            <span class="text-lg">🗑️</span>
                         </button>
                     `;
                     planList.appendChild(planElement);
@@ -480,6 +685,10 @@
 
         async function initialize() {
             await components.renderMainNavigation('dashboard.html');
+            
+            // Add hero animation class
+            document.querySelector('main section').classList.add('hero-fade-in');
+            
             fetchAndDisplayPlans();
             
             const examDateInput = document.getElementById('exam_date');
@@ -535,12 +744,18 @@
                     examDateInput.dispatchEvent(new Event('change'));
                     
                     // Feedback visual melhorado
-                    this.classList.add('bg-blue-100', 'border-blue-300');
+                    this.classList.add('bg-blue-100', 'border-blue-300', 'shadow-lg');
                     this.style.transform = 'scale(1.02)';
+                    
+                    // Animação de pulso no ícone
+                    const icon = this.querySelector('span:first-child');
+                    icon.style.animation = 'bounce 0.6s ease-in-out';
+                    
                     setTimeout(() => {
-                        this.classList.remove('bg-blue-100', 'border-blue-300');
+                        this.classList.remove('bg-blue-100', 'border-blue-300', 'shadow-lg');
                         this.style.transform = '';
-                    }, 1000);
+                        icon.style.animation = '';
+                    }, 1200);
                 });
             });
             
@@ -556,7 +771,7 @@
                 const email_study_reminders = document.getElementById('email_study_reminders').checked;
 
                 button.disabled = true;
-                button.innerHTML = '<span class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Criando seu plano...</span>';
+                button.innerHTML = '<span class="flex items-center justify-center"><div class="loading-spinner rounded-full h-5 w-5 border-2 border-white border-t-transparent mr-3"></div>Criando seu plano...</span>';
                 app.showSpinner();
 
                 try {
@@ -572,8 +787,9 @@
                     });
                     
                     // Feedback de sucesso antes da transição
-                    button.innerHTML = '<span class="flex items-center justify-center text-green-600"><svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>✨ Plano criado! Redirecionando...</span>';
-                    button.style.transform = 'scale(1.05)';
+                    button.innerHTML = '<span class="flex items-center justify-center text-white"><span class="mr-3">✓</span>✨ Plano criado! Redirecionando...</span>';
+                    button.classList.add('bg-green-500', 'hover:bg-green-600');
+                    button.style.transform = 'scale(1.02)';
                     
                     setTimeout(() => {
                         window.location.href = `plan_settings.html?id=${data.newPlanId}&new=true&guide=true`;
@@ -581,7 +797,8 @@
                 } catch (error) {
                     app.showToast(error.message, 'error');
                     button.disabled = false;
-                    button.innerHTML = '<span class="flex items-center justify-center">Criar Meu Plano! <span class="ml-2 transform group-hover:translate-x-1 transition-transform">→</span></span>';
+                    button.innerHTML = '<span class="flex items-center justify-center"><span class="mr-3">✨</span>Criar Meu Plano!<span class="ml-3 transform group-hover:translate-x-1 transition-transform">→</span></span>';
+                    button.classList.remove('bg-green-500', 'hover:bg-green-600');
                     app.hideSpinner();
                 }
             });
@@ -597,6 +814,9 @@
     </script>
     
     </div> <!-- End main content wrapper -->
+    
+    <!-- Script de preferências de email -->
+    <script src="js/email-preferences.js"></script>
     
     <!-- Script do rodapé modular -->
     <script src="js/footer.js"></script>

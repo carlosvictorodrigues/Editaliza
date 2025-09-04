@@ -88,11 +88,30 @@
         
       } catch (err) {
         errorLog('login error:', err);
+        
+        // Mensagens de erro mais específicas
+        let errorMessage = 'Erro ao fazer login';
+        if (err.message && err.message.includes('404')) {
+          errorMessage = 'Serviço temporariamente indisponível. Por favor, tente novamente em alguns minutos.';
+        } else if (err.message && err.message.includes('401')) {
+          errorMessage = 'Email ou senha incorretos. Verifique suas credenciais enviadas por email após a compra do plano.';
+        } else if (err.message && err.message.includes('403')) {
+          errorMessage = 'Você não possui um plano ativo. Adquira um plano em editaliza.com.br para ter acesso.';
+        } else if (err.message && err.message.includes('Usuário não encontrado')) {
+          errorMessage = 'Usuário não encontrado. Certifique-se de usar o email cadastrado no Cackto.';
+        } else if (err.message && err.message.includes('Senha incorreta')) {
+          errorMessage = 'Senha incorreta. Use a senha enviada por email após a compra.';
+        } else if (err.message && err.message.includes('plano ativo')) {
+          errorMessage = 'Você não possui um plano ativo. Entre em contato com o suporte.';
+        } else if (err.message) {
+          errorMessage = err.message;
+        }
+        
         if (window.notifications && typeof window.notifications.error === 'function') {
-          window.notifications.error((err && err.message) || 'Erro ao fazer login. Tente novamente.');
+          window.notifications.error(errorMessage);
         }
         if (messageContainer) {
-          messageContainer.textContent = (err && err.message) || 'Erro ao fazer login';
+          messageContainer.textContent = errorMessage;
           messageContainer.classList.add('text-red-600');
           messageContainer.style.padding = '10px';
           messageContainer.style.backgroundColor = '#fee2e2';

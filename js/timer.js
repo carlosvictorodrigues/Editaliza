@@ -542,20 +542,6 @@ function getPomodoroProgress() {
     return Math.min(100, (currentPomodoroTime / pomodoroInterval) * 100);
 }
 
-/**
- * Calcula tempo total decorrido
- */
-function getElapsedSeconds() {
-    if (!state.startTime) return state.pausedElapsed;
-    
-    if (state.running) {
-        const now = Date.now();
-        const elapsed = Math.floor((now - state.startTime) / 1000);
-        return state.pausedElapsed + elapsed;
-    }
-    
-    return state.pausedElapsed;
-}
 
 
 /**
