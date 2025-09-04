@@ -1718,11 +1718,14 @@
                 app.showSpinner();
                 try {
                     const response = await app.apiFetch(`/plans/${planId}/subjects_with_topics`, { method: 'POST', body: JSON.stringify(body) });
-                    if (!response.ok && response.status !== 201) {
-                        const error = await response.json();
-                        throw new Error(error.message || 'Erro ao adicionar disciplina');
-                    }
+                    
+                    // Ler o corpo da resposta uma única vez
                     const data = await response.json();
+                    
+                    if (!response.ok && response.status !== 201) {
+                        throw new Error(data.message || 'Erro ao adicionar disciplina');
+                    }
+                    
                     app.showToast(data.message || 'Disciplina e tópicos adicionados com sucesso!', 'success');
                     form.reset();
                     await loadSubjects();
