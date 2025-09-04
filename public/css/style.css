@@ -544,6 +544,8 @@ label.checklist-item:hover input[type="checkbox"]:not(:disabled) {
     -webkit-backdrop-filter: blur(10px) !important;
     padding: 0.5rem !important;
     margin-top: 0.5rem !important;
+    z-index: 9999 !important; /* Garantir que dropdown fique acima de outros elementos */
+    position: absolute !important;
 }
 
 .dropdown-menu a,
