@@ -510,11 +510,11 @@ const getSubjectsWithTopics = async (req, res) => {
         const query = `
             SELECT 
                 s.id, s.subject_name, s.priority_weight, s.created_at,
-                t.id as topic_id, t.topic_name, t.priority_weight as topic_priority, t.status
+                t.id as topic_id, t.description as topic_name, t.priority_weight as topic_priority, t.status
             FROM subjects s
             LEFT JOIN topics t ON s.id = t.subject_id
             WHERE s.study_plan_id = $1
-            ORDER BY s.priority_weight DESC, s.subject_name ASC, t.topic_name ASC
+            ORDER BY s.priority_weight DESC, s.subject_name ASC, t.description ASC
         `;
         
         const result = await db.pool.query(query, [planId]);
@@ -758,7 +758,7 @@ const getPlanExclusions = async (req, res) => {
         // Buscar exclusões/tópicos removidos no modo reta final - PostgreSQL compatible
         const exclusions = await dbAll(
             `SELECT 
-                t.id, t.topic_name, s.subject_name,
+                t.id, t.description as topic_name, s.subject_name,
                 'excluded_final_stretch' as reason,
                 COALESCE(t.priority_weight, 3) as priority_weight
             FROM topics t
@@ -772,7 +772,7 @@ const getPlanExclusions = async (req, res) => {
                 AND session_date >= $3
             )
             AND $4 = 1
-            ORDER BY s.subject_name, t.topic_name`,
+            ORDER BY s.subject_name, t.description`,
             [planId, planId, getBrazilianDateString(), plan.reta_final_mode ? 1 : 0]
         );
 
@@ -811,7 +811,7 @@ const getExcludedTopics = async (req, res) => {
         const excludedTopics = await dbAll(`
             SELECT DISTINCT
                 t.id,
-                t.topic_name,
+                t.description as topic_name,
                 s.subject_name,
                 COALESCE(t.priority_weight, 3) as priority_weight,
                 'Excluído automaticamente no modo Reta Final' as exclusion_reason
@@ -827,7 +827,7 @@ const getExcludedTopics = async (req, res) => {
                 AND ss.session_date >= $3
             )
             AND $4 = 1
-            ORDER BY s.subject_name ASC, t.topic_name ASC
+            ORDER BY s.subject_name ASC, t.description ASC
         `, [planId, planId, getBrazilianDateString(), plan.reta_final_mode ? 1 : 0]);
 
         const response = {
@@ -1100,7 +1100,7 @@ const getStudyTimeDistribution = async (req, res) => {
         const sessionsQuery = `
             SELECT 
                 ss.subject_name,
-                t.topic_name,
+                t.description as topic_name,
                 ss.time_studied_seconds,
                 ss.session_date,
                 ss.questions_solved
@@ -1109,7 +1109,7 @@ const getStudyTimeDistribution = async (req, res) => {
             WHERE ss.study_plan_id = $1 
                 AND ss.status IN ('Concluído', 'Concluída', 'Concluida')
                 AND ss.time_studied_seconds > 0
-            ORDER BY ss.subject_name, t.topic_name, ss.session_date DESC
+            ORDER BY ss.subject_name, t.description, ss.session_date DESC
         `;
         
         const sessions = await dbAll(sessionsQuery, [planId]);
