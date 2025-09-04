@@ -36,6 +36,11 @@ const Navigation = {
                 void('⚠️ Nenhum avatar encontrado no perfil');
             }
             
+            // Normalize local path to absolute from site root
+            if (avatar && !(String(avatar).startsWith('https://') || String(avatar).startsWith('/'))) {
+                avatar = '/' + String(avatar);
+            }
+
             this.userAvatarCache = avatar;
             this.userAvatarCacheTime = now;
             return this.userAvatarCache;
@@ -76,7 +81,7 @@ const Navigation = {
             { href: 'faq.html', text: 'FAQ' }
         ];
 
-        let linksHtml = links.map(link => {
+        const linksHtml = links.map(link => {
             if (link.dropdown) {
                 // Dropdown menu
                 const dropdownItems = link.dropdown.map(item => 
@@ -148,20 +153,18 @@ const Navigation = {
     // Gerar HTML do perfil do usuário
     generateProfileHtml(userAvatar) {
         if (userAvatar) {
-            // Sanitizar o caminho do avatar
-            const sanitizedAvatarPath = window.app?.sanitizeHtml ? window.app.sanitizeHtml(userAvatar) : userAvatar;
-            
-            // Melhor tratamento de URLs de avatar (Google vs Local)
+            // Construir URL de imagem sem escapar '/' para evitar que vire &#x2F;
+            const rawPath = typeof userAvatar === 'string' ? userAvatar : '';
             let avatarUrl;
-            if (sanitizedAvatarPath.startsWith('https://')) {
+            if (rawPath.startsWith('https://')) {
                 // Avatar do Google - usar diretamente
-                avatarUrl = sanitizedAvatarPath;
-            } else if (sanitizedAvatarPath.startsWith('/')) {
+                avatarUrl = rawPath;
+            } else if (rawPath.startsWith('/')) {
                 // Avatar local com caminho absoluto
-                avatarUrl = sanitizedAvatarPath + '?t=' + new Date().getTime();
+                avatarUrl = rawPath + '?t=' + new Date().getTime();
             } else {
-                // Avatar local relativo - adicionar cache buster e prefixo
-                avatarUrl = (sanitizedAvatarPath.startsWith('./') ? sanitizedAvatarPath : './' + sanitizedAvatarPath) + '?t=' + new Date().getTime();
+                // Avatar local relativo - normalizar para raiz
+                avatarUrl = '/' + rawPath + '?t=' + new Date().getTime();
             }
             
             return `
@@ -180,13 +183,20 @@ const Navigation = {
                     <span class="hidden md:inline group-hover:text-editaliza-blue transition-colors duration-200">Perfil</span>
                 </a>`;
         } else {
-            // Fallback para ícone padrão
+            // Fallback para ícone padrão, mas já deixa o <img id="nav-user-avatar"> oculto
+            // para permitir atualização dinâmica após o usuário salvar um avatar.
             return `
                 <a href="profile.html" class="hidden sm:flex items-center space-x-2 text-sm font-medium text-editaliza-gray hover:text-editaliza-black transition-all duration-200 group">
-                    <div class="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center text-white group-hover:from-editaliza-blue group-hover:to-indigo-600 transition-all duration-200 shadow-sm">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
-                        </svg>
+                    <div class="relative">
+                        <img id="nav-user-avatar" src="" 
+                             class="w-8 h-8 rounded-full object-cover border-2 border-transparent group-hover:border-editaliza-blue transition-all duration-200 shadow-sm"
+                             alt="Avatar do usuário" style="display: none;"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center text-white group-hover:from-editaliza-blue group-hover:to-indigo-600 transition-all duration-200 shadow-sm">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
                     </div>
                     <span class="hidden md:inline group-hover:text-editaliza-blue transition-colors duration-200">Perfil</span>
                 </a>`;
@@ -301,7 +311,7 @@ const Navigation = {
             { id: 'navSettings', href: `plan_settings.html?id=${planId}`, text: 'Configurar Plano' }
         ];
 
-        let linksHtml = links.map(link => {
+        const linksHtml = links.map(link => {
             const isActive = activePage === link.href.split('?')[0];
             const activeClass = 'bg-editaliza-blue text-white cursor-default';
             const defaultClass = 'bg-white hover:bg-gray-100 text-gray-700';
@@ -330,19 +340,15 @@ const Navigation = {
         if (navAvatar) {
             const newAvatar = await this.loadUserAvatar();
             if (newAvatar) {
-                const sanitizedAvatarPath = window.app?.sanitizeHtml ? window.app.sanitizeHtml(newAvatar) : newAvatar;
-                
-                // Handle Google avatars vs local avatars
+                // Construir URL de imagem sem escapar '/'
+                const rawPath = typeof newAvatar === 'string' ? newAvatar : '';
                 let avatarUrl;
-                if (sanitizedAvatarPath.startsWith('https://')) {
-                    // Google avatar - use directly
-                    avatarUrl = sanitizedAvatarPath;
-                } else if (sanitizedAvatarPath.startsWith('/')) {
-                    // Local avatar with absolute path
-                    avatarUrl = sanitizedAvatarPath + '?t=' + new Date().getTime();
+                if (rawPath.startsWith('https://')) {
+                    avatarUrl = rawPath;
+                } else if (rawPath.startsWith('/')) {
+                    avatarUrl = rawPath + '?t=' + new Date().getTime();
                 } else {
-                    // Local avatar - add relative path and cache buster
-                    avatarUrl = (sanitizedAvatarPath.startsWith('./') ? sanitizedAvatarPath : './' + sanitizedAvatarPath) + '?t=' + new Date().getTime();
+                    avatarUrl = '/' + rawPath + '?t=' + new Date().getTime();
                 }
                 
                 navAvatar.src = avatarUrl;

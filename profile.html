@@ -720,7 +720,7 @@
                 // Novos dados pessoais
                 document.getElementById('state').value = profile.state || '';
                 document.getElementById('city').value = profile.city || '';
-                document.getElementById('birthDate').value = profile.birth_date || '';
+                document.getElementById('birthDate').value = profile.birth_date ? String(profile.birth_date).split('T')[0] : '';
                 document.getElementById('education').value = profile.education || '';
                 document.getElementById('workStatus').value = profile.work_status || '';
                 
@@ -754,10 +754,13 @@
                 
                 if (profile.google_avatar && profile.auth_provider === 'google') {
                     selectedAvatarPath = profile.google_avatar;
-
                 } else {
                     selectedAvatarPath = profile.profile_picture;
+                }
 
+                // Normalize local paths to absolute from root
+                if (selectedAvatarPath && !(selectedAvatarPath.startsWith('https://') || selectedAvatarPath.startsWith('/'))) {
+                    selectedAvatarPath = '/' + selectedAvatarPath;
                 }
 
                 updateProfilePhoto(selectedAvatarPath);
@@ -806,16 +809,21 @@
 
                 console.log('🖼️ Tipo de avatar:', path.startsWith('https://') ? 'Google' : 'Local');
                 
-                // Check if it's a Google avatar (starts with https://)
+                // Handle Google vs local vs absolute paths robustly
                 if (path.startsWith('https://')) {
                     // Google avatar - use directly without cache buster
-
                     profilePhoto.src = path;
                 } else {
                     // Local avatar - add cache buster to avoid caching issues
                     const cacheBuster = '?t=' + new Date().getTime();
-                    const finalPath = path.startsWith('./') ? path + cacheBuster : './' + path + cacheBuster;
-
+                    let finalPath = path;
+                    if (path.startsWith('/')) {
+                        finalPath = path + cacheBuster; // absolute site root
+                    } else if (path.startsWith('./')) {
+                        finalPath = path + cacheBuster; // relative kept as-is
+                    } else {
+                        finalPath = '/' + path + cacheBuster; // make absolute from root
+                    }
                     profilePhoto.src = finalPath;
                 }
                 
@@ -895,7 +903,7 @@
 
             const files = avatarCategories[category]?.files || [];
             files.forEach(file => {
-                const avatarPath = `images/avatars/${category}/${file}`;
+                const avatarPath = `/images/avatars/${category}/${file}`;
 
                 const avatarContainer = document.createElement('div');
                 avatarContainer.className = 'relative';

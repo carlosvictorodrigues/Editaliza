@@ -20,6 +20,7 @@ class CacktoWebhookProcessor {
      */
     setupEventHandlers() {
         // Eventos de pagamento
+        this.eventHandlers.set('purchase_approved', this.handlePaymentApproved.bind(this));
         this.eventHandlers.set('payment.approved', this.handlePaymentApproved.bind(this));
         this.eventHandlers.set('payment.rejected', this.handlePaymentRejected.bind(this));
         this.eventHandlers.set('payment.cancelled', this.handlePaymentCancelled.bind(this));

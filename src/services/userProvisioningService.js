@@ -83,40 +83,48 @@ class UserProvisioningService {
             const hashedPassword = await bcrypt.hash(tempPassword, 10);
             
             // Criar usuário
-            const result = await dbRun(`
-                INSERT INTO users (
-                    email, 
-                    name, 
-                    password_hash, 
-                    plan_type, 
-                    plan_status,
-                    plan_expiry,
-                    cackto_transaction_id,
-                    created_at,
-                    updated_at
-                ) VALUES (?, ?, ?, ?, 'active', NOW() + INTERVAL '${this.planTypes[plan_type].duration} days', ?, NOW(), NOW())
-            `, [
-                customer_email,
-                customer_name,
-                hashedPassword,
-                plan_type,
-                transaction_id
-            ]);
+            const insertedRow = await dbGet(`
+                    INSERT INTO users (
+                        email,
+                        name,
+                        password_hash,
+                        plan_type,
+                        plan_status,
+                        plan_expiry,
+                        cackto_transaction_id,
+                        created_at,
+                        updated_at
+                    ) VALUES (?, ?, ?, ?, 'active', NOW() + INTERVAL '${this.planTypes[plan_type].duration} days', ?, NOW(), NOW())
+                    RETURNING id
+                `, [
+                    customer_email,
+                    customer_name,
+                    hashedPassword,
+                    plan_type,
+                    transaction_id
+                ]);
 
-            // Enviar email com credenciais
-            await this.sendWelcomeEmail({
+                const newUserId = insertedRow && insertedRow.id ? insertedRow.id : null;
+// Enviar email com credenciais
+    
+            console.info('[DEBUG_EMAIL] prestes a enviar welcome email para:', customer_email);
+    
+            const sendResult = await this.sendWelcomeEmail({
                 email: customer_email,
                 name: customer_name,
                 password: tempPassword,
                 planType: plan_type,
                 expiryDate: new Date(Date.now() + (this.planTypes[plan_type].duration * 24 * 60 * 60 * 1000))
             });
+    
+            console.info('[DEBUG_EMAIL] resultado do envio welcome:', sendResult);
+
 
             console.log(`✅ Usuário criado com sucesso: ${customer_email}`);
             
             return {
                 success: true,
-                userId: result.lastID,
+                userId: newUserId,
                 email: customer_email,
                 planType: plan_type
             };
@@ -145,12 +153,18 @@ class UserProvisioningService {
             const user = await dbGet('SELECT email, name FROM users WHERE id = ?', [userId]);
 
             // Enviar email de renovação
-            await this.sendRenewalEmail({
+    
+            console.info('[DEBUG_EMAIL] prestes a enviar renewal email para:', user.email);
+    
+            const renewalResult = await this.sendRenewalEmail({
                 email: user.email,
                 name: user.name,
                 planType: planType,
                 expiryDate: new Date(Date.now() + (this.planTypes[planType].duration * 24 * 60 * 60 * 1000))
             });
+    
+            console.info('[DEBUG_EMAIL] resultado do envio renewal:', renewalResult);
+
 
             return {
                 success: true,

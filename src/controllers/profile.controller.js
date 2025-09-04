@@ -91,13 +91,18 @@ const uploadMiddleware = multer({
  */
 const getProfile = async (req, res) => {
     try {
+        // Selecionar todos os campos esperados pelo frontend e necessários para avatar
         const user = await db.getAsync(`
             SELECT 
                 id, 
                 email, 
                 name, 
                 created_at,
-                password_hash
+                profile_picture,
+                phone, whatsapp,
+                state, city, birth_date, education, work_status, first_time, concursos_count,
+                difficulties, area_interest, level_desired, timeline_goal, study_hours, motivation_text,
+                auth_provider, google_avatar
             FROM users 
             WHERE id = ?
         `, [req.user.id]);
@@ -107,9 +112,18 @@ const getProfile = async (req, res) => {
             return res.status(404).json({ error: 'Usuário não encontrado.' });
         }
         
-        // Não enviar password_hash na resposta
-        delete user.password_hash;
-        
+        // Normalizar/parsear campos especiais
+        let parsedDifficulties = [];
+        try {
+            if (user.difficulties) {
+                parsedDifficulties = Array.isArray(user.difficulties)
+                    ? user.difficulties
+                    : JSON.parse(user.difficulties || '[]');
+            }
+        } catch {
+            parsedDifficulties = [];
+        }
+
         logger.info('PROFILE_FETCHED', { userId: req.user.id });
         
         res.json({
@@ -117,7 +131,7 @@ const getProfile = async (req, res) => {
             email: user.email,
             name: user.name,
             created_at: user.created_at,
-            // Campos que a página profile.html espera (retornar vazio se não existir)
+            profile_picture: user.profile_picture || null,
             phone: user.phone || '',
             whatsapp: user.whatsapp || '',
             state: user.state || '',
@@ -127,12 +141,14 @@ const getProfile = async (req, res) => {
             work_status: user.work_status || '',
             first_time: user.first_time || false,
             concursos_count: user.concursos_count || 0,
-            difficulties: user.difficulties || [],
+            difficulties: parsedDifficulties,
             area_interest: user.area_interest || '',
             level_desired: user.level_desired || '',
             timeline_goal: user.timeline_goal || '',
             study_hours: user.study_hours || '',
-            motivation_text: user.motivation_text || ''
+            motivation_text: user.motivation_text || '',
+            auth_provider: user.auth_provider || 'email',
+            google_avatar: user.google_avatar || null
         });
     } catch (error) {
         logger.error('GET_PROFILE_ERROR', { 

@@ -601,9 +601,13 @@ console.log('🚀 SERVER.JS: Continuando com configuração do servidor...');
 
 // WORKAROUND: Aplicar apenas autenticação sem subscription info
 app.use('*', (req, res, next) => {
-    // Pular autenticação para rotas públicas
-    const publicPaths = ['/health', '/login.html', '/register.html', '/auth', '/api/webhooks', '/api/test'];
-    if (publicPaths.some(path => req.originalUrl.includes(path)) || req.method === 'OPTIONS') {
+    // Pular autenticação para rotas públicas e assets estáticos
+    const publicPaths = [
+        '/health', '/login.html', '/register.html', '/auth', '/api/webhooks', '/api/test',
+        // Assets estáticos
+        '/images', '/css', '/js', '/uploads', '/favicon', '/favicon.ico', '/manifest', '/apple-touch-icon'
+    ];
+    if (publicPaths.some(path => req.originalUrl.startsWith(path)) || req.method === 'OPTIONS') {
         return next();
     }
     
