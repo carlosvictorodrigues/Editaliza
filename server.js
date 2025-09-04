@@ -603,7 +603,7 @@ console.log('🚀 SERVER.JS: Continuando com configuração do servidor...');
 app.use('*', (req, res, next) => {
     // Pular autenticação para rotas públicas e assets estáticos
     const publicPaths = [
-        '/health', '/login.html', '/register.html', '/auth', '/api/webhooks', '/api/test',
+        '/health', '/login.html', '/register.html', '/auth', '/api/auth', '/api/webhooks', '/api/test',
         // Assets estáticos
         '/images', '/css', '/js', '/uploads', '/favicon', '/favicon.ico', '/manifest', '/apple-touch-icon'
     ];
