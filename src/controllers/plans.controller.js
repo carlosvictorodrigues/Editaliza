@@ -449,7 +449,7 @@ const createSubjectWithTopics = async (req, res) => {
         const createdTopics = [];
         for (const topicName of topicsList) {
             const topicQuery = `
-                INSERT INTO topics (subject_id, topic_name, priority_weight, status, created_at, updated_at)
+                INSERT INTO topics (subject_id, description, priority_weight, status, created_at, updated_at)
                 VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
                 RETURNING id
             `;
