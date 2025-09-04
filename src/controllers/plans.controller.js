@@ -133,7 +133,14 @@ const getPlans = async (req, res) => {
 const createPlan = async (req, res) => {
     console.log('\n\n🎯š¨🎯š¨🎯š¨ [CREATEPLAN_MODULAR] MÃ‰TODO MODULAR EXECUTADO! 🎯š¨🎯š¨🎯š¨\n\n');
     
-    const { plan_name, exam_date } = req.body;
+    // Extrair preferências de email separadamente
+    const { 
+        plan_name, 
+        exam_date,
+        email_daily_schedule,
+        email_weekly_summary,
+        email_study_reminders 
+    } = req.body;
     const defaultHours = { '0': 0, '1': 4, '2': 4, '3': 4, '4': 4, '5': 4, '6': 4 };
     
     try {
@@ -150,6 +157,34 @@ const createPlan = async (req, res) => {
             postponement_count: 0,
             has_essay: false
         };
+        
+        // Se houver preferências de email, salvar em tabela separada
+        if (email_daily_schedule !== undefined || email_weekly_summary !== undefined || email_study_reminders !== undefined) {
+            try {
+                const emailPrefs = {
+                    email_daily_schedule: email_daily_schedule !== undefined ? email_daily_schedule : true,
+                    email_weekly_summary: email_weekly_summary !== undefined ? email_weekly_summary : true,
+                    email_study_reminders: email_study_reminders !== undefined ? email_study_reminders : false
+                };
+                
+                // Salvar preferências de email
+                await dbRun(`
+                    INSERT INTO user_email_preferences (user_id, email_daily_schedule, email_weekly_summary, email_study_reminders)
+                    VALUES ($1, $2, $3, $4)
+                    ON CONFLICT (user_id) 
+                    DO UPDATE SET 
+                        email_daily_schedule = $2,
+                        email_weekly_summary = $3,
+                        email_study_reminders = $4,
+                        updated_at = CURRENT_TIMESTAMP
+                `, [req.user.id, emailPrefs.email_daily_schedule, emailPrefs.email_weekly_summary, emailPrefs.email_study_reminders]);
+                
+                console.log('[PLANS] Preferências de email salvas:', emailPrefs);
+            } catch (emailError) {
+                console.log('[PLANS] Erro ao salvar preferências de email (continuando):', emailError.message);
+                // Não falhar a criação do plano se houver erro nas preferências de email
+            }
+        }
         
         console.log('[PLANS_CONTROLLER] Chamando repos.plan.createPlan com:', planData);
         console.log('[PLANS_CONTROLLER] tipo do repos.plan:', typeof repos.plan, repos.plan.constructor?.name);
@@ -600,7 +635,7 @@ const getPlanStatistics = async (req, res) => {
             `, [planId]);
 
             if (streakData && streakData.length > 0) {
-                let today = new Date(getBrazilianDateString());
+                const today = new Date(getBrazilianDateString());
                 let current = 0;
                 let max = 0;
 
