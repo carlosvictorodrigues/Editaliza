@@ -155,7 +155,7 @@ const createPlan = async (req, res) => {
             session_duration_minutes: 50,
             review_mode: 'completo',
             has_essay: false,
-            reta_final_mode: false
+            reta_final_mode: 0
         };
         
         // Depois, se houver preferências de email, salvar em tabela separada
