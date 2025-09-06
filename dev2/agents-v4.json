@@ -1,0 +1,136 @@
+{
+  "project_dir": "C:\\Users\\Gabriel\\OneDrive\\Área de Trabalho\\Editaliza",
+  "server_host": "editaliza",
+  "pm2_app": "editaliza-app",
+  "orchestration": {
+    "max_turns": 16,
+    "parallel_execution": true,
+    "auto_retry": true,
+    "stop_tokens": ["<DONE>"],
+    "sync_token": "<SYNC_GO>"
+  },
+  "architect": {
+    "command": "claude",
+    "patterns": [
+      "{cmd} --model opus --print --dangerously-skip-permissions \"{prompt}\"",
+      "{cmd} --model opus-4.1 --print --dangerously-skip-permissions \"{prompt}\"",
+      "echo \"{prompt}\" | {cmd} --model opus --print --dangerously-skip-permissions",
+      "{cmd} --model opus --print \"{prompt}\""
+    ],
+    "timeout_ms": 120000,
+    "retry_count": 2,
+    "env": {
+      "NO_COLOR": "1",
+      "CI": "1"
+    }
+  },
+  "architect_fallback": {
+    "command": "gemini",
+    "patterns": [
+      "{cmd} -p \"{prompt}\" --model gemini-2.5-pro",
+      "{cmd} -p \"{prompt}\" -m gemini-2.5-pro",
+      "echo \"{prompt}\" | {cmd} -p \"\" --model gemini-2.5-pro"
+    ],
+    "timeout_ms": 120000,
+    "retry_count": 1
+  },
+  "agents": {
+    "fe": {
+      "name": "Frontend Agent",
+      "command": "gemini",
+      "specialization": "Frontend, React, TypeScript, CSS, UX",
+      "patterns": [
+        "{cmd} -p \"{prompt}\" --model gemini-2.5-pro -y",
+        "{cmd} -p \"{prompt}\" -m gemini-2.5-pro -y",
+        "echo \"{prompt}\" | {cmd} -p \"\" --model gemini-2.5-pro -y"
+      ],
+      "timeout_ms": 300000,
+      "retry_count": 2
+    },
+    "be": {
+      "name": "Backend Agent",
+      "command": "claude",
+      "specialization": "Node.js, Express, APIs, Business Logic",
+      "patterns": [
+        "{cmd} --model sonnet --print --dangerously-skip-permissions --add-dir . \"{prompt}\"",
+        "{cmd} --model sonnet-4.1 --print --dangerously-skip-permissions --add-dir . \"{prompt}\"",
+        "echo \"{prompt}\" | {cmd} --model sonnet --print --dangerously-skip-permissions --add-dir ."
+      ],
+      "timeout_ms": 300000,
+      "retry_count": 3,
+      "env": {
+        "NO_COLOR": "1",
+        "CI": "1"
+      }
+    },
+    "devops": {
+      "name": "DevOps Agent",
+      "command": "claude",
+      "specialization": "Deploy, PM2, Nginx, SSH, CI/CD",
+      "patterns": [
+        "{cmd} --model sonnet --print --dangerously-skip-permissions --add-dir . \"{prompt}\"",
+        "{cmd} --model sonnet-4.1 --print --dangerously-skip-permissions --add-dir . \"{prompt}\"",
+        "echo \"{prompt}\" | {cmd} --model sonnet --print --dangerously-skip-permissions --add-dir ."
+      ],
+      "timeout_ms": 300000,
+      "retry_count": 3,
+      "env": {
+        "NO_COLOR": "1",
+        "CI": "1"
+      }
+    },
+    "dba": {
+      "name": "Database Agent",
+      "command": "claude",
+      "specialization": "PostgreSQL, Migrations, Indexes, Query Optimization",
+      "patterns": [
+        "{cmd} --model sonnet --print --dangerously-skip-permissions --add-dir . \"{prompt}\"",
+        "{cmd} --model sonnet-4.1 --print --dangerously-skip-permissions --add-dir . \"{prompt}\"",
+        "echo \"{prompt}\" | {cmd} --model sonnet --print --dangerously-skip-permissions --add-dir ."
+      ],
+      "timeout_ms": 300000,
+      "retry_count": 3,
+      "env": {
+        "NO_COLOR": "1",
+        "CI": "1"
+      }
+    },
+    "qa": {
+      "name": "QA Agent",
+      "command": "gemini",
+      "specialization": "Testing, E2E, API Contracts, Test Automation",
+      "patterns": [
+        "{cmd} -p \"{prompt}\" --model gemini-2.5-pro -y",
+        "{cmd} -p \"{prompt}\" -m gemini-2.5-pro -y",
+        "echo \"{prompt}\" | {cmd} -p \"\" --model gemini-2.5-pro -y"
+      ],
+      "timeout_ms": 300000,
+      "retry_count": 2
+    }
+  },
+  "monitoring": {
+    "health_check_interval": 30000,
+    "metrics_enabled": true,
+    "alert_on_failure": true
+  },
+  "legacy_executors": {
+    "executor_a": {
+      "command": "claude",
+      "patterns": [
+        "{cmd} --model sonnet --print --dangerously-skip-permissions --add-dir . \"{prompt}\"",
+        "{cmd} --model sonnet-4.1 --print --dangerously-skip-permissions --add-dir . \"{prompt}\""
+      ],
+      "timeout_ms": 420000,
+      "retry_count": 3
+    },
+    "executor_b": {
+      "command": "gemini",
+      "patterns": [
+        "{cmd} -p \"{prompt}\" --model gemini-2.5-pro -y",
+        "{cmd} -p \"{prompt}\" -m gemini-2.5-pro -y"
+      ],
+      "timeout_ms": 420000,
+      "retry_count": 2
+    }
+  }
+}

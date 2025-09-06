@@ -603,7 +603,7 @@ console.log('🚀 SERVER.JS: Continuando com configuração do servidor...');
 app.use('*', (req, res, next) => {
     // Pular autenticação para rotas públicas e assets estáticos
     const publicPaths = [
-        '/health', '/login.html', '/register.html', '/auth', '/api/auth', '/api/webhooks', '/api/test',
+        '/health', '/healthz', '/login.html', '/register.html', '/auth', '/api/auth', '/api/webhooks', '/api/test',
         // Assets estáticos
         '/images', '/css', '/js', '/uploads', '/favicon', '/favicon.ico', '/manifest', '/apple-touch-icon'
     ];
@@ -762,7 +762,7 @@ const globalLimiter = rateLimit({
         }
         
         const skipPaths = [
-            '/health', '/ready', // Health checks
+            '/health', '/healthz', '/ready', // Health checks
             '/gamification',
             '/schedule', 
             '/overdue_check',
@@ -852,6 +852,11 @@ const dbRun = db.run && typeof db.run === 'function' ?
     (sql, params = []) => new Promise((resolve, reject) => db.run(sql, params, function(err) { err ? reject(err) : resolve(this); }));
 
 // --- ROTAS DE AUTENTICAÇÃO E USUÁRIO ---
+
+// Health check endpoint (kubernetes/docker health probe)
+app.get('/healthz', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // Rota para registrar um novo usuário
 // LEGACY AUTH ROUTES - COMMENTED OUT (Now using modular /auth routes)
@@ -1195,26 +1200,6 @@ app.get('/api/test-db', authenticateToken, async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // === ROTA DE GAMIFICAÇÃO MIGRADA PARA MÓDULO ===
 // A rota /api/plans/:planId/gamification foi migrada para:
 // src/controllers/gamification.controller.js
@@ -1235,20 +1220,13 @@ app.get('/api/test-db', authenticateToken, async (req, res) => {
 
 
 
-
             // Pegar dados de gamificação
             // CORREÇÃO: Contar tópicos únicos concluídos independente do session_type
 
 
 
 
-
-
-
-
-
             // Debug: Log para verificar o que está sendo calculado
-
 
 
 
@@ -1267,36 +1245,12 @@ app.get('/api/test-db', authenticateToken, async (req, res) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             // Calcular dias até prova
 
 
 
 
-
             // Determinar nível atual
-
-
-
-
-
 
 
 

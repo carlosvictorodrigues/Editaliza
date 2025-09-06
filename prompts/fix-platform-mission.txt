@@ -1,0 +1,104 @@
+MISSÃO CRÍTICA: SINCRONIZAÇÃO COMPLETA FRONTEND/BACKEND DO EDITALIZA
+
+CONTEXTO DO PROBLEMA:
+- Backend foi modificado e está funcionando corretamente
+- Frontend ficou desconectado após mudanças no backend
+- Sistema precisa funcionar 100% sem erros
+- Fluxo: Local → GitHub → Servidor (161.35.127.123)
+
+OBJETIVO PRINCIPAL:
+Garantir que TODAS as funcionalidades funcionem perfeitamente, testando cada fluxo como um usuário real faria.
+
+FLUXOS QUE DEVEM FUNCIONAR:
+1. AUTENTICAÇÃO
+   - Entrar no site (login.html)
+   - Fazer login com credenciais existentes
+   - Registrar novo usuário
+   - Recuperar senha
+
+2. GESTÃO DE PLANOS
+   - Criar novo plano de estudos
+   - Adicionar disciplinas ao plano
+   - Adicionar tópicos às disciplinas
+   - Editar configurações do plano
+   - Deletar plano se necessário
+
+3. CRONOGRAMA
+   - Gerar cronograma de estudos
+   - Visualizar cronograma gerado
+   - Ajustar datas e horários
+   - Recalcular cronograma
+
+4. SESSÕES DE ESTUDO (home.html)
+   - Ver sessões de estudo agendadas
+   - Clicar em "Iniciar Estudo"
+   - Modal de checklist deve abrir
+   - Modal de cronômetro deve funcionar
+   - Pomodoro timer funcionando
+   - Pausar/Continuar cronômetro
+   - Marcar sessão como concluída
+   - Registrar progresso
+
+5. NOTIFICAÇÕES
+   - Notificações inteligentes funcionando
+   - Lembretes de estudo
+   - Alertas de revisão
+
+6. OUTRAS FUNCIONALIDADES
+   - Dashboard com estatísticas
+   - Relatórios de progresso
+   - Configurações do usuário
+   - Tema dark/light se existir
+
+PROBLEMAS CONHECIDOS A RESOLVER:
+1. Interceptador temporário em plan_settings.html (linha 786)
+   - Está corrigindo /subjects para /subjects_with_topics
+   - Precisa encontrar origem da chamada incorreta
+
+2. Erro de tipo reta_final_mode já corrigido
+   - Mudado de boolean para integer
+
+3. Arquivos temporários a remover:
+   - plan_settings_server_temp.html
+   - plan_settings_temp.html
+   - public/plan_settings_server.html
+
+ESTRATÉGIA DE CORREÇÃO:
+1. Mapear todas as chamadas de API no frontend
+2. Verificar se correspondem às rotas do backend
+3. Testar cada funcionalidade individualmente
+4. Corrigir erros encontrados
+5. Fazer teste end-to-end completo
+
+EVIDÊNCIAS DE SUCESSO:
+- Nenhum erro no console do navegador
+- Nenhum erro 404 ou 500 nas requisições
+- Todos os modais abrem corretamente
+- Dados salvos persistem no banco
+- Cronômetro e notificações funcionam
+- Usuário consegue completar todo o fluxo
+
+ARQUIVOS CRÍTICOS:
+Frontend:
+- public/login.html
+- public/home.html
+- public/plan_settings.html
+- public/js/app.js
+- public/js/modules/*
+
+Backend:
+- server.js
+- src/routes/*
+- src/controllers/*
+- src/repositories/*
+
+COMANDOS ÚTEIS:
+# Logs do servidor
+ssh editaliza "pm2 logs editaliza-app --lines 100"
+
+# Reiniciar aplicação
+ssh editaliza "pm2 restart editaliza-app"
+
+# Deploy
+git add . && git commit -m "fix: message" && git push origin main
+ssh editaliza "cd /root/editaliza && git pull && pm2 restart editaliza-app"

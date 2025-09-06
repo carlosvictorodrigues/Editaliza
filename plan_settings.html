@@ -783,6 +783,7 @@
             }, 300);
         }
         
+        
         async function initialize() {
             components.renderMainNavigation('dashboard.html');
             if (!planId) { window.location.href = 'dashboard.html'; return; }
@@ -801,7 +802,11 @@
             renderHoursInputs();
             app.showSpinner();
             try {
-                                const plan = await app.apiFetch(`/plans/${planId}`);
+                const response = await app.apiFetch(`/plans/${planId}`);
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar plano');
+                }
+                const plan = await response.json();
                 components.renderPlanHeader(planId, plan.plan_name, 'plan_settings.html');
                 
                 document.getElementById('daily_goal').value = plan.daily_question_goal;
@@ -881,11 +886,17 @@
             
             loadingSubjects = true;
             try {
-                                const subjects = await app.apiFetch(`/plans/${planId}/subjects_with_topics`);
+                console.log('[loadSubjects] Buscando disciplinas para plano:', planId);
+                const response = await app.apiFetch(`/plans/${planId}/subjects_with_topics`);
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar disciplinas');
+                }
+                const subjects = await response.json();
+                console.log('[loadSubjects] Disciplinas recebidas:', subjects);
                 const container = document.getElementById('subjectsContainer');
                 container.innerHTML = '';
 
-                if (subjects.length === 0) {
+                if (!subjects || subjects.length === 0) {
                     container.innerHTML = `<div class="text-center p-6 bg-yellow-50 border border-yellow-200 rounded-lg"><p class="text-yellow-800">Nenhuma disciplina cadastrada.</p></div>`;
                     return;
                 }
@@ -978,7 +989,11 @@
             const header = document.getElementById(`topics-header-${subjectId}`);
             
             try {
-                                const topics = await app.apiFetch(`/subjects/${subjectId}/topics`);
+                const response = await app.apiFetch(`/subjects/${subjectId}/topics`);
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar tópicos');
+                }
+                const topics = await response.json();
                 const todayStr = new Date().toISOString().split('T')[0];
 
                 // Salvar dados originais para comparação
@@ -1266,10 +1281,14 @@
 
                 app.showSpinner();
                 try {
-                                        const response = await app.apiFetch('/topics/batch_update_details', {
+                    const response = await app.apiFetch('/topics/batch_update_details', {
                         method: 'PATCH',
                         body: JSON.stringify({ topics: topicsToUpdate })
                     });
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Erro ao atualizar tópicos');
+                    }
 
                     app.showToast(`✓ ${topicsToUpdate.length} tópico${topicsToUpdate.length > 1 ? 's' : ''} atualizado${topicsToUpdate.length > 1 ? 's' : ''} com sucesso!`, 'success');
                     
@@ -1350,7 +1369,11 @@
         async function deleteTopic(topicId) {
             app.showSpinner();
             try {
-                                await app.apiFetch(`/topics/${topicId}`, { method: 'DELETE' });
+                const response = await app.apiFetch(`/topics/${topicId}`, { method: 'DELETE' });
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Erro ao excluir tópico');
+                }
                 app.showToast('✓ Tópico excluído com sucesso!', 'success');
                 
                 // Recarregar a disciplina que contém este tópico
@@ -1612,8 +1635,16 @@
         async function submitApiRequestWrapper(url, method, body, successMessage) {
             app.showSpinner();
             try {
-                const data = await app.apiFetch(url, { method, body: body ? JSON.stringify(body) : undefined });
-                app.showToast(successMessage || data.message, 'success');
+                const response = await app.apiFetch(url, { method, body: body ? JSON.stringify(body) : undefined });
+                if (!response.ok && response.status !== 201 && response.status !== 204) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'Erro ao processar requisição');
+                }
+                let data = {};
+                if (response.status !== 204) {
+                    data = await response.json();
+                }
+                app.showToast(successMessage || data.message || 'Operação realizada com sucesso!', 'success');
                 closeModal();
                 await loadSubjects();
                 document.getElementById('generateButton').disabled = false;
@@ -1687,11 +1718,26 @@
                 const body = { subject_name: document.getElementById('subject_name').value, priority_weight: document.getElementById('priority_weight').value, topics_list: document.getElementById('topics_list').value };
                 app.showSpinner();
                 try {
-                                        const data = await app.apiFetch(`/plans/${planId}/subjects_with_topics`, { method: 'POST', body: JSON.stringify(body) });
-                    app.showToast(data.message, 'success');
+                    console.log('[submitAddSubjectWithTopics] Enviando requisição...');
+                    const response = await app.apiFetch(`/plans/${planId}/subjects_with_topics`, { method: 'POST', body: JSON.stringify(body) });
+                    
+                    console.log('[submitAddSubjectWithTopics] Response status:', response.status);
+                    
+                    // Ler o corpo da resposta uma única vez
+                    const data = await response.json();
+                    console.log('[submitAddSubjectWithTopics] Response data:', data);
+                    
+                    if (!response.ok && response.status !== 201) {
+                        throw new Error(data.message || 'Erro ao adicionar disciplina');
+                    }
+                    
+                    app.showToast(data.message || 'Disciplina e tópicos adicionados com sucesso!', 'success');
                     form.reset();
+                    console.log('[submitAddSubjectWithTopics] Chamando loadSubjects...');
                     await loadSubjects();
+                    console.log('[submitAddSubjectWithTopics] loadSubjects concluído');
                 } catch (error) {
+                    console.error('[submitAddSubjectWithTopics] Erro:', error);
                     app.showToast(error.message, 'error');
                 } finally {
                     app.hideSpinner();
@@ -1801,6 +1847,12 @@
                             timeout: 15000 // Aumentar timeout para 15 segundos
                         });
                         console.log('apiFetch retornou:', response);
+                        
+                        // Processar resposta
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.message || 'Erro ao salvar configurações');
+                        }
                     } catch (fetchError) {
                         console.error('Erro no app.apiFetch:', fetchError);
                         console.error('Stack:', fetchError.stack);
@@ -1857,10 +1909,15 @@
                 
                 try {
                     const settings = getSettingsFromForm();
-                                        const result = await app.apiFetch(`/plans/${planId}/generate`, {
+                    const response = await app.apiFetch(`/plans/${planId}/generate`, {
                         method: 'POST',
                         body: JSON.stringify(settings)
                     });
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.message || 'Erro ao gerar cronograma');
+                    }
+                    const result = await response.json();
 
                     if (result.retaFinal && result.retaFinal.excludedTopics.length > 0) {
                         showRetaFinalReport(result.retaFinal.excludedTopics, result.retaFinal.prioritizedSubjects || []);

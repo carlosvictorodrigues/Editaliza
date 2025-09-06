@@ -264,7 +264,7 @@
                     return;
                 }
 
-                const subjects = await app.apiFetch(`/plans/${planId}/subjects`);
+                const subjects = await app.apiFetch(`/plans/${planId}/subjects_with_topics`);
                 planSubjects = subjects.map(s => s.subject_name).sort();
 
                 

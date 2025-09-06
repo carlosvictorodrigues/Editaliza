@@ -1,0 +1,764 @@
+{
+  "backend": {
+    "routes": [
+      "/webhook/cackto",
+      "/api/subscription/status/:param",
+      "/:param",
+      "/profile/upload-photo",
+      "/register",
+      "/login",
+      "/auth/google",
+      "/auth/google/callback",
+      "/auth/session-token",
+      "/auth/google/status",
+      "/logout",
+      "/request-password-reset",
+      "/reset-password",
+      "/profile",
+      "/plans",
+      "/plans/:param",
+      "/plans/:param",
+      "/plans/:param/settings",
+      "/plans/:param/subjects",
+      "/plans/:param/subjects_with_topics",
+      "/subjects/:param",
+      "/subjects/:param/topics",
+      "/topics/batch_update",
+      "/topics/batch_update_details",
+      "/topics/:param",
+      "/plans/:param/generate",
+      "/plans/:param/replan-preview",
+      "/plans/:param/replan",
+      "/plans/:param/exclusions",
+      "/plans/:param/excluded-topics",
+      "/plans/:param/overdue_check",
+      "/plans/:param/schedule",
+      "/sessions/batch_update_status",
+      "/sessions/:param/reinforce",
+      "/sessions/:param/postpone",
+      "/plans/:param/progress",
+      "/plans/:param/goal_progress",
+      "/plans/:param/question_radar",
+      "/plans/:param/review_data",
+      "/plans/:param/detailed_progress",
+      "/plans/:param/activity_summary",
+      "/plans/:param/realitycheck",
+      "/sessions/:param/time",
+      "/plans/:param/gamification",
+      "/plans/:param/share-progress",
+      "/",
+      "/health",
+      "/ready",
+      "/my",
+      "/status",
+      "/sync",
+      "/admin/list",
+      "/admin/:param",
+      "/admin/:param/cancel",
+      "/admin/stats",
+      "/admin/export",
+      "/kiwify",
+      "/stats",
+      "/dlq/reprocess/:param",
+      "/dlq",
+      "/dlq/cleanup",
+      "/test",
+      "/sessions/:param",
+      "/api/admin/users",
+      "/api/admin/system/metrics",
+      "/api/profile/upload-photo",
+      "/api/webhooks/cackto/__ping",
+      "/api/dashboard",
+      "/healthz",
+      "/api/register",
+      "/api/profile",
+      "/api/test-db",
+      "/metrics",
+      "/admin/email/status",
+      "/admin/email/test",
+      "/admin/email/reset-limits",
+      "/webhooks/kiwify",
+      "/api/subscription/status",
+      "/api/subscription/checkout/:param",
+      "/premium-feature",
+      "/upgrade",
+      "/cackto",
+      "/cackto/__ping",
+      "/cackto/__test",
+      "/cackto/health",
+      "/cackto/stats",
+      "/cackto/test",
+      "/cackto/sync/:param",
+      "/cackto/events/:param",
+      "/cackto/retry/:param",
+      "/api/premium-content",
+      "/api/download-pdf",
+      "/api/user-dashboard",
+      "/api/cackto/status",
+      "/fast-users",
+      "/fast-metrics",
+      "/fast-health",
+      "/email/status",
+      "/email/test",
+      "/email/reset-limits",
+      "/system/health",
+      "/system/metrics",
+      "/system/ready",
+      "/users",
+      "/users/:param",
+      "/users/:param/role",
+      "/users/:param/ban",
+      "/config",
+      "/config/update",
+      "/audit/logs",
+      "/audit/summary",
+      "/cache/stats",
+      "/cache/clear",
+      "/cache/refresh-views",
+      "/verify",
+      "/refresh",
+      "/google",
+      "/google/callback",
+      "/google/status",
+      "/preferences",
+      "/unsubscribe",
+      "/stats/user",
+      "/progress",
+      "/achievements",
+      "/statistics",
+      "/gamification/profile",
+      "/gamification/plan/:param",
+      "/gamification/leaderboard",
+      "/test-db",
+      "/:param",
+      "/:param/settings",
+      "/:param/subjects_with_topics",
+      "/:param/generate",
+      "/:param/schedule",
+      "/:param/overdue_check",
+      "/:param/replan-preview",
+      "/:param/replan",
+      "/:param/overdue_details",
+      "/:param/statistics",
+      "/:param/progress",
+      "/:param/study-time",
+      "/:param/exclusions",
+      "/:param/excluded-topics",
+      "/:param/dashboard",
+      "/:param/gamification",
+      "/:param/share-progress",
+      "/:param/schedule_preview",
+      "/:param/schedule-preview",
+      "/:param/realitycheck",
+      "/:param/goal_progress",
+      "/:param/question_radar",
+      "/:param/detailed_progress",
+      "/:param/reta-final-exclusions",
+      "/:param/reta-final-exclusions/:param",
+      "/:param/batch_update",
+      "/:param/batch_update_details",
+      "/:param/schedule-conflicts",
+      "/:param/resolve-conflicts",
+      "/:param/sessions",
+      "/TEST_EMERGENCY/:param/subjects",
+      "/email",
+      "/email/:param",
+      "/profile/photo",
+      "/schedule/health",
+      "/schedule/docs",
+      "/api/sessions/batch_update_status",
+      "/api/sessions/:param",
+      "/api/sessions/:param/time",
+      "/api/plans/:param/schedule",
+      "/api/plans/:param/overdue_check",
+      "/api/sessions/:param/reinforce",
+      "/api/sessions/:param/postpone",
+      "/by-date/:param",
+      "/overdue-check/:param",
+      "/statistics/:param",
+      "/question-progress/:param",
+      "/batch-update-status",
+      "/:param",
+      "/:param/postpone",
+      "/:param/time",
+      "/:param/reinforce",
+      "/streak/:param",
+      "/schedule/:param",
+      "/:param/complete",
+      "/notes/:param",
+      "/plans/:param/statistics",
+      "/subjects",
+      "/check",
+      "/maintenance/run",
+      "/maintenance/status",
+      "/expiring",
+      "/expired",
+      "/send-welcome-email",
+      "/send-test-email",
+      "/send-schedule-email",
+      "/email-config",
+      "/api/subscription-system/health",
+      "/api/subscription-system/info",
+      "/send-test",
+      "/auth/refresh",
+      "/protected",
+      "/test/oauth/google/callback",
+      "/test/create-google-user",
+      "/test/add-user-data"
+    ]
+  },
+  "frontend": {
+    "calls": [
+      "/api/auth/login",
+      "/api/auth/register",
+      "/api/auth/login",
+      "/api/plans",
+      "/api/plans",
+      "/api/auth/login",
+      "/api/users/profile",
+      "/api/plans",
+      "/api/plans",
+      "/api/plans/:param/statistics",
+      "/api/plans/:param/schedule",
+      "/api/plans",
+      "/api/plans",
+      "/api/plans",
+      "/api/auth/login",
+      "/api/plans",
+      "/api/plans",
+      "/api/plans/:param/generate",
+      "/api/plans/:param/generate",
+      "/api/auth/password/request",
+      "/api/auth/login",
+      "/api/auth/login",
+      "/api/auth/register",
+      "/api/auth/login",
+      "/api/plans",
+      "/api/plans",
+      "/api/auth/login",
+      "/api/users/profile",
+      "/api/plans",
+      "/api/plans",
+      "/api/plans/:param/statistics",
+      "/api/plans/:param/schedule",
+      "/api/plans",
+      "/api/plans",
+      "/api/plans",
+      "/api/auth/login",
+      "/api/plans",
+      "/api/plans",
+      "/api/user/preferences/email",
+      "/api/user/preferences/email",
+      "/api/plans/active",
+      "/api/auth/login",
+      "/api/auth/session-token",
+      "/api/plans/:param/dashboard",
+      "/api/plans/:param/dashboard",
+      "/api/plans/:param/dashboard",
+      "/api/plans/:param/gamification",
+      "/api/plans/:param/study-time",
+      "/api/plans/:param/study-time",
+      "/api/plans",
+      "/api/auth/csrf-token",
+      "/api/auth/register",
+      "/api/auth/login",
+      "/api/auth/me",
+      "/api/auth/logout",
+      "/api/plans/:param/generate",
+      "/api/plans/:param/generate",
+      "/api/auth/password/request",
+      "/api/test-retry",
+      "/api/test-fail",
+      "/api/endpoint-inexistente-",
+      "/api/test-circuit",
+      "/api/auth/login",
+      "/api/auth/login",
+      "/api/plans",
+      "/api/plans",
+      "/api/auth/check",
+      "/api/plans/:param/dashboard",
+      "/api/sessions/:param/time",
+      "/api/sessions/:param/time",
+      "/api/sessions/:param/time",
+      "/api/test",
+      "/api/test",
+      "/api/test",
+      "/api/auth/check"
+    ],
+    "raw": [
+      {
+        "file": "backups/fase4/test_api_routes.html",
+        "url": "/api/auth/login"
+      },
+      {
+        "file": "backups/fase4/test_api_routes.html",
+        "url": "/api/auth/register"
+      },
+      {
+        "file": "backups/fase4/test_api_routes.html",
+        "url": "/api/auth/login"
+      },
+      {
+        "file": "backups/fase4/test_api_routes.html",
+        "url": "/api/plans"
+      },
+      {
+        "file": "backups/fase4/test_api_routes.html",
+        "url": "/plans/"
+      },
+      {
+        "file": "backups/fase4/test_api_routes.html",
+        "url": "/api/plans/"
+      },
+      {
+        "file": "backups/fase4/test_complete_flow.html",
+        "url": "${API_URL}/health"
+      },
+      {
+        "file": "backups/fase4/test_complete_flow.html",
+        "url": "${API_URL}/api/auth/login"
+      },
+      {
+        "file": "backups/fase4/test_complete_flow.html",
+        "url": "${API_URL}/api/users/profile"
+      },
+      {
+        "file": "backups/fase4/test_complete_flow.html",
+        "url": "${API_URL}/api/plans"
+      },
+      {
+        "file": "backups/fase4/test_complete_flow.html",
+        "url": "${API_URL}/api/plans"
+      },
+      {
+        "file": "backups/fase4/test_complete_flow.html",
+        "url": "${API_URL}/api/plans/${planId}/statistics"
+      },
+      {
+        "file": "backups/fase4/test_complete_flow.html",
+        "url": "${API_URL}/api/plans/${planId}/schedule"
+      },
+      {
+        "file": "backups/fase4/test_complete_flow.html",
+        "url": "${API_URL}${path}"
+      },
+      {
+        "file": "backups/fase4/test_create_plan.html",
+        "url": "http://localhost:3000/login"
+      },
+      {
+        "file": "backups/fase4/test_create_plan.html",
+        "url": "http://localhost:3000/api/plans"
+      },
+      {
+        "file": "backups/fase4/test_create_plan_v2.html",
+        "url": "http://localhost:3000/login"
+      },
+      {
+        "file": "backups/fase4/test_create_plan_v2.html",
+        "url": "http://localhost:3000/api/plans"
+      },
+      {
+        "file": "backups/fase4/test_create_plan_v2.html",
+        "url": "http://localhost:3000/api/plans"
+      },
+      {
+        "file": "backups/fase4/test_oauth.html",
+        "url": "${baseUrl}/auth/verify"
+      },
+      {
+        "file": "backups/fase4/test_oauth_user.html",
+        "url": "https://editaliza.com.br/auth/verify"
+      },
+      {
+        "file": "backups/fase4/test_statistics_routes.html",
+        "url": "${API_URL}/api/auth/login"
+      },
+      {
+        "file": "backups/fase4/test_statistics_routes.html",
+        "url": "${API_URL}/api/plans"
+      },
+      {
+        "file": "backups/fase4/test_statistics_routes.html",
+        "url": "${API_URL}/api/plans"
+      },
+      {
+        "file": "backups/fase4/test_statistics_routes.html",
+        "url": "${API_URL}${path}"
+      },
+      {
+        "file": "backups/fase4-v2/test-csrf-fix.html",
+        "url": "/api/plans/1/generate"
+      },
+      {
+        "file": "backups/fase4-v2/test-csrf-fix.html",
+        "url": "/api/plans/1/generate"
+      },
+      {
+        "file": "backups/fase4-v2/test-email-recovery.html",
+        "url": "/api/auth/password/request"
+      },
+      {
+        "file": "backups/fase4-v2/test-ui-excluded-topics.html",
+        "url": "http://localhost:3000/api/auth/login"
+      },
+      {
+        "file": "backups/fase4-v2/test-ui-excluded-topics.html",
+        "url": "http://localhost:3000/plans/${planId}/excluded-topics"
+      },
+      {
+        "file": "backups/fase4-v2/test_api_routes.html",
+        "url": "/api/auth/login"
+      },
+      {
+        "file": "backups/fase4-v2/test_api_routes.html",
+        "url": "/api/auth/register"
+      },
+      {
+        "file": "backups/fase4-v2/test_api_routes.html",
+        "url": "/api/auth/login"
+      },
+      {
+        "file": "backups/fase4-v2/test_api_routes.html",
+        "url": "/api/plans"
+      },
+      {
+        "file": "backups/fase4-v2/test_api_routes.html",
+        "url": "/plans/"
+      },
+      {
+        "file": "backups/fase4-v2/test_api_routes.html",
+        "url": "/api/plans/"
+      },
+      {
+        "file": "backups/fase4-v2/test_complete_flow.html",
+        "url": "${API_URL}/api/auth/login"
+      },
+      {
+        "file": "backups/fase4-v2/test_complete_flow.html",
+        "url": "${API_URL}/api/users/profile"
+      },
+      {
+        "file": "backups/fase4-v2/test_complete_flow.html",
+        "url": "${API_URL}/api/plans"
+      },
+      {
+        "file": "backups/fase4-v2/test_complete_flow.html",
+        "url": "${API_URL}/api/plans"
+      },
+      {
+        "file": "backups/fase4-v2/test_complete_flow.html",
+        "url": "${API_URL}/api/plans/${planId}/statistics"
+      },
+      {
+        "file": "backups/fase4-v2/test_complete_flow.html",
+        "url": "${API_URL}/api/plans/${planId}/schedule"
+      },
+      {
+        "file": "backups/fase4-v2/test_complete_flow.html",
+        "url": "${API_URL}${path}"
+      },
+      {
+        "file": "backups/fase4-v2/test_create_plan.html",
+        "url": "http://localhost:3000/login"
+      },
+      {
+        "file": "backups/fase4-v2/test_create_plan.html",
+        "url": "http://localhost:3000/api/plans"
+      },
+      {
+        "file": "backups/fase4-v2/test_create_plan_v2.html",
+        "url": "http://localhost:3000/login"
+      },
+      {
+        "file": "backups/fase4-v2/test_create_plan_v2.html",
+        "url": "http://localhost:3000/api/plans"
+      },
+      {
+        "file": "backups/fase4-v2/test_create_plan_v2.html",
+        "url": "http://localhost:3000/api/plans"
+      },
+      {
+        "file": "backups/fase4-v2/test_oauth.html",
+        "url": "${baseUrl}/auth/verify"
+      },
+      {
+        "file": "backups/fase4-v2/test_oauth_user.html",
+        "url": "https://editaliza.com.br/auth/verify"
+      },
+      {
+        "file": "backups/fase4-v2/test_statistics_routes.html",
+        "url": "${API_URL}/api/auth/login"
+      },
+      {
+        "file": "backups/fase4-v2/test_statistics_routes.html",
+        "url": "${API_URL}/api/plans"
+      },
+      {
+        "file": "backups/fase4-v2/test_statistics_routes.html",
+        "url": "${API_URL}/api/plans"
+      },
+      {
+        "file": "backups/fase4-v2/test_statistics_routes.html",
+        "url": "${API_URL}${path}"
+      },
+      {
+        "file": "login-simple.html",
+        "url": "/auth/login"
+      },
+      {
+        "file": "public/js/email-preferences.js",
+        "url": "/api/user/preferences/email"
+      },
+      {
+        "file": "public/js/email-preferences.js",
+        "url": "/api/user/preferences/email"
+      },
+      {
+        "file": "public/js/login-cleanup.js",
+        "url": "/api/plans/active"
+      },
+      {
+        "file": "public/js/login-fallback.js",
+        "url": "/api/auth/login"
+      },
+      {
+        "file": "public/js/login-fallback.js",
+        "url": "/api/auth/session-token"
+      },
+      {
+        "file": "public/js/plan-dashboard.js",
+        "url": "/api/plans/${this.planId}/dashboard"
+      },
+      {
+        "file": "public/js/plan-page-fixed.js",
+        "url": "/api/plans/${planId}/dashboard"
+      },
+      {
+        "file": "public/js/plan-page-fixed.js",
+        "url": "/api/plans/${planId}/dashboard"
+      },
+      {
+        "file": "public/js/plan-page-fixed.js",
+        "url": "/api/plans/${planId}/gamification"
+      },
+      {
+        "file": "public/js/plan-page-fixed.js",
+        "url": "/api/plans/${planId}/study-time"
+      },
+      {
+        "file": "public/js/plan-page-fixed.js",
+        "url": "/api/plans/${planId}/study-time"
+      },
+      {
+        "file": "public/js/planid-manager.js",
+        "url": "/api/plans"
+      },
+      {
+        "file": "public/login-simple.html",
+        "url": "/auth/login"
+      },
+      {
+        "file": "public/test-frontend-integration.html",
+        "url": "${CONFIG.apiUrl}/health"
+      },
+      {
+        "file": "public/test-frontend-integration.html",
+        "url": "${CONFIG.apiUrl}/api/auth/csrf-token"
+      },
+      {
+        "file": "public/test-frontend-integration.html",
+        "url": "${CONFIG.apiUrl}/api/auth/register"
+      },
+      {
+        "file": "public/test-frontend-integration.html",
+        "url": "${CONFIG.apiUrl}/api/auth/login"
+      },
+      {
+        "file": "public/test-frontend-integration.html",
+        "url": "${CONFIG.apiUrl}/api/auth/me"
+      },
+      {
+        "file": "public/test-frontend-integration.html",
+        "url": "${CONFIG.apiUrl}/api/auth/logout"
+      },
+      {
+        "file": "public/test-sistema.html",
+        "url": "/css/tailwind.css"
+      },
+      {
+        "file": "public/test-sistema.html",
+        "url": "/js/app.js"
+      },
+      {
+        "file": "public/test-sistema.html",
+        "url": "/health"
+      },
+      {
+        "file": "public/tests/test-csrf-fix.html",
+        "url": "/api/plans/1/generate"
+      },
+      {
+        "file": "public/tests/test-csrf-fix.html",
+        "url": "/api/plans/1/generate"
+      },
+      {
+        "file": "public/tests/test-email-recovery.html",
+        "url": "/api/auth/password/request"
+      },
+      {
+        "file": "public/tests/test-interceptors.html",
+        "url": "/api/test-retry"
+      },
+      {
+        "file": "public/tests/test-interceptors.html",
+        "url": "/api/test-fail"
+      },
+      {
+        "file": "public/tests/test-interceptors.html",
+        "url": "/api/endpoint-inexistente-"
+      },
+      {
+        "file": "public/tests/test-interceptors.html",
+        "url": "/api/test-circuit"
+      },
+      {
+        "file": "public/tests/test-notifications-complete.html",
+        "url": "/health"
+      },
+      {
+        "file": "public/tests/test-notifications-complete.html",
+        "url": "/health"
+      },
+      {
+        "file": "public/tests/test-ui-excluded-topics.html",
+        "url": "http://localhost:3000/api/auth/login"
+      },
+      {
+        "file": "public/tests/test-ui-excluded-topics.html",
+        "url": "http://localhost:3000/plans/${planId}/excluded-topics"
+      },
+      {
+        "file": "public/tests/test_oauth_user.html",
+        "url": "https://editaliza.com.br/auth/verify"
+      },
+      {
+        "file": "public/tests/test_statistics_routes.html",
+        "url": "${API_URL}/api/auth/login"
+      },
+      {
+        "file": "public/tests/test_statistics_routes.html",
+        "url": "${API_URL}/api/plans"
+      },
+      {
+        "file": "public/tests/test_statistics_routes.html",
+        "url": "${API_URL}/api/plans"
+      },
+      {
+        "file": "public/tests/test_statistics_routes.html",
+        "url": "${API_URL}${path}"
+      },
+      {
+        "file": "public/test_auth.html",
+        "url": "/api/auth/check"
+      },
+      {
+        "file": "temp/home_backup.html",
+        "url": "/plans"
+      },
+      {
+        "file": "test-dashboard.html",
+        "url": "/api/plans/140/dashboard"
+      },
+      {
+        "file": "test-debug.html",
+        "url": "/health"
+      },
+      {
+        "file": "test-debug.html",
+        "url": "/js/app.js"
+      },
+      {
+        "file": "test-debug.html",
+        "url": "https://cdn.tailwindcss.com"
+      },
+      {
+        "file": "test-timer-400-fix.html",
+        "url": "/api/sessions/${SESSION_ID}/time"
+      },
+      {
+        "file": "test-timer-400-fix.html",
+        "url": "/api/sessions/${SESSION_ID}/time"
+      },
+      {
+        "file": "test-timer-400-fix.html",
+        "url": "/api/sessions/${SESSION_ID}/time"
+      },
+      {
+        "file": "tests/frontend/app-basic.test.js",
+        "url": "${apiUrl}/api/test"
+      },
+      {
+        "file": "tests/frontend/app-basic.test.js",
+        "url": "/api/test"
+      },
+      {
+        "file": "tests/frontend/app-basic.test.js",
+        "url": "/api/test"
+      },
+      {
+        "file": "tests/legacy/debug-footer-real.html",
+        "url": "css/footer.css"
+      },
+      {
+        "file": "tests/legacy/debug-footer-real.html",
+        "url": "components/footer.html"
+      },
+      {
+        "file": "tests/legacy/debug-footer-simples.html",
+        "url": "components/footer.html"
+      },
+      {
+        "file": "tests/legacy/debug-footer-simples.html",
+        "url": "js/footer.js"
+      },
+      {
+        "file": "tests/temp-tests/test-disciplinas-frontend.js",
+        "url": "post"
+      },
+      {
+        "file": "tests/temp-tests/test-disciplinas-frontend.js",
+        "url": "get"
+      },
+      {
+        "file": "tests/temp-tests/test-disciplinas-frontend.js",
+        "url": "get"
+      },
+      {
+        "file": "tests/temp-tests/test-disciplinas-frontend.js",
+        "url": "post"
+      },
+      {
+        "file": "tests/temp-tests/test-disciplinas-frontend.js",
+        "url": "get"
+      },
+      {
+        "file": "tests/temp-tests/test-disciplinas-frontend.js",
+        "url": "get"
+      },
+      {
+        "file": "test_auth.html",
+        "url": "/api/auth/check"
+      },
+      {
+        "file": "test_oauth.html",
+        "url": "${baseUrl}/auth/verify"
+      },
+      {
+        "file": "test_oauth_user.html",
+        "url": "https://editaliza.com.br/auth/verify"
+      }
+    ]
+  },
+  "mismatches": []
+}

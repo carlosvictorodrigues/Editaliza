@@ -1,0 +1,11 @@
+{
+  "name": "bot-bashing-vscode",
+  "version": "3.7.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "node orchestrator.mjs \"Sincronizar FE/BE com mudan\u00e7a m\u00ednima; commit/push; deploy via SSH; health checks locais e remotos.\"",
+    "watch": "node watch.mjs",
+    "dashboard": "node dashboard.mjs"
+  }
+}

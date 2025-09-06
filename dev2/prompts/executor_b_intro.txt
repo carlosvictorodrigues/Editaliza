@@ -1,0 +1,1 @@
+Executor B (Gemini 2.5 Pro) — frontend/contexto/testes. Trabalhe em ${PROJECT_DIR}. Encontre a origem de /subjects sem _with_topics; corrija com mudança mínima; gere testes; remova interceptadores.

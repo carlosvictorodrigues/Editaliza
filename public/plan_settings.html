@@ -783,18 +783,6 @@
             }, 300);
         }
         
-        // Interceptador para rastrear chamadas a /subjects
-        const originalApiFetch = app.apiFetch.bind(app);
-        app.apiFetch = function(url, options = {}) {
-            if (url.includes('/subjects') && !url.includes('_with_topics')) {
-                console.error('⚠️ CHAMADA INCORRETA PARA /subjects!');
-                console.trace('Stack trace da chamada:');
-                // Corrigir a URL automaticamente
-                url = url.replace('/subjects', '/subjects_with_topics');
-                console.log('✅ URL corrigida para:', url);
-            }
-            return originalApiFetch(url, options);
-        };
         
         async function initialize() {
             components.renderMainNavigation('dashboard.html');
