@@ -1,0 +1,48 @@
+name: Auto Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # Permite trigger manual
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy via Webhook
+      run: |
+        # Gerar token do dia
+        TODAY=$(date +%Y-%m-%d)
+        SECRET="${{ secrets.WEBHOOK_SECRET }}${TODAY}"
+        TOKEN=$(echo -n "$SECRET" | sha256sum | cut -d' ' -f1)
+        
+        # Chamar webhook de deploy
+        curl -X POST https://app.editaliza.com.br/webhook/deploy \
+          -H "Content-Type: application/json" \
+          -H "X-Deploy-Token: $TOKEN" \
+          -d '{"source":"github-actions","ref":"${{ github.ref }}","sha":"${{ github.sha }}"}' \
+          --fail \
+          || echo "Webhook falhou, tentando método alternativo..."
+    
+    - name: Alternative Deploy Method
+      if: failure()
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: 161.35.127.123
+        username: root
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd /root/editaliza
+          git pull origin main
+          npm install --production
+          pm2 restart editaliza-app
+          pm2 logs editaliza-app --lines 20
+    
+    - name: Verify Deployment
+      run: |
+        sleep 10
+        curl -f https://app.editaliza.com.br/health || exit 1
+        echo "Deploy verificado com sucesso!"
