@@ -15,7 +15,7 @@ const app = {
 
     // Configurações de segurança
     config: {
-        apiUrl: window.location.hostname === 'localhost' ? 'https://app.editaliza.com.br' : window.location.origin,
+        apiUrl: window.location.hostname === 'localhost' ? 'http://localhost:3000' : window.location.origin,
         tokenKey: 'editaliza_token',
         planKey: 'selectedPlanId',
         sessionTimeout: 24 * 60 * 60 * 1000, // 24 horas em ms

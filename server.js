@@ -600,7 +600,7 @@ console.log('🚀 SERVER.JS: Continuando com configuração do servidor...');
 // app.use(authenticateToken, addSubscriptionInfo());
 
 // WORKAROUND: Aplicar apenas autenticação sem subscription info
-app.use('*', (req, res, next) => {
+app.use((req, res, next) => {
     // Pular autenticação para rotas públicas e assets estáticos
     const publicPaths = [
         '/health', '/healthz', '/login.html', '/register.html', '/auth', '/api/auth', '/api/webhooks', '/api/test',
