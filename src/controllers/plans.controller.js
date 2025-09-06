@@ -139,7 +139,9 @@ const createPlan = async (req, res) => {
         exam_date,
         email_daily_schedule,
         email_weekly_summary,
-        email_study_reminders 
+        email_study_reminders,
+        has_essay,
+        reta_final_mode
     } = req.body;
     const defaultHours = { '0': 0, '1': 4, '2': 4, '3': 4, '4': 4, '5': 4, '6': 4 };
     
@@ -154,8 +156,8 @@ const createPlan = async (req, res) => {
             weekly_question_goal: 300,
             session_duration_minutes: 50,
             review_mode: 'completo',
-            has_essay: false,
-            reta_final_mode: 0
+            has_essay: has_essay === true || has_essay === 1 ? 1 : 0,
+            reta_final_mode: reta_final_mode === true || reta_final_mode === 1 ? 1 : 0
         };
         
         // Depois, se houver preferências de email, salvar em tabela separada
