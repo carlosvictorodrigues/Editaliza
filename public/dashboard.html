@@ -847,9 +847,11 @@
                         body: JSON.stringify({
                             plan_name, 
                             exam_date,
-                            email_daily_schedule,
-                            email_weekly_summary,
-                            email_study_reminders
+                            email_daily_schedule: email_daily_schedule ? 1 : 0,
+                            email_weekly_summary: email_weekly_summary ? 1 : 0,
+                            email_study_reminders: email_study_reminders ? 1 : 0,
+                            has_essay: false,
+                            reta_final_mode: 0
                         })
                     });
                     
