@@ -17,21 +17,12 @@
   }
 
   async function doApiLogin(email, password) {
-    // Prefer app.apiFetch when available
+    // Prefer app.apiFetch when available (it returns parsed JSON or throws on error)
     if (window.app && typeof window.app.apiFetch === 'function') {
-      const response = await window.app.apiFetch('/auth/login', {
+      return await window.app.apiFetch('/api/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password })
       });
-      if (!response.ok) {
-        let msg = 'Login failed';
-        try {
-          const data = await response.json();
-          msg = data && (data.message || data.error) || msg;
-        } catch (_err) { /* ignore */ }
-        throw new Error(msg);
-      }
-      return await response.json();
     }
     // Fallback to native fetch
     const resp = await fetch('/api/auth/login', {

@@ -186,8 +186,18 @@ const app = {
                 fullUrl = `${this.config.apiUrl}/api/${url}`;
             }
 
-            console.log('Fazendo requisição para:', fullUrl);
-            console.log('Método:', config.method || 'GET');
+            // DEBUG: Log detalhado para identificar chamadas incorretas
+            console.log('[apiFetch] URL original:', url);
+            console.log('[apiFetch] URL final:', fullUrl);
+            console.log('[apiFetch] Método:', config.method || 'GET');
+
+            // ALERTA: Detectar chamadas incorretas para /subjects
+            if (url.includes('/subjects') && !url.includes('_with_topics')) {
+                console.warn('[apiFetch] ⚠️ Chamada incorreta detectada para /subjects sem _with_topics!');
+                console.warn('[apiFetch] URL:', url);
+                console.warn('[apiFetch] Stack trace:', new Error().stack);
+            }
+
             console.log('Token presente?', !!this.state.token);
             console.log('Headers:', config.headers);
             console.log('Body:', config.body);

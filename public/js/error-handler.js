@@ -139,6 +139,19 @@
             });
 
             window.addEventListener('error', (event) => {
+                // Ignore benign IMG resource errors (e.g., avatar not found or slow load)
+                const isImgError = event.target && event.target.tagName === 'IMG';
+                if (isImgError) {
+                    if (config.debugMode) {
+                        console.warn('Resource IMG error ignored:', {
+                            src: event.target && event.target.src,
+                            message: event.message
+                        });
+                    }
+                    event.preventDefault();
+                    return; // do not surface toast for image load failures
+                }
+
                 const extra = {
                     source: event.filename,
                     lineno: event.lineno,

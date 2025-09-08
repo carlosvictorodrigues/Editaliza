@@ -304,6 +304,11 @@ O MCP Gemini está configurado para funcionar com o Claude Code no VS Code atrav
 - **Senha:** @Editaliza2025
 - **Uso:** Serviço de email para notificações do sistema
 
+### Conta de Teste (Produção):
+- **Email:** carlosvictorodrigues@gmail.com
+- **Senha:** 1a2b3c4d
+- **Uso:** Conta de teste para verificação de funcionalidades em produção
+
 ## 📝 CONVENÇÕES DE COMMIT
 
 Use Conventional Commits:

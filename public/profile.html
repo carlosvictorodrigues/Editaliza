@@ -781,9 +781,15 @@
                     selectedAvatarPath = profile.profile_picture;
                 }
 
-                // Normalize local paths to absolute from root
-                if (selectedAvatarPath && !(selectedAvatarPath.startsWith('https://') || selectedAvatarPath.startsWith('/'))) {
-                    selectedAvatarPath = '/' + selectedAvatarPath;
+                // Decode HTML entities and normalize path
+                const decodeHtml = (s) => { try { const el = document.createElement('textarea'); el.innerHTML = s; return el.value; } catch(_) { return s; } };
+                if (selectedAvatarPath) {
+                    selectedAvatarPath = decodeHtml(String(selectedAvatarPath));
+                    if (!selectedAvatarPath.startsWith('https://') && !selectedAvatarPath.startsWith('/')) {
+                        selectedAvatarPath = '/' + selectedAvatarPath;
+                    }
+                    // Collapse any accidental double slashes to single
+                    selectedAvatarPath = selectedAvatarPath.replace(/^\/+/, '/');
                 }
 
                 updateProfilePhoto(selectedAvatarPath);
@@ -832,7 +838,9 @@
 
                 console.log('🖼️ Tipo de avatar:', path.startsWith('https://') ? 'Google' : 'Local');
                 
-                // Handle Google vs local vs absolute paths robustly
+                // Decode entities and handle Google vs local vs absolute paths robustly
+                const decodeHtml2 = (s) => { try { const el = document.createElement('textarea'); el.innerHTML = s; return el.value; } catch(_) { return s; } };
+                path = decodeHtml2(String(path));
                 if (path.startsWith('https://')) {
                     // Google avatar - use directly without cache buster
                     profilePhoto.src = path;
@@ -847,6 +855,8 @@
                     } else {
                         finalPath = '/' + path + cacheBuster; // make absolute from root
                     }
+                    // Normalize double leading slashes
+                    finalPath = finalPath.replace(/^\/+/, '/');
                     profilePhoto.src = finalPath;
                 }
                 

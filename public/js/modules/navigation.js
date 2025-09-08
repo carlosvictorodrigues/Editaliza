@@ -148,9 +148,17 @@ const Navigation = {
     // Gerar HTML do perfil do usuário
     generateProfileHtml(userAvatar) {
         if (userAvatar) {
-            // Sanitizar o caminho do avatar
-            const sanitizedAvatarPath = window.app?.sanitizeHtml ? window.app.sanitizeHtml(userAvatar) : userAvatar;
-            
+            // Sanitizar e decodificar o caminho do avatar (evitar encoding de '/')
+            const rawAvatarPath = window.app?.sanitizeHtml ? window.app.sanitizeHtml(userAvatar) : userAvatar;
+            const decodeHtmlEntities = (s) => {
+                try {
+                    const el = document.createElement('textarea');
+                    el.innerHTML = s;
+                    return el.value;
+                } catch (_) { return s; }
+            };
+            const sanitizedAvatarPath = decodeHtmlEntities(String(rawAvatarPath || ''));
+
             // Melhor tratamento de URLs de avatar (Google vs Local)
             let avatarUrl;
             if (sanitizedAvatarPath.startsWith('https://')) {
@@ -160,17 +168,18 @@ const Navigation = {
                 // Avatar local com caminho absoluto
                 avatarUrl = sanitizedAvatarPath + '?t=' + new Date().getTime();
             } else {
-                // Avatar local relativo - adicionar cache buster e prefixo
-                avatarUrl = (sanitizedAvatarPath.startsWith('./') ? sanitizedAvatarPath : './' + sanitizedAvatarPath) + '?t=' + new Date().getTime();
+                // Avatar local relativo - forçar caminho absoluto e adicionar cache buster
+                const rel = sanitizedAvatarPath.replace(/^\.\/?/, ''); // remove './' se existir
+                avatarUrl = '/' + rel + '?t=' + new Date().getTime();
             }
             
             return `
                 <a href="profile.html" class="hidden sm:flex items-center space-x-2 text-sm font-medium text-editaliza-gray hover:text-editaliza-black transition-all duration-200 group">
                     <div class="relative">
-                        <img id="nav-user-avatar" src="${avatarUrl}" 
+                        <img id="nav-user-avatar" src="${(avatarUrl && avatarUrl.startsWith('//') ? avatarUrl.replace(/^\/+/, '/') : avatarUrl)}" 
                              class="w-8 h-8 rounded-full object-cover border-2 border-transparent group-hover:border-editaliza-blue transition-all duration-200 shadow-sm" 
                              alt="Avatar do usuário"
-                             onerror="console.error('Erro ao carregar avatar:', '${avatarUrl}'); this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                             onerror="console.error('Erro ao carregar avatar:', '${(avatarUrl && avatarUrl.startsWith('//') ? avatarUrl.replace(/^\/+/, '/') : avatarUrl)}'); this.style.display='none'; this.nextElementSibling.style.display='flex';">
                         <div class="w-8 h-8 bg-gradient-to-br from-editaliza-blue to-indigo-600 rounded-full hidden items-center justify-center text-white text-xs font-bold border-2 border-transparent group-hover:border-editaliza-blue transition-all duration-200 shadow-sm">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path>
@@ -330,8 +339,13 @@ const Navigation = {
         if (navAvatar) {
             const newAvatar = await this.loadUserAvatar();
             if (newAvatar) {
-                const sanitizedAvatarPath = window.app?.sanitizeHtml ? window.app.sanitizeHtml(newAvatar) : newAvatar;
-                
+                const raw = window.app?.sanitizeHtml ? window.app.sanitizeHtml(newAvatar) : newAvatar;
+                // Decode any HTML entities (e.g., &#x2F;)
+                const decodeHtmlEntities = (s) => {
+                    try { const el = document.createElement('textarea'); el.innerHTML = s; return el.value; } catch (_) { return s; }
+                };
+                const sanitizedAvatarPath = decodeHtmlEntities(String(raw || ''));
+
                 // Handle Google avatars vs local avatars
                 let avatarUrl;
                 if (sanitizedAvatarPath.startsWith('https://')) {
@@ -340,11 +354,16 @@ const Navigation = {
                 } else if (sanitizedAvatarPath.startsWith('/')) {
                     // Local avatar with absolute path
                     avatarUrl = sanitizedAvatarPath + '?t=' + new Date().getTime();
+                } else if (sanitizedAvatarPath) {
+                    // Local avatar - force absolute path and cache buster
+                    const rel = sanitizedAvatarPath.replace(/^\.\/?/, '');
+                    avatarUrl = '/' + rel + '?t=' + new Date().getTime();
                 } else {
-                    // Local avatar - add relative path and cache buster
-                    avatarUrl = (sanitizedAvatarPath.startsWith('./') ? sanitizedAvatarPath : './' + sanitizedAvatarPath) + '?t=' + new Date().getTime();
+                    avatarUrl = '';
                 }
                 
+                // Normalize accidental protocol-relative path
+                if (avatarUrl && avatarUrl.startsWith('//')) { avatarUrl = avatarUrl.replace(/^\/+/, '/'); }
                 navAvatar.src = avatarUrl;
                 navAvatar.style.display = 'block';
                 navAvatar.nextElementSibling.style.display = 'none';

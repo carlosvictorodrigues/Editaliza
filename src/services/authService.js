@@ -119,41 +119,49 @@ const login = async (credentials, req) => {
         throw new Error('Senha incorreta. Tente novamente ou use "Esqueci minha senha".');
     }
     
-    // Check subscription status - BLOCK if expired
-    if (user.plan_expiry) {
-        const now = new Date();
-        const expiry = new Date(user.plan_expiry);
-        
-        if (expiry < now) {
-            // Plan expired - BLOCK ACCESS COMPLETELY
-            securityLog('login_blocked_expired_plan', { email: sanitizedEmail, userId: user.id, expiry: user.plan_expiry }, user.id, req);
-            
-            // Update plan status if needed
-            if (user.plan_status === 'active') {
-                await authRepository.updatePlanStatus(user.id, 'expired');
+    // Check subscription status (dev bypass supported)
+    const bypassSubscription = (process.env.NODE_ENV !== 'production') &&
+        (process.env.ALLOW_LOGIN_WITHOUT_PLAN === 'true' || process.env.DISABLE_SUBSCRIPTION_CHECK === 'true');
+
+    if (!bypassSubscription) {
+        if (user.plan_expiry) {
+            const now = new Date();
+            const expiry = new Date(user.plan_expiry);
+
+            if (expiry < now) {
+                // Plan expired - BLOCK ACCESS COMPLETELY
+                securityLog('login_blocked_expired_plan', { email: sanitizedEmail, userId: user.id, expiry: user.plan_expiry }, user.id, req);
+
+                // Update plan status if needed
+                if (user.plan_status === 'active') {
+                    await authRepository.updatePlanStatus(user.id, 'expired');
+                }
+
+                // Record failed attempt due to expired plan
+                await authRepository.recordLoginAttempt(sanitizedEmail, false, req.ip, req.headers['user-agent']);
+
+                // BLOCK LOGIN - Throw error
+                throw new Error('Seu plano expirou. Por favor, renove sua assinatura para continuar acessando a plataforma. Acesse: https://editaliza.com.br/');
             }
-            
-            // Record failed attempt due to expired plan
+
+            // Check if expiring soon (less than 7 days)
+            const daysUntilExpiry = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
+            if (daysUntilExpiry <= 7) {
+                securityLog('login_success_expiring_soon', {
+                    email: sanitizedEmail,
+                    userId: user.id,
+                    daysRemaining: daysUntilExpiry
+                }, user.id, req);
+            }
+        } else {
+            // User has no plan at all - BLOCK ACCESS
+            securityLog('login_blocked_no_plan', { email: sanitizedEmail, userId: user.id }, user.id, req);
             await authRepository.recordLoginAttempt(sanitizedEmail, false, req.ip, req.headers['user-agent']);
-            
-            // BLOCK LOGIN - Throw error
-            throw new Error('Seu plano expirou. Por favor, renove sua assinatura para continuar acessando a plataforma. Acesse: https://editaliza.com.br/');
-        }
-        
-        // Check if expiring soon (less than 7 days)
-        const daysUntilExpiry = Math.floor((expiry - now) / (1000 * 60 * 60 * 24));
-        if (daysUntilExpiry <= 7) {
-            securityLog('login_success_expiring_soon', { 
-                email: sanitizedEmail, 
-                userId: user.id, 
-                daysRemaining: daysUntilExpiry 
-            }, user.id, req);
+            throw new Error('Você não possui um plano ativo. Por favor, assine um plano para acessar a plataforma. Acesse: https://editaliza.com.br/');
         }
     } else {
-        // User has no plan at all - BLOCK ACCESS
-        securityLog('login_blocked_no_plan', { email: sanitizedEmail, userId: user.id }, user.id, req);
-        await authRepository.recordLoginAttempt(sanitizedEmail, false, req.ip, req.headers['user-agent']);
-        throw new Error('Você não possui um plano ativo. Por favor, assine um plano para acessar a plataforma. Acesse: https://editaliza.com.br/');
+        // Development: allow login without active plan to speed up local testing
+        securityLog('login_dev_subscription_bypass', { email: sanitizedEmail, userId: user.id }, user.id, req);
     }
     
     // Success - record attempt and generate token
